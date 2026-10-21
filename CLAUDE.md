@@ -9,12 +9,25 @@
 
 - **Project name**: ACME Unified P&L
 - **One-line purpose**: One management P&L (IFRS 18 spine, 3 entities) delivered as a Rayfin (Fabric) app, a Power BI report and a custom JS report, showcased on vosk.dev.
-- **Canonical domain / workspace**: vosk.dev (consumer of this repo's assets; the site wrapper lives in a separate repo). Fabric workspace(s): TBD.
+- **Canonical domain / workspace**: vosk.dev (consumer of this repo's assets; the site wrapper lives in a separate repo). Fabric workspaces: see Workspaces below.
 - **Public surface/URL**: vosk.dev showcase page — this repo delivers the three assets only; embedding is done in the vosk.dev repo.
 - **Runtime hook**: per track — A: `rayfin/.env` values interpolated into `rayfin.yml` (`${VAR}`) and the Vite `VITE_FABRIC_*` vars; B: PBIP model parameters for the data source binding; C: `NEXT_PUBLIC_SITE_URL`. These are the canonical source of truth at runtime; do NOT hard-code the domain/workspace in code. The strings above are for docs/copy/UX-text only.
 - **Spec**: `docs/Requirements.md` — requirement IDs (L-, M-, K-, F-, C-, D-, N-, T-) are the contract. Cite them in code comments, tests and commit messages.
 - **Data**: `data/acme_pl_dummy_data/` (CSV, spec §8) · expected totals: `data/acme_pl_dummy_data/checks/control_totals_usd.csv`.
 - **Repo**: https://github.com/rusloc/pnl — single branch `prod`.
+
+### Workspaces
+
+| Role | Workspace | Workspace ID | Items |
+|------|-----------|--------------|-------|
+| Raw data — source for Tracks A + B (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Lakehouse `lh_raw` (`b4fdb831-8417-475c-badb-a9a87be796b8`), schema `acme_pl` — holds the `data/acme_pl_dummy_data/` tables |
+| Track A app (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Fabric App `acme` — see Track A |
+
+- RAW runs on a **dev** capacity (F64, North Europe). It is for building assets only; publishing happens later on another capacity (TBD).
+- In RAW, **only `lh_raw` and the `acme` app are relevant**. Every other item in the workspace is a leftover from other projects — ignore it, never use or modify it.
+- No Spark for this project's data layer (cost): pipelines are plain Python.
+
+Report / app workspaces and publishing capacity: TBD.
 
 ---
 
@@ -33,6 +46,7 @@
 | Features plan, log of implementation, user idea stash | `.log/features_and_decisions.md` |
 | Raw ideas / parking lot | `docs/ADD/ideas/ideas.md` |
 | Dummy dataset + data README (rules for measures) | `data/acme_pl_dummy_data/` |
+| Shared Fabric data layer (feeds A + B) | `fabric-data/` · ADR-0003 |
 | Track A — Rayfin app | `fabric-app/` |
 | Track B — Power BI report | `pbi-report/` |
 | Track C — custom JS report | `js-report/` |
@@ -199,9 +213,41 @@ These rules are load-bearing. They override convenience, speed, and any implicit
 
 All three tracks live in this repo, one folder each, built from the same spec and data.
 
+### Shared data layer · `fabric-data/` (feeds Tracks A + B)
+
+**Stack:** local Python (`deltalake` + `pyarrow` + `azure-identity`, pinned in `requirements.txt`, venv at `fabric-data/.venv`) writing Delta tables straight to OneLake · no Spark (ADR-0003)
+
+**Structure:**
+```
+fabric-data/
+  lh_raw/
+    load_acme_pl.py      → CSV (repo) → typed Delta tables in lh_raw.acme_pl; --dry-run writes nothing
+    requirements.txt
+    sql/verify-acme-pl.sql → row counts + control total via the SQL endpoint (read-only)
+```
+
+**Key rules:**
+- The repo CSVs are the source; the script's `TABLES` spec is the only place column types are declared
+- Schema `acme_pl`; table names = CSV file names; every load is an idempotent full overwrite
+- Workspace / lakehouse come from `--workspace` / `--lakehouse` or `FABRIC_WORKSPACE` / `FABRIC_LAKEHOUSE` — no IDs in code
+- `--dry-run` first; every write to `lh_raw` waits for the USER's yes; verify with `sql/verify-acme-pl.sql` after each load
+- The SQL endpoint can lag ~15 min behind a write — retry before calling a verification failed
+- `local_per_usd` is DECIMAL(18,6): model it as Decimal Number (double), never Fixed Decimal
+
 ### ▶ TRACK A — Rayfin app (Microsoft Fabric App) · `fabric-app/`
 
-**Stack:** Microsoft Fabric Apps (Rayfin) SDK/CLI · TypeScript strict · React (Vite) frontend from the Rayfin template · Fabric SQL database backend · connector to the shared Fabric data layer or the Track B semantic model (ADR-0003, open) · Fabric SSO · deploy with `npx rayfin up` to workspace TBD
+**App:**
+| Field | Value |
+|---|---|
+| Fabric App item | `acme` in workspace RAW (dev) |
+| Live URL (Entra sign-in) | https://pine-shard-756dd25a7d-northeurope.webapp.fabricapps.net |
+| Created / first published | 2026-10-21 11:41 (blank app, from the Fabric portal) |
+| Scaffold | `npm create @microsoft/rayfin@latest -- "acme" --template blankapp --workspace "RAW"` → project root `fabric-app/` |
+| Run locally (against the Fabric backend) | `npm run dev` (in `fabric-app/`) |
+| Deploy | `npx rayfin up` — USER's go-ahead each time |
+| Data | `lh_raw.acme_pl` via a Rayfin connector (a warehouse only if the connector can't read the lakehouse) |
+
+**Stack:** Microsoft Fabric Apps (Rayfin) SDK/CLI · TypeScript strict · frontend from the Rayfin `blankapp` template · Fabric SQL database backend · connector to `lh_raw.acme_pl` · Fabric SSO · deploy with `npx rayfin up` to workspace RAW (dev)
 
 **Structure:**
 ```
@@ -226,7 +272,7 @@ fabric-app/
 
 ### ▶ TRACK B — Power BI report (PBIP) · `pbi-report/`
 
-**Stack:** Power BI Desktop (PBIP enabled) · TMDL semantic model · DAX · Power Query/M · deployment to Fabric workspace TBD (method open: single workspace vs deployment pipeline) · source: Fabric Lakehouse/Warehouse loaded from the CSVs (ADR-0003, open)
+**Stack:** Power BI Desktop (PBIP enabled) · TMDL semantic model · DAX · Power Query/M · deployment to Fabric workspace TBD (method open: single workspace vs deployment pipeline) · source: `lh_raw.acme_pl` in workspace RAW (ADR-0003; storage mode open)
 
 **Structure:**
 ```

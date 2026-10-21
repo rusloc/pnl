@@ -15,13 +15,13 @@ TODO: lock North Star
 - **2026-10-21** — Stack defaults: C = Next.js on Vercel + pre-aggregated Parquet + DuckDB-wasm; A + B = one Fabric Lakehouse/Warehouse loaded from the CSVs; no dbt. (ADR-0001)
 - **2026-10-21** — Orchestrated roster of 8 agents: bip, ginee, fin, archi, nerd, hunter, chef, svg-designer. (ADR-0001)
 - **2026-10-21** — Locales: `en` only. North Star deferred.
+- **2026-10-21** — Data layer: Lakehouse `lh_raw` (workspace RAW, dev F64), schema `acme_pl`, 28 typed Delta tables loaded by local Python (delta-rs); no Spark (cost). Only `lh_raw` is relevant in RAW; publishing later on another capacity. (ADR-0003)
 
 ## Features
 ### Planned
-- Shared Fabric data layer (CSV → Lakehouse/Warehouse) — feeds A + B
 - Track A — Rayfin (Fabric) app
 - Track B — Power BI report (PBIP)
 - Track C — custom JS report (Next.js)
 
 ### Implemented
-_(none yet)_
+- **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)

@@ -9,6 +9,7 @@ Status as of 2026-10-21 (ADR-0001). Items marked **open** wait for a USER answer
 | Acceptance: `checks/control_totals_usd.csv` + spec §10 tests | One numeric truth for all three flavors. |
 | Repo: single branch `prod` on GitHub (`rusloc/pnl`) | Solo build; no review gate needed yet. |
 | No dbt | Data is static dummy data; transformation needs are small. |
+| Fabric data layer: Lakehouse `lh_raw` (workspace RAW, dev capacity), schema `acme_pl`, loaded by local Python (delta-rs) — ADR-0003 | No Spark cost; typed, idempotent, verified against control totals. No V-Order, accepted at ~1.2M rows. |
 
 ## Track A — Rayfin app (`fabric-app/`)
 | Choice | Rationale |
@@ -22,7 +23,7 @@ Status as of 2026-10-21 (ADR-0001). Items marked **open** wait for a USER answer
 | Choice | Rationale |
 |---|---|
 | Power BI Desktop, PBIP (TMDL + PBIR) | Diff-reviewable source; edited with the pbip-editor skill. |
-| Source: Fabric Lakehouse/Warehouse loaded from the CSVs | One data layer shared with Track A. Lakehouse vs Warehouse **open** — ADR-0003. |
+| Source: `lh_raw.acme_pl` | One data layer shared with Track A — ADR-0003 (accepted). |
 | Storage mode | **Open** (Import vs Direct Lake) — ADR-0003. |
 | Workspaces, capacity, deploy method | **Open** — single workspace vs deployment pipeline (fab-admin-mcp). |
 
