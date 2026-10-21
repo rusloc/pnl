@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Truck time utilization — Plan vs Fact</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F5F8}
+a{color:#1D6FA5}a:hover{color:#1C2B3A}
+button{font-family:inherit}
+input[type=checkbox],input[type=radio]{accent-color:#1C2B3A;width:16px;height:16px;margin:0}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: #F3F5F8; color: #1C2B3A; font-family: Inter, 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column">
+
+  <!-- Top bar -->
+  <header style="background: #1C2B3A; color: #FFFFFF">
+    <div style="max-width: 1392px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+      <div style="display: flex; align-items: center; gap: 14px">
+        <svg aria-hidden="true" width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="6" fill="#A3AFC4"></rect><path d="M8 18h12M8 14h8M8 10h5" stroke="#1C2B3A" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <div style="font-family: Manrope, Inter, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em">Truck time utilization</div>
+          <div style="font-size: 12px; color: #A3AFC4">Haul fleet · Plan vs Fact · share of total time</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #A3AFC4">
+        <span>Weeks 44–52</span>
+        <span aria-hidden="true" style="width: 3px; height: 3px; border-radius: 50%; background: #A3AFC4"></span>
+        <span>Weighted calculation</span>
+        <span aria-hidden="true" style="width: 3px; height: 3px; border-radius: 50%; background: #A3AFC4"></span>
+        <span>Month plan</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filter bar: every filter lives in a popover -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #E1E6ED">
+    <div style="max-width: 1392px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+
+      <!-- Week -->
+      <div style="position: relative">
+        <button onClick="{{ openWeek }}" aria-expanded="{{ isWeek }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Week</span>
+          <span style="font-weight: 600">All (44–52)</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isWeek }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 260px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Week</div>
+            <div style="display: flex; flex-direction: column; max-height: 300px; overflow-y: auto">
+              <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #EEF1F5"><input type="checkbox" defaultChecked="{{ true }}">Select all</label>
+              <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="9">
+                <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="checkbox" defaultChecked="{{ true }}">{{ w.label }}</label>
+              </sc-for>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #EEF1F5">
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">Clear</button>
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #1C2B3A; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer">Apply</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Office -->
+      <div style="position: relative">
+        <button onClick="{{ openOffice }}" aria-expanded="{{ isOffice }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Office</span>
+          <span style="font-weight: 600">All</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isOffice }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 220px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Office</div>
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{ offices }}" as="o" hint-placeholder-count="6">
+                <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="checkbox">{{ o.label }}</label>
+              </sc-for>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #EEF1F5">
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">Clear</button>
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #1C2B3A; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer">Apply</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Plan type -->
+      <div style="position: relative">
+        <button onClick="{{ openPlan }}" aria-expanded="{{ isPlan }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Plan type</span>
+          <span style="font-weight: 600">Month</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 200px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column; padding-bottom: 6px">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Plan type</div>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="radio" name="plantype" defaultChecked="{{ true }}">Month</label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="radio" name="plantype">Week</label>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Calculation -->
+      <div style="position: relative">
+        <button onClick="{{ openCalc }}" aria-expanded="{{ isCalc }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Calculation</span>
+          <span style="font-weight: 600">Weighted</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isCalc }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 200px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column; padding-bottom: 6px">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Calculation</div>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="radio" name="calc">Linear</label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="radio" name="calc" defaultChecked="{{ true }}">Weighted</label>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Work type -->
+      <div style="position: relative">
+        <button onClick="{{ openWork }}" aria-expanded="{{ isWork }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Work type</span>
+          <span style="font-weight: 600">On spot, Trucks</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isWork }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 200px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Work type</div>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="checkbox" defaultChecked="{{ true }}">On spot</label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="checkbox" defaultChecked="{{ true }}">Trucks</label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px"><input type="checkbox">Undefined</label>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #EEF1F5">
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">Clear</button>
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #1C2B3A; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer">Apply</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Loader -->
+      <div style="position: relative">
+        <button onClick="{{ openLoader }}" aria-expanded="{{ isLoader }}" style="display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">
+          <span style="color: #5B6B7D">Loader</span>
+          <span style="font-weight: 600">All ({{ loaderCount }})</span>
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#5B6B7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <sc-if value="{{ isLoader }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 42px; left: 0; z-index: 30; width: 280px; background: #FFFFFF; border: 1px solid #D6DCE5; border-radius: 12px; box-shadow: 0 12px 32px rgba(28,43,58,0.14); display: flex; flex-direction: column">
+            <div style="padding: 12px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">Loader</div>
+            <div style="padding: 0 14px 8px">
+              <label for="loader-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search loaders</label>
+              <input id="loader-search" type="search" placeholder="Search…" style="width: 100%; box-sizing: border-box; height: 34px; padding: 0 10px; border: 1px solid #D6DCE5; border-radius: 8px; font: inherit; font-size: 13px; color: #1C2B3A; background: #F8F9FB">
+            </div>
+            <div style="display: flex; flex-direction: column; max-height: 300px; overflow-y: auto">
+              <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #EEF1F5"><input type="checkbox" defaultChecked="{{ true }}">Select all</label>
+              <sc-for list="{{ loaders }}" as="l" hint-placeholder-count="8">
+                <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px; font-variant-numeric: tabular-nums"><input type="checkbox" defaultChecked="{{ true }}">{{ l.label }}</label>
+              </sc-for>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #EEF1F5">
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 12px; border: 1px solid #D6DCE5; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #1C2B3A; cursor: pointer">Clear</button>
+              <button onClick="{{ close }}" style="height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #1C2B3A; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer">Apply</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex: 1 1 auto"></div>
+      <button style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; color: #1D6FA5; cursor: pointer">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7a4.5 4.5 0 1 0 1.3-3.2M2.5 1.5v2.6h2.6" stroke="#1D6FA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        Reset filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Backdrop closes any open menu -->
+  <sc-if value="{{ anyOpen }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ close }}" aria-label="Close menu" style="position: fixed; inset: 0; z-index: 20; background: transparent; border: 0; padding: 0; cursor: default"></button>
+  </sc-if>
+
+  <!-- Content -->
+  <main style="max-width: 1392px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 20px 24px 32px; display: flex; flex-direction: column; gap: 16px">
+
+    <!-- KPI tiles -->
+    <section aria-label="Key figures" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px">
+
+      <div style="background: #FFFFFF; border: 1px solid #E1E6ED; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6B7D">Truck loading</div>
+          <div style="font-size: 11px; color: #5B6B7D">% of total time</div>
+        </div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+          <div style="display: flex; gap: 20px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Plan</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 600; font-size: 22px; color: #5B6B7D; font-variant-numeric: tabular-nums">41.9%</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Fact</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 800; font-size: 28px; line-height: 1; color: #1C2B3A; font-variant-numeric: tabular-nums">46.2%</span></div>
+          </div>
+          <span style="padding: 4px 8px; border-radius: 999px; background: #E3EEF7; color: #155A88; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums">+4.28 pp</span>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E1E6ED; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6B7D">Effective work time</div>
+          <div style="font-size: 11px; color: #5B6B7D">% of total time</div>
+        </div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+          <div style="display: flex; gap: 20px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Plan</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 600; font-size: 22px; color: #5B6B7D; font-variant-numeric: tabular-nums">52.9%</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Fact</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 800; font-size: 28px; line-height: 1; color: #1C2B3A; font-variant-numeric: tabular-nums">52.3%</span></div>
+          </div>
+          <span style="padding: 4px 8px; border-radius: 999px; background: #FBEADF; color: #9A4511; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums">−0.57 pp</span>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E1E6ED; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6B7D">Performance per truck</div>
+          <div style="font-size: 11px; color: #5B6B7D">m³/h</div>
+        </div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+          <div style="display: flex; gap: 20px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Plan</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 600; font-size: 22px; color: #5B6B7D; font-variant-numeric: tabular-nums">1,115,022</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Fact</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 800; font-size: 28px; line-height: 1; color: #1C2B3A; font-variant-numeric: tabular-nums">5,967,540</span></div>
+          </div>
+          <span style="padding: 4px 8px; border-radius: 999px; background: #E3EEF7; color: #155A88; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums">+4,852,518</span>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E1E6ED; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5B6B7D">Mass loaded per truck</div>
+          <div style="font-size: 11px; color: #5B6B7D">thousand m³</div>
+        </div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+          <div style="display: flex; gap: 20px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Plan</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 600; font-size: 22px; color: #5B6B7D; font-variant-numeric: tabular-nums">140,454</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #5B6B7D">Fact</span><span style="font-family: Manrope, Inter, sans-serif; font-weight: 800; font-size: 28px; line-height: 1; color: #1C2B3A; font-variant-numeric: tabular-nums">240,390</span></div>
+          </div>
+          <span style="padding: 4px 8px; border-radius: 999px; background: #E3EEF7; color: #155A88; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums">+99,936</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Waterfall: Plan | Fact | Δ in one aligned table -->
+    <section aria-label="Time structure, plan versus fact" style="background: #FFFFFF; border: 1px solid #E1E6ED; border-radius: 12px; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid #EEF1F5">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <div style="font-family: Manrope, Inter, sans-serif; font-weight: 700; font-size: 16px">Time structure</div>
+          <div style="font-size: 12px; color: #5B6B7D">Waterfall from total time to truck loading, % of total</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 18px; font-size: 12px; color: #5B6B7D">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #1C2B3A"></span>Subtotal</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #A3AFC4"></span>Time loss</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #E3EEF7; border: 1px solid #9CC0DF"></span>Better than plan</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #FBEADF; border: 1px solid #E8B08B"></span>Worse than plan</span>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto">
+        <div style="min-width: 980px; padding: 12px 20px 16px; display: flex; flex-direction: column; gap: 4px">
+
+          <!-- Column headers -->
+          <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 70px 28px minmax(0, 1fr) 70px 92px; gap: 0 12px; align-items: end; padding-bottom: 8px; border-bottom: 1px solid #EEF1F5; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B7D">
+            <div>Category</div>
+            <div>Plan</div>
+            <div style="text-align: right">%</div>
+            <div></div>
+            <div>Fact</div>
+            <div style="text-align: right">%</div>
+            <div style="text-align: right">Δ fact − plan, pp</div>
+          </div>
+
+          <sc-for list="{{ rows }}" as="row" hint-placeholder-count="19">
+            <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 70px 28px minmax(0, 1fr) 70px 92px; gap: 0 12px; align-items: center; height: 28px">
+              <div style="font-size: 13px; font-weight: {{ row.labelWeight }}; color: #1C2B3A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ row.label }}</div>
+
+              <div style="position: relative; height: 20px; background-image: linear-gradient(to right, transparent calc(50% - 1px), #E6EAF0 calc(50% - 1px), #E6EAF0 50%, transparent 50%); border-right: 1px solid #E6EAF0">
+                <div style="position: absolute; top: 0; bottom: 0; left: {{ row.planLeft }}%; width: {{ row.planWidth }}%; min-width: 2px; background: {{ row.fill }}; border-radius: 3px; display: flex; align-items: center; padding-left: 6px; box-sizing: border-box; color: #FFFFFF; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap">{{ row.planInBar }}</div>
+              </div>
+              <div style="text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: #1C2B3A">{{ row.planText }}</div>
+
+              <div></div>
+
+              <div style="position: relative; height: 20px; background-image: linear-gradient(to right, transparent calc(50% - 1px), #E6EAF0 calc(50% - 1px), #E6EAF0 50%, transparent 50%); border-right: 1px solid #E6EAF0">
+                <div style="position: absolute; top: 0; bottom: 0; left: {{ row.factLeft }}%; width: {{ row.factWidth }}%; min-width: 2px; background: {{ row.fill }}; border-radius: 3px; display: flex; align-items: center; padding-left: 6px; box-sizing: border-box; color: #FFFFFF; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap">{{ row.factInBar }}</div>
+              </div>
+              <div style="text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: #1C2B3A">{{ row.factText }}</div>
+
+              <div style="display: flex; justify-content: flex-end">
+                <span style="display: inline-block; min-width: 56px; text-align: right; padding: 3px 8px; border-radius: 999px; background: {{ row.deltaBg }}; color: {{ row.deltaColor }}; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums">{{ row.deltaText }}</span>
+              </div>
+            </div>
+          </sc-for>
+
+          <!-- Axis -->
+          <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 70px 28px minmax(0, 1fr) 70px 92px; gap: 0 12px; padding-top: 6px; font-size: 11px; color: #5B6B7D; font-variant-numeric: tabular-nums">
+            <div></div>
+            <div style="display: flex; justify-content: space-between"><span>0%</span><span>50%</span><span>100%</span></div>
+            <div></div>
+            <div></div>
+            <div style="display: flex; justify-content: space-between"><span>0%</span><span>50%</span><span>100%</span></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div style="font-size: 12px; color: #5B6B7D">Δ is favorable (blue) when a subtotal grows or a time loss shrinks against plan; unfavorable (orange) otherwise.</div>
+  </main>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"subtotalColor":{"editor":"color","default":"#1C2B3A","options":["#1C2B3A","#2B3F55","#333333"],"section":"Palette"},"lossColor":{"editor":"color","default":"#A3AFC4","options":["#A3AFC4","#8E9BB3","#C3CBD9"],"section":"Palette"},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { menu: null };
+  }
+
+  renderVals() {
+    const subtotal = this.props.subtotalColor ?? '#1C2B3A';
+    const loss = this.props.lossColor ?? '#A3AFC4';
+
+    const data = [
+      { label: 'Total time',          kind: 'total', plan: 100,   fact: 100 },
+      { label: 'Maintenance',         kind: 'loss',  plan: 9.01,  fact: 5.68 },
+      { label: 'Conservation',        kind: 'loss',  plan: 8.56,  fact: 8.58 },
+      { label: 'Accidents',           kind: 'loss',  plan: 5.11,  fact: 9.30 },
+      { label: 'Spare part',          kind: 'loss',  plan: 0.42,  fact: 0.36 },
+      { label: 'Ready for work',      kind: 'total', plan: 76.91, fact: 76.08 },
+      { label: 'Shift change',        kind: 'loss',  plan: 4.32,  fact: 3.36 },
+      { label: 'Lunch',               kind: 'loss',  plan: 3.41,  fact: 2.18 },
+      { label: 'Personal issues',     kind: 'loss',  plan: 1.71,  fact: 0.47 },
+      { label: 'Refueling',           kind: 'loss',  plan: 0.29,  fact: 0.27 },
+      { label: 'Explosion works',     kind: 'loss',  plan: 1.75,  fact: 1.24 },
+      { label: 'Field switch',        kind: 'loss',  plan: 2.10,  fact: 1.79 },
+      { label: 'Awaiting',            kind: 'loss',  plan: 6.03,  fact: 6.69 },
+      { label: 'Reserved',            kind: 'loss',  plan: 1.34,  fact: 0.32 },
+      { label: 'Other idles',         kind: 'loss',  plan: 3.06,  fact: 5.59 },
+      { label: 'Not classified',      kind: 'loss',  plan: 0,     fact: 1.84 },
+      { label: 'Effective work time', kind: 'total', plan: 52.90, fact: 52.33 },
+      { label: 'Auxiliary work',      kind: 'loss',  plan: 11.02, fact: 6.17 },
+      { label: 'Truck loading',       kind: 'total', plan: 41.88, fact: 46.16 }
+    ];
+
+    let runPlan = 100;
+    let runFact = 100;
+    const rows = data.map((d) => {
+      const isTotal = d.kind === 'total';
+      let planLeft, planWidth, factLeft, factWidth;
+      if (isTotal) {
+        planLeft = 0; planWidth = d.plan; runPlan = d.plan;
+        factLeft = 0; factWidth = d.fact; runFact = d.fact;
+      } else {
+        planLeft = Math.max(0, runPlan - d.plan); planWidth = d.plan; runPlan -= d.plan;
+        factLeft = Math.max(0, runFact - d.fact); factWidth = d.fact; runFact -= d.fact;
+      }
+      const delta = d.fact - d.plan;
+      const neutral = Math.abs(delta) < 0.005;
+      const favorable = isTotal ? delta > 0 : delta < 0;
+      const sign = delta > 0 ? '+' : (delta < 0 ? '−' : '');
+      return {
+        label: d.label,
+        labelWeight: isTotal ? 600 : 400,
+        fill: isTotal ? subtotal : loss,
+        planLeft: planLeft.toFixed(2),
+        planWidth: planWidth.toFixed(2),
+        factLeft: factLeft.toFixed(2),
+        factWidth: factWidth.toFixed(2),
+        planInBar: isTotal ? Math.round(d.plan) + '%' : '',
+        factInBar: isTotal ? Math.round(d.fact) + '%' : '',
+        planText: d.plan === 0 ? '–' : d.plan.toFixed(2) + '%',
+        factText: d.fact.toFixed(2) + '%',
+        deltaText: neutral ? '0.00' : sign + Math.abs(delta).toFixed(2),
+        deltaBg: neutral ? '#EEF1F5' : (favorable ? '#E3EEF7' : '#FBEADF'),
+        deltaColor: neutral ? '#5B6B7D' : (favorable ? '#155A88' : '#9A4511')
+      };
+    });
+
+    const weeks = [
+      '44 (29.10–4.11)', '45 (5.11–11.11)', '46 (12.11–18.11)', '47 (19.11–25.11)',
+      '48 (26.11–2.12)', '49 (3.12–9.12)', '50 (10.12–16.12)', '51 (17.12–23.12)',
+      '52 (24.12–30.12)', '1 (31.12–6.1)'
+    ].map((label) => ({ label }));
+
+    const offices = ['B1', 'K1', 'K2', 'K3', 'M2', 'T1'].map((label) => ({ label }));
+
+    const loaders = [
+      'LDR-10-010', 'LDR-10-05', 'LDR-10-111', 'LDR-10-132', 'LDR-10-139', 'LDR-10-140',
+      'LDR-10-293', 'LDR-10-294', 'LDR-10-300-L', 'LDR-10-328', 'LDR-10-353', 'LDR-10-4-G',
+      'LDR-10-555', 'LDR-10-67', 'LDR-10-70-175', 'LDR-10-70-23', 'LDR-10-70-24-D',
+      'LDR-10-70-28', 'LDR-10-70-299', 'LDR-10-70-332-O', 'LDR-10-70-381', 'LDR-10-70-419',
+      'LDR-10-70-430', 'LDR-10-70-449', 'LDR-10-7062', 'LDR-10-72', 'LDR-10-9', 'LDR-10-90-M',
+      'LDR-11-14', 'LDR-11-70-13-13', 'LDR-11-70-16-G', 'LDR-11-70-17'
+    ].map((label) => ({ label }));
+
+    const menu = this.state.menu;
+    const toggle = (k) => () => this.setState({ menu: menu === k ? null : k });
+
+    return {
+      rows, weeks, offices, loaders,
+      loaderCount: loaders.length,
+      isWeek: menu === 'week',
+      isOffice: menu === 'office',
+      isPlan: menu === 'plan',
+      isCalc: menu === 'calc',
+      isWork: menu === 'work',
+      isLoader: menu === 'loader',
+      anyOpen: menu !== null,
+      openWeek: toggle('week'),
+      openOffice: toggle('office'),
+      openPlan: toggle('plan'),
+      openCalc: toggle('calc'),
+      openWork: toggle('work'),
+      openLoader: toggle('loader'),
+      close: () => this.setState({ menu: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

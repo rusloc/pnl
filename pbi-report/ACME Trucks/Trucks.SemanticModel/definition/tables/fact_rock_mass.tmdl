@@ -1,0 +1,424 @@
+table fact_rock_mass
+	lineageTag: e915917e-227f-4d5e-9570-29da000f1327
+
+	column date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 25392964-908a-4cdb-9dfd-c785d375a028
+		summarizeBy: none
+		sourceColumn: Дата
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mine
+		dataType: string
+		lineageTag: 8725b970-ab3d-463a-b2f2-01f46a2941e1
+		summarizeBy: none
+		sourceColumn: Разрез
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column calendar_time
+		dataType: int64
+		formatString: 0
+		lineageTag: e4955bd3-011b-419c-8018-8f35247ba68c
+		summarizeBy: sum
+		sourceColumn: КФВ
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column production_volume_plan
+		dataType: double
+		lineageTag: db477a15-5c6d-440c-a455-83424d1984cb
+		summarizeBy: sum
+		sourceColumn: Объем добычи план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column production_volume_fact
+		dataType: double
+		lineageTag: 2b757563-03fb-46b2-85a4-813b6f407a72
+		summarizeBy: sum
+		sourceColumn: Объем добычи факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_plan
+		dataType: double
+		lineageTag: fbfa8158-5f3a-418d-bb39-6ed0e3b2bee5
+		summarizeBy: sum
+		sourceColumn: Объем ГМ план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_fact
+		dataType: double
+		lineageTag: ead76fed-e238-42a1-9fcb-380e92b26ad2
+		summarizeBy: sum
+		sourceColumn: Объем ГМ факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_truck_plan
+		dataType: double
+		lineageTag: 3d18560e-c773-4b7b-8fa3-54569d5e831d
+		summarizeBy: sum
+		sourceColumn: Объем ГМ на авто план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_truck_fact
+		dataType: double
+		lineageTag: df857705-888b-424d-a34d-947938a5edb9
+		summarizeBy: sum
+		sourceColumn: Объем ГМ на авто факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column production_plan
+		dataType: double
+		lineageTag: a98a8e67-ca72-4bb6-892a-82132233ea6b
+		summarizeBy: sum
+		sourceColumn: Добыча план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_truck_plan
+		dataType: double
+		lineageTag: 79fde3e8-12f5-4b82-8d96-91fbbfad5eeb
+		summarizeBy: sum
+		sourceColumn: Вскрыша авто план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_truck_fact
+		dataType: double
+		lineageTag: 7b46c2ae-5334-4d71-a279-05e12cb3717e
+		summarizeBy: sum
+		sourceColumn: Вскрыша авто факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column stockpile_truck_plan
+		dataType: double
+		lineageTag: edb379fc-7f5c-4520-ad76-49c1c3b1401a
+		summarizeBy: sum
+		sourceColumn: Навалы авто план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column stockpile_truck_fact
+		dataType: double
+		lineageTag: 997f5a30-ca59-4937-ab10-a9459ca6b0cd
+		summarizeBy: sum
+		sourceColumn: Навалы авто факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_truck_plan
+		dataType: double
+		lineageTag: f86c1bb1-058a-4578-be69-e19c50921f54
+		summarizeBy: sum
+		sourceColumn: ПГР авто план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_truck_fact
+		dataType: double
+		lineageTag: 63be60ef-2ea5-4ebe-be7d-53bb325c6613
+		summarizeBy: sum
+		sourceColumn: ПГР авто факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_no_haul_plan
+		dataType: double
+		lineageTag: 9babc621-77d9-4dfa-9c84-c74cc709951a
+		summarizeBy: sum
+		sourceColumn: Вскрыша б/т план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_no_haul_fact
+		dataType: double
+		lineageTag: 7657a41d-7a22-4049-b3ba-a70cd30e35be
+		summarizeBy: sum
+		sourceColumn: Вскрыша б/т факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rehandling_plan
+		dataType: double
+		lineageTag: c344fd9f-ecd2-4412-a458-6f43d4fe5607
+		summarizeBy: sum
+		sourceColumn: Переэкскавация план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rehandling_fact
+		dataType: double
+		lineageTag: 03f1b844-7d75-42cf-9580-2fbcc68e4b9d
+		summarizeBy: sum
+		sourceColumn: Переэкскавация факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_plan
+		dataType: double
+		lineageTag: dab42848-98e4-46e6-a7fd-595f06c03dc2
+		summarizeBy: sum
+		sourceColumn: ПГР план
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_fact
+		dataType: double
+		lineageTag: abe9e455-1fe0-49c7-a734-b629bf511f72
+		summarizeBy: sum
+		sourceColumn: ПГР факт
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column export_code
+		dataType: int64
+		formatString: 0
+		lineageTag: 24dfed2c-0997-4357-92b3-5502e5b360b5
+		summarizeBy: none
+		sourceColumn: Экспортный код
+
+		annotation SummarizationSetBy = Automatic
+
+	column production_volume_plan_month
+		dataType: double
+		lineageTag: 11500126-57dd-4c46-a4ed-c24f9d8972df
+		summarizeBy: sum
+		sourceColumn: Объем добычи план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_plan_month
+		dataType: double
+		lineageTag: 13f15d9a-ee01-48dc-a3d7-f6c881a7c443
+		summarizeBy: sum
+		sourceColumn: Объем ГМ план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rock_mass_truck_plan_month
+		dataType: double
+		lineageTag: 044628da-6935-4db3-90f5-77eda57a759f
+		summarizeBy: sum
+		sourceColumn: Объем ГМ на авто план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column production_plan_month
+		dataType: double
+		lineageTag: 05064950-d252-4b43-990d-f139acfddc64
+		summarizeBy: sum
+		sourceColumn: Добыча план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_truck_plan_month
+		dataType: double
+		lineageTag: 7c6e8749-b735-4620-8cfe-66fce8f8dc68
+		summarizeBy: sum
+		sourceColumn: Вскрыша авто план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column stockpile_truck_plan_month
+		dataType: double
+		lineageTag: bcb0108d-e023-4e31-804a-b49e39438425
+		summarizeBy: sum
+		sourceColumn: Навалы авто план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_truck_plan_month
+		dataType: double
+		lineageTag: 165b7dcc-859f-4066-9e2e-e12d989a2e11
+		summarizeBy: sum
+		sourceColumn: ПГР авто план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column overburden_no_haul_plan_month
+		dataType: double
+		lineageTag: 0fc8500f-7e9f-4e2e-b5a5-5cbbb8606e13
+		summarizeBy: sum
+		sourceColumn: Вскрыша б/т план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rehandling_plan_month
+		dataType: double
+		lineageTag: f91d0873-7551-44b9-98ba-394193063aaa
+		summarizeBy: sum
+		sourceColumn: Переэкскавация план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mining_prep_plan_month
+		dataType: double
+		lineageTag: c09ded55-9171-4c52-bda1-59389a5b5bd2
+		summarizeBy: sum
+		sourceColumn: ПГР план месяц
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_rock_mass-393ee214-1bd7-4e26-b8c7-c6a98a33218c = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\ПФ объемы.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"Дата", type datetime},
+				            {"Разрез", type text},
+				            {"КФВ", Int64.Type},
+				            {"Объем добычи план", type number},
+				            {"Объем добычи факт", type number},
+				            {"Объем ГМ план", type number},
+				            {"Объем ГМ факт", type number},
+				            {"Объем ГМ на авто план", type number},
+				            {"Объем ГМ на авто факт", type number},
+				            {"Добыча план", type number},
+				            {"Вскрыша авто план", type number},
+				            {"Вскрыша авто факт", type number},
+				            {"Навалы авто план", type number},
+				            {"Навалы авто факт", type number},
+				            {"ПГР авто план", type number},
+				            {"ПГР авто факт", type number},
+				            {"Вскрыша б/т план", type number},
+				            {"Вскрыша б/т факт", type number},
+				            {"Переэкскавация план", type number},
+				            {"Переэкскавация факт", type number},
+				            {"ПГР план", type number},
+				            {"ПГР факт", type number},
+				            {"Экспортный код", Int64.Type},
+				            {"Объем добычи план месяц", type number},
+				            {"Объем ГМ план месяц", type number},
+				            {"Объем ГМ на авто план месяц", type number},
+				            {"Добыча план месяц", type number},
+				            {"Вскрыша авто план месяц", type number},
+				            {"Навалы авто план месяц", type number},
+				            {"ПГР авто план месяц", type number},
+				            {"Вскрыша б/т план месяц", type number},
+				            {"Переэкскавация план месяц", type number},
+				            {"ПГР план месяц", type number}
+				        }
+				    )
+				in
+				    typed
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Table
+

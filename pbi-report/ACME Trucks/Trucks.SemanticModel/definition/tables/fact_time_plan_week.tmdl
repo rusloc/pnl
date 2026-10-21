@@ -1,0 +1,242 @@
+table fact_time_plan_week
+	lineageTag: d884eb5f-f486-48c7-a979-4e30148e016f
+
+	column enterprise_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 0d7680b7-28cc-4a40-9190-d5ddf623b31d
+		summarizeBy: sum
+		sourceColumn: enterprise_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column dat
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 0c0b7e9a-afd7-4c85-88d3-5320cd4cecdb
+		summarizeBy: none
+		sourceColumn: dat
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_export_code
+		dataType: int64
+		formatString: 0
+		lineageTag: d3aec9c1-1919-4e9a-96e2-bcc734895571
+		summarizeBy: none
+		sourceColumn: vehicle_export_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_name
+		dataType: string
+		lineageTag: ae944a70-74d9-46fe-b26b-48ab33a9c62a
+		summarizeBy: none
+		sourceColumn: vehicle_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicator_name
+		dataType: string
+		lineageTag: 54475a46-117f-4568-b9c2-f29dde11ac8d
+		summarizeBy: none
+		sourceColumn: indicator_name
+		sortByColumn: category_sort
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column measure_name
+		dataType: string
+		lineageTag: 5481d018-f58f-4e7b-8331-31c1c64d5197
+		summarizeBy: none
+		sourceColumn: measure_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicator_amount
+		dataType: double
+		lineageTag: dbee42bf-358a-4449-a2d7-2ef22c7093e2
+		summarizeBy: sum
+		sourceColumn: indicator_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column duration_share = if([indicator_name] = "КТГ план" || [indicator_name] = "КИО", [indicator_amount]/24, if([measure_name]="ч" || [measure_name]="ч." || [measure_name]="Проверка КТГ", fact_time_plan_week[indicator_amount]/24,if([measure_name]="%",[indicator_amount]/100,BLANK())))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: f61cb14d-4488-4d8e-8873-3f080b5a4062
+		summarizeBy: sum
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_sort_2 = ```
+			
+			if ([indicator_name] = "КФВ" , 0 , 
+			if ([indicator_name] = "ТО, ППР" , 1 , 
+			if ([indicator_name] = "КР" , 2 , 
+			if ([indicator_name] = "Авар. прост." , 3 , 
+			if ([indicator_name] = "Ожид з/ч" , 4 , 
+			if ([indicator_name] = "КТГ план" , 5 , 
+			if ([indicator_name] = "Пересменок" , 6 , 
+			if ([indicator_name] = "Обед" , 7 , 
+			if ([indicator_name] = "Личные нужды" , 8 , 
+			if ([indicator_name] = "Заправка" , 9 , 
+			if ([indicator_name] = "Взрывные работы" , 10 , 
+			if ([indicator_name] = "Перегоны" , 11 , 
+			if ([indicator_name] = "Переключение" , 12 , 
+			if ([indicator_name] = "Ожидание АС" , 13 , 
+			if ([indicator_name] = "Консервация/Резерв" , 14 , 
+			if ([indicator_name] = "Отсутствие экипажа" , 15 , 
+			if ([indicator_name] = "Работа на другом поле" , 16 , 
+			if ([indicator_name] = "Прочие простои" , 20 , 
+			if ([indicator_name] = "Без классификации" , 21 , 
+			if ([indicator_name] = "Отсутствие телеметрии" , 22 , 
+			if ([indicator_name] = "КИО" , 23 , 
+			if ([indicator_name] = "Вспомогательная работа" , 24 , 
+			if ([indicator_name] = "Основная работа" , 25 , 
+			if ([indicator_name] = "Погрузка самосвалов" , 26 , -1))))))))))))))))))))))))
+			```
+		formatString: 0
+		lineageTag: 6da0756a-06b3-4eaa-8237-27f7adc3f07f
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column blank_share = if([indicator_name] = "ТО, ППР", 1 - [duration_share], if([indicator_name] = "КТГ план" || [indicator_name] = "КИО" || [indicator_name] = "Проверка КТГ" , 0, 1- CALCULATE(SUM([duration_share]),FILTER(ALL(fact_time_plan_week),[dat]=EARLIER([dat]) && [category_sort_2]<=EARLIER([category_sort_2]) && [vehicle_name]=EARLIER([vehicle_name]) && [indicator_name] <> "КТГ план" && [indicator_name] <> "КИО" && [indicator_name] <> "Проверка КТГ"))))
+		lineageTag: 67e6bdb6-72d0-49fd-9569-e5a25db93982
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remainder_share = if([indicator_name] = "КТГ план" || [indicator_name] = "КИО", 0, CALCULATE(SUM([duration_share]),FILTER(ALL(fact_time_plan_week),[dat]=EARLIER([dat]) && [category_sort_2]<=EARLIER([category_sort_2]) && [vehicle_name]=EARLIER([vehicle_name])))-[duration_share])
+		lineageTag: 40c26549-dcff-4b3f-a8bc-e0990af92311
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_share = if([indicator_name] = "КТГ план" || [indicator_name] = "КИО" || [indicator_name] = "Проверка КТГ", [duration_share])
+		formatString: 0%;-0%;0%
+		lineageTag: b8b4b362-ba44-4a1d-bbca-f49bb5faac20
+		summarizeBy: sum
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column duration_hours_plan = [indicator_amount]
+		lineageTag: 6af36bce-8631-467e-818a-33c9eb74a92f
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column category_sort
+		dataType: string
+		lineageTag: 061c747a-0317-421c-8b1c-2ccff97b2215
+		summarizeBy: none
+		sourceColumn: Сортировка
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicatior_name_2 = ```
+			// blank line
+			
+			SWITCH(TRUE(),
+			    fact_time_plan_week[indicator_name] = "КТГ план", 
+			        "КТГ", 
+			    fact_time_plan_week[indicator_name] = "Проверка",
+			        "КФВ",
+			    fact_time_plan_week[indicator_name])
+			```
+		lineageTag: 5cf5ef81-7759-406d-ad43-a55f1b762bb9
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column idle_x_bucket_volume = [duration_share] * RELATED(dim_loader[bucket_volume_m3] )
+		lineageTag: b924d0d1-9785-4601-8adc-b52e8f0d79ee
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column bucket_volume_m3 = RELATED(dim_loader[bucket_volume_m3])
+		formatString: 0
+		lineageTag: 37dd4503-2c91-4b85-aad5-48577c3b6356
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column _active
+		dataType: int64
+		formatString: 0
+		lineageTag: 0423fcf4-1e53-42da-beb3-a843ef96aa5d
+		summarizeBy: sum
+		sourceColumn: _active
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: 6cd353db-f0b9-4ac4-8948-34c9a6795cb0
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column block
+		dataType: string
+		lineageTag: 1068f854-63e9-4dba-9acb-cbda1d2e26d5
+		summarizeBy: none
+		sourceColumn: block
+
+		annotation SummarizationSetBy = Automatic
+
+	column _id
+		dataType: string
+		lineageTag: 29cca784-df45-4bb4-a744-b391b4527c8b
+		summarizeBy: none
+		sourceColumn: _id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_time_plan_week-e4329dea-dfcb-48e1-bfb1-acd2df75c898 = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\План_2.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"enterprise_id", Int64.Type},
+				            {"dat", type datetime},
+				            {"vehicle_export_code", Int64.Type},
+				            {"vehicle_name", type text},
+				            {"indicator_name", type text},
+				            {"measure_name", type text},
+				            {"indicator_amount", type number},
+				            {"Сортировка", type text},
+				            {"_active", Int64.Type},
+				            {"area", type text},
+				            {"block", type text},
+				            {"_id", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

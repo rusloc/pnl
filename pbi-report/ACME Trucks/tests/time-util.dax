@@ -1,0 +1,618 @@
+// ACME Trucks - page "Time utilization": expected values AFTER the contractor = blank drillthrough filter was dropped
+// (USER decision 5, 2026-10-21). Captured by bip from the local Import model (Trucks.SemanticModel, refreshed from
+// data/*.parquet) once tests/baseline-live-en.dax had passed in full against the same model, so these numbers are the
+// live model's logic with all contractors included. Run in Power BI Desktop > DAX query view after a refresh; every
+// row of every result tab must show _pass = TRUE. Tolerance: relative 1e-9.
+// Contexts (the page defaults, i.e. what Reset filters restores; report filter dim_loader[is_included] = "да"):
+//   default  = all weeks, all offices, all loaders, plan type Month, calculation Weighted, work type Trucks + On spot,
+//              plus the table's visual filters (is_shown = "1", is_included = "да").
+//   week 9   = the same with week "9 (25.2-3.3)" (the week the old page had saved), for comparison with the baseline.
+// Tabs: 1 waterfall default | 2 waterfall week 9 | 3 waterfall chain (bars meet) | 4 KPI tiles vs table rows |
+//       5 Δ colour rule | 6 KPI noise rule (_KPI Noise) | 7 header context and the dropped contractor filter.
+
+DEFINE
+    // Deterministic units of the four noisy KPI measures (same DAX with _KPI Noise = 1)
+    MEASURE _measures[_test Rock Mass by Truck Plan unit] =
+        SWITCH (
+            TRUE ()
+            ,FIRSTNONBLANK ( param_plan_type[plan_type_code], 1 ) = "Неделя"
+                ,SUM ( fact_rock_mass[rock_mass_truck_plan] )
+            ,SUM ( fact_rock_mass[rock_mass_truck_plan_month] )
+        )
+    MEASURE _measures[_test Rock Mass by Truck Fact unit] =
+        SUM ( fact_rock_mass[rock_mass_truck_fact] )
+
+    VAR _tol             = 1e-9
+
+    VAR _f_included      = TREATAS ( { "да" }, dim_loader[is_included] )
+    VAR _f_plan_type     = TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    VAR _f_calculation   = TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+    VAR _f_work_type     = TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+    VAR _f_week9         = TREATAS ( { "9 (25.2-3.3)" }, dim_date[week_label] )
+    VAR _v_shown         = TREATAS ( { "1" }, dim_time_category[is_shown] )
+    VAR _v_included      = TREATAS ( { "да" }, dim_time_category[is_included] )
+
+EVALUATE
+// ---------------------------------------------------------------- 1 waterfall, default context
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _v_shown, _v_included
+        ,"m0", [WF Plan %]
+        ,"m1", [WF Fact %]
+        ,"m2", [Time Share Δ]
+        ,"m3", [_WF Plan Base]
+        ,"m4", [_WF Plan Loss]
+        ,"m5", [_WF Plan Subtotal]
+        ,"m6", [_WF Fact Base]
+        ,"m7", [_WF Fact Loss]
+        ,"m8", [_WF Fact Subtotal]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "WF Plan %", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "WF Fact %", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "Time Share Δ", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Base", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Loss", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Subtotal", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Base", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Loss", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Subtotal", "_actual", [m8] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 1, "WF Plan %", 1.0 },
+                { 1, "WF Fact %", 1.0 },
+                { 1, "Time Share Δ", 0.0 },
+                { 1, "_WF Plan Base", 0.0 },
+                { 1, "_WF Plan Loss", 0.0 },
+                { 1, "_WF Plan Subtotal", 1.0 },
+                { 1, "_WF Fact Base", 0.0 },
+                { 1, "_WF Fact Loss", 1.0 },
+                { 1, "_WF Fact Subtotal", 1.0 },
+                { 2, "WF Plan %", 0.0872818851616736 },
+                { 2, "WF Fact %", 0.0509857984227829 },
+                { 2, "Time Share Δ", -0.0362960867388907 },
+                { 2, "_WF Plan Base", 0.912718114838327 },
+                { 2, "_WF Plan Loss", 0.0872818851616736 },
+                { 2, "_WF Plan Subtotal", BLANK () },
+                { 2, "_WF Fact Base", 0.949014201577217 },
+                { 2, "_WF Fact Loss", 0.0509857984227829 },
+                { 2, "_WF Fact Subtotal", BLANK () },
+                { 3, "WF Plan %", 0.0935116232530461 },
+                { 3, "WF Fact %", 0.0915734450319548 },
+                { 3, "Time Share Δ", -0.00193817822109138 },
+                { 3, "_WF Plan Base", 0.81920649158528 },
+                { 3, "_WF Plan Loss", 0.0935116232530461 },
+                { 3, "_WF Plan Subtotal", BLANK () },
+                { 3, "_WF Fact Base", 0.857440756545262 },
+                { 3, "_WF Fact Loss", 0.0915734450319548 },
+                { 3, "_WF Fact Subtotal", BLANK () },
+                { 4, "WF Plan %", 0.0485726313740597 },
+                { 4, "WF Fact %", 0.078078221496312 },
+                { 4, "Time Share Δ", 0.0295055901222523 },
+                { 4, "_WF Plan Base", 0.770633860211221 },
+                { 4, "_WF Plan Loss", 0.0485726313740597 },
+                { 4, "_WF Plan Subtotal", BLANK () },
+                { 4, "_WF Fact Base", 0.77936253504895 },
+                { 4, "_WF Fact Loss", 0.078078221496312 },
+                { 4, "_WF Fact Subtotal", BLANK () },
+                { 5, "WF Plan %", 0.00387559619617673 },
+                { 5, "WF Fact %", 0.0129340753985065 },
+                { 5, "Time Share Δ", 0.00905847920232978 },
+                { 5, "_WF Plan Base", 0.766758264015044 },
+                { 5, "_WF Plan Loss", 0.00387559619617673 },
+                { 5, "_WF Plan Subtotal", BLANK () },
+                { 5, "_WF Fact Base", 0.766428459650444 },
+                { 5, "_WF Fact Loss", 0.0129340753985065 },
+                { 5, "_WF Fact Subtotal", BLANK () },
+                { 6, "WF Plan %", 0.766758264015044 },
+                { 6, "WF Fact %", 0.766428459650444 },
+                { 6, "Time Share Δ", -0.000329804364600061 },
+                { 6, "_WF Plan Base", 0.0 },
+                { 6, "_WF Plan Loss", 0.0 },
+                { 6, "_WF Plan Subtotal", 0.766758264015044 },
+                { 6, "_WF Fact Base", 0.0 },
+                { 6, "_WF Fact Loss", 0.0 },
+                { 6, "_WF Fact Subtotal", 0.766428459650444 },
+                { 7, "WF Plan %", 0.0412788950849797 },
+                { 7, "WF Fact %", 0.0356159650323309 },
+                { 7, "Time Share Δ", -0.00566293005264887 },
+                { 7, "_WF Plan Base", 0.725479368930064 },
+                { 7, "_WF Plan Loss", 0.0412788950849797 },
+                { 7, "_WF Plan Subtotal", BLANK () },
+                { 7, "_WF Fact Base", 0.730812494618113 },
+                { 7, "_WF Fact Loss", 0.0356159650323309 },
+                { 7, "_WF Fact Subtotal", BLANK () },
+                { 8, "WF Plan %", 0.0327436565638628 },
+                { 8, "WF Fact %", 0.0223935392270521 },
+                { 8, "Time Share Δ", -0.0103501173368107 },
+                { 8, "_WF Plan Base", 0.692735712366201 },
+                { 8, "_WF Plan Loss", 0.0327436565638628 },
+                { 8, "_WF Plan Subtotal", BLANK () },
+                { 8, "_WF Fact Base", 0.708418955391061 },
+                { 8, "_WF Fact Loss", 0.0223935392270521 },
+                { 8, "_WF Fact Subtotal", BLANK () },
+                { 9, "WF Plan %", 0.0163718282819314 },
+                { 9, "WF Fact %", 0.00288243577961817 },
+                { 9, "Time Share Δ", -0.0134893925023132 },
+                { 9, "_WF Plan Base", 0.67636388408427 },
+                { 9, "_WF Plan Loss", 0.0163718282819314 },
+                { 9, "_WF Plan Subtotal", BLANK () },
+                { 9, "_WF Fact Base", 0.705536519611443 },
+                { 9, "_WF Fact Loss", 0.00288243577961817 },
+                { 9, "_WF Fact Subtotal", BLANK () },
+                { 10, "WF Plan %", 0.00280152109154229 },
+                { 10, "WF Fact %", 0.00215372428814581 },
+                { 10, "Time Share Δ", -0.000647796803396477 },
+                { 10, "_WF Plan Base", 0.673562362992728 },
+                { 10, "_WF Plan Loss", 0.00280152109154229 },
+                { 10, "_WF Plan Subtotal", BLANK () },
+                { 10, "_WF Fact Base", 0.703382795323297 },
+                { 10, "_WF Fact Loss", 0.00215372428814581 },
+                { 10, "_WF Fact Subtotal", BLANK () },
+                { 11, "WF Plan %", 0.0153220469963914 },
+                { 11, "WF Fact %", 0.0120137374558489 },
+                { 11, "Time Share Δ", -0.00330830954054251 },
+                { 11, "_WF Plan Base", 0.658240315996336 },
+                { 11, "_WF Plan Loss", 0.0153220469963914 },
+                { 11, "_WF Plan Subtotal", BLANK () },
+                { 11, "_WF Fact Base", 0.691369057867448 },
+                { 11, "_WF Fact Loss", 0.0120137374558489 },
+                { 11, "_WF Fact Subtotal", BLANK () },
+                { 12, "WF Plan %", 0.0256369506474301 },
+                { 12, "WF Fact %", 0.0242162850158649 },
+                { 12, "Time Share Δ", -0.00142066563156527 },
+                { 12, "_WF Plan Base", 0.632603365348906 },
+                { 12, "_WF Plan Loss", 0.0256369506474301 },
+                { 12, "_WF Plan Subtotal", BLANK () },
+                { 12, "_WF Fact Base", 0.667152772851583 },
+                { 12, "_WF Fact Loss", 0.0242162850158649 },
+                { 12, "_WF Fact Subtotal", BLANK () },
+                { 14, "WF Plan %", 0.0547523256893481 },
+                { 14, "WF Fact %", 0.0634534664125613 },
+                { 14, "Time Share Δ", 0.00870114072321328 },
+                { 14, "_WF Plan Base", 0.577851039659559 },
+                { 14, "_WF Plan Loss", 0.0547523256893481 },
+                { 14, "_WF Plan Subtotal", BLANK () },
+                { 14, "_WF Fact Base", 0.603699306439022 },
+                { 14, "_WF Fact Loss", 0.0634534664125613 },
+                { 14, "_WF Fact Subtotal", BLANK () },
+                { 15, "WF Plan %", 0.0150707176383042 },
+                { 15, "WF Fact %", 0.0110091648291646 },
+                { 15, "Time Share Δ", -0.00406155280913955 },
+                { 15, "_WF Plan Base", 0.562780322021254 },
+                { 15, "_WF Plan Loss", 0.0150707176383042 },
+                { 15, "_WF Plan Subtotal", BLANK () },
+                { 15, "_WF Fact Base", 0.592690141609857 },
+                { 15, "_WF Fact Loss", 0.0110091648291646 },
+                { 15, "_WF Fact Subtotal", BLANK () },
+                { 21, "WF Plan %", 0.0357270876219547 },
+                { 21, "WF Fact %", 0.0644814131786512 },
+                { 21, "Time Share Δ", 0.0287543255566965 },
+                { 21, "_WF Plan Base", 0.527053234399299 },
+                { 21, "_WF Plan Loss", 0.0357270876219547 },
+                { 21, "_WF Plan Subtotal", BLANK () },
+                { 21, "_WF Fact Base", 0.528208728431206 },
+                { 21, "_WF Fact Loss", 0.0644814131786512 },
+                { 21, "_WF Fact Subtotal", BLANK () },
+                { 22, "WF Plan %", 0.0 },
+                { 22, "WF Fact %", 0.0223650897268025 },
+                { 22, "Time Share Δ", 0.0223650897268025 },
+                { 22, "_WF Plan Base", 0.527053234399299 },
+                { 22, "_WF Plan Loss", BLANK () },
+                { 22, "_WF Plan Subtotal", BLANK () },
+                { 22, "_WF Fact Base", 0.505843638704403 },
+                { 22, "_WF Fact Loss", 0.0223650897268025 },
+                { 22, "_WF Fact Subtotal", BLANK () },
+                { 24, "WF Plan %", 0.527053234399299 },
+                { 24, "WF Fact %", 0.505843638704403 },
+                { 24, "Time Share Δ", -0.0212095956948959 },
+                { 24, "_WF Plan Base", 0.0 },
+                { 24, "_WF Plan Loss", 0.0 },
+                { 24, "_WF Plan Subtotal", 0.527053234399299 },
+                { 24, "_WF Fact Base", 0.0 },
+                { 24, "_WF Fact Loss", 0.0 },
+                { 24, "_WF Fact Subtotal", 0.505843638704403 },
+                { 25, "WF Plan %", 0.110898288588565 },
+                { 25, "WF Fact %", 0.0672264998825356 },
+                { 25, "Time Share Δ", -0.0436717887060299 },
+                { 25, "_WF Plan Base", 0.416154945810734 },
+                { 25, "_WF Plan Loss", 0.110898288588565 },
+                { 25, "_WF Plan Subtotal", BLANK () },
+                { 25, "_WF Fact Base", 0.438617138821868 },
+                { 25, "_WF Fact Loss", 0.0672264998825356 },
+                { 25, "_WF Fact Subtotal", BLANK () },
+                { 27, "WF Plan %", 0.416154945810734 },
+                { 27, "WF Fact %", 0.438617138821868 },
+                { 27, "Time Share Δ", 0.0224621930111343 },
+                { 27, "_WF Plan Base", 0.0 },
+                { 27, "_WF Plan Loss", 0.0 },
+                { 27, "_WF Plan Subtotal", 0.416154945810734 },
+                { 27, "_WF Fact Base", 0.0 },
+                { 27, "_WF Fact Loss", 0.0 },
+                { 27, "_WF Fact Subtotal", 0.438617138821868 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            VAR _e      = [_expected]
+            VAR _a      = [_actual]
+            RETURN
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _a )
+                    ,NOT ISBLANK ( _a ) && ABS ( _a - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- 2 waterfall, week 9
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _f_week9, _v_shown, _v_included
+        ,"m0", [WF Plan %]
+        ,"m1", [WF Fact %]
+        ,"m2", [Time Share Δ]
+        ,"m3", [_WF Plan Base]
+        ,"m4", [_WF Plan Loss]
+        ,"m5", [_WF Plan Subtotal]
+        ,"m6", [_WF Fact Base]
+        ,"m7", [_WF Fact Loss]
+        ,"m8", [_WF Fact Subtotal]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "WF Plan %", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "WF Fact %", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "Time Share Δ", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Base", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Loss", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Plan Subtotal", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Base", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Loss", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_measure", "_WF Fact Subtotal", "_actual", [m8] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 1, "WF Plan %", 1.0 },
+                { 1, "WF Fact %", 1.0 },
+                { 1, "Time Share Δ", 0.0 },
+                { 1, "_WF Plan Base", 0.0 },
+                { 1, "_WF Plan Loss", 0.0 },
+                { 1, "_WF Plan Subtotal", 1.0 },
+                { 1, "_WF Fact Base", 0.0 },
+                { 1, "_WF Fact Loss", 1.0 },
+                { 1, "_WF Fact Subtotal", 1.0 },
+                { 2, "WF Plan %", 0.0901310673084527 },
+                { 2, "WF Fact %", 0.0568110938873133 },
+                { 2, "Time Share Δ", -0.0333199734211394 },
+                { 2, "_WF Plan Base", 0.909868932691547 },
+                { 2, "_WF Plan Loss", 0.0901310673084527 },
+                { 2, "_WF Plan Subtotal", BLANK () },
+                { 2, "_WF Fact Base", 0.943188906112686 },
+                { 2, "_WF Fact Loss", 0.0568110938873133 },
+                { 2, "_WF Fact Subtotal", BLANK () },
+                { 3, "WF Plan %", 0.0855541561883537 },
+                { 3, "WF Fact %", 0.0857868020304568 },
+                { 3, "Time Share Δ", 0.000232645842103182 },
+                { 3, "_WF Plan Base", 0.824314776503194 },
+                { 3, "_WF Plan Loss", 0.0855541561883537 },
+                { 3, "_WF Plan Subtotal", BLANK () },
+                { 3, "_WF Fact Base", 0.85740210408223 },
+                { 3, "_WF Fact Loss", 0.0857868020304568 },
+                { 3, "_WF Fact Subtotal", BLANK () },
+                { 4, "WF Plan %", 0.0510540230088347 },
+                { 4, "WF Fact %", 0.0929875950495434 },
+                { 4, "Time Share Δ", 0.0419335720407087 },
+                { 4, "_WF Plan Base", 0.773260753494359 },
+                { 4, "_WF Plan Loss", 0.0510540230088347 },
+                { 4, "_WF Plan Subtotal", BLANK () },
+                { 4, "_WF Fact Base", 0.764414509032687 },
+                { 4, "_WF Fact Loss", 0.0929875950495434 },
+                { 4, "_WF Fact Subtotal", BLANK () },
+                { 5, "WF Plan %", 0.0041653372008702 },
+                { 5, "WF Fact %", 0.00359195807482609 },
+                { 5, "Time Share Δ", -0.000573379126044102 },
+                { 5, "_WF Plan Base", 0.769095416293489 },
+                { 5, "_WF Plan Loss", 0.0041653372008702 },
+                { 5, "_WF Plan Subtotal", BLANK () },
+                { 5, "_WF Fact Base", 0.760822550957861 },
+                { 5, "_WF Fact Loss", 0.00359195807482609 },
+                { 5, "_WF Fact Subtotal", BLANK () },
+                { 6, "WF Plan %", 0.769095416293489 },
+                { 6, "WF Fact %", 0.760822550957861 },
+                { 6, "Time Share Δ", -0.00827286533562788 },
+                { 6, "_WF Plan Base", 0.0 },
+                { 6, "_WF Plan Loss", 0.0 },
+                { 6, "_WF Plan Subtotal", 0.769095416293489 },
+                { 6, "_WF Fact Base", 0.0 },
+                { 6, "_WF Fact Loss", 0.0 },
+                { 6, "_WF Fact Subtotal", 0.760822550957861 },
+                { 7, "WF Plan %", 0.0432348769517951 },
+                { 7, "WF Fact %", 0.0335755725014051 },
+                { 7, "Time Share Δ", -0.00965930445039 },
+                { 7, "_WF Plan Base", 0.725860539341694 },
+                { 7, "_WF Plan Loss", 0.0432348769517951 },
+                { 7, "_WF Plan Subtotal", BLANK () },
+                { 7, "_WF Fact Base", 0.727246978456455 },
+                { 7, "_WF Fact Loss", 0.0335755725014051 },
+                { 7, "_WF Fact Subtotal", BLANK () },
+                { 8, "WF Plan %", 0.034118349360606 },
+                { 8, "WF Fact %", 0.0218447228958892 },
+                { 8, "Time Share Δ", -0.0122736264647168 },
+                { 8, "_WF Plan Base", 0.691742189981088 },
+                { 8, "_WF Plan Loss", 0.034118349360606 },
+                { 8, "_WF Plan Subtotal", BLANK () },
+                { 8, "_WF Fact Base", 0.705402255560566 },
+                { 8, "_WF Fact Loss", 0.0218447228958892 },
+                { 8, "_WF Fact Subtotal", BLANK () },
+                { 9, "WF Plan %", 0.017059174680303 },
+                { 9, "WF Fact %", 0.00470681787271533 },
+                { 9, "Time Share Δ", -0.0123523568075877 },
+                { 9, "_WF Plan Base", 0.674683015300785 },
+                { 9, "_WF Plan Loss", 0.017059174680303 },
+                { 9, "_WF Plan Subtotal", BLANK () },
+                { 9, "_WF Fact Base", 0.700695437687851 },
+                { 9, "_WF Fact Loss", 0.00470681787271533 },
+                { 9, "_WF Fact Subtotal", BLANK () },
+                { 10, "WF Plan %", 0.00286957712973652 },
+                { 10, "WF Fact %", 0.00272680760185825 },
+                { 10, "Time Share Δ", -0.000142769527878267 },
+                { 10, "_WF Plan Base", 0.671813438171048 },
+                { 10, "_WF Plan Loss", 0.00286957712973652 },
+                { 10, "_WF Plan Subtotal", BLANK () },
+                { 10, "_WF Fact Base", 0.697968630085993 },
+                { 10, "_WF Fact Loss", 0.00272680760185825 },
+                { 10, "_WF Fact Subtotal", BLANK () },
+                { 11, "WF Plan %", 0.0175347800964458 },
+                { 11, "WF Fact %", 0.0123560443550209 },
+                { 11, "Time Share Δ", -0.00517873574142494 },
+                { 11, "_WF Plan Base", 0.654278658074602 },
+                { 11, "_WF Plan Loss", 0.0175347800964458 },
+                { 11, "_WF Plan Subtotal", BLANK () },
+                { 11, "_WF Fact Base", 0.685612585730972 },
+                { 11, "_WF Fact Loss", 0.0123560443550209 },
+                { 11, "_WF Fact Subtotal", BLANK () },
+                { 12, "WF Plan %", 0.020976447731132 },
+                { 12, "WF Fact %", 0.017878330866747 },
+                { 12, "Time Share Δ", -0.00309811686438499 },
+                { 12, "_WF Plan Base", 0.63330221034347 },
+                { 12, "_WF Plan Loss", 0.020976447731132 },
+                { 12, "_WF Plan Subtotal", BLANK () },
+                { 12, "_WF Fact Base", 0.667734254864225 },
+                { 12, "_WF Fact Loss", 0.017878330866747 },
+                { 12, "_WF Fact Subtotal", BLANK () },
+                { 14, "WF Plan %", 0.0602645766931307 },
+                { 14, "WF Fact %", 0.0668871467264268 },
+                { 14, "Time Share Δ", 0.00662257003329612 },
+                { 14, "_WF Plan Base", 0.57303763365034 },
+                { 14, "_WF Plan Loss", 0.0602645766931307 },
+                { 14, "_WF Plan Subtotal", BLANK () },
+                { 14, "_WF Fact Base", 0.600847108137798 },
+                { 14, "_WF Fact Loss", 0.0668871467264268 },
+                { 14, "_WF Fact Subtotal", BLANK () },
+                { 15, "WF Plan %", 0.0134436185641769 },
+                { 15, "WF Fact %", 0.00323602801949883 },
+                { 15, "Time Share Δ", -0.0102075905446781 },
+                { 15, "_WF Plan Base", 0.559594015086163 },
+                { 15, "_WF Plan Loss", 0.0134436185641769 },
+                { 15, "_WF Plan Subtotal", BLANK () },
+                { 15, "_WF Fact Base", 0.597611080118299 },
+                { 15, "_WF Fact Loss", 0.00323602801949883 },
+                { 15, "_WF Fact Subtotal", BLANK () },
+                { 21, "WF Plan %", 0.0305616961784922 },
+                { 21, "WF Fact %", 0.055929648912814 },
+                { 21, "Time Share Δ", 0.0253679527343218 },
+                { 21, "_WF Plan Base", 0.529032318907671 },
+                { 21, "_WF Plan Loss", 0.0305616961784922 },
+                { 21, "_WF Plan Subtotal", BLANK () },
+                { 21, "_WF Fact Base", 0.541681431205485 },
+                { 21, "_WF Fact Loss", 0.055929648912814 },
+                { 21, "_WF Fact Subtotal", BLANK () },
+                { 22, "WF Plan %", 0.0 },
+                { 22, "WF Fact %", 0.0183967231692055 },
+                { 22, "Time Share Δ", 0.0183967231692055 },
+                { 22, "_WF Plan Base", 0.529032318907671 },
+                { 22, "_WF Plan Loss", BLANK () },
+                { 22, "_WF Plan Subtotal", BLANK () },
+                { 22, "_WF Fact Base", 0.52328470803628 },
+                { 22, "_WF Fact Loss", 0.0183967231692055 },
+                { 22, "_WF Fact Subtotal", BLANK () },
+                { 24, "WF Plan %", 0.529032318907671 },
+                { 24, "WF Fact %", 0.52328470803628 },
+                { 24, "Time Share Δ", -0.00574761087139131 },
+                { 24, "_WF Plan Base", 0.0 },
+                { 24, "_WF Plan Loss", 0.0 },
+                { 24, "_WF Plan Subtotal", 0.529032318907671 },
+                { 24, "_WF Fact Base", 0.0 },
+                { 24, "_WF Fact Loss", 0.0 },
+                { 24, "_WF Fact Subtotal", 0.52328470803628 },
+                { 25, "WF Plan %", 0.110229204496384 },
+                { 25, "WF Fact %", 0.0616820355602055 },
+                { 25, "Time Share Δ", -0.0485471689361783 },
+                { 25, "_WF Plan Base", 0.418803114411287 },
+                { 25, "_WF Plan Loss", 0.110229204496384 },
+                { 25, "_WF Plan Subtotal", BLANK () },
+                { 25, "_WF Fact Base", 0.461602672476074 },
+                { 25, "_WF Fact Loss", 0.0616820355602055 },
+                { 25, "_WF Fact Subtotal", BLANK () },
+                { 27, "WF Plan %", 0.418803114411287 },
+                { 27, "WF Fact %", 0.461602672476074 },
+                { 27, "Time Share Δ", 0.0427995580647871 },
+                { 27, "_WF Plan Base", 0.0 },
+                { 27, "_WF Plan Loss", 0.0 },
+                { 27, "_WF Plan Subtotal", 0.418803114411287 },
+                { 27, "_WF Fact Base", 0.0 },
+                { 27, "_WF Fact Loss", 0.0 },
+                { 27, "_WF Fact Subtotal", 0.461602672476074 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            VAR _e      = [_expected]
+            VAR _a      = [_actual]
+            RETURN
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _a )
+                    ,NOT ISBLANK ( _a ) && ABS ( _a - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- 3 waterfall chain: every loss bar ends where the previous bar
+// starts (base + loss = previous level) and every subtotal equals the level left after the losses above it
+VAR _rows =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _v_shown, _v_included
+        ,"_sub", [_WF Is Subtotal]
+        ,"_pb", [_WF Plan Base], "_pl", [_WF Plan Loss], "_ps", [_WF Plan Subtotal]
+        ,"_fb", [_WF Fact Base], "_fl", [_WF Fact Loss], "_fs", [_WF Fact Subtotal]
+    )
+VAR _levels =
+    ADDCOLUMNS (
+        _rows
+        ,"_plan_level", IF ( [_sub] = 1, [_ps], [_pb] )
+        ,"_fact_level", IF ( [_sub] = 1, [_fs], [_fb] )
+    )
+VAR _checked =
+    ADDCOLUMNS (
+        FILTER ( _levels, dim_time_category[sort_order] > 1 )
+        ,"_prev_plan",
+            VAR _s      = dim_time_category[sort_order]
+            VAR _p      = MAXX ( FILTER ( _levels, dim_time_category[sort_order] < _s ), dim_time_category[sort_order] )
+            RETURN
+                MAXX ( FILTER ( _levels, dim_time_category[sort_order] = _p ), [_plan_level] )
+        ,"_prev_fact",
+            VAR _s      = dim_time_category[sort_order]
+            VAR _p      = MAXX ( FILTER ( _levels, dim_time_category[sort_order] < _s ), dim_time_category[sort_order] )
+            RETURN
+                MAXX ( FILTER ( _levels, dim_time_category[sort_order] = _p ), [_fact_level] )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _checked
+        ,"_category_sort", dim_time_category[sort_order]
+        ,"_subtotal", [_sub]
+        ,"_pass",
+            IF (
+                [_sub] = 1
+                ,ABS ( [_ps] - [_prev_plan] ) <= 1e-9 && ABS ( [_fs] - [_prev_fact] ) <= 1e-9
+                ,ABS ( [_pb] + COALESCE ( [_pl], 0 ) - [_prev_plan] ) <= 1e-9
+                    && ABS ( [_fb] + COALESCE ( [_fl], 0 ) - [_prev_fact] ) <= 1e-9
+            )
+    )
+ORDER BY [_pass], [_category_sort]
+
+EVALUATE
+// ---------------------------------------------------------------- 4 KPI tiles 1-2 equal the table rows 27 / 24; Δ pp = (fact - plan) x 100
+VAR _k =
+    SUMMARIZECOLUMNS (
+        _f_included, _f_plan_type, _f_calculation, _f_work_type
+        ,"_tl_p", [KPI Truck Loading Plan %], "_tl_f", [KPI Truck Loading Fact %], "_tl_d", [KPI Truck Loading Δ pp]
+        ,"_ew_p", [KPI Effective Work Plan %], "_ew_f", [KPI Effective Work Fact %], "_ew_d", [KPI Effective Work Δ pp]
+    )
+VAR _t =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _v_shown, _v_included
+        ,"_p", [WF Plan %], "_f", [WF Fact %]
+    )
+RETURN
+    UNION (
+        ROW ( "_check", "truck loading plan = row 27", "_pass", ABS ( MAXX ( _k, [_tl_p] ) - MAXX ( FILTER ( _t, dim_time_category[sort_order] = 27 ), [_p] ) ) <= 1e-12 )
+        ,ROW ( "_check", "truck loading fact = row 27", "_pass", ABS ( MAXX ( _k, [_tl_f] ) - MAXX ( FILTER ( _t, dim_time_category[sort_order] = 27 ), [_f] ) ) <= 1e-12 )
+        ,ROW ( "_check", "truck loading delta pp", "_pass", ABS ( MAXX ( _k, [_tl_d] ) - ( MAXX ( _k, [_tl_f] ) - MAXX ( _k, [_tl_p] ) ) * 100 ) <= 1e-9 )
+        ,ROW ( "_check", "effective work plan = row 24", "_pass", ABS ( MAXX ( _k, [_ew_p] ) - MAXX ( FILTER ( _t, dim_time_category[sort_order] = 24 ), [_p] ) ) <= 1e-12 )
+        ,ROW ( "_check", "effective work fact = row 24", "_pass", ABS ( MAXX ( _k, [_ew_f] ) - MAXX ( FILTER ( _t, dim_time_category[sort_order] = 24 ), [_f] ) ) <= 1e-12 )
+        ,ROW ( "_check", "effective work delta pp", "_pass", ABS ( MAXX ( _k, [_ew_d] ) - ( MAXX ( _k, [_ew_f] ) - MAXX ( _k, [_ew_p] ) ) * 100 ) <= 1e-9 )
+    )
+ORDER BY [_pass], [_check]
+
+EVALUATE
+// ---------------------------------------------------------------- 5 Δ colour rule: subtotal up or time loss down = favourable (blue),
+// otherwise unfavourable (orange), |Δ| < 0.005 pp = neutral; checked on the pill SVG's fill
+VAR _r =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _v_shown, _v_included
+        ,"_sub", [_WF Is Subtotal]
+        ,"_pp", [Time Share Δ] * 100
+        ,"_pill", [WF Δ Pill]
+    )
+RETURN
+    SELECTCOLUMNS (
+        _r
+        ,"_category_sort", dim_time_category[sort_order]
+        ,"_pp", [_pp]
+        ,"_pass",
+            VAR _pp     = COALESCE ( [_pp], 0 )
+            VAR _bg     =
+                SWITCH (
+                    TRUE ()
+                    ,ABS ( _pp ) < 0.005
+                        ,"%23EEF1F5"
+                    ,IF ( [_sub] = 1, _pp > 0, _pp < 0 )
+                        ,"%23E3EEF7"
+                    ,"%23FBEADF"
+                )
+            RETURN
+                CONTAINSSTRING ( [_pill], "fill='" & _bg & "'" )
+    )
+ORDER BY [_pass], [_category_sort]
+
+EVALUATE
+// ---------------------------------------------------------------- 6 KPI noise rule: while _KPI Noise is RANDBETWEEN ( 10, 100 ), the rock mass
+// tiles are unit x a whole number in [10, 100]. When the noise is removed (body = 1) this tab must be updated.
+VAR _w =
+    SUMMARIZECOLUMNS (
+        _f_included, _f_plan_type, _f_calculation, _f_work_type
+        ,"k0", [Rock Mass by Truck Plan], "u0", [_test Rock Mass by Truck Plan unit]
+        ,"k1", [Rock Mass by Truck Fact], "u1", [_test Rock Mass by Truck Fact unit]
+        ,"n", [_KPI Noise]
+    )
+RETURN
+    UNION (
+        ROW ( "_check", "rock mass plan = unit x noise", "_pass", VAR _m = DIVIDE ( MAXX ( _w, [k0] ), MAXX ( _w, [u0] ) ) RETURN _m >= 10 && _m <= 100 && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6 )
+        ,ROW ( "_check", "rock mass fact = unit x noise", "_pass", VAR _m = DIVIDE ( MAXX ( _w, [k1] ), MAXX ( _w, [u1] ) ) RETURN _m >= 10 && _m <= 100 && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6 )
+        ,ROW ( "_check", "_KPI Noise in [10, 100]", "_pass", VAR _n = MAXX ( _w, [n] ) RETURN _n >= 10 && _n <= 100 )
+    )
+ORDER BY [_pass], [_check]
+
+EVALUATE
+// ---------------------------------------------------------------- 7 header context; the page no longer filters contractor (both groups count)
+VAR _h =
+    CALCULATE (
+        [_Header Context]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type
+    )
+VAR _contractors =
+    CALCULATE (
+        DISTINCTCOUNT ( dim_loader[contractor] )
+        ,_f_included
+        ,fact_time_actual
+    )
+RETURN
+    UNION (
+        ROW ( "_check", "header text", "_pass", _h = "Weeks 44 (2022) – 14 (2023)  ·  Weighted calculation  ·  Month plan" )
+        ,ROW ( "_check", "loaders with and without contractor both in the fact data", "_pass", _contractors = 2 )
+    )
+ORDER BY [_pass], [_check]

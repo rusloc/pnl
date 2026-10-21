@@ -1,0 +1,163 @@
+table dim_time_category
+	lineageTag: 0a292699-48d3-420e-a3d6-bcc745812576
+
+	column category_code
+		dataType: string
+		lineageTag: 97c0082f-cf89-4f04-bf42-58301b042663
+		summarizeBy: none
+		sourceColumn: idle_model_category
+		sortByColumn: sort_order
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column sort_order
+		dataType: int64
+		formatString: 0
+		lineageTag: 543cf003-7026-4704-896d-158e11b8fa03
+		summarizeBy: sum
+		sourceColumn: Sorting
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_included
+		dataType: string
+		lineageTag: edb30dea-fbb6-422d-b930-a294fbe782ac
+		summarizeBy: none
+		sourceColumn: Учитывать
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_shown
+		dataType: string
+		lineageTag: 2e5c66e4-b0c4-4de3-a0b6-569915d3c4eb
+		summarizeBy: none
+		sourceColumn: show
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name =
+			
+			
+			SWITCH(TRUE()
+			    ,[sort_order] = 1
+			        ,"Total time"
+			    ,[sort_order] = 2
+			        ,"Maintenance"
+			    ,[sort_order] = 3
+			        ,"Capital repairs"
+			    ,[sort_order] = 4
+			        ,"Accidents"
+			    ,[sort_order] = 5
+			        ,"Spare part"
+			    ,[sort_order] = 6
+			        ,"Ready for work"
+			    ,[sort_order] = 7
+			        ,"Shift change"
+			    ,[sort_order] = 8
+			        ,"Lunch"
+			    ,[sort_order] = 9
+			        ,"Personal issues"
+			    ,[sort_order] = 10
+			        ,"Refueling"
+			    ,[sort_order] = 11
+			        ,"Explosion works"
+			    ,[sort_order] = 12
+			        ,"Field switch"
+			    ,[sort_order] = 13
+			        ,"Other switch"
+			    ,[sort_order] = 14
+			        ,"Awaiting trucks"
+			    ,[sort_order] = 15
+			        ,"Conservation / reserve"
+			    ,[sort_order] = 16
+			        ,"Awaiting operator"
+			    ,[sort_order] = 17
+			        ,"Other field"
+			    ,[sort_order] = 18
+			        ,"Spot clearance"
+			    ,[sort_order] = 19
+			        ,"Awaiting truck"
+			    ,[sort_order] = 20
+			        ,"Obstacles"
+			    ,[sort_order] = 21
+			        ,"Other idles"
+			    ,[sort_order] = 22
+			        ,"Not classified"
+			    ,[sort_order] = 23
+			        ,"Telemetrics issues"
+			    ,[sort_order] = 24
+			        ,"Effective work time"
+			    ,[sort_order] = 25
+			        ,"Auxiliary work"
+			    ,[sort_order] = 26
+			        ,"Main work"
+			    ,[sort_order] = 27
+			        ,"Truck loading"
+			    ,[sort_order] = 28
+			        ,"NA_1"
+			    ,[sort_order] = 29
+			        ,"NA_2"
+			    ,[sort_order] = 30
+			        ,"NA_3"
+			    ,[sort_order] = 31
+			        ,"NA_4"
+			    ,BLANK())
+		lineageTag: 0b67d048-0e5f-4400-ad0c-1c92a2df3b3f
+		summarizeBy: none
+		sortByColumn: sort_order
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_time_category-9f2a05f0-bda1-4e82-ac28-1e6ab9b337e8 = m
+		mode: import
+		source = ```
+				let 
+				    src = #table(
+				
+				        {"idle_model_category","Sorting","show","Учитывать"},
+				        {
+				            {"КФВ","1","1","да"},
+				            {"ТО, ППР","2","1","да"},
+				            {"КР","3","1","да"},
+				            {"Авар. прост.","4","1","да"},
+				            {"Ожид з/ч","5","1","да"},
+				            {"КТГ","6","1","да"},
+				            {"Пересменок","7","1","да"},
+				            {"Обед","8","1","да"},
+				            {"Личные нужды","9","1","да"},
+				            {"Заправка","10","1","да"},
+				            {"Взрывные работы","11","1","да"},
+				            {"Перегоны","12","1","да"},
+				            {"Переключение","13","0","нет"},
+				            {"Ожидание АС","14","1","да"},
+				            {"Консервация/Резерв","15","1","да"},
+				            {"Отсутствие экипажа","16","0","нет"},
+				            {"Работа на другом поле","17","0","нет"},
+				            {"Зачистка подъезда","18","0","нет"},
+				            {"Ожидание погрузки","19","0","нет"},
+				            {"Отсутствие фронта","20","0","нет"},
+				            {"Прочие простои","21","1","да"},
+				            {"Без классификации","22","1","да"},
+				            {"Отсутствие телеметрии","23","0","нет"},
+				            {"КИО","24","1","да"},
+				            {"Вспомогательная работа","25","1","да"},
+				            {"Основная работа","26","0","нет"},
+				            {"Погрузка самосвалов","27","1","да"},
+				            {"КИО (движ. груженым)","28","0","нет"},
+				            {"КИО (движ. порожним)","29","0","нет"},
+				            {"КИО (погрузка)","30","0","нет"},
+				            {"КИО (разгрузка)","31","0","нет"}
+				        }
+				
+				    ),
+				    #"Changed Type" = Table.TransformColumnTypes(src,{{"Sorting", Int64.Type}})
+				in 
+				    #"Changed Type"
+				```
+
+	annotation PBI_ResultType = Table
+

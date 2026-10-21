@@ -1,0 +1,52 @@
+table param_plan_type
+	lineageTag: 69bf6301-5943-4355-b93d-62a20e339c01
+
+	column plan_type_code
+		dataType: string
+		lineageTag: b60720f9-7f80-4ad7-9477-0f171236faec
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column plan_type_id
+		dataType: int64
+		formatString: 0
+		lineageTag: c13af17a-4777-48b4-bacb-ce94da824d0e
+		summarizeBy: sum
+		sourceColumn: attr
+
+		annotation SummarizationSetBy = Automatic
+
+	column plan_type_name =
+			
+			
+			SWITCH(TRUE()
+			    ,[plan_type_id] = 1
+			        ,"Month"
+			    ,[plan_type_id] = 2
+			        ,"Week"
+			    ,BLANK())
+		lineageTag: 182072e2-2711-4a47-943f-c7a506ea5883
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition param_plan_type-60ca555f-176d-411e-b22f-387a23a8a321 = m
+		mode: import
+		source =
+				let
+				    src = Table.TransformColumnTypes(
+				            #table(
+				                {"type", "attr"},
+				                {
+				                    {"Месяц",1},
+				                    {"Неделя",2}
+				                }
+				            ),
+				        {"attr", Int32.Type})
+				in
+				    src
+
+	annotation PBI_ResultType = Table
+

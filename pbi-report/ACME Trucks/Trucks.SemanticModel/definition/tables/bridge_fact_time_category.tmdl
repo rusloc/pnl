@@ -1,0 +1,59 @@
+table bridge_fact_time_category
+	lineageTag: 84ba76ff-453d-4040-8270-9e2fabd92b03
+
+	column fact_category
+		dataType: string
+		lineageTag: 067ca521-a616-4e57-9df3-2f8356ade371
+		summarizeBy: none
+		sourceColumn: Факт_категория
+
+		annotation SummarizationSetBy = Automatic
+
+	column chart_category
+		dataType: string
+		lineageTag: b5c335e4-5f5b-4dc7-b1e5-3d87f089cbd8
+		summarizeBy: none
+		sourceColumn: Категория для графиков
+
+		annotation SummarizationSetBy = Automatic
+
+	partition bridge_fact_time_category-0a59b908-8198-4053-8b3c-af86b82258b8 = m
+		mode: import
+		source = ```
+				let 
+				    src =  #table(
+				
+				            {"Факт_категория","Категория для графиков"},
+				            {
+				                {"ТО, ППР","ТО, ППР"},
+				                {"КР","КР"},
+				                {"Авар. Прост.","Авар. Прост."},
+				                {"Ожид з/ч","Ожид з/ч"},
+				                {"КТГ","КТГ"},
+				                {"Пересменок","Пересменок"},
+				                {"Обед","Обед"},
+				                {"Личные нужды","Личные нужды"},
+				                {"Заправка","Заправка"},
+				                {"Взрывные работы","Взрывные работы"},
+				                {"Перегоны","Перегоны"},
+				                {"Ожидание АС","Ожидание АС"},
+				                {"Консервация/резерв","Консервация/резерв"},
+				                {"Прочие простои","Прочие простои"},
+				                {"Без классификации","Без классификации"},
+				                {"КИО","КИО"},
+				                {"Основная работа","Погрузка самосвалов"},
+				                {"Вспомогательная работа","Вспомогательная работа"},
+				                {"Погрузка самосвалов","Погрузка самосвалов"},
+				                {"КФВ","КФВ"},
+				                {"kio_adv","Не учитывать"},
+				                {"NULL","Не учитывать"}
+				    
+				            }
+				
+				    )
+				in 
+				    src
+				```
+
+	annotation PBI_ResultType = Table
+

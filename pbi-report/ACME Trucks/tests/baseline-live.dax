@@ -1,0 +1,1024 @@
+// ACME Trucks - baseline of the LIVE model "Time unitilaztion" (workspace Showcase), captured 2026-10-21 by ginee
+// through executeQueries (read-only). Run in Power BI Desktop > DAX query view against the local Import model
+// (Trucks.SemanticModel) after a full refresh. Each EVALUATE returns its own result tab; a test passes when every
+// row shows _pass = TRUE. Tolerance: relative 1e-9 (same data, so only floating-point summation order may differ).
+// Expected values also in baseline-live.csv (same folder). This file was self-tested against the live model: all TRUE.
+// Scopes:
+//   row counts         = COUNTROWS per table vs the live model.
+//   waterfall_saved    = "Time util" saved state: report filter Справочник ЭКС[Учитывать] = "да"; page drillthrough
+//                        filter Справочник ЭКС[Подрядчик] = blank (Q-06); week "9 (25.2-3.3)"; plan type "MONTH";
+//                        calculation "Weighted"; work type "Trucks" + "On spot"; office and loader unfiltered;
+//                        plus the waterfall visuals' own filters (idle_model_category not blank, show = "1",
+//                        Справочник простоев[Учитывать] = "да"). Rows = waterfall categories (Sorting).
+//   waterfall_switches = plan type "MONTH" + calculation "Weighted" only (all data), same visual filters.
+//   model_total        = the waterfall / label / tooltip measures with no filter at all.
+//   kpi_*              = the 4 KPI cards (saved page context / switches only / no filter). In the source model these
+//                        measures multiply by RANDBETWEEN(10,100), so every evaluation differs. The test pins the
+//                        deterministic unit (same DAX without RANDBETWEEN, defined below as _test measures) exactly,
+//                        and checks KPI / unit is a whole number in [10, 100] (ГМ на авто *: one RANDBETWEEN) or
+//                        [100, 10000] (_производительность_авто_*: two nested RANDBETWEEN).
+// Measures: waterfall bars (_plan_/_fact_ *_SWITCH), % / delta labels (*_LABEL*), tooltip hours (_planHours,
+// _factHours, _factHours_LIN, _factHours_%%), helper _zero, KPI cards (_производительность_авто_*, ГМ на авто *).
+
+DEFINE
+    // Deterministic units of the KPI measures: the source DAX without RANDBETWEEN (see header)
+    MEASURE 'Таблица мер'[_test ГМ на авто план unit] =
+        SWITCH (
+            TRUE ()
+            ,FIRSTNONBLANK ( 'PLAN_SWITCHER'[type], 1 ) = "Неделя"
+                ,SUM ( 'ПФ объемы'[Объем ГМ на авто план] )
+            ,SUM ( 'ПФ объемы'[Объем ГМ на авто план месяц] )
+        )
+    MEASURE 'Таблица мер'[_test ГМ на авто факт unit] =
+        SUM ( 'ПФ объемы'[Объем ГМ на авто факт] )
+    MEASURE 'Таблица мер'[_test производительность план unit] =
+        DIVIDE ( [_test ГМ на авто план unit], [_погрузка_план_расчет] ) * 1000
+    MEASURE 'Таблица мер'[_test производительность факт unit] =
+        DIVIDE ( [_test ГМ на авто факт unit], [_погрузка_факт_расчет] ) * 1000
+
+    VAR _tol             = 1e-9
+
+    VAR _f_included      = TREATAS ( { "да" }, 'Справочник ЭКС'[Учитывать] )
+    VAR _f_contractor    = TREATAS ( { BLANK () }, 'Справочник ЭКС'[Подрядчик] )
+    VAR _f_week          = TREATAS ( { "9 (25.2-3.3)" }, 'Calendar'[_dateSpanBiz] )
+    VAR _f_plan_type     = TREATAS ( { "MONTH" }, 'PLAN_SWITCHER'[_typeAltName] )
+    VAR _f_calculation   = TREATAS ( { "Weighted" }, 'METRIC_SWITCH'[_metricAltName] )
+    VAR _f_work_type     = TREATAS ( { "Trucks", "On spot" }, 'СПИСОК_ЭКС'[_schemaAltName] )
+    VAR _v_category      = FILTER ( ALL ( 'Справочник простоев'[idle_model_category] ), NOT ISBLANK ( 'Справочник простоев'[idle_model_category] ) )
+    VAR _v_show          = TREATAS ( { "1" }, 'Справочник простоев'[show] )
+    VAR _v_included      = TREATAS ( { "да" }, 'Справочник простоев'[Учитывать] )
+    VAR _s_plan_type     = TREATAS ( { "MONTH" }, 'PLAN_SWITCHER'[_typeAltName] )
+    VAR _s_calculation   = TREATAS ( { "Weighted" }, 'METRIC_SWITCH'[_metricAltName] )
+
+EVALUATE
+// ---------------------------------------------------------------- row counts per table vs live
+VAR _expected =
+        DATATABLE (
+            "_table", STRING,
+            "_expected", INTEGER,
+            {
+                { "AREA_DIM", 13 },
+                { "Calendar", 156 },
+                { "D4_METRICS_SWITCH", 9 },
+                { "DateTableTemplate_432d62ed-472e-468a-b164-32515fcfb4b8", 1 },
+                { "FIELD_DIM", 21 },
+                { "intervals", 891 },
+                { "LocalDateTable_03e1c694-ffc1-4ac9-b666-46ce6a5c5016", 1096 },
+                { "LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324", 730 },
+                { "LocalDateTable_55854758-d3a0-472c-8f75-2eea87c06008", 365 },
+                { "LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487", 730 },
+                { "LocalDateTable_df0c20f7-d568-479f-a326-973c3c10d880", 730 },
+                { "LocalDateTable_eb9c3c70-4675-4236-a899-66032be25b37", 730 },
+                { "METRIC_SWITCH", 2 },
+                { "OFFICE_DIM", 6 },
+                { "PLAN_SWITCHER", 2 },
+                { "waterfall_DIM", 19 },
+                { "Интервалы", 136 },
+                { "КРВ АС", 804526 },
+                { "План_2", 394056 },
+                { "План_2_МЕС", 249080 },
+                { "План_справочник_прост", 25 },
+                { "ПФ КРВ", 203867 },
+                { "ПФ объемы", 18684 },
+                { "ПФ Отчет о рейсах", 18677 },
+                { "СПИСОК_ЭКС", 168 },
+                { "Справочник простоев", 31 },
+                { "Справочник разрезов", 7 },
+                { "Справочник ЭКС", 168 },
+                { "Средневзвеш_план", 17617 },
+                { "Средневзвеш_план_д2", 394056 },
+                { "Средневзвеш_факт", 18168 },
+                { "Средневзвеш_факт_Д2", 203867 },
+                { "Факт_справочник_прост", 22 }
+            }
+        )
+VAR _actual =
+        UNION (
+            ROW ( "_table", "AREA_DIM", "_actual", COUNTROWS ( 'AREA_DIM' ) )
+            ,ROW ( "_table", "Calendar", "_actual", COUNTROWS ( 'Calendar' ) )
+            ,ROW ( "_table", "D4_METRICS_SWITCH", "_actual", COUNTROWS ( 'D4_METRICS_SWITCH' ) )
+            ,ROW ( "_table", "DateTableTemplate_432d62ed-472e-468a-b164-32515fcfb4b8", "_actual", COUNTROWS ( 'DateTableTemplate_432d62ed-472e-468a-b164-32515fcfb4b8' ) )
+            ,ROW ( "_table", "FIELD_DIM", "_actual", COUNTROWS ( 'FIELD_DIM' ) )
+            ,ROW ( "_table", "intervals", "_actual", COUNTROWS ( 'intervals' ) )
+            ,ROW ( "_table", "LocalDateTable_03e1c694-ffc1-4ac9-b666-46ce6a5c5016", "_actual", COUNTROWS ( 'LocalDateTable_03e1c694-ffc1-4ac9-b666-46ce6a5c5016' ) )
+            ,ROW ( "_table", "LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324", "_actual", COUNTROWS ( 'LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324' ) )
+            ,ROW ( "_table", "LocalDateTable_55854758-d3a0-472c-8f75-2eea87c06008", "_actual", COUNTROWS ( 'LocalDateTable_55854758-d3a0-472c-8f75-2eea87c06008' ) )
+            ,ROW ( "_table", "LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487", "_actual", COUNTROWS ( 'LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487' ) )
+            ,ROW ( "_table", "LocalDateTable_df0c20f7-d568-479f-a326-973c3c10d880", "_actual", COUNTROWS ( 'LocalDateTable_df0c20f7-d568-479f-a326-973c3c10d880' ) )
+            ,ROW ( "_table", "LocalDateTable_eb9c3c70-4675-4236-a899-66032be25b37", "_actual", COUNTROWS ( 'LocalDateTable_eb9c3c70-4675-4236-a899-66032be25b37' ) )
+            ,ROW ( "_table", "METRIC_SWITCH", "_actual", COUNTROWS ( 'METRIC_SWITCH' ) )
+            ,ROW ( "_table", "OFFICE_DIM", "_actual", COUNTROWS ( 'OFFICE_DIM' ) )
+            ,ROW ( "_table", "PLAN_SWITCHER", "_actual", COUNTROWS ( 'PLAN_SWITCHER' ) )
+            ,ROW ( "_table", "waterfall_DIM", "_actual", COUNTROWS ( 'waterfall_DIM' ) )
+            ,ROW ( "_table", "Интервалы", "_actual", COUNTROWS ( 'Интервалы' ) )
+            ,ROW ( "_table", "КРВ АС", "_actual", COUNTROWS ( 'КРВ АС' ) )
+            ,ROW ( "_table", "План_2", "_actual", COUNTROWS ( 'План_2' ) )
+            ,ROW ( "_table", "План_2_МЕС", "_actual", COUNTROWS ( 'План_2_МЕС' ) )
+            ,ROW ( "_table", "План_справочник_прост", "_actual", COUNTROWS ( 'План_справочник_прост' ) )
+            ,ROW ( "_table", "ПФ КРВ", "_actual", COUNTROWS ( 'ПФ КРВ' ) )
+            ,ROW ( "_table", "ПФ объемы", "_actual", COUNTROWS ( 'ПФ объемы' ) )
+            ,ROW ( "_table", "ПФ Отчет о рейсах", "_actual", COUNTROWS ( 'ПФ Отчет о рейсах' ) )
+            ,ROW ( "_table", "СПИСОК_ЭКС", "_actual", COUNTROWS ( 'СПИСОК_ЭКС' ) )
+            ,ROW ( "_table", "Справочник простоев", "_actual", COUNTROWS ( 'Справочник простоев' ) )
+            ,ROW ( "_table", "Справочник разрезов", "_actual", COUNTROWS ( 'Справочник разрезов' ) )
+            ,ROW ( "_table", "Справочник ЭКС", "_actual", COUNTROWS ( 'Справочник ЭКС' ) )
+            ,ROW ( "_table", "Средневзвеш_план", "_actual", COUNTROWS ( 'Средневзвеш_план' ) )
+            ,ROW ( "_table", "Средневзвеш_план_д2", "_actual", COUNTROWS ( 'Средневзвеш_план_д2' ) )
+            ,ROW ( "_table", "Средневзвеш_факт", "_actual", COUNTROWS ( 'Средневзвеш_факт' ) )
+            ,ROW ( "_table", "Средневзвеш_факт_Д2", "_actual", COUNTROWS ( 'Средневзвеш_факт_Д2' ) )
+            ,ROW ( "_table", "Факт_справочник_прост", "_actual", COUNTROWS ( 'Факт_справочник_прост' ) )
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass", [_actual] = [_expected]
+    )
+ORDER BY [_pass], [_table]
+
+EVALUATE
+// ---------------------------------------------------------------- waterfall_saved
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        'Справочник простоев'[Sorting]
+        ,_f_included, _f_contractor, _f_week, _f_plan_type, _f_calculation, _f_work_type, _v_category, _v_show, _v_included
+        ,"m0", [_plan_KTG_KIO_WRK_SWITCH]
+        ,"m1", [_plan_LIN_AVGW_BLANK_SWITCH]
+        ,"m2", [_plan_SWTICH_NEW]
+        ,"m3", [_fact_KTG_KIO_WRK_SWITCH]
+        ,"m4", [_fact_BLANK_SWITCH]
+        ,"m5", [_fact_LIN_AVGW_SWITCH]
+        ,"m6", [_plan_AVGW_LIN_LABEL_SWITCH]
+        ,"m7", [_fact_AVGW_LIN_LABEL_SWITCH]
+        ,"m8", [_plan_fact_DIFF_LABEL]
+        ,"m9", [_planHours]
+        ,"m10", [_factHours]
+        ,"m11", [_factHours_LIN]
+        ,"m12", [_factHours_%%]
+        ,"m13", [_zero]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_KTG_KIO_WRK_SWITCH", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_LIN_AVGW_BLANK_SWITCH", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_SWTICH_NEW", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_KTG_KIO_WRK_SWITCH", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_BLANK_SWITCH", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_LIN_AVGW_SWITCH", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_AVGW_LIN_LABEL_SWITCH", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_AVGW_LIN_LABEL_SWITCH", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_fact_DIFF_LABEL", "_actual", [m8] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_planHours", "_actual", [m9] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours", "_actual", [m10] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours_LIN", "_actual", [m11] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours_%%", "_actual", [m12] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_zero", "_actual", [m13] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 1, "_plan_KTG_KIO_WRK_SWITCH", 1.0 },
+                { 1, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 1, "_plan_SWTICH_NEW", 0.0 },
+                { 1, "_fact_KTG_KIO_WRK_SWITCH", 1.0 },
+                { 1, "_fact_BLANK_SWITCH", 0.0 },
+                { 1, "_fact_LIN_AVGW_SWITCH", 1.0 },
+                { 1, "_plan_AVGW_LIN_LABEL_SWITCH", 1.0 },
+                { 1, "_fact_AVGW_LIN_LABEL_SWITCH", 1.0 },
+                { 1, "_plan_fact_DIFF_LABEL", 0.0 },
+                { 1, "_planHours", 152.51336872586873 },
+                { 1, "_factHours", 159.73087301587304 },
+                { 1, "_factHours_LIN", 20328.144444444446 },
+                { 1, "_factHours_%%", 1.0 },
+                { 1, "_zero", 0.0 },
+                { 2, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 2, "_plan_LIN_AVGW_BLANK_SWITCH", 0.9098689326915471 },
+                { 2, "_plan_SWTICH_NEW", 0.09013106730845269 },
+                { 2, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 2, "_fact_BLANK_SWITCH", 0.9431889061126866 },
+                { 2, "_fact_LIN_AVGW_SWITCH", 0.056811093887313285 },
+                { 2, "_plan_AVGW_LIN_LABEL_SWITCH", 0.09013106730845269 },
+                { 2, "_fact_AVGW_LIN_LABEL_SWITCH", 0.056811093887313285 },
+                { 2, "_plan_fact_DIFF_LABEL", -0.033319973421139404 },
+                { 2, "_planHours", 14.297779922779922 },
+                { 2, "_factHours", 9.074457850707855 },
+                { 2, "_factHours_LIN", 1179.8136111111112 },
+                { 2, "_factHours_%%", 0.056810920014229764 },
+                { 2, "_zero", 0.0 },
+                { 3, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 3, "_plan_LIN_AVGW_BLANK_SWITCH", 0.8243147765031935 },
+                { 3, "_plan_SWTICH_NEW", 0.08555415618835366 },
+                { 3, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 3, "_fact_BLANK_SWITCH", 0.8574021040822297 },
+                { 3, "_fact_LIN_AVGW_SWITCH", 0.08578680203045685 },
+                { 3, "_plan_AVGW_LIN_LABEL_SWITCH", 0.08555415618835366 },
+                { 3, "_fact_AVGW_LIN_LABEL_SWITCH", 0.08578680203045685 },
+                { 3, "_plan_fact_DIFF_LABEL", 0.00023264584210319628 },
+                { 3, "_planHours", 13.048262548262548 },
+                { 3, "_factHours", 13.702702702702704 },
+                { 3, "_factHours_LIN", 1680.0 },
+                { 3, "_factHours_%%", 0.08578618800475106 },
+                { 3, "_zero", 0.0 },
+                { 4, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 4, "_plan_LIN_AVGW_BLANK_SWITCH", 0.773260753494359 },
+                { 4, "_plan_SWTICH_NEW", 0.05105402300883467 },
+                { 4, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 4, "_fact_BLANK_SWITCH", 0.7644145090326867 },
+                { 4, "_fact_LIN_AVGW_SWITCH", 0.0929875950495434 },
+                { 4, "_plan_AVGW_LIN_LABEL_SWITCH", 0.05105402300883467 },
+                { 4, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0929875950495434 },
+                { 4, "_plan_fact_DIFF_LABEL", 0.04193357204070873 },
+                { 4, "_planHours", 7.810907335907337 },
+                { 4, "_factHours", 14.852960773273272 },
+                { 4, "_factHours_LIN", 1723.9891666666667 },
+                { 4, "_factHours_%%", 0.09298741372181243 },
+                { 4, "_zero", 0.0 },
+                { 5, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 5, "_plan_LIN_AVGW_BLANK_SWITCH", 0.7690954162934888 },
+                { 5, "_plan_SWTICH_NEW", 0.004165337200870196 },
+                { 5, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 5, "_fact_BLANK_SWITCH", 0.7608225509578606 },
+                { 5, "_fact_LIN_AVGW_SWITCH", 0.0035919580748260947 },
+                { 5, "_plan_AVGW_LIN_LABEL_SWITCH", 0.004165337200870196 },
+                { 5, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0035919580748260947 },
+                { 5, "_plan_fact_DIFF_LABEL", -0.0005733791260441015 },
+                { 5, "_planHours", 0.6486486486486487 },
+                { 5, "_factHours", 0.5737424924924925 },
+                { 5, "_factHours_LIN", 180.07944444444445 },
+                { 5, "_factHours_%%", 0.003591932365106886 },
+                { 5, "_zero", 0.0 },
+                { 6, "_plan_KTG_KIO_WRK_SWITCH", 0.7690954162934888 },
+                { 6, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 6, "_plan_SWTICH_NEW", 0.0 },
+                { 6, "_fact_KTG_KIO_WRK_SWITCH", 0.7608225509578606 },
+                { 6, "_fact_BLANK_SWITCH", 0.0 },
+                { 6, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 6, "_plan_AVGW_LIN_LABEL_SWITCH", 0.7690954162934888 },
+                { 6, "_fact_AVGW_LIN_LABEL_SWITCH", 0.7608225509578606 },
+                { 6, "_plan_fact_DIFF_LABEL", -0.00827286533562821 },
+                { 6, "_planHours", 122.65000000000002 },
+                { 6, "_factHours", 120.18904054054052 },
+                { 6, "_factHours_LIN", 15386.9712 },
+                { 6, "_factHours_%%", 0.7608235458940998 },
+                { 6, "_zero", 0.0 },
+                { 7, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 7, "_plan_LIN_AVGW_BLANK_SWITCH", 0.725860539341694 },
+                { 7, "_plan_SWTICH_NEW", 0.043234876951795065 },
+                { 7, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 7, "_fact_BLANK_SWITCH", 0.7272469784564553 },
+                { 7, "_fact_LIN_AVGW_SWITCH", 0.03357557250140507 },
+                { 7, "_plan_AVGW_LIN_LABEL_SWITCH", 0.043234876951795065 },
+                { 7, "_fact_AVGW_LIN_LABEL_SWITCH", 0.03357557250140507 },
+                { 7, "_plan_fact_DIFF_LABEL", -0.009659304450389997 },
+                { 7, "_planHours", 6.5311583011583005 },
+                { 7, "_factHours", 5.363056225868727 },
+                { 7, "_factHours_LIN", 693.6211111111111 },
+                { 7, "_factHours_%%", 0.0335755769977904 },
+                { 7, "_zero", 0.0 },
+                { 8, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 8, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6917421899810882 },
+                { 8, "_plan_SWTICH_NEW", 0.03411834936060599 },
+                { 8, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 8, "_fact_BLANK_SWITCH", 0.7054022555605657 },
+                { 8, "_fact_LIN_AVGW_SWITCH", 0.021844722895889155 },
+                { 8, "_plan_AVGW_LIN_LABEL_SWITCH", 0.03411834936060599 },
+                { 8, "_fact_AVGW_LIN_LABEL_SWITCH", 0.021844722895889155 },
+                { 8, "_plan_fact_DIFF_LABEL", -0.012273626464716834 },
+                { 8, "_planHours", 5.168194980694981 },
+                { 8, "_factHours", 3.489278072715572 },
+                { 8, "_factHours_LIN", 458.91777777777776 },
+                { 8, "_factHours_%%", 0.021844731746810335 },
+                { 8, "_zero", 0.0 },
+                { 9, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 9, "_plan_LIN_AVGW_BLANK_SWITCH", 0.674683015300785 },
+                { 9, "_plan_SWTICH_NEW", 0.017059174680302994 },
+                { 9, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 9, "_fact_BLANK_SWITCH", 0.7006954376878507 },
+                { 9, "_fact_LIN_AVGW_SWITCH", 0.0047068178727153335 },
+                { 9, "_plan_AVGW_LIN_LABEL_SWITCH", 0.017059174680302994 },
+                { 9, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0047068178727153335 },
+                { 9, "_plan_fact_DIFF_LABEL", -0.012352356807587662 },
+                { 9, "_planHours", 2.5840974903474905 },
+                { 9, "_factHours", 0.7518212408837409 },
+                { 9, "_factHours_LIN", 71.87583333333333 },
+                { 9, "_factHours_%%", 0.004706799798239566 },
+                { 9, "_zero", 0.0 },
+                { 10, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 10, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6718134381710481 },
+                { 10, "_plan_SWTICH_NEW", 0.0028695771297365174 },
+                { 10, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 10, "_fact_BLANK_SWITCH", 0.6979686300859927 },
+                { 10, "_fact_LIN_AVGW_SWITCH", 0.0027268076018582502 },
+                { 10, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0028695771297365174 },
+                { 10, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0027268076018582502 },
+                { 10, "_plan_fact_DIFF_LABEL", -0.0001427695278782672 },
+                { 10, "_planHours", 0.45031853281853285 },
+                { 10, "_factHours", 0.4355522039897041 },
+                { 10, "_factHours_LIN", 82.05666666666667 },
+                { 10, "_factHours_%%", 0.002726787851127701 },
+                { 10, "_zero", 0.0 },
+                { 11, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 11, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6542786580746023 },
+                { 11, "_plan_SWTICH_NEW", 0.017534780096445803 },
+                { 11, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 11, "_fact_BLANK_SWITCH", 0.6856125857309716 },
+                { 11, "_fact_LIN_AVGW_SWITCH", 0.012356044355020874 },
+                { 11, "_plan_AVGW_LIN_LABEL_SWITCH", 0.017534780096445803 },
+                { 11, "_fact_AVGW_LIN_LABEL_SWITCH", 0.012356044355020874 },
+                { 11, "_plan_fact_DIFF_LABEL", -0.005178735741424929 },
+                { 11, "_planHours", 2.727490347490347 },
+                { 11, "_factHours", 1.9736414092664092 },
+                { 11, "_factHours_LIN", 239.22194444444443 },
+                { 11, "_factHours_%%", 0.012356042210263768 },
+                { 11, "_zero", 0.0 },
+                { 12, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 12, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6333022103434702 },
+                { 12, "_plan_SWTICH_NEW", 0.02097644773113198 },
+                { 12, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 12, "_fact_BLANK_SWITCH", 0.6677342548642247 },
+                { 12, "_fact_LIN_AVGW_SWITCH", 0.01787833086674699 },
+                { 12, "_plan_AVGW_LIN_LABEL_SWITCH", 0.02097644773113198 },
+                { 12, "_fact_AVGW_LIN_LABEL_SWITCH", 0.01787833086674699 },
+                { 12, "_plan_fact_DIFF_LABEL", -0.0030981168643849887 },
+                { 12, "_planHours", 3.1974613899613904 },
+                { 12, "_factHours", 2.855724474474475 },
+                { 12, "_factHours_LIN", 371.7427777777778 },
+                { 12, "_factHours_%%", 0.017878350130789627 },
+                { 12, "_zero", 0.0 },
+                { 14, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 14, "_plan_LIN_AVGW_BLANK_SWITCH", 0.57303763365034 },
+                { 14, "_plan_SWTICH_NEW", 0.06026457669313073 },
+                { 14, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 14, "_fact_BLANK_SWITCH", 0.6008471081377981 },
+                { 14, "_fact_LIN_AVGW_SWITCH", 0.06688714672642683 },
+                { 14, "_plan_AVGW_LIN_LABEL_SWITCH", 0.06026457669313073 },
+                { 14, "_fact_AVGW_LIN_LABEL_SWITCH", 0.06688714672642683 },
+                { 14, "_plan_fact_DIFF_LABEL", 0.006622570033296103 },
+                { 14, "_planHours", 9.275680501930507 },
+                { 14, "_factHours", 10.683887548262547 },
+                { 14, "_factHours_LIN", 1545.9302777777777 },
+                { 14, "_factHours_%%", 0.06688680370012659 },
+                { 14, "_zero", 0.0 },
+                { 15, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 15, "_plan_LIN_AVGW_BLANK_SWITCH", 0.5595940150861629 },
+                { 15, "_plan_SWTICH_NEW", 0.01344361856417694 },
+                { 15, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 15, "_fact_BLANK_SWITCH", 0.5976110801182989 },
+                { 15, "_fact_LIN_AVGW_SWITCH", 0.003236028019498832 },
+                { 15, "_plan_AVGW_LIN_LABEL_SWITCH", 0.01344361856417694 },
+                { 15, "_fact_AVGW_LIN_LABEL_SWITCH", 0.003236028019498832 },
+                { 15, "_plan_fact_DIFF_LABEL", -0.010207590544678109 },
+                { 15, "_planHours", 2.1473455598455597 },
+                { 15, "_factHours", 0.516889880952381 },
+                { 15, "_factHours_LIN", 96.71027777777778 },
+                { 15, "_factHours_%%", 0.003236004857376668 },
+                { 15, "_zero", 0.0 },
+                { 21, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 21, "_plan_LIN_AVGW_BLANK_SWITCH", 0.529032318907671 },
+                { 21, "_plan_SWTICH_NEW", 0.030561696178492165 },
+                { 21, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 21, "_fact_BLANK_SWITCH", 0.541681431205485 },
+                { 21, "_fact_LIN_AVGW_SWITCH", 0.05592964891281395 },
+                { 21, "_plan_AVGW_LIN_LABEL_SWITCH", 0.030561696178492165 },
+                { 21, "_fact_AVGW_LIN_LABEL_SWITCH", 0.05592964891281395 },
+                { 21, "_plan_fact_DIFF_LABEL", 0.025367952734321783 },
+                { 21, "_planHours", 4.582712355212355 },
+                { 21, "_factHours", 8.933684979622479 },
+                { 21, "_factHours_LIN", 1389.4719444444445 },
+                { 21, "_factHours_%%", 0.05592960716326083 },
+                { 21, "_zero", 0.0 },
+                { 22, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 22, "_plan_LIN_AVGW_BLANK_SWITCH", 0.529032318907671 },
+                { 22, "_plan_SWTICH_NEW", BLANK () },
+                { 22, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 22, "_fact_BLANK_SWITCH", 0.5232847080362797 },
+                { 22, "_fact_LIN_AVGW_SWITCH", 0.018396723169205473 },
+                { 22, "_plan_AVGW_LIN_LABEL_SWITCH", BLANK () },
+                { 22, "_fact_AVGW_LIN_LABEL_SWITCH", 0.018396723169205473 },
+                { 22, "_plan_fact_DIFF_LABEL", 0.018396723169205473 },
+                { 22, "_planHours", BLANK () },
+                { 22, "_factHours", 2.938553061990562 },
+                { 22, "_factHours_LIN", 440.63388888888886 },
+                { 22, "_factHours_%%", 0.018396901028009453 },
+                { 22, "_zero", 0.0 },
+                { 24, "_plan_KTG_KIO_WRK_SWITCH", 0.529032318907671 },
+                { 24, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 24, "_plan_SWTICH_NEW", 0.0 },
+                { 24, "_fact_KTG_KIO_WRK_SWITCH", 0.5232847080362797 },
+                { 24, "_fact_BLANK_SWITCH", 0.0 },
+                { 24, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 24, "_plan_AVGW_LIN_LABEL_SWITCH", 0.529032318907671 },
+                { 24, "_fact_AVGW_LIN_LABEL_SWITCH", 0.5232847080362797 },
+                { 24, "_plan_fact_DIFF_LABEL", -0.0057476108713913066 },
+                { 24, "_planHours", 71.54743243243242 },
+                { 24, "_factHours", 83.65153320463317 },
+                { 24, "_factHours_LIN", 10182.230399999999 },
+                { 24, "_factHours_%%", 0.523285940410305 },
+                { 24, "_zero", 0.0 },
+                { 25, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 25, "_plan_LIN_AVGW_BLANK_SWITCH", 0.41880311441128704 },
+                { 25, "_plan_SWTICH_NEW", 0.11022920449638378 },
+                { 25, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 25, "_fact_BLANK_SWITCH", 0.4616026724760741 },
+                { 25, "_fact_LIN_AVGW_SWITCH", 0.0616820355602055 },
+                { 25, "_plan_AVGW_LIN_LABEL_SWITCH", 0.11022920449638378 },
+                { 25, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0616820355602055 },
+                { 25, "_plan_fact_DIFF_LABEL", -0.048547168936178275 },
+                { 25, "_planHours", 16.302388996138998 },
+                { 25, "_factHours", 9.852516489703989 },
+                { 25, "_factHours_LIN", 1328.4144444444444 },
+                { 25, "_factHours_%%", 0.06168197984321358 },
+                { 25, "_zero", 0.0 },
+                { 27, "_plan_KTG_KIO_WRK_SWITCH", 0.41880311441128704 },
+                { 27, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 27, "_plan_SWTICH_NEW", 0.0 },
+                { 27, "_fact_KTG_KIO_WRK_SWITCH", 0.4616026724760741 },
+                { 27, "_fact_BLANK_SWITCH", 0.0 },
+                { 27, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 27, "_plan_AVGW_LIN_LABEL_SWITCH", 0.41880311441128704 },
+                { 27, "_fact_AVGW_LIN_LABEL_SWITCH", 0.4616026724760741 },
+                { 27, "_plan_fact_DIFF_LABEL", 0.04279955806478708 },
+                { 27, "_planHours", 62.98937741312741 },
+                { 27, "_factHours", 73.7324036089661 },
+                { 27, "_factHours_LIN", 8845.665277777778 },
+                { 27, "_factHours_%%", 0.4616039605670911 },
+                { 27, "_zero", 0.0 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            IF (
+                ISBLANK ( [_expected] )
+                ,ISBLANK ( [_actual] )
+                ,NOT ISBLANK ( [_actual] ) && ABS ( [_actual] - [_expected] ) <= _tol * MAX ( 1, ABS ( [_expected] ) )
+            )
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- waterfall_switches
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        'Справочник простоев'[Sorting]
+        ,_s_plan_type, _s_calculation, _v_category, _v_show, _v_included
+        ,"m0", [_plan_KTG_KIO_WRK_SWITCH]
+        ,"m1", [_plan_LIN_AVGW_BLANK_SWITCH]
+        ,"m2", [_plan_SWTICH_NEW]
+        ,"m3", [_fact_KTG_KIO_WRK_SWITCH]
+        ,"m4", [_fact_BLANK_SWITCH]
+        ,"m5", [_fact_LIN_AVGW_SWITCH]
+        ,"m6", [_plan_AVGW_LIN_LABEL_SWITCH]
+        ,"m7", [_fact_AVGW_LIN_LABEL_SWITCH]
+        ,"m8", [_plan_fact_DIFF_LABEL]
+        ,"m9", [_planHours]
+        ,"m10", [_factHours]
+        ,"m11", [_factHours_LIN]
+        ,"m12", [_factHours_%%]
+        ,"m13", [_zero]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_KTG_KIO_WRK_SWITCH", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_LIN_AVGW_BLANK_SWITCH", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_SWTICH_NEW", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_KTG_KIO_WRK_SWITCH", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_BLANK_SWITCH", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_LIN_AVGW_SWITCH", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_AVGW_LIN_LABEL_SWITCH", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_fact_AVGW_LIN_LABEL_SWITCH", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_plan_fact_DIFF_LABEL", "_actual", [m8] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_planHours", "_actual", [m9] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours", "_actual", [m10] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours_LIN", "_actual", [m11] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_factHours_%%", "_actual", [m12] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 'Справочник простоев'[Sorting] + 0, "_measure", "_zero", "_actual", [m13] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 1, "_plan_KTG_KIO_WRK_SWITCH", 1.0 },
+                { 1, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 1, "_plan_SWTICH_NEW", 0.0 },
+                { 1, "_fact_KTG_KIO_WRK_SWITCH", 1.0 },
+                { 1, "_fact_BLANK_SWITCH", 0.0 },
+                { 1, "_fact_LIN_AVGW_SWITCH", 1.0 },
+                { 1, "_plan_AVGW_LIN_LABEL_SWITCH", 1.0 },
+                { 1, "_fact_AVGW_LIN_LABEL_SWITCH", 1.0 },
+                { 1, "_plan_fact_DIFF_LABEL", 0.0 },
+                { 1, "_planHours", 1774.793054318789 },
+                { 1, "_factHours", 3119.5207841100228 },
+                { 1, "_factHours_LIN", 435780.3483333333 },
+                { 1, "_factHours_%%", 1.0 },
+                { 1, "_zero", 0.0 },
+                { 6, "_plan_KTG_KIO_WRK_SWITCH", 0.7688416574977249 },
+                { 6, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 6, "_plan_SWTICH_NEW", 0.0 },
+                { 6, "_fact_KTG_KIO_WRK_SWITCH", 0.765768671158917 },
+                { 6, "_fact_BLANK_SWITCH", 0.0 },
+                { 6, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 6, "_plan_AVGW_LIN_LABEL_SWITCH", 0.7688416574977249 },
+                { 6, "_fact_AVGW_LIN_LABEL_SWITCH", 0.765768671158917 },
+                { 6, "_plan_fact_DIFF_LABEL", -0.003072986338807926 },
+                { 6, "_planHours", 1418.5736776491542 },
+                { 6, "_factHours", 2354.6999497773822 },
+                { 6, "_factHours_LIN", 330180.1344 },
+                { 6, "_factHours_%%", 0.7631020316615014 },
+                { 6, "_zero", 0.0 },
+                { 24, "_plan_KTG_KIO_WRK_SWITCH", 0.5291623826217776 },
+                { 24, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 24, "_plan_SWTICH_NEW", 0.0 },
+                { 24, "_fact_KTG_KIO_WRK_SWITCH", 0.49769397923568626 },
+                { 24, "_fact_BLANK_SWITCH", 0.0 },
+                { 24, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 24, "_plan_AVGW_LIN_LABEL_SWITCH", 0.5291623826217776 },
+                { 24, "_fact_AVGW_LIN_LABEL_SWITCH", 0.49769397923568626 },
+                { 24, "_plan_fact_DIFF_LABEL", -0.03146840338609136 },
+                { 24, "_planHours", 814.79643365984 },
+                { 24, "_factHours", 1574.0332381121991 },
+                { 24, "_factHours_LIN", 209176.0632 },
+                { 24, "_factHours_%%", 0.5040660204959491 },
+                { 24, "_zero", 0.0 },
+                { 27, "_plan_KTG_KIO_WRK_SWITCH", 0.41657656899768347 },
+                { 27, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 27, "_plan_SWTICH_NEW", 0.0 },
+                { 27, "_fact_KTG_KIO_WRK_SWITCH", 0.4318663346634286 },
+                { 27, "_fact_BLANK_SWITCH", 0.0 },
+                { 27, "_fact_LIN_AVGW_SWITCH", 0.0 },
+                { 27, "_plan_AVGW_LIN_LABEL_SWITCH", 0.41657656899768347 },
+                { 27, "_fact_AVGW_LIN_LABEL_SWITCH", 0.4318663346634286 },
+                { 27, "_plan_fact_DIFF_LABEL", 0.015289765665745136 },
+                { 27, "_planHours", 729.9998085485308 },
+                { 27, "_factHours", 1364.7516815078654 },
+                { 27, "_factHours_LIN", 179099.5011111111 },
+                { 27, "_factHours_%%", 0.4374876065771171 },
+                { 27, "_zero", 0.0 },
+                { 2, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 2, "_plan_LIN_AVGW_BLANK_SWITCH", 0.9130476612076196 },
+                { 2, "_plan_SWTICH_NEW", 0.08695233879238067 },
+                { 2, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 2, "_fact_BLANK_SWITCH", 0.9490872533169858 },
+                { 2, "_fact_LIN_AVGW_SWITCH", 0.050912746683014924 },
+                { 2, "_plan_AVGW_LIN_LABEL_SWITCH", 0.08695233879238067 },
+                { 2, "_fact_AVGW_LIN_LABEL_SWITCH", 0.050912746683014924 },
+                { 2, "_plan_fact_DIFF_LABEL", -0.03603959210936574 },
+                { 2, "_planHours", 155.2027070347284 },
+                { 2, "_factHours", 158.20219699218362 },
+                { 2, "_factHours_LIN", 22358.731666666667 },
+                { 2, "_factHours_%%", 0.05071362171972756 },
+                { 2, "_zero", 0.0 },
+                { 3, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 3, "_plan_LIN_AVGW_BLANK_SWITCH", 0.8208614715197434 },
+                { 3, "_plan_SWTICH_NEW", 0.0921861896878759 },
+                { 3, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 3, "_fact_BLANK_SWITCH", 0.8558860037816286 },
+                { 3, "_fact_LIN_AVGW_SWITCH", 0.09320124953535672 },
+                { 3, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0921861896878759 },
+                { 3, "_fact_AVGW_LIN_LABEL_SWITCH", 0.09320124953535672 },
+                { 3, "_plan_fact_DIFF_LABEL", 0.0010150598474808203 },
+                { 3, "_planHours", 173.5512021371327 },
+                { 3, "_factHours", 298.3514805332938 },
+                { 3, "_factHours_LIN", 35768.35055555555 },
+                { 3, "_factHours_%%", 0.09564016436531336 },
+                { 3, "_zero", 0.0 },
+                { 4, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 4, "_plan_LIN_AVGW_BLANK_SWITCH", 0.7726623210009939 },
+                { 4, "_plan_SWTICH_NEW", 0.048199150518749935 },
+                { 4, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 4, "_fact_BLANK_SWITCH", 0.7783735740596592 },
+                { 4, "_fact_LIN_AVGW_SWITCH", 0.07751242972196909 },
+                { 4, "_plan_AVGW_LIN_LABEL_SWITCH", 0.048199150518749935 },
+                { 4, "_fact_AVGW_LIN_LABEL_SWITCH", 0.07751242972196909 },
+                { 4, "_plan_fact_DIFF_LABEL", 0.029313279203219154 },
+                { 4, "_planHours", 87.05173642030279 },
+                { 4, "_factHours", 241.69373862174734 },
+                { 4, "_factHours_LIN", 36688.80027777778 },
+                { 4, "_factHours_%%", 0.07747784206243102 },
+                { 4, "_zero", 0.0 },
+                { 5, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 5, "_plan_LIN_AVGW_BLANK_SWITCH", 0.7688416574977249 },
+                { 5, "_plan_SWTICH_NEW", 0.0038206635032690416 },
+                { 5, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 5, "_fact_BLANK_SWITCH", 0.765768671158917 },
+                { 5, "_fact_LIN_AVGW_SWITCH", 0.012604902900742279 },
+                { 5, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0038206635032690416 },
+                { 5, "_fact_AVGW_LIN_LABEL_SWITCH", 0.012604902900742279 },
+                { 5, "_plan_fact_DIFF_LABEL", 0.008784239397473238 },
+                { 5, "_planHours", 7.308993766696349 },
+                { 5, "_factHours", 40.76071979815969 },
+                { 5, "_factHours_LIN", 6625.45 },
+                { 5, "_factHours_%%", 0.013066340191026628 },
+                { 5, "_zero", 0.0 },
+                { 7, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 7, "_plan_LIN_AVGW_BLANK_SWITCH", 0.7274354635010718 },
+                { 7, "_plan_SWTICH_NEW", 0.04140619399665296 },
+                { 7, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 7, "_fact_BLANK_SWITCH", 0.7299530376921062 },
+                { 7, "_fact_LIN_AVGW_SWITCH", 0.035815633466811346 },
+                { 7, "_plan_AVGW_LIN_LABEL_SWITCH", 0.04140619399665296 },
+                { 7, "_fact_AVGW_LIN_LABEL_SWITCH", 0.035815633466811346 },
+                { 7, "_plan_fact_DIFF_LABEL", -0.005590560529841616 },
+                { 7, "_planHours", 73.8637221727516 },
+                { 7, "_factHours", 111.41106646383692 },
+                { 7, "_factHours_LIN", 15895.120833333332 },
+                { 7, "_factHours_%%", 0.035714160659334 },
+                { 7, "_zero", 0.0 },
+                { 8, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 8, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6946203042604033 },
+                { 8, "_plan_SWTICH_NEW", 0.032815159240668065 },
+                { 8, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 8, "_fact_BLANK_SWITCH", 0.70788932579984 },
+                { 8, "_fact_LIN_AVGW_SWITCH", 0.022063711892265945 },
+                { 8, "_plan_AVGW_LIN_LABEL_SWITCH", 0.032815159240668065 },
+                { 8, "_fact_AVGW_LIN_LABEL_SWITCH", 0.022063711892265945 },
+                { 8, "_plan_fact_DIFF_LABEL", -0.01075144734840212 },
+                { 8, "_planHours", 58.66785396260018 },
+                { 8, "_factHours", 69.30036979321265 },
+                { 8, "_factHours_LIN", 9894.530277777778 },
+                { 8, "_factHours_%%", 0.022215069104911753 },
+                { 8, "_zero", 0.0 },
+                { 9, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 9, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6782127246400695 },
+                { 9, "_plan_SWTICH_NEW", 0.016407579620334033 },
+                { 9, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 9, "_fact_BLANK_SWITCH", 0.7050213470417647 },
+                { 9, "_fact_LIN_AVGW_SWITCH", 0.002867978758075243 },
+                { 9, "_plan_AVGW_LIN_LABEL_SWITCH", 0.016407579620334033 },
+                { 9, "_fact_AVGW_LIN_LABEL_SWITCH", 0.002867978758075243 },
+                { 9, "_plan_fact_DIFF_LABEL", -0.01353960086225879 },
+                { 9, "_planHours", 29.33392698130009 },
+                { 9, "_factHours", 8.87609404373207 },
+                { 9, "_factHours_LIN", 1012.7186111111112 },
+                { 9, "_factHours_%%", 0.0028453389664670425 },
+                { 9, "_zero", 0.0 },
+                { 10, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 10, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6753859809919726 },
+                { 10, "_plan_SWTICH_NEW", 0.0028267436480969603 },
+                { 10, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 10, "_fact_BLANK_SWITCH", 0.7028856899459622 },
+                { 10, "_fact_LIN_AVGW_SWITCH", 0.0021356570958028275 },
+                { 10, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0028267436480969603 },
+                { 10, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0021356570958028275 },
+                { 10, "_plan_fact_DIFF_LABEL", -0.0006910865522941328 },
+                { 10, "_planHours", 5.113731077471062 },
+                { 10, "_factHours", 6.564412535866231 },
+                { 10, "_factHours_LIN", 1483.0997222222222 },
+                { 10, "_factHours_%%", 0.00210430158673843 },
+                { 10, "_zero", 0.0 },
+                { 11, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 11, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6602811086597528 },
+                { 11, "_plan_SWTICH_NEW", 0.015104872332219656 },
+                { 11, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 11, "_fact_BLANK_SWITCH", 0.6909451180066989 },
+                { 11, "_fact_LIN_AVGW_SWITCH", 0.011940571939262845 },
+                { 11, "_plan_AVGW_LIN_LABEL_SWITCH", 0.015104872332219656 },
+                { 11, "_fact_AVGW_LIN_LABEL_SWITCH", 0.011940571939262845 },
+                { 11, "_plan_fact_DIFF_LABEL", -0.0031643003929568113 },
+                { 11, "_planHours", 27.41919857524488 },
+                { 11, "_factHours", 37.80414403383794 },
+                { 11, "_factHours_LIN", 4444.253055555556 },
+                { 11, "_factHours_%%", 0.012118574181778757 },
+                { 11, "_zero", 0.0 },
+                { 12, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 12, "_plan_LIN_AVGW_BLANK_SWITCH", 0.6345752502117052 },
+                { 12, "_plan_SWTICH_NEW", 0.025705858448047653 },
+                { 12, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 12, "_fact_BLANK_SWITCH", 0.6670412156015701 },
+                { 12, "_fact_LIN_AVGW_SWITCH", 0.023903902405128394 },
+                { 12, "_plan_AVGW_LIN_LABEL_SWITCH", 0.025705858448047653 },
+                { 12, "_fact_AVGW_LIN_LABEL_SWITCH", 0.023903902405128394 },
+                { 12, "_plan_fact_DIFF_LABEL", -0.0018019560429192588 },
+                { 12, "_planHours", 46.70662956366874 },
+                { 12, "_factHours", 73.28039675472449 },
+                { 12, "_factHours_LIN", 10988.795555555556 },
+                { 12, "_factHours_%%", 0.02349091473536403 },
+                { 12, "_zero", 0.0 },
+                { 14, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 14, "_plan_LIN_AVGW_BLANK_SWITCH", 0.5798750168419329 },
+                { 14, "_plan_SWTICH_NEW", 0.05470023336977266 },
+                { 14, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 14, "_fact_BLANK_SWITCH", 0.6044190360578772 },
+                { 14, "_fact_LIN_AVGW_SWITCH", 0.06262217954369322 },
+                { 14, "_plan_AVGW_LIN_LABEL_SWITCH", 0.05470023336977266 },
+                { 14, "_fact_AVGW_LIN_LABEL_SWITCH", 0.06262217954369322 },
+                { 14, "_plan_fact_DIFF_LABEL", 0.007921946173920558 },
+                { 14, "_planHours", 97.7505031166519 },
+                { 14, "_factHours", 192.73347098545557 },
+                { 14, "_factHours_LIN", 29902.426944444444 },
+                { 14, "_factHours_%%", 0.061783037948388304 },
+                { 14, "_zero", 0.0 },
+                { 15, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 15, "_plan_LIN_AVGW_BLANK_SWITCH", 0.5650179115259703 },
+                { 15, "_plan_SWTICH_NEW", 0.014857105315962613 },
+                { 15, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 15, "_fact_BLANK_SWITCH", 0.5879803194680527 },
+                { 15, "_fact_LIN_AVGW_SWITCH", 0.016438716589824046 },
+                { 15, "_plan_AVGW_LIN_LABEL_SWITCH", 0.014857105315962613 },
+                { 15, "_fact_AVGW_LIN_LABEL_SWITCH", 0.016438716589824046 },
+                { 15, "_plan_fact_DIFF_LABEL", 0.0015816112738614337 },
+                { 15, "_planHours", 21.180534283170076 },
+                { 15, "_factHours", 35.5012232858415 },
+                { 15, "_factHours_LIN", 7022.9302777777775 },
+                { 15, "_factHours_%%", 0.01138034516925642 },
+                { 15, "_zero", 0.0 },
+                { 21, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 21, "_plan_LIN_AVGW_BLANK_SWITCH", 0.5291623826217776 },
+                { 21, "_plan_SWTICH_NEW", 0.0358555289041921 },
+                { 21, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 21, "_fact_BLANK_SWITCH", 0.5210546653192717 },
+                { 21, "_fact_LIN_AVGW_SWITCH", 0.0669256541487818 },
+                { 21, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0358555289041921 },
+                { 21, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0669256541487818 },
+                { 21, "_plan_fact_DIFF_LABEL", 0.031070125244589693 },
+                { 21, "_planHours", 63.12292074799646 },
+                { 21, "_factHours", 201.49996734936184 },
+                { 21, "_factHours_LIN", 32875.703888888886 },
+                { 21, "_factHours_%%", 0.06459324405714718 },
+                { 21, "_zero", 0.0 },
+                { 22, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 22, "_plan_LIN_AVGW_BLANK_SWITCH", 0.5291623826217776 },
+                { 22, "_plan_SWTICH_NEW", BLANK () },
+                { 22, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 22, "_fact_BLANK_SWITCH", 0.49769397923568626 },
+                { 22, "_fact_LIN_AVGW_SWITCH", 0.023360686083585134 },
+                { 22, "_plan_AVGW_LIN_LABEL_SWITCH", BLANK () },
+                { 22, "_fact_AVGW_LIN_LABEL_SWITCH", 0.023360686083585134 },
+                { 22, "_plan_fact_DIFF_LABEL", 0.023360686083585134 },
+                { 22, "_planHours", BLANK () },
+                { 22, "_factHours", 71.09707541802712 },
+                { 22, "_factHours_LIN", 11867.355555555556 },
+                { 22, "_factHours_%%", 0.02279102475616639 },
+                { 22, "_zero", 0.0 },
+                { 25, "_plan_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 25, "_plan_LIN_AVGW_BLANK_SWITCH", 0.41657656899768347 },
+                { 25, "_plan_SWTICH_NEW", 0.11258581362409428 },
+                { 25, "_fact_KTG_KIO_WRK_SWITCH", BLANK () },
+                { 25, "_fact_BLANK_SWITCH", 0.4318663346634286 },
+                { 25, "_fact_LIN_AVGW_SWITCH", 0.06582764457225797 },
+                { 25, "_plan_AVGW_LIN_LABEL_SWITCH", 0.11258581362409428 },
+                { 25, "_fact_AVGW_LIN_LABEL_SWITCH", 0.06582764457225797 },
+                { 25, "_plan_fact_DIFF_LABEL", -0.046758169051836315 },
+                { 25, "_planHours", 193.48543187889587 },
+                { 25, "_factHours", 207.69274599287618 },
+                { 25, "_factHours_LIN", 29852.58 },
+                { 25, "_factHours_%%", 0.06657841391883192 },
+                { 25, "_zero", 0.0 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            IF (
+                ISBLANK ( [_expected] )
+                ,ISBLANK ( [_actual] )
+                ,NOT ISBLANK ( [_actual] ) && ABS ( [_actual] - [_expected] ) <= _tol * MAX ( 1, ABS ( [_expected] ) )
+            )
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- model_total
+VAR _actual_wide =
+    ROW (
+        "m0", [_plan_KTG_KIO_WRK_SWITCH]
+        ,"m1", [_plan_LIN_AVGW_BLANK_SWITCH]
+        ,"m2", [_plan_SWTICH_NEW]
+        ,"m3", [_fact_KTG_KIO_WRK_SWITCH]
+        ,"m4", [_fact_BLANK_SWITCH]
+        ,"m5", [_fact_LIN_AVGW_SWITCH]
+        ,"m6", [_plan_AVGW_LIN_LABEL_SWITCH]
+        ,"m7", [_fact_AVGW_LIN_LABEL_SWITCH]
+        ,"m8", [_plan_fact_DIFF_LABEL]
+        ,"m9", [_planHours]
+        ,"m10", [_factHours]
+        ,"m11", [_factHours_LIN]
+        ,"m12", [_factHours_%%]
+        ,"m13", [_zero]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_plan_KTG_KIO_WRK_SWITCH", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_plan_LIN_AVGW_BLANK_SWITCH", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_plan_SWTICH_NEW", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_fact_KTG_KIO_WRK_SWITCH", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_fact_BLANK_SWITCH", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_fact_LIN_AVGW_SWITCH", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_plan_AVGW_LIN_LABEL_SWITCH", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_fact_AVGW_LIN_LABEL_SWITCH", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_plan_fact_DIFF_LABEL", "_actual", [m8] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_planHours", "_actual", [m9] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_factHours", "_actual", [m10] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_factHours_LIN", "_actual", [m11] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_factHours_%%", "_actual", [m12] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", 0, "_measure", "_zero", "_actual", [m13] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 0, "_plan_KTG_KIO_WRK_SWITCH", 0.0 },
+                { 0, "_plan_LIN_AVGW_BLANK_SWITCH", 0.0 },
+                { 0, "_plan_SWTICH_NEW", 0.0 },
+                { 0, "_fact_KTG_KIO_WRK_SWITCH", 0.0 },
+                { 0, "_fact_BLANK_SWITCH", BLANK () },
+                { 0, "_fact_LIN_AVGW_SWITCH", BLANK () },
+                { 0, "_plan_AVGW_LIN_LABEL_SWITCH", 0.0 },
+                { 0, "_fact_AVGW_LIN_LABEL_SWITCH", 0.0 },
+                { 0, "_plan_fact_DIFF_LABEL", 0.0 },
+                { 0, "_planHours", BLANK () },
+                { 0, "_factHours", BLANK () },
+                { 0, "_factHours_LIN", 1590227.1438666666 },
+                { 0, "_factHours_%%", BLANK () },
+                { 0, "_zero", 0.0 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            IF (
+                ISBLANK ( [_expected] )
+                ,ISBLANK ( [_actual] )
+                ,NOT ISBLANK ( [_actual] ) && ABS ( [_actual] - [_expected] ) <= _tol * MAX ( 1, ABS ( [_expected] ) )
+            )
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- kpi_saved (RANDBETWEEN rule)
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        _f_included, _f_contractor, _f_week, _f_plan_type, _f_calculation, _f_work_type
+        ,"k0", [_производительность_авто_ПЛАН]
+        ,"u0", [_test производительность план unit]
+        ,"k1", [_производительность_авто_ФАКТ]
+        ,"u1", [_test производительность факт unit]
+        ,"k2", [ГМ на авто план]
+        ,"u2", [_test ГМ на авто план unit]
+        ,"k3", [ГМ на авто факт]
+        ,"u3", [_test ГМ на авто факт unit]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ПЛАН", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ФАКТ", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто план", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто факт", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+        )
+VAR _expected =
+        DATATABLE (
+            "_measure", STRING,
+            "_expected_unit", DOUBLE,
+            {
+                { "_производительность_авто_ПЛАН", 884.9378035561388 },
+                { "_производительность_авто_ФАКТ", 753.4772201555679 },
+                { "ГМ на авто план", 7022.69 },
+                { "ГМ на авто факт", 7070.292666 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_multiplier", DIVIDE ( [_actual], [_actual_unit] )
+        ,"_pass",
+            VAR _e      = [_expected_unit]
+            VAR _u      = [_actual_unit]
+            VAR _m      = DIVIDE ( [_actual], [_actual_unit] )
+            VAR _unit_ok =
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _u )
+                    ,NOT ISBLANK ( _u ) && ABS ( _u - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+            VAR _mult_ok =
+                IF (
+                    ISBLANK ( _u ) || _u = 0
+                    ,ISBLANK ( [_actual] ) || [_actual] = 0
+                    ,_m >= [_lo] && _m <= [_hi] && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6
+                )
+            RETURN
+                _unit_ok && _mult_ok
+    )
+ORDER BY [_pass], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- kpi_switches (RANDBETWEEN rule)
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        _s_plan_type, _s_calculation
+        ,"k0", [_производительность_авто_ПЛАН]
+        ,"u0", [_test производительность план unit]
+        ,"k1", [_производительность_авто_ФАКТ]
+        ,"u1", [_test производительность факт unit]
+        ,"k2", [ГМ на авто план]
+        ,"u2", [_test ГМ на авто план unit]
+        ,"k3", [ГМ на авто факт]
+        ,"u3", [_test ГМ на авто факт unit]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ПЛАН", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ФАКТ", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто план", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто факт", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+        )
+VAR _expected =
+        DATATABLE (
+            "_measure", STRING,
+            "_expected_unit", DOUBLE,
+            {
+                { "_производительность_авто_ПЛАН", 880.9515302221978 },
+                { "_производительность_авто_ФАКТ", 759.4891363723495 },
+                { "ГМ на авто план", 87793.82 },
+                { "ГМ на авто факт", 144795.46582 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_multiplier", DIVIDE ( [_actual], [_actual_unit] )
+        ,"_pass",
+            VAR _e      = [_expected_unit]
+            VAR _u      = [_actual_unit]
+            VAR _m      = DIVIDE ( [_actual], [_actual_unit] )
+            VAR _unit_ok =
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _u )
+                    ,NOT ISBLANK ( _u ) && ABS ( _u - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+            VAR _mult_ok =
+                IF (
+                    ISBLANK ( _u ) || _u = 0
+                    ,ISBLANK ( [_actual] ) || [_actual] = 0
+                    ,_m >= [_lo] && _m <= [_hi] && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6
+                )
+            RETURN
+                _unit_ok && _mult_ok
+    )
+ORDER BY [_pass], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- kpi_total (RANDBETWEEN rule)
+VAR _actual_wide =
+    ROW (
+        "k0", [_производительность_авто_ПЛАН]
+        ,"u0", [_test производительность план unit]
+        ,"k1", [_производительность_авто_ФАКТ]
+        ,"u1", [_test производительность факт unit]
+        ,"k2", [ГМ на авто план]
+        ,"u2", [_test ГМ на авто план unit]
+        ,"k3", [ГМ на авто факт]
+        ,"u3", [_test ГМ на авто факт unit]
+    )
+VAR _actual =
+        UNION (
+            SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ПЛАН", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "_производительность_авто_ФАКТ", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто план", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "ГМ на авто факт", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+        )
+VAR _expected =
+        DATATABLE (
+            "_measure", STRING,
+            "_expected_unit", DOUBLE,
+            {
+                { "_производительность_авто_ПЛАН", BLANK () },
+                { "_производительность_авто_ФАКТ", BLANK () },
+                { "ГМ на авто план", 87793.82 },
+                { "ГМ на авто факт", 144795.46582 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_multiplier", DIVIDE ( [_actual], [_actual_unit] )
+        ,"_pass",
+            VAR _e      = [_expected_unit]
+            VAR _u      = [_actual_unit]
+            VAR _m      = DIVIDE ( [_actual], [_actual_unit] )
+            VAR _unit_ok =
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _u )
+                    ,NOT ISBLANK ( _u ) && ABS ( _u - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+            VAR _mult_ok =
+                IF (
+                    ISBLANK ( _u ) || _u = 0
+                    ,ISBLANK ( [_actual] ) || [_actual] = 0
+                    ,_m >= [_lo] && _m <= [_hi] && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6
+                )
+            RETURN
+                _unit_ok && _mult_ok
+    )
+ORDER BY [_pass], [_measure]

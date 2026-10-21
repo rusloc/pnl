@@ -1,0 +1,90 @@
+table fact_interval
+	lineageTag: 4bf62a39-e2ce-4c96-8545-248dd6ac3757
+
+	column interval_id
+		dataType: int64
+		formatString: 0
+		lineageTag: ac1c2c5f-f9d0-4d92-af12-5a73cfed4231
+		summarizeBy: sum
+		sourceColumn: interval_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_export_code
+		dataType: int64
+		formatString: 0
+		lineageTag: c667f7b0-44c0-427e-81c7-470dda120026
+		summarizeBy: none
+		sourceColumn: vehicle_export_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_group_code
+		dataType: int64
+		formatString: 0
+		lineageTag: e3fd3040-3368-4274-a74a-d92d31edfa80
+		summarizeBy: sum
+		sourceColumn: vehicle_group_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column reserve_l
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: edb623a9-48d1-4ea4-b36a-082e1cc663f9
+		summarizeBy: none
+		sourceColumn: reserve_l
+
+		annotation SummarizationSetBy = Automatic
+
+	column start_dat
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: cfba9fff-5f5f-44c4-ab5c-97d29f652d23
+		summarizeBy: none
+		sourceColumn: start_dat
+
+		variation Variation
+			isDefault
+			relationship: e198c523-cc42-4a29-a1e5-aab186b9b2db
+			defaultHierarchy: LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column end_dat
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 65efeb92-b9af-4287-9dfb-bd18c15e2443
+		summarizeBy: none
+		sourceColumn: end_dat
+
+		variation Variation
+			isDefault
+			relationship: 4bf020c9-7fcb-42ad-89c2-b0da6e773723
+			defaultHierarchy: LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_interval-f3e6f3d4-20f0-451b-9524-b627f2029640 = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\intervals.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"interval_id", Int64.Type},
+				            {"vehicle_export_code", Int64.Type},
+				            {"vehicle_group_code", Int64.Type},
+				            {"reserve_l", type logical},
+				            {"start_dat", type datetime},
+				            {"end_dat", type datetime}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

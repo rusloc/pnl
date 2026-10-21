@@ -1,0 +1,100 @@
+{
+  "name": "acme-trucks-theme.json",
+  "dataColors": [
+    "#1C2B3A",
+    "#A3AFC4",
+    "#1D6FA5",
+    "#155A88",
+    "#9A4511",
+    "#5B6B7D",
+    "#9CC0DF",
+    "#E8B08B"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1C2B3A",
+  "tableAccent": "#EEF1F5",
+  "good": "#155A88",
+  "bad": "#9A4511",
+  "neutral": "#5B6B7D",
+  "foregroundNeutralSecondary": "#5B6B7D",
+  "foregroundNeutralTertiary": "#A3AFC4",
+  "backgroundLight": "#F3F5F8",
+  "backgroundNeutral": "#D6DCE5",
+  "textClasses": {
+    "callout": {
+      "fontFace": "Segoe UI Bold",
+      "fontSize": 28,
+      "color": "#1C2B3A"
+    },
+    "title": {
+      "fontFace": "Segoe UI Bold",
+      "fontSize": 16,
+      "color": "#1C2B3A"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 11,
+      "color": "#5B6B7D"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 13,
+      "color": "#1C2B3A"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F3F5F8"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F3F5F8"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "border": [
+          {
+            "show": false,
+            "color": {
+              "solid": {
+                "color": "#E1E6ED"
+              }
+            },
+            "radius": 12
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "slicer": {
+      "*": {
+        "items": [
+          {
+            "textSize": 13
+          }
+        ]
+      }
+    }
+  }
+}

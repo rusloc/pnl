@@ -1,0 +1,3269 @@
+table _measures
+	lineageTag: cbb2865b-a8fa-4c58-869c-63132826edb6
+
+	measure 'Rock Mass by Truck Fact' = SUM(fact_rock_mass[rock_mass_truck_fact]) * [_KPI Noise]
+		formatString: #,0
+		displayFolder: 1 KPI
+		lineageTag: 25c38c40-7ef5-4d54-a007-e8295f9b15b0
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Rock Mass by Truck Plan' =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Неделя",
+			        SUM(fact_rock_mass[rock_mass_truck_plan]) * [_KPI Noise],
+			    SUM(fact_rock_mass[rock_mass_truck_plan_month]) * [_KPI Noise])
+		formatString: #,0
+		displayFolder: 1 KPI
+		lineageTag: b2abdf67-e1a4-42d8-84f2-28f92c116b04
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure '_Plan Hours' =
+			/// blank line
+			
+			    SWITCH(TRUE(),
+			        HASONEVALUE(param_calculation[calculation_code]) && FIRSTNONBLANK(param_calculation[calculation_code],1) = "Линейно",
+			            [_Plan Hours Linear],
+			        HASONEVALUE(param_calculation[calculation_code]) && FIRSTNONBLANK(param_calculation[calculation_code],1) = "Взвешенно",
+			            [_Plan Hours Weighted],
+			        BLANK())
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 77f4e448-d303-46e9-9cf1-8e149e3c0ad6
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure '_Plan Hours Total Time' =
+			// blank line
+			
+			CALCULATE(
+			    [_Plan Hours],
+			    FILTER(ALL(dim_time_category),
+			        dim_time_category[category_code] = "КФВ"))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: a7a3ffed-7cc8-48a0-be4c-8576fa431c95
+
+		changedProperty = FormatString
+
+	measure _Zero =
+			// blank line
+			
+			// исопльзуется чтобы ВСЕГДА была видна категория по ОСИ Y
+			
+			SWITCH(TRUE(),
+			    ISBLANK([_Plan Hours]),
+			        0,
+			    0)
+		formatString: 0%;-0%;0%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: 64c295c6-e7e5-4496-9ed5-f964809d4720
+
+		changedProperty = FormatString
+
+	measure '_Plan Truck Loading Share Row' = ```
+			// blank line
+			
+			SWITCH(TRUE(),
+			    FIRSTNONBLANK(dim_time_category[category_code],1) = "Погрузка самосвалов",
+			    /*
+			        расчет базового бара для категории
+			    */
+			        DIVIDE([_Plan Hours],[_Plan Hours Total Time]) 
+			
+			    ,BLANK())
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 72cbb4c1-eefc-427e-95d8-8a3bd66a1143
+
+		changedProperty = FormatString
+
+	measure '_Fact Hours Linear' =
+			/// blank line
+			
+			    SUM(fact_time_actual[duration]) / 3600
+		formatString: #,0.000
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: fb6444e2-5798-48a7-a87c-0ae21aabc4b7
+
+		changedProperty = FormatString
+
+	measure '_Fact Hours Total Time' =
+			// blank line
+			
+			CALCULATE(
+			    [_Fact Hours],
+			    FILTER(ALL(dim_time_category),
+			        dim_time_category[category_code] = "КФВ"))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 687187bf-1a03-40b0-b92b-401af76f24aa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Truck Loading Share Row' = ```
+			// blank line
+			    
+			    SWITCH(TRUE(),
+			        FIRSTNONBLANK(dim_time_category[category_code],1) = "Погрузка самосвалов",
+			            DIVIDE([_Fact Hours],[_Fact Hours Total Time]) 
+			        ,BLANK())
+			```
+		formatString: #,##0.00 %
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: ca04ad25-0242-41c2-9d5c-758fde950fcb
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure '_Plan Hours Linear' =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Месяц",
+			        [_Plan Hours Month],
+			    FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Неделя",
+			        [_Plan Hours Week],
+			    [_Plan Hours Week])
+		formatString: #,0.000
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: edc5d25d-0fb5-4392-8923-f8b9cf5a42f9
+
+		changedProperty = FormatString
+
+	measure '_Plan Hours Weighted' = ```
+			// blank line
+			
+			VAR _tab = ADDCOLUMNS(
+			                VALUES(dim_loader[loader_name_dispatch]),
+			                "_vol",
+			                    CALCULATE(
+			                        MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			                "_hours",
+			                    CALCULATE(
+			                        SUMX(dim_loader,SWITCH(TRUE(),
+			                                                FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Месяц",
+			                                                    [_Plan Hours Month],
+			                                                FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Неделя",
+			                                                    [_Plan Hours Week],
+			                                                [_Plan Hours Week]))))
+			                    
+			VAR _addTop = ADDCOLUMNS(
+			                    _tab,
+			                    "_topSum",
+			                        [_vol] * [_hours])
+			             	
+			RETURN
+			    DIVIDE(
+			        SUMX(_addTop,[_topSum]),
+			        SUMX(_addTop,[_vol]))
+			```
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 52dca106-426d-4e48-9a79-c6c4676d45cc
+
+		changedProperty = FormatString
+
+	measure '_Fact Hours Weighted' = ```
+			// blank line
+			
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			                "@active",
+			                    CALCULATE(
+			                        MAXX(fact_time_actual,fact_time_actual[_active]),
+			                        REMOVEFILTERS(dim_time_category[category_code])),
+			                "@vol",
+			                    CALCULATE(
+			                        MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			                "@hours",
+			                CALCULATE(
+			                    SUMX(
+			                        FILTER(fact_time_actual,
+			                            fact_time_actual[_active] = 1),
+			                        fact_time_actual[duration])) / 3600)
+			                    
+			VAR _percent = ADDCOLUMNS(
+			                    _base,
+			                    "@topSum",
+			                        [@vol] * [@hours])
+			             	
+			RETURN
+			    DIVIDE(
+			        SUMX(_percent,[@topSum]),
+			        SUMX(_percent,[@vol]))
+			```
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 638a3132-563d-47f3-b9c6-e454a423fe23
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Hours' =
+			/// blank line
+			
+			    SWITCH(TRUE(),
+			        HASONEVALUE(param_calculation[calculation_code]) && FIRSTNONBLANK(param_calculation[calculation_code],1) = "Линейно",
+			            [_Fact Hours Linear],
+			        HASONEVALUE(param_calculation[calculation_code]) && FIRSTNONBLANK(param_calculation[calculation_code],1) = "Взвешенно",
+			            [_Fact Hours Weighted],
+			        BLANK())
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: af31ff48-0f35-4bc5-a169-ab8ca5bf124e
+
+		changedProperty = FormatString
+
+	measure '_Plan Truck Loading Share' =
+			// blank line
+			
+			CALCULATE(
+			    [_Plan Truck Loading Share Row],
+			    FILTER(ALL(dim_time_category[category_code]),
+			        dim_time_category[category_code] = "Погрузка самосвалов"))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: bed8ba41-ac12-4c4e-af66-386deffb1eba
+
+		changedProperty = FormatString
+
+	measure '_Plan Truck Loading Hours' =
+			// blank line
+			
+			[_Plan Total Time Hours] * [_Plan Truck Loading Share]
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 97c43e1f-2391-4b96-9ea5-11f8a22bd247
+
+		changedProperty = FormatString
+
+	measure '_Plan Total Time Hours' =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    FIRSTNONBLANK(param_plan_type[plan_type_code],1) = "Неделя",
+			    CALCULATE(
+			        [_Plan Hours Linear],
+			        FILTER(ALL(fact_time_plan_week[indicator_name]),
+			            fact_time_plan_week[indicator_name] = "Проверка")),
+			    CALCULATE(
+			        [_Plan Hours Linear],
+			        FILTER(ALL(fact_time_plan_month[indicator_name]),
+			            fact_time_plan_month[indicator_name] = "Проверка")))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 7206dbbc-4cad-4d8b-adc1-9103eed9446f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Performance per Truck Plan' =
+			// blank line
+			
+			DIVIDE(
+			    [Rock Mass by Truck Plan],
+			    [_Plan Truck Loading Hours]
+			) * 1000 * [_KPI Noise]
+		formatString: #,0
+		displayFolder: 1 KPI
+		lineageTag: 4cb7769c-26ac-47e1-95d1-bccc2767b1f2
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure '_Fact Truck Loading Share' =
+			// blank line
+			
+			CALCULATE(
+			    [_Fact Truck Loading Share Row],
+			    FILTER(ALL(dim_time_category[category_code]),
+			        dim_time_category[category_code] = "Погрузка самосвалов"))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 48352c30-02c5-4975-b5b0-9926f3e7481c
+
+		changedProperty = FormatString
+
+	measure '_Fact Total Time Hours' =
+			// blank line
+			
+			CALCULATE(
+			    [_Fact Hours Linear],
+			    FILTER(ALL(dim_time_category[category_code]),
+			        dim_time_category[category_code] = "КФВ"))
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: ecf388df-096f-4c47-9125-18b3073691b0
+
+	measure '_Fact Truck Loading Hours' =
+			// blank line
+			
+			[_Fact Total Time Hours] * [_Fact Truck Loading Share]
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 0433634b-e7b8-4c4f-95fe-d5e100d5d23c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Performance per Truck Fact' =
+			// blank line
+			
+			DIVIDE(
+			    [Rock Mass by Truck Fact],
+			    [_Fact Truck Loading Hours]
+			) * 1000 * [_KPI Noise]
+		formatString: #,0
+		displayFolder: 1 KPI
+		lineageTag: f0c20964-348e-40f2-9a7b-9cd93e98de53
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure '_Plan Hours Week' =
+			// blank line
+			
+			SUM(fact_time_plan_week[indicator_amount])
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 4d0e3b6b-5482-4bb3-a79f-933064a560db
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Hours Month' =
+			// blank line
+			
+			SUM(fact_time_plan_month[indicator_amount])
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 51bb1738-d51a-49d7-8e6a-bd20fe0f907c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Loss % Weighted' = ```
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[sort_order])
+			/*
+			    формируем виртуальную таблицу с колонками:
+			        1. собираем список всех ЭКС (SUMMARIZE)
+			        2. добавляем обьем ковша (@vol)
+			        3. добавляем признак АКТИВЕН (@active): смотрим была ли хоть одна запись с признаком Активен в таблице ПФ_КРВ
+			        4. считаем часы по категории простоя (@HOURS), отдельно по ключевым шагам КТГ, КИО, ПОГРУЗКА
+			        5. считаем общее время (@totalHours)
+			        6. в переменной _percent рассчитываем проценты (@hours / @totalHours) и фильтруем таблицу только по активным экскаваторам
+			        7. при выводе результата RETURN рассчитываем средневзвешенные (по ковшу) проценты по категориям простоя
+			*/   
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = 6,
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[sort_order] IN {2,3,4,5})) / 3600,
+			                    _breakPoint = 24,
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[sort_order] IN {2,3,4,5,7,8,9,10,11,12,14,15,21,22})) / 3600,
+			                    _breakPoint = 27,
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[sort_order] IN {2,3,4,5,7,8,9,10,11,12,14,15,21,22,25})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {6,24,27},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			                        
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint IN {6,24,27},
+			        0,
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+			```
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 48d1dc18-7621-495c-9ecf-c5247cd91b02
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Loss % Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})) / 3600,
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})) / 3600,
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								_base,
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",0,
+			    _breakPoint = "КТГ",0,
+			    _breakPoint = "КИО",0,
+			    _breakPoint = "Погрузка самосвалов",0,
+			    DIVIDE(
+			                SUMX(_percent, [@hours]),
+			                SUMX(_percent, [@totalHours])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 40e2bde4-3a44-4578-a16c-bf23f3b533e5
+
+	measure '_WF Fact Loss' =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    SELECTEDVALUE(param_calculation[calculation_code]) = "Линейно",
+			        [_Fact Loss % Linear],
+			    SELECTEDVALUE(param_calculation[calculation_code]) = "Взвешенно",
+			        [_Fact Loss % Weighted],
+			    BLANK())
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: 73b782d3-7a07-4900-a709-74573339ef1c
+
+	measure '_Fact Base % Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "ТО, ППР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР"})) / 3600,
+			                _breakPoint = "КР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР"})) / 3600,
+			                _breakPoint = "Авар. прост.",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})) / 3600,
+			                _breakPoint = "Ожид з/ч",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})) / 3600,
+			                _breakPoint = "Пересменок",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})) / 3600,
+			                _breakPoint = "Обед",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})) / 3600,
+			                _breakPoint = "Личные нужды",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})) / 3600,
+			                _breakPoint = "Заправка",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})) / 3600,
+			                _breakPoint = "Взрывные работы",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})) / 3600,
+			                _breakPoint = "Перегоны",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})) / 3600,
+			                _breakPoint = "Ожидание АС",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})) / 3600,
+			                _breakPoint = "Консервация/Резерв",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})) / 3600,
+			                _breakPoint = "Прочие простои",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})) / 3600,
+			                _breakPoint = "Без классификации",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})) / 3600,
+			                _breakPoint = "Вспомогательная работа",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})) / 3600,
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы","Перегоны",
+			                                        "Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        0))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",
+			        DIVIDE(
+			            SUMX(_percent, [@hours]),
+			            SUMX(_percent, [@totalHours])),
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: a51e912a-2875-41aa-854c-5d4494f69629
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Base % Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "ТО, ППР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР"})) / 3600,
+			                _breakPoint = "КР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР"})) / 3600,
+			                _breakPoint = "Авар. прост.",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})) / 3600,
+			                _breakPoint = "Ожид з/ч",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})) / 3600,
+			                _breakPoint = "Пересменок",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})) / 3600,
+			                _breakPoint = "Обед",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})) / 3600,
+			                _breakPoint = "Личные нужды",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})) / 3600,
+			                _breakPoint = "Заправка",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})) / 3600,
+			                _breakPoint = "Взрывные работы",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})) / 3600,
+			                _breakPoint = "Перегоны",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})) / 3600,
+			                _breakPoint = "Ожидание АС",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})) / 3600,
+			                _breakPoint = "Консервация/Резерв",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})) / 3600,
+			                _breakPoint = "Прочие простои",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})) / 3600,
+			                _breakPoint = "Без классификации",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})) / 3600,
+			                _breakPoint = "Вспомогательная работа",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})) / 3600,
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								_base,
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы","Перегоны",
+			                                        "Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        0))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",
+			        DIVIDE(
+			            SUMX(_percent, [@hours]),
+			            SUMX(_percent, [@totalHours])),
+			    _breakPoint IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы","Перегоны",
+			                                        "Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"},
+			    1 - DIVIDE(
+			        SUMX(_percent, [@hours]),
+			        SUMX(_percent, [@totalHours])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: de1421fc-d00d-4fcc-ae32-8b3631796755
+
+	measure '_WF Fact Base' =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    SELECTEDVALUE(param_calculation[calculation_code]) = "Линейно",
+			        [_Fact Base % Linear],
+			    SELECTEDVALUE(param_calculation[calculation_code]) = "Взвешенно",
+			        [_Fact Base % Weighted],
+			    BLANK())
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: 2f1a0275-1ded-41fd-b313-3924988d8b90
+
+	measure '_Plan Loss % Week Weighted' = ```
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    // _breakPoint = "КФВ",
+			    //     DIVIDE(
+			    //         SUMX(_percent, [@hours]),
+			    //         SUMX(_percent, [@totalHours])),
+			    _breakPoint IN {"КФВ","КТГ","КИО","Погрузка самосвалов"},0,
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+			        
+			```
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 55003389-a217-4c2e-82a6-e727856f3711
+
+	measure '_Plan Loss % Month Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint IN {"КФВ","КТГ","КИО","Погрузка самосвалов"},0,
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1a346dfa-9a0c-4061-8487-8d48fa8c63ca
+
+	measure '_Plan Loss % Weighted' =
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _res = SWITCH(TRUE(),
+			                _param = "Неделя",
+			                    [_Plan Loss % Week Weighted],
+			                _param = "Месяц",
+			                    [_Plan Loss % Month Weighted],
+			                0)
+			RETURN
+			    _res
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: ef8a9e49-0e52-4b4b-a922-755c22ebe78b
+
+	measure '_Plan Loss % Week Linear' = ```
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN  
+			    SWITCH(TRUE(),
+			        _breakPoint IN {"КФВ","КТГ","КИО","Погрузка самосвалов"},0,
+			        // 1 - DIVIDE(
+			        //     SUMX(_base, [@hours]),
+			        //     SUMX(_base, [@totalHours])),
+			        DIVIDE(
+			            SUMX(_base, [@hours]),
+			            SUMX(_base, [@totalHours])))
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: bc7f26f6-5143-4add-98a1-737ca646341b
+
+	measure '_Plan Loss % Month Linear' = ```
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN  
+			    SWITCH(TRUE(),
+			        _breakPoint IN {"КФВ","КТГ","КИО","Погрузка самосвалов"},0,
+			        // 1 - DIVIDE(
+			        //     SUMX(_base, [@hours]),
+			        //     SUMX(_base, [@totalHours])),
+			        DIVIDE(
+			            SUMX(_base, [@hours]),
+			            SUMX(_base, [@totalHours])))
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 75c63341-aafb-4626-9bad-6e8e7812d866
+
+	measure '_Plan Loss % Linear' =
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _res = SWITCH(TRUE(),
+			                _param = "Неделя",
+			                    [_Plan Loss % Week Linear],
+			                _param = "Месяц",
+			                    [_Plan Loss % Month Linear],
+			                0)
+			RETURN
+			    _res
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e26928e5-330f-41fb-868f-dc1b63fb85dd
+
+	measure '_WF Plan Loss' = ```
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _res = SWITCH(TRUE(),
+			                _param = "Линейно",
+			                    [_Plan Loss % Linear],
+			                _param = "Взвешенно",
+			                    [_Plan Loss % Weighted],
+			                0)
+			
+			RETURN 
+			    _res
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: e1afd5b8-7f7b-4303-b081-573cd2b24ef5
+
+	measure '_Fact Subtotal % Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})) / 3600,
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})) / 3600,
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			
+			RETURN
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ" && ISBLANK(SUMX(_base,[@totalHours])),
+			        0,
+			    _breakPoint = "КФВ" && NOT(ISBLANK(SUMX(_base,[@totalHours]))),
+			        1,
+			    _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			        IF(
+			            ISBLANK(SUMX(_base,[@totalHours])),
+			                0,
+			        1 - DIVIDE(
+			                SUMX(_base, [@hours]),
+			                SUMX(_base, [@totalHours]))),
+			    BLANK())
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 0580dcc2-de53-4cf4-8ef3-47b5257bf378
+
+	measure '_Fact Subtotal % Weighted' = ```
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})) / 3600,
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})) / 3600,
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            DIVIDE(
+			                SUMX(_percent, [@hours]),
+			                SUMX(_percent, [@totalHours])),
+			        _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			            IF(
+			                ISBLANK(SUMX(_percent,[@totalHours])),
+			                    0,
+			                DIVIDE(
+			                    SUMX(_percent, [@percent] * [@vol]),
+			                    SUMX(_percent, [@vol]))),
+			        BLANK())
+			
+			```
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 4a16ec97-b454-4e01-8cc2-e454be9e64f3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_WF Fact Subtotal' = ```
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _res = SWITCH(TRUE(),
+			            _param = "Взвешенно",
+			                [_Fact Subtotal % Weighted],
+			            _param = "Линейно",
+			                [_Fact Subtotal % Linear],
+			            0)
+			RETURN
+			    _res
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: 0267b31d-c239-4ba9-a48a-c16dc1fe0fde
+
+	measure '_Plan Base % Week Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "ТО, ППР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР"})),
+			                _breakPoint = "КР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР"})),
+			                _breakPoint = "Авар. прост.",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})),
+			                _breakPoint = "Ожид з/ч",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})),
+			                _breakPoint = "Пересменок",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})),
+			                _breakPoint = "Обед",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})),
+			                _breakPoint = "Личные нужды",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})),
+			                _breakPoint = "Заправка",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})),
+			                _breakPoint = "Взрывные работы",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})),
+			                _breakPoint = "Перегоны",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})),
+			                _breakPoint = "Ожидание АС",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})),
+			                _breakPoint = "Консервация/Резерв",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})),
+			                _breakPoint = "Прочие простои",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})),
+			                _breakPoint = "Без классификации",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})),
+			                _breakPoint = "Вспомогательная работа",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                    "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})),
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы","Перегоны",
+			                                        "Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        0))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",0,
+			        // DIVIDE(
+			        //     SUMX(_percent, [@hours]),
+			        //     SUMX(_percent, [@totalHours])),
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 2c0811dd-c324-4f31-8a1e-84ac14278677
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Base % Month Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                _breakPoint = "ТО, ППР",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР"})),
+			                _breakPoint = "КР",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР"})),
+			                _breakPoint = "Авар. прост.",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})),
+			                _breakPoint = "Ожид з/ч",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})),
+			                _breakPoint = "Пересменок",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})),
+			                _breakPoint = "Обед",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})),
+			                _breakPoint = "Личные нужды",
+			                    CALCULATE(
+			                            SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})),
+			                _breakPoint = "Заправка",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})),
+			                _breakPoint = "Взрывные работы",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})),
+			                _breakPoint = "Перегоны",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})),
+			                _breakPoint = "Ожидание АС",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})),
+			                _breakPoint = "Консервация/Резерв",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})),
+			                _breakPoint = "Прочие простои",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})),
+			                _breakPoint = "Без классификации",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})),
+			                _breakPoint = "Вспомогательная работа",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                    "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})),
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы","Перегоны",
+			                                        "Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        0))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",0,
+			        // DIVIDE(
+			        //     SUMX(_percent, [@hours]),
+			        //     SUMX(_percent, [@totalHours])),
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 690dfc42-95ff-42e8-b469-af3bdc365aac
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Base % Weighted' =
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _res = SWITCH(TRUE(),
+			            _param = "Неделя",
+			                [_Plan Base % Week Weighted],
+			            _param = "Месяц",
+			                [_Plan Base % Month Weighted],
+			            0)
+			RETURN
+			    _res
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 19d8a15c-4514-45b3-a915-3dec392ea5ad
+
+	measure '_Plan Base % Month Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                _breakPoint = "ТО, ППР",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР"})),
+			                _breakPoint = "КР",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР"})),
+			                _breakPoint = "Авар. прост.",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})),
+			                _breakPoint = "Ожид з/ч",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})),
+			                _breakPoint = "Пересменок",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})),
+			                _breakPoint = "Обед",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})),
+			                _breakPoint = "Личные нужды",
+			                    CALCULATE(
+			                            SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})),
+			                _breakPoint = "Заправка",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})),
+			                _breakPoint = "Взрывные работы",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})),
+			                _breakPoint = "Перегоны",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})),
+			                _breakPoint = "Ожидание АС",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})),
+			                _breakPoint = "Консервация/Резерв",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})),
+			                _breakPoint = "Прочие простои",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})),
+			                _breakPoint = "Без классификации",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})),
+			                _breakPoint = "Вспомогательная работа",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                    "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})),
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",0,
+			        // DIVIDE(
+			        //     SUMX(_percent, [@hours]),
+			        //     SUMX(_percent, [@totalHours])),
+			    1 - DIVIDE(
+			        SUMX(_base, [@hours]),
+			        SUMX(_base, [@totalHours])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 47eb32e2-90cb-4128-9bb8-23768af63718
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Base % Week Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "ТО, ППР",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР"})),
+			                _breakPoint = "КР",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР"})),
+			                _breakPoint = "Авар. прост.",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост."})),
+			                _breakPoint = "Ожид з/ч",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч"})),
+			                _breakPoint = "Пересменок",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок"})),
+			                _breakPoint = "Обед",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед"})),
+			                _breakPoint = "Личные нужды",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды"})),
+			                _breakPoint = "Заправка",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка"})),
+			                _breakPoint = "Взрывные работы",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы"})),
+			                _breakPoint = "Перегоны",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны"})),
+			                _breakPoint = "Ожидание АС",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС"})),
+			                _breakPoint = "Консервация/Резерв",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв"})),
+			                _breakPoint = "Прочие простои",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                            "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои"})),
+			                _breakPoint = "Без классификации",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                    "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации"})),
+			                _breakPoint = "Вспомогательная работа",
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]),
+			                        FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч","Пересменок","Обед","Личные нужды","Заправка","Взрывные работы",
+			                                                                    "Перегоны","Ожидание АС","Консервация/Резерв","Прочие простои","Без классификации","Вспомогательная работа"})),
+			                    0),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",0,
+			        // DIVIDE(
+			        //     SUMX(_percent, [@hours]),
+			        //     SUMX(_percent, [@totalHours])),
+			        1 - DIVIDE(
+			            SUMX(_base, [@hours]),
+			            SUMX(_base, [@totalHours])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 8e7a787b-78dd-49ae-8be9-7c37b7e594f5
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Base % Linear' =
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _res = SWITCH(TRUE(),
+			            _param = "Неделя",
+			                [_Plan Base % Week Linear],
+			            _param = "Месяц",
+			                [_Plan Base % Month Linear],
+			            0)
+			RETURN
+			    _res
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 7cb9b642-c17e-458c-816d-c93e8cd50d2d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_WF Plan Base' =
+			// blank line
+			
+			VAR _param = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _res = SWITCH(TRUE(),
+			            _param = "Линейно",
+			                [_Plan Base % Linear],
+			            _param = "Взвешенно",
+			                [_Plan Base % Weighted],
+			            0)
+			RETURN
+			    _res
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: 4d9e899b-cd34-4a73-b5a1-091ec7b2dc7a
+
+	measure '_Plan Subtotal % Week Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint IN {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            DIVIDE(
+			                SUMX(_percent, [@hours]),
+			                SUMX(_percent, [@totalHours])),
+			        _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			            IF(
+			                ISBLANK(SUMX(_percent,[@hours])),
+			                    0,
+			                DIVIDE(
+			                    SUMX(_percent, [@percent] * [@vol]),
+			                    SUMX(_percent, [@vol]))),
+			        BLANK())
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 7e19347d-9f47-44b0-8e35-43d15740b978
+
+	measure '_Plan Subtotal % Month Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint IN {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ",
+			        DIVIDE(
+			            SUMX(_percent, [@hours]),
+			            SUMX(_percent, [@totalHours])),
+			    _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			    IF(
+			        ISBLANK(SUMX(_percent,[@hours])),0,
+			            DIVIDE(
+			                SUMX(_percent, [@percent] * [@vol]),
+			                SUMX(_percent, [@vol]))),
+			    BLANK())
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 0a950416-539c-49e4-a89b-ca2f8774de5a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_WF Plan Subtotal' = ```
+			// blank line
+			
+			VAR _period = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _metric = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _res = SWITCH(TRUE(),
+			            _period = "Неделя" && _metric = "Линейно",
+			                [_Plan Subtotal % Week Linear],
+			            _period = "Месяц" && _metric = "Линейно",
+			                [_Plan Subtotal % Month Linear],
+			            _period = "Неделя" && _metric = "Взвешенно",
+			                [_Plan Subtotal % Week Weighted],
+			            _period = "Месяц" && _metric = "Взвешенно",
+			                [_Plan Subtotal % Month Weighted],
+			            0)
+			RETURN 
+			    _res
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 2 Time Structure
+		lineageTag: e777dc1a-e88d-40b9-aa0b-f66f99a50c4a
+
+	measure '_Plan Subtotal % Week Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            DIVIDE(
+			                SUMX(_base, [@hours]),
+			                SUMX(_base, [@totalHours])),
+			        _breakPoint IN {"КТГ", "КИО", "Погрузка самосвалов"},
+			            1 - COALESCE(DIVIDE(
+			                    SUMX(_base, [@hours]),
+			                    SUMX(_base, [@totalHours])),1),
+			        0)
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: f08ffcf0-4423-495c-9394-c32906cc7a65
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Plan Subtotal % Month Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                        "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            DIVIDE(
+			                SUMX(_base, [@hours]),
+			                SUMX(_base, [@totalHours])),
+			        _breakPoint IN {"КТГ", "КИО", "Погрузка самосвалов"},
+			            1 - COALESCE(DIVIDE(
+			                    SUMX(_base, [@hours]),
+			                    SUMX(_base, [@totalHours])),1),
+			        0)
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 130e7c91-07ef-495b-af34-6b0ce32ef826
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '_Fact Share % Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})) / 3600,
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})) / 3600,
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ" && ISBLANK(SUMX(_base,[@totalHours])),
+			        0,
+			    _breakPoint = "КФВ" && NOT(ISBLANK(SUMX(_base,[@totalHours]))),
+			        1,
+			    _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			        IF(
+			            ISBLANK(SUMX(_percent,[@totalHours])),
+			                0,
+			            DIVIDE(
+			                SUMX(_percent, [@percent] * [@vol]),
+			                SUMX(_percent, [@vol]))),
+			    DIVIDE(
+			        SUMX(_percent, [@percent] * [@vol]),
+			        SUMX(_percent, [@vol])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 91b3f447-837c-47e1-8eb3-bd08ffcfa420
+
+	measure '_Fact Share % Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_actual,fact_time_actual[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})) / 3600,
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})) / 3600,
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_actual,
+			                                    fact_time_actual[_active] = 1),
+			                                fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})) / 3600,
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_actual,
+			                                fact_time_actual[_active] = 1),
+			                            fact_time_actual[duration])) / 3600),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_actual[duration]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")) / 3600)
+			VAR _percent = ADDCOLUMNS(
+								_base,
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ" && ISBLANK(SUMX(_base,[@totalHours])),
+			        0,
+			    _breakPoint = "КФВ" && NOT(ISBLANK(SUMX(_base,[@totalHours]))),
+			        1,
+			    _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			        IF(
+			            ISBLANK(SUMX(_percent,[@totalHours])),
+			                0,
+			            1 - DIVIDE(
+			                    SUMX(_percent, [@hours]),
+			                    SUMX(_percent, [@totalHours]))),
+			        DIVIDE(
+			            SUMX(_percent, [@hours]),
+			            SUMX(_percent, [@totalHours])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e383bcd8-f873-4261-a6c9-1fc6f206475f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Time Share Fact %' = ```
+			// blank line
+			VAR _param = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _res = SWITCH(TRUE(),
+			                _param = "Линейно",
+			                    [_Fact Share % Linear],
+			                _param = "Взвешенно",
+			                    [_Fact Share % Weighted],
+			                0)
+			RETURN
+			    _res
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 2 Time Structure
+		lineageTag: 1e51ffe6-4e18-4c53-bec6-672e9b7ee345
+
+	measure '_Plan Share % Week Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN
+			SWITCH(TRUE(),
+			    _breakPoint = "КФВ" && ISBLANK(SUMX(_base,[@totalHours])),
+			        0,
+			    _breakPoint = "КФВ" && NOT(ISBLANK(SUMX(_base,[@totalHours]))),
+			        1,
+			    _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			        1 - COALESCE(DIVIDE(
+			                SUMX(_base, [@hours]),
+			                SUMX(_base, [@totalHours])),1),
+			    DIVIDE(
+			        SUMX(_base, [@hours]),
+			        SUMX(_base, [@totalHours])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 47253ef8-f057-41cd-9de1-24eb2d19f802
+
+	measure '_Plan Share % Month Linear' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    REMOVEFILTERS(dim_time_category[category_code])),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			RETURN
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ" && ISBLANK(SUMX(_base,[@totalHours])),
+			            0,
+			        _breakPoint = "КФВ" && NOT(ISBLANK(SUMX(_base,[@totalHours]))),
+			            1,
+			        _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			            1 - COALESCE(DIVIDE(
+			                    SUMX(_base, [@hours]),
+			                    SUMX(_base, [@totalHours])),1),
+			        DIVIDE(
+			            SUMX(_base, [@hours]),
+			            SUMX(_base, [@totalHours])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 06cb7516-3e12-45a7-927f-bec33764c67c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Time Share Plan %' =
+			// blank line
+			VAR _param = SELECTEDVALUE(param_calculation[calculation_code])
+			VAR _period = SELECTEDVALUE(param_plan_type[plan_type_code])
+			VAR _res = SWITCH(TRUE(),
+			                _param = "Линейно" && _period = "Неделя",
+			                    [_Plan Share % Week Linear],
+			                _param = "Линейно" && _period = "Месяц",
+			                    [_Plan Share % Month Linear],
+			                _param = "Взвешенно" && _period = "Неделя",
+			                    [_Plan Share % Week Weighted],
+			                _param = "Взвешенно" && _period = "Месяц",
+			                    [_Plan Share % Month Weighted],
+			                0)
+			RETURN
+			    _res
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 2 Time Structure
+		lineageTag: 8bb96c64-3228-41ea-a942-507bfe3e2a2d
+
+	measure '_Plan Share % Week Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_week,fact_time_plan_week[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_week,
+			                                    fact_time_plan_week[_active] = 1),
+			                                fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_week,
+			                                fact_time_plan_week[_active] = 1),
+			                            fact_time_plan_week[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_week[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            COALESCE(DIVIDE(
+			                        SUMX(_percent, [@hours]),
+			                        SUMX(_percent, [@totalHours])),0),
+			        _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			            IF(
+			                ISBLANK(SUMX(_percent,[@hours])),
+			                    0,
+			                DIVIDE(
+			                    SUMX(_percent, [@percent] * [@vol]),
+			                    SUMX(_percent, [@vol]))),
+			        DIVIDE(
+			            SUMX(_percent, [@percent] * [@vol]),
+			            SUMX(_percent, [@vol])))
+		formatString: 0.00%;-0.00%;0.00%
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: f9456b06-255e-4e4b-b4fd-f59f5e0a8c2f
+
+	measure '_Plan Share % Month Weighted' =
+			// blank line
+			
+			VAR _breakPoint = SELECTEDVALUE(dim_time_category[category_code])
+			VAR _base = ADDCOLUMNS(
+			                SUMMARIZE(dim_loader,
+			                    dim_loader[loader_name_dispatch]),
+			            "@vol",
+			                CALCULATE(
+			                    MAXX(dim_loader,dim_loader[bucket_volume_m3])),
+			            "@active",
+			                CALCULATE(
+			                    MAXX(fact_time_plan_month,fact_time_plan_month[_active]),
+			                    ALL(dim_time_category)),
+			            "@hours",
+			                SWITCH(TRUE(),
+			                    _breakPoint = "КТГ",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Ожид з/ч","Авар. прост."})),
+			                    _breakPoint = "КИО",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации"})),
+			                    _breakPoint = "Погрузка самосвалов",
+			                        CALCULATE(
+			                            SUMX(
+			                                FILTER(fact_time_plan_month,
+			                                    fact_time_plan_month[_active] = 1),
+			                                fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                            dim_time_category[category_code] IN {"ТО, ППР","КР","Авар. прост.","Ожид з/ч", "Пересменок", "Обед","Личные нужды","Заправка",
+			                                                                            "Взрывные работы","Перегоны","Ожидание АС","Консервация/Резерв", "Прочие простои","Без классификации",
+			                                                                            "Основная работа","Вспомогательная работа"})),
+			                    CALCULATE(
+			                        SUMX(
+			                            FILTER(fact_time_plan_month,
+			                                fact_time_plan_month[_active] = 1),
+			                            fact_time_plan_month[indicator_amount]))),
+			            "@totalHours",
+			                    CALCULATE(
+			                        SUM(fact_time_plan_month[indicator_amount]),
+			                            FILTER(ALL(dim_time_category),
+			                        dim_time_category[category_code] = "КФВ")))
+			VAR _percent = ADDCOLUMNS(
+								FILTER(_base,
+			                        [@active] = 1),
+			                    "@percent",
+			                    SWITCH(TRUE(),
+			                        _breakPoint in {"КИО","КТГ","Погрузка самосвалов"},
+			                            1 - ([@hours] / [@totalHours]),
+			                        [@hours] / [@totalHours]))
+			RETURN
+			
+			    SWITCH(TRUE(),
+			        _breakPoint = "КФВ",
+			            COALESCE(DIVIDE(
+			                        SUMX(_percent, [@hours]),
+			                        SUMX(_percent, [@totalHours])),0),
+			        _breakPoint IN {"КТГ","КИО","Погрузка самосвалов"},
+			            IF(
+			                ISBLANK(SUMX(_percent,[@hours])),
+			                    0,
+			                DIVIDE(
+			                    SUMX(_percent, [@percent] * [@vol]),
+			                    SUMX(_percent, [@vol]))),
+			        DIVIDE(
+			            SUMX(_percent, [@percent] * [@vol]),
+			            SUMX(_percent, [@vol])))
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 64d4f076-f88b-4de5-8b4b-649a3de79d2b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Time Share Δ' =
+			// blank line
+			
+			[Time Share Fact %] - [Time Share Plan %]
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 2 Time Structure
+		lineageTag: 16260f73-a5aa-4a9c-b2fa-baa2ba68e2c1
+
+	/// Placeholder noise in the four KPI tile measures, kept on USER request (2026-10-21). To remove it, change the body to 1.
+	measure '_KPI Noise' = RANDBETWEEN ( 10, 100 )
+		formatString: 0
+		isHidden
+		displayFolder: 1 KPI
+		lineageTag: cb64d6de-b16e-4693-8d6c-3626c509ee01
+
+	/// Truck loading share of total time, plan (waterfall row "Truck loading", sort_order 27).
+	measure 'KPI Truck Loading Plan %' =
+			CALCULATE (
+			    [Time Share Plan %]
+			    ,dim_time_category[sort_order] = 27
+			)
+		formatString: 0.0%
+		displayFolder: 1 KPI
+		lineageTag: 582056bd-257e-4e8a-a009-cbb9a86a4164
+
+	/// Truck loading share of total time, fact (waterfall row "Truck loading", sort_order 27).
+	measure 'KPI Truck Loading Fact %' =
+			CALCULATE (
+			    [Time Share Fact %]
+			    ,dim_time_category[sort_order] = 27
+			)
+		formatString: 0.0%
+		displayFolder: 1 KPI
+		lineageTag: 00313d95-9280-4a85-bdea-369b0955485c
+
+	/// Fact minus plan of the truck loading share, in percentage points.
+	measure 'KPI Truck Loading Δ pp' =
+			VAR _plan         = [KPI Truck Loading Plan %]
+			VAR _fact         = [KPI Truck Loading Fact %]
+			RETURN
+			    IF ( NOT ISBLANK ( _plan ) && NOT ISBLANK ( _fact ), ( _fact - _plan ) * 100 )
+		formatString: +0.00 "pp";"−"0.00 "pp";0.00 "pp"
+		displayFolder: 1 KPI
+		lineageTag: e23ce5db-7d75-4834-8667-9a1500c6a26c
+
+	/// Effective work time share of total time, plan (waterfall row "Effective work time", sort_order 24).
+	measure 'KPI Effective Work Plan %' =
+			CALCULATE (
+			    [Time Share Plan %]
+			    ,dim_time_category[sort_order] = 24
+			)
+		formatString: 0.0%
+		displayFolder: 1 KPI
+		lineageTag: 23c2df7b-e3c9-4a26-b0d9-bdda08618610
+
+	/// Effective work time share of total time, fact (waterfall row "Effective work time", sort_order 24).
+	measure 'KPI Effective Work Fact %' =
+			CALCULATE (
+			    [Time Share Fact %]
+			    ,dim_time_category[sort_order] = 24
+			)
+		formatString: 0.0%
+		displayFolder: 1 KPI
+		lineageTag: d2cd55b1-d467-4851-8052-2a9414a28736
+
+	/// Fact minus plan of the effective work time share, in percentage points.
+	measure 'KPI Effective Work Δ pp' =
+			VAR _plan         = [KPI Effective Work Plan %]
+			VAR _fact         = [KPI Effective Work Fact %]
+			RETURN
+			    IF ( NOT ISBLANK ( _plan ) && NOT ISBLANK ( _fact ), ( _fact - _plan ) * 100 )
+		formatString: +0.00 "pp";"−"0.00 "pp";0.00 "pp"
+		displayFolder: 1 KPI
+		lineageTag: 4148107a-c79e-4166-aea1-e0b33c06241d
+
+	/// Fact minus plan, performance per truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown.
+	measure 'KPI Performance per Truck Δ' =
+			VAR _plan         = [Performance per Truck Plan]
+			VAR _fact         = [Performance per Truck Fact]
+			RETURN
+			    IF ( NOT ISBLANK ( _plan ) && NOT ISBLANK ( _fact ), _fact - _plan )
+		formatString: +#,0;"−"#,0;0
+		displayFolder: 1 KPI
+		lineageTag: 308fc7b4-eb58-4d59-b88c-2f0e86fcd734
+
+	/// Fact minus plan, rock mass by truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown.
+	measure 'KPI Rock Mass by Truck Δ' =
+			VAR _plan         = [Rock Mass by Truck Plan]
+			VAR _fact         = [Rock Mass by Truck Fact]
+			RETURN
+			    IF ( NOT ISBLANK ( _plan ) && NOT ISBLANK ( _fact ), _fact - _plan )
+		formatString: +#,0;"−"#,0;0
+		displayFolder: 1 KPI
+		lineageTag: 333b072c-50ff-45bf-8ff0-5621175ea04f
+
+	/// 1 on the four waterfall subtotal rows (Total time, Ready for work, Effective work time, Truck loading), 0 on time-loss rows, blank without one category.
+	measure '_WF Is Subtotal' =
+			VAR _sort         = SELECTEDVALUE ( dim_time_category[sort_order] )
+			RETURN
+			    IF ( NOT ISBLANK ( _sort ), IF ( _sort IN { 1, 6, 24, 27 }, 1, 0 ) )
+		formatString: 0
+		isHidden
+		displayFolder: 3 Design
+		lineageTag: baf85832-e53b-424f-b7d2-a3914f87236f
+
+	/// Plan share shown in the waterfall table; a missing plan shows as "–".
+	measure 'WF Plan %' = COALESCE ( [Time Share Plan %], 0 )
+		formatString: 0.00%;-0.00%;"–"
+		displayFolder: 3 Design
+		lineageTag: 3450e48f-cec0-43db-9300-6b1c01de0e99
+
+	/// Fact share shown in the waterfall table; a missing fact shows as "–".
+	measure 'WF Fact %' = COALESCE ( [Time Share Fact %], 0 )
+		formatString: 0.00%;-0.00%;"–"
+		displayFolder: 3 Design
+		lineageTag: b170e6b3-b206-43a8-b147-55733bc154fa
+
+	/// SVG bar for the waterfall PLAN column (594 px wide = the table image box, so the table does not centre it): subtotals start at 0 (ink, whole-percent label), time losses float from _WF Plan Base (steel). 50 % grid line and 100 % edge.
+	measure 'WF Plan Bar' =
+			VAR _w            = 594
+			VAR _pad          = 8
+			VAR _track        = 533
+			VAR _h            = 24
+			VAR _is_subtotal  = [_WF Is Subtotal]
+			VAR _value        = COALESCE ( IF ( _is_subtotal = 1, [_WF Plan Subtotal], [_WF Plan Loss] ), 0 )
+			VAR _left         = IF ( _is_subtotal = 1, 0, COALESCE ( [_WF Plan Base], 0 ) )
+			VAR _x            = _pad + _left * _track
+			VAR _bar_w        = MAX ( _value * _track, 2 )
+			VAR _fill         = IF ( _is_subtotal = 1, "%231C2B3A", "%23A3AFC4" )
+			VAR _label        =
+			    IF (
+			        _is_subtotal = 1 && _bar_w > 48
+			        ,"<text x='" & FORMAT ( _x + 8, "0.0", "en-US" )
+			            & "' y='17' font-family='Segoe UI' font-size='15' font-weight='600' fill='%23FFFFFF'>"
+			            & FORMAT ( _value * 100, "0", "en-US" ) & "%25</text>"
+			    )
+			VAR _svg          =
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='" & _w & "' height='" & _h
+			        & "' viewBox='0 0 " & _w & " " & _h & "'>"
+			        & "<rect x='" & FORMAT ( _pad + _track / 2 - 1, "0.0", "en-US" ) & "' y='0' width='1' height='" & _h & "' fill='%23E6EAF0'/>"
+			        & "<rect x='" & FORMAT ( _pad + _track - 1, "0.0", "en-US" ) & "' y='0' width='1' height='" & _h & "' fill='%23E6EAF0'/>"
+			        & "<rect x='" & FORMAT ( _x, "0.0", "en-US" ) & "' y='0' width='" & FORMAT ( _bar_w, "0.0", "en-US" )
+			        & "' height='" & _h & "' rx='4' fill='" & _fill & "'/>"
+			        & _label
+			        & "</svg>"
+			RETURN
+			    IF ( NOT ISBLANK ( _is_subtotal ), _svg )
+		displayFolder: 3 Design
+		lineageTag: 75590198-3ca3-4d73-b75e-c6dbbb6d4046
+		dataCategory: ImageUrl
+
+	/// SVG bar for the waterfall FACT column, same rules as WF Plan Bar; 53 px of left padding stand for the column gap and spacer.
+	measure 'WF Fact Bar' =
+			VAR _w            = 594
+			VAR _pad          = 53
+			VAR _track        = 533
+			VAR _h            = 24
+			VAR _is_subtotal  = [_WF Is Subtotal]
+			VAR _value        = COALESCE ( IF ( _is_subtotal = 1, [_WF Fact Subtotal], [_WF Fact Loss] ), 0 )
+			VAR _left         = IF ( _is_subtotal = 1, 0, COALESCE ( [_WF Fact Base], 0 ) )
+			VAR _x            = _pad + _left * _track
+			VAR _bar_w        = MAX ( _value * _track, 2 )
+			VAR _fill         = IF ( _is_subtotal = 1, "%231C2B3A", "%23A3AFC4" )
+			VAR _label        =
+			    IF (
+			        _is_subtotal = 1 && _bar_w > 48
+			        ,"<text x='" & FORMAT ( _x + 8, "0.0", "en-US" )
+			            & "' y='17' font-family='Segoe UI' font-size='15' font-weight='600' fill='%23FFFFFF'>"
+			            & FORMAT ( _value * 100, "0", "en-US" ) & "%25</text>"
+			    )
+			VAR _svg          =
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='" & _w & "' height='" & _h
+			        & "' viewBox='0 0 " & _w & " " & _h & "'>"
+			        & "<rect x='" & FORMAT ( _pad + _track / 2 - 1, "0.0", "en-US" ) & "' y='0' width='1' height='" & _h & "' fill='%23E6EAF0'/>"
+			        & "<rect x='" & FORMAT ( _pad + _track - 1, "0.0", "en-US" ) & "' y='0' width='1' height='" & _h & "' fill='%23E6EAF0'/>"
+			        & "<rect x='" & FORMAT ( _x, "0.0", "en-US" ) & "' y='0' width='" & FORMAT ( _bar_w, "0.0", "en-US" )
+			        & "' height='" & _h & "' rx='4' fill='" & _fill & "'/>"
+			        & _label
+			        & "</svg>"
+			RETURN
+			    IF ( NOT ISBLANK ( _is_subtotal ), _svg )
+		displayFolder: 3 Design
+		lineageTag: 2d7ba45e-5ff8-4fcb-9487-4aeda28f05a2
+		dataCategory: ImageUrl
+
+	/// Δ fact − plan in percentage points as a pill, drawn in the first 128 px of a 594 px image (the table image box). Favourable (blue) when a subtotal grows or a time loss shrinks, unfavourable (orange) otherwise, neutral below 0.005 pp.
+	measure 'WF Δ Pill' =
+			VAR _w            = 594
+			VAR _h            = 24
+			VAR _end          = 128
+			VAR _is_subtotal  = [_WF Is Subtotal]
+			VAR _pp           = COALESCE ( [Time Share Δ], 0 ) * 100
+			VAR _neutral      = ABS ( _pp ) < 0.005
+			VAR _favourable   = IF ( _is_subtotal = 1, _pp > 0, _pp < 0 )
+			VAR _bg           =
+			    SWITCH (
+			        TRUE ()
+			        ,_neutral
+			            ,"%23EEF1F5"
+			        ,_favourable
+			            ,"%23E3EEF7"
+			        ,"%23FBEADF"
+			    )
+			VAR _fg           =
+			    SWITCH (
+			        TRUE ()
+			        ,_neutral
+			            ,"%235B6B7D"
+			        ,_favourable
+			            ,"%23155A88"
+			        ,"%239A4511"
+			    )
+			VAR _number       = FORMAT ( ABS ( _pp ), "0.00", "en-US" )
+			VAR _text         =
+			    SWITCH (
+			        TRUE ()
+			        ,_neutral
+			            ,"0.00"
+			        ,_pp > 0
+			            ,"+" & _number
+			        ,"&%238722;" & _number
+			    )
+			VAR _pill_w       = MAX ( 75, ( LEN ( _number ) + 1 ) * 9 + 22 )
+			VAR _svg          =
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='" & _w & "' height='" & _h
+			        & "' viewBox='0 0 " & _w & " " & _h & "'>"
+			        & "<rect x='" & _end - _pill_w & "' y='1' width='" & _pill_w & "' height='22' rx='11' fill='" & _bg & "'/>"
+			        & "<text x='" & _end - 11 & "' y='17' text-anchor='end' font-family='Segoe UI' font-size='16' font-weight='600' fill='"
+			        & _fg & "'>" & _text & "</text>"
+			        & "</svg>"
+			RETURN
+			    IF ( NOT ISBLANK ( _is_subtotal ), _svg )
+		displayFolder: 3 Design
+		lineageTag: 8c664eee-2d8f-43f1-9dca-7b86da9f82fb
+		dataCategory: ImageUrl
+
+	/// Header context line, e.g. "Weeks 44 (2022) – 14 (2023)  ·  Weighted calculation  ·  Month plan". The year is the year of the business week's last day, so week 1 (31.12–6.1) counts to the new year.
+	measure '_Header Context' =
+			VAR _first_date   = MIN ( dim_date[date] )
+			VAR _last_date    = MAX ( dim_date[date] )
+			VAR _first_week   =
+			    CALCULATE (
+			        MIN ( dim_date[_weekNumBiz] )
+			        ,dim_date[date] = _first_date
+			    )
+			VAR _last_week    =
+			    CALCULATE (
+			        MAX ( dim_date[_weekNumBiz] )
+			        ,dim_date[date] = _last_date
+			    )
+			VAR _first_year   =
+			    CALCULATE (
+			        YEAR ( MIN ( dim_date[_weekEndBiz] ) )
+			        ,dim_date[date] = _first_date
+			    )
+			VAR _last_year    =
+			    CALCULATE (
+			        YEAR ( MAX ( dim_date[_weekEndBiz] ) )
+			        ,dim_date[date] = _last_date
+			    )
+			VAR _weeks        =
+			    SWITCH (
+			        TRUE ()
+			        ,_first_week = _last_week && _first_year = _last_year
+			            ,"Week " & _first_week & " (" & _first_year & ")"
+			        ,_first_year = _last_year
+			            ,"Weeks " & _first_week & "–" & _last_week & " (" & _first_year & ")"
+			        ,"Weeks " & _first_week & " (" & _first_year & ") – " & _last_week & " (" & _last_year & ")"
+			    )
+			VAR _calc         = SELECTEDVALUE ( param_calculation[calculation_name], "Mixed" )
+			VAR _plan         = SELECTEDVALUE ( param_plan_type[plan_type_name], "Mixed" )
+			RETURN
+			    _weeks & "  ·  " & _calc & " calculation  ·  " & _plan & " plan"
+		isHidden
+		displayFolder: 3 Design
+		lineageTag: f99ee63d-cd0a-40e3-80c5-843386f3135d
+
+	partition _measures-af740960-5f3e-40ba-9525-5934467d7cf6 = m
+		mode: import
+		source =
+				let
+				    Источник = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMjQyjskDEkqxsQA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Столбец1 = _t]),
+				    #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"Столбец1", type text}}),
+				    #"Удаленные столбцы" = Table.RemoveColumns(#"Измененный тип",{"Столбец1"})
+				in
+				    #"Удаленные столбцы"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
