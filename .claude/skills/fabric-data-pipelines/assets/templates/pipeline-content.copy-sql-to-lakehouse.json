@@ -1,0 +1,100 @@
+{
+  "properties": {
+    "description": "Copy one SQL table into a Lakehouse table, then log the row count. Replace __SQL_CONNECTION_ID__ and __LAKEHOUSE_ID__.",
+    "parameters": {
+      "SourceSchema": { "type": "string", "defaultValue": "dbo" },
+      "SourceTable":  { "type": "string", "defaultValue": "DimCustomer" },
+      "TargetTable":  { "type": "string", "defaultValue": "dim_customer" },
+      "TableAction":  { "type": "string", "defaultValue": "Append" }
+    },
+    "variables": {
+      "RowsCopied": { "type": "Integer", "defaultValue": 0 }
+    },
+    "activities": [
+      {
+        "name": "Copy Table",
+        "type": "Copy",
+        "dependsOn": [],
+        "policy": { "timeout": "0.12:00:00", "retry": 1, "retryIntervalInSeconds": 60, "secureOutput": false, "secureInput": false },
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": { "value": "@concat('SELECT * FROM [', pipeline().parameters.SourceSchema, '].[', pipeline().parameters.SourceTable, ']')", "type": "Expression" },
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None",
+            "datasetSettings": {
+              "annotations": [],
+              "type": "AzureSqlTable",
+              "schema": [],
+              "typeProperties": {},
+              "externalReferences": { "connection": "__SQL_CONNECTION_ID__" }
+            }
+          },
+          "sink": {
+            "type": "LakehouseTableSink",
+            "tableActionOption": { "value": "@pipeline().parameters.TableAction", "type": "Expression" },
+            "datasetSettings": {
+              "annotations": [],
+              "linkedService": {
+                "name": "TargetLakehouse",
+                "properties": {
+                  "annotations": [],
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "artifactId": "__LAKEHOUSE_ID__",
+                    "rootFolder": "Tables"
+                  }
+                }
+              },
+              "type": "LakehouseTable",
+              "schema": [],
+              "typeProperties": {
+                "table": { "value": "@pipeline().parameters.TargetTable", "type": "Expression" }
+              }
+            }
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": { "allowDataTruncation": true, "treatBooleanAsNumber": false }
+          }
+        }
+      },
+      {
+        "name": "Set RowsCopied",
+        "type": "SetVariable",
+        "dependsOn": [ { "activity": "Copy Table", "dependencyConditions": [ "Succeeded" ] } ],
+        "policy": { "secureOutput": false, "secureInput": false },
+        "typeProperties": {
+          "variableName": "RowsCopied",
+          "value": { "value": "@activity('Copy Table').output.rowsCopied", "type": "Expression" }
+        }
+      },
+      {
+        "name": "Return Value",
+        "type": "SetVariable",
+        "dependsOn": [ { "activity": "Set RowsCopied", "dependencyConditions": [ "Succeeded" ] } ],
+        "policy": { "secureOutput": false, "secureInput": false },
+        "typeProperties": {
+          "variableName": "pipelineReturnValue",
+          "setSystemVariable": true,
+          "value": [
+            { "key": "rowsCopied", "value": { "type": "Expression", "content": "@variables('RowsCopied')" } },
+            { "key": "table",      "value": { "type": "Expression", "content": "@pipeline().parameters.TargetTable" } }
+          ]
+        }
+      },
+      {
+        "name": "Fail Loudly",
+        "type": "Fail",
+        "dependsOn": [ { "activity": "Copy Table", "dependencyConditions": [ "Failed" ] } ],
+        "typeProperties": {
+          "message": { "value": "@concat('Copy of ', pipeline().parameters.SourceTable, ' failed: ', activity('Copy Table').Error.message)", "type": "Expression" },
+          "errorCode": "COPY_FAILED"
+        }
+      }
+    ]
+  }
+}

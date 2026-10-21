@@ -1,0 +1,131 @@
+{
+  "properties": {
+    "description": "Metadata-driven orchestration: Lookup a control table, ForEach row run a notebook, then invoke an audit pipeline and fail if any table failed. Replace __SQL_CONNECTION_ID__, __NOTEBOOK_ID__, __AUDIT_PIPELINE_ID__, __FABRIC_PIPELINES_CONNECTION_ID__.",
+    "parameters": {
+      "RunDate":  { "type": "string", "defaultValue": "2026-01-01" },
+      "FullLoad": { "type": "bool",   "defaultValue": false }
+    },
+    "variables": {
+      "FailedTables": { "type": "Array" }
+    },
+    "activities": [
+      {
+        "name": "Lookup Control Table",
+        "type": "Lookup",
+        "dependsOn": [],
+        "policy": { "timeout": "0.00:10:00", "retry": 2, "retryIntervalInSeconds": 30, "secureOutput": false, "secureInput": false },
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": "SELECT source_schema, source_table, target_table, watermark_column FROM etl.control WHERE enabled = 1",
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "firstRowOnly": false,
+          "datasetSettings": {
+            "annotations": [],
+            "type": "AzureSqlTable",
+            "schema": [],
+            "typeProperties": {},
+            "externalReferences": { "connection": "__SQL_CONNECTION_ID__" }
+          }
+        }
+      },
+      {
+        "name": "Check Rows",
+        "type": "IfCondition",
+        "dependsOn": [ { "activity": "Lookup Control Table", "dependencyConditions": [ "Succeeded" ] } ],
+        "typeProperties": {
+          "expression": { "value": "@equals(length(activity('Lookup Control Table').output.value), 0)", "type": "Expression" },
+          "ifTrueActivities": [
+            {
+              "name": "Fail No Rows",
+              "type": "Fail",
+              "dependsOn": [],
+              "typeProperties": { "message": "Control table returned no enabled rows", "errorCode": "NO_ROWS" }
+            }
+          ],
+          "ifFalseActivities": []
+        }
+      },
+      {
+        "name": "For Each Table",
+        "type": "ForEach",
+        "dependsOn": [ { "activity": "Check Rows", "dependencyConditions": [ "Succeeded" ] } ],
+        "typeProperties": {
+          "items": { "value": "@activity('Lookup Control Table').output.value", "type": "Expression" },
+          "isSequential": false,
+          "batchCount": 4,
+          "activities": [
+            {
+              "name": "Run Load Notebook",
+              "type": "TridentNotebook",
+              "dependsOn": [],
+              "policy": { "timeout": "0.02:00:00", "retry": 1, "retryIntervalInSeconds": 120, "secureOutput": false, "secureInput": false },
+              "typeProperties": {
+                "notebookId": "__NOTEBOOK_ID__",
+                "workspaceId": "00000000-0000-0000-0000-000000000000",
+                "parameters": {
+                  "source_schema":    { "value": { "value": "@item().source_schema", "type": "Expression" }, "type": "string" },
+                  "source_table":     { "value": { "value": "@item().source_table", "type": "Expression" }, "type": "string" },
+                  "target_table":     { "value": { "value": "@item().target_table", "type": "Expression" }, "type": "string" },
+                  "watermark_column": { "value": { "value": "@item().watermark_column", "type": "Expression" }, "type": "string" },
+                  "run_date":         { "value": { "value": "@pipeline().parameters.RunDate", "type": "Expression" }, "type": "string" },
+                  "full_load":        { "value": { "value": "@pipeline().parameters.FullLoad", "type": "Expression" }, "type": "bool" }
+                },
+                "sessionTag": "etl-load"
+              }
+            },
+            {
+              "name": "Record Failure",
+              "type": "AppendVariable",
+              "dependsOn": [ { "activity": "Run Load Notebook", "dependencyConditions": [ "Failed" ] } ],
+              "typeProperties": {
+                "variableName": "FailedTables",
+                "value": { "value": "@item().source_table", "type": "Expression" }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Invoke Audit Pipeline",
+        "type": "InvokePipeline",
+        "dependsOn": [ { "activity": "For Each Table", "dependencyConditions": [ "Completed" ] } ],
+        "policy": { "timeout": "0.01:00:00", "retry": 0, "retryIntervalInSeconds": 30, "secureOutput": false, "secureInput": false },
+        "typeProperties": {
+          "operationType": "InvokeFabricPipeline",
+          "waitOnCompletion": true,
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "pipelineId": "__AUDIT_PIPELINE_ID__",
+          "parameters": {
+            "parent_run_id": { "value": "@pipeline().RunId", "type": "Expression" },
+            "failed_tables": { "value": "@string(variables('FailedTables'))", "type": "Expression" },
+            "run_date":      { "value": "@pipeline().parameters.RunDate", "type": "Expression" }
+          }
+        },
+        "externalReferences": { "connection": "__FABRIC_PIPELINES_CONNECTION_ID__" }
+      },
+      {
+        "name": "Check Failures",
+        "type": "IfCondition",
+        "dependsOn": [ { "activity": "Invoke Audit Pipeline", "dependencyConditions": [ "Completed" ] } ],
+        "typeProperties": {
+          "expression": { "value": "@greater(length(variables('FailedTables')), 0)", "type": "Expression" },
+          "ifTrueActivities": [
+            {
+              "name": "Fail Partial",
+              "type": "Fail",
+              "dependsOn": [],
+              "typeProperties": {
+                "message": { "value": "@concat('Tables failed: ', string(variables('FailedTables')))", "type": "Expression" },
+                "errorCode": "PARTIAL_FAILURE"
+              }
+            }
+          ],
+          "ifFalseActivities": []
+        }
+      }
+    ]
+  }
+}

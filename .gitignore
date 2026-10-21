@@ -1,0 +1,33 @@
+# init-proc quarantine (dropped agents/skills, 2026-10-21) — delete locally when satisfied
+_removed/
+
+# backups written by agents / tools before edits
+__backup__/
+
+# dependencies & build output
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+__pycache__/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Track A — Rayfin
+fabric-app/rayfin/.env
+fabric-app/rayfin/.temp/
+fabric-app/.env.fabric*
+
+# Track B — PBIP local state (never commit binaries / local settings)
+*.pbix
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# OS / editor
+.DS_Store
+Thumbs.db

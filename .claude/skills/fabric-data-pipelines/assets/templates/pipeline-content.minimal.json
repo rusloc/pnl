@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "description": "Minimal pipeline: a single Wait activity. Use to smoke-test create/run plumbing.",
+    "activities": [
+      {
+        "name": "Wait 10s",
+        "type": "Wait",
+        "dependsOn": [],
+        "typeProperties": { "waitTimeInSeconds": 10 }
+      }
+    ],
+    "parameters": {},
+    "variables": {}
+  }
+}

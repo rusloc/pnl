@@ -1,0 +1,6 @@
+choice_code,choice_name,allowed_as_base,allowed_as_compare,sort_order,default_for
+A,Actual,TRUE,FALSE,10,Base
+LE,Latest estimate (actual + latest forecast),TRUE,TRUE,20,
+B,Budget,TRUE,TRUE,30,Compare A
+PY,"Prior year (actual, months shifted 12 back)",FALSE,TRUE,40,Compare B
+NONE,None,FALSE,TRUE,50,

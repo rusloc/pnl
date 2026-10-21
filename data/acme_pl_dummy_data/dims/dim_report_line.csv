@@ -1,0 +1,30 @@
+line_code,line_name,row_type,formula,block_code,spine_step,tag,parent_line_code,is_key,alias_products,alias_services,ifrs18_category,sort_order
+GR,Gross revenue,input_block,,GR,1,,,FALSE,Gross sales,Gross billings,Operating,10
+GTN,Gross-to-net deductions,input_block,,GTN,2,,,FALSE,Trade spend & customer deductions,"Discounts, credits & refunds",Operating,20
+NR,Net revenue,subtotal,GR + GTN,,3,,,TRUE,Net sales,Revenue,Operating,30
+COR,Cost of revenue,input_block,,COR,4,,,FALSE,Cost of goods sold,Cost of revenue,Operating,40
+GP,Gross profit,subtotal,NR + COR,,5,,,FALSE,Gross profit,Gross profit,Operating,50
+GM_PCT,Gross margin %,ratio,GP / NR,,5,,,FALSE,,,Operating,60
+VSC,Variable selling & cost-to-serve,input_block,,VSC,6,,,FALSE,Distribution & channel costs,Acquisition & transaction costs,Operating,70
+CM,Contribution margin,subtotal,GP + VSC,,7,Mgmt,,FALSE,,,Operating,80
+CM_PCT,Contribution margin %,ratio,CM / NR,,7,,,FALSE,,,Operating,90
+OPEX,Operating expenses,group_total,SM + RD + GA + OOI,,8,,,FALSE,,,Operating,100
+SM,Sales & marketing,input_block,,SM,8a,,OPEX,FALSE,"Advertising, promotion & selling",Sales & marketing,Operating,110
+RD,Research & development,input_block,,RD,8b,,OPEX,FALSE,Product innovation,Product development,Operating,120
+GA,General & administrative,input_block,,GA,8c,,OPEX,FALSE,,,Operating,130
+OOI,Other operating income / (expense),input_block,,OOI,8d,,OPEX,FALSE,,,Operating,140
+EBITDA,Adjusted EBITDA,subtotal,CM + OPEX,,9,MPM,,TRUE,,,Operating,150
+EBITDA_PCT,Adjusted EBITDA margin %,ratio,EBITDA / NR,,9,,,FALSE,,,Operating,160
+DA,Depreciation & amortisation,input_block,,DA,10,,,FALSE,,,Operating,170
+UOP,Underlying operating profit,memo,EBITDA + DA,,11,MPM,,FALSE,,,Operating,180
+ADJ,Adjusting items (non-underlying),input_block,,ADJ,12,,,FALSE,,,Operating,190
+OP,Operating profit,subtotal,UOP + ADJ,,13,IFRS 18,,TRUE,,,Operating,200
+OP_PCT,Operating margin %,ratio,OP / NR,,13,,,FALSE,,,Operating,210
+INV,Investing income,input_block,,INV,14,,,FALSE,,,Investing,220
+PBFIT,Profit before financing and income taxes,subtotal,OP + INV,,15,IFRS 18,,FALSE,,,,230
+FIN,Financing expenses,input_block,,FIN,16,,,FALSE,,,Financing,240
+PBT,Profit before tax,subtotal,PBFIT + FIN,,17,,,FALSE,,,,250
+TAX,Income tax expense,input_block,,TAX,18,,,FALSE,,,Income tax,260
+ETR_PCT,Effective tax rate %,ratio,-TAX / PBT,,18,,,FALSE,,,,270
+NP,Net profit for the period,subtotal,PBT + TAX,,19,,,TRUE,Net earnings,Net income,,280
+NP_PCT,Net margin %,ratio,NP / NR,,19,,,FALSE,,,,290

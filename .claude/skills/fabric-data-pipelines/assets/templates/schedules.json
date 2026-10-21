@@ -1,0 +1,27 @@
+{
+  "_comment": "Bodies for POST /v1/workspaces/{ws}/items/{pipelineId}/jobs/Pipeline/schedules. localTimeZoneId is a Windows time-zone id. Both start and end are required; a start in the past fires immediately.",
+  "every_15_minutes": {
+    "enabled": true,
+    "configuration": { "type": "Cron", "startDateTime": "2026-10-15T00:00:00", "endDateTime": "2099-01-01T00:00:00", "localTimeZoneId": "UTC", "interval": 15 }
+  },
+  "daily_0600_and_1800_moscow": {
+    "enabled": true,
+    "configuration": { "type": "Daily", "startDateTime": "2026-10-15T00:00:00", "endDateTime": "2099-01-01T00:00:00", "localTimeZoneId": "Russian Standard Time", "times": ["06:00", "18:00"] }
+  },
+  "weekdays_0600_berlin": {
+    "enabled": true,
+    "configuration": { "type": "Weekly", "startDateTime": "2026-10-15T00:00:00", "endDateTime": "2099-01-01T00:00:00", "localTimeZoneId": "W. Europe Standard Time",
+                       "times": ["06:00"], "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+  },
+  "first_of_month_0200_utc_with_parameters": {
+    "enabled": true,
+    "configuration": { "type": "Monthly", "startDateTime": "2026-11-01T00:00:00", "endDateTime": "2099-01-01T00:00:00", "localTimeZoneId": "UTC",
+                       "recurrence": 1, "times": ["02:00"], "occurrence": { "occurrenceType": "DayOfMonth", "dayOfMonth": 1 } },
+    "executionData": { "parameters": { "FullLoad": true } }
+  },
+  "last_friday_1900_eastern": {
+    "enabled": true,
+    "configuration": { "type": "Monthly", "startDateTime": "2026-11-01T00:00:00", "endDateTime": "2099-01-01T00:00:00", "localTimeZoneId": "Eastern Standard Time",
+                       "recurrence": 1, "times": ["19:00"], "occurrence": { "occurrenceType": "OrdinalWeekday", "weekIndex": "Fourth", "weekday": "Friday" } }
+  }
+}
