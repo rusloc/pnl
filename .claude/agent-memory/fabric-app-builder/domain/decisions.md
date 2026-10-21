@@ -1,0 +1,74 @@
+# Decisions (durable) — lessons folded in while short
+<!-- next-id: DEC-004 · next-id: LSN-005 -->
+
+### LSN-004 · The Track B `1 Statement` measures gate on `ISINSCOPE ( dim_pl_row[account_label] )`; a flat SUMMARIZECOLUMNS that groups by the account columns drops every line, subtotal and ratio row · 2026-10-21
+**What:** `_PL Base`, `_PL Is Ratio`, `PL Fav Off` test `NOT ISINSCOPE ( dim_pl_row[account_label] )` to tell a line from a leaf — a matrix-level test. In a `SUMMARIZECOLUMNS` that groups by `row_key … account_label, is_leaf`, every row has `account_label` in scope, so line rows evaluate as blank leaves and SUMMARIZECOLUMNS removes them: the first live Q1 returned 44 rows, all leaves. Fix: Q1 is two halves — `_lines` grouped without the four account columns (`TREATAS ( { FALSE () }, dim_pl_row[is_leaf] )`, constants projected for `account_code/label`, `is_leaf`, `account_sort`) and `_leaves` with all eleven columns — `UNION`ed in one `EVALUATE`, `ORDER BY [line_sort], [account_sort]`. Result: 73 rows (29 lines + 44 leaves), NR/EBITDA/OP/NP base and Compare A equal `control_totals_usd` to the cent.
+**Why / Evidence:** `_measures.tmdl` lines 1885-1950; `rayfin/probes/q1-statement-smoke.query.json` probe 2026-10-21 (request `316f8f28-…`). Any future zone that reads `dim_pl_row` (bridge drivers, entity columns) must keep lines and leaves in separate SUMMARIZECOLUMNS or ask bip for a measure that does not use ISINSCOPE.
+**Where:** `fabric-app/packages/frontend/src/pnl/data/pnl-model-queries.ts` (`statementPart`), `pnl-model-queries.spec.ts`
+**Versions:** rayfin-connector-fabric-semanticmodel 1.36.2 · model as published 2026-10-21
+**Reversal cost:** low (query shape only)
+**Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, summarizecolumns, isinscope, dim_pl_row, adr-0006
+**Last-verified:** 2026-10-21 · **Related:** DEC-003, CAND-002
+**Status:** active
+
+### LSN-001 · `rayfin up` refused the first real bundle: TC39 decorators reached dist untransformed · 2026-10-21
+**What:** With the template's `react()` (plugin-react-swc) and no options, SWC runs only in dev; at build Vite 8's native oxc strips TS and leaves `@role(...)`/`@entity()` on the connector entity classes that `connectors.ts` value-imports via `schema.ts`. `rayfin up` parses every `dist` script with `node --input-type=module --check` right before packaging and refused ("not parseable JavaScript … blank page"). `up --dry-run`, `vite build`, `tsc`, vitest and eslint all passed: none of them parse the output.
+**Fix:** `react({ useAtYourOwnRisk_mutateSwcOptions(o) { o.jsc.parser.decorators = true; o.jsc.transform.decoratorVersion = '2022-03'; } })` in `vite.config.ts` — the same lowering the template already applies in `vitest.config.ts` (plugin-react-swc enables its build-time SWC transform only when `plugins` or that option is set; `index.js` ~line 37). Bundle grew 499 → 547 KB. Gate: `scripts/check-bundle.mjs` (mirror of the CLI check) wired into root `build` / `build:fabric` as `npm run check:bundle`.
+**Why / Evidence:** `~/.rayfin/logs/2026-10-21T132038…-up-….log`; acorn "Unexpected character '@'" at the `entities:{DimAccount:@$e(...)` literal; `rayfin-cli/dist/utils/static-hosting-utils.js` `findUnparseableScripts`. SDK doc `rayfin-guide/getting-started/project-structure.md` §"Vite configuration" prescribes esbuild `@vitejs/plugin-react` + `target: es2022` and warns plugin-react-swc "fails to parse" TC39 decorators — the shipped `universal-app` template contradicts it (ships SWC, no option), so the mutate-SWC route avoids a new dependency.
+**Where:** `fabric-app/packages/frontend/vite.config.ts`, `fabric-app/scripts/check-bundle.mjs`, `fabric-app/package.json`
+**Versions:** rayfin-cli 1.36.2 · vite 8.3.5 · @vitejs/plugin-react-swc 4.3.1
+**Reversal cost:** low
+**Hits:** 1 · **Confidence:** high · **Tags:** build, decorators, swc, oxc, deploy, gate
+**Last-verified:** 2026-10-21 · **Related:** QRK-002, DEC-001
+**Status:** active — the gate is the standing rule: never hand `up` to the USER without `npm run build` (which now parses dist) green.
+
+### DEC-001 · Track A reads lh_raw.acme_pl through a fabric-sqlanalytics connector, no warehouse · 2026-10-21
+**What:** Connector `lhraw` (type `fabric-sqlanalytics`, operations `read` only) reads the schema-enabled lakehouse `lh_raw`, schema `acme_pl`, directly. No Warehouse copy. Connector IDs live in `rayfin/.env` as `LH_RAW_WORKSPACE_ID` / `LH_RAW_SQL_ENDPOINT_ID` and are interpolated into `rayfin.yml` (CLAUDE.md runtime hook). Entities are keyless (`Source({ schema: 'acme_pl', table })`, no `primaryKey`) because the SQL endpoint exposes no PK/FK metadata; carry `@role('authenticated', ['read'])`.
+**Why / Evidence:** `SourceOptions.schema` is a free string (typings); `connector inspect` in direct mode listed all 28 `acme_pl` tables and returned the 2 `dim_entity` rows; `connector add` discovery wrote all 28 tables to `metadata.json` with `pk=None fk=None`. Warehouse path would have cost ginee a CTAS copy for nothing.
+**Where:** `fabric-app/rayfin/rayfin.yml`, `fabric-app/rayfin/connectors/lhraw/`, `fabric-app/rayfin/.env.example`; ADR-0003 (open item "which connector" now answered, ADR update pending).
+**Versions:** rayfin-core 1.36.2 · rayfin-cli 1.36.2
+**Reversal cost:** low (connector remove + add; no app-owned data)
+**Hits:** 2 · **Confidence:** high · **Tags:** connector, lakehouse, sqlanalytics, acme_pl, env
+**Last-verified:** 2026-10-21 · **Related:** QRK-001, QRK-002, DEC-002
+**Status:** active · open sub-decision: `auth.type` is the CLI default `application` (app identity reads lh_raw); switch to `delegated` only if viewers must hold their own lh_raw rights — USER/archi call before first `rayfin up` (restated as ADR-0005 open question 2).
+
+### DEC-002 · P&L numbers come through `where → groupBy → aggregate` on the lhraw facts, engine in the app (ADR-0005, proposed) · 2026-10-21
+**What:** Facts (`fact_pl` 458k, `fact_pl_allocated` 758k rows) are never paged into the browser. Each version × window is one DAB aggregation on `FactPl` grouped by `account_code, month_key, currency_code` with `sum(amount_local)` (≈1.4k rows per call); `fact_fx_rate` (288 rows) read once; translation (C-10…C-13), spine and bridge evaluated in a framework-free TS engine (`packages/frontend/src/pnl/model/`) tested against `control_totals_usd`. Rejected for now: Rayfin functions + mssql (new UDF item, cold starts), semantic-model DAX (model unpublished, delegated-only), pre-aggregated lh_raw tables (ginee lane; kept as the optimisation path).
+**Why / Evidence:** `ConnectorEntityClient.d.ts` (rayfin-connectors 1.36.2) exposes `groupBy`/`aggregate`; `rayfin-data/assets/docs/aggregations.md` documents the DAB contract (no joins/expressions, filter before aggregate, no paging). Option (b) would create a Fabric UDF child item, excluded while "no new Fabric items" holds.
+**Where:** `docs/ADR/0005-track-a-pnl-data-access.md`; `fabric-app/rayfin/connectors/lhraw/{FactPl,FactFxRate}.ts`; `packages/frontend/src/pnl/data/pnl-aggregate.prototype.ts`, `model/fx.ts`; probe at `#probe`.
+**Versions:** rayfin-core 1.36.2 · rayfin-cli 1.36.2
+**Reversal cost:** medium (swap the figures source behind `PnlDataSource`; entities stay)
+**Hits:** 1 · **Confidence:** medium (unverified on the deployed app: grouped-row cap, `in` with 12 keys, decimal sums as numbers) · **Tags:** connector, aggregation, dab, fact_pl, fx, engine, adr
+**Last-verified:** 2026-10-21 · **Related:** DEC-001, QRK-003
+**Status:** superseded by DEC-003 on 2026-10-21 (USER chose ADR-0005 option (c); the aggregate prototype was never deployed — removal of `pnl-aggregate.prototype.ts`, `fx.ts`, `FactPl`/`FactFxRate` awaits the USER).
+
+### DEC-003 · Track A gets its numbers from the Track B semantic model via `fabric-semanticmodel` (delegated, RLS in the model); §7 lives in DAX only (ADR-0006, proposed) · 2026-10-21
+**What:** Connector `pnlModel` (`fabric-semanticmodel`, `version: '1'`, `auth.type: delegated`, `executeQuery` only) against the published `ACME Unified PnL.SemanticModel` in RAW. One DAX query per zone built by a pure allow-listed builder from `FilterState` (param tables filtered with `TREATAS`; never user text); unscaled engine measures (`_PL Base`, `_PL Compare A/B`, `_Bridge Value`, `Base Amount`, …) + `CONVERT(…, DOUBLE)`; units/sign/variance format stay in TS. N-04 = model RLS (static entity roles first, dynamic `sec_user_scope` later); Q0 `VALUES(dim_entity[entity_code])` gates the Group option. Sample figures remain the offline fallback; `lhraw` stays for dims until phase 2, then `connector remove`.
+**Why / Evidence:** USER decision 2026-10-21 (supersedes ADR-0005 (a)): no second §7 implementation, per-user RLS, seat for the AI chat. Platform facts: Category B is delegated-only, `rayfin dev` does not wire it, OBO runs the DAX as the signed-in user, viewers need Read + **Build** on the model and must not be Contributor+ (RLS bypass), roles are additive (entity × region needs one role), 120 req/min/user — all cited with paths in ADR-0006 §3.
+**Where:** `docs/ADR/0006-track-a-semantic-model-delegated.md` (findings table §3, roles §6, queries §8, fin plan §14); will touch `fabric-app/rayfin/rayfin.yml`, `rayfin/connectors/pnlModel/`, `packages/frontend/src/lib/connectors.ts`, `pnl/data/pnl-model-*.ts`.
+**Versions:** rayfin-cli 1.36.2 · rayfin-connector-fabric-semanticmodel 1.36.2
+**Reversal cost:** medium (connector swap is cheap; the RLS roles, demo accounts and the measure contract with bip are the sunk part)
+**Hits:** 1 · **Confidence:** high · **Tags:** connector, semantic-model, delegated, rls, n-04, dax, adr-0006
+**Last-verified:** 2026-10-21 · **Related:** DEC-001, DEC-002, LSN-002, LSN-003, QRK-001, CAND-002
+**Status:** active — ADR-0006 accepted for phase 1 by the main agent under USER delegation (2026-10-21): connector `pnlModel` deployed, the statement live on the `PL *` measures (Number, pre-divided by `param_units` pinned to `M`; not the `9 Engine` Currency twins), Month the one un-gated filter, no RLS yet. ADR-0006 §3.14 (OBO + RLS) remains [I] until a demo Viewer sees filtered rows. Unit rule: the app never divides again (`fmtAmount` treats values as millions).
+
+### LSN-002 · Sample figures that ignore the filter state read as a broken app · 2026-10-21
+**What:** The Ledger shell shipped with mockup numbers keyed only by entity (`SAMPLE_DATA[entity]`), while the rail, versions, slice and toolbar controls wrote state the figures path never read. The USER's first deployed-app report was "every filter except company and tabs is broken", not "sample data". A "Sample data" chip per view, with the caveat only in the statement footer, was not enough; worse, the version and breakdown pickers re-titled columns and headings over unchanged sample numbers (Budget figures under a "Latest est." title).
+**Why / Evidence:** Investigation 2026-10-21 (coms entry 26): `sample-source.ts:164-178` reads `filter.entity` only; every other filter reaches labels (`windowLabel`, `contextLine`, column titles) but not values. No handler, reducer or memo bug (`filters.spec`, `pnl-app.spec` green).
+**Where:** `packages/frontend/src/pnl/data/sample-source.ts`, `views/*.tsx`, `pnl-app.tsx`.
+**Reversal cost:** low (feed real figures per ADR-0005, or disable/annotate the controls while `figures.sample`).
+**Rule:** when a placeholder data path ignores a control, the control must say so at the point of use (disabled with a reason, or one notice-strip line listing the inert filters), and must never re-label columns or headings that still show placeholder numbers.
+**Applied (stopgap, USER-approved option (i), 2026-10-21):** `pnl/model/sample-mode.ts` holds the one caveat text, the notice line, the `title` reason and `sampleGate(options, sample)`; every panel/toolbar picker that reaches a label (period, versions, slices, currency, FX, Compared with, Break down by) is `disabled` + `title` + `aria-describedby` → visible in-panel note while `figures.sample`. Display controls that only the statement honours carry a sample-gated "statement only" caption. Guarded by `pnl/sample-mode.spec.tsx` (incl. a live-like source proving the gates vanish). Non-obvious: the deployed reference's `lastClosed` is Sep 2026 (dim_month), so defaults coincide with the sample and no title pinning beyond the Profitability "by" was needed; reducer-rule tests (F-30/F-31) now run on a `sample: false` source.
+**Hits:** 2 · **Confidence:** high · **Tags:** sample-data, placeholder, filters, ux, honesty, a11y
+**Last-verified:** 2026-10-21 · **Last-refined:** 2026-10-21 · **Related:** DEC-002, CAND-001
+**Status:** active (stopgap shipped to code, not yet deployed; the real fix remains ADR-0005)
+
+### LSN-003 · Rayfin functions call Fabric/SQL/AzureAI **as the app item owner**, not as the signed-in user; any "chat with data" routed through a UDF is single-identity · 2026-10-21
+**What:** `ctx.Tokens.Fabric|Sql|AzureAI` in a deployed UDF carry the Fabric app item owner's identity; only `ctx.getDataClient()` (Rayfin DB) keeps the caller. A Fabric data agent reached via the `fabric-data-agent` pack therefore answers with the owner's permissions for every app user — RLS/N-04 is not per-user. The browser SDK exposes no user Entra token (Fabric broker = handoff code only; `signInWithEntraToken` consumes one, never mints one), so a per-user call needs MSAL + own app registration in the frontend.
+**Why / Evidence:** `@microsoft/rayfin-guide/assets/docs/functions/index.md` ("app identity is the owner of the Fabric app item"), `functions/connections/index.md`; `rayfin-auth` typings have no acquire-token API. Research task 2026-10-21 (AI chat option for Track A).
+**Where:** `fabric-app/.agents/skills/{fabric-data-agent,functions-capability}/SKILL.md`; docs/ADR candidate "Track A AI chat".
+**Versions:** rayfin-cli 1.36.2 · rayfin-functions 1.36.2
+**Reversal cost:** high (identity model is platform-defined; changing it means a different auth architecture)
+**Hits:** 1 · **Confidence:** high · **Tags:** functions, identity, data-agent, rls, n-04, ai-chat
+**Last-verified:** 2026-10-21 · **Related:** DEC-001, QRK-002
+**Status:** active

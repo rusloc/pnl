@@ -1,0 +1,1247 @@
+{
+  "source": "lhraw",
+  "connector": "fabric-sqlanalytics",
+  "connectionString": "gbpyeggwhrpurjozyf5wy5acci-5boam77i75yenchl5wa2hsobxu.datawarehouse.fabric.microsoft.com",
+  "discoveredAt": "2026-10-21T08:51:47.921Z",
+  "schemas": [
+    {
+      "schemaName": "acme_pl",
+      "tables": [
+        {
+          "tableName": "bridge_account_nature",
+          "columns": [
+            {
+              "columnName": "account_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "nature_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "weight",
+              "dataType": "decimal",
+              "isNullable": false,
+              "precision": 5,
+              "scale": 4
+            }
+          ]
+        },
+        {
+          "tableName": "control_totals_usd",
+          "columns": [
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "window",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "amount_usd",
+              "dataType": "decimal",
+              "isNullable": false,
+              "precision": 18,
+              "scale": 2
+            }
+          ]
+        },
+        {
+          "tableName": "dim_account",
+          "columns": [
+            {
+              "columnName": "account_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "account_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_scope",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_scope_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "block_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "block_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "block_alias_products",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "block_alias_services",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "spine_step",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "natural_sign",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "ifrs18_category",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "is_direct",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "is_below_cm",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "is_intercompany",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "has_fact_rows",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "definition",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "published_comparable",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "default_cost_centre_products",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "default_cost_centre_services",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            }
+          ]
+        },
+        {
+          "tableName": "dim_channel",
+          "columns": [
+            {
+              "columnName": "channel_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "channel_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "slot_label",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_unassigned",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "dim_cost_centre",
+          "columns": [
+            {
+              "columnName": "cost_centre_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "cost_centre_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "function",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            }
+          ]
+        },
+        {
+          "tableName": "dim_entity",
+          "columns": [
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "short_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "description",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "consolidation_group",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            }
+          ]
+        },
+        {
+          "tableName": "dim_line",
+          "columns": [
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "slot_label",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_unassigned",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "dim_month",
+          "columns": [
+            {
+              "columnName": "month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_start_date",
+              "dataType": "date",
+              "isNullable": false,
+              "datePrecision": 0
+            },
+            {
+              "columnName": "month_index",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "fiscal_year",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "quarter",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_number",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "month_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "is_closed",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "dim_nature",
+          "columns": [
+            {
+              "columnName": "nature_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "nature_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "natural_sign",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "dim_region",
+          "columns": [
+            {
+              "columnName": "region_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "region_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "functional_currency",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "dim_report_line",
+          "columns": [
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "row_type",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "formula",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "block_code",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "spine_step",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "tag",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "parent_line_code",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "is_key",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "alias_products",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "alias_services",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "ifrs18_category",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "dim_segment",
+          "columns": [
+            {
+              "columnName": "segment_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "segment_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "slot_label",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_unassigned",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "dim_version",
+          "columns": [
+            {
+              "columnName": "version_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "forecast_cycle",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "is_latest_forecast",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "first_month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "last_month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            }
+          ]
+        },
+        {
+          "tableName": "fact_fx_rate",
+          "columns": [
+            {
+              "columnName": "currency_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "rate_type",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "local_per_usd",
+              "dataType": "decimal",
+              "isNullable": false,
+              "precision": 18,
+              "scale": 6
+            }
+          ]
+        },
+        {
+          "tableName": "fact_operational",
+          "columns": [
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "region_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "channel_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "segment_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "currency_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "units_sold",
+              "dataType": "int",
+              "isNullable": true,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "gmv_local",
+              "dataType": "decimal",
+              "isNullable": true,
+              "precision": 18,
+              "scale": 2
+            },
+            {
+              "columnName": "active_merchants_end",
+              "dataType": "int",
+              "isNullable": true,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "fact_pl",
+          "columns": [
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "region_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "channel_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "segment_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "account_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "counterparty_entity_code",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "currency_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "cost_centre_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "amount_local",
+              "dataType": "decimal",
+              "isNullable": false,
+              "precision": 18,
+              "scale": 2
+            }
+          ]
+        },
+        {
+          "tableName": "fact_pl_allocated",
+          "columns": [
+            {
+              "columnName": "entity_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "month_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "version_key",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "region_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "channel_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "line_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "segment_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "account_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "counterparty_entity_code",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "currency_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "cost_centre_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "amount_local",
+              "dataType": "decimal",
+              "isNullable": false,
+              "precision": 18,
+              "scale": 2
+            }
+          ]
+        },
+        {
+          "tableName": "param_breakdown",
+          "columns": [
+            {
+              "columnName": "breakdown_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "breakdown_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "available_for",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "param_cost_lens",
+          "columns": [
+            {
+              "columnName": "lens_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "lens_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_cost_sign",
+          "columns": [
+            {
+              "columnName": "cost_sign_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "cost_sign_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "display_multiplier_for_costs",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_detail_level",
+          "columns": [
+            {
+              "columnName": "detail_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "detail_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_fx_basis",
+          "columns": [
+            {
+              "columnName": "fx_basis_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "fx_basis_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_layout",
+          "columns": [
+            {
+              "columnName": "layout_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "layout_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "available_for",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            }
+          ]
+        },
+        {
+          "tableName": "param_reporting_currency",
+          "columns": [
+            {
+              "columnName": "currency_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "currency_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "symbol",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_time_view",
+          "columns": [
+            {
+              "columnName": "time_view_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "time_view_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_units",
+          "columns": [
+            {
+              "columnName": "units_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "units_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "divisor",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "decimals",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_variance_format",
+          "columns": [
+            {
+              "columnName": "variance_format_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "variance_format_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "is_default",
+              "dataType": "bit",
+              "isNullable": false
+            }
+          ]
+        },
+        {
+          "tableName": "param_version_choice",
+          "columns": [
+            {
+              "columnName": "choice_code",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "choice_name",
+              "dataType": "varchar",
+              "isNullable": false,
+              "maxLength": 8000
+            },
+            {
+              "columnName": "allowed_as_base",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "allowed_as_compare",
+              "dataType": "bit",
+              "isNullable": false
+            },
+            {
+              "columnName": "sort_order",
+              "dataType": "int",
+              "isNullable": false,
+              "precision": 10,
+              "scale": 0
+            },
+            {
+              "columnName": "default_for",
+              "dataType": "varchar",
+              "isNullable": true,
+              "maxLength": 8000
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

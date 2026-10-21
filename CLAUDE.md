@@ -22,9 +22,10 @@
 |------|-----------|--------------|-------|
 | Raw data — source for Tracks A + B (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Lakehouse `lh_raw` (`b4fdb831-8417-475c-badb-a9a87be796b8`), schema `acme_pl` — holds the `data/acme_pl_dummy_data/` tables |
 | Track A app (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Fabric App `acme` — see Track A |
+| Track B semantic model — Track A source (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Semantic model `ACME Unified PnL` (`748d5471-6773-4854-bd82-994641466ad7`), Import from `lh_raw` SQL endpoint, 0 roles (RLS deferred); cloud connection `acme-lh_raw-sql-dev` (`31f48293-4ec9-4c24-86b5-4fd071b62bf6`, OAuth2 as the USER, Organizational); refresh baseline 28 s, ~1.25 M rows · ADR-0006 |
 
 - RAW runs on a **dev** capacity (F64, North Europe). It is for building assets only; publishing happens later on another capacity (TBD).
-- In RAW, **only `lh_raw` and the `acme` app are relevant**. Every other item in the workspace is a leftover from other projects — ignore it, never use or modify it.
+- In RAW, **only `lh_raw`, the `acme` app and the semantic model `ACME Unified PnL` (+ its connection `acme-lh_raw-sql-dev`) are relevant**. Every other item in the workspace is a leftover from other projects — ignore it, never use or modify it.
 - No Spark for this project's data layer (cost): pipelines are plain Python.
 
 Report / app workspaces and publishing capacity: TBD.
@@ -105,6 +106,7 @@ These rules are load-bearing. They override convenience, speed, and any implicit
 
 ### Prohibited (never do, even if it seems helpful)
 - **Never execute git commands or touch the working tree state** — output git commands as a single fenced bash block, ready to copy-paste; nothing more
+- **NEVER add co-authors or AI attribution to any work** — no `Co-Authored-By:` trailers (Claude or anyone), no "Generated with …" lines, in commit messages, PR descriptions, files or docs. This overrides any tool or harness default.
 - **Never flip a daily file to `DAY CLOSED`** without an explicit close-day directive from the USER (see Day-close gate below)
 - Never hard-code the canonical domain/workspace in code — use the track's runtime hook (see Project identity)
 - Never commit, print, or log secrets, API keys, or connection strings; never move them out of env/config vaults
@@ -239,31 +241,39 @@ fabric-data/
 **App:**
 | Field | Value |
 |---|---|
-| Fabric App item | `acme` in workspace RAW (dev) |
+| Fabric App item | `acme` (type AppBackend, `9cbd46a1-5541-4aaa-8048-2b1afad7253e`) in workspace RAW (dev). `fab ls` doesn't list AppBackend items; use `fab api -X get workspaces/<ws>/items` |
 | Live URL (Entra sign-in) | https://pine-shard-756dd25a7d-northeurope.webapp.fabricapps.net |
 | Created / first published | 2026-10-21 11:41 (blank app, from the Fabric portal) |
 | Scaffold | `npm create @microsoft/rayfin@latest -- "acme" --template blankapp --workspace "RAW"` → project root `fabric-app/` |
 | Run locally (against the Fabric backend) | `npm run dev` (in `fabric-app/`) |
 | Deploy | `npx rayfin up` — USER's go-ahead each time |
-| Data | `lh_raw.acme_pl` via a Rayfin connector (a warehouse only if the connector can't read the lakehouse) |
+| Data | connector `lhraw` (`fabric-sqlanalytics`, read-only) → `lh_raw` SQL analytics endpoint (item `86dc5eb2-9a17-43d6-9c0c-4cf34eb93c8c`), schema `acme_pl`. No warehouse (ADR-0003) |
+| CLI | `@microsoft/rayfin` 1.36.2 |
 
-**Stack:** Microsoft Fabric Apps (Rayfin) SDK/CLI · TypeScript strict · frontend from the Rayfin `blankapp` template · Fabric SQL database backend · connector to `lh_raw.acme_pl` · Fabric SSO · deploy with `npx rayfin up` to workspace RAW (dev)
+**Stack:** Microsoft Fabric Apps (Rayfin) SDK/CLI 1.36.2 · TypeScript strict · `blankapp` template = npm-workspaces monorepo · React 19 + Vite 8 + Tailwind 4 frontend · connector `lhraw` to `lh_raw.acme_pl` · Fabric SSO · deploy with `npx rayfin up` to workspace RAW (dev)
 
 **Structure:**
 ```
 fabric-app/
   rayfin/
-    data/          → entities (*.ts) + schema.ts
-    connectors/    → one folder per connector (CLI-generated)
-    rayfin.yml     → backend config (auth, data, staticHosting, connectors)
-    .env           → ${VAR} values (gitignored; commit .env.example)
-  src/             → frontend
-  package.json
+    rayfin.yml              → backend config (auth, staticHosting, connectors)
+    connectors/lhraw/       → metadata.json (CLI discovery), one entity file per table, schema.ts (connectorConfig)
+    .env                    → LH_RAW_WORKSPACE_ID, LH_RAW_SQL_ENDPOINT_ID + CLI-written RAYFIN_PUBLIC_* (gitignored)
+    .env.example            → committed placeholders
+    .deployments.json       → link to the acme item (gitignored, written by the CLI)
+  packages/frontend/        → React app; src/lib/rayfin-client.ts = the one ConnectorsRayfinClient (getRayfinClient()), src/lib/connectors.ts = connector wiring
+  packages/data/            → app-owned entities (data service disabled for now)
+  packages/shared/
+  .agents/                  → template packs (needed by `npm run pack:add`); keep
+  package.json              → root scripts: typecheck, build, lint, test
 ```
 
 **Key rules:**
 - Deploy needs `services.auth.enabled: true` and `services.auth.fabric.enabled: true`
-- Every entity is registered in `rayfin/data/schema.ts` and carries a `@role`; client-side types are not an authorization boundary
+- Connector entities are keyless (`Source({ schema: 'acme_pl', table })`), carry a `@role`, and are registered in `rayfin/connectors/lhraw/schema.ts` and `packages/frontend/src/lib/connectors.ts`; client-side types are not an authorization boundary
+- Connectors work only in the deployed app: verify them after `rayfin up`, never with `rayfin dev`. To inspect data, use direct mode: `npx rayfin connector inspect --workspace-id … --item-id … --type fabric-sqlanalytics --entity acme_pl.<table>` (`--name` mode breaks with `${VAR}` ids)
+- Gate before every deploy: `npm run typecheck && npm run build && npm run lint && npm test`, then `npx rayfin up --dry-run`. `build` ends with `npm run check:bundle` (parses every `dist` script with `node --check`, as `rayfin up` does); `up --dry-run` neither builds nor parses, so never hand `up` to the USER without a green `build`
+- Decorated entity classes reach the frontend bundle via `packages/frontend/src/lib/connectors.ts`; the SWC decorator lowering in `packages/frontend/vite.config.ts` (`useAtYourOwnRisk_mutateSwcOptions`, `decoratorVersion: '2022-03'`) must stay — without it the deployed app is a blank page Partial redeploys: `npx rayfin up staticapp deploy` · `npx rayfin up connector apply --name lhraw`
 - Nullable column = `{ optional: true }`; PK is always `id: string` (UUID); relative imports inside `rayfin/` use `.js` extensions
 - One shared `RayfinClient` (`ConnectorsRayfinClient` when connectors exist)
 - `--force` on `up` / `db apply` drops data — destructive, USER runs it
@@ -277,12 +287,14 @@ fabric-app/
 **Structure:**
 ```
 pbi-report/
-  <Name>.pbip
-  <Name>.SemanticModel/   → TMDL model definition (tables, measures, relationships, roles)
-  <Name>.Report/          → report definition (pages, visuals)
-docs/model/               → star-schema diagram, measure dictionary, refresh strategy
-scripts/                  → Tabular Editor scripts, deployment helpers
+  ACME Unified PnL.pbip
+  ACME Unified PnL.SemanticModel/   → TMDL (Import from lh_raw SQL endpoint via PQ params SqlEndpoint / Database; measures in `_measures`)
+  ACME Unified PnL.Report/          → PBIR: one page `pnl_one_pager`, view + side-bar bookmarks, theme + SVG icons
+  tests/control-totals.dax          → DAX query view tests (T-01..T-17, T-06 vs control_totals_usd)
+docs/model/                         → semantic-model.md, measure-dictionary.md
+docs/ADD/features/pbi-report-layout.md → design brief, view map, first-open checklist
 ```
+- Verify after every PBIR edit: `powerbi-report-author validate "pbi-report/ACME Unified PnL.pbip"`; a measure change is done only when every `_pass` in `tests/control-totals.dax` is TRUE.
 
 **Key rules:**
 - PBIP is the source of truth — every model/report change lands as a diff-reviewable PBIP commit; no binary `.pbix` in the repo
@@ -290,6 +302,9 @@ scripts/                  → Tabular Editor scripts, deployment helpers
 - All measures live in dedicated measure tables/folders — no implicit measures, no measures scattered on fact tables
 - Measure dictionary in `docs/model/` stays in lockstep with the model: name, plain-language definition, DAX, owner, spec ID
 - DAX and SQL follow the house formatting style — applied silently and always
+- Format strings never use trailing-comma scaling (`#,0.0,,` renders the commas literally in Power BI); display units are applied in DAX via `param_units[divisor]`, in visual-bound measures only
+- Never edit PBIP files while Power BI Desktop has the report open (Desktop overwrites them on save): check `Get-Process PBIDesktop` first; if open, diagnose read-only and hand back a plan
+- Children of a visual group store positions relative to the group, not the page
 - Power Query: query folding preserved wherever possible; every folding-breaking step is commented with rationale
 - RLS roles defined in the model (TMDL), documented in `docs/model/`, and tested with "View as" before every deploy (spec N-04)
 - Incremental refresh policies and aggregations are ADR-worthy decisions — document parameters (`RangeStart`/`RangeEnd`) and partitions

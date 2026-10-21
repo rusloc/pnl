@@ -1,0 +1,4 @@
+{
+  "query": "EVALUATE\nSELECTCOLUMNS (\n    FILTER (\n        INFO.VIEW.MEASURES ()\n        ,[Name] IN { \"PL Base\", \"PL % NR\", \"PL Compare A\", \"PL Δ A\", \"PL Δ A %\", \"PL Compare B\", \"PL Δ B\", \"PL Δ B %\", \"PL FY Budget\", \"PL FY LE\", \"PL Δ LE vs Budget\" }\n    )\n    ,\"name\", [Name]\n    ,\"data_type\", [DataType]\n    ,\"folder\", [DisplayFolder]\n)\nORDER BY [name]",
+  "resultSetRowCountLimit": 50
+}

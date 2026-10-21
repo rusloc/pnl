@@ -1,0 +1,53 @@
+id: acme
+name: acme
+version: 1.0.0
+services:
+  auth:
+    enabled: true
+    fabric:
+      enabled: true
+      externalEntraExchange: true
+    password:
+      enabled: false
+    allowedRedirectUris:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+      - https://pine-shard-756dd25a7d-northeurope.webapp.fabricapps.net
+  data:
+    enabled: false
+    path: packages/data
+    buildCommand: npm run build
+  staticHosting:
+    enabled: true
+    path: packages/frontend
+    folder: dist
+    buildCommand: npm run build:fabric
+    indexDocument: index.html
+    assetAccess: protected
+    embedded:
+      only: false
+  storage:
+    enabled: false
+  functions:
+    enabled: false
+connectors:
+  - name: lhraw
+    type: fabric-sqlanalytics
+    config:
+      workspaceId: ${LH_RAW_WORKSPACE_ID}
+      itemId: ${LH_RAW_SQL_ENDPOINT_ID}
+    auth:
+      type: application
+    operations:
+      - name: read
+  # ADR-0006 phase 1: Track B semantic model, DAX on behalf of the signed-in user.
+  - name: pnlModel
+    type: fabric-semanticmodel
+    version: '1'
+    config:
+      workspaceId: ${PNL_MODEL_WORKSPACE_ID}
+      itemId: ${PNL_MODEL_ITEM_ID}
+    auth:
+      type: delegated
+    operations:
+      - name: executeQuery
