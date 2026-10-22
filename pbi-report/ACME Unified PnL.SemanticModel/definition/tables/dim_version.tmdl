@@ -1,0 +1,78 @@
+/// D-16 versions: ACT, BUD, FC2606, FC2609 (latest).
+table dim_version
+	isHidden
+	lineageTag: 4d8e63c3-86b3-5529-a928-e576c1f3b57c
+
+	column version_key
+		dataType: string
+		isHidden
+		lineageTag: 79224118-9058-518b-a357-e0e7cd240fab
+		summarizeBy: none
+		sourceColumn: version_key
+
+		annotation SummarizationSetBy = User
+
+	column version_code
+		dataType: string
+		isHidden
+		lineageTag: 1c68d434-e746-5f28-be8a-e48f883d82d3
+		summarizeBy: none
+		sourceColumn: version_code
+
+		annotation SummarizationSetBy = User
+
+	column version_name
+		dataType: string
+		lineageTag: 177f1f52-4f09-57df-a299-9d240dfaec90
+		summarizeBy: none
+		sourceColumn: version_name
+
+		annotation SummarizationSetBy = User
+
+	column forecast_cycle
+		dataType: string
+		isHidden
+		lineageTag: debe045c-2599-562f-a5a5-51822ea9b456
+		summarizeBy: none
+		sourceColumn: forecast_cycle
+
+		annotation SummarizationSetBy = User
+
+	column is_latest_forecast
+		dataType: boolean
+		isHidden
+		lineageTag: 6996cdac-7b16-5654-aacb-0dcba2e788bc
+		summarizeBy: none
+		sourceColumn: is_latest_forecast
+
+		annotation SummarizationSetBy = User
+
+	column first_month_key
+		dataType: string
+		isHidden
+		lineageTag: 8a7d1700-94f5-56b2-9fe9-b9ce752e97e2
+		summarizeBy: none
+		sourceColumn: first_month_key
+
+		annotation SummarizationSetBy = User
+
+	column last_month_key
+		dataType: string
+		isHidden
+		lineageTag: a8cbaef5-5dc0-50ec-b6de-2098f5cfd3a7
+		summarizeBy: none
+		sourceColumn: last_month_key
+
+		annotation SummarizationSetBy = User
+
+	partition dim_version = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_version"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

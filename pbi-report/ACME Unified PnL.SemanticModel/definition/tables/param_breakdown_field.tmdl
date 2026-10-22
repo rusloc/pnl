@@ -1,0 +1,57 @@
+/// F-21 field parameter: the slice that rows of the profitability table break down by.
+table param_breakdown_field
+	lineageTag: b1c2e532-f800-5e21-a37e-8a76405f5f6a
+
+	column Breakdown
+		dataType: string
+		lineageTag: 22b27331-47f5-5c91-9822-b487b8c7f481
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Breakdown Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Breakdown Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Breakdown Fields'
+		dataType: string
+		isHidden
+		lineageTag: 0ac4a572-7be7-5cb6-9e80-ecf5250dc3bf
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Breakdown Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Breakdown Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 929040b3-8321-5d6b-9764-5092a2285451
+		summarizeBy: none
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition param_breakdown_field = calculated
+		mode: import
+		source =
+				{
+				    ( "Region", NAMEOF ( 'dim_region'[region_name] ), 0 ),
+				    ( "Channel / sales motion", NAMEOF ( 'dim_channel'[channel_name] ), 1 ),
+				    ( "Category / service line", NAMEOF ( 'dim_line'[line_name] ), 2 ),
+				    ( "Price tier / segment", NAMEOF ( 'dim_segment'[segment_name] ), 3 ),
+				    ( "Entity (Group view)", NAMEOF ( 'dim_entity'[short_name] ), 4 )
+				}
+
+	annotation PBI_Id = 75c121a199df51b7b0725286fddf1dda
+
+	annotation PBI_ResultType = Table
+

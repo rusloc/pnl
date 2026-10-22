@@ -1,0 +1,70 @@
+/// D-18 channel (Products) / sales motion (Services), plus one _UNASSIGNED member per entity.
+table dim_channel
+	lineageTag: ca555746-0eb8-59b8-a5eb-80c5b35b163c
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: fdc2fca4-b1d7-55f8-abfb-0d2c6ace5ed9
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_name
+		dataType: string
+		lineageTag: fb1d27a5-1145-5cab-9ff1-d4daaacdb605
+		summarizeBy: none
+		sourceColumn: channel_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: b6cd9487-46fb-5db2-a453-59e8ab0cd645
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column slot_label
+		dataType: string
+		isHidden
+		lineageTag: dbe3ea5f-92cc-5a83-a2c7-a041ac9f9dd4
+		summarizeBy: none
+		sourceColumn: slot_label
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 26165c6e-e997-5115-ad5c-5d90eeb43493
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_unassigned
+		dataType: boolean
+		isHidden
+		lineageTag: 794bedad-c195-5c63-aac0-4d3abd9e0108
+		summarizeBy: none
+		sourceColumn: is_unassigned
+
+		annotation SummarizationSetBy = User
+
+	partition dim_channel = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_channel"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

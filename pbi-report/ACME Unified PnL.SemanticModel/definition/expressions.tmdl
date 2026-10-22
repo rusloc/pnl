@@ -1,0 +1,12 @@
+expression SqlEndpoint = "gbpyeggwhrpurjozyf5wy5acci-5boam77i75yenchl5wa2hsobxu.datawarehouse.fabric.microsoft.com" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: fcf6be9a-b7df-5276-a7d5-01987004fa18
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+expression Database = "lh_raw" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 1d7aefff-b365-5342-b069-85eb6038e67d
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+

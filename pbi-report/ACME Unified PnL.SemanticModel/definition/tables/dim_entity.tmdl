@@ -1,0 +1,58 @@
+/// D-14 entities; also the counterparty (inactive relationship).
+table dim_entity
+	lineageTag: 430baf8b-c279-5253-8e07-a170a825ec95
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 6ca1bf62-a808-5718-ab5d-7da050cbc2db
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column entity_name
+		dataType: string
+		lineageTag: 1d62fc1e-b644-58b4-9385-171b20d2423d
+		summarizeBy: none
+		sourceColumn: entity_name
+
+		annotation SummarizationSetBy = User
+
+	column short_name
+		dataType: string
+		lineageTag: 7aca4e3a-feaa-56c6-a942-c3d8f94aebe7
+		summarizeBy: none
+		sourceColumn: short_name
+
+		annotation SummarizationSetBy = User
+
+	column description
+		dataType: string
+		isHidden
+		lineageTag: 587bc095-fc51-5ff5-81c6-d0ea2a5b66a0
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = User
+
+	column consolidation_group
+		dataType: string
+		isHidden
+		lineageTag: 6d55e135-99ee-56ac-8cd4-7db49502c26f
+		summarizeBy: none
+		sourceColumn: consolidation_group
+
+		annotation SummarizationSetBy = User
+
+	partition dim_entity = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_entity"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

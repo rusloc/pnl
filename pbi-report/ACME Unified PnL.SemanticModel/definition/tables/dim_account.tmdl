@@ -1,0 +1,192 @@
+/// D-10 leaf accounts (73) with block, spine step, sign, IFRS 18 category and flags.
+table dim_account
+	lineageTag: 32a7d965-4fbe-5841-bd8a-4daffbe11976
+
+	column account_code
+		dataType: string
+		isHidden
+		lineageTag: b285078d-cbc3-52df-98a9-3e12236e0401
+		summarizeBy: none
+		sourceColumn: account_code
+
+		annotation SummarizationSetBy = User
+
+	column account_name
+		dataType: string
+		lineageTag: 109c6cef-0138-501a-8c18-44932c65ea5a
+		summarizeBy: none
+		sourceColumn: account_name
+
+		annotation SummarizationSetBy = User
+
+	column entity_scope
+		dataType: string
+		isHidden
+		lineageTag: c58ed5fa-e6c3-51f2-a53f-a63e2e0d0baa
+		summarizeBy: none
+		sourceColumn: entity_scope
+
+		annotation SummarizationSetBy = User
+
+	column entity_scope_name
+		dataType: string
+		lineageTag: 7928b792-ff24-5fb0-8ce8-24519b776554
+		summarizeBy: none
+		sourceColumn: entity_scope_name
+
+		annotation SummarizationSetBy = User
+
+	column block_code
+		dataType: string
+		isHidden
+		lineageTag: 71d112d0-6987-5a88-9bc2-abc50e5c6824
+		summarizeBy: none
+		sourceColumn: block_code
+
+		annotation SummarizationSetBy = User
+
+	column block_name
+		dataType: string
+		lineageTag: 5e549d64-dc7d-54d4-bf5f-829ca0a077a3
+		summarizeBy: none
+		sourceColumn: block_name
+
+		annotation SummarizationSetBy = User
+
+	column block_alias_products
+		dataType: string
+		isHidden
+		lineageTag: 334af172-a096-505a-b319-31e64047651c
+		summarizeBy: none
+		sourceColumn: block_alias_products
+
+		annotation SummarizationSetBy = User
+
+	column block_alias_services
+		dataType: string
+		isHidden
+		lineageTag: 2074ab06-a15e-519d-a1ed-f92eaac52f44
+		summarizeBy: none
+		sourceColumn: block_alias_services
+
+		annotation SummarizationSetBy = User
+
+	column spine_step
+		dataType: string
+		isHidden
+		lineageTag: f3936347-1f35-507d-8245-b93d2affcd9e
+		summarizeBy: none
+		sourceColumn: spine_step
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 86c5f9ac-69b7-5c70-a4bb-e34364f0000d
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column natural_sign
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 41f66905-1970-556e-ae17-429d0dcc7d89
+		summarizeBy: none
+		sourceColumn: natural_sign
+
+		annotation SummarizationSetBy = User
+
+	column ifrs18_category
+		dataType: string
+		lineageTag: 35a07066-5b8a-5484-9a28-6bce2cc84828
+		summarizeBy: none
+		sourceColumn: ifrs18_category
+
+		annotation SummarizationSetBy = User
+
+	column is_direct
+		dataType: boolean
+		isHidden
+		lineageTag: 8632a6d8-198f-528e-b772-d92e4f1ed502
+		summarizeBy: none
+		sourceColumn: is_direct
+
+		annotation SummarizationSetBy = User
+
+	column is_below_cm
+		dataType: boolean
+		isHidden
+		lineageTag: d5b34d81-9a98-59ea-a988-26e53c363ea3
+		summarizeBy: none
+		sourceColumn: is_below_cm
+
+		annotation SummarizationSetBy = User
+
+	column is_intercompany
+		dataType: boolean
+		isHidden
+		lineageTag: bfe1fea4-10d5-5e10-a491-a5f57f945936
+		summarizeBy: none
+		sourceColumn: is_intercompany
+
+		annotation SummarizationSetBy = User
+
+	column has_fact_rows
+		dataType: boolean
+		isHidden
+		lineageTag: c8392179-f904-5ae8-8ede-a22147d2b047
+		summarizeBy: none
+		sourceColumn: has_fact_rows
+
+		annotation SummarizationSetBy = User
+
+	column definition
+		dataType: string
+		lineageTag: 84659cb8-95e9-5379-b68d-09158e4b7c1b
+		summarizeBy: none
+		sourceColumn: definition
+
+		annotation SummarizationSetBy = User
+
+	column published_comparable
+		dataType: string
+		isHidden
+		lineageTag: 4a23d8a0-5f98-5d10-a213-00390301aeb6
+		summarizeBy: none
+		sourceColumn: published_comparable
+
+		annotation SummarizationSetBy = User
+
+	column default_cost_centre_products
+		dataType: string
+		isHidden
+		lineageTag: 2516b548-1af6-5f94-9af4-ba53563e6e75
+		summarizeBy: none
+		sourceColumn: default_cost_centre_products
+
+		annotation SummarizationSetBy = User
+
+	column default_cost_centre_services
+		dataType: string
+		isHidden
+		lineageTag: d6bf2b0c-9115-5e09-a797-08d395ab0a37
+		summarizeBy: none
+		sourceColumn: default_cost_centre_services
+
+		annotation SummarizationSetBy = User
+
+	partition dim_account = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_account"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,30 @@
+/// Engine switch (not a slicer): which quantity _Local Sum adds up.
+table param_metric
+	isHidden
+	lineageTag: 3258d259-5ed1-5975-b7a6-bb285367f957
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: d55a98d6-3d60-5d79-936a-68e2cc9514d6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [metric_code]
+
+		annotation SummarizationSetBy = User
+
+	partition param_metric = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "metric_code", STRING,
+				    {
+				        { "AMOUNT" },
+				        { "UNITS" },
+				        { "GMV" },
+				        { "MERCHANTS" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,70 @@
+/// D-20 price tier (Products) / customer segment (Services).
+table dim_segment
+	lineageTag: 3dce8760-703b-5b12-9290-f3da44fc4fbf
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: 4abb31a3-8fcb-5daf-8c55-1e402a8f0615
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_name
+		dataType: string
+		lineageTag: 4d650f31-b899-5d26-9f50-5ca41d437e73
+		summarizeBy: none
+		sourceColumn: segment_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 3087f03e-ff6e-5f85-845d-c10286b6046e
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column slot_label
+		dataType: string
+		isHidden
+		lineageTag: dfb751de-f246-51fd-a658-3c9f820a8be1
+		summarizeBy: none
+		sourceColumn: slot_label
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 961e8686-5cd4-5137-ab4d-3e5676d73041
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_unassigned
+		dataType: boolean
+		isHidden
+		lineageTag: 652c0261-c60e-59cb-ba82-6896b4da885c
+		summarizeBy: none
+		sourceColumn: is_unassigned
+
+		annotation SummarizationSetBy = User
+
+	partition dim_segment = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_segment"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

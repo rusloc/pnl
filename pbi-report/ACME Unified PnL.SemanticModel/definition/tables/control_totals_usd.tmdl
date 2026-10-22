@@ -1,0 +1,63 @@
+/// T-06 expected subtotals in USD (data/acme_pl_dummy_data/checks). Used by the DAX tests only.
+table control_totals_usd
+	isHidden
+	lineageTag: 7fdc2af8-3c16-51a6-a803-b2e9b788ea92
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 0d246bc3-db5f-5538-b9d6-1ac324ea3c3e
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column version
+		dataType: string
+		isHidden
+		lineageTag: fa3fd169-9728-58d1-9e5e-218c7b7774fd
+		summarizeBy: none
+		sourceColumn: version
+
+		annotation SummarizationSetBy = User
+
+	column window
+		dataType: string
+		isHidden
+		lineageTag: 11ca20f9-a923-58f5-8043-4ec48901b503
+		summarizeBy: none
+		sourceColumn: window
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 4d7948b2-2763-5040-a811-21247185ed89
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column amount_usd
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 115e874d-538f-581a-8925-cbf474191ac5
+		summarizeBy: none
+		sourceColumn: amount_usd
+
+		annotation SummarizationSetBy = User
+
+	partition control_totals_usd = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "control_totals_usd"]}[Data],
+				    Typed = Table.TransformColumnTypes(Data, {{"amount_usd", Currency.Type}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

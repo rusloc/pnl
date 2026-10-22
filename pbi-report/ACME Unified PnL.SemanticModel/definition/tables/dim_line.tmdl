@@ -1,0 +1,70 @@
+/// D-19 category (Products) / service line (Services).
+table dim_line
+	lineageTag: 8f739d63-b0b4-5389-9d8a-508852f9e9d0
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 0136d17e-1a23-518d-82bc-7a3600956068
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column line_name
+		dataType: string
+		lineageTag: da4a7096-99f4-5eef-958c-7c982f0ff8ec
+		summarizeBy: none
+		sourceColumn: line_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 4e2c0977-d338-5ffc-8bd3-4281df320adf
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column slot_label
+		dataType: string
+		isHidden
+		lineageTag: 6267994c-abce-5060-8ec6-1f0b8909bb72
+		summarizeBy: none
+		sourceColumn: slot_label
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7996e920-5621-5bc8-9616-f06f3d3d3be9
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_unassigned
+		dataType: boolean
+		isHidden
+		lineageTag: c57e7559-5902-5b0b-ada9-6dd0849c9f3c
+		summarizeBy: none
+		sourceColumn: is_unassigned
+
+		annotation SummarizationSetBy = User
+
+	partition dim_line = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_line"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,607 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "View: Key figures",
+  "name": "bm_view_kpi",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_view_pl",
+      "pl_tabsel",
+      "pl_tabline",
+      "tb_layout_frame",
+      "tb_layout_variance",
+      "tb_layout_div1",
+      "tb_layout_trend",
+      "tb_layout_div2",
+      "tb_layout_entityco",
+      "tb_lens_frame",
+      "tb_lens_byfuncti",
+      "tb_lens_div1",
+      "tb_lens_bynature",
+      "tb_detail_frame",
+      "tb_detail_summary",
+      "tb_detail_div1",
+      "tb_detail_standard",
+      "tb_detail_div2",
+      "tb_detail_full",
+      "pl_card",
+      "pl_h_units",
+      "pl_h_base",
+      "pl_h_base_rule",
+      "pl_h_cmpa",
+      "pl_h_cmpa_rule",
+      "pl_h_cmpb",
+      "pl_h_cmpb_rule",
+      "pl_h_fy",
+      "pl_h_fy_rule",
+      "pl_matrix",
+      "pl_foot_rule",
+      "pl_footnote",
+      "grp_view_kpi",
+      "kpi_tabsel",
+      "kpi_tabline",
+      "kpi_tb_caption",
+      "kpi_tb_fav",
+      "kpi_tb_unf",
+      "kpi_lbl_fin",
+      "kpi_fin",
+      "kpi_lbl_ops",
+      "kpi_ops",
+      "grp_view_analysis",
+      "analysis_tabsel",
+      "analysis_tabline",
+      "ana_tb_label",
+      "ana_tb_cmp",
+      "ana_card_b",
+      "ana_title_b",
+      "ana_sub_b",
+      "an_bridge",
+      "ana_card_v",
+      "ana_title_v",
+      "ana_sub_v",
+      "an_variances",
+      "grp_view_prof",
+      "prof_tabsel",
+      "prof_tabline",
+      "prof_tb_label",
+      "prof_breakdown",
+      "prof_card_t",
+      "prof_title",
+      "prof_sub",
+      "prof_margin_hdr",
+      "prof_table",
+      "prof_note",
+      "prof_card_c",
+      "cm_title",
+      "cm_sub",
+      "cm_bars"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {
+          "pl_tabsel": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_tabline": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_frame": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_variance": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_div1": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_trend": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_div2": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_layout_entityco": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_lens_frame": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_lens_byfuncti": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_lens_div1": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_lens_bynature": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_frame": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_summary": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_div1": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_standard": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_div2": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "tb_detail_full": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_card": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_units": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_base": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_base_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_cmpa": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_cmpa_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_cmpb": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_cmpb_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_fy": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_h_fy_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_matrix": {
+            "singleVisual": {
+              "visualType": "pivotTable",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_foot_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pl_footnote": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_tabsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "kpi_tabline": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "kpi_tb_caption": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "kpi_tb_fav": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "kpi_tb_unf": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "kpi_lbl_fin": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "kpi_fin": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "kpi_lbl_ops": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "kpi_ops": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "analysis_tabsel": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "analysis_tabline": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_tb_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_tb_cmp": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_card_b": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_title_b": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_sub_b": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_bridge": {
+            "singleVisual": {
+              "visualType": "waterfallChart",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_card_v": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_title_v": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ana_sub_v": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_variances": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_tabsel": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_tabline": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_tb_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_breakdown": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_card_t": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_title": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_sub": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_margin_hdr": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_table": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_note": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "prof_card_c": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "cm_title": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "cm_sub": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "cm_bars": {
+            "singleVisual": {
+              "visualType": "clusteredBarChart",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_view_pl": {
+            "isHidden": true
+          },
+          "grp_view_kpi": {
+            "isHidden": false
+          },
+          "grp_view_analysis": {
+            "isHidden": true
+          },
+          "grp_view_prof": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

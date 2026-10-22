@@ -1,6 +1,6 @@
 # Tech stack + rationale
 
-Status as of 2026-10-21 (ADR-0001). Items marked **open** wait for a USER answer or an ADR.
+Status as of 2026-10-22 (ADR-0001; Track C per ADR-0002). Items marked **open** wait for a USER answer or an ADR.
 
 ## Shared
 | Choice | Rationale |
@@ -30,7 +30,7 @@ Status as of 2026-10-21 (ADR-0001). Items marked **open** wait for a USER answer
 ## Track C — custom JS report (`js-report/`)
 | Choice | Rationale |
 |---|---|
-| Next.js (App Router), TypeScript strict | Default accepted; strong fit with nerd / front-end skills. |
-| Data: pre-aggregated Parquet + DuckDB-wasm in the browser | No backend to run or pay for; raw facts (≈68 MB CSV) are too large to ship, so a build step pre-aggregates. Grain **open** — ADR-0002. |
-| Hosting: Vercel (team `yaga`) | Already connected via MCP; embedding handled by the vosk.dev repo. |
-| Calc engine: framework-free TS module | Spec §7 rules are tested in isolation against the control totals. |
+| Next.js 16 (App Router), React 19, TypeScript 5.9 strict, Vitest, Zod; no Tailwind, no chart library | ADR-0002 §2.1, §2.9 (dependency list approved 2026-10-22). The Ledger guide's px/hex values map to CSS variables + CSS Modules. |
+| Data: pre-aggregated Parquet read by `hyparquet` in the browser (no DuckDB-wasm) | ADR-0002 §2.1–2.2. `fact_pl` minus cost centre and the FC2606 cycle (422,712 rows) as per-entity Parquet, built by `scripts/build-data.ts` from the repo CSVs; DuckDB-wasm dropped — several MB of wasm for 8 fixed query shapes over < 0.5 M rows. Amends ADR-0001 §3. |
+| Calc engine: framework-free TS module (`lib/engine/`), C-31 allocation computed live | ADR-0002 §2.3. The single source of every number; tested in Vitest against all 552 control totals (T-06); allocation parity-tested against `fact_pl_allocated`. |
+| Hosting + embedding: vosk.dev repo, via the `.sync/` hand-off | ADR-0002 §2.6, §5 Q4. This repo delivers the skeleton (ADR-0002 §2.8 slices 0–3) only; no Vercel project or deploy from here. |

@@ -1,0 +1,62 @@
+/// F-01 entity switch: Consumer Products, Commerce Cloud, ACME Group. Disconnected from facts.
+table param_entity_view
+	lineageTag: 6c452f46-7d46-5591-824f-dd509e2a4855
+
+	column entity_view_code
+		dataType: string
+		isHidden
+		lineageTag: 3836f5f3-9a72-572e-8bf9-a3f05d61603c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_view_code]
+
+		annotation SummarizationSetBy = User
+
+	column entity_view_name
+		dataType: string
+		lineageTag: e934d4c9-27f2-5a5a-bb70-9daecb1691d6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_view_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5cad1626-3316-58e7-91e2-78ebf9963e5f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 8cc741b9-f678-5041-aa38-9a6d47327460
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_default]
+
+		annotation SummarizationSetBy = User
+
+	partition param_entity_view = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "entity_view_code", STRING,
+				    "entity_view_name", STRING,
+				    "sort_order", INTEGER,
+				    "is_default", BOOLEAN,
+				    {
+				        { "P", "Consumer Products", 10, TRUE },
+				        { "S", "Commerce Cloud", 20, FALSE },
+				        { "GROUP", "ACME Group", 30, FALSE }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

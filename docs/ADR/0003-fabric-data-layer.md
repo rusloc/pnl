@@ -66,7 +66,7 @@ delta-rs writes plain Parquet without Fabric's V-Order. At this size, 28 tables 
 - **Track B (bip / ginee):** the tables are Delta with one file each, far inside every Direct Lake guardrail. The storage mode (Import vs Direct Lake) stays **open**.
   - In the model, `local_per_usd` must be a **Decimal Number (double)**, never Fixed Decimal (4 dp), so the rates are not rounded.
   - Amounts at decimal(18,2) can be Fixed Decimal.
-- **Track A (fin):** a Rayfin connector reads `lh_raw.acme_pl.*` through the SQL analytics endpoint. Which connector to use stays **open** (fin).
+- **Track A (fin):** a Rayfin connector reads `lh_raw.acme_pl.*` through the SQL analytics endpoint. Decided 2026-10-21 (fin, DEC-001): connector `lhraw`, type `fabric-sqlanalytics`, on the `lh_raw` SQL analytics endpoint, schema `acme_pl`, read-only. No warehouse needed.
 - Tables are replaced one at a time. For a moment during a reload, readers can see some tables already reloaded and others not yet. This is acceptable for static data.
 - **Re-running needs:** the venv (`python -m venv fabric-data/.venv` + `pip install -r fabric-data/lh_raw/requirements.txt`), `az login`, and Contributor rights on RAW.
 

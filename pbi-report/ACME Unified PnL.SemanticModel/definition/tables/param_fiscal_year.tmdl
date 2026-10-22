@@ -1,0 +1,35 @@
+/// F-02 fiscal year (disconnected; the measures build the window).
+table param_fiscal_year
+	lineageTag: 1bdbd256-0102-5057-a8f1-39a31352596d
+
+	column fiscal_year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d2a7e34e-0ebc-5945-97d2-cba4a63afcde
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [fiscal_year]
+
+		annotation SummarizationSetBy = User
+
+	column fiscal_year_label
+		dataType: string
+		lineageTag: 12a29af5-c017-501a-bf35-6e75f1fcf724
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [fiscal_year_label]
+		sortByColumn: fiscal_year
+
+		annotation SummarizationSetBy = User
+
+	partition param_fiscal_year = calculated
+		mode: import
+		source =
+				ADDCOLUMNS (
+				    DISTINCT ( SELECTCOLUMNS ( dim_month, "fiscal_year", dim_month[fiscal_year] ) )
+				    ,"fiscal_year_label", "FY" & [fiscal_year]
+				)
+
+	annotation PBI_ResultType = Table
+

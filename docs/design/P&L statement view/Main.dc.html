@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ACME profit and loss app</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; height: 100vh; min-height: 680px; display: flex; overflow: hidden; background: #F2F4F7; font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #101B2B">
+
+<nav aria-label="Filters and tools" style="flex: none; width: {{railW}}px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; padding: 12px 10px; background: #101B2B; color: #C9D3E0; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 10px; height: 44px; margin-bottom: 12px; padding: 0 4px">
+<div aria-hidden="true" style="flex: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: {{acc}}; color: #FFFFFF; font-size: 16px; font-weight: 700">A</div>
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; min-width: 0; line-height: 1.2"><span style="font-size: 15px; font-weight: 600; color: #FFFFFF; white-space: nowrap">ACME P&amp;L</span><span style="font-size: 12px; color: #AEB9C7; white-space: nowrap">Management reporting</span></div></sc-if>
+</div>
+<div style="display: flex; align-items: center; height: 24px; padding: 0 10px">
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8592A3">Filters</span></sc-if>
+<sc-if value="{{narrow}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="display: block; width: 24px; height: 1px; background: #3A475A"></span></sc-if>
+</div>
+
+<button type="button" onClick="{{g.period.toggle}}" aria-expanded="{{g.period.exp}}" aria-label="Period: {{g.period.sum}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 10px; box-sizing: border-box; border: 0; border-radius: 8px; background: {{g.period.bg}}; color: {{g.period.fg}}; font-family: inherit; text-align: left; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" style="flex: none"><rect x="3" y="4.5" width="14" height="12.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"></rect><path d="M3 8.5h14M7 2.5v4M13 2.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.25"><span style="font-size: 14px; font-weight: 500; color: #FFFFFF">Period</span><span style="font-size: 12px; color: #AEB9C7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.period.sum}}</span></span></sc-if>
+</button>
+<button type="button" onClick="{{g.compare.toggle}}" aria-expanded="{{g.compare.exp}}" aria-label="Versions: {{g.compare.sum}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 10px; box-sizing: border-box; border: 0; border-radius: 8px; background: {{g.compare.bg}}; color: {{g.compare.fg}}; font-family: inherit; text-align: left; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" style="flex: none"><path d="M2.5 17h15M5 15V9.5M10 15V4.5M15 15V7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.25"><span style="font-size: 14px; font-weight: 500; color: #FFFFFF">Versions</span><span style="font-size: 12px; color: #AEB9C7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.compare.sum}}</span></span></sc-if>
+</button>
+<button type="button" onClick="{{g.slice.toggle}}" aria-expanded="{{g.slice.exp}}" aria-label="Slice: {{g.slice.sum}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 10px; box-sizing: border-box; border: 0; border-radius: 8px; background: {{g.slice.bg}}; color: {{g.slice.fg}}; font-family: inherit; text-align: left; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" style="flex: none"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.25"><span style="font-size: 14px; font-weight: 500; color: #FFFFFF">Slice</span><span style="font-size: 12px; color: #AEB9C7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.slice.sum}}</span></span></sc-if>
+</button>
+<button type="button" onClick="{{g.display.toggle}}" aria-expanded="{{g.display.exp}}" aria-label="Display: {{g.display.sum}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 10px; box-sizing: border-box; border: 0; border-radius: 8px; background: {{g.display.bg}}; color: {{g.display.fg}}; font-family: inherit; text-align: left; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" style="flex: none"><path d="M3 6h8.5M15.5 6H17M3 14h2.5M9.5 14H17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="13.5" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="7.5" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+<sc-if value="{{wide}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.25"><span style="font-size: 14px; font-weight: 500; color: #FFFFFF">Display</span><span style="font-size: 12px; color: #AEB9C7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.display.sum}}</span></span></sc-if>
+</button>
+
+<div style="flex: 1 1 auto"></div>
+
+
+
+
+</nav>
+
+<sc-if value="{{panelOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; z-index: 30; left: {{flyL}}px; top: 92px; width: 352px">
+<div aria-hidden="true" style="position: absolute; left: -7px; top: {{ptrT}}px; width: 12px; height: 12px; background: #FFFFFF; border-left: 1px solid #DEE3E9; border-bottom: 1px solid #DEE3E9; transform: rotate(45deg)"></div>
+<div role="dialog" aria-label="{{panelTitle}} filters" style="position: relative; display: flex; flex-direction: column; max-height: calc(100vh - 108px); box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px; box-shadow: 0 14px 36px rgba(16, 27, 43, 0.20)">
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 12px; border-bottom: 1px solid #EDF0F3">
+<div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 600">{{panelTitle}}</span><span style="font-size: 12px; color: #4F5C6C">{{panelSub}}</span></div>
+<button type="button" onClick="{{closePanel}}" aria-label="Close" style="flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 8px; background: #F2F4F7; cursor: pointer"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" fill="none" stroke="#4F5C6C" stroke-width="1.8" stroke-linecap="round"></path></svg></button>
+</div>
+<div style="flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 14px 16px 16px">
+
+<sc-if value="{{pPeriod}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Fiscal year</span>
+<div role="group" aria-label="Fiscal year" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="false" style="border: 0; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">FY2024</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">FY2025</button>
+<button type="button" aria-pressed="true" style="border: 0; border-left: 1px solid #CDD4DC; background: {{accT}}; font-family: inherit; font-size: 14px; font-weight: 600; color: {{acc}}; cursor: pointer">FY2026</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Month</span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Jan</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Feb</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Mar</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Apr</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">May</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Jun</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Jul</button>
+<button type="button" style="height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">Aug</button>
+<button type="button" aria-pressed="true" style="height: 40px; border: 1px solid {{acc}}; border-radius: 8px; background: {{acc}}; font-family: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer">Sep</button>
+<button type="button" style="height: 40px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; font-family: inherit; font-size: 14px; color: #4F5C6C; cursor: pointer">Oct</button>
+<button type="button" style="height: 40px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; font-family: inherit; font-size: 14px; color: #4F5C6C; cursor: pointer">Nov</button>
+<button type="button" style="height: 40px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; font-family: inherit; font-size: 14px; color: #4F5C6C; cursor: pointer">Dec</button>
+</div>
+<span style="font-size: 12px; color: #4F5C6C">Dashed months are still open. They show figures only with Latest estimate or Budget as the base.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Time view</span>
+<div role="group" aria-label="Time view" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="false" style="border: 0; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Month</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">QTD</button>
+<button type="button" aria-pressed="true" style="border: 0; border-left: 1px solid #CDD4DC; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">YTD</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">LTM</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">FY</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{pCompare}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Base version</span>
+<label for="base-act" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid {{acc}}; box-shadow: 0 0 0 1px {{acc}}; border-radius: 8px; background: {{accT}}; cursor: pointer"><input id="base-act" type="radio" name="base" checked="" style="margin: 3px 0 0; accent-color: {{acc}}"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Actual</span><span style="font-size: 12px; color: #4F5C6C">Closed months only, Jan–Sep 2026</span></span></label>
+<label for="base-le" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; cursor: pointer"><input id="base-le" type="radio" name="base" style="margin: 3px 0 0; accent-color: {{acc}}"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Latest estimate</span><span style="font-size: 12px; color: #4F5C6C">Actual Jan–Sep plus the Sep forecast for Oct–Dec</span></span></label>
+<label for="base-bud" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid #CDD4DC; border-radius: 8px; background: #FFFFFF; cursor: pointer"><input id="base-bud" type="radio" name="base" style="margin: 3px 0 0; accent-color: {{acc}}"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Budget</span><span style="font-size: 12px; color: #4F5C6C">Approved FY2026 budget, phased by month</span></span></label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Compare A</span>
+<div role="group" aria-label="Compare A" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Budget</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Latest est.</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Prior year</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">None</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Compare B</span>
+<div role="group" aria-label="Compare B" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="false" style="border: 0; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Budget</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Latest est.</button>
+<button type="button" aria-pressed="true" style="border: 0; border-left: 1px solid #CDD4DC; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Prior year</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">None</button>
+</div>
+<span style="font-size: 12px; color: #4F5C6C">Comparisons always cover the same months as the base.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{pSlice}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Region</span><span style="font-size: 12px; color: #4F5C6C">All 4</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{regions}}" as="v" hint-placeholder-count="4"><button type="button" aria-pressed="true" style="display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid {{acc}}; border-radius: 20px; background: {{accT}}; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="{{acc}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{v.t}}</button></sc-for>
+</div>
+</div>
+<sc-if value="{{sliceOn}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{sets}}" as="ss" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 12px; font-weight: 600; color: #4F5C6C">{{ss.lab}}</span><span style="font-size: 12px; color: #4F5C6C">{{ss.n}}</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ss.vals}}" as="v" hint-placeholder-count="4"><button type="button" aria-pressed="true" style="display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid {{acc}}; border-radius: 20px; background: {{accT}}; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="{{acc}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{v.t}}</button></sc-for>
+</div>
+</div>
+</sc-for>
+<span style="font-size: 12px; color: #4F5C6C">Every value starts selected. The last selected value in a group can’t be cleared. Lines below contribution margin are then allocated by net revenue share.</span>
+</sc-if>
+<sc-if value="{{sliceOff}}" hint-placeholder-val="{{ false }}">
+<div role="note" style="display: flex; gap: 8px; padding: 10px 12px; border: 1px solid #EBD9AE; border-radius: 8px; background: #FBF4E4; font-size: 13px; color: #3D3216"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" style="flex: none; margin-top: 2px"><circle cx="8" cy="8" r="6.5" fill="none" stroke="#8A5A00" stroke-width="1.4"></circle><path d="M8 7v4M8 4.6v.2" fill="none" stroke="#8A5A00" stroke-width="1.6" stroke-linecap="round"></path></svg><span>Channel, category and segment values differ by company, so these filters are off in the consolidated view. Pick Consumer Products or Commerce Cloud to slice by them.</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 0 12px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; color: #4F5C6C"><span>Channel / sales motion</span><span>All</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 0 12px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; color: #4F5C6C"><span>Category / service line</span><span>All</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 0 12px; border: 1px dashed #CDD4DC; border-radius: 8px; background: #F6F8FA; color: #4F5C6C"><span>Price tier / customer segment</span><span>All</span></div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{pDisplay}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Currency</span>
+<div role="group" aria-label="Currency" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 14px; font-weight: 600; color: {{acc}}; cursor: pointer">USD</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">EUR</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #101B2B; cursor: pointer">GBP</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">FX basis</span>
+<div role="group" aria-label="FX basis" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Actual rates</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Constant currency</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Units</span>
+<div role="group" aria-label="Units" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">$m</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">$k</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Costs shown</span>
+<div role="group" aria-label="Costs shown" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">−</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">+</button>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Variance</span>
+<div role="group" aria-label="Variance format" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 40px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden">
+<button type="button" aria-pressed="true" style="border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Amount and %</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Amount</button>
+<button type="button" aria-pressed="false" style="border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">%</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 12px; font-weight: 600; color: #4F5C6C">Statement shows</span>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; border-bottom: 1px solid #EDF0F3"><span id="sw-pct">% of net revenue column</span><button type="button" role="switch" aria-checked="true" aria-labelledby="sw-pct" style="flex: none; position: relative; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{acc}}; cursor: pointer"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span></button></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; border-bottom: 1px solid #EDF0F3"><span id="sw-fy">Full-year outlook columns</span><button type="button" role="switch" aria-checked="true" aria-labelledby="sw-fy" style="flex: none; position: relative; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{acc}}; cursor: pointer"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span></button></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; border-bottom: 1px solid #EDF0F3"><span id="sw-tags">Classification tags</span><button type="button" role="switch" aria-checked="true" aria-labelledby="sw-tags" style="flex: none; position: relative; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{acc}}; cursor: pointer"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span></button></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px"><span id="sw-zero">Hide empty lines</span><button type="button" role="switch" aria-checked="true" aria-labelledby="sw-zero" style="flex: none; position: relative; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{acc}}; cursor: pointer"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF"></span></button></div>
+</div>
+</sc-if>
+
+</div>
+<div style="flex: none; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid #EDF0F3">
+<button type="button" style="height: 40px; padding: 0 4px; border: 0; background: none; font-family: inherit; font-size: 14px; color: {{acc}}; text-decoration: underline; cursor: pointer">Reset this group</button>
+<button type="button" onClick="{{closePanel}}" style="height: 40px; padding: 0 20px; border: 0; border-radius: 8px; background: {{acc}}; font-family: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer">Done</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column">
+<header style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px 24px 0; background: #FFFFFF; border-bottom: 1px solid #DEE3E9">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #4F5C6C">ACME Group · Management reporting · Actuals closed through Sep 2026</span>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 1.25">Profit &amp; loss</h1>
+<span style="font-size: 13px; color: #4F5C6C">{{ctx}}</span>
+</div>
+</div>
+<div role="group" aria-label="Company" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{companies}}" as="c" hint-placeholder-count="3">
+<button type="button" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 16px 6px 12px; box-sizing: border-box; border: 1px solid {{c.bd}}; box-shadow: {{c.sh}}; border-radius: 10px; background: {{c.bg}}; font-family: inherit; text-align: left; color: #101B2B; cursor: pointer">
+<span aria-hidden="true" style="flex: none; width: 12px; height: 12px; border-radius: 6px; background: {{c.dot}}"></span>
+<span style="display: flex; flex-direction: column; line-height: 1.25"><span style="font-size: 15px; font-weight: 600">{{c.name}}</span><span style="font-size: 12px; color: #4F5C6C">{{c.sub}}</span></span>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 4px 24px">
+<div role="tablist" aria-label="View" style="display: flex; flex-wrap: wrap; gap: 4px">
+<button type="button" role="tab" aria-selected="{{t.pnl.sel}}" onClick="{{t.pnl.pick}}" style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.pnl.bd}}; background: none; font-family: inherit; font-size: 15px; font-weight: {{t.pnl.fw}}; color: {{t.pnl.col}}; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"></rect><path d="M3 8h14M3 12h14M8 8v8" fill="none" stroke="currentColor" stroke-width="1.6"></path></svg>P&amp;L statement</button>
+<button type="button" role="tab" aria-selected="{{t.kpi.sel}}" onClick="{{t.kpi.pick}}" style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.kpi.bd}}; background: none; font-family: inherit; font-size: 15px; font-weight: {{t.kpi.fw}}; color: {{t.kpi.col}}; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"></rect><rect x="11" y="3" width="6" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"></rect><rect x="3" y="11" width="6" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"></rect><rect x="11" y="11" width="6" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"></rect></svg>Key figures</button>
+<button type="button" role="tab" aria-selected="{{t.ana.sel}}" onClick="{{t.ana.pick}}" style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.ana.bd}}; background: none; font-family: inherit; font-size: 15px; font-weight: {{t.ana.fw}}; color: {{t.ana.col}}; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20"><path d="M2.5 17.5h15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><rect x="3.5" y="6" width="2.6" height="10" fill="currentColor"></rect><rect x="7.6" y="3.5" width="2.6" height="2.5" fill="currentColor"></rect><rect x="11.7" y="3.5" width="2.6" height="5" fill="currentColor"></rect><rect x="15" y="8.5" width="2.6" height="7.5" fill="currentColor"></rect></svg>Analysis</button>
+<button type="button" role="tab" aria-selected="{{t.prof.sel}}" onClick="{{t.prof.pick}}" style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.prof.bd}}; background: none; font-family: inherit; font-size: 15px; font-weight: {{t.prof.fw}}; color: {{t.prof.col}}; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10 3v7l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>Profitability</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px">
+<sc-if value="{{vPnl}}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Layout" style="display: flex; height: 36px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+<button type="button" aria-pressed="true" style="padding: 0 12px; border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Variance</button>
+<button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Trend</button>
+<sc-if value="{{entOn}}" hint-placeholder-val="{{ false }}"><button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Entity columns</button></sc-if>
+<sc-if value="{{entOff}}" hint-placeholder-val="{{ true }}"><button type="button" disabled="" title="Available in the ACME Group view" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #F6F8FA; font-family: inherit; font-size: 13px; color: #8592A3; cursor: not-allowed">Entity columns</button></sc-if>
+</div>
+<div role="group" aria-label="Cost lens" style="display: flex; height: 36px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+<button type="button" aria-pressed="true" style="padding: 0 12px; border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">By function</button>
+<button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">By nature</button>
+</div>
+<div role="group" aria-label="Detail" style="display: flex; height: 36px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+<button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Summary</button>
+<button type="button" aria-pressed="true" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Standard</button>
+<button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Full</button>
+</div>
+</sc-if>
+<sc-if value="{{vKpi}}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; color: #4F5C6C"><span>Changes vs Budget and Prior year, same months</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; background: #E4F3EC; color: #06603F; font-weight: 600">▲ favourable</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; background: #FCEDE5; color: #C2410C; font-weight: 600">▼ unfavourable</span></span>
+</sc-if>
+<sc-if value="{{vAna}}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 13px; color: #4F5C6C">Compared with</span>
+<div role="group" aria-label="Compared with" style="display: flex; height: 36px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+<button type="button" aria-pressed="true" style="padding: 0 12px; border: 0; background: {{accT}}; font-family: inherit; font-size: 13px; font-weight: 600; color: {{acc}}; cursor: pointer">Budget</button>
+<button type="button" aria-pressed="false" style="padding: 0 12px; border: 0; border-left: 1px solid #CDD4DC; background: #FFFFFF; font-family: inherit; font-size: 13px; color: #101B2B; cursor: pointer">Prior year</button>
+</div>
+</sc-if>
+<sc-if value="{{vProf}}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 13px; color: #4F5C6C">Break down by</span>
+<div role="group" aria-label="Break down by" style="display: flex; height: 36px; border: 1px solid #CDD4DC; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+<sc-for list="{{profOpts}}" as="o" hint-placeholder-count="4"><button type="button" aria-pressed="{{o.pressed}}" style="padding: 0 12px; border: 0; border-left: {{o.bl}}; background: {{o.bg}}; font-family: inherit; font-size: 13px; font-weight: {{o.fw}}; color: {{o.col}}; cursor: pointer">{{o.t}}</button></sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+</header>
+
+<div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 14px 24px 16px; box-sizing: border-box; overflow: auto">
+<div role="note" style="flex: none; display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border: 1px solid #EBD9AE; border-radius: 8px; background: #FBF4E4; font-size: 13px; color: #3D3216">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" style="flex: none; margin-top: 2px"><circle cx="8" cy="8" r="6.5" fill="none" stroke="#8A5A00" stroke-width="1.4"></circle><path d="M8 7v4M8 4.6v.2" fill="none" stroke="#8A5A00" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 2px"><sc-for list="{{notices}}" as="n" hint-placeholder-count="1"><span>{{n.t}}</span></sc-for></div>
+</div>
+
+<sc-if value="{{vPnl}}" hint-placeholder-val="{{ true }}">
+<section aria-label="Income statement" style="flex: 1 1 0; min-height: 320px; display: flex; flex-direction: column; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px; overflow: hidden">
+<div style="flex: 1 1 auto; min-height: 0; overflow: auto">
+<div style="min-width: 1180px; font-family: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif; font-variant-numeric: tabular-nums">
+<div style="position: sticky; top: 0; z-index: 3; background: #FFFFFF">
+<div style="display: grid; grid-template-columns: minmax(300px, 1fr) 84px 60px 84px 72px 62px 84px 84px 72px 62px 84px 84px 72px; font-size: 12px; font-weight: 600; color: #101B2B">
+<div style="position: sticky; left: 0; z-index: 1; background: #FFFFFF"></div>
+<div style="grid-column: span 2; padding: 8px 8px 6px; text-align: center; border-bottom: 2px solid #101B2B">YTD Sep 2026 · Actual</div>
+<div style="grid-column: span 4; padding: 8px 8px 6px; text-align: center; border-bottom: 2px solid #101B2B; border-left: 12px solid #FFFFFF">vs Budget</div>
+<div style="grid-column: span 3; padding: 8px 8px 6px; text-align: center; border-bottom: 2px solid #101B2B; border-left: 12px solid #FFFFFF">vs Prior year</div>
+<div style="grid-column: span 3; padding: 8px 8px 6px; text-align: center; border-bottom: 2px solid #101B2B; border-left: 12px solid #FFFFFF">Full year 2026</div>
+</div>
+<div style="display: grid; grid-template-columns: minmax(300px, 1fr) 84px 60px 84px 72px 62px 84px 84px 72px 62px 84px 84px 72px; font-size: 12px; font-weight: 600; color: #4F5C6C; border-bottom: 1px solid #CDD4DC">
+<div style="position: sticky; left: 0; z-index: 1; padding: 8px 8px 8px 20px; background: #FFFFFF">Line · USD m</div>
+<div style="padding: 8px; text-align: right; color: #101B2B">Actual</div>
+<div style="padding: 8px; text-align: right">% NR</div>
+<div style="padding: 8px; text-align: right; border-left: 1px solid #E3E8ED">Budget</div>
+<div style="padding: 8px; text-align: right">Δ</div>
+<div style="padding: 8px; text-align: right">Δ %</div>
+<div style="padding: 8px; text-align: center">±15%</div>
+<div style="padding: 8px; text-align: right; border-left: 1px solid #E3E8ED">Prior year</div>
+<div style="padding: 8px; text-align: right">Δ</div>
+<div style="padding: 8px; text-align: right">Δ %</div>
+<div style="padding: 8px; text-align: right; border-left: 1px solid #E3E8ED">Budget</div>
+<div style="padding: 8px; text-align: right">Latest est.</div>
+<div style="padding: 8px; text-align: right">Δ</div>
+</div>
+</div>
+<sc-for list="{{rows}}" as="row" hint-placeholder-count="18">
+<div style="display: grid; grid-template-columns: minmax(300px, 1fr) 84px 60px 84px 72px 62px 84px 84px 72px 62px 84px 84px 72px; align-items: stretch; min-height: {{rowH}}px; background: {{row.bg}}; border-top: 1px solid {{row.rule}}; font-weight: {{row.fw}}; font-style: {{row.fi}}; font-size: {{row.fs}}; color: {{row.ink}}">
+<div style="position: sticky; left: 0; z-index: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; padding: 2px 8px 2px {{row.pad}}px; background: {{row.bg}}">
+<sc-if value="{{row.hasKids}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{row.toggle}}" aria-expanded="{{row.exp}}" style="display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 0; border: 0; background: none; font-family: inherit; font-size: inherit; font-weight: inherit; font-style: inherit; color: inherit; text-align: left; cursor: pointer"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" style="flex: none; transform: {{row.rot}}"><path d="M4.5 3l3 3-3 3" fill="none" stroke="#4F5C6C" stroke-width="1.6"></path></svg><span>{{row.label}}</span></button></sc-if>
+<sc-if value="{{row.noKids}}" hint-placeholder-val="{{ true }}"><span style="padding-left: 18px">{{row.label}}</span></sc-if>
+<sc-if value="{{row.hasAlias}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 400; font-style: normal; color: #4F5C6C; white-space: nowrap">{{row.alias}}</span></sc-if>
+<sc-if value="{{showTags}}" hint-placeholder-val="{{ true }}"><sc-for list="{{row.tags}}" as="tg" hint-placeholder-count="0"><span style="font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; font-weight: 500; font-style: normal; line-height: 16px; padding: 0 6px; border: 1px {{tg.st}} {{tg.col}}; border-radius: 4px; color: {{tg.col}}; white-space: nowrap">{{tg.t}}</span></sc-for></sc-if>
+</div>
+<sc-for list="{{row.cells}}" as="c" hint-placeholder-count="12">
+<sc-if value="{{c.isTxt}}" hint-placeholder-val="{{ true }}"><div style="display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; white-space: nowrap; color: {{c.col}}; border-left: {{c.bl}}">{{c.t}}</div></sc-if>
+<sc-if value="{{c.isBar}}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position: relative; min-height: 20px"><div style="position: absolute; left: 50%; top: 6px; bottom: 6px; width: 1px; background: #CDD4DC"></div><sc-if value="{{c.has}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; top: 30%; bottom: 30%; left: {{c.l}}%; width: {{c.w}}%; background: {{c.col}}; border-radius: 2px"></div></sc-if></div></sc-if>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<p style="flex: none; margin: 0; padding: 8px 16px; border-top: 1px solid #EDF0F3; font-size: 12px; color: #4F5C6C">Actual at monthly average rates, budget at budget rates · costs negative · Δ positive when favourable · bar = Δ % vs Budget on a ±15% scale · IFRS 18 required subtotal · MPM management-defined measure · IC intercompany</p>
+</section>
+</sc-if>
+
+<sc-if value="{{vKpi}}" hint-placeholder-val="{{ false }}">
+<section aria-label="Key figures" style="flex: 1 1 0; min-height: 520px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="flex: none; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4F5C6C">Financial</h2>
+<div style="flex: 2 1 0; min-height: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(max(240px, calc((100% - 36px) / 4)), 1fr)); grid-auto-rows: minmax(150px, 1fr); gap: 12px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="8">
+<article style="display: flex; flex-direction: column; justify-content: space-between; gap: 8px; min-height: 0; padding: 16px 18px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h3 style="margin: 0; font-size: 14px; font-weight: 500; color: #4F5C6C">{{k.l}}</h3>
+<sc-if value="{{k.hasH}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #4F5C6C">{{k.h}}</span></sc-if>
+</div>
+<div style="font-size: 34px; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums">{{k.v}}</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{k.s}}" as="s" hint-placeholder-count="2"><div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px"><span style="color: #4F5C6C">{{s.n}}</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; background: {{s.bg}}; color: {{s.col}}; font-weight: 600; font-variant-numeric: tabular-nums"><span aria-hidden="true" style="font-size: 9px">{{s.ar}}</span>{{s.t}}</span></div></sc-for>
+</div>
+</article>
+</sc-for>
+</div>
+<h2 style="flex: none; margin: 4px 0 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4F5C6C">Operational</h2>
+<div style="flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(max(240px, calc((100% - 36px) / 4)), 1fr)); grid-auto-rows: minmax(132px, 1fr); gap: 12px">
+<sc-for list="{{ops}}" as="k" hint-placeholder-count="4">
+<article style="display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 0; padding: 14px 18px; box-sizing: border-box; background: #F6F8FA; border: 1px solid #DEE3E9; border-radius: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h3 style="margin: 0; font-size: 14px; font-weight: 500; color: #4F5C6C">{{k.l}}</h3>
+<sc-if value="{{k.hasH}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #4F5C6C">{{k.h}}</span></sc-if>
+</div>
+<div style="font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums">{{k.v}}</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{k.s}}" as="s" hint-placeholder-count="2"><div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px"><span style="color: #4F5C6C">{{s.n}}</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; background: {{s.bg}}; color: {{s.col}}; font-weight: 600; font-variant-numeric: tabular-nums"><span aria-hidden="true" style="font-size: 9px">{{s.ar}}</span>{{s.t}}</span></div></sc-for>
+</div>
+</article>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{vAna}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1 1 0; min-height: 460px; display: flex; flex-wrap: wrap; gap: 16px">
+<section aria-labelledby="h-bridge" style="flex: 1.2 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px">
+<h2 id="h-bridge" style="margin: 0; font-size: 17px; font-weight: 600">Net revenue bridge</h2>
+<span style="font-size: 13px; color: #4F5C6C">Budget to Actual, USD millions. {{bridgeSub}}</span>
+<div style="flex: 1 1 auto; min-height: 220px; display: flex; gap: 10px; margin-top: 20px; border-bottom: 1px solid #8592A3">
+<sc-for list="{{bridge}}" as="b" hint-placeholder-count="5">
+<div style="position: relative; flex: 1 1 0; min-width: 0">
+<div style="position: absolute; left: 14%; right: 14%; bottom: {{b.bot}}%; height: {{b.h}}%; background: {{b.col}}; border-radius: 3px 3px 0 0"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: calc({{b.top}}% + 6px); text-align: center; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: {{b.tcol}}">{{b.v}}</div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; gap: 10px; padding-top: 8px">
+<sc-for list="{{bridge}}" as="b" hint-placeholder-count="5"><div style="flex: 1 1 0; min-width: 0; text-align: center; font-size: 12px; line-height: 1.3; color: #2B3748">{{b.l}}</div></sc-for>
+</div>
+<span style="margin-top: 8px; font-size: 12px; color: #4F5C6C">The axis starts at {{axis}}, so both totals are cut short and the steps stay readable.</span>
+</section>
+<section aria-labelledby="h-var" style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px">
+<h2 id="h-var" style="margin: 0; font-size: 17px; font-weight: 600">Largest variances vs Budget</h2>
+<span style="font-size: 13px; color: #4F5C6C">Top 8 lines by size of Δ, USD millions</span>
+<div style="display: flex; flex-direction: column; margin-top: 10px; font-variant-numeric: tabular-nums">
+<div style="display: grid; grid-template-columns: minmax(150px, 1.3fr) minmax(100px, 1fr) 64px 64px; font-size: 12px; font-weight: 600; color: #4F5C6C; border-bottom: 1px solid #CDD4DC">
+<div style="padding: 6px 8px 6px 0">Line</div><div style="padding: 6px 8px; text-align: center">Unfavourable · Favourable</div><div style="padding: 6px 8px; text-align: right">Δ</div><div style="padding: 6px 0 6px 8px; text-align: right">Δ %</div>
+</div>
+<sc-for list="{{drivers}}" as="dr" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: minmax(150px, 1.3fr) minmax(100px, 1fr) 64px 64px; align-items: center; min-height: 48px; border-bottom: 1px solid #EDF0F3; font-size: 14px">
+<div style="display: flex; flex-direction: column; min-width: 0; padding: 4px 8px 4px 0"><span style="font-weight: 500">{{dr.n}}</span><span style="font-size: 12px; color: #4F5C6C">{{dr.b}}</span></div>
+<div aria-hidden="true" style="position: relative; height: 22px; margin: 0 8px"><div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #CDD4DC"></div><div style="position: absolute; top: 4px; bottom: 4px; left: {{dr.l}}%; width: {{dr.w}}%; background: {{dr.bar}}; border-radius: 2px"></div></div>
+<div style="padding: 4px 8px; text-align: right; font-weight: 600; color: {{dr.col}}">{{dr.d}}</div>
+<div style="padding: 4px 0 4px 8px; text-align: right; color: {{dr.col}}">{{dr.dp}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{vProf}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1 1 0; min-height: 420px; display: flex; flex-wrap: wrap; gap: 16px">
+<section aria-labelledby="h-prof" style="flex: 1.7 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px">
+<h2 id="h-prof" style="margin: 0; font-size: 17px; font-weight: 600">Profitability by {{profBy}}</h2>
+<span style="font-size: 13px; color: #4F5C6C">YTD Jan–Sep 2026, USD millions</span>
+<div style="overflow-x: auto; margin-top: 12px">
+<div style="min-width: 760px; font-variant-numeric: tabular-nums">
+<div style="display: grid; grid-template-columns: minmax(190px, 1.4fr) 90px minmax(130px, 1fr) 84px 84px 96px 96px 96px; font-size: 12px; font-weight: 600; color: #4F5C6C; border-bottom: 1px solid #CDD4DC">
+<div style="padding: 6px 8px 6px 0">{{profCol}}</div><div style="padding: 6px 8px; text-align: right">Net revenue</div><div style="padding: 6px 8px">Share</div><div style="padding: 6px 8px; text-align: right">vs Budget</div><div style="padding: 6px 8px; text-align: right; border-left: 1px solid #E3E8ED">Gross</div><div style="padding: 6px 8px; text-align: right">Contribution</div><div style="padding: 6px 8px; text-align: right">Adj. EBITDA</div><div style="padding: 6px 8px; text-align: right">Operating</div>
+</div>
+<div style="display: grid; grid-template-columns: minmax(190px, 1.4fr) 90px minmax(130px, 1fr) 84px 84px 96px 96px 96px; font-size: 11px; color: #4F5C6C"><div></div><div></div><div></div><div></div><div style="grid-column: span 4; padding: 2px 8px; text-align: center; border-left: 1px solid #E3E8ED">margin, % of net revenue</div></div>
+<sc-for list="{{prof}}" as="p" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: minmax(190px, 1.4fr) 90px minmax(130px, 1fr) 84px 84px 96px 96px 96px; align-items: center; min-height: 48px; border-top: 1px solid #EDF0F3; font-size: 14px">
+<div style="padding: 6px 8px 6px 0; font-weight: 500">{{p.n}}</div>
+<div style="padding: 6px 8px; text-align: right">{{p.nr}}</div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px"><div aria-hidden="true" style="flex: 1 1 auto; height: 8px; background: #EDF0F3; border-radius: 4px; overflow: hidden"><div style="width: {{p.w}}%; height: 100%; background: {{acc}}"></div></div><span style="width: 48px; text-align: right; color: #2B3748">{{p.sh}}</span></div>
+<div style="padding: 6px 8px; text-align: right; font-weight: 600; color: {{p.col}}">{{p.dp}}</div>
+<div style="padding: 6px 8px; text-align: right; border-left: 1px solid #E3E8ED">{{p.gm}}</div>
+<div style="padding: 6px 8px; text-align: right">{{p.cm}}</div>
+<div style="padding: 6px 8px; text-align: right">{{p.eb}}</div>
+<div style="padding: 6px 8px; text-align: right">{{p.op}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<span style="margin-top: 10px; font-size: 12px; color: #4F5C6C">{{profNote}}</span>
+</section>
+<section aria-labelledby="h-cm" style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px">
+<h2 id="h-cm" style="margin: 0; font-size: 17px; font-weight: 600">Contribution margin by {{profBy}}</h2>
+<span style="font-size: 13px; color: #4F5C6C">Dashed line: {{cmLabel}}. Scale 0–60%.</span>
+<div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px">
+<sc-for list="{{cmBars}}" as="cb" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span>{{cb.n}}</span><span style="font-weight: 600; font-variant-numeric: tabular-nums">{{cb.v}}</span></div>
+<div aria-hidden="true" style="position: relative; height: 14px; background: #EDF0F3; border-radius: 3px"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{cb.w}}%; background: {{acc}}; border-radius: 3px"></div><div style="position: absolute; left: {{cmPos}}%; top: -3px; bottom: -3px; border-left: 2px dashed #101B2B"></div></div>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;P&amp;L&quot;,&quot;Key figures&quot;,&quot;Analysis&quot;,&quot;Profitability&quot;],&quot;default&quot;:&quot;P&amp;L&quot;,&quot;section&quot;:&quot;Start state&quot;},&quot;entity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Consumer Products&quot;,&quot;Commerce Cloud&quot;,&quot;ACME Group&quot;],&quot;default&quot;:&quot;Consumer Products&quot;,&quot;section&quot;:&quot;Start state&quot;},&quot;panel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Period&quot;,&quot;Versions&quot;,&quot;Slice&quot;,&quot;Display&quot;],&quot;default&quot;:&quot;None&quot;,&quot;section&quot;:&quot;Start state&quot;},&quot;rail&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Collapsed&quot;,&quot;Expanded&quot;],&quot;default&quot;:&quot;Collapsed&quot;,&quot;section&quot;:&quot;Start state&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Comfortable&quot;,&quot;Compact&quot;],&quot;default&quot;:&quot;Compact&quot;,&quot;section&quot;:&quot;Statement&quot;},&quot;showTags&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;section&quot;:&quot;Statement&quot;},&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:810}}">
+const DATA = {"P":{"rows":[["GR","","sec","Gross revenue","Gross sales",["Operating"],["4,321.0","127.1%","4,390.3","−69.3","−1.6%","3,988.0","+333.0","+8.4%","6,378.7","6,246.3","−132.4"],"000uu0ff00u",-0.105],["GR_P1","GR","leaf","Gross product sales","",[],["4,302.4","126.6%","4,371.9","−69.5","−1.6%","3,972.6","+329.8","+8.3%","6,351.6","6,219.0","−132.6"],"000uu0ff00u",-0.106],["GR_P2","GR","leaf","Shipping & delivery fees billed","",[],["18.6","0.5%","18.4","+0.2","+1.3%","15.4","+3.2","+21.1%","27.1","27.3","+0.2"],"000ff0ff00f",0.085],["GTN","","sec","Gross-to-net deductions","Trade spend & deductions",["Operating"],["−922.5","−27.1%","−925.5","+3.0","+0.3%","−848.4","−74.1","−8.7%","−1,349.5","−1,338.2","+11.3"],"000ff0uu00f",0.022],["GTN_P1","GTN","leaf","Trade promotions & retailer allowances","",[],["−480.1","−14.1%","−475.5","−4.7","−1.0%","−440.7","−39.4","−8.9%","−688.6","−691.9","−3.3"],"000uu0uu00u",-0.065],["GTN_P2","GTN","leaf","Customer rebates, listing & slotting fees","",[],["−163.6","−4.8%","−167.4","+3.7","+2.2%","−155.3","−8.3","−5.4%","−242.3","−235.7","+6.6"],"000ff0uu00f",0.148],["GTN_P3","GTN","leaf","Consumer coupons & D2C discounts","",[],["−118.2","−3.5%","−118.6","+0.4","+0.4%","−103.6","−14.6","−14.1%","−173.5","−171.9","+1.5"],"000ff0uu00f",0.025],["GTN_P4","GTN","leaf","Returns, damages & spoilage","",[],["−113.0","−3.3%","−115.3","+2.3","+2.0%","−103.2","−9.8","−9.5%","−174.7","−170.3","+4.4"],"000ff0uu00f",0.134],["GTN_P5","GTN","leaf","Prompt-payment discounts","",[],["−47.5","−1.4%","−48.7","+1.2","+2.4%","−45.6","−1.9","−4.3%","−70.4","−68.4","+2.0"],"000ff0uu00f",0.161],["NR","","key","Net revenue","Net sales",[],["3,398.5","100.0%","3,464.8","−66.3","−1.9%","3,139.6","+258.9","+8.2%","5,029.2","4,908.1","−121.1"],"000uu0ff00u",-0.128],["COR","","sec","Cost of revenue","Cost of goods sold",["Operating"],["−1,719.3","−50.6%","−1,738.6","+19.3","+1.1%","−1,589.3","−130.0","−8.2%","−2,544.6","−2,507.8","+36.8"],"000ff0uu00f",0.074],["COR_P1","COR","leaf","Raw materials & packaging","",[],["−670.3","−19.7%","−680.7","+10.4","+1.5%","−623.2","−47.1","−7.6%","−955.9","−937.8","+18.2"],"000ff0uu00f",0.101],["COR_P2","COR","leaf","Sourced finished goods","",[],["−452.3","−13.3%","−466.8","+14.5","+3.1%","−423.9","−28.4","−6.7%","−729.7","−702.9","+26.8"],"000ff0uu00f",0.207],["COR_P3","COR","leaf","Direct labour","",[],["−163.1","−4.8%","−165.9","+2.7","+1.6%","−151.8","−11.4","−7.5%","−235.0","−230.2","+4.8"],"000ff0uu00f",0.11],["COR_P4","COR","leaf","Manufacturing overhead (ex-depreciation)","",[],["−168.1","−4.9%","−171.0","+2.9","+1.7%","−156.4","−11.7","−7.5%","−243.6","−238.3","+5.2"],"000ff0uu00f",0.114],["COR_P5","COR","leaf","Inbound freight, duties & tariffs","",[],["−166.9","−4.9%","−157.4","−9.5","−6.0%","−145.7","−21.2","−14.5%","−236.9","−251.8","−14.9"],"000uu0uu00u",-0.401],["COR_P6","COR","leaf","Royalties on licensed brands","",[],["−43.8","−1.3%","−44.9","+1.1","+2.5%","−40.9","−2.9","−7.0%","−67.6","−65.5","+2.1"],"000ff0uu00f",0.168],["COR_P7","COR","leaf","Inventory write-downs & obsolescence","",[],["−54.8","−1.6%","−51.8","−2.9","−5.7%","−47.3","−7.5","−15.7%","−75.8","−81.2","−5.4"],"000uu0uu00u",-0.377],["GP","","sub","Gross profit","",[],["1,679.2","49.4%","1,726.2","−47.0","−2.7%","1,550.3","+128.9","+8.3%","2,484.6","2,400.3","−84.3"],"000uu0ff00u",-0.182],["GM","","ratio","Gross margin %","",[],["49.4%","","49.8%","−0.4 pp","","49.4%","0.0 pp","","49.4%","48.9%","−0.5 pp"],"000u000000u",null],["VSC","","sec","Variable selling & cost-to-serve","Distribution & channel costs",["Operating"],["−348.8","−10.3%","−350.2","+1.4","+0.4%","−308.4","−40.4","−13.1%","−510.4","−505.8","+4.6"],"000ff0uu00f",0.026],["VSC_P1","VSC","leaf","Outbound freight & last-mile delivery","",[],["−117.6","−3.5%","−116.9","−0.6","−0.6%","−103.5","−14.0","−13.6%","−170.1","−170.2","−0.1"],"000uu0uu00u",-0.037],["VSC_P2","VSC","leaf","Warehousing & pick-pack (3PL)","",[],["−66.2","−1.9%","−67.2","+0.9","+1.4%","−60.1","−6.1","−10.2%","−97.7","−95.8","+1.9"],"000ff0uu00f",0.093],["VSC_P3","VSC","leaf","Marketplace referral & fulfilment fees","",[],["−113.0","−3.3%","−113.5","+0.5","+0.4%","−97.5","−15.5","−15.9%","−166.1","−164.5","+1.5"],"000ff0uu00f",0.028],["VSC_P4","VSC","leaf","E-commerce platform & payment fees (intercompany)","",["IC"],["−21.8","−0.6%","−21.5","−0.3","−1.3%","−18.0","−3.8","−21.1%","−31.6","−31.9","−0.2"],"000uu0uu00u",-0.086],["VSC_P5","VSC","leaf","Sales commissions & broker fees","",[],["−30.2","−0.9%","−31.1","+0.9","+2.8%","−29.2","−1.0","−3.4%","−44.9","−43.4","+1.5"],"000ff0uu00f",0.187],["CM","","sub","Contribution margin","",["Mgmt"],["1,330.4","39.1%","1,376.0","−45.7","−3.3%","1,241.9","+88.5","+7.1%","1,974.2","1,894.5","−79.8"],"000uu0ff00u",-0.221],["CMP","","ratio","Contribution margin %","",[],["39.1%","","39.7%","−0.6 pp","","39.6%","−0.4 pp","","39.3%","38.6%","−0.7 pp"],"000u00u000u",null],["OPEX","","grp","Operating expenses","",["Operating"],["−647.8","−19.1%","−675.0","+27.2","+4.0%","−613.1","−34.7","−5.7%","−977.5","−933.4","+44.1"],"000ff0uu00f",0.269],["SM","OPEX","sec","Sales & marketing","Advertising, promotion & selling",[],["−392.3","−11.5%","−414.4","+22.1","+5.3%","−377.0","−15.3","−4.1%","−598.9","−564.1","+34.8"],"000ff0uu00f",0.356],["SM_P1","SM","leaf","Advertising: working media","",[],["−222.0","−6.5%","−240.2","+18.3","+7.6%","−217.8","−4.2","−1.9%","−346.4","−318.4","+28.0"],"000ff0uu00f",0.507],["SM_P2","SM","leaf","Consumer promotions, sampling & sponsorship","",[],["−51.0","−1.5%","−52.0","+1.0","+1.9%","−47.1","−3.9","−8.2%","−75.4","−73.6","+1.8"],"000ff0uu00f",0.128],["SM_P3","SM","leaf","Marketing overhead","",[],["−40.8","−1.2%","−41.6","+0.8","+1.9%","−37.7","−3.1","−8.2%","−60.4","−58.9","+1.5"],"000ff0uu00f",0.128],["SM_P4","SM","leaf","Sales force & key-account management","",[],["−78.6","−2.3%","−80.7","+2.1","+2.6%","−74.4","−4.2","−5.6%","−116.7","−113.2","+3.6"],"000ff0uu00f",0.171],["RD","OPEX","sec","Research & development","Product innovation",[],["−82.2","−2.4%","−83.9","+1.7","+2.0%","−75.9","−6.3","−8.3%","−122.0","−119.0","+3.0"],"000ff0uu00f",0.132],["RD_P1","RD","leaf","Product innovation & development","",[],["−61.8","−1.8%","−63.1","+1.3","+2.0%","−57.1","−4.7","−8.3%","−91.9","−89.6","+2.3"],"000ff0uu00f",0.133],["RD_P2","RD","leaf","Quality, regulatory & safety testing","",[],["−20.4","−0.6%","−20.8","+0.4","+1.9%","−18.8","−1.6","−8.2%","−30.2","−29.4","+0.7"],"000ff0uu00f",0.128],["GA","OPEX","sec","General & administrative","",[],["−180.1","−5.3%","−183.6","+3.6","+1.9%","−166.3","−13.8","−8.3%","−266.5","−260.1","+6.5"],"000ff0uu00f",0.129],["GA_1","GA","leaf","Finance, legal & HR","",[],["−74.7","−2.2%","−76.2","+1.5","+1.9%","−69.0","−5.7","−8.3%","−110.6","−108.0","+2.7"],"000ff0uu00f",0.13],["GA_2","GA","leaf","IT & corporate systems","",[],["−40.8","−1.2%","−41.6","+0.8","+1.9%","−37.6","−3.1","−8.3%","−60.4","−58.9","+1.5"],"000ff0uu00f",0.13],["GA_3","GA","leaf","Facilities & insurance","",[],["−30.6","−0.9%","−31.2","+0.6","+1.9%","−28.3","−2.3","−8.2%","−45.3","−44.2","+1.1"],"000ff0uu00f",0.128],["GA_4","GA","leaf","Corporate centre allocation","",[],["−34.0","−1.0%","−34.6","+0.7","+1.9%","−31.4","−2.6","−8.2%","−50.3","−49.1","+1.2"],"000ff0uu00f",0.128],["OOI","OPEX","sec","Other operating income / (expense)","",[],["6.8","0.2%","6.9","−0.1","−1.6%","6.1","+0.7","+11.7%","10.1","9.8","−0.2"],"000uu0ff00u",-0.107],["OOI_1","OOI","leaf","Operating FX gains / (losses)","",[],["0.1","0.0%","0.0","+0.1","","−0.2","+0.2","+127.0%","0.0","0.1","+0.1"],"000f00ff00f",null],["OOI_2","OOI","leaf","Gain / (loss) on disposal of assets","",[],["0.0","0.0%","0.0","0.0","","0.0","−0.1","−246.1%","0.0","0.0","0.0"],"000000uu000",null],["OOI_3","OOI","leaf","Other operating income","",[],["6.8","0.2%","6.9","−0.1","−1.9%","6.3","+0.5","+8.2%","10.1","9.8","−0.2"],"000uu0ff00u",-0.128],["EBITDA","","key","Adjusted EBITDA","",["MPM"],["682.6","20.1%","701.0","−18.4","−2.6%","628.8","+53.8","+8.6%","996.8","961.1","−35.7"],"000uu0ff00u",-0.175],["EBP","","ratio","Adjusted EBITDA margin %","",[],["20.1%","","20.2%","−0.1 pp","","20.0%","+0.1 pp","","19.8%","19.6%","−0.2 pp"],"000u00f000u",null],["DA","","sec","Depreciation & amortisation","",["Operating"],["−122.3","−3.6%","−124.7","+2.4","+1.9%","−113.0","−9.3","−8.2%","−181.1","−176.7","+4.4"],"000ff0uu00f",0.128],["DA_P1","DA","leaf","Depreciation: plants, DCs & equipment","",[],["−74.8","−2.2%","−76.2","+1.5","+1.9%","−69.1","−5.7","−8.2%","−110.6","−108.0","+2.7"],"000ff0uu00f",0.128],["DA_P2","DA","leaf","Depreciation: right-of-use assets","",[],["−27.2","−0.8%","−27.7","+0.5","+1.9%","−25.1","−2.1","−8.2%","−40.2","−39.3","+1.0"],"000ff0uu00f",0.128],["DA_P3","DA","leaf","Amortisation: acquired brands & customer relationships","",[],["−20.4","−0.6%","−20.8","+0.4","+1.9%","−18.8","−1.6","−8.2%","−30.2","−29.4","+0.7"],"000ff0uu00f",0.128],["UOP","","memo","Underlying operating profit","",["MPM"],["560.2","16.5%","576.3","−16.1","−2.8%","515.8","+44.5","+8.6%","815.7","784.4","−31.3"],"000uu0ff00u",-0.186],["ADJ","","sec","Adjusting items","",["Operating"],["−10.0","−0.3%","−4.5","−5.5","−121.5%","−26.3","+16.3","+61.9%","−4.5","−10.0","−5.5"],"000uu0ff00u",-1],["ADJ_1","ADJ","leaf","Restructuring & reorganisation","",[],["−4.3","−0.1%","−2.2","−2.1","−96.5%","−26.3","+22.1","+83.8%","−2.2","−4.3","−2.1"],"000uu0ff00u",-1],["ADJ_3","ADJ","leaf","M&A, integration & other one-offs","",[],["−5.7","−0.2%","−2.3","−3.4","−144.7%","0.0","−5.7","","−2.3","−5.7","−3.4"],"000uu0u000u",-1],["OP","","key","Operating profit","",["IFRS 18"],["550.2","16.2%","571.8","−21.6","−3.8%","489.4","+60.8","+12.4%","811.2","774.3","−36.8"],"000uu0ff00u",-0.251],["OPP","","ratio","Operating margin %","",[],["16.2%","","16.5%","−0.3 pp","","15.6%","+0.6 pp","","16.1%","15.8%","−0.4 pp"],"000u00f000u",null],["INV","","sec","Investing income","",["Investing"],["12.2","0.4%","12.5","−0.2","−1.9%","11.9","+0.3","+2.5%","18.1","17.7","−0.4"],"000uu0ff00u",-0.128],["INV_1","INV","leaf","Share of profit of associates & JVs","",[],["8.5","0.3%","8.7","−0.2","−1.9%","7.8","+0.6","+8.2%","12.6","12.3","−0.3"],"000uu0ff00u",-0.128],["INV_2","INV","leaf","Income on cash & investments","",[],["3.7","0.1%","3.8","−0.1","−1.9%","4.1","−0.3","−8.4%","5.5","5.4","−0.1"],"000uu0uu00u",-0.128],["PBFIT","","sub","Profit before financing and income taxes","",["IFRS 18"],["562.5","16.6%","584.3","−21.8","−3.7%","501.4","+61.1","+12.2%","829.3","792.0","−37.3"],"000uu0ff00u",-0.249],["FIN","","sec","Financing expenses","",["Financing"],["−41.1","−1.2%","−41.9","+0.8","+2.0%","−38.0","−3.1","−8.2%","−60.9","−59.4","+1.5"],"000ff0uu00f",0.133],["FIN_1","FIN","leaf","Interest on borrowings","",[],["−30.6","−0.9%","−31.2","+0.6","+1.9%","−28.3","−2.3","−8.2%","−45.3","−44.2","+1.1"],"000ff0uu00f",0.128],["FIN_2","FIN","leaf","Interest on lease liabilities","",[],["−8.5","−0.3%","−8.7","+0.2","+1.9%","−7.8","−0.6","−8.2%","−12.6","−12.3","+0.3"],"000ff0uu00f",0.128],["FIN_3","FIN","leaf","FX & other finance costs on financing items","",[],["−2.0","−0.1%","−2.1","+0.1","+3.6%","−1.9","−0.1","−7.5%","−3.0","−2.9","+0.1"],"000ff0uu00f",0.24],["PBT","","sub","Profit before tax","",[],["521.4","15.3%","542.3","−21.0","−3.9%","463.4","+58.0","+12.5%","768.4","732.7","−35.8"],"000uu0ff00u",-0.258],["TAX","","sec","Income tax expense","",["Income tax"],["−125.1","−3.7%","−130.2","+5.0","+3.9%","−111.2","−13.9","−12.5%","−184.4","−175.8","+8.6"],"000ff0uu00f",0.258],["TAX_1","TAX","leaf","Current tax","",[],["−104.3","−3.1%","−108.5","+4.2","+3.9%","−92.7","−11.6","−12.5%","−153.7","−146.5","+7.2"],"000ff0uu00f",0.258],["TAX_2","TAX","leaf","Deferred tax","",[],["−20.9","−0.6%","−21.7","+0.8","+3.9%","−18.5","−2.3","−12.5%","−30.7","−29.3","+1.4"],"000ff0uu00f",0.258],["ETR","","ratio","Effective tax rate %","",[],["24.0%","","24.0%","0.0 pp","","24.0%","0.0 pp","","24.0%","24.0%","0.0 pp"],"00000000000",null],["NP","","key","Net profit for the period","",[],["396.2","11.7%","412.2","−15.9","−3.9%","352.2","+44.1","+12.5%","584.0","556.8","−27.2"],"000uu0ff00u",-0.258],["NPP","","ratio","Net margin %","",[],["11.7%","","11.9%","−0.2 pp","","11.2%","+0.4 pp","","11.6%","11.3%","−0.3 pp"],"000u00f000u",null]],"kpis":[{"l":"Net revenue","v":"$3,398.5m","s":[["vs Budget","−1.9%","u"],["vs Prior year","+8.2%","f"]],"h":""},{"l":"Organic growth","v":"+6.1%","s":[["Reported, incl. FX","+8.2%","f"]],"h":"vs prior year, constant currency"},{"l":"Gross margin","v":"49.4%","s":[["vs Budget","−0.4 pp","u"],["vs Prior year","0.0 pp","0"]],"h":""},{"l":"Gross-to-net","v":"21.3%","s":[["vs Budget","+0.3 pp","u"],["vs Prior year","+0.1 pp","u"]],"h":"Deductions, % of gross sales"},{"l":"Advertising & promotion","v":"8.0%","s":[["vs Budget","−0.4 pp","0"],["vs Prior year","−0.4 pp","0"]],"h":"Media + consumer promotions, % of NR"},{"l":"Contribution margin","v":"39.1%","s":[["vs Budget","−0.6 pp","u"],["vs Prior year","−0.4 pp","u"]],"h":""},{"l":"Adjusted EBITDA","v":"$682.6m","s":[["Margin","20.1%","0"],["vs Budget","−2.6%","u"],["vs Prior year","+8.6%","f"]],"h":""},{"l":"Operating profit","v":"$550.2m","s":[["Margin","16.2%","0"],["vs Budget","−3.8%","u"],["vs Prior year","+12.4%","f"]],"h":""}],"ops":[{"l":"Units sold","v":"419.8m","s":[["vs Budget","−1.7%","u"],["vs Prior year","+3.9%","f"]],"h":""},{"l":"Net revenue per unit","v":"$8.09","s":[["vs Budget","−0.2%","u"],["vs Prior year","+4.2%","f"]],"h":""},{"l":"Volume growth","v":"+4.0%","s":[],"h":"vs prior year: unit change × prior-year price"},{"l":"Price / mix","v":"+2.1%","s":[],"h":"vs prior year, constant currency"}],"bridge":{"vs":"Budget","geo":[["Budget","$3,464.8m","t",0,89.8],["Volume","−65.0","u",62.11,27.68],["Price / mix","−30.8","u",48.98,13.13],["FX translation","+29.5","f",48.98,12.58],["Actual","$3,398.5m","t",0,61.56]],"axis":"$3,254m"},"drivers":[["Gross product sales","Gross revenue","4,302.4","4,371.9","−69.5","−1.6%","u"],["Advertising: working media","Sales & marketing","−222.0","−240.2","+18.3","+7.6%","f"],["Sourced finished goods","Cost of revenue","−452.3","−466.8","+14.5","+3.1%","f"],["Raw materials & packaging","Cost of revenue","−670.3","−680.7","+10.4","+1.5%","f"],["Inbound freight, duties & tariffs","Cost of revenue","−166.9","−157.4","−9.5","−6.0%","u"],["Trade promotions & retailer allowances","Gross-to-net deductions","−480.1","−475.5","−4.7","−1.0%","u"],["Current tax","Income tax expense","−104.3","−108.5","+4.2","+3.9%","f"],["Customer rebates, listing & slotting fees","Gross-to-net deductions","−163.6","−167.4","+3.7","+2.2%","f"]],"prof":[["Grocery & mass retail","1,107.7","32.6%",32.59,"−3.8%","u","49.4%","43.6%","24.6%","20.7%"],["Online marketplaces","706.2","20.8%",20.78,"−0.4%","u","49.5%","30.9%","11.8%","7.9%"],["Wholesale & distributors","571.5","16.8%",16.81,"−2.5%","u","49.4%","43.1%","24.0%","20.1%"],["Drugstore & specialty retail","528.7","15.6%",15.56,"−2.1%","u","49.4%","43.2%","24.1%","20.2%"],["Own D2C webstore","484.5","14.3%",14.26,"+1.3%","f","49.4%","31.9%","12.9%","9.0%"]]},"S":{"rows":[["GR","","sec","Gross revenue","Gross billings",["Operating"],["623.3","104.6%","630.1","−6.9","−1.1%","481.8","+141.4","+29.4%","910.9","899.1","−11.8"],"000uu0ff00u",-0.073],["GR_S1","GR","leaf","Subscription platform fees","",[],["242.9","40.8%","249.9","−7.0","−2.8%","194.9","+48.0","+24.6%","344.0","333.7","−10.3"],"000uu0ff00u",-0.185],["GR_S2","GR","leaf","Payments & transaction fees","",[],["304.3","51.1%","301.5","+2.8","+0.9%","222.1","+82.2","+37.0%","457.5","460.0","+2.5"],"000ff0ff00f",0.061],["GR_S3","GR","leaf","Apps, partner revenue share & ads","",[],["44.3","7.4%","45.0","−0.7","−1.5%","35.8","+8.5","+23.7%","63.6","62.4","−1.2"],"000uu0ff00u",-0.103],["GR_S4","GR","leaf","Professional services","",[],["31.8","5.3%","33.7","−2.0","−5.9%","29.0","+2.7","+9.4%","45.7","42.9","−2.8"],"000uu0ff00u",-0.39],["GTN","","sec","Gross-to-net deductions","Discounts, credits & refunds",["Operating"],["−27.3","−4.6%","−28.0","+0.7","+2.4%","−21.7","−5.6","−25.9%","−39.1","−38.1","+1.0"],"000ff0uu00f",0.162],["GTN_S1","GTN","leaf","Contractual discounts & promotional credits","",[],["−16.9","−2.8%","−17.3","+0.5","+2.7%","−13.5","−3.3","−24.8%","−24.0","−23.3","+0.7"],"000ff0uu00f",0.181],["GTN_S2","GTN","leaf","Free-trial & onboarding credits","",[],["−4.2","−0.7%","−4.3","+0.1","+3.2%","−3.4","−0.8","−23.8%","−5.9","−5.7","+0.2"],"000ff0uu00f",0.214],["GTN_S3","GTN","leaf","Refunds, SLA credits & billing adjustments","",[],["−6.3","−1.1%","−6.3","+0.1","+1.1%","−4.8","−1.5","−30.4%","−9.2","−9.1","+0.1"],"000ff0uu00f",0.074],["NR","","key","Net revenue","Revenue",[],["596.0","100.0%","602.2","−6.2","−1.0%","460.2","+135.8","+29.5%","871.7","861.0","−10.8"],"000uu0ff00u",-0.069],["COR","","sec","Cost of revenue","",["Operating"],["−263.5","−44.2%","−263.4","−0.1","0.0%","−199.4","−64.1","−32.1%","−388.3","−387.7","+0.7"],"000u00uu00f",-0.003],["COR_S1","COR","leaf","Cloud hosting & infrastructure","",[],["−24.9","−4.2%","−25.5","+0.6","+2.3%","−20.2","−4.7","−23.5%","−35.6","−34.8","+0.9"],"000ff0uu00f",0.152],["COR_S2","COR","leaf","Payment processing & interchange","",[],["−172.0","−28.9%","−169.1","−2.9","−1.7%","−123.7","−48.4","−39.1%","−257.0","−260.6","−3.5"],"000uu0uu00u",-0.115],["COR_S3","COR","leaf","Third-party software, data & partner payouts","",[],["−19.4","−3.3%","−19.8","+0.4","+1.8%","−15.5","−3.9","−25.4%","−27.9","−27.4","+0.6"],"000ff0uu00f",0.119],["COR_S4","COR","leaf","Customer support & merchant onboarding","",[],["−23.1","−3.9%","−23.5","+0.5","+1.9%","−18.1","−5.0","−27.5%","−33.2","−32.5","+0.7"],"000ff0uu00f",0.128],["COR_S5","COR","leaf","Professional services delivery","",[],["−24.1","−4.0%","−25.5","+1.4","+5.6%","−22.0","−2.1","−9.4%","−34.5","−32.5","+2.1"],"000ff0uu00f",0.371],["GP","","sub","Gross profit","",[],["332.5","55.8%","338.8","−6.3","−1.9%","260.7","+71.7","+27.5%","483.4","473.3","−10.1"],"000uu0ff00u",-0.124],["GM","","ratio","Gross margin %","",[],["55.8%","","56.3%","−0.5 pp","","56.7%","−0.9 pp","","55.5%","55.0%","−0.5 pp"],"000u00u000u",null],["VSC","","sec","Variable selling & cost-to-serve","Acquisition & transaction costs",["Operating"],["−28.9","−4.8%","−27.8","−1.1","−3.9%","−21.3","−7.6","−35.7%","−39.9","−41.5","−1.6"],"000uu0uu00u",-0.262],["VSC_S1","VSC","leaf","Sales commissions","",[],["−10.3","−1.7%","−10.5","+0.3","+2.5%","−8.2","−2.1","−25.5%","−14.7","−14.3","+0.4"],"000ff0uu00f",0.167],["VSC_S2","VSC","leaf","Partner & agency referral fees","",[],["−9.1","−1.5%","−9.3","+0.2","+2.0%","−7.3","−1.8","−25.4%","−13.2","−12.9","+0.3"],"000ff0uu00f",0.135],["VSC_S3","VSC","leaf","Transaction & merchant credit losses","",[],["−9.4","−1.6%","−7.9","−1.5","−19.6%","−5.8","−3.7","−63.2%","−12.0","−14.3","−2.3"],"000uu0uu00u",-1],["CM","","sub","Contribution margin","",["Mgmt"],["303.6","50.9%","311.0","−7.4","−2.4%","239.5","+64.1","+26.8%","443.5","431.8","−11.7"],"000uu0ff00u",-0.158],["CMP","","ratio","Contribution margin %","",[],["50.9%","","51.6%","−0.7 pp","","52.0%","−1.1 pp","","50.9%","50.2%","−0.7 pp"],"000u00u000u",null],["OPEX","","grp","Operating expenses","",["Operating"],["−225.8","−37.9%","−228.4","+2.6","+1.1%","−178.9","−46.9","−26.2%","−330.5","−326.1","+4.4"],"000ff0uu00f",0.076],["SM","OPEX","sec","Sales & marketing","",[],["−84.5","−14.2%","−85.4","+0.9","+1.1%","−69.6","−14.9","−21.4%","−123.6","−122.0","+1.6"],"000ff0uu00f",0.073],["SM_S1","SM","leaf","Performance marketing & paid acquisition","",[],["−41.2","−6.9%","−41.6","+0.4","+1.0%","−34.1","−7.0","−20.6%","−60.2","−59.5","+0.7"],"000ff0uu00f",0.067],["SM_S2","SM","leaf","Brand, content & events","",[],["−12.4","−2.1%","−12.6","+0.1","+1.1%","−10.3","−2.1","−20.8%","−18.2","−17.9","+0.2"],"000ff0uu00f",0.074],["SM_S3","SM","leaf","Sales & account management staff","",[],["−24.6","−4.1%","−24.9","+0.3","+1.2%","−20.3","−4.3","−21.1%","−36.0","−35.5","+0.5"],"000ff0uu00f",0.081],["SM_S4","SM","leaf","Partner programme & ecosystem","",[],["−6.3","−1.1%","−6.4","+0.1","+1.2%","−4.9","−1.4","−29.4%","−9.2","−9.1","+0.1"],"000ff0uu00f",0.079],["RD","OPEX","sec","Research & development","Product development",[],["−95.1","−16.0%","−96.2","+1.1","+1.1%","−72.5","−22.6","−31.2%","−139.2","−137.4","+1.8"],"000ff0uu00f",0.074],["RD_S1","RD","leaf","Engineering & product management","",[],["−79.5","−13.3%","−80.4","+0.9","+1.1%","−65.8","−13.7","−20.8%","−116.3","−114.7","+1.5"],"000ff0uu00f",0.074],["RD_S2","RD","leaf","Data, AI & security platform","",[],["−31.6","−5.3%","−31.9","+0.4","+1.1%","−19.9","−11.7","−58.7%","−46.2","−45.6","+0.6"],"000ff0uu00f",0.074],["RD_S3","RD","leaf","Capitalised development costs (credit)","",[],["15.9","2.7%","16.1","−0.2","−1.1%","13.2","+2.7","+20.8%","23.3","22.9","−0.3"],"000uu0ff00u",-0.074],["GA","OPEX","sec","General & administrative","",[],["−46.9","−7.9%","−47.4","+0.5","+1.1%","−37.2","−9.7","−26.0%","−68.5","−67.7","+0.9"],"000ff0uu00f",0.073],["GA_1","GA","leaf","Finance, legal & HR","",[],["−19.9","−3.3%","−20.1","+0.2","+1.1%","−16.4","−3.5","−21.0%","−29.1","−28.7","+0.4"],"000ff0uu00f",0.072],["GA_2","GA","leaf","IT & corporate systems","",[],["−11.5","−1.9%","−11.6","+0.1","+1.1%","−8.8","−2.6","−29.9%","−16.8","−16.6","+0.2"],"000ff0uu00f",0.074],["GA_3","GA","leaf","Facilities & insurance","",[],["−6.9","−1.2%","−7.0","+0.1","+1.1%","−5.3","−1.6","−29.9%","−10.1","−9.9","+0.1"],"000ff0uu00f",0.074],["GA_4","GA","leaf","Corporate centre allocation","",[],["−8.6","−1.4%","−8.7","+0.1","+1.1%","−6.6","−2.0","−29.9%","−12.6","−12.4","+0.2"],"000ff0uu00f",0.074],["OOI","OPEX","sec","Other operating income / (expense)","",[],["0.6","0.1%","0.6","+0.1","+10.8%","0.4","+0.3","+69.2%","0.8","0.9","+0.1"],"000ff0ff00f",0.723],["OOI_1","OOI","leaf","Operating FX gains / (losses)","",[],["0.1","0.0%","0.0","+0.1","","−0.1","+0.1","+212.3%","0.0","0.1","+0.1"],"000f00ff00f",null],["OOI_3","OOI","leaf","Other operating income","",[],["0.6","0.1%","0.6","0.0","−1.1%","0.4","+0.1","+29.9%","0.8","0.8","0.0"],"000000ff000",-0.074],["EBITDA","","key","Adjusted EBITDA","",["MPM"],["77.8","13.1%","82.6","−4.8","−5.8%","60.5","+17.2","+28.5%","113.0","105.7","−7.3"],"000uu0ff00u",-0.387],["EBP","","ratio","Adjusted EBITDA margin %","",[],["13.1%","","13.7%","−0.7 pp","","13.2%","−0.1 pp","","13.0%","12.3%","−0.7 pp"],"000u00u000u",null],["DA","","sec","Depreciation & amortisation","",["Operating"],["−29.9","−5.0%","−30.2","+0.3","+1.1%","−20.7","−9.1","−44.0%","−43.7","−43.1","+0.6"],"000ff0uu00f",0.074],["DA_S1","DA","leaf","Amortisation: capitalised software","",[],["−16.1","−2.7%","−16.3","+0.2","+1.1%","−12.4","−3.7","−29.9%","−23.5","−23.2","+0.3"],"000ff0uu00f",0.074],["DA_S2","DA","leaf","Depreciation: servers, equipment & right-of-use assets","",[],["−6.9","−1.2%","−7.0","+0.1","+1.1%","−5.3","−1.6","−29.9%","−10.1","−9.9","+0.1"],"000ff0uu00f",0.074],["DA_S3","DA","leaf","Amortisation: acquired intangibles","",[],["−6.9","−1.2%","−7.0","+0.1","+1.1%","−3.1","−3.8","−125.5%","−10.1","−9.9","+0.1"],"000ff0uu00f",0.074],["UOP","","memo","Underlying operating profit","",["MPM"],["47.9","8.0%","52.4","−4.5","−8.5%","39.8","+8.1","+20.4%","69.3","62.6","−6.7"],"000uu0ff00u",-0.568],["ADJ","","sec","Adjusting items","",["Operating"],["−1.4","−0.2%","0.0","−1.4","","−3.2","+1.8","+55.4%","0.0","−1.4","−1.4"],"000u00ff00u",null],["ADJ_1","ADJ","leaf","Restructuring & reorganisation","",[],["−1.4","−0.2%","0.0","−1.4","","0.0","−1.4","","0.0","−1.4","−1.4"],"000u00u000u",null],["ADJ_3","ADJ","leaf","M&A, integration & other one-offs","",[],["0.0","0.0%","0.0","0.0","","−3.2","+3.2","+100.0%","0.0","0.0","0.0"],"000000ff000",null],["OP","","key","Operating profit","",["IFRS 18"],["46.5","7.8%","52.4","−5.9","−11.2%","36.6","+9.9","+27.0%","69.3","61.2","−8.1"],"000uu0ff00u",-0.748],["OPP","","ratio","Operating margin %","",[],["7.8%","","8.7%","−0.9 pp","","8.0%","−0.2 pp","","8.0%","7.1%","−0.8 pp"],"000u00u000u",null],["INV","","sec","Investing income","",["Investing"],["4.0","0.7%","4.1","0.0","−1.1%","3.1","+0.9","+29.9%","5.9","5.8","−0.1"],"000000ff00u",-0.074],["INV_2","INV","leaf","Income on cash & investments","",[],["4.0","0.7%","4.1","0.0","−1.1%","3.1","+0.9","+29.9%","5.9","5.8","−0.1"],"000000ff00u",-0.074],["PBFIT","","sub","Profit before financing and income taxes","",["IFRS 18"],["50.5","8.5%","56.5","−5.9","−10.5%","39.7","+10.8","+27.2%","75.2","67.0","−8.2"],"000uu0ff00u",-0.7],["FIN","","sec","Financing expenses","",["Financing"],["−3.7","−0.6%","−3.8","0.0","+0.9%","−2.9","−0.9","−30.4%","−5.5","−5.4","+0.1"],"000000uu00f",0.059],["FIN_1","FIN","leaf","Interest on borrowings","",[],["−1.1","−0.2%","−1.2","0.0","+1.1%","−0.9","−0.3","−29.9%","−1.7","−1.7","0.0"],"000000uu000",0.074],["FIN_2","FIN","leaf","Interest on lease liabilities","",[],["−2.3","−0.4%","−2.3","0.0","+1.1%","−1.8","−0.5","−29.9%","−3.4","−3.3","0.0"],"000000uu000",0.074],["FIN_3","FIN","leaf","FX & other finance costs on financing items","",[],["−0.3","0.0%","−0.3","0.0","−1.8%","−0.2","−0.1","−36.5%","−0.4","−0.4","0.0"],"000000uu000",-0.119],["PBT","","sub","Profit before tax","",[],["46.8","7.9%","52.7","−5.9","−11.2%","36.9","+9.9","+27.0%","69.7","61.6","−8.2"],"000uu0ff00u",-0.745],["TAX","","sec","Income tax expense","",["Income tax"],["−10.3","−1.7%","−11.6","+1.3","+11.2%","−8.1","−2.2","−27.0%","−15.3","−13.5","+1.8"],"000ff0uu00f",0.745],["TAX_1","TAX","leaf","Current tax","",[],["−8.0","−1.3%","−9.0","+1.0","+11.2%","−6.3","−1.7","−27.0%","−11.9","−10.5","+1.4"],"000ff0uu00f",0.745],["TAX_2","TAX","leaf","Deferred tax","",[],["−2.3","−0.4%","−2.6","+0.3","+11.2%","−1.8","−0.5","−27.0%","−3.5","−3.1","+0.4"],"000ff0uu00f",0.745],["ETR","","ratio","Effective tax rate %","",[],["22.0%","","22.0%","0.0 pp","","22.0%","0.0 pp","","22.0%","22.0%","0.0 pp"],"00000000000",null],["NP","","key","Net profit for the period","",[],["36.5","6.1%","41.1","−4.6","−11.2%","28.7","+7.8","+27.0%","54.4","48.0","−6.4"],"000uu0ff00u",-0.745],["NPP","","ratio","Net margin %","",[],["6.1%","","6.8%","−0.7 pp","","6.2%","−0.1 pp","","6.2%","5.6%","−0.7 pp"],"000u00u000u",null]],"kpis":[{"l":"Net revenue","v":"$596.0m","s":[["vs Budget","−1.0%","u"],["vs Prior year","+29.5%","f"]],"h":""},{"l":"Organic growth","v":"+27.4%","s":[["Reported, incl. FX","+29.5%","f"]],"h":"vs prior year, constant currency"},{"l":"Gross margin","v":"55.8%","s":[["vs Budget","−0.5 pp","u"],["vs Prior year","−0.9 pp","u"]],"h":""},{"l":"ARR, period end","v":"$320.0m","s":[["vs Budget","−3.3%","u"],["vs Prior year","+21.9%","f"]],"h":"Sep subscription revenue × 12"},{"l":"Payments take rate","v":"2.66%","s":[["vs Budget","0.0 pp","0"],["vs Prior year","0.0 pp","0"]],"h":"Payments revenue / GMV"},{"l":"Contribution margin","v":"50.9%","s":[["vs Budget","−0.7 pp","u"],["vs Prior year","−1.1 pp","u"]],"h":""},{"l":"Adjusted EBITDA","v":"$77.8m","s":[["Margin","13.1%","0"],["vs Budget","−5.8%","u"],["vs Prior year","+28.5%","f"]],"h":""},{"l":"Operating profit","v":"$46.5m","s":[["Margin","7.8%","0"],["vs Budget","−11.2%","u"],["vs Prior year","+27.0%","f"]],"h":""}],"ops":[{"l":"GMV processed","v":"$11.28bn","s":[["vs Budget","+0.8%","f"],["vs Prior year","+38.1%","f"]],"h":""},{"l":"Active merchants, period end","v":"138,726","s":[["vs Budget","−4.6%","u"],["vs Prior year","+16.3%","f"]],"h":""},{"l":"Subscription gross margin","v":"81.2%","s":[["vs Budget","0.0 pp","0"],["vs Prior year","+0.3 pp","f"]],"h":"Platform subscriptions only"},{"l":"Rule of 40","v":"40.4","s":[],"h":"Organic growth % + Adj. EBITDA margin %"}],"bridge":{"vs":"Budget","geo":[["Budget","$602.2m","t",0,89.8],["Platform subscriptions","−8.0","u",58.87,30.93],["Payments","+0.5","f",58.87,2.01],["Apps, partners & ads","−1.0","u",57.09,3.79],["Professional services","−2.1","u",48.98,8.11],["FX translation","+4.3","f",48.98,16.77],["Actual","$596.0m","t",0,65.75]],"axis":"$579m"},"drivers":[["Subscription platform fees","Gross revenue","242.9","249.9","−7.0","−2.8%","u"],["Payment processing & interchange","Cost of revenue","−172.0","−169.1","−2.9","−1.7%","u"],["Payments & transaction fees","Gross revenue","304.3","301.5","+2.8","+0.9%","f"],["Professional services","Gross revenue","31.8","33.7","−2.0","−5.9%","u"],["Transaction & merchant credit losses","Variable selling & cost-to-serve","−9.4","−7.9","−1.5","−19.6%","u"],["Professional services delivery","Cost of revenue","−24.1","−25.5","+1.4","+5.6%","f"],["Restructuring & reorganisation","Adjusting items","−1.4","0.0","−1.4","","u"],["Current tax","Income tax expense","−8.0","−9.0","+1.0","+11.2%","f"]],"prof":[["Self-serve sign-up","243.3","40.8%",40.83,"−0.9%","u","55.3%","53.4%","15.5%","10.2%"],["Sales-led (direct)","234.4","39.3%",39.33,"−1.0%","u","57.4%","52.4%","14.5%","9.3%"],["Partner & agency-led","118.3","19.8%",19.85,"−1.3%","u","53.5%","43.1%","5.2%","−0.1%"]]},"G":{"rows":[["GR","","sec","Gross revenue","",["Operating"],["4,922.5","123.9%","4,998.9","−76.4","−1.5%","4,451.8","+470.6","+10.6%","7,257.9","7,113.5","−144.4"],"000uu0ff00u",-0.102],["GR|P","GR","ent","ACME Consumer Products","",[],["4,321.0","108.8%","4,390.3","−69.3","−1.6%","3,988.0","+333.0","+8.4%","6,378.7","6,246.3","−132.4"],"000uu0ff00u",-0.105],["GR|S","GR","ent","ACME Commerce Cloud","",[],["623.3","15.7%","630.1","−6.9","−1.1%","481.8","+141.4","+29.4%","910.9","899.1","−11.8"],"000uu0ff00u",-0.073],["GR|G","GR","ent","Intercompany eliminations","",["IC"],["−21.8","−0.5%","−21.5","−0.3","−1.3%","−18.0","−3.8","−21.1%","−31.6","−31.9","−0.2"],"000uu0uu00u",-0.086],["GTN","","sec","Gross-to-net deductions","",["Operating"],["−949.8","−23.9%","−953.5","+3.7","+0.4%","−870.1","−79.7","−9.2%","−1,388.7","−1,376.3","+12.3"],"000ff0uu00f",0.026],["GTN|P","GTN","ent","ACME Consumer Products","",[],["−922.5","−23.2%","−925.5","+3.0","+0.3%","−848.4","−74.1","−8.7%","−1,349.5","−1,338.2","+11.3"],"000ff0uu00f",0.022],["GTN|S","GTN","ent","ACME Commerce Cloud","",[],["−27.3","−0.7%","−28.0","+0.7","+2.4%","−21.7","−5.6","−25.9%","−39.1","−38.1","+1.0"],"000ff0uu00f",0.162],["NR","","key","Net revenue","",[],["3,972.7","100.0%","4,045.4","−72.7","−1.8%","3,581.7","+390.9","+10.9%","5,869.3","5,737.2","−132.1"],"000uu0ff00u",-0.12],["COR","","sec","Cost of revenue","",["Operating"],["−1,982.8","−49.9%","−2,002.0","+19.1","+1.0%","−1,788.7","−194.1","−10.9%","−2,932.9","−2,895.5","+37.4"],"000ff0uu00f",0.064],["COR|P","COR","ent","ACME Consumer Products","",[],["−1,719.3","−43.3%","−1,738.6","+19.3","+1.1%","−1,589.3","−130.0","−8.2%","−2,544.6","−2,507.8","+36.8"],"000ff0uu00f",0.074],["COR|S","COR","ent","ACME Commerce Cloud","",[],["−263.5","−6.6%","−263.4","−0.1","0.0%","−199.4","−64.1","−32.1%","−388.3","−387.7","+0.7"],"000u00uu00f",-0.003],["GP","","sub","Gross profit","",[],["1,989.9","50.1%","2,043.5","−53.6","−2.6%","1,793.0","+196.8","+11.0%","2,936.4","2,841.7","−94.7"],"000uu0ff00u",-0.175],["GM","","ratio","Gross margin %","",[],["50.1%","","50.5%","−0.4 pp","","50.1%","0.0 pp","","50.0%","49.5%","−0.5 pp"],"000u000000u",null],["VSC","","sec","Variable selling & cost-to-serve","",["Operating"],["−355.9","−9.0%","−356.5","+0.6","+0.2%","−311.7","−44.2","−14.2%","−518.6","−515.4","+3.2"],"000ff0uu00f",0.01],["VSC|P","VSC","ent","ACME Consumer Products","",[],["−348.8","−8.8%","−350.2","+1.4","+0.4%","−308.4","−40.4","−13.1%","−510.4","−505.8","+4.6"],"000ff0uu00f",0.026],["VSC|S","VSC","ent","ACME Commerce Cloud","",[],["−28.9","−0.7%","−27.8","−1.1","−3.9%","−21.3","−7.6","−35.7%","−39.9","−41.5","−1.6"],"000uu0uu00u",-0.262],["VSC|G","VSC","ent","Intercompany eliminations","",["IC"],["21.8","0.5%","21.5","+0.3","+1.3%","18.0","+3.8","+21.1%","31.6","31.9","+0.2"],"000ff0ff00f",0.086],["CM","","sub","Contribution margin","",["Mgmt"],["1,634.0","41.1%","1,687.0","−53.0","−3.1%","1,481.4","+152.6","+10.3%","2,417.7","2,326.3","−91.4"],"000uu0ff00u",-0.21],["CMP","","ratio","Contribution margin %","",[],["41.1%","","41.7%","−0.6 pp","","41.4%","−0.2 pp","","41.2%","40.5%","−0.6 pp"],"000u00u000u",null],["OPEX","","grp","Operating expenses","",["Operating"],["−873.6","−22.0%","−903.4","+29.8","+3.3%","−792.0","−81.6","−10.3%","−1,308.0","−1,259.5","+48.4"],"000ff0uu00f",0.22],["SM","OPEX","sec","Sales & marketing","",[],["−476.8","−12.0%","−499.8","+23.0","+4.6%","−446.6","−30.2","−6.8%","−722.5","−686.1","+36.4"],"000ff0uu00f",0.307],["SM|P","SM","ent","ACME Consumer Products","",[],["−392.3","−9.9%","−414.4","+22.1","+5.3%","−377.0","−15.3","−4.1%","−598.9","−564.1","+34.8"],"000ff0uu00f",0.356],["SM|S","SM","ent","ACME Commerce Cloud","",[],["−84.5","−2.1%","−85.4","+0.9","+1.1%","−69.6","−14.9","−21.4%","−123.6","−122.0","+1.6"],"000ff0uu00f",0.073],["RD","OPEX","sec","Research & development","",[],["−177.4","−4.5%","−180.1","+2.7","+1.5%","−148.4","−28.9","−19.5%","−261.3","−256.4","+4.8"],"000ff0uu00f",0.101],["RD|P","RD","ent","ACME Consumer Products","",[],["−82.2","−2.1%","−83.9","+1.7","+2.0%","−75.9","−6.3","−8.3%","−122.0","−119.0","+3.0"],"000ff0uu00f",0.132],["RD|S","RD","ent","ACME Commerce Cloud","",[],["−95.1","−2.4%","−96.2","+1.1","+1.1%","−72.5","−22.6","−31.2%","−139.2","−137.4","+1.8"],"000ff0uu00f",0.074],["GA","OPEX","sec","General & administrative","",[],["−226.9","−5.7%","−231.0","+4.1","+1.8%","−203.5","−23.4","−11.5%","−335.1","−327.7","+7.4"],"000ff0uu00f",0.118],["GA|P","GA","ent","ACME Consumer Products","",[],["−180.1","−4.5%","−183.6","+3.6","+1.9%","−166.3","−13.8","−8.3%","−266.5","−260.1","+6.5"],"000ff0uu00f",0.129],["GA|S","GA","ent","ACME Commerce Cloud","",[],["−46.9","−1.2%","−47.4","+0.5","+1.1%","−37.2","−9.7","−26.0%","−68.5","−67.7","+0.9"],"000ff0uu00f",0.073],["OOI","OPEX","sec","Other operating income / (expense)","",[],["7.5","0.2%","7.5","0.0","−0.6%","6.5","+1.0","+15.1%","10.9","10.7","−0.2"],"000000ff00u",-0.043],["OOI|P","OOI","ent","ACME Consumer Products","",[],["6.8","0.2%","6.9","−0.1","−1.6%","6.1","+0.7","+11.7%","10.1","9.8","−0.2"],"000uu0ff00u",-0.107],["OOI|S","OOI","ent","ACME Commerce Cloud","",[],["0.6","0.0%","0.6","+0.1","+10.8%","0.4","+0.3","+69.2%","0.8","0.9","+0.1"],"000ff0ff00f",0.723],["EBITDA","","key","Adjusted EBITDA","",["MPM"],["760.4","19.1%","783.6","−23.2","−3.0%","689.3","+71.0","+10.3%","1,109.8","1,066.7","−43.0"],"000uu0ff00u",-0.198],["EBP","","ratio","Adjusted EBITDA margin %","",[],["19.1%","","19.4%","−0.2 pp","","19.2%","−0.1 pp","","18.9%","18.6%","−0.3 pp"],"000u00u000u",null],["DA","","sec","Depreciation & amortisation","",["Operating"],["−152.2","−3.8%","−154.9","+2.7","+1.8%","−133.8","−18.4","−13.8%","−224.7","−219.8","+4.9"],"000ff0uu00f",0.117],["DA|P","DA","ent","ACME Consumer Products","",[],["−122.3","−3.1%","−124.7","+2.4","+1.9%","−113.0","−9.3","−8.2%","−181.1","−176.7","+4.4"],"000ff0uu00f",0.128],["DA|S","DA","ent","ACME Commerce Cloud","",[],["−29.9","−0.8%","−30.2","+0.3","+1.1%","−20.7","−9.1","−44.0%","−43.7","−43.1","+0.6"],"000ff0uu00f",0.074],["UOP","","memo","Underlying operating profit","",["MPM"],["608.2","15.3%","628.7","−20.5","−3.3%","555.6","+52.6","+9.5%","885.0","846.9","−38.1"],"000uu0ff00u",-0.218],["ADJ","","sec","Adjusting items","",["Operating"],["−11.4","−0.3%","−4.5","−6.9","−152.9%","−29.5","+18.1","+61.2%","−4.5","−11.4","−6.9"],"000uu0ff00u",-1],["ADJ|P","ADJ","ent","ACME Consumer Products","",[],["−10.0","−0.3%","−4.5","−5.5","−121.5%","−26.3","+16.3","+61.9%","−4.5","−10.0","−5.5"],"000uu0ff00u",-1],["ADJ|S","ADJ","ent","ACME Commerce Cloud","",[],["−1.4","0.0%","0.0","−1.4","","−3.2","+1.8","+55.4%","0.0","−1.4","−1.4"],"000u00ff00u",null],["OP","","key","Operating profit","",["IFRS 18"],["596.7","15.0%","624.2","−27.4","−4.4%","526.1","+70.7","+13.4%","880.5","835.5","−45.0"],"000uu0ff00u",-0.293],["OPP","","ratio","Operating margin %","",[],["15.0%","","15.4%","−0.4 pp","","14.7%","+0.3 pp","","15.0%","14.6%","−0.4 pp"],"000u00f000u",null],["INV","","sec","Investing income","",["Investing"],["16.3","0.4%","16.5","−0.3","−1.7%","15.0","+1.2","+8.2%","24.0","23.5","−0.5"],"000uu0ff00u",-0.114],["INV|P","INV","ent","ACME Consumer Products","",[],["12.2","0.3%","12.5","−0.2","−1.9%","11.9","+0.3","+2.5%","18.1","17.7","−0.4"],"000uu0ff00u",-0.128],["INV|S","INV","ent","ACME Commerce Cloud","",[],["4.0","0.1%","4.1","0.0","−1.1%","3.1","+0.9","+29.9%","5.9","5.8","−0.1"],"000000ff00u",-0.074],["PBFIT","","sub","Profit before financing and income taxes","",["IFRS 18"],["613.0","15.4%","640.7","−27.7","−4.3%","541.1","+71.9","+13.3%","904.5","859.0","−45.5"],"000uu0ff00u",-0.288],["FIN","","sec","Financing expenses","",["Financing"],["−44.8","−1.1%","−45.7","+0.9","+1.9%","−40.8","−4.0","−9.8%","−66.3","−64.8","+1.6"],"000ff0uu00f",0.127],["FIN|P","FIN","ent","ACME Consumer Products","",[],["−41.1","−1.0%","−41.9","+0.8","+2.0%","−38.0","−3.1","−8.2%","−60.9","−59.4","+1.5"],"000ff0uu00f",0.133],["FIN|S","FIN","ent","ACME Commerce Cloud","",[],["−3.7","−0.1%","−3.8","0.0","+0.9%","−2.9","−0.9","−30.4%","−5.5","−5.4","+0.1"],"000000uu00f",0.059],["PBT","","sub","Profit before tax","",[],["568.2","14.3%","595.0","−26.8","−4.5%","500.3","+67.9","+13.6%","838.2","794.2","−43.9"],"000uu0ff00u",-0.301],["TAX","","sec","Income tax expense","",["Income tax"],["−135.4","−3.4%","−141.7","+6.3","+4.5%","−119.3","−16.1","−13.5%","−199.8","−189.4","+10.4"],"000ff0uu00f",0.297],["TAX|P","TAX","ent","ACME Consumer Products","",[],["−125.1","−3.1%","−130.2","+5.0","+3.9%","−111.2","−13.9","−12.5%","−184.4","−175.8","+8.6"],"000ff0uu00f",0.258],["TAX|S","TAX","ent","ACME Commerce Cloud","",[],["−10.3","−0.3%","−11.6","+1.3","+11.2%","−8.1","−2.2","−27.0%","−15.3","−13.5","+1.8"],"000ff0uu00f",0.745],["ETR","","ratio","Effective tax rate %","",[],["23.8%","","23.8%","0.0 pp","","23.9%","0.0 pp","","23.8%","23.8%","0.0 pp"],"00000000000",null],["NP","","key","Net profit for the period","",[],["432.7","10.9%","453.3","−20.5","−4.5%","380.9","+51.8","+13.6%","638.4","604.8","−33.6"],"000uu0ff00u",-0.302],["NPP","","ratio","Net margin %","",[],["10.9%","","11.2%","−0.3 pp","","10.6%","+0.3 pp","","10.9%","10.5%","−0.3 pp"],"000u00f000u",null]],"kpis":[{"l":"Net revenue","v":"$3,972.7m","s":[["vs Budget","−1.8%","u"],["vs Prior year","+10.9%","f"]],"h":""},{"l":"Organic growth","v":"+8.7%","s":[["Reported, incl. FX","+10.9%","f"]],"h":"vs prior year, constant currency"},{"l":"Gross margin","v":"50.1%","s":[["vs Budget","−0.4 pp","u"],["vs Prior year","0.0 pp","0"]],"h":""},{"l":"Services share of revenue","v":"14.5%","s":[],"h":"Commerce Cloud external revenue / group"},{"l":"Intercompany eliminated","v":"$21.8m","s":[],"h":"Platform & payment fees, D2C webstore"},{"l":"Contribution margin","v":"41.1%","s":[["vs Budget","−0.6 pp","u"],["vs Prior year","−0.2 pp","u"]],"h":""},{"l":"Adjusted EBITDA","v":"$760.4m","s":[["Margin","19.1%","0"],["vs Budget","−3.0%","u"],["vs Prior year","+10.3%","f"]],"h":""},{"l":"Operating profit","v":"$596.7m","s":[["Margin","15.0%","0"],["vs Budget","−4.4%","u"],["vs Prior year","+13.4%","f"]],"h":""}],"ops":[{"l":"Consumer Products operating margin","v":"16.2%","s":[["Operating profit","$550.2m","0"]],"h":""},{"l":"Commerce Cloud operating margin","v":"7.8%","s":[["Operating profit","$46.5m","0"]],"h":""},{"l":"Net profit","v":"$432.7m","s":[["Margin","10.9%","0"],["vs Budget","−4.5%","u"],["vs Prior year","+13.6%","f"]],"h":""},{"l":"Effective tax rate","v":"23.8%","s":[["vs Budget","0.0 pp","0"],["vs Prior year","0.0 pp","0"]],"h":""}],"bridge":{"vs":"Budget","geo":[["Budget","$4,045.4m","t",0,89.8],["Consumer Products","−95.8","u",53.05,36.75],["Commerce Cloud","−10.5","u",49.01,4.03],["Eliminations","−0.1","u",48.98,0.6],["FX translation","+33.6","f",48.98,12.91],["Actual","$3,972.7m","t",0,61.89]],"axis":"$3,811m"},"drivers":[["Gross product sales","Gross revenue · Consumer Products","4,302.4","4,371.9","−69.5","−1.6%","u"],["Advertising: working media","Sales & marketing · Consumer Products","−222.0","−240.2","+18.3","+7.6%","f"],["Sourced finished goods","Cost of revenue · Consumer Products","−452.3","−466.8","+14.5","+3.1%","f"],["Raw materials & packaging","Cost of revenue · Consumer Products","−670.3","−680.7","+10.4","+1.5%","f"],["Inbound freight, duties & tariffs","Cost of revenue · Consumer Products","−166.9","−157.4","−9.5","−6.0%","u"],["Subscription platform fees","Gross revenue · Commerce Cloud","242.9","249.9","−7.0","−2.8%","u"],["Trade promotions & retailer allowances","Gross-to-net deductions · Consumer Products","−480.1","−475.5","−4.7","−1.0%","u"],["Current tax","Income tax expense · Consumer Products","−104.3","−108.5","+4.2","+3.9%","f"]],"prof":[["ACME Consumer Products","3,398.5","85.5%",85.55,"−1.9%","u","49.4%","39.1%","20.1%","16.2%"],["ACME Commerce Cloud","596.0","15.0%",15.0,"−1.0%","u","55.8%","50.9%","13.1%","7.8%"],["Intercompany eliminations","−21.8","−0.5%",0,"","0","","","",""]]}};
+
+const META = {
+  P: {
+    sliceNote: 'All slices',
+    notices: ['Full year compares the budget with the latest estimate: Jan–Sep actuals plus the Sep 2026 forecast for Oct–Dec.'],
+    sets: [
+      { lab: 'Channel', vals: ['Grocery & mass retail', 'Drugstore & specialty retail', 'Own D2C webstore', 'Online marketplaces', 'Wholesale & distributors'] },
+      { lab: 'Category', vals: ['Home care', 'Personal care & beauty', 'Kitchen & household', 'Electronics accessories', 'Toys & leisure'] },
+      { lab: 'Price tier', vals: ['Premium', 'Mainstream', 'Value & private label'] }
+    ],
+    sliceSub: 'Region, channel, category and price tier',
+    bridgeSub: 'Volume and price / mix at constant currency; FX is the translation effect.',
+    profBy: 'channel', profCol: 'Channel', profOpts: ['Region', 'Channel', 'Category', 'Price tier'], profSel: 1,
+    profNote: 'Gross and contribution margins use costs booked to each channel. Lines below contribution margin are allocated by net revenue share, so EBITDA and operating margins by channel are indicative.'
+  },
+  S: {
+    sliceNote: 'All slices',
+    notices: ['Full year compares the budget with the latest estimate: Jan–Sep actuals plus the Sep 2026 forecast for Oct–Dec.', 'Revenue includes $21.8m billed to Consumer Products for its D2C webstore and payments; it is eliminated in the Group view.'],
+    sets: [
+      { lab: 'Sales motion', vals: ['Self-serve sign-up', 'Sales-led (direct)', 'Partner & agency-led'] },
+      { lab: 'Service line', vals: ['Platform subscriptions', 'Payments', 'Apps, partners & ads', 'Professional services'] },
+      { lab: 'Customer segment', vals: ['Small business', 'Mid-market', 'Enterprise'] }
+    ],
+    sliceSub: 'Region, sales motion, service line and segment',
+    bridgeSub: 'Change by service line at constant currency; FX is the translation effect.',
+    profBy: 'sales motion', profCol: 'Sales motion', profOpts: ['Region', 'Sales motion', 'Service line', 'Segment'], profSel: 1,
+    profNote: 'Gross and contribution margins use costs booked to each sales motion. Lines below contribution margin are allocated by net revenue share, so EBITDA and operating margins by sales motion are indicative.'
+  },
+  G: {
+    sliceNote: 'All regions, consolidated',
+    notices: ['Consolidated: $21.8m of Commerce Cloud fees to the Consumer Products D2C webstore are removed from revenue and from cost-to-serve. Channel, category and segment filters are off.', 'Full year compares the budget with the latest estimate: Jan–Sep actuals plus the Sep 2026 forecast for Oct–Dec.'],
+    sets: [],
+    sliceSub: 'Only region applies in the consolidated view',
+    bridgeSub: 'Change by company at constant currency; FX is the translation effect.',
+    profBy: 'company', profCol: 'Company', profOpts: ['Region', 'Company'], profSel: 1,
+    profNote: 'Company margins are each company’s own results before eliminations. Shares are of consolidated net revenue.'
+  }
+};
+
+const THEME = {
+  P: { acc: '#2453A6', accT: '#E8EEF8', keyRule: '#B9C8E4', short: 'Consumer Products' },
+  S: { acc: '#6B48C8', accT: '#F0EBFB', keyRule: '#CFC2F0', short: 'Commerce Cloud' },
+  G: { acc: '#3B4A5E', accT: '#EAEDF1', keyRule: '#C5CCD5', short: 'ACME Group' }
+};
+const COMPANIES = [
+  { key: 'P', name: 'Consumer Products', sub: 'Goods · retail, D2C, marketplaces' },
+  { key: 'S', name: 'Commerce Cloud', sub: 'E-commerce SaaS services' },
+  { key: 'G', name: 'ACME Group', sub: 'Consolidated' }
+];
+const VIEWS = { 'P&L': 'pnl', 'Key figures': 'kpi', 'Analysis': 'ana', 'Profitability': 'prof' };
+const ENTS = { 'Consumer Products': 'P', 'Commerce Cloud': 'S', 'ACME Group': 'G' };
+const PANELS = { 'Period': 'period', 'Versions': 'compare', 'Slice': 'slice', 'Display': 'display' };
+const GROUPS = ['period', 'compare', 'slice', 'display'];
+const REGIONS = ['North America', 'Continental Europe', 'UK & Ireland', 'Asia-Pacific'];
+const OPEN = { P: ['GR', 'GTN', 'COR', 'VSC', 'OPEX'], S: ['GR', 'GTN', 'COR', 'VSC', 'OPEX'], G: ['GR', 'VSC', 'OPEX'] };
+const FAV = '#06603F', UNF = '#C2410C', MUTED = '#4F5C6C', INK = '#101B2B';
+const TAGCOL = { 'IFRS 18': ['#2B3748', 'solid'], 'MPM': [MUTED, 'dashed'], 'Mgmt': [MUTED, 'dashed'], 'IC': ['#6B48C8', 'solid'] };
+const GSTART = { 2: true, 5: true, 8: true };
+const num = (s) => parseFloat(String(s).replace(/−/g, '-').replace(/[^0-9.\-]/g, ''));
+
+class Component extends DCLogic {
+  state = { ent: null, view: null, panel: 'init', wide: null, open: { P: OPEN.P.slice(), S: OPEN.S.slice(), G: OPEN.G.slice() } };
+
+  cur() {
+    const ent = this.state.ent || ENTS[this.props.entity] || 'P';
+    const view = this.state.view || VIEWS[this.props.view] || 'pnl';
+    const panel = this.state.panel === 'init' ? (PANELS[this.props.panel] || null) : this.state.panel;
+    const wide = this.state.wide === null ? this.props.rail === 'Expanded' : this.state.wide;
+    return { ent: ent, view: view, panel: panel, wide: wide };
+  }
+
+  toggleRow(e, id) {
+    const cur = this.state.open[e];
+    const next = cur.indexOf(id) >= 0 ? cur.filter((x) => x !== id) : cur.concat([id]);
+    const open = Object.assign({}, this.state.open);
+    open[e] = next;
+    this.setState({ open: open });
+  }
+
+  renderVals() {
+    const c = this.cur();
+    const e = c.ent, d = DATA[e], m = META[e], th = THEME[e], open = this.state.open[e];
+    const railW = c.wide ? 248 : 64;
+
+    const KIND = {
+      sec: { bg: '#FFFFFF', fw: 500, fi: 'normal', fs: '14px', ink: INK, rule: '#E3E8ED' },
+      grp: { bg: '#FFFFFF', fw: 500, fi: 'normal', fs: '14px', ink: INK, rule: '#E3E8ED' },
+      leaf: { bg: '#FFFFFF', fw: 400, fi: 'normal', fs: '14px', ink: INK, rule: '#EDF0F3' },
+      ent: { bg: '#FFFFFF', fw: 400, fi: 'normal', fs: '14px', ink: INK, rule: '#EDF0F3' },
+      sub: { bg: '#F6F8FA', fw: 600, fi: 'normal', fs: '14px', ink: INK, rule: '#D5DCE3' },
+      memo: { bg: '#F6F8FA', fw: 500, fi: 'italic', fs: '14px', ink: INK, rule: '#D5DCE3' },
+      key: { bg: th.accT, fw: 700, fi: 'normal', fs: '14px', ink: INK, rule: th.keyRule },
+      ratio: { bg: '#FFFFFF', fw: 400, fi: 'italic', fs: '13px', ink: MUTED, rule: '#EDF0F3' }
+    };
+    const byId = {}, kids = {};
+    d.rows.forEach((r) => { byId[r[0]] = r; if (r[1]) kids[r[1]] = true; });
+    const depth = (r) => { let n = 0, p = r[1]; while (p) { n += 1; p = byId[p] ? byId[p][1] : ''; } return n; };
+    const shown = (r) => { let p = r[1]; while (p) { if (open.indexOf(p) < 0) return false; p = byId[p] ? byId[p][1] : ''; } return true; };
+    const rows = d.rows.filter(shown).map((r) => {
+      const ratio = r[2] === 'ratio', has = !!kids[r[0]], isOpen = open.indexOf(r[0]) >= 0;
+      const cells = [];
+      r[6].forEach((t, i) => {
+        const code = r[7][i];
+        cells.push({ isTxt: true, isBar: false, t: t, col: (i === 1 && !ratio) ? MUTED : code === 'f' ? FAV : code === 'u' ? UNF : 'inherit', bl: GSTART[i] ? '1px solid #E3E8ED' : 'none' });
+        if (i === 4) {
+          const v = r[8], hasBar = typeof v === 'number' && !ratio;
+          const w = hasBar ? Math.max(1, Math.abs(v) * 42) : 0;
+          cells.push({ isTxt: false, isBar: true, has: hasBar, l: hasBar && v < 0 ? 50 - w : 50, w: w, col: hasBar && v < 0 ? '#E2804A' : '#3BA37B' });
+        }
+      });
+      return Object.assign({}, KIND[r[2]], {
+        label: r[3], alias: r[4], hasAlias: !!r[4],
+        tags: r[5].map((t) => { const tc = TAGCOL[t] || [MUTED, 'solid']; return { t: t, col: tc[0], st: tc[1] }; }),
+        pad: 12 + depth(r) * 22, hasKids: has, noKids: !has,
+        exp: isOpen ? 'true' : 'false', rot: isOpen ? 'rotate(90deg)' : 'none',
+        toggle: () => this.toggleRow(e, r[0]), cells: cells
+      });
+    });
+
+    const sub = (s) => {
+      const t = s[1], code = s[2];
+      const plain = s[0] === 'Margin' || s[0] === 'Operating profit';
+      return {
+        n: s[0], t: t,
+        ar: plain ? '' : t.charAt(0) === '+' ? '▲' : t.charAt(0) === '−' ? '▼' : '',
+        col: code === 'f' ? FAV : code === 'u' ? UNF : INK,
+        bg: code === 'f' ? '#E4F3EC' : code === 'u' ? '#FCEDE5' : '#EDF0F3'
+      };
+    };
+    const tile = (k) => ({ l: k.l, v: k.v, h: k.h, hasH: !!k.h, s: k.s.map(sub) });
+
+    const g = {};
+    const sums = { period: 'YTD · Sep 2026', compare: 'Actual vs Budget, Prior year', slice: m.sliceNote, display: 'USD m · actual rates' };
+    GROUPS.forEach((k) => {
+      const isOpen = c.panel === k;
+      g[k] = { toggle: () => this.setState({ panel: isOpen ? null : k }), exp: isOpen ? 'true' : 'false', bg: isOpen ? '#2B3748' : 'transparent', fg: isOpen ? '#FFFFFF' : '#C9D3E0', sum: sums[k] };
+    });
+    const titles = { period: ['Period', 'Year, month and time view'], compare: ['Versions', 'Base and two comparisons'], slice: ['Slice', m.sliceSub], display: ['Display', 'Currency, units and table options'] };
+    const pIdx = c.panel ? GROUPS.indexOf(c.panel) : 0;
+
+    const tab = (k) => {
+      const sel = c.view === k;
+      return { sel: sel ? 'true' : 'false', bd: sel ? th.acc : 'transparent', col: sel ? INK : MUTED, fw: sel ? 600 : 500, pick: () => this.setState({ view: k }) };
+    };
+
+    const maxD = Math.max.apply(null, d.drivers.map((x) => Math.abs(num(x[4]))).concat([1]));
+    const cmTile = d.kpis.filter((k) => k.l === 'Contribution margin')[0];
+    const cmAvg = cmTile ? num(cmTile.v) : 0;
+
+    return {
+      acc: th.acc, accT: th.accT,
+      railW: railW, wide: c.wide, narrow: !c.wide, wideStr: c.wide ? 'true' : 'false',
+      chev: c.wide ? 'rotate(180deg)' : 'none',
+      railAria: c.wide ? 'Collapse filter panel' : 'Expand filter panel',
+      toggleRail: () => this.setState({ wide: !c.wide }),
+      g: g,
+      panelOpen: !!c.panel, pPeriod: c.panel === 'period', pCompare: c.panel === 'compare', pSlice: c.panel === 'slice', pDisplay: c.panel === 'display',
+      panelTitle: c.panel ? titles[c.panel][0] : '', panelSub: c.panel ? titles[c.panel][1] : '',
+      closePanel: () => this.setState({ panel: null }),
+      flyL: railW + 10, ptrT: pIdx * 52 + 18,
+      regions: REGIONS.map((t) => ({ t: t })),
+      sets: m.sets.map((s) => ({ lab: s.lab, n: 'All ' + s.vals.length, vals: s.vals.map((t) => ({ t: t })) })),
+      sliceOn: e !== 'G', sliceOff: e === 'G',
+      ctx: 'YTD Jan–Sep 2026 · Actual vs Budget and Prior year · USD m, actual rates · ' + m.sliceNote,
+      companies: COMPANIES.map((co) => {
+        const sel = co.key === e, ct = THEME[co.key];
+        return { name: co.name, sub: co.sub, dot: ct.acc, pressed: sel ? 'true' : 'false', bd: sel ? ct.acc : '#CDD4DC', sh: sel ? '0 0 0 1px ' + ct.acc : 'none', bg: sel ? ct.accT : '#FFFFFF', pick: () => this.setState({ ent: co.key }) };
+      }),
+      t: { pnl: tab('pnl'), kpi: tab('kpi'), ana: tab('ana'), prof: tab('prof') },
+      vPnl: c.view === 'pnl', vKpi: c.view === 'kpi', vAna: c.view === 'ana', vProf: c.view === 'prof',
+      entOn: e === 'G', entOff: e !== 'G',
+      notices: m.notices.map((t) => ({ t: t })),
+      rows: rows, rowH: (this.props.density ?? 'Comfortable') === 'Compact' ? 28 : 34, showTags: this.props.showTags ?? true,
+      kpis: d.kpis.map(tile), ops: d.ops.map(tile),
+      bridgeSub: m.bridgeSub, axis: d.bridge.axis,
+      bridge: d.bridge.geo.map((b) => ({
+        l: b[0], v: b[1], bot: b[3], h: b[4], top: b[3] + b[4],
+        col: b[2] === 't' ? th.acc : b[2] === 'f' ? '#3BA37B' : '#E2804A',
+        tcol: b[2] === 'f' ? FAV : b[2] === 'u' ? UNF : INK
+      })),
+      drivers: d.drivers.map((x) => {
+        const v = num(x[4]), w = Math.max(1, (Math.abs(v) / maxD) * 46);
+        return { n: x[0], b: x[1], d: x[4], dp: x[5], col: x[6] === 'f' ? FAV : UNF, bar: v < 0 ? '#E2804A' : '#3BA37B', l: v < 0 ? 50 - w : 50, w: w };
+      }),
+      profBy: m.profBy, profCol: m.profCol, profNote: m.profNote,
+      profOpts: m.profOpts.map((o, i) => {
+        const sel = i === m.profSel;
+        return { t: o, pressed: sel ? 'true' : 'false', bg: sel ? th.accT : '#FFFFFF', col: sel ? th.acc : INK, fw: sel ? 600 : 400, bl: i === 0 ? '0' : '1px solid #CDD4DC' };
+      }),
+      prof: d.prof.map((p) => ({ n: p[0], nr: p[1], sh: p[2], w: Math.max(0, Math.min(100, p[3])), dp: p[4], col: p[5] === 'f' ? FAV : p[5] === 'u' ? UNF : INK, gm: p[6], cm: p[7], eb: p[8], op: p[9] })),
+      cmBars: d.prof.filter((p) => p[7] !== '').map((p) => ({ n: p[0], v: p[7], w: Math.max(0, Math.min(100, (num(p[7]) / 60) * 100)) })),
+      cmPos: Math.min(100, (cmAvg / 60) * 100), cmLabel: th.short + ' average ' + (cmTile ? cmTile.v : '')
+    };
+  }
+}
+</script>
+</body>
+</html>

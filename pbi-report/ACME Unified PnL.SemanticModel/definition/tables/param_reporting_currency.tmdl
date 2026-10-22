@@ -1,0 +1,61 @@
+/// D-21 / F-12 reporting currency.
+table param_reporting_currency
+	lineageTag: 558d2159-d771-5332-ade1-7f5dfd9317f0
+
+	column currency_code
+		dataType: string
+		lineageTag: 1c16ea04-6dbd-522c-b873-2c9650552001
+		summarizeBy: none
+		sourceColumn: currency_code
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column currency_name
+		dataType: string
+		lineageTag: 6cfaef09-9dca-5508-a8fc-fb00091c299c
+		summarizeBy: none
+		sourceColumn: currency_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column symbol
+		dataType: string
+		isHidden
+		lineageTag: dcebd4d1-10fb-503f-9547-7bbf8a55d7e6
+		summarizeBy: none
+		sourceColumn: symbol
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4aca40ac-98d2-5f27-86e3-e4a10dfe35b3
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 3759b067-454b-55b2-a8b8-95621d1239a7
+		summarizeBy: none
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = User
+
+	partition param_reporting_currency = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "param_reporting_currency"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

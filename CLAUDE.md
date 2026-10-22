@@ -84,7 +84,7 @@ Main agent (Claude Opus 5.5) routes work to sub-agents. Auto-route obvious cases
 
 ### MCP access
 - **supabase (Postgres project, registered in `.mcp.json`):** archi, chef, hunter
-- **vercel (team `yaga`, hosts Track C; registered in `.mcp.json`):** archi, nerd — deploy writes go through the main agent with USER consent
+- **vercel (team `yaga`; registered in `.mcp.json`):** archi, nerd — read-only; no Track C project or deploys from this repo (hosting lives in the vosk.dev repo, 2026-10-22)
 - **microsoft-learn (Fabric / Power BI / Rayfin docs):** fin, ginee, bip — needs claude.ai connector auth
 - **fab-admin / fab-admin-write / pbi-profiler (local tools in `tools/`):** bip, ginee — not registered in `.mcp.json` yet (open item); write server only with `--allow-write` and USER consent
 - Do not add MCPs to agents outside this matrix without an ADR.
@@ -198,12 +198,12 @@ These rules are load-bearing. They override convenience, speed, and any implicit
 
 ### Branching & CI
 - Single branch `prod`. Every change is committed and pushed to `prod`; no `dev`, no feature branches.
-- Vercel builds Track C production from `prod`; there is no preview branch.
+- Track C is hosted and embedded by the vosk.dev repo (hand-off via `.sync/`); this repo has no Vercel project.
 - CI (GitHub Actions, per track once code exists): lint → typecheck → build → test
 - Reconciliation gate: each track's totals match `data/acme_pl_dummy_data/checks/control_totals_usd.csv` (T-06); PBIP validation for Track B.
 
 ### Testing policy
-- **All manual / smoke / click-test runs happen on the deploy target** (A: Fabric workspace via `rayfin up` · B: Power BI Service workspace · C: Vercel deployment) — not against localhost / Desktop-only state — unless a heavy need for local testing arises (e.g., debugging an OS-only failure, isolating a build-tool issue, or when no deploy exists yet). Reason: parity with the deploy environment, no local-version drift, no host-only quirks.
+- **All manual / smoke / click-test runs happen on the deploy target** (A: Fabric workspace via `rayfin up` · B: Power BI Service workspace · C: local `next build && next start` here; the hosted deploy is tested in the vosk.dev repo) — not against localhost / Desktop-only state — unless a heavy need for local testing arises (e.g., debugging an OS-only failure, isolating a build-tool issue, or when no deploy exists yet). Reason: parity with the deploy environment, no local-version drift, no host-only quirks.
 - Automated tests (C: Vitest; B: DAX query tests against control totals; A: per fin's recommendation) still run locally and in CI as usual; the rule above applies to **manual end-to-end / interactive verification only**.
 - Spec §10 acceptance tests (T-01 … T-18) are the shared gauntlet: every track proves them before a feature is marked implemented.
 
@@ -328,14 +328,14 @@ docs/ADD/features/pbi-report-layout.md → design brief, view map, first-open ch
 
 ### ▶ TRACK C — Custom JS report · `js-report/`
 
-**Stack:** Next.js (App Router) · TypeScript strict · pre-aggregated Parquet + DuckDB-wasm in the browser (no backend) · Vitest · Vercel (team `yaga`)
+**Stack:** Next.js 16 (App Router) · TypeScript strict · pre-aggregated Parquet (`hyparquet`) + pure-TS engine in the browser (no backend, no DuckDB-wasm) · Zod · Vitest · ADR-0002. Hosting + embedding: the vosk.dev repo (hand-off via `.sync/`)
 
-**Structure** (proposed; finalized in ADR-0002):
+**Structure** (ADR-0002):
 ```
 js-report/
   app/             → app shell (thin — orchestration only)
   lib/engine/      → P&L calc engine (spec §7: time windows, versions, FX, allocation, intercompany, bridge)
-  lib/data/        → DuckDB-wasm loader + typed queries
+  lib/data/        → Parquet loader + manifest contract (Zod)
   scripts/         → CSV → Parquet pre-aggregation build
   public/data/     → generated Parquet (build output)
 ```
@@ -348,6 +348,7 @@ js-report/
 - All URL/query-state inputs (F-37 shareable link) validated at the boundary before reaching the engine
 - Keep the shipped Parquet small: pre-aggregate in `scripts/`, never ship raw fact CSVs to the browser
 - Embeddable: no assumptions about the host page; the vosk.dev repo owns the wrapper
+- Scope here = minimum skeleton (ADR-0002 steps 0–3) + hand-off in `.sync/` (artifacts + README); the vosk.dev repo agent finalizes, hosts and embeds. No Vercel project, deploy or embed code in this repo
 - Components: `PascalCase.tsx` · engine modules: `kebab-case.ts`
 
 ---

@@ -1,0 +1,53 @@
+/// D-13 expense natures (by-nature lens, deferred).
+table dim_nature
+	lineageTag: d57db908-99f7-50f2-b958-294768d0252a
+
+	column nature_code
+		dataType: string
+		isHidden
+		lineageTag: 32718b74-8c45-5471-a3cc-723444453b30
+		summarizeBy: none
+		sourceColumn: nature_code
+
+		annotation SummarizationSetBy = User
+
+	column nature_name
+		dataType: string
+		lineageTag: d49f918d-a71c-5cd2-a7d9-a3623fc96dc1
+		summarizeBy: none
+		sourceColumn: nature_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ea5fe960-c66f-53f2-8abb-3b129418f72b
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column natural_sign
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ff330813-f52a-5be6-afd7-558441799fbf
+		summarizeBy: none
+		sourceColumn: natural_sign
+
+		annotation SummarizationSetBy = User
+
+	partition dim_nature = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "dim_nature"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

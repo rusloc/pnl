@@ -1,0 +1,205 @@
+/// Statement rows: one row per dim_report_line line plus one per leaf account under its block (D-10, D-11). Drives the matrix; disconnected, applied by _Amt Row.
+table dim_pl_row
+	lineageTag: c4742911-3521-54e3-9cf1-a35b7218810f
+
+	column row_key
+		dataType: string
+		isHidden
+		lineageTag: 933f32bd-ea17-5280-aa96-bd35b6e74574
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_key]
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 4613bf17-46ea-520f-86a8-4faa590539c8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [line_code]
+
+		annotation SummarizationSetBy = User
+
+	column line_label
+		dataType: string
+		lineageTag: 7dd8f42f-7797-55d2-bead-03fe1dba844c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [line_label]
+		sortByColumn: line_sort
+
+		annotation SummarizationSetBy = User
+
+	column line_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 034ba803-eb0a-5aaa-9f43-157bec308090
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [line_sort]
+
+		annotation SummarizationSetBy = User
+
+	column row_type
+		dataType: string
+		isHidden
+		lineageTag: 2454c8ae-9f92-5474-a125-edae56099530
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_type]
+
+		annotation SummarizationSetBy = User
+
+	column is_key
+		dataType: boolean
+		isHidden
+		lineageTag: 8eef4046-9f8f-53a7-a085-01104706df9c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_key]
+
+		annotation SummarizationSetBy = User
+
+	column tag
+		dataType: string
+		isHidden
+		lineageTag: 1586681d-a916-57a6-b169-9e2e924e24a8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [tag]
+
+		annotation SummarizationSetBy = User
+
+	column account_code
+		dataType: string
+		isHidden
+		lineageTag: 1b699768-4b22-581c-914e-b8c00769f142
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [account_code]
+
+		annotation SummarizationSetBy = User
+
+	column account_label
+		dataType: string
+		lineageTag: a3568efa-635e-5051-9f1c-b0f518367311
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [account_label]
+		sortByColumn: account_sort
+
+		annotation SummarizationSetBy = User
+
+	column account_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e50070fb-cd3b-53bc-b818-f181a1917fc2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [account_sort]
+
+		annotation SummarizationSetBy = User
+
+	column is_leaf
+		dataType: boolean
+		isHidden
+		lineageTag: f0747d44-7104-5684-adaf-9747f9d19c5d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_leaf]
+
+		annotation SummarizationSetBy = User
+
+	column ratio_num_line
+		dataType: string
+		isHidden
+		lineageTag: 1ffb461d-9454-5492-bf12-c0db04c8f985
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ratio_num_line]
+
+		annotation SummarizationSetBy = User
+
+	column ratio_den_line
+		dataType: string
+		isHidden
+		lineageTag: 3f32cc29-39a6-5d9d-b7c6-8f38835c5a5d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ratio_den_line]
+
+		annotation SummarizationSetBy = User
+
+	column ratio_sign
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8545e3ca-3992-5de6-9098-a1399a23861d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ratio_sign]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_pl_row = calculated
+		mode: import
+		source =
+				VAR _lines        =
+				    SELECTCOLUMNS (
+				        dim_report_line
+				        ,"row_key", dim_report_line[line_code]
+				        ,"line_code", dim_report_line[line_code]
+				        ,"line_label", dim_report_line[line_name]
+				        ,"line_sort", dim_report_line[sort_order]
+				        ,"row_type", dim_report_line[row_type]
+				        ,"is_key", dim_report_line[is_key]
+				        ,"tag", dim_report_line[tag] & ""
+				        ,"account_code", ""
+				        ,"account_label", ""
+				        ,"account_sort", 0
+				        ,"is_leaf", FALSE ()
+				        ,"ratio_num_line",
+				            IF (
+				                dim_report_line[row_type] = "ratio"
+				                ,SUBSTITUTE (
+				                    TRIM ( LEFT ( dim_report_line[formula], SEARCH ( "/", dim_report_line[formula], 1, 1 ) - 1 ) )
+				                    ,"-"
+				                    ,""
+				                )
+				                ,""
+				            )
+				        ,"ratio_den_line",
+				            IF (
+				                dim_report_line[row_type] = "ratio"
+				                ,TRIM ( MID ( dim_report_line[formula], SEARCH ( "/", dim_report_line[formula], 1, 1 ) + 1, 100 ) )
+				                ,""
+				            )
+				        ,"ratio_sign", IF ( LEFT ( TRIM ( dim_report_line[formula] & "" ), 1 ) = "-", -1, 1 )
+				    )
+				VAR _leaves       =
+				    SELECTCOLUMNS (
+				        dim_account
+				        ,"row_key", dim_account[block_code] & "|" & dim_account[account_code]
+				        ,"line_code", dim_account[block_code]
+				        ,"line_label", LOOKUPVALUE ( dim_report_line[line_name], dim_report_line[line_code], dim_account[block_code] )
+				        ,"line_sort", LOOKUPVALUE ( dim_report_line[sort_order], dim_report_line[line_code], dim_account[block_code] )
+				        ,"row_type", "input_block"
+				        ,"is_key", FALSE ()
+				        ,"tag", IF ( dim_account[is_intercompany], "IC", "" )
+				        ,"account_code", dim_account[account_code]
+				        ,"account_label", dim_account[account_name]
+				        ,"account_sort", IF ( dim_account[has_fact_rows], dim_account[sort_order], 9990 )
+				        ,"is_leaf", TRUE ()
+				        ,"ratio_num_line", ""
+				        ,"ratio_den_line", ""
+				        ,"ratio_sign", 1
+				    )
+				RETURN
+				    UNION ( _lines, _leaves )
+
+	annotation PBI_ResultType = Table
+

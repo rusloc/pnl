@@ -1,0 +1,58 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["SqlEndpoint", "Database", "fact_pl", "fact_pl_allocated", "fact_operational", "fact_fx_rate", "dim_account", "dim_report_line", "bridge_account_nature", "dim_nature", "dim_entity", "dim_month", "dim_version", "dim_region", "dim_channel", "dim_line", "dim_segment", "dim_cost_centre", "param_reporting_currency", "param_fx_basis", "param_units", "param_time_view", "param_version_choice", "control_totals_usd"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table fact_pl
+ref table fact_pl_allocated
+ref table fact_operational
+ref table fact_fx_rate
+ref table dim_account
+ref table dim_report_line
+ref table bridge_account_nature
+ref table dim_nature
+ref table dim_entity
+ref table dim_month
+ref table dim_version
+ref table dim_region
+ref table dim_channel
+ref table dim_line
+ref table dim_segment
+ref table dim_cost_centre
+ref table param_reporting_currency
+ref table param_fx_basis
+ref table param_units
+ref table param_time_view
+ref table param_version_choice
+ref table control_totals_usd
+ref table param_entity_view
+ref table param_fiscal_year
+ref table param_period
+ref table param_base_version
+ref table param_compare_a
+ref table param_compare_b
+ref table param_metric
+ref table param_eval
+ref table dim_pl_row
+ref table dim_kpi
+ref table dim_bridge_step
+ref table param_breakdown_field
+ref table _meta_refresh
+ref table _measures
+
+ref cultureInfo en-US
+

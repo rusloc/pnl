@@ -1,0 +1,72 @@
+/// D-21 / F-14 display units.
+table param_units
+	lineageTag: e4ca2eb6-b8b8-54e5-8556-becc7649cd40
+
+	column units_code
+		dataType: string
+		isHidden
+		lineageTag: 4723c86d-db50-56b4-8b33-e79730c73087
+		summarizeBy: none
+		sourceColumn: units_code
+
+		annotation SummarizationSetBy = User
+
+	column units_name
+		dataType: string
+		lineageTag: df1cdd6e-5bc2-5cfd-81d9-66f73035bedc
+		summarizeBy: none
+		sourceColumn: units_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column divisor
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d33c83e7-6c7e-5531-b4d9-2d237bd86692
+		summarizeBy: none
+		sourceColumn: divisor
+
+		annotation SummarizationSetBy = User
+
+	column decimals
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 287fa241-2fa2-5da0-9e79-816c037217ef
+		summarizeBy: none
+		sourceColumn: decimals
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2b7d2368-7d1e-5502-a5f3-686a8c083d2e
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 2add17aa-a13f-5ee6-ae0d-24c612fb6acb
+		summarizeBy: none
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = User
+
+	partition param_units = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "param_units"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,29 @@
+/// Engine switch (not a slicer): evaluate Base Amount as base, Compare A or Compare B (KPI deltas).
+table param_eval
+	isHidden
+	lineageTag: a7508af3-38f6-5fe2-ae66-ab97e40cb26e
+
+	column eval_code
+		dataType: string
+		isHidden
+		lineageTag: bac6d204-09b8-5d0a-8e80-18bd46221dec
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [eval_code]
+
+		annotation SummarizationSetBy = User
+
+	partition param_eval = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "eval_code", STRING,
+				    {
+				        { "BASE" },
+				        { "CMP_A" },
+				        { "CMP_B" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

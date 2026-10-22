@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "bmg_views",
+      "displayName": "Views",
+      "children": [
+        "bm_view_pl",
+        "bm_view_kpi",
+        "bm_view_analysis",
+        "bm_view_prof"
+      ]
+    },
+    {
+      "name": "bmg_flyouts",
+      "displayName": "Filter flyouts",
+      "children": [
+        "bm_fly_period",
+        "bm_fly_versions",
+        "bm_fly_slice",
+        "bm_fly_display",
+        "bm_fly_close"
+      ]
+    },
+    {
+      "name": "bmg_rail",
+      "displayName": "Rail",
+      "children": [
+        "bm_rail_expand",
+        "bm_rail_collapse"
+      ]
+    },
+    {
+      "name": "bmg_reset",
+      "displayName": "Reset groups",
+      "children": [
+        "bm_reset_period",
+        "bm_reset_versions",
+        "bm_reset_slice",
+        "bm_reset_display"
+      ]
+    }
+  ]
+}

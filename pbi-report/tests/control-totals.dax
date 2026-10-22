@@ -1,0 +1,325 @@
+// ACME Unified P&L - Track B DAX tests (spec §10). Run in Power BI Desktop > DAX query view:
+// open this file (or paste it), press Run. Each EVALUATE returns its own result tab.
+// A test passes when every row shows _pass = TRUE. Tolerance: 0.01 USD (amounts are translated in floating point).
+// Expected values: table control_totals_usd = data/acme_pl_dummy_data/checks/control_totals_usd.csv (USD,
+// actual rates for ACT and forecast, budget rates for BUD). Spec IDs: T-01, T-02, T-03, T-05, T-06, T-07, T-10, T-17.
+
+DEFINE
+    // One scenario = the slicer state the report would have. Base: A = Actual, B = Budget, LE = Latest estimate.
+    VAR _scenarios =
+        DATATABLE (
+            "_entity", STRING,
+            "_version", STRING,
+            "_window", STRING,
+            "_fiscal_year", INTEGER,
+            "_month", INTEGER,
+            "_time_view", STRING,
+            "_base", STRING,
+            "_headline", BOOLEAN,
+            {
+                { "P", "ACT", "FY2025", 2025, 12, "FY", "A", TRUE },
+                { "P", "ACT", "FY2026 YTD Sep", 2026, 9, "YTD", "A", TRUE },
+                { "S", "ACT", "FY2025", 2025, 12, "FY", "A", TRUE },
+                { "S", "ACT", "FY2026 YTD Sep", 2026, 9, "YTD", "A", TRUE },
+                { "GROUP", "ACT", "FY2026 YTD Sep", 2026, 9, "YTD", "A", TRUE },
+                { "GROUP", "LE", "FY2026 (actual Jan-Sep + forecast 9+3)", 2026, 12, "FY", "LE", TRUE },
+                { "P", "BUD", "FY2026 YTD Sep", 2026, 9, "YTD", "B", FALSE },
+                { "GROUP", "BUD", "FY2026", 2026, 12, "FY", "B", FALSE },
+                { "GROUP", "ACT", "FY2024", 2024, 12, "FY", "A", FALSE }
+            }
+        )
+
+    // T-06 full reconciliation: map every control_totals_usd window to a slicer state.
+    VAR _control_rows =
+        ADDCOLUMNS (
+            control_totals_usd
+            ,"_fiscal_year",
+                SWITCH (
+                    TRUE ()
+                    ,LEFT ( control_totals_usd[window], 6 ) = "FY2024"
+                        ,2024
+                    ,LEFT ( control_totals_usd[window], 6 ) = "FY2025"
+                        ,2025
+                    ,2026
+                )
+            ,"_month", IF ( CONTAINSSTRING ( control_totals_usd[window], "YTD Sep" ), 9, 12 )
+            ,"_time_view", IF ( CONTAINSSTRING ( control_totals_usd[window], "YTD Sep" ), "YTD", "FY" )
+            ,"_base", SWITCH ( control_totals_usd[version], "ACT", "A", "BUD", "B", "LE" )
+        )
+
+EVALUATE
+// ---------------------------------------------------------------- T-06 headline (README table, USD m)
+VAR _lines =
+    DATATABLE (
+        "_line", STRING,
+        {
+            { "NR" },
+            { "EBITDA" },
+            { "OP" },
+            { "NP" }
+        }
+    )
+VAR _rows =
+    ADDCOLUMNS (
+        CROSSJOIN ( FILTER ( _scenarios, [_headline] ), _lines )
+        ,"_model_usd",
+            VAR _entity      = [_entity]
+            VAR _fiscal_year = [_fiscal_year]
+            VAR _month       = [_month]
+            VAR _time_view   = [_time_view]
+            VAR _base        = [_base]
+            VAR _line        = [_line]
+            RETURN
+                CALCULATE (
+                    [Base Amount]
+                    ,REMOVEFILTERS ( dim_pl_row )
+                    ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { _time_view }, param_time_view[time_view_code] )
+                    ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    ,TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+                    ,TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+                )
+        ,"_expected_usd",
+            LOOKUPVALUE (
+                control_totals_usd[amount_usd]
+                ,control_totals_usd[entity_code], [_entity]
+                ,control_totals_usd[version], [_version]
+                ,control_totals_usd[window], [_window]
+                ,control_totals_usd[line_code], [_line]
+            )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_test", "T-06 headline"
+        ,"_entity", [_entity]
+        ,"_version", [_version]
+        ,"_window", [_window]
+        ,"_line", [_line]
+        ,"_model_m", ROUND ( [_model_usd] / 1e6, 1 )
+        ,"_expected_m", ROUND ( [_expected_usd] / 1e6, 1 )
+        ,"_diff_usd", [_model_usd] - [_expected_usd]
+        ,"_pass", ABS ( [_model_usd] - [_expected_usd] ) < 0.01
+    )
+ORDER BY [_entity], [_window], [_line]
+
+EVALUATE
+// ---------------------------------------------------------------- T-06 full: all 552 control rows, summary
+VAR _rows =
+    ADDCOLUMNS (
+        _control_rows
+        ,"_model_usd",
+            VAR _entity      = control_totals_usd[entity_code]
+            VAR _fiscal_year = [_fiscal_year]
+            VAR _month       = [_month]
+            VAR _time_view   = [_time_view]
+            VAR _base        = [_base]
+            VAR _line        = control_totals_usd[line_code]
+            RETURN
+                CALCULATE (
+                    [Base Amount]
+                    ,REMOVEFILTERS ( control_totals_usd )
+                    ,REMOVEFILTERS ( dim_pl_row )
+                    ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { _time_view }, param_time_view[time_view_code] )
+                    ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    ,TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+                    ,TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+                )
+    )
+VAR _checked =
+    ADDCOLUMNS ( _rows, "_abs_diff", ABS ( [_model_usd] - control_totals_usd[amount_usd] ) )
+RETURN
+    ROW (
+        "_test", "T-06 full reconciliation"
+        ,"_rows_checked", COUNTROWS ( _checked )
+        ,"_rows_failed", COUNTROWS ( FILTER ( _checked, [_abs_diff] >= 0.01 ) ) + 0
+        ,"_max_abs_diff_usd", MAXX ( _checked, [_abs_diff] )
+        ,"_pass", COUNTROWS ( FILTER ( _checked, [_abs_diff] >= 0.01 ) ) + 0 = 0
+    )
+
+EVALUATE
+// ---------------------------------------------------------------- T-01 / T-02 Group = CP + CC + eliminations (ACT FY2026 YTD Sep)
+VAR _lines =
+    DATATABLE (
+        "_line", STRING,
+        {
+            { "GR" },
+            { "NR" },
+            { "VSC" },
+            { "CM" },
+            { "EBITDA" },
+            { "OP" },
+            { "NP" }
+        }
+    )
+RETURN
+    ADDCOLUMNS (
+        _lines
+        ,"_test", "T-01/T-02"
+        ,"_group",
+            VAR _line = [_line]
+            RETURN
+                CALCULATE (
+                    [Base Amount]
+                    ,REMOVEFILTERS ( dim_pl_row )
+                    ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                    ,TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { 9 }, param_period[month_number] )
+                    ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+                )
+        ,"_cp_plus_cc",
+            VAR _line = [_line]
+            RETURN
+                SUMX (
+                    { "P", "S" }
+                    ,CALCULATE (
+                        [Base Amount]
+                        ,REMOVEFILTERS ( dim_pl_row )
+                        ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                        ,TREATAS ( { [Value] }, param_entity_view[entity_view_code] )
+                        ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                        ,TREATAS ( { 9 }, param_period[month_number] )
+                        ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+                    )
+                )
+        ,"_ic_eliminated",
+            CALCULATE (
+                [KPI IC Eliminated]
+                ,TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+                ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                ,TREATAS ( { 9 }, param_period[month_number] )
+                ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+            )
+    )
+
+EVALUATE
+// ---------------------------------------------------------------- T-03 slices add up (CP ACT FY2026 YTD Sep, allocated lines included)
+VAR _lines =
+    DATATABLE (
+        "_line", STRING,
+        {
+            { "NR" },
+            { "CM" },
+            { "EBITDA" },
+            { "NP" }
+        }
+    )
+RETURN
+    ADDCOLUMNS (
+        _lines
+        ,"_test", "T-03"
+        ,"_total",
+            VAR _line = [_line]
+            RETURN
+                CALCULATE (
+                    [Base Amount]
+                    ,REMOVEFILTERS ( dim_pl_row )
+                    ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                    ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                )
+        ,"_sum_by_channel",
+            VAR _line = [_line]
+            RETURN
+                SUMX (
+                    CALCULATETABLE ( VALUES ( dim_channel[channel_code] ), dim_channel[entity_code] = "P" )
+                    ,CALCULATE (
+                        [Base Amount]
+                        ,REMOVEFILTERS ( dim_pl_row )
+                        ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                        ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                    )
+                )
+        ,"_sum_by_segment",
+            VAR _line = [_line]
+            RETURN
+                SUMX (
+                    CALCULATETABLE ( VALUES ( dim_segment[segment_code] ), dim_segment[entity_code] = "P" )
+                    ,CALCULATE (
+                        [Base Amount]
+                        ,REMOVEFILTERS ( dim_pl_row )
+                        ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                        ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                    )
+                )
+    )
+
+EVALUATE
+// ---------------------------------------------------------------- T-05 bridge: comparison NR + steps = base NR; T-10 FX step = 0 at constant currency
+ADDCOLUMNS (
+    SELECTCOLUMNS ( param_entity_view, "_entity", param_entity_view[entity_view_code] )
+    ,"_test", "T-05/T-10"
+    ,"_base_nr",
+        VAR _entity = [_entity]
+        RETURN
+            CALCULATE ( [Net Revenue], TREATAS ( { _entity }, param_entity_view[entity_view_code] ) )
+    ,"_comparison_plus_steps",
+        VAR _entity = [_entity]
+        RETURN
+            CALCULATE (
+                SUMX ( dim_bridge_step, [_Bridge Value] )
+                ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+            )
+    ,"_fx_step_constant_currency",
+        VAR _entity = [_entity]
+        RETURN
+            CALCULATE (
+                [Bridge FX]
+                ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+            )
+)
+
+EVALUATE
+// ---------------------------------------------------------------- T-17 period-end KPIs read the last month, not a sum (CC, FY2026)
+ROW (
+    "_test", "T-17"
+    ,"_merchants_ytd_sep",
+        CALCULATE (
+            [KPI Active Merchants]
+            ,TREATAS ( { "S" }, param_entity_view[entity_view_code] )
+            ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+        )
+    ,"_merchants_month_sep",
+        CALCULATE (
+            [KPI Active Merchants]
+            ,TREATAS ( { "S" }, param_entity_view[entity_view_code] )
+            ,TREATAS ( { "MTD" }, param_time_view[time_view_code] )
+        )
+    ,"_arr_ytd_sep",
+        CALCULATE (
+            [KPI ARR]
+            ,TREATAS ( { "S" }, param_entity_view[entity_view_code] )
+            ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+        )
+    ,"_arr_month_sep",
+        CALCULATE (
+            [KPI ARR]
+            ,TREATAS ( { "S" }, param_entity_view[entity_view_code] )
+            ,TREATAS ( { "MTD" }, param_time_view[time_view_code] )
+        )
+)
+
+EVALUATE
+// ---------------------------------------------------------------- T-07 account attributes complete; nature weights sum to 1
+FILTER (
+    ADDCOLUMNS (
+        dim_account
+        ,"_weight_sum", CALCULATE ( SUM ( bridge_account_nature[weight] ) )
+        ,"_has_attributes",
+            NOT ISBLANK ( dim_account[block_code] )
+                && NOT ISBLANK ( dim_account[spine_step] )
+                && NOT ISBLANK ( dim_account[ifrs18_category] )
+    )
+    ,NOT [_has_attributes]
+        || ( NOT ISBLANK ( [_weight_sum] ) && [_weight_sum] <> 1 )
+        || ( ISBLANK ( [_weight_sum] ) && dim_account[block_code] IN { "COR", "VSC", "SM", "RD", "GA", "OOI" } )
+)
+// T-07 passes when this result is empty.

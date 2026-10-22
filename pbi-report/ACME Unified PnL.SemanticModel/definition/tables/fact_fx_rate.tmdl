@@ -1,0 +1,54 @@
+/// D-04 local currency per 1 USD: ACTUAL_AVG monthly, BUDGET one per fiscal year. Disconnected; looked up by _Amt Raw.
+table fact_fx_rate
+	isHidden
+	lineageTag: a3e857a2-0f1e-5669-928a-fe3944734cfc
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 82750900-94d0-54b5-ac0d-51bf6d45a559
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 54d40052-6ac3-570f-8ce2-948e37afa5ac
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column rate_type
+		dataType: string
+		isHidden
+		lineageTag: 2b1cf0da-bef4-5a76-a0ea-585cebfe9869
+		summarizeBy: none
+		sourceColumn: rate_type
+
+		annotation SummarizationSetBy = User
+
+	column local_per_usd
+		dataType: double
+		isHidden
+		formatString: 0.000000
+		lineageTag: 6f7d613c-616b-536d-b419-f80bd9633749
+		summarizeBy: none
+		sourceColumn: local_per_usd
+
+		annotation SummarizationSetBy = User
+
+	partition fact_fx_rate = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "fact_fx_rate"]}[Data],
+				    Typed = Table.TransformColumnTypes(Data, {{"local_per_usd", type number}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

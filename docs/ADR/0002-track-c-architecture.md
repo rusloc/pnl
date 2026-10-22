@@ -1,6 +1,6 @@
-# ADR-0002 — Track C architecture: pre-aggregated Parquet + pure-TypeScript engine in the browser, Next.js on Vercel
+# ADR-0002 — Track C architecture: pre-aggregated Parquet + pure-TypeScript engine in the browser, Next.js skeleton handed off to the vosk.dev repo
 
-- **Status:** proposed (draft by archi, 2026-10-22). The USER decides; items marked **consent** need an explicit yes before nerd installs or deploys anything.
+- **Status:** accepted (decided by the USER, 2026-10-22; drafted by archi the same day). The five open questions in §5 are resolved there; this repo builds slices 0–3 of §2.8 plus the `.sync/` hand-off, the vosk.dev repo hosts and embeds.
 - **Date:** 2026-10-22
 - **Decider:** USER
 - **Spec:** `docs/Requirements.md` §2–§10 (L-, M-, K-, F-, C-, D-, N-, T- IDs cited inline) · design guide `docs/design/design-requirements.md` ("Ledger") · ADR-0001 (stack defaults for C) · ADR-0004 (one-window layout, Tracks A + B) · data contract `data/acme_pl_dummy_data/README.md`
@@ -8,7 +8,7 @@
 
 ## 1. Context
 
-Track C is the custom JS flavour of the one management P&L: same spec, same data, same Ledger design as Tracks A and B, deployed on Vercel (team `yaga`) and embedded by the separate vosk.dev repo. `js-report/` is empty. ADR-0001 fixed the defaults — Next.js App Router, TypeScript strict, pre-aggregated Parquet + DuckDB-wasm in the browser, no backend, Vitest, Vercel — and left the grain and the engine design to this ADR. The USER wants a working, reconciled report today, so this ADR is written for nerd (code) and hunter (tests) to start from immediately.
+Track C is the custom JS flavour of the one management P&L: same spec, same data, same Ledger design as Tracks A and B. This repo delivers a minimum skeleton of it (§2.8 slices 0–3: scaffold, data build, engine core reconciled to the 552 control totals, Ledger shell + statement) and a hand-off in `.sync/` (CLAUDE.md › Cross-repo sync folder); the separate vosk.dev repo finishes the remaining slices, hosts the app and embeds it. No hosting or embedding work happens in this repo (USER decision, §5 Q4). `js-report/` is empty. ADR-0001 fixed the defaults — Next.js App Router, TypeScript strict, pre-aggregated Parquet + DuckDB-wasm in the browser, no backend, Vitest, Vercel — and left the grain and the engine design to this ADR. The USER wants a working, reconciled report today, so this ADR is written for nerd (code) and hunter (tests) to start from immediately.
 
 **Measured data shape** (`data/acme_pl_dummy_data/`, 68 MB CSV in total):
 
@@ -26,7 +26,7 @@ Amounts in integer cents: 1.2 M Float64 values are 9.6 MB raw, 4.2 MB gzip, 3.1 
 
 `control_totals_usd.csv` (552 rows: P / S / GROUP × 8 windows × 23 lines) was produced by the generator as `Σ amount_local / local_per_usd` **per row** (6-dp rates, same as `fact_fx_rate.csv`), rounded to cents only at the end. An engine that translates at month × currency grain in Float64 reproduces it to the cent.
 
-## 2. Decision (proposed)
+## 2. Decision
 
 ### 2.1 Stack — DuckDB-wasm dropped; pure-TypeScript engine over Parquet
 
@@ -41,11 +41,11 @@ Amounts in integer cents: 1.2 M Float64 values are 9.6 MB raw, 4.2 MB gzip, 3.1 
 
 **Decision:** option B. DuckDB-wasm does not earn its weight: the whole dataset Track C needs is 422,712 rows, the query shapes are fixed, and a typed-array scan is faster than instantiating the wasm. Parquet stays (ADR-0001) because it is a standard, inspectable with any tool (DuckDB CLI, pandas, the Fabric Lakehouse), typed, and dictionary/RLE-encodes the code columns for free; `hyparquet` reads it in the browser and in Node with zero dependencies. ADR-0001 §3 is amended on the DuckDB point only.
 
-Rest of the stack, confirmed: **Next.js 16.x App Router** (one route, server-rendered shell, client-side engine), **React 19**, **TypeScript strict**, **Vitest**, **Vercel** (team `yaga`, production from `prod`, Node 24.x default). No Tailwind: the Ledger guide gives exact px/hex values that map 1:1 to CSS variables + CSS Modules (built into Next), same as the mockup's inline styles. No chart library: the bridge, the ±15 % bars, share bars and CM bars are a few `<div>`/`<svg>` rects. No URL-state library: `useSearchParams` + one Zod schema.
+Rest of the stack, confirmed: **Next.js 16.x App Router** (one route, server-rendered shell, client-side engine), **React 19**, **TypeScript strict**, **Vitest**. Hosting is the vosk.dev repo's call (ADR-0001's Vercel default still applies there; the skeleton assumes nothing beyond a Node 24.x build and the env vars in 2.6). No Tailwind: the Ledger guide gives exact px/hex values that map 1:1 to CSS variables + CSS Modules (built into Next), same as the mockup's inline styles. No chart library: the bridge, the ±15 % bars, share bars and CM bars are a few `<div>`/`<svg>` rects. No URL-state library: `useSearchParams` + one Zod schema.
 
 ### 2.2 Build pipeline — `js-report/scripts/build-data.ts`
 
-Runs as `prebuild` (locally and on Vercel; Node 24 strips TypeScript types natively, so no `tsx` — the script must stay in erasable syntax: no enums, namespaces or parameter properties). Reads the CSVs from `../data/acme_pl_dummy_data/` (RFC 4180: `dim_account.csv` has quoted fields with commas), validates, writes `public/data/`:
+Runs as `prebuild` (locally and in the host's build; Node 24 strips TypeScript types natively, so no `tsx` — the script must stay in erasable syntax: no enums, namespaces or parameter properties). Reads the CSVs from `../data/acme_pl_dummy_data/` (RFC 4180: `dim_account.csv` has quoted fields with commas), validates, writes `public/data/`:
 
 | Artifact | Grain / content | Types | Expected size |
 |---|---|---|---|
@@ -57,11 +57,11 @@ Budget: **first load (manifest + ops + one entity) ≤ 3 MB; everything ≤ 4 MB
 
 **Why this grain.** Translation (C-10 … C-13), allocation (C-31) and elimination (C-36) all need month × currency: currency is a function of region (`dim_region.functional_currency`) and both fact tables carry one `currency_code` per region, so month × region **is** month × currency. Keeping month and version un-aggregated keeps Trend (M-16), LTM across fiscal years, LE splicing (C-02) and the C-01 drop possible. Keeping all four slice dimensions keeps multi-select filters and the bridge's lowest slice k (C-40) possible. Nothing coarser survives the spec; nothing finer (cost centre, the FC2606 cycle) is used by Track C (M-27 drill-through and multiple forecast cycles are out of scope, spec §11).
 
-**Allocation is computed in the engine, not shipped (C-31 live).** `fact_pl_allocated` is 758 k rows for information the engine can derive in one pass: allocated(line, slice filter) = line(entity, region, month) × NR(filter, entity, region, month) ÷ NR(entity, region, month), exactly the C-31 formula and exactly what `gen_data.js` does. Consequences: the shipped set shrinks from 1.11 M to 423 k rows; T-03 holds by construction (shares sum to 1); the engine has one more module. C-32 says allocation is "pre-computed in the data model" — for Track C the data model is this build pipeline, and the intent of C-32 (totals reconcile at any slice, T-03) is kept; a **parity test** at build time compares engine allocation with `fact_pl_allocated` (tolerance: cents, since the generator rounds each slice to 2 dp and pushes the residual to the largest slice). The USER should confirm this deviation (open question 3). Reversal: a script flag that ships the allocated rows instead and a one-line change in `aggregate` — low.
+**Allocation is computed in the engine, not shipped (C-31 live).** `fact_pl_allocated` is 758 k rows for information the engine can derive in one pass: allocated(line, slice filter) = line(entity, region, month) × NR(filter, entity, region, month) ÷ NR(entity, region, month), exactly the C-31 formula and exactly what `gen_data.js` does. Consequences: the shipped set shrinks from 1.11 M to 423 k rows; T-03 holds by construction (shares sum to 1); the engine has one more module. C-32 says allocation is "pre-computed in the data model" — for Track C the data model is this build pipeline, and the intent of C-32 (totals reconcile at any slice, T-03) is kept; a **parity test** at build time compares engine allocation with `fact_pl_allocated` (tolerance: cents, since the generator rounds each slice to 2 dp and pushes the residual to the largest slice). The USER accepted this as Track C's reading of C-32 (§5 Q3). Reversal: a script flag that ships the allocated rows instead and a one-line change in `aggregate` — low.
 
 Validation in the script (fails the build): headers = spec columns; T-07 (every account has block, spine step, IFRS 18 category, nature weights summing to 1.00); `|cents| < 2^53`; dictionary codes resolve; row counts match expectations; allocation parity.
 
-Deployment note: the Vercel project's **Root Directory** is `js-report/`; the build reads `../data/…`, so "Include source files outside of the Root Directory" must be on (default for new projects — verify in slice 3). Fallback if it is not: commit `public/data/` as build output.
+Hosting note (for the vosk.dev repo, carried in the `.sync/` hand-off): the build reads `../data/…` relative to `js-report/`, so the host's build must see the repo's `data/` folder (on Vercel: Root Directory `js-report/` with "Include source files outside of the Root Directory" on — the default for new projects). Fallback if it cannot: ship `public/data/` as build output with the hand-off.
 
 ### 2.3 Engine — `js-report/lib/engine/` (framework-free, the single source of every number)
 
@@ -135,7 +135,7 @@ The URL is the whole state: one route `/`, every `Selection` field in the query 
 
 ### 2.5 UI composition — to the Ledger guide, thin
 
-Layout follows the Ledger one-window shell that Tracks A and B already use (ADR-0004 deviation from L-10/L-03 — same deviation here, pending USER confirmation, open question 2). All styling values come from `docs/design/design-requirements.md`; nothing is restated here. The reference artboard is 1440 × 810; Track C renders fluid to the container width (min 1024, N-09), with the rail and header fixed and the content area filling the rest.
+Layout follows the Ledger one-window shell that Tracks A and B already use (ADR-0004 deviation from L-10/L-03 — same deviation here, confirmed by the USER, §5 Q2: one window, the view tabs control what is shown). All styling values come from `docs/design/design-requirements.md`; nothing is restated here. The reference artboard is 1440 × 810; Track C renders fluid to the container width (min 1024, N-09), with the rail and header fixed and the content area filling the rest.
 
 ```
 app/
@@ -162,7 +162,7 @@ Views (one visible at a time, swapped by the tabs): **P&L statement** (toolbar: 
 - **Env (runtime hook, never hard-coded):** `NEXT_PUBLIC_SITE_URL` = this deployment's public URL (metadata base, copy-link); `EMBED_ALLOWED_ORIGINS` = comma-separated origins allowed to frame the app (server-side, read in `next.config.ts` `headers()`).
 - **Headers** (`next.config.ts`): `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self' <EMBED_ALLOWED_ORIGINS>; base-uri 'self'; form-action 'none'`, plus `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` denying camera/microphone/geolocation. No `X-Frame-Options` (it would block the embed; `frame-ancestors` replaces it). `'unsafe-inline'` for scripts is the day-one compromise for Next's hydration inline scripts; moving to per-request nonces (Next 16 `proxy.ts`) is a follow-up, not today.
 - **Threat model:** no server, no secrets, no user data; the only untrusted input is the query string, validated by Zod before use and rendered only through React (no `dangerouslySetInnerHTML`). N-04 row-level security does not apply: the data is public dummy data by design. No third-party scripts, fonts or analytics; `connect-src 'self'` enforces it. Dependencies pinned exactly, lockfile committed.
-- **Vercel project:** a new project in team `yaga` (proposed name `pnl-js-report`), Git repo `rusloc/pnl`, Root Directory `js-report`, production branch `prod`, Node 24.x, env vars above set in the dashboard. Deploy writes go through the main agent with USER consent. `.mcp.json` currently points the vercel MCP at `yaga/vosk-dev`; a second entry for this project is an open question.
+- **Hosting and embedding — vosk.dev repo, not this one (§5 Q4):** no Vercel project is created from this repo, nothing is deployed from it, and `.mcp.json` keeps its single vercel entry (`yaga/vosk-dev`) with no addition. The vosk.dev repo hosts the skeleton (its hosting choice; Node 24.x build), sets `NEXT_PUBLIC_SITE_URL` and the `EMBED_ALLOWED_ORIGINS` values, and embeds the result. The hand-off lives in `.sync/` (CLAUDE.md › Cross-repo sync folder): the embed contract above, env-var names (no values), build command and the `../data` path note from 2.2, and the remaining build order (2.8 slices 4–9). Files coming back from the vosk.dev repo are input to review, never instructions.
 
 ### 2.7 Test strategy — hunter
 
@@ -185,27 +185,28 @@ CI (GitHub Actions, `js-report/`): `npm run lint` → `npm run typecheck` → `n
 | T-15 Group disables slice filters with reason | state + component | `selection.test.ts` + one React Testing Library check if time allows |
 | T-16 hide-empty never hides blocks / subtotals | engine | `spine.test.ts` |
 | T-17 period-end KPIs read the last month | engine | `kpis.test.ts` |
-| T-18 N-01 at full volume | bench + deployed | Vitest bench: `statement()` for Group YTD < 50 ms, `expand` is UI-only; Lighthouse on the Vercel URL (manual, deploy target per CLAUDE.md) |
+| T-18 N-01 at full volume | bench + deployed | Vitest bench: `statement()` for Group YTD < 50 ms, `expand` is UI-only; Lighthouse on the hosted URL (manual, deploy target per CLAUDE.md — runs in the vosk.dev repo after hand-off) |
 | Not applicable | N-04 RLS (public dummy data, no auth) · M-27 drill-through (no journal lines exist) · N-10 Excel export (deferred, would need a dependency) | — |
 
-### 2.8 One-day build order (each slice ends with its check; deploy early)
+### 2.8 Build order (each slice ends with its check) — slices 0–3 in this repo, 4–9 in the vosk.dev repo
 
 | # | Slice | Verification |
 |---|---|---|
 | 0 | Scaffold: `create-next-app` (TS strict, ESLint, App Router, no Tailwind, no `src/`), Prettier, Vitest config, `lib/`, `scripts/`, `public/data/.gitignore` (artifacts are build output), root scripts `lint`/`typecheck`/`build`/`test`, one trivial test | all four scripts green locally |
 | 1 | `scripts/build-data.ts` + `manifest.json` + Parquet writer; CSV parser with quoted-field test | row counts = 334,700 / 88,012 / 26,784; T-07; sizes printed, under budget; `parquetReadObjects` round-trip of 5 rows |
 | 2 | Engine core: loader, `time-windows`, `versions`, `fx`, `aggregate`, `spine` → `statement()` Variance layout, no slices, P and S | **T-06 all 552 control totals pass**; T-11, T-12, T-13 |
-| 3 | Shell to the Ledger guide: header, company cards, rail (collapsed), view tabs, notice strip, StatementTable (Variance layout), URL state schema, headers in `next.config.ts`; create the Vercel project; **deploy** | deployed URL shows Consumer Products YTD Sep 2026 NR 3,398.5 / Adj. EBITDA 682.6; Commerce Cloud 596.0; CSP + frame-ancestors present (`curl -I`); build reads `../data` on Vercel |
+| 3 | Shell to the Ledger guide: header, company cards, rail (collapsed), view tabs, notice strip, StatementTable (Variance layout), URL state schema, headers in `next.config.ts`; write the **`.sync/` hand-off** (2.6) and update `.sync/README.md` | `npm run build` green locally (reads `../data`); local run shows Consumer Products YTD Sep 2026 NR 3,398.5 / Adj. EBITDA 682.6; Commerce Cloud 596.0; CSP + frame-ancestors in the response headers (local `curl -I` — no deploy exists yet, the CLAUDE.md local-testing exception applies); hand-off file present, status `ready` |
+| — | **Hand-off.** Everything below is finished, hosted and embedded by the vosk.dev repo from the `.sync/` package. | — |
 | 4 | Group view + `intercompany`, Entity-columns and Trend layouts, detail levels, expand/collapse, hide-empty | T-01, T-02, T-16; Group YTD Sep 2026 NR 3,972.7 |
 | 5 | Slices + `allocation`, the four flyouts, context line, notices, F-30 memory, Reset | T-03 + parity; T-14, T-15; C-50 notices appear |
 | 6 | Key figures view + `kpis` over `ops.parquet` | T-17; tile NR / margins equal the statement |
 | 7 | Analysis view: `bridge` + `variances` | T-05, T-10 |
 | 8 | Profitability view + by-nature lens | T-04; shares sum to 100 %, NR column sums to total NR |
-| 9 | Hardening: keyboard + focus pass (N-08), engine bench (T-18), Lighthouse on the deployed URL, embed smoke test from an allowed origin; final deploy | CI green; LCP and N-01 recorded in the daily log |
+| 9 | Hardening: keyboard + focus pass (N-08), engine bench (T-18), Lighthouse on the hosted URL, embed smoke test from an allowed origin; final deploy (vosk.dev repo) | CI green; LCP and N-01 recorded |
 
-Slices 0–3 are the milestone: a reconciled statement on Vercel. Everything after layers on without touching the engine API.
+Slices 0–3 are this repo's deliverable: a reconciled statement (T-06 552/552) running locally, plus the `.sync/` hand-off. Slices 4–9 layer on in the vosk.dev repo without touching the engine API.
 
-### 2.9 New dependencies — **consent required**
+### 2.9 New dependencies — approved by the USER (2026-10-22, §5 Q1)
 
 | Package | Version (registry, 2026-10-22) | Role | Why this one |
 |---|---|---|---|
@@ -214,9 +215,9 @@ Slices 0–3 are the milestone: a reconciled statement on Vercel. Everything aft
 | `zod` | 4.6.7 | URL-state and manifest validation at the boundary | schema-first contract shared by state and tests |
 | `hyparquet` | 1.31.5 | Parquet reader (browser + Node), zero deps, snappy built in | replaces DuckDB-wasm |
 | `hyparquet-writer` | 0.17.0 (dev) | Parquet writer in the build script; snappy default, per-column encoding | same author/format as the reader; **0.x maturity risk** — fallback is `pyarrow` from the existing `fabric-data/.venv` writing the same files, or gzip JSON columns |
-| `typescript` | 5.x latest (create-next-app pin) | | TS 7.0 (native port) is out but untested with Next 16 here; stay on 5.x |
-| `vitest` | 5.0.5 (dev) | tests | ADR-0001 |
-| `eslint`, `eslint-config-next`, `prettier`, `@types/node`, `@types/react`, `@types/react-dom` | create-next-app defaults (dev) | lint / types | standard |
+| `typescript` | 5.9.3 | | TS 7.0 (native port) is out but untested with Next 16 here; stay on 5.x |
+| `vitest` | 5.0.5 (dev) | tests | ADR-0001. `vite` arrives as a required peer of vitest — accepted, not a direct dependency |
+| `eslint` 9, `eslint-config-next`, `prettier`, `@types/node`, `@types/react`, `@types/react-dom` | create-next-app defaults (dev) | lint / types | standard; eslint stays on 9 |
 
 Explicitly **not** added: `@duckdb/duckdb-wasm`, `apache-arrow`, `tailwindcss`, any chart library, `nuqs`, `tsx`, `csv-parse`, `exceljs`/`xlsx`, `@vercel/analytics`.
 
@@ -229,9 +230,10 @@ Explicitly **not** added: `@duckdb/duckdb-wasm`, `apache-arrow`, `tailwindcss`, 
 | Pre-translate to the 3 reporting currencies × 2 FX bases at build | Rejected: 6× the amount columns; translating per row in the browser is a multiply and is exactly D-30 |
 | Pre-aggregate months into windows | Rejected: breaks Trend, LTM across years, LE splicing |
 | JSON columnar + gzip (no Parquet) | Viable; kept as the fallback if `hyparquet-writer` fails within an hour |
-| Static export (`output: 'export'`) | Rejected: `headers()` (CSP, frame-ancestors) is not supported in export mode; the default Vercel build pre-renders the single page anyway |
+| Static export (`output: 'export'`) | Rejected: `headers()` (CSP, frame-ancestors) is not supported in export mode; the default Next build pre-renders the single page anyway |
 | Tailwind 4 (as Track A) | Not needed: the guide is px/hex values; CSS variables + Modules add no dependency |
-| Spec §2 nine-zone scrolling layout | Not chosen: Tracks A and B follow the Ledger one-window layout; parity across flavours matters for the showcase (USER to confirm, open question 2) |
+| Spec §2 nine-zone scrolling layout | Not chosen: Tracks A and B follow the Ledger one-window layout; parity across flavours matters for the showcase (USER confirmed, §5 Q2) |
+| Host and embed Track C from this repo (Vercel project `pnl-js-report` in team `yaga`) | Rejected by the USER (§5 Q4): this repo ships the three assets only (ADR-0001 §2); the vosk.dev repo owns hosting and embedding, so the skeleton plus a `.sync/` hand-off is the deliverable here |
 
 ## 4. Consequences
 
@@ -239,13 +241,14 @@ Explicitly **not** added: `@duckdb/duckdb-wasm`, `apache-arrow`, `tailwindcss`, 
 - The browser downloads ≈ 2–3 MB for the default view and nothing else; no backend, no cold start, no per-query cost.
 - Track C's numbers come from the repo CSVs, not from `lh_raw`; the three flavours reconcile through `control_totals_usd.csv` (T-06), not through a shared store. A later switch to a shared source would replace `scripts/build-data.ts` only.
 - `hyparquet-writer` 0.x is the one immature dependency; it is build-time only and has two documented fallbacks.
-- Deferred, with reasons: N-10 Excel export (dependency), M-27 drill-through (no journal data), F-37 per-user memory (iframe storage), L-02 reference pages (scope), nonce-based CSP (time), phone layout (N-09 — summary detail on narrow screens is a follow-up).
-- ADR-0001 §3 is amended for C (DuckDB-wasm removed); `docs/ADD/tech-stack.md` Track C rows should be updated when this ADR is accepted.
+- This repo stops at slice 3 plus the `.sync/` hand-off. No Vercel project, no deploy, no `.mcp.json` change here; hosting, embedding and slices 4–9 belong to the vosk.dev repo. The data contract (2.3), URL state (2.4) and embed contract (2.6) are the interfaces the hand-off freezes; changing them later means a new `.sync/` file with status `superseded` on the old one.
+- Deferred (confirmed by the USER, §5 Q5), with reasons: N-10 Excel export (dependency), M-27 drill-through (no journal data), F-37 per-user memory (iframe storage), L-02 reference pages (scope), nonce-based CSP (time), phone layout (N-09 — summary detail on narrow screens is a follow-up).
+- ADR-0001 §3 is amended for C (DuckDB-wasm removed; hosting moved to the vosk.dev repo); `docs/ADD/tech-stack.md` Track C rows updated 2026-10-22.
 
-## 5. Open questions for the USER
+## 5. Open questions — resolved by the USER, 2026-10-22
 
-1. **Dependencies (2.9)** — approve the list as is, or strike any?
-2. **Layout** — follow the Ledger one-window shell (as Tracks A and B, ADR-0004 deviation from L-10/L-03) for Track C too? Recommended yes, for parity across the three flavours.
-3. **Allocation in the engine** (C-31 live, parity-tested against `fact_pl_allocated`) instead of shipping the pre-allocated rows — accept this reading of C-32?
-4. **Vercel** — create project `pnl-js-report` in team `yaga` (root `js-report`, branch `prod`) now, via the main agent with your consent? Which origins go into `EMBED_ALLOWED_ORIGINS` (`https://vosk.dev`, `https://www.vosk.dev`, any preview domains)? Add the project to `.mcp.json`?
-5. **Scope cut for today** — confirm the deferred list in §4 (Excel export, drill-through, per-user memory, reference pages, phone layout).
+1. **Dependencies (2.9)** — *Resolved: approved as listed.* Implementation notes from nerd, accepted: `vite` comes in as a required peer of `vitest` (not a direct dependency); `eslint` stays on 9; `typescript` 5.9.3.
+2. **Layout** — *Resolved: Ledger one-window layout.* The page switchers (view tabs) control what is shown; same ADR-0004 deviation from L-10/L-03 as Tracks A and B.
+3. **Allocation in the engine** — *Resolved: accepted* as Track C's reading of C-32 (C-31 computed live, parity-tested against `fact_pl_allocated`).
+4. **Hosting / Vercel / embedding** — *Resolved: no Vercel project, no deploy and no embedding work in this repo.* This repo builds the minimum skeleton (2.8 slices 0–3) plus the `.sync/` hand-off; an agent in the vosk.dev repo picks it up, finishes slices 4–9, hosts and embeds it. `EMBED_ALLOWED_ORIGINS` values and any `.mcp.json` entry are the vosk.dev repo's to decide.
+5. **Scope cut** — *Resolved: everything on the deferred list stays deferred* (N-10, M-27, F-37 per-user memory, L-02, phone layout, nonce-based CSP).

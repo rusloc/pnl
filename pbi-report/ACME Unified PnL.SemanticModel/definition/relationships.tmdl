@@ -1,0 +1,121 @@
+relationship edd6210f-4588-5598-b9d0-81eb63290475
+	fromColumn: fact_pl.entity_code
+	toColumn: dim_entity.entity_code
+
+relationship dcadc47a-d013-5c8b-b95f-0241fa40e0b0
+	fromColumn: fact_pl.month_key
+	toColumn: dim_month.month_key
+
+relationship 694d6e1e-2114-5175-8c1c-e44b4e5f1750
+	fromColumn: fact_pl.version_key
+	toColumn: dim_version.version_key
+
+relationship 28e691c5-8bc4-577c-933c-34bec7526a3f
+	fromColumn: fact_pl.region_code
+	toColumn: dim_region.region_code
+
+relationship 9ab77ff4-3027-5a31-86eb-1c0c054a496c
+	fromColumn: fact_pl.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 23743cf1-674a-5d66-9f69-fba54c286e6b
+	fromColumn: fact_pl.line_code
+	toColumn: dim_line.line_code
+
+relationship 518c5881-d2d5-5c91-aa09-dea6b9b25454
+	fromColumn: fact_pl.segment_code
+	toColumn: dim_segment.segment_code
+
+relationship b5fa4223-e812-515a-a223-44ec03366060
+	fromColumn: fact_pl.account_code
+	toColumn: dim_account.account_code
+
+relationship 692f4886-2e29-5f1c-b313-5eba7bd8991d
+	fromColumn: fact_pl.cost_centre_code
+	toColumn: dim_cost_centre.cost_centre_code
+
+relationship 6b7f4bf4-c900-5039-8d85-05b823c2bd01
+	fromColumn: fact_pl_allocated.entity_code
+	toColumn: dim_entity.entity_code
+
+relationship 0a056581-6489-5ef6-8c01-6df571035373
+	fromColumn: fact_pl_allocated.month_key
+	toColumn: dim_month.month_key
+
+relationship 8e0537e1-e97f-5124-84b0-a5c0af1df276
+	fromColumn: fact_pl_allocated.version_key
+	toColumn: dim_version.version_key
+
+relationship 26aad7de-de02-5960-bbca-1171b0b44154
+	fromColumn: fact_pl_allocated.region_code
+	toColumn: dim_region.region_code
+
+relationship 13fc7a3f-9f91-52f4-ab1f-91ffec38c047
+	fromColumn: fact_pl_allocated.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 35dc1d52-90b0-5a0b-acc0-6fe6f2a8ba9e
+	fromColumn: fact_pl_allocated.line_code
+	toColumn: dim_line.line_code
+
+relationship 2d6258ad-4342-5ba4-a5d8-919ffac56db6
+	fromColumn: fact_pl_allocated.segment_code
+	toColumn: dim_segment.segment_code
+
+relationship d8795b88-6f57-573e-a96a-24011f98fc51
+	fromColumn: fact_pl_allocated.account_code
+	toColumn: dim_account.account_code
+
+relationship 67b88684-2994-5dea-acdf-cbb3611b0117
+	fromColumn: fact_pl_allocated.cost_centre_code
+	toColumn: dim_cost_centre.cost_centre_code
+
+relationship 828db2e7-6d58-5e74-9ec3-b6c7e7c2bfb1
+	isActive: false
+	fromColumn: fact_pl.counterparty_entity_code
+	toColumn: dim_entity.entity_code
+
+relationship 77482288-c04d-5192-8fd6-22448f19307c
+	fromColumn: fact_operational.entity_code
+	toColumn: dim_entity.entity_code
+
+relationship 02c4ab76-0ced-54b0-80f9-7893c493ee37
+	fromColumn: fact_operational.month_key
+	toColumn: dim_month.month_key
+
+relationship 4c145943-42f4-5be7-b54f-8593a47f79a9
+	fromColumn: fact_operational.version_key
+	toColumn: dim_version.version_key
+
+relationship 865841f8-6bf3-5f31-9645-fa1e6b9d5ffe
+	fromColumn: fact_operational.region_code
+	toColumn: dim_region.region_code
+
+relationship ef700e7f-73b3-584f-a902-dd6bf8e79a66
+	fromColumn: fact_operational.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 39c5b179-d32d-5082-8df5-f424d86ccefa
+	fromColumn: fact_operational.line_code
+	toColumn: dim_line.line_code
+
+relationship 90cc09d6-ada3-5903-adeb-c515a984077c
+	fromColumn: fact_operational.segment_code
+	toColumn: dim_segment.segment_code
+
+relationship 54a1bfc9-19c6-5b63-82c9-8513a802a0e9
+	fromColumn: bridge_account_nature.account_code
+	toColumn: dim_account.account_code
+
+relationship 51dd328b-35a4-572a-9c36-f36ee0cbead6
+	fromColumn: bridge_account_nature.nature_code
+	toColumn: dim_nature.nature_code
+
+relationship bb660f94-6348-59b0-896c-f99917e04131
+	fromColumn: dim_kpi.entity_view_code
+	toColumn: param_entity_view.entity_view_code
+
+relationship 82065b8a-fc58-54c7-9ef6-b4cc523749e2
+	fromColumn: dim_bridge_step.entity_view_code
+	toColumn: param_entity_view.entity_view_code
+
