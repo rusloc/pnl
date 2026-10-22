@@ -1,0 +1,69 @@
+/* Ledger tokens — docs/design/design-requirements.md §2–§4. Company identity (--acc, --acc-t, --key-rule) is set per
+   company on the app root (components/theme.ts). */
+:root {
+  --ink-900: #101b2b;
+  --ink-700: #2b3748;
+  --slate-600: #4f5c6c;
+  --slate-400: #8592a3;
+  --line-300: #cdd4dc;
+  --line-200: #dee3e9;
+  --line-100: #edf0f3;
+  --ground: #f2f4f7;
+  --subtle: #f6f8fa;
+  --surface: #ffffff;
+  --rail-text: #c9d3e0;
+  --rail-muted: #aeb9c7;
+  --rail-divider: #3a475a;
+  --group-rule: #e3e8ed;
+  --subtotal-rule: #d5dce3;
+
+  --fav: #06603f;
+  --fav-bar: #3ba37b;
+  --fav-tint: #e4f3ec;
+  --unf: #c2410c;
+  --unf-bar: #e2804a;
+  --unf-tint: #fcede5;
+  --notice-icon: #8a5a00;
+  --notice-text: #3d3216;
+  --notice-border: #ebd9ae;
+  --notice-fill: #fbf4e4;
+  --ic: #6b48c8;
+
+  --acc: #2453a6;
+  --acc-t: #e8eef8;
+  --key-rule: #b9c8e4;
+
+  --flyout-shadow: 0 14px 36px rgba(16, 27, 43, 0.2);
+  --font-ui: var(--font-plex), 'Segoe UI', system-ui, sans-serif;
+  --font-table: var(--font-plex-condensed), var(--font-plex), 'Arial Narrow', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  min-width: 1024px; /* N-09: usable at 1024 px */
+  background: var(--ground);
+  color: var(--ink-900);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px; /* N-08: visible focus */
+}

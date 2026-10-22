@@ -9,8 +9,7 @@ import type { AppClient } from '@/lib/rayfin-client';
 
 import { defaultFilters } from '../model/filters';
 import type { Figures, ZoneKey } from '../model/types';
-import { assembleFigures, createAppDataSource, loadVisibleEntities, modelTrendLoader, modelZoneLoaders, trendBatches, trendQueryKey, zoneQueryKey, ZONES, type KpiTrendLoader, type ZoneLoaders } from './data-source';
-import { Q7_FIN_OPS } from './fixtures/q7-kpi-trend.fixture';
+import { assembleFigures, createAppDataSource, loadVisibleEntities, modelZoneLoaders, zoneQueryKey, ZONES, type ZoneLoaders } from './data-source';
 import type { KpiMeta } from './pnl-model-figures';
 import type { ModelQueryRunner } from './pnl-model-client';
 import { sampleReference } from './sample-reference';
@@ -171,11 +170,11 @@ describe('loadReference with the model’s visible entities (Q0)', () => {
   });
 });
 
-// K-24, K-25 (ADR-0007): the trends start after the KPI zone settles, in two batches (financial /
-// operational) reported on their own, and the tile values are never held back by them.
-describe('createAppDataSource().loadFigures — KPI trends (Q7)', () => {
+// kpi-card-v2: a tile's comparison rows come from the KPI zone's own Q2b values; once the zone has
+// settled nothing else is read for the tiles (no trend query).
+describe('createAppDataSource().loadFigures — KPI tiles', () => {
   const META: KpiMeta[] = [
-    { slot: 1, code: 'NR', label: 'Net revenue', group: 'Financial', betterWhen: 'Higher', valueType: 'AMT', definition: '' },
+    { slot: 1, code: 'NR', label: 'Net revenue', group: 'Financial', betterWhen: 'Higher', valueType: 'AMT', definition: 'Gross revenue + GTN' },
     { slot: 2, code: 'ORG_GROWTH', label: 'Organic growth', group: 'Financial', betterWhen: 'Higher', valueType: 'PCT', definition: '' },
     { slot: 9, code: 'UNITS', label: 'Units sold', group: 'Operational', betterWhen: 'Higher', valueType: 'CNT', definition: '' },
   ];
@@ -185,79 +184,28 @@ describe('createAppDataSource().loadFigures — KPI trends (Q7)', () => {
   };
   const kpiResult = async () => ({ zone: 'kpi', meta: META, values: [valuesTable], requestId: 'req-k' });
 
-  it('splits the batches by kpi_group: financial tiles, then operational tiles', () => {
-    expect(trendBatches(META).map((b) => b.map((m) => m.code))).toEqual([['NR', 'ORG_GROWTH'], ['UNITS']]);
-    expect(trendBatches(META.filter((m) => m.group === 'Financial'))).toHaveLength(1);
-  });
-
-  it('runs Q7 per batch through the connector after the values are on screen, and maps the series as ready', async () => {
-    const executeQuery = vi.fn<(input: ExecuteQueryInput) => Promise<SemanticModelQueryResult>>(async ({ query }) => ({
-      status: 'success',
-      table: query.includes('[KPI Trend]') ? Q7_FIN_OPS : { columns: [], rows: [] },
-      requestId: 'req-t',
-    }));
+  it('maps the comparison rows from the Q2b values and sends no further query for the tiles', async () => {
+    const executeQuery = vi.fn<(input: ExecuteQueryInput) => Promise<SemanticModelQueryResult>>();
     const client = { connectors: { pnlModel: { executeQuery } } } as unknown as AppClient;
     const source = createAppDataSource({ getClient: async () => client, loaders: fakeLoaders({ kpi: kpiResult }) });
     const snapshots: Figures[] = [];
     const final = await source.loadFigures(filter, reference, (f) => snapshots.push(f));
-    const firstWithValues = snapshots.find((f) => f.financial.length > 0);
-    // Values first (trends empty), with the target bar inputs on the tile.
-    expect(firstWithValues?.trends).toEqual({});
-    expect(firstWithValues?.financial[0]).toMatchObject({ code: 'NR', target: { base: 3398.5, marks: [{ name: 'Budget', value: 3464.8, text: '$3,464.8m' }, { name: 'Prior year', value: 3250.1 }] } });
-    expect(firstWithValues?.financial[1].target).toBeNull();
-    // Two Q7 calls, one per batch, each with its own _kpis list and the 200-row cap.
-    const trendCalls = executeQuery.mock.calls.filter(([i]) => i.query.includes('[KPI Trend]'));
-    expect(trendCalls).toHaveLength(2);
-    expect(trendCalls[0][0].query).toContain('TREATAS ( { "NR", "ORG_GROWTH" }, dim_kpi[kpi_code] )');
-    expect(trendCalls[1][0].query).toContain('TREATAS ( { "UNITS" }, dim_kpi[kpi_code] )');
-    expect(trendCalls[0][0].resultSetRowCountLimit).toBe(200);
-    expect(final.trends.NR.kind).toBe('ready');
-    expect(final.trends.ORG_GROWTH.kind).toBe('ready');
-    expect(final.trends.UNITS.kind).toBe('ready');
-    if (final.trends.NR.kind === 'ready') expect(final.trends.NR.trend.points.at(-1)).toMatchObject({ month: '2026-09', value: 419.9 });
-  });
-
-  it('settles each batch on its own, marks a failed batch unavailable with the reason, caches successes and retries failures', async () => {
-    const gate: Record<string, () => void> = {};
-    const trendLoader = vi.fn<KpiTrendLoader>(async (_r, _f, _ref, meta) => {
-      const key = meta.map((m) => m.code).join(',');
-      if (!gate[key]) {
-        await new Promise<void>((resolve) => {
-          gate[key] = resolve;
-        });
-      }
-      if (key === 'UNITS') throw new Error('series timed out');
-      return Object.fromEntries(meta.map((m) => [m.code, { kind: 'ready' as const, trend: { code: m.code, points: [] } }]));
+    expect(executeQuery).not.toHaveBeenCalled();
+    expect(snapshots.length).toBe(1 + ZONES.length);
+    expect(final.zones.kpi).toEqual({ kind: 'live', requestId: 'req-k' });
+    expect(final.financial[0]).toMatchObject({
+      code: 'NR',
+      hint: 'Gross revenue + GTN',
+      sublines: [],
+      compares: [
+        { name: 'vs Budget', text: '−1.9%', tone: 'unf', bar: { capped: false } },
+        { name: 'vs Prior year', text: '+4.6%', tone: 'fav', bar: { capped: false } },
+      ],
     });
-    const source = createAppDataSource({ getClient: async () => fakeClient, loaders: fakeLoaders({ kpi: kpiResult }), trendLoader });
-    const snapshots: Figures[] = [];
-    const pending = source.loadFigures(filter, reference, (f) => snapshots.push(f));
-    await vi.waitFor(() => expect(Object.keys(gate).sort()).toEqual(['NR,ORG_GROWTH', 'UNITS']));
-    gate['NR,ORG_GROWTH']();
-    await vi.waitFor(() => expect(snapshots.at(-1)?.trends.NR?.kind).toBe('ready'));
-    expect(snapshots.at(-1)?.trends.ORG_GROWTH?.kind).toBe('ready');
-    expect(snapshots.at(-1)?.trends.UNITS).toBeUndefined();
-    gate.UNITS();
-    const final = await pending;
-    expect(final.trends.UNITS).toEqual({ kind: 'unavailable', reason: 'series timed out' });
-    expect(final.trends.NR.kind).toBe('ready');
-    // Display-only change: only the failed batch is read again (a failed result is not cached, like a zone).
-    await source.loadFigures({ ...filter, units: 'k' }, reference);
-    expect(trendLoader).toHaveBeenCalledTimes(3);
-    expect(trendLoader.mock.calls[2][3].map((m) => m.code)).toEqual(['UNITS']);
-    // A query-relevant change reads both batches again.
-    await source.loadFigures({ ...filter, month: 6 }, reference);
-    expect(trendLoader).toHaveBeenCalledTimes(5);
-  });
-
-  it('modelTrendLoader surfaces a failed Q7 as an error (the data source turns it into the batch’s reason)', async () => {
-    const failing: ModelQueryRunner = { executeQuery: async () => ({ status: 'error', error: { category: 'api', message: 'Row limit of 200 exceeded' }, requestId: 'req-e' }) };
-    await expect(modelTrendLoader(failing, filter, reference, META)).rejects.toThrow(/Row limit/);
-  });
-
-  it('trendQueryKey follows the KPI zone’s filters plus the batch codes', () => {
-    expect(trendQueryKey(['NR'], filter)).toBe(trendQueryKey(['NR'], { ...filter, units: 'k', analysisCompare: 'PY' }));
-    expect(trendQueryKey(['NR'], filter)).not.toBe(trendQueryKey(['NR', 'GM_PCT'], filter));
-    expect(trendQueryKey(['NR'], filter)).not.toBe(trendQueryKey(['NR'], { ...filter, compareA: 'LE' }));
+    expect(final.financial[0].compares[0].bar?.fraction).toBeLessThan(0);
+    expect(final.financial[0].compares[1].bar?.fraction).toBeGreaterThan(0);
+    // Growth KPIs: value and sub-line only.
+    expect(final.financial[1]).toMatchObject({ code: 'ORG_GROWTH', value: '+6.0%', sublines: ['Reported +8.2%'], compares: [] });
+    expect(final.operational[0].compares.map((c) => c.text)).toEqual(['−1.7%', '+3.9%']);
   });
 });

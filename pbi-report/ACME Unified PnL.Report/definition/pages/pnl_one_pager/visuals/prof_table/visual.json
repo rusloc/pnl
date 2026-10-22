@@ -3,9 +3,9 @@
   "name": "prof_table",
   "position": {
     "x": 12,
-    "y": 203,
+    "y": 147,
     "z": 900,
-    "height": 455,
+    "height": 511,
     "width": 802,
     "tabOrder": 7400
   },
@@ -20,15 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dim_channel"
+                      "Entity": "dim_region"
                     }
                   },
-                  "Property": "channel_name"
+                  "Property": "region_name"
                 }
               },
-              "queryRef": "dim_channel.channel_name",
-              "nativeQueryRef": "Channel / sales motion",
-              "displayName": "Channel / sales motion"
+              "queryRef": "dim_region.region_name",
+              "nativeQueryRef": "Region",
+              "displayName": "Region"
             },
             {
               "field": {
@@ -455,13 +455,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "196D"
+                  "Value": "176D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "dim_channel.channel_name"
+            "metadata": "dim_region.region_name"
           }
         },
         {
@@ -497,7 +497,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "80D"
+                  "Value": "100D"
                 }
               }
             }

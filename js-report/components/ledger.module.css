@@ -1,0 +1,480 @@
+/* App frame, rail, flyout, header, notice strip — design guide §5. */
+.app {
+  position: relative;
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+.main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+.content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 24px 16px;
+}
+.state {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--line-200);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--slate-600);
+}
+.state button {
+  margin-left: 12px;
+}
+
+/* 5.1 rail */
+.rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 10px;
+  overflow: hidden;
+  background: var(--ink-900);
+  color: var(--rail-text);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+.brandMark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--acc);
+  color: var(--surface);
+  font-size: 16px;
+  font-weight: 700;
+}
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.brandName {
+  color: var(--surface);
+  font-size: 15px;
+  font-weight: 600;
+}
+.railMuted {
+  color: var(--rail-muted);
+  font-size: 12px;
+}
+.railSection {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  color: var(--slate-400);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.railDivider {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--rail-divider);
+}
+.railItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rail-text);
+  text-align: left;
+  cursor: pointer;
+}
+.railItem[aria-expanded='true'] {
+  background: var(--ink-700);
+  color: var(--surface);
+}
+.railItemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+.railItemLabel {
+  color: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+.railItemSummary {
+  overflow: hidden;
+  color: var(--rail-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.railSpacer {
+  flex: 1 1 auto;
+}
+
+/* 5.2 flyout */
+.flyout {
+  position: absolute;
+  z-index: 30;
+  top: 92px;
+  width: 352px;
+}
+.flyoutPointer {
+  position: absolute;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  transform: rotate(45deg);
+  border-bottom: 1px solid var(--line-200);
+  border-left: 1px solid var(--line-200);
+  background: var(--surface);
+}
+.flyoutCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 108px);
+  border: 1px solid var(--line-200);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--flyout-shadow);
+}
+.flyoutHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--line-100);
+}
+.flyoutTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+.caption {
+  color: var(--slate-600);
+  font-size: 12px;
+}
+.close {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--ground);
+  cursor: pointer;
+}
+.flyoutBody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  overflow: auto;
+}
+.flyoutFoot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-100);
+}
+.resetLink {
+  height: 40px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--acc);
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.primaryButton {
+  height: 40px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--acc);
+  color: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.groupLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--slate-600);
+  font-size: 12px;
+  font-weight: 600;
+}
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.month {
+  height: 40px;
+  border: 1px solid var(--line-300);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-900);
+  font-size: 14px;
+  cursor: pointer;
+}
+.monthOpen {
+  border-style: dashed;
+  background: var(--subtle);
+  color: var(--slate-600);
+}
+.month[aria-pressed='true'] {
+  border-color: var(--acc);
+  border-style: solid;
+  background: var(--acc);
+  color: var(--surface);
+  font-weight: 600;
+}
+.radioCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-300);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.radioCardOn {
+  border-color: var(--acc);
+  background: var(--acc-t);
+  box-shadow: 0 0 0 1px var(--acc);
+}
+.radioCard input {
+  margin-top: 3px;
+  accent-color: var(--acc);
+}
+.radioText {
+  display: flex;
+  flex-direction: column;
+}
+.radioTitle {
+  font-weight: 600;
+}
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.noticeBox {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--notice-border);
+  border-radius: 8px;
+  background: var(--notice-fill);
+  color: var(--notice-text);
+  font-size: 13px;
+}
+.disabledRow {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px dashed var(--line-300);
+  border-radius: 8px;
+  background: var(--subtle);
+  color: var(--slate-600);
+}
+
+/* 5.3 header */
+.header {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 24px 0;
+  border-bottom: 1px solid var(--line-200);
+  background: var(--surface);
+}
+.headerTop,
+.headerBottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+}
+.headerTop {
+  align-items: center;
+}
+.headerBottom {
+  align-items: flex-end;
+}
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.eyebrow {
+  color: var(--slate-600);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.titleLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+}
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.context {
+  color: var(--slate-600);
+  font-size: 13px;
+}
+.companies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.company {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 16px 6px 12px;
+  border: 1px solid var(--line-300);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+.company:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.companyDot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+.companyText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.companyName {
+  font-size: 15px;
+  font-weight: 600;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--slate-600);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.tab[aria-selected='true'] {
+  border-bottom-color: var(--acc);
+  color: var(--ink-900);
+  font-weight: 600;
+}
+.tab:disabled {
+  color: var(--slate-400);
+  cursor: not-allowed;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+.toolbarLabel {
+  color: var(--slate-600);
+  font-size: 13px;
+}
+.linkButton {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-300);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 5.4 notice strip */
+.notices {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--notice-border);
+  border-radius: 8px;
+  background: var(--notice-fill);
+  color: var(--notice-text);
+  font-size: 13px;
+  list-style: none;
+}
+.notices li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

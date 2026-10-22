@@ -14,7 +14,6 @@ import {
   SAMPLE_FIGURES_NOTICE,
   SAMPLE_INERT_REASON,
   SAMPLE_STATEMENT_ONLY_NOTE,
-  TREND_UNAVAILABLE_TEXT,
   zoneErrorText,
   zoneLoadingText,
 } from './model/sample-mode';
@@ -195,10 +194,11 @@ describe('sample mode', () => {
     switchCompany('Commerce Cloud');
     expect(screen.getByText(/^Commerce Cloud · /)).toBeVisible();
     fireEvent.click(screen.getByRole('tab', { name: 'Key figures' }));
-    expect(screen.getByRole('region', { name: 'Key figures' })).toBeVisible();
-    // Sample tiles carry no monthly series: every trend is honestly unavailable (LSN-002, K-24).
-    expect(screen.getAllByText(TREND_UNAVAILABLE_TEXT).length).toBe(12);
-    expect(screen.queryByTestId('sparkline')).toBeNull();
+    const kpi = screen.getByRole('region', { name: 'Key figures' });
+    expect(kpi).toBeVisible();
+    // Sample tiles carry comparison rows read back from the mockup's Δ text (kpi-card-v2); nothing is invented (LSN-002).
+    expect(within(kpi).getAllByTestId('compare-row').length).toBeGreaterThan(0);
+    expect(within(kpi).getAllByText('vs Budget').length).toBeGreaterThan(0);
   });
 });
 

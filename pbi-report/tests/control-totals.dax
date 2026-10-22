@@ -2,7 +2,8 @@
 // open this file (or paste it), press Run. Each EVALUATE returns its own result tab.
 // A test passes when every row shows _pass = TRUE. Tolerance: 0.01 USD (amounts are translated in floating point).
 // Expected values: table control_totals_usd = data/acme_pl_dummy_data/checks/control_totals_usd.csv (USD,
-// actual rates for ACT and forecast, budget rates for BUD). Spec IDs: T-01, T-02, T-03, T-05, T-06, T-07, T-10, T-17, K-24 (KPI trend).
+// actual rates for ACT and forecast, budget rates for BUD). Spec IDs: T-01, T-02, T-03, T-05, T-06, T-07, T-10, T-17, K-24 (KPI trend),
+// L-07 (statement row labels), L-09 / F-21 (profitability coverage per company x breakdown), K-20 (Key figures tile body).
 // T-04 (By nature lens) was dropped by ADR-0007; it never had a test here.
 
 DEFINE
@@ -616,3 +617,155 @@ RETURN
                 && [_first_index] = [_expected_first]
                 && [_last_index] = [_expected_last]
     )
+
+EVALUATE
+// ---------------------------------------------------------------- L-07 statement row labels (dim_pl_row[line_display], the matrix's top level): every line numbered 01..NN in display order, ratio rows included, name in capitals; leaf rows carry their line's label
+VAR _lines        =
+    ADDCOLUMNS (
+        FILTER ( dim_pl_row, NOT dim_pl_row[is_leaf] )
+        ,"_expected",
+            FORMAT ( RANKX ( FILTER ( dim_pl_row, NOT dim_pl_row[is_leaf] ), dim_pl_row[line_sort], , ASC, DENSE ), "00" )
+                & ". "
+                & UPPER ( dim_pl_row[line_label] )
+    )
+VAR _wrong_lines  = COUNTROWS ( FILTER ( _lines, dim_pl_row[line_display] <> [_expected] ) )
+VAR _wrong_leaves =
+    COUNTROWS (
+        FILTER (
+            dim_pl_row
+            ,dim_pl_row[is_leaf]
+                && dim_pl_row[line_display]
+                    <> LOOKUPVALUE (
+                        dim_pl_row[line_display]
+                        ,dim_pl_row[line_code], dim_pl_row[line_code]
+                        ,dim_pl_row[is_leaf], FALSE ()
+                    )
+        )
+    )
+VAR _n_lines      = COUNTROWS ( _lines )
+VAR _n_labels     = COUNTROWS ( DISTINCT ( SELECTCOLUMNS ( _lines, "_l", dim_pl_row[line_display] ) ) )
+RETURN
+    ROW (
+        "_test", "L-07 labels"
+        ,"_lines", _n_lines
+        ,"_report_lines", COUNTROWS ( dim_report_line )
+        ,"_first", MINX ( FILTER ( _lines, dim_pl_row[line_sort] = MINX ( _lines, dim_pl_row[line_sort] ) ), dim_pl_row[line_display] )
+        ,"_last", MINX ( FILTER ( _lines, dim_pl_row[line_sort] = MAXX ( _lines, dim_pl_row[line_sort] ) ), dim_pl_row[line_display] )
+        ,"_wrong_lines", _wrong_lines + 0
+        ,"_wrong_leaves", _wrong_leaves + 0
+        ,"_pass", _n_lines = COUNTROWS ( dim_report_line ) && _n_labels = _n_lines && _wrong_lines + 0 = 0 && _wrong_leaves + 0 = 0
+    )
+
+EVALUATE
+// ---------------------------------------------------------------- L-09 / F-21 profitability coverage, every company x breakdown (default selection): an allowed breakdown shows rows and no hint; one that is not allowed shows no rows and says why (_Breakdown Hint); Region, the saved breakdown, is allowed for every company. Catches the blank Profitability view of 2026-10-22 (ACME Group with Channel kept from another company: no rows, no explanation).
+VAR _cells        =
+    UNION (
+        SELECTCOLUMNS (
+            SUMMARIZECOLUMNS ( param_entity_view[entity_view_code], dim_region[region_name], TREATAS ( { 0 }, param_breakdown_field[Breakdown Order] ), "_in", [Slice Member In View], "_nr", [Prof Net Revenue] )
+            ,"_entity", param_entity_view[entity_view_code], "_order", 0, "_in", [_in], "_nr", [_nr]
+        )
+        ,SELECTCOLUMNS (
+            SUMMARIZECOLUMNS ( param_entity_view[entity_view_code], dim_channel[channel_name], TREATAS ( { 1 }, param_breakdown_field[Breakdown Order] ), "_in", [Slice Member In View], "_nr", [Prof Net Revenue] )
+            ,"_entity", param_entity_view[entity_view_code], "_order", 1, "_in", [_in], "_nr", [_nr]
+        )
+        ,SELECTCOLUMNS (
+            SUMMARIZECOLUMNS ( param_entity_view[entity_view_code], dim_line[line_name], TREATAS ( { 2 }, param_breakdown_field[Breakdown Order] ), "_in", [Slice Member In View], "_nr", [Prof Net Revenue] )
+            ,"_entity", param_entity_view[entity_view_code], "_order", 2, "_in", [_in], "_nr", [_nr]
+        )
+        ,SELECTCOLUMNS (
+            SUMMARIZECOLUMNS ( param_entity_view[entity_view_code], dim_segment[segment_name], TREATAS ( { 3 }, param_breakdown_field[Breakdown Order] ), "_in", [Slice Member In View], "_nr", [Prof Net Revenue] )
+            ,"_entity", param_entity_view[entity_view_code], "_order", 3, "_in", [_in], "_nr", [_nr]
+        )
+        ,SELECTCOLUMNS (
+            SUMMARIZECOLUMNS ( param_entity_view[entity_view_code], dim_entity[short_name], TREATAS ( { 4 }, param_breakdown_field[Breakdown Order] ), "_in", [Slice Member In View], "_nr", [Prof Net Revenue] )
+            ,"_entity", param_entity_view[entity_view_code], "_order", 4, "_in", [_in], "_nr", [_nr]
+        )
+    )
+VAR _grid         =
+    CROSSJOIN (
+        SELECTCOLUMNS ( VALUES ( param_entity_view[entity_view_code] ), "_entity", param_entity_view[entity_view_code] )
+        ,SELECTCOLUMNS ( GENERATESERIES ( 0, 4 ), "_order", [Value] )
+    )
+VAR _checked      =
+    ADDCOLUMNS (
+        _grid
+        ,"_allowed",
+            CALCULATE (
+                [Breakdown Allowed]
+                ,TREATAS ( { [_entity] }, param_entity_view[entity_view_code] )
+                ,TREATAS ( { [_order] }, param_breakdown_field[Breakdown Order] )
+            )
+        ,"_hint",
+            CALCULATE (
+                [_Breakdown Hint]
+                ,TREATAS ( { [_entity] }, param_entity_view[entity_view_code] )
+                ,TREATAS ( { [_order] }, param_breakdown_field[Breakdown Order] )
+            )
+        ,"_rows_in_view",
+            VAR _e            = [_entity]
+            VAR _o            = [_order]
+            RETURN
+                COUNTROWS ( FILTER ( _cells, [_entity] = _e && [_order] = _o && [_in] = 1 && NOT ISBLANK ( [_nr] ) ) ) + 0
+    )
+RETURN
+    ADDCOLUMNS (
+        _checked
+        ,"_pass",
+            ( [_allowed] = 1 && [_rows_in_view] > 0 && LEN ( [_hint] ) = 0 )
+                || ( ISBLANK ( [_allowed] ) && [_rows_in_view] = 0 && LEN ( [_hint] ) > 0 && [_order] <> 0 )
+    )
+ORDER BY [_entity], [_order]
+
+EVALUATE
+// ---------------------------------------------------------------- K-20 / kpi-card-v2 tile body: the Δ text in KPI Tile SVG equals KPI Δ A / KPI Δ B (rounded as shown), n/a without data, no comparison rows on growth KPIs; every KPI of every company (default selection: last closed FY and month, YTD, Actual vs Budget / Prior year)
+VAR _tiles        =
+    SUMMARIZECOLUMNS (
+        param_entity_view[entity_view_code]
+        ,dim_kpi[kpi_code]
+        ,dim_kpi[value_type]
+        ,"_svg", [KPI Tile SVG]
+        ,"_d_a", [KPI Δ A]
+        ,"_d_b", [KPI Δ B]
+    )
+RETURN
+    SELECTCOLUMNS (
+        ADDCOLUMNS (
+            _tiles
+            ,"_ok",
+                VAR _svg          = [_svg]
+                VAR _pp           = dim_kpi[value_type] IN { "PCT", "PCT2" }
+                VAR _growth       = dim_kpi[kpi_code] IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" }
+                VAR _text_a       =
+                    VAR _r            = ROUND ( [_d_a], IF ( _pp, 1, 3 ) )
+                    RETURN
+                        IF (
+                            ISBLANK ( [_d_a] )
+                            ,"n/a"
+                            ,IF ( _r > 0, "▲ +", IF ( _r < 0, "▼ −", "" ) ) & FORMAT ( ABS ( _r ), IF ( _pp, "0.0", "0.0%" ) ) & IF ( _pp, " pp", "" )
+                        )
+                VAR _text_b       =
+                    VAR _r            = ROUND ( [_d_b], IF ( _pp, 1, 3 ) )
+                    RETURN
+                        IF (
+                            ISBLANK ( [_d_b] )
+                            ,"n/a"
+                            ,IF ( _r > 0, "▲ +", IF ( _r < 0, "▼ −", "" ) ) & FORMAT ( ABS ( _r ), IF ( _pp, "0.0", "0.0%" ) ) & IF ( _pp, " pp", "" )
+                        )
+                RETURN
+                    IF (
+                        _growth
+                        ,NOT CONTAINSSTRING ( _svg, "vs " )
+                        ,CONTAINSSTRING ( _svg, ">" & SUBSTITUTE ( _text_a, "%", "%25" ) & "<" )
+                            && CONTAINSSTRING ( _svg, ">" & SUBSTITUTE ( _text_b, "%", "%25" ) & "<" )
+                            && CONTAINSSTRING ( _svg, ">vs Budget<" )
+                            && CONTAINSSTRING ( _svg, ">vs Prior year<" )
+                    )
+        )
+        ,"_test", "K-20 tile"
+        ,"_entity", param_entity_view[entity_view_code]
+        ,"_kpi", dim_kpi[kpi_code]
+        ,"_d_a", [_d_a]
+        ,"_d_b", [_d_b]
+        ,"_pass", [_ok]
+    )
+ORDER BY [_entity], [_kpi]

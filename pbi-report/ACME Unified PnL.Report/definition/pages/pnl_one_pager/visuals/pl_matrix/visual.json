@@ -3,9 +3,9 @@
   "name": "pl_matrix",
   "position": {
     "x": 1,
-    "y": 150,
+    "y": 94,
     "z": 2900,
-    "height": 534,
+    "height": 590,
     "width": 1326,
     "tabOrder": 4200
   },
@@ -23,11 +23,11 @@
                       "Entity": "dim_pl_row"
                     }
                   },
-                  "Property": "line_label"
+                  "Property": "line_display"
                 }
               },
-              "queryRef": "dim_pl_row.line_label",
-              "nativeQueryRef": "line_label",
+              "queryRef": "dim_pl_row.line_display",
+              "nativeQueryRef": "line_display",
               "active": true,
               "displayName": "Line"
             },
@@ -243,7 +243,7 @@
         "levels": [
           {
             "queryRefs": [
-              "dim_pl_row.line_label"
+              "dim_pl_row.line_display"
             ],
             "isCollapsed": true,
             "identityKeys": [
@@ -254,7 +254,7 @@
                       "Entity": "dim_pl_row"
                     }
                   },
-                  "Property": "line_label"
+                  "Property": "line_display"
                 }
               }
             ],
@@ -1601,7 +1601,7 @@
             }
           },
           "selector": {
-            "metadata": "dim_pl_row.line_label"
+            "metadata": "dim_pl_row.line_display"
           }
         },
         {

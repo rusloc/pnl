@@ -1,6 +1,6 @@
 # Measure dictionary — ACME Unified P&L (Track B)
 
-> Generated from `pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22: T-05 fix, query-plan performance pass, ADR-0007 KPI trend contract K-24, Key figures trend overlay K-24/K-25, info pop-ups L-15). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
+> Generated from `pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22: T-05 fix, query-plan performance pass, ADR-0007 KPI trend contract K-24, Key figures trend overlay K-24/K-25, info pop-ups L-15; review batch: KPI card v2 tile body, header status and applied-filters list, notice strip removed, Profitability breakdown hint). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
 
 186 measures in table `_measures`; folder `9 Engine` is hidden from report authors.
 
@@ -14,9 +14,9 @@
 | `3 KPIs\Items` | 24 | One measure per KPI formula, unscaled |
 | `4 Analysis` | 11 | Net revenue bridge (C-40) and largest variances (C-45) |
 | `5 Profitability` | 5 | Profitability by slice (C-46) and slice-member filter |
-| `6 Context` | 5 | Header status, context line, notices, panel notes (L-01, L-04, L-05) |
+| `6 Context` | 5 | Data status, context line, notices, panel notes (L-01, L-04, L-05); Track A reads them, the report does not |
 | `9 Engine` | 45 | Hidden: selections, time window, translation, entity view, row logic, unscaled statement values |
-| `Design` | 56 | Ledger design helpers: identity colour, header and rail texts, flyout labels, favourability inputs for rules-based colours, Key figures trend overlay (KPI Row SVG), info pop-up paragraphs (no engine calls except Notice Strip, CM Subtitle, KPI Row SVG) |
+| `Design` | 56 | Ledger design helpers: identity colour, header status and applied-filters list, rail texts, flyout labels, favourability inputs for rules-based colours, Key figures tile body (KPI Tile SVG), info pop-up paragraphs (no engine calls except CM Subtitle, KPI Tile SVG) |
 
 ## How the engine fits together
 
@@ -229,19 +229,16 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_Units Short` | Currency and unit letter, e.g. USD m. | F-14 | — |
 | `_Units Long` | Currency and unit word, e.g. USD millions. | F-14 | — |
 | `_Window Label` | Time window as text, e.g. YTD Jan–Sep 2026 (months the base covers). | L-04 | — |
-| `Hdr Eyebrow` | Header eyebrow with the data status (N-02, N-03): last closed month. | L-01, N-02, N-03 | — |
-| `Rail Sum Period` | Rail summary of the Period group, e.g. YTD · Sep 2026. | F-02..F-04 | — |
+| `Rail Sum Period` | Rail summary of the Period group, e.g. YTD - Sep 2026. | F-02..F-04 | — |
 | `Rail Sum Versions` | Rail summary of the Versions group, e.g. Actual vs Budget, Prior year. | F-05..F-07 | — |
 | `Rail Sum Slice` | Rail summary of the Slice group: All slices, filtered regions / slices, or consolidated in the Group view. | F-08..F-11, F-32 | — |
-| `Rail Sum Display` | Rail summary of the Display group, e.g. USD m · actual rates. | F-12..F-14 | — |
-| `Hdr Context` | Header context line (L-04): company (the entity switch moved to the rail brand mark, ADR-0007) · window · versions · currency, units and FX basis · slices. | L-04 | — |
-| `Notice Strip` | Notice strip text (L-05, C-50): full-year outlook basis, Commerce Cloud intercompany revenue, then the conditional notices. | L-05, C-50 | — |
+| `Rail Sum Display` | Rail summary of the Display group, e.g. USD m - actual rates. | F-12..F-14 | — |
 | `Seg Label` | Short label of a segmented-control item (Label role of the button slicers): versions, FX basis, units, time view, breakdown. | F-03..F-07, F-12..F-14, F-21 | — |
 | `Version Desc` | One-line description of each base-version card in the Versions flyout (Label role). | F-05 | — |
 | `Month Item Fill` | Month button fill in the Period flyout: open months (after the last close) in Subtle, closed months white. | F-03 | — |
 | `Month Item Font` | Month button text colour in the Period flyout: open months Slate 600, closed months Ink 900. | F-03 | — |
 | `_Slice Sub` | Slice flyout subtitle: which slices apply to the selected company. | F-08..F-11, F-32 | — |
-| `Slice Hdr Region` | Region group label with its count in the Slice flyout, e.g. Region · All 4. | F-08 | — |
+| `Slice Hdr Region` | Region group label with its count in the Slice flyout, e.g. Region - All 4. | F-08 | — |
 | `Slice Hdr Channel` | Channel / sales motion group label with its count; blank in the Group view. | F-09 | — |
 | `Slice Hdr Line` | Category / service line group label with its count; blank in the Group view. | F-10 | — |
 | `Slice Hdr Segment` | Price tier / customer segment group label with its count; blank in the Group view. | F-11 | — |
@@ -251,7 +248,7 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_Breakdown Short` | Short, company-specific name of the profitability breakdown in context (default Channel). | F-21 | — |
 | `Breakdown Allowed` | 1 when the breakdown option applies to the selected company: Region or Entity in the Group view, the four slices otherwise. Visual filter of the breakdown slicer. | F-21 | — |
 | `PL Notes` | Statement notes column: company-specific secondary label (L-11) and classification tags (L-14) on line rows; blank on leaves. | L-11, L-14 | — |
-| `PL Hdr Base` | Statement column-group title over Base and % NR, e.g. YTD Sep 2026 · Actual. | L-07 | — |
+| `PL Hdr Base` | Statement column-group title over Base and % NR, e.g. YTD Sep 2026 - Actual. | L-07 | — |
 | `PL Hdr Cmp A` | Statement column-group title over Compare A (also the KPI tile label), e.g. vs Budget. | L-07, K-20 | — |
 | `PL Hdr Cmp B` | Statement column-group title over Compare B (also the KPI tile label), e.g. vs Prior year. | L-07, K-20 | — |
 | `PL Hdr FY` | Statement column-group title over the full-year columns, e.g. Full year 2026. | L-07 | — |
@@ -260,10 +257,14 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Var Title` | Largest variances card title, e.g. Largest variances vs Budget. | C-45 | — |
 | `Var Subtitle` | Largest variances card subtitle, e.g. Top 8 lines by size of Δ, USD millions. | C-45 | — |
 | `Prof Title` | Profitability table title, e.g. Profitability by channel. | C-46 | — |
-| `Prof Subtitle` | Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions. | C-46 | — |
+| `Prof Subtitle` | Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions; the breakdown hint instead when the selected breakdown does not apply to the company. | C-46 | — |
 | `CM Title` | Contribution margin chart title, e.g. Contribution margin by channel. | C-46 | — |
 | `CM Subtitle` | Contribution margin chart subtitle with the company average CM % (the dashed line). | C-46 | — |
-| `KPI Row SVG` | K-24 / K-25 overlay for one row of KPI tiles (image visual over the tile cards, own query, so the tile values never wait for it): per tile, in the left column of the card (the deltas sit on the right), a 13-month sparkline of _KPI Trend Value above the value, in the company colour with the selected month marked, the tile sub-line (KPI Secondary: margin or reported growth; a 179 px card shows only four reference-label lines) and a target bar below the value (base value as the bar, Compare A / Compare B as labelled ticks; none for growth KPIs or a compare set to None). SVG 1328 x 179 in tile coordinates: 4 tiles of 323 px with 12 px gaps, column = (slot - 1) mod 4. The visual filters dim_kpi[kpi_code] to a literal list, which lets the engine drop the SWITCH branches of other KPIs (about 4x faster than a filter on kpi_group). | K-24, K-25, K-20 | — |
+| `KPI Tile SVG` | Key figures tile body (kpi-card-v2, K-20, K-21; replaces the K-24 / K-25 overlay): image of the card visual, evaluated in the tile query itself, no extra query. Sub-line (KPI Secondary) and one diverging comparison row per active comparison: name, a bar from a centre line that grows right when favourable and left when unfavourable (neutral KPIs grey, right, by size), Δ text with ▲ / ▼ and sign. Scale ±20 % for amount KPIs, ±5 pp for percent KPIs, capped with a chevron; n/a without data; no rows for growth KPIs. SVG 300 x 64. | K-20, K-21, kpi-card-v2 | — |
+| `KPI Definition` | Tooltip of a Key figures tile: the KPI definition from dim_kpi (kpi-card-v2: the one-line definition moves to the tooltip). | L-06, kpi-card-v2 | — |
+| `Hdr Status` | Header status on the title row (N-02, N-03): company - Management reporting - last closed month - last refresh, e.g. ACME Group - Management reporting - Closed through Sep 2026 - Refreshed 22 Oct 2026 13:53. | L-01, N-02, N-03 | — |
+| `Filter Value` | Value of a row of the applied-filters pop-up (dim_filter_row): company, fiscal year, period, time view with its window, versions, currency, FX basis, units, regions, slices. Covers everything the former header context line showed (L-04). | L-04, F-01..F-14 | — |
+| `_Breakdown Hint` | Why the Profitability view is empty: blank when the selected breakdown applies to the company, else e.g. Channel does not apply to ACME Group - pick Region or Company. The breakdown slicer keeps its selection when the company changes, and Breakdown Allowed hides the kept item. | F-21, L-09 | — |
 | `Info Bridge 1` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
 | `Info Bridge 2` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
 | `Info Variances 1` | Info pop-up text of the largest variances table (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims "underneath" because the block is a column of its own. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-45 | — |
@@ -272,7 +273,6 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Info Profitability 2` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
 | `Info Profitability 3` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 3 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
 | `Info CM 1` | Info pop-up text of the contribution margin chart (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown filled in. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
-| `KPI Fav Sign` | Favourability sign of the KPI tile in context from dim_kpi.better_when: 1 higher is better, -1 lower is better, 0 neutral; blank without a KPI row, so it never adds tiles. No engine call; input of the rules that colour the tile deltas. | K-20, N-07 | — |
 | `PL Fav Off` | 1 on the effective tax rate ratio row, whose deltas are never coloured; blank elsewhere. No engine call; input of the rules that colour the statement deltas. | L-12, N-07 | — |
 
 ## DAX
@@ -3163,7 +3163,7 @@ SWITCH (
         ,"E-commerce SaaS services"
     ,"GROUP"
         ,"Consolidated"
-    ,"Goods · retail, D2C, marketplaces"
+    ,"Goods - retail, D2C, marketplaces"
 )
 ```
 
@@ -3278,23 +3278,6 @@ RETURN
     )
 ```
 
-### Hdr Eyebrow
-
-Folder `Design` · spec L-01, N-02, N-03
-
-```dax
-Hdr Eyebrow =
-VAR _last_closed  = [_Last Closed Index]
-VAR _closed_label =
-    CALCULATE (
-        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _last_closed
-    )
-RETURN
-    "ACME GROUP · MANAGEMENT REPORTING · ACTUALS CLOSED THROUGH " & UPPER ( _closed_label )
-```
-
 ### Rail Sum Period
 
 Folder `Design` · spec F-02..F-04
@@ -3311,7 +3294,7 @@ VAR _anchor_label =
         ,dim_month[month_index] = _anchor
     )
 RETURN
-    _time_label & " · " & _anchor_label
+    _time_label & " - " & _anchor_label
 ```
 
 ### Rail Sum Versions
@@ -3371,7 +3354,7 @@ RETURN
             ,"All slices"
         ,_slices = 0
             ,_regions
-        ,_regions & " · " & _slices & IF ( _slices = 1, " slice filtered", " slices filtered" )
+        ,_regions & " - " & _slices & IF ( _slices = 1, " slice filtered", " slices filtered" )
     )
 ```
 
@@ -3381,102 +3364,7 @@ Folder `Design` · spec F-12..F-14
 
 ```dax
 Rail Sum Display =
-[_Units Short] & " · " & IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
-```
-
-### Hdr Context
-
-Folder `Design` · spec L-04
-
-```dax
-Hdr Context =
-VAR _compare_a    = [_Cmp A Name]
-VAR _compare_b    = [_Cmp B Name]
-VAR _compares     =
-    SWITCH (
-        TRUE ()
-        ,ISBLANK ( _compare_a ) && ISBLANK ( _compare_b )
-            ,BLANK ()
-        ,ISBLANK ( _compare_b )
-            ,_compare_a
-        ,ISBLANK ( _compare_a )
-            ,_compare_b
-        ,_compare_a & " and " & _compare_b
-    )
-VAR _versions     = [_Base Name] & IF ( ISBLANK ( _compares ), " only", " vs " & _compares )
-VAR _fx           = IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
-VAR _company      = SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
-RETURN
-    _company & " · " & [_Window Label] & " · " & _versions & " · " & [_Units Short] & ", " & _fx & " · " & [Rail Sum Slice]
-```
-
-### Notice Strip
-
-Folder `Design` · spec L-05, C-50
-
-```dax
-Notice Strip =
-VAR _view         = [_Sel Entity]
-VAR _fy           = [_Sel FY]
-VAR _last_closed  = [_Last Closed Index]
-VAR _fy_last      =
-    CALCULATE (
-        MAX ( dim_month[month_index] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[fiscal_year] = _fy
-    )
-VAR _closed_month =
-    CALCULATE (
-        MAX ( dim_month[month_name] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _last_closed
-    )
-VAR _open_month   =
-    CALCULATE (
-        MAX ( dim_month[month_name] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _last_closed + 1
-    )
-VAR _forecast     =
-    CALCULATE (
-        MAX ( dim_version[version_name] )
-        ,REMOVEFILTERS ( dim_version )
-        ,dim_version[is_latest_forecast] = TRUE ()
-    )
-VAR _n_fy         =
-    SWITCH (
-        TRUE ()
-        ,_last_closed >= _fy_last
-            ,"Full year " & _fy & " is closed: the latest estimate equals actuals."
-        ,_last_closed < _fy_last - 11
-            ,"Full year " & _fy & " compares the budget with the latest estimate (" & _forecast & ")."
-        ,"Full year compares the budget with the latest estimate: Jan–" & _closed_month & " actuals plus " & _forecast & " for " & _open_month & "–Dec."
-    )
-VAR _ic           =
-    IF (
-        _view = "S"
-        ,CALCULATE (
-            [KPI IC Eliminated]
-            ,REMOVEFILTERS ( param_entity_view )
-            ,param_entity_view[entity_view_code] = "GROUP"
-        )
-    )
-VAR _currency     = [_Sel Currency]
-VAR _symbol       =
-    CALCULATE (
-        MAX ( param_reporting_currency[symbol] )
-        ,REMOVEFILTERS ( param_reporting_currency )
-        ,param_reporting_currency[currency_code] = _currency
-    )
-VAR _n_ic         =
-    IF (
-        _ic > 0
-        ,"Revenue includes " & _symbol & FORMAT ( DIVIDE ( _ic, [_Units Divisor] ), IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) & IF ( [_Sel Units] = "K", "k", "m" )
-            & " billed to Consumer Products; it is eliminated in the Group view."
-    )
-VAR _list         = { _n_fy, _n_ic, [Notices] }
-RETURN
-    CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], "  ·  " )
+[_Units Short] & " - " & IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
 ```
 
 ### Seg Label
@@ -3622,7 +3510,7 @@ Slice Hdr Region =
 VAR _total        = COUNTROWS ( ALL ( dim_region[region_name] ) )
 VAR _selected     = COUNTROWS ( VALUES ( dim_region[region_name] ) )
 RETURN
-    "Region · " & IF ( ISFILTERED ( dim_region[region_name] ) && _selected < _total, _selected & " of " & _total, "All " & _total )
+    "Region - " & IF ( ISFILTERED ( dim_region[region_name] ) && _selected < _total, _selected & " of " & _total, "All " & _total )
 ```
 
 ### Slice Hdr Channel
@@ -3647,7 +3535,7 @@ VAR _selected     =
     )
 VAR _count        = IF ( ISFILTERED ( dim_channel[channel_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 RETURN
-    IF ( _view <> "GROUP", IF ( _view = "S", "Sales motion", "Channel" ) & " · " & _count )
+    IF ( _view <> "GROUP", IF ( _view = "S", "Sales motion", "Channel" ) & " - " & _count )
 ```
 
 ### Slice Hdr Line
@@ -3672,7 +3560,7 @@ VAR _selected     =
     )
 VAR _count        = IF ( ISFILTERED ( dim_line[line_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 RETURN
-    IF ( _view <> "GROUP", IF ( _view = "S", "Service line", "Category" ) & " · " & _count )
+    IF ( _view <> "GROUP", IF ( _view = "S", "Service line", "Category" ) & " - " & _count )
 ```
 
 ### Slice Hdr Segment
@@ -3697,7 +3585,7 @@ VAR _selected     =
     )
 VAR _count        = IF ( ISFILTERED ( dim_segment[segment_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 RETURN
-    IF ( _view <> "GROUP", IF ( _view = "S", "Customer segment", "Price tier" ) & " · " & _count )
+    IF ( _view <> "GROUP", IF ( _view = "S", "Customer segment", "Price tier" ) & " - " & _count )
 ```
 
 ### Slice Group Notice
@@ -3797,7 +3685,7 @@ VAR _list         =
         ,_category
     }
 RETURN
-    IF ( NOT _is_leaf, CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], " · " ) )
+    IF ( NOT _is_leaf, CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], " - " ) )
 ```
 
 ### PL Hdr Base
@@ -3824,7 +3712,7 @@ VAR _window       =
         ,_time_code & " " & _anchor_label
     )
 RETURN
-    _window & " · " & [_Base Name]
+    _window & " - " & [_Base Name]
 ```
 
 ### PL Hdr Cmp A
@@ -3928,7 +3816,7 @@ Folder `Design` · spec C-46
 
 ```dax
 Prof Subtitle =
-[_Window Label] & ", " & [_Units Long]
+IF ( ISBLANK ( [_Breakdown Hint] ), [_Window Label] & ", " & [_Units Long], [_Breakdown Hint] )
 ```
 
 ### CM Title
@@ -3948,135 +3836,260 @@ Folder `Design` · spec C-46
 CM Subtitle =
 VAR _entity       =
     SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
+VAR _hint         = [_Breakdown Hint]
 RETURN
-    "Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
+    IF (
+        ISBLANK ( _hint )
+        ,"Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
+        ,_hint
+    )
 ```
 
-### KPI Row SVG
+### KPI Tile SVG
 
-Folder `Design` · spec K-24, K-25, K-20
+Folder `Design` · spec K-20, K-21, kpi-card-v2
 
 ```dax
-KPI Row SVG =
-VAR _acc          = [_Acc]
-VAR _anchor       = [_Anchor Index]
-VAR _cmp_a_name   = SWITCH ( [_Sel Compare A], "B", "Bud", "LE", "LE", "PY", "PY" )
-VAR _cmp_b_name   = SWITCH ( [_Sel Compare B], "B", "Bud", "LE", "LE", "PY", "PY" )
-VAR _months       =
+KPI Tile SVG =
+VAR _code         = SELECTEDVALUE ( dim_kpi[kpi_code] )
+VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
+VAR _better       = SELECTEDVALUE ( dim_kpi[better_when] )
+VAR _is_growth    = _code IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" }
+VAR _is_pp        = _type IN { "PCT", "PCT2" }
+VAR _scale        = IF ( _is_pp, 5, 0.2 )
+VAR _sel_a        = [_Sel Compare A]
+VAR _sel_b        = [_Sel Compare B]
+VAR _value        = IF ( NOT _is_growth, [_KPI Value] )
+VAR _cmp_a        =
+    IF (
+        NOT _is_growth && _sel_a <> "NONE"
+        ,CALCULATE (
+            [_KPI Value]
+            ,REMOVEFILTERS ( param_eval )
+            ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
+        )
+    )
+VAR _cmp_b        =
+    IF (
+        NOT _is_growth && _sel_b <> "NONE"
+        ,CALCULATE (
+            [_KPI Value]
+            ,REMOVEFILTERS ( param_eval )
+            ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
+        )
+    )
+VAR _sec          = [KPI Secondary]
+VAR _rows         =
     FILTER (
-        ALL ( dim_month[month_index] )
-        ,dim_month[month_index] >= _anchor - 12
-            && dim_month[month_index] <= _anchor
+        {
+            ( 1, _sel_a, IF ( _is_pp, ( _value - _cmp_a ) * 100, DIVIDE ( _value - _cmp_a, ABS ( _cmp_a ) ) ), NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp_a ) )
+            ,( 2, _sel_b, IF ( _is_pp, ( _value - _cmp_b ) * 100, DIVIDE ( _value - _cmp_b, ABS ( _cmp_b ) ) ), NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp_b ) )
+        }
+        ,NOT _is_growth && [Value2] <> "NONE"
     )
-VAR _kpis         =
-    SUMMARIZECOLUMNS (
-        dim_kpi[slot]
-        ,dim_kpi[kpi_code]
-        ,"@base", [_KPI Value]
-        ,"@cmp_a",
-            IF (
-                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
-                ,CALCULATE (
-                    [_KPI Value]
-                    ,REMOVEFILTERS ( param_eval )
-                    ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
-                )
-            )
-        ,"@cmp_b",
-            IF (
-                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
-                ,CALCULATE (
-                    [_KPI Value]
-                    ,REMOVEFILTERS ( param_eval )
-                    ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
-                )
-            )
-        ,"@sec", [KPI Secondary]
-    )
-VAR _points       =
-    SUMMARIZECOLUMNS (
-        dim_kpi[kpi_code]
-        ,dim_month[month_index]
-        ,_months
-        ,"@v", [_KPI Trend Value]
-    )
-VAR _tiles        =
+VAR _body         =
     CONCATENATEX (
-        _kpis
-        ,VAR _code        = dim_kpi[kpi_code]
-         VAR _x0          = MOD ( dim_kpi[slot] - 1, 4 ) * 335 + 18
-         VAR _w           = 140
-         VAR _top         = 48
-         VAR _h           = 30
-         VAR _series      = FILTER ( _points, dim_kpi[kpi_code] = _code && NOT ISBLANK ( [@v] ) )
-         VAR _lo          = MINX ( _series, [@v] )
-         VAR _hi          = MAXX ( _series, [@v] )
-         VAR _span        = _hi - _lo
-         VAR _path        =
-             CONCATENATEX (
-                 _series
-                 ,VAR _i          = dim_month[month_index]
-                  VAR _prev       = COUNTROWS ( FILTER ( _series, dim_month[month_index] = _i - 1 ) )
-                  VAR _x          = _x0 + ( _i - _anchor + 12 ) * _w / 12
-                  VAR _y          = _top + _h - IF ( _span = 0, _h / 2, ( [@v] - _lo ) / _span * _h )
-                  RETURN
-                      IF ( _prev = 1, "L", "M" ) & FORMAT ( _x, "0.0" ) & " " & FORMAT ( _y, "0.0" )
-                 ," "
-                 ,dim_month[month_index], ASC
+        _rows
+        ,VAR _y           = 14 + 22 * [Value1]
+         VAR _name        = "vs " & SWITCH ( [Value2], "B", "Budget", "LE", "Latest est.", "PY", "Prior year" )
+         VAR _has         = [Value4]
+         VAR _delta       = ROUND ( [Value3], IF ( _is_pp, 1, 3 ) )
+         VAR _fav         =
+             SWITCH (
+                 TRUE ()
+                 ,_better = "Neutral" || _delta = 0
+                     ,0
+                 ,( _delta > 0 && _better = "Higher" ) || ( _delta < 0 && _better = "Lower" )
+                     ,1
+                 ,-1
              )
-         VAR _last        = MAXX ( FILTER ( _series, dim_month[month_index] = _anchor ), [@v] )
-         VAR _dot         =
+         VAR _len         = MIN ( ABS ( _delta ) / _scale, 1 ) * 50
+         VAR _bar_x       = IF ( _fav = -1, 146 - _len, 146 )
+         VAR _fill        = SWITCH ( _fav, 1, "#3BA37B", -1, "#E2804A", "#8592A3" )
+         VAR _ink         = SWITCH ( _fav, 1, "#06603F", -1, "#C2410C", "#101B2B" )
+         VAR _arrow       = IF ( _delta > 0, "▲ +", IF ( _delta < 0, "▼ −", "" ) )
+         VAR _number      =
+             FORMAT ( ABS ( _delta ), IF ( _is_pp, "0.0", "0.0%" ) ) & IF ( _is_pp, " pp", "" )
+         VAR _chevron     =
              IF (
-                 NOT ISBLANK ( _last )
-                 ,"<circle cx='" & FORMAT ( _x0 + _w, "0.0" ) & "' cy='"
-                     & FORMAT ( _top + _h - IF ( _span = 0, _h / 2, ( _last - _lo ) / _span * _h ), "0.0" )
-                     & "' r='2.8' fill='" & _acc & "'/>"
-             )
-         VAR _base        = [@base]
-         VAR _cmp_a       = IF ( NOT ISBLANK ( _cmp_a_name ), [@cmp_a] )
-         VAR _cmp_b       = IF ( NOT ISBLANK ( _cmp_b_name ), [@cmp_b] )
-         VAR _has_bar     = NOT ( _code IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } ) && NOT ISBLANK ( _base ) && ( NOT ISBLANK ( _cmp_a ) || NOT ISBLANK ( _cmp_b ) )
-         VAR _b_lo        = MIN ( 0, MIN ( _base, MIN ( _cmp_a, _cmp_b ) ) )
-         VAR _b_hi        = MAX ( 0, MAX ( _base, MAX ( _cmp_a, _cmp_b ) ) ) * 1.08
-         VAR _b_span      = _b_hi - _b_lo
-         VAR _zero        = _x0 + DIVIDE ( 0 - _b_lo, _b_span ) * _w
-         VAR _base_x      = _x0 + DIVIDE ( _base - _b_lo, _b_span ) * _w
-         VAR _a_x         = _x0 + DIVIDE ( _cmp_a - _b_lo, _b_span ) * _w
-         VAR _b_x         = _x0 + DIVIDE ( _cmp_b - _b_lo, _b_span ) * _w
-         VAR _close       = NOT ISBLANK ( _cmp_a ) && NOT ISBLANK ( _cmp_b ) && ABS ( _a_x - _b_x ) < 24
-         VAR _a_anchor    = IF ( _close, IF ( _a_x <= _b_x, "end", "start" ), "middle" )
-         VAR _a_dx        = IF ( _close, IF ( _a_x <= _b_x, -3, 3 ), 0 )
-         VAR _b_dx        = - _a_dx
-         VAR _b_anchor    = IF ( _close, IF ( _a_x <= _b_x, "start", "end" ), "middle" )
-         VAR _bar         =
-             IF (
-                 _has_bar
-                 ,"<rect x='" & FORMAT ( _x0, "0.0" ) & "' y='150' width='" & _w & "' height='6' rx='3' fill='#EDF0F3'/>"
-                     & "<rect x='" & FORMAT ( MIN ( _zero, _base_x ), "0.0" ) & "' y='150' width='" & FORMAT ( ABS ( _base_x - _zero ), "0.0" ) & "' height='6' rx='3' fill='" & _acc & "'/>"
-                     & IF (
-                         NOT ISBLANK ( _cmp_a )
-                         ,"<rect x='" & FORMAT ( _a_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
-                             & "<text x='" & FORMAT ( _a_x + _a_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _a_anchor & "'>" & _cmp_a_name & "</text>"
-                     )
-                     & IF (
-                         NOT ISBLANK ( _cmp_b )
-                         ,"<rect x='" & FORMAT ( _b_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
-                             & "<text x='" & FORMAT ( _b_x + _b_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _b_anchor & "'>" & _cmp_b_name & "</text>"
-                     )
+                 ABS ( _delta ) > _scale
+                 ,IF (
+                     _fav = -1
+                     ,"<path d='M99 " & _y - 9 & " l-3 3 l3 3' fill='none' stroke='" & _fill & "' stroke-width='1.4'/>"
+                     ,"<path d='M193 " & _y - 9 & " l3 3 l-3 3' fill='none' stroke='" & _fill & "' stroke-width='1.4'/>"
+                 )
              )
          RETURN
-             IF ( LEN ( _path ) > 0, "<path d='" & _path & "' fill='none' stroke='" & _acc & "' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round'/>" )
-                 & _dot
-                 & IF ( LEN ( [@sec] ) > 0, "<text x='" & _x0 & "' y='141' font-size='10' fill='#4F5C6C'>" & [@sec] & "</text>" )
-                 & _bar
+             "<text x='0' y='" & _y & "' font-size='13' fill='#4F5C6C'>" & _name & "</text>"
+                 & IF (
+                     _has
+                     ,"<rect x='96' y='" & _y - 10 & "' width='100' height='8' rx='2' fill='#EDF0F3'/>"
+                         & IF ( _len > 0, "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='" & _y - 10 & "' width='" & FORMAT ( _len, "0.0" ) & "' height='8' rx='2' fill='" & _fill & "'/>" )
+                         & "<rect x='145.5' y='" & _y - 13 & "' width='1' height='14' fill='#101B2B' fill-opacity='0.4'/>"
+                         & _chevron
+                         & "<text x='300' y='" & _y & "' font-size='13' font-weight='600' text-anchor='end' fill='" & _ink & "'>" & _arrow & _number & "</text>"
+                     ,"<text x='300' y='" & _y & "' font-size='13' text-anchor='end' fill='#4F5C6C'>n/a</text>"
+                 )
         ,""
+        ,[Value1], ASC
     )
 VAR _svg          =
-    "<svg xmlns='http://www.w3.org/2000/svg' width='1328' height='179' viewBox='0 0 1328 179' font-family='Segoe UI, sans-serif'>"
-        & _tiles
+    "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='64' viewBox='0 0 300 64' font-family='Segoe UI, sans-serif' style='font-variant-numeric:tabular-nums'>"
+        & IF ( LEN ( _sec ) > 0, "<text x='0' y='12' font-size='12' fill='#4F5C6C'>" & _sec & "</text>" )
+        & _body
         & "</svg>"
 RETURN
-    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+    IF (
+        NOT ISBLANK ( _code )
+        ,"data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+    )
+```
+
+### KPI Definition
+
+Folder `Design` · spec L-06, kpi-card-v2
+
+```dax
+KPI Definition =
+SELECTEDVALUE ( dim_kpi[definition] )
+```
+
+### Hdr Status
+
+Folder `Design` · spec L-01, N-02, N-03
+
+```dax
+Hdr Status =
+VAR _company      = SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
+VAR _last_closed  = [_Last Closed Index]
+VAR _closed_label =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _last_closed
+    )
+VAR _refreshed    = MAX ( _meta_refresh[refreshed_at] )
+RETURN
+    _company & " - Management reporting - Closed through " & _closed_label & " - Refreshed " & FORMAT ( _refreshed, "d mmm yyyy hh:nn" )
+```
+
+### Filter Value
+
+Folder `Design` · spec L-04, F-01..F-14
+
+```dax
+Filter Value =
+VAR _row          = SELECTEDVALUE ( dim_filter_row[filter_code] )
+VAR _view         = [_Sel Entity]
+VAR _compare_a    = [_Cmp A Name]
+VAR _compare_b    = [_Cmp B Name]
+VAR _anchor       = [_Anchor Index]
+VAR _anchor_label =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _anchor
+    )
+VAR _versions     =
+    [_Base Name]
+        & SWITCH (
+            TRUE ()
+            ,ISBLANK ( _compare_a ) && ISBLANK ( _compare_b )
+                ," only"
+            ,ISBLANK ( _compare_b )
+                ," vs " & _compare_a & " (A)"
+            ,ISBLANK ( _compare_a )
+                ," vs " & _compare_b & " (B)"
+            ," vs " & _compare_a & " (A) and " & _compare_b & " (B)"
+        )
+VAR _regions      =
+    IF (
+        ISFILTERED ( dim_region[region_name] ) && COUNTROWS ( VALUES ( dim_region[region_name] ) ) < COUNTROWS ( ALL ( dim_region[region_name] ) )
+        ,CONCATENATEX ( VALUES ( dim_region[region_name] ), dim_region[region_name], ", ", dim_region[region_name], ASC )
+        ,"All regions"
+    )
+VAR _channels     =
+    IF (
+        ISFILTERED ( dim_channel[channel_name] )
+        ,CONCATENATEX (
+            CALCULATETABLE ( VALUES ( dim_channel[channel_name] ), KEEPFILTERS ( dim_channel[entity_code] = _view ) )
+            ,dim_channel[channel_name]
+            ,", "
+            ,dim_channel[channel_name], ASC
+        )
+    )
+VAR _lines        =
+    IF (
+        ISFILTERED ( dim_line[line_name] )
+        ,CONCATENATEX (
+            CALCULATETABLE ( VALUES ( dim_line[line_name] ), KEEPFILTERS ( dim_line[entity_code] = _view ) )
+            ,dim_line[line_name]
+            ,", "
+            ,dim_line[line_name], ASC
+        )
+    )
+VAR _segments     =
+    IF (
+        ISFILTERED ( dim_segment[segment_name] )
+        ,CONCATENATEX (
+            CALCULATETABLE ( VALUES ( dim_segment[segment_name] ), KEEPFILTERS ( dim_segment[entity_code] = _view ) )
+            ,dim_segment[segment_name]
+            ,", "
+            ,dim_segment[segment_name], ASC
+        )
+    )
+VAR _is_services  = _view = "S"
+VAR _slices       =
+    IF (
+        ISBLANK ( _channels ) && ISBLANK ( _lines ) && ISBLANK ( _segments )
+        ,"All slices"
+        ,IF ( _is_services, "Sales motion: ", "Channel: " ) & IF ( ISBLANK ( _channels ), "All", _channels )
+            & " - " & IF ( _is_services, "Service line: ", "Category: " ) & IF ( ISBLANK ( _lines ), "All", _lines )
+            & " - " & IF ( _is_services, "Segment: ", "Price tier: " ) & IF ( ISBLANK ( _segments ), "All", _segments )
+    )
+RETURN
+    SWITCH (
+        _row
+        ,"COMPANY"
+            ,SWITCH ( _view, "S", "Commerce Cloud", "GROUP", "ACME Group (consolidated)", "Consumer Products" )
+        ,"FY"
+            ,"FY" & [_Sel FY]
+        ,"PERIOD"
+            ,_anchor_label
+        ,"TIME"
+            ,[_Window Label]
+        ,"VERSIONS"
+            ,_versions
+        ,"CURRENCY"
+            ,[_Sel Currency]
+        ,"FX"
+            ,IF ( [_Sel FX Basis] = "CC", "Constant currency (FY" & [_Sel FY] & " budget rates)", "Actual rates" )
+        ,"UNITS"
+            ,IF ( [_Sel Units] = "K", "Thousands", "Millions" )
+        ,"REGIONS"
+            ,_regions
+        ,"SLICES"
+            ,IF ( _view = "GROUP", "Consolidated: channel, category and segment do not apply", _slices )
+    )
+```
+
+### _Breakdown Hint
+
+Folder `Design` · spec F-21, L-09
+
+```dax
+_Breakdown Hint =
+VAR _order        = SELECTEDVALUE ( param_breakdown_field[Breakdown Order] )
+VAR _view         = [_Sel Entity]
+RETURN
+    IF (
+        NOT ISBLANK ( _order ) && ISBLANK ( [Breakdown Allowed] )
+        ,IF (
+            _view = "GROUP"
+            ,[_Breakdown Short] & " does not apply to ACME Group - pick Region or Company"
+            ,"Company applies only to ACME Group - pick another breakdown"
+        )
+    )
 ```
 
 ### Info Bridge 1
@@ -4166,15 +4179,6 @@ Info CM 1 =
 VAR _bd          = LOWER ( [_Breakdown Short] )
 RETURN
     "For each " & _bd & ", the share of its revenue that is left after the direct costs of making, selling and delivering: the contribution margin %."
-```
-
-### KPI Fav Sign
-
-Folder `Design` · spec K-20, N-07
-
-```dax
-KPI Fav Sign =
-SWITCH ( SELECTEDVALUE ( dim_kpi[better_when] ), "Higher", 1, "Lower", -1, "Neutral", 0 )
 ```
 
 ### PL Fav Off

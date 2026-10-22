@@ -5,6 +5,7 @@
 - [ACME Trucks report](project_trucks_report.md) — 2nd showcase report: Time util redesign + RU→EN rename plan, waits for ginee export; real-name risk Q-01
 
 ## Open threads
+- 2026-10-22 20:36 review batch applied (notice strip out, numbered statement, KPI card v2, header status + filters pop-up, Profitability Region default + hint, ' - '). Open: USER records bm_pl_expand (line_display), first-open checklist in pbi-report-layout.md; ginee republish; ADR-0007 / design guide §5.3-5.4 still describe sparklines / notice strip (main agent)
 - 2026-10-22 ADR-0007 built (tests green, validator 0/0, render-checked). Open: USER records bm_pl_expand in Desktop; ginee republish (KPI Trend contract live for fin); ops row Key figures still ~16 s
 - 2026-10-21 Trucks redesign BUILT (tests green, validator 0/0). Open: USER first open + Refresh, click-test Reset bookmark, confirm main-agent defaults, re-save to refresh diagram layout
 - 2026-10-22 perf pass applied (T-05 fix, Bridge Volume set-based, merged SWITCH branches, FY LE one window). Open: ginee republish; physical asks (pre-translated amounts, elimination rows); fin option Q1 = 5 base columns; N-01 not reachable on this design

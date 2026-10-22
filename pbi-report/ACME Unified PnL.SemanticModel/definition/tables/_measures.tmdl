@@ -2523,7 +2523,7 @@ table _measures
 			        ,"E-commerce SaaS services"
 			    ,"GROUP"
 			        ,"Consolidated"
-			    ,"Goods · retail, D2C, marketplaces"
+			    ,"Goods - retail, D2C, marketplaces"
 			)
 		displayFolder: Design
 		lineageTag: e3bf4eee-81b9-575a-a2f4-0e96455261b3
@@ -2620,21 +2620,7 @@ table _measures
 		displayFolder: Design
 		lineageTag: d03f79c3-ca36-54e4-b923-c8f481ef9b8b
 
-	/// Header eyebrow with the data status (N-02, N-03): last closed month.
-	measure 'Hdr Eyebrow' =
-			VAR _last_closed  = [_Last Closed Index]
-			VAR _closed_label =
-			    CALCULATE (
-			        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _last_closed
-			    )
-			RETURN
-			    "ACME GROUP · MANAGEMENT REPORTING · ACTUALS CLOSED THROUGH " & UPPER ( _closed_label )
-		displayFolder: Design
-		lineageTag: 1523a8ed-a743-5fd3-b246-bc1298f97d91
-
-	/// Rail summary of the Period group, e.g. YTD · Sep 2026.
+	/// Rail summary of the Period group, e.g. YTD - Sep 2026.
 	measure 'Rail Sum Period' =
 			VAR _time_code    = [_Sel Time View]
 			VAR _time_label   = SWITCH ( _time_code, "MTD", "Month", "FY", "Full year", _time_code )
@@ -2646,7 +2632,7 @@ table _measures
 			        ,dim_month[month_index] = _anchor
 			    )
 			RETURN
-			    _time_label & " · " & _anchor_label
+			    _time_label & " - " & _anchor_label
 		displayFolder: Design
 		lineageTag: 97cfc644-03a7-5ff6-b5ea-773819cced13
 
@@ -2700,104 +2686,15 @@ table _measures
 			            ,"All slices"
 			        ,_slices = 0
 			            ,_regions
-			        ,_regions & " · " & _slices & IF ( _slices = 1, " slice filtered", " slices filtered" )
+			        ,_regions & " - " & _slices & IF ( _slices = 1, " slice filtered", " slices filtered" )
 			    )
 		displayFolder: Design
 		lineageTag: 3e1d7ac2-433e-5b99-83c3-9fdcc2db1879
 
-	/// Rail summary of the Display group, e.g. USD m · actual rates.
-	measure 'Rail Sum Display' = [_Units Short] & " · " & IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
+	/// Rail summary of the Display group, e.g. USD m - actual rates.
+	measure 'Rail Sum Display' = [_Units Short] & " - " & IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
 		displayFolder: Design
 		lineageTag: e4afc7da-9239-59da-ac75-757bdf197c82
-
-	/// Header context line (L-04): company (the entity switch moved to the rail brand mark, ADR-0007) · window · versions · currency, units and FX basis · slices.
-	measure 'Hdr Context' =
-			VAR _compare_a    = [_Cmp A Name]
-			VAR _compare_b    = [_Cmp B Name]
-			VAR _compares     =
-			    SWITCH (
-			        TRUE ()
-			        ,ISBLANK ( _compare_a ) && ISBLANK ( _compare_b )
-			            ,BLANK ()
-			        ,ISBLANK ( _compare_b )
-			            ,_compare_a
-			        ,ISBLANK ( _compare_a )
-			            ,_compare_b
-			        ,_compare_a & " and " & _compare_b
-			    )
-			VAR _versions     = [_Base Name] & IF ( ISBLANK ( _compares ), " only", " vs " & _compares )
-			VAR _fx           = IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
-			VAR _company      = SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
-			RETURN
-			    _company & " · " & [_Window Label] & " · " & _versions & " · " & [_Units Short] & ", " & _fx & " · " & [Rail Sum Slice]
-		displayFolder: Design
-		lineageTag: a8980913-fb5a-5ef2-8861-47b33fdd251e
-
-	/// Notice strip text (L-05, C-50): full-year outlook basis, Commerce Cloud intercompany revenue, then the conditional notices.
-	measure 'Notice Strip' =
-			VAR _view         = [_Sel Entity]
-			VAR _fy           = [_Sel FY]
-			VAR _last_closed  = [_Last Closed Index]
-			VAR _fy_last      =
-			    CALCULATE (
-			        MAX ( dim_month[month_index] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[fiscal_year] = _fy
-			    )
-			VAR _closed_month =
-			    CALCULATE (
-			        MAX ( dim_month[month_name] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _last_closed
-			    )
-			VAR _open_month   =
-			    CALCULATE (
-			        MAX ( dim_month[month_name] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _last_closed + 1
-			    )
-			VAR _forecast     =
-			    CALCULATE (
-			        MAX ( dim_version[version_name] )
-			        ,REMOVEFILTERS ( dim_version )
-			        ,dim_version[is_latest_forecast] = TRUE ()
-			    )
-			VAR _n_fy         =
-			    SWITCH (
-			        TRUE ()
-			        ,_last_closed >= _fy_last
-			            ,"Full year " & _fy & " is closed: the latest estimate equals actuals."
-			        ,_last_closed < _fy_last - 11
-			            ,"Full year " & _fy & " compares the budget with the latest estimate (" & _forecast & ")."
-			        ,"Full year compares the budget with the latest estimate: Jan–" & _closed_month & " actuals plus " & _forecast & " for " & _open_month & "–Dec."
-			    )
-			VAR _ic           =
-			    IF (
-			        _view = "S"
-			        ,CALCULATE (
-			            [KPI IC Eliminated]
-			            ,REMOVEFILTERS ( param_entity_view )
-			            ,param_entity_view[entity_view_code] = "GROUP"
-			        )
-			    )
-			VAR _currency     = [_Sel Currency]
-			VAR _symbol       =
-			    CALCULATE (
-			        MAX ( param_reporting_currency[symbol] )
-			        ,REMOVEFILTERS ( param_reporting_currency )
-			        ,param_reporting_currency[currency_code] = _currency
-			    )
-			VAR _n_ic         =
-			    IF (
-			        _ic > 0
-			        ,"Revenue includes " & _symbol & FORMAT ( DIVIDE ( _ic, [_Units Divisor] ), IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) & IF ( [_Sel Units] = "K", "k", "m" )
-			            & " billed to Consumer Products; it is eliminated in the Group view."
-			    )
-			VAR _list         = { _n_fy, _n_ic, [Notices] }
-			RETURN
-			    CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], "  ·  " )
-		displayFolder: Design
-		lineageTag: 59e22312-c552-597f-9f80-34f4e5c7bef5
 
 	/// Short label of a segmented-control item (Label role of the button slicers): versions, FX basis, units, time view, breakdown.
 	measure 'Seg Label' =
@@ -2919,12 +2816,12 @@ table _measures
 		displayFolder: Design
 		lineageTag: e15f58ee-2c67-5912-8dc9-1705ab0c9c84
 
-	/// Region group label with its count in the Slice flyout, e.g. Region · All 4.
+	/// Region group label with its count in the Slice flyout, e.g. Region - All 4.
 	measure 'Slice Hdr Region' =
 			VAR _total        = COUNTROWS ( ALL ( dim_region[region_name] ) )
 			VAR _selected     = COUNTROWS ( VALUES ( dim_region[region_name] ) )
 			RETURN
-			    "Region · " & IF ( ISFILTERED ( dim_region[region_name] ) && _selected < _total, _selected & " of " & _total, "All " & _total )
+			    "Region - " & IF ( ISFILTERED ( dim_region[region_name] ) && _selected < _total, _selected & " of " & _total, "All " & _total )
 		displayFolder: Design
 		lineageTag: 396b148c-864c-5040-9f1f-7f32dace5ee0
 
@@ -2946,7 +2843,7 @@ table _measures
 			    )
 			VAR _count        = IF ( ISFILTERED ( dim_channel[channel_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 			RETURN
-			    IF ( _view <> "GROUP", IF ( _view = "S", "Sales motion", "Channel" ) & " · " & _count )
+			    IF ( _view <> "GROUP", IF ( _view = "S", "Sales motion", "Channel" ) & " - " & _count )
 		displayFolder: Design
 		lineageTag: 0aef3cec-4261-5d52-a28b-c31eb96bcc33
 
@@ -2968,7 +2865,7 @@ table _measures
 			    )
 			VAR _count        = IF ( ISFILTERED ( dim_line[line_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 			RETURN
-			    IF ( _view <> "GROUP", IF ( _view = "S", "Service line", "Category" ) & " · " & _count )
+			    IF ( _view <> "GROUP", IF ( _view = "S", "Service line", "Category" ) & " - " & _count )
 		displayFolder: Design
 		lineageTag: c3d5280e-c77b-50df-a06f-b9776b325a1b
 
@@ -2990,7 +2887,7 @@ table _measures
 			    )
 			VAR _count        = IF ( ISFILTERED ( dim_segment[segment_name] ) && _selected > 0 && _selected < _total, _selected & " of " & _total, "All " & _total )
 			RETURN
-			    IF ( _view <> "GROUP", IF ( _view = "S", "Customer segment", "Price tier" ) & " · " & _count )
+			    IF ( _view <> "GROUP", IF ( _view = "S", "Customer segment", "Price tier" ) & " - " & _count )
 		displayFolder: Design
 		lineageTag: 7ec42f5a-346e-5c56-8f13-071edc315427
 
@@ -3071,11 +2968,11 @@ table _measures
 			        ,_category
 			    }
 			RETURN
-			    IF ( NOT _is_leaf, CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], " · " ) )
+			    IF ( NOT _is_leaf, CONCATENATEX ( FILTER ( _list, LEN ( [Value] ) > 0 ), [Value], " - " ) )
 		displayFolder: Design
 		lineageTag: b3a80a97-ab17-50a8-a8d7-5347e7bf3b1a
 
-	/// Statement column-group title over Base and % NR, e.g. YTD Sep 2026 · Actual.
+	/// Statement column-group title over Base and % NR, e.g. YTD Sep 2026 - Actual.
 	measure 'PL Hdr Base' =
 			VAR _time_code    = [_Sel Time View]
 			VAR _anchor       = [_Anchor Index]
@@ -3095,7 +2992,7 @@ table _measures
 			        ,_time_code & " " & _anchor_label
 			    )
 			RETURN
-			    _window & " · " & [_Base Name]
+			    _window & " - " & [_Base Name]
 		displayFolder: Design
 		lineageTag: edf0ba53-22b5-539a-ad42-caca548b760b
 
@@ -3164,8 +3061,8 @@ table _measures
 		displayFolder: Design
 		lineageTag: 46439856-996b-595c-a665-5fcbb3119c8e
 
-	/// Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions.
-	measure 'Prof Subtitle' = [_Window Label] & ", " & [_Units Long]
+	/// Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions; the breakdown hint instead when the selected breakdown does not apply to the company.
+	measure 'Prof Subtitle' = IF ( ISBLANK ( [_Breakdown Hint] ), [_Window Label] & ", " & [_Units Long], [_Breakdown Hint] )
 		displayFolder: Design
 		lineageTag: 5948ae79-8c3c-5366-b511-1ac3c3b98907
 
@@ -3178,135 +3075,249 @@ table _measures
 	measure 'CM Subtitle' =
 			VAR _entity       =
 			    SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
+			VAR _hint         = [_Breakdown Hint]
 			RETURN
-			    "Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
+			    IF (
+			        ISBLANK ( _hint )
+			        ,"Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
+			        ,_hint
+			    )
 		displayFolder: Design
 		lineageTag: bacc4250-1b3b-56e5-833e-0d4e4ee8418d
 
-	/// K-24 / K-25 overlay for one row of KPI tiles (image visual over the tile cards, own query, so the tile values never wait for it): per tile, in the left column of the card (the deltas sit on the right), a 13-month sparkline of _KPI Trend Value above the value, in the company colour with the selected month marked, the tile sub-line (KPI Secondary: margin or reported growth; a 179 px card shows only four reference-label lines) and a target bar below the value (base value as the bar, Compare A / Compare B as labelled ticks; none for growth KPIs or a compare set to None). SVG 1328 x 179 in tile coordinates: 4 tiles of 323 px with 12 px gaps, column = (slot - 1) mod 4. The visual filters dim_kpi[kpi_code] to a literal list, which lets the engine drop the SWITCH branches of other KPIs (about 4x faster than a filter on kpi_group).
-	measure 'KPI Row SVG' =
-			VAR _acc          = [_Acc]
-			VAR _anchor       = [_Anchor Index]
-			VAR _cmp_a_name   = SWITCH ( [_Sel Compare A], "B", "Bud", "LE", "LE", "PY", "PY" )
-			VAR _cmp_b_name   = SWITCH ( [_Sel Compare B], "B", "Bud", "LE", "LE", "PY", "PY" )
-			VAR _months       =
+	/// Key figures tile body (kpi-card-v2, K-20, K-21; replaces the K-24 / K-25 overlay): image of the card visual, evaluated in the tile query itself, no extra query. Sub-line (KPI Secondary) and one diverging comparison row per active comparison: name, a bar from a centre line that grows right when favourable and left when unfavourable (neutral KPIs grey, right, by size), Δ text with ▲ / ▼ and sign. Scale ±20 % for amount KPIs, ±5 pp for percent KPIs, capped with a chevron; n/a without data; no rows for growth KPIs. SVG 300 x 64.
+	measure 'KPI Tile SVG' =
+			VAR _code         = SELECTEDVALUE ( dim_kpi[kpi_code] )
+			VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
+			VAR _better       = SELECTEDVALUE ( dim_kpi[better_when] )
+			VAR _is_growth    = _code IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" }
+			VAR _is_pp        = _type IN { "PCT", "PCT2" }
+			VAR _scale        = IF ( _is_pp, 5, 0.2 )
+			VAR _sel_a        = [_Sel Compare A]
+			VAR _sel_b        = [_Sel Compare B]
+			VAR _value        = IF ( NOT _is_growth, [_KPI Value] )
+			VAR _cmp_a        =
+			    IF (
+			        NOT _is_growth && _sel_a <> "NONE"
+			        ,CALCULATE (
+			            [_KPI Value]
+			            ,REMOVEFILTERS ( param_eval )
+			            ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
+			        )
+			    )
+			VAR _cmp_b        =
+			    IF (
+			        NOT _is_growth && _sel_b <> "NONE"
+			        ,CALCULATE (
+			            [_KPI Value]
+			            ,REMOVEFILTERS ( param_eval )
+			            ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
+			        )
+			    )
+			VAR _sec          = [KPI Secondary]
+			VAR _rows         =
 			    FILTER (
-			        ALL ( dim_month[month_index] )
-			        ,dim_month[month_index] >= _anchor - 12
-			            && dim_month[month_index] <= _anchor
+			        {
+			            ( 1, _sel_a, IF ( _is_pp, ( _value - _cmp_a ) * 100, DIVIDE ( _value - _cmp_a, ABS ( _cmp_a ) ) ), NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp_a ) )
+			            ,( 2, _sel_b, IF ( _is_pp, ( _value - _cmp_b ) * 100, DIVIDE ( _value - _cmp_b, ABS ( _cmp_b ) ) ), NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp_b ) )
+			        }
+			        ,NOT _is_growth && [Value2] <> "NONE"
 			    )
-			VAR _kpis         =
-			    SUMMARIZECOLUMNS (
-			        dim_kpi[slot]
-			        ,dim_kpi[kpi_code]
-			        ,"@base", [_KPI Value]
-			        ,"@cmp_a",
-			            IF (
-			                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
-			                ,CALCULATE (
-			                    [_KPI Value]
-			                    ,REMOVEFILTERS ( param_eval )
-			                    ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
-			                )
-			            )
-			        ,"@cmp_b",
-			            IF (
-			                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
-			                ,CALCULATE (
-			                    [_KPI Value]
-			                    ,REMOVEFILTERS ( param_eval )
-			                    ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
-			                )
-			            )
-			        ,"@sec", [KPI Secondary]
-			    )
-			VAR _points       =
-			    SUMMARIZECOLUMNS (
-			        dim_kpi[kpi_code]
-			        ,dim_month[month_index]
-			        ,_months
-			        ,"@v", [_KPI Trend Value]
-			    )
-			VAR _tiles        =
+			VAR _body         =
 			    CONCATENATEX (
-			        _kpis
-			        ,VAR _code        = dim_kpi[kpi_code]
-			         VAR _x0          = MOD ( dim_kpi[slot] - 1, 4 ) * 335 + 18
-			         VAR _w           = 140
-			         VAR _top         = 48
-			         VAR _h           = 30
-			         VAR _series      = FILTER ( _points, dim_kpi[kpi_code] = _code && NOT ISBLANK ( [@v] ) )
-			         VAR _lo          = MINX ( _series, [@v] )
-			         VAR _hi          = MAXX ( _series, [@v] )
-			         VAR _span        = _hi - _lo
-			         VAR _path        =
-			             CONCATENATEX (
-			                 _series
-			                 ,VAR _i          = dim_month[month_index]
-			                  VAR _prev       = COUNTROWS ( FILTER ( _series, dim_month[month_index] = _i - 1 ) )
-			                  VAR _x          = _x0 + ( _i - _anchor + 12 ) * _w / 12
-			                  VAR _y          = _top + _h - IF ( _span = 0, _h / 2, ( [@v] - _lo ) / _span * _h )
-			                  RETURN
-			                      IF ( _prev = 1, "L", "M" ) & FORMAT ( _x, "0.0" ) & " " & FORMAT ( _y, "0.0" )
-			                 ," "
-			                 ,dim_month[month_index], ASC
+			        _rows
+			        ,VAR _y           = 14 + 22 * [Value1]
+			         VAR _name        = "vs " & SWITCH ( [Value2], "B", "Budget", "LE", "Latest est.", "PY", "Prior year" )
+			         VAR _has         = [Value4]
+			         VAR _delta       = ROUND ( [Value3], IF ( _is_pp, 1, 3 ) )
+			         VAR _fav         =
+			             SWITCH (
+			                 TRUE ()
+			                 ,_better = "Neutral" || _delta = 0
+			                     ,0
+			                 ,( _delta > 0 && _better = "Higher" ) || ( _delta < 0 && _better = "Lower" )
+			                     ,1
+			                 ,-1
 			             )
-			         VAR _last        = MAXX ( FILTER ( _series, dim_month[month_index] = _anchor ), [@v] )
-			         VAR _dot         =
+			         VAR _len         = MIN ( ABS ( _delta ) / _scale, 1 ) * 50
+			         VAR _bar_x       = IF ( _fav = -1, 146 - _len, 146 )
+			         VAR _fill        = SWITCH ( _fav, 1, "#3BA37B", -1, "#E2804A", "#8592A3" )
+			         VAR _ink         = SWITCH ( _fav, 1, "#06603F", -1, "#C2410C", "#101B2B" )
+			         VAR _arrow       = IF ( _delta > 0, "▲ +", IF ( _delta < 0, "▼ −", "" ) )
+			         VAR _number      =
+			             FORMAT ( ABS ( _delta ), IF ( _is_pp, "0.0", "0.0%" ) ) & IF ( _is_pp, " pp", "" )
+			         VAR _chevron     =
 			             IF (
-			                 NOT ISBLANK ( _last )
-			                 ,"<circle cx='" & FORMAT ( _x0 + _w, "0.0" ) & "' cy='"
-			                     & FORMAT ( _top + _h - IF ( _span = 0, _h / 2, ( _last - _lo ) / _span * _h ), "0.0" )
-			                     & "' r='2.8' fill='" & _acc & "'/>"
-			             )
-			         VAR _base        = [@base]
-			         VAR _cmp_a       = IF ( NOT ISBLANK ( _cmp_a_name ), [@cmp_a] )
-			         VAR _cmp_b       = IF ( NOT ISBLANK ( _cmp_b_name ), [@cmp_b] )
-			         VAR _has_bar     = NOT ( _code IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } ) && NOT ISBLANK ( _base ) && ( NOT ISBLANK ( _cmp_a ) || NOT ISBLANK ( _cmp_b ) )
-			         VAR _b_lo        = MIN ( 0, MIN ( _base, MIN ( _cmp_a, _cmp_b ) ) )
-			         VAR _b_hi        = MAX ( 0, MAX ( _base, MAX ( _cmp_a, _cmp_b ) ) ) * 1.08
-			         VAR _b_span      = _b_hi - _b_lo
-			         VAR _zero        = _x0 + DIVIDE ( 0 - _b_lo, _b_span ) * _w
-			         VAR _base_x      = _x0 + DIVIDE ( _base - _b_lo, _b_span ) * _w
-			         VAR _a_x         = _x0 + DIVIDE ( _cmp_a - _b_lo, _b_span ) * _w
-			         VAR _b_x         = _x0 + DIVIDE ( _cmp_b - _b_lo, _b_span ) * _w
-			         VAR _close       = NOT ISBLANK ( _cmp_a ) && NOT ISBLANK ( _cmp_b ) && ABS ( _a_x - _b_x ) < 24
-			         VAR _a_anchor    = IF ( _close, IF ( _a_x <= _b_x, "end", "start" ), "middle" )
-			         VAR _a_dx        = IF ( _close, IF ( _a_x <= _b_x, -3, 3 ), 0 )
-			         VAR _b_dx        = - _a_dx
-			         VAR _b_anchor    = IF ( _close, IF ( _a_x <= _b_x, "start", "end" ), "middle" )
-			         VAR _bar         =
-			             IF (
-			                 _has_bar
-			                 ,"<rect x='" & FORMAT ( _x0, "0.0" ) & "' y='150' width='" & _w & "' height='6' rx='3' fill='#EDF0F3'/>"
-			                     & "<rect x='" & FORMAT ( MIN ( _zero, _base_x ), "0.0" ) & "' y='150' width='" & FORMAT ( ABS ( _base_x - _zero ), "0.0" ) & "' height='6' rx='3' fill='" & _acc & "'/>"
-			                     & IF (
-			                         NOT ISBLANK ( _cmp_a )
-			                         ,"<rect x='" & FORMAT ( _a_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
-			                             & "<text x='" & FORMAT ( _a_x + _a_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _a_anchor & "'>" & _cmp_a_name & "</text>"
-			                     )
-			                     & IF (
-			                         NOT ISBLANK ( _cmp_b )
-			                         ,"<rect x='" & FORMAT ( _b_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
-			                             & "<text x='" & FORMAT ( _b_x + _b_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _b_anchor & "'>" & _cmp_b_name & "</text>"
-			                     )
+			                 ABS ( _delta ) > _scale
+			                 ,IF (
+			                     _fav = -1
+			                     ,"<path d='M99 " & _y - 9 & " l-3 3 l3 3' fill='none' stroke='" & _fill & "' stroke-width='1.4'/>"
+			                     ,"<path d='M193 " & _y - 9 & " l3 3 l-3 3' fill='none' stroke='" & _fill & "' stroke-width='1.4'/>"
+			                 )
 			             )
 			         RETURN
-			             IF ( LEN ( _path ) > 0, "<path d='" & _path & "' fill='none' stroke='" & _acc & "' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round'/>" )
-			                 & _dot
-			                 & IF ( LEN ( [@sec] ) > 0, "<text x='" & _x0 & "' y='141' font-size='10' fill='#4F5C6C'>" & [@sec] & "</text>" )
-			                 & _bar
+			             "<text x='0' y='" & _y & "' font-size='13' fill='#4F5C6C'>" & _name & "</text>"
+			                 & IF (
+			                     _has
+			                     ,"<rect x='96' y='" & _y - 10 & "' width='100' height='8' rx='2' fill='#EDF0F3'/>"
+			                         & IF ( _len > 0, "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='" & _y - 10 & "' width='" & FORMAT ( _len, "0.0" ) & "' height='8' rx='2' fill='" & _fill & "'/>" )
+			                         & "<rect x='145.5' y='" & _y - 13 & "' width='1' height='14' fill='#101B2B' fill-opacity='0.4'/>"
+			                         & _chevron
+			                         & "<text x='300' y='" & _y & "' font-size='13' font-weight='600' text-anchor='end' fill='" & _ink & "'>" & _arrow & _number & "</text>"
+			                     ,"<text x='300' y='" & _y & "' font-size='13' text-anchor='end' fill='#4F5C6C'>n/a</text>"
+			                 )
 			        ,""
+			        ,[Value1], ASC
 			    )
 			VAR _svg          =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='1328' height='179' viewBox='0 0 1328 179' font-family='Segoe UI, sans-serif'>"
-			        & _tiles
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='64' viewBox='0 0 300 64' font-family='Segoe UI, sans-serif' style='font-variant-numeric:tabular-nums'>"
+			        & IF ( LEN ( _sec ) > 0, "<text x='0' y='12' font-size='12' fill='#4F5C6C'>" & _sec & "</text>" )
+			        & _body
 			        & "</svg>"
 			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+			    IF (
+			        NOT ISBLANK ( _code )
+			        ,"data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+			    )
 		displayFolder: Design
-		lineageTag: 3f9a62d1-5b7e-4c08-8d2f-6e1a0b47c9d5
+		lineageTag: 3d63820e-90f4-47c2-b006-c449f74f90c2
 		dataCategory: ImageUrl
+
+	/// Tooltip of a Key figures tile: the KPI definition from dim_kpi (kpi-card-v2: the one-line definition moves to the tooltip).
+	measure 'KPI Definition' =
+			SELECTEDVALUE ( dim_kpi[definition] )
+		displayFolder: Design
+		lineageTag: 18780fd6-4b12-4040-9415-5c84bd4f461b
+
+	/// Header status on the title row (N-02, N-03): company - Management reporting - last closed month - last refresh, e.g. ACME Group - Management reporting - Closed through Sep 2026 - Refreshed 22 Oct 2026 13:53.
+	measure 'Hdr Status' =
+			VAR _company      = SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
+			VAR _last_closed  = [_Last Closed Index]
+			VAR _closed_label =
+			    CALCULATE (
+			        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _last_closed
+			    )
+			VAR _refreshed    = MAX ( _meta_refresh[refreshed_at] )
+			RETURN
+			    _company & " - Management reporting - Closed through " & _closed_label & " - Refreshed " & FORMAT ( _refreshed, "d mmm yyyy hh:nn" )
+		displayFolder: Design
+		lineageTag: 5e10b662-c0bb-4eae-9062-ac3a9e1e7c24
+
+	/// Value of a row of the applied-filters pop-up (dim_filter_row): company, fiscal year, period, time view with its window, versions, currency, FX basis, units, regions, slices. Covers everything the former header context line showed (L-04).
+	measure 'Filter Value' =
+			VAR _row          = SELECTEDVALUE ( dim_filter_row[filter_code] )
+			VAR _view         = [_Sel Entity]
+			VAR _compare_a    = [_Cmp A Name]
+			VAR _compare_b    = [_Cmp B Name]
+			VAR _anchor       = [_Anchor Index]
+			VAR _anchor_label =
+			    CALCULATE (
+			        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _anchor
+			    )
+			VAR _versions     =
+			    [_Base Name]
+			        & SWITCH (
+			            TRUE ()
+			            ,ISBLANK ( _compare_a ) && ISBLANK ( _compare_b )
+			                ," only"
+			            ,ISBLANK ( _compare_b )
+			                ," vs " & _compare_a & " (A)"
+			            ,ISBLANK ( _compare_a )
+			                ," vs " & _compare_b & " (B)"
+			            ," vs " & _compare_a & " (A) and " & _compare_b & " (B)"
+			        )
+			VAR _regions      =
+			    IF (
+			        ISFILTERED ( dim_region[region_name] ) && COUNTROWS ( VALUES ( dim_region[region_name] ) ) < COUNTROWS ( ALL ( dim_region[region_name] ) )
+			        ,CONCATENATEX ( VALUES ( dim_region[region_name] ), dim_region[region_name], ", ", dim_region[region_name], ASC )
+			        ,"All regions"
+			    )
+			VAR _channels     =
+			    IF (
+			        ISFILTERED ( dim_channel[channel_name] )
+			        ,CONCATENATEX (
+			            CALCULATETABLE ( VALUES ( dim_channel[channel_name] ), KEEPFILTERS ( dim_channel[entity_code] = _view ) )
+			            ,dim_channel[channel_name]
+			            ,", "
+			            ,dim_channel[channel_name], ASC
+			        )
+			    )
+			VAR _lines        =
+			    IF (
+			        ISFILTERED ( dim_line[line_name] )
+			        ,CONCATENATEX (
+			            CALCULATETABLE ( VALUES ( dim_line[line_name] ), KEEPFILTERS ( dim_line[entity_code] = _view ) )
+			            ,dim_line[line_name]
+			            ,", "
+			            ,dim_line[line_name], ASC
+			        )
+			    )
+			VAR _segments     =
+			    IF (
+			        ISFILTERED ( dim_segment[segment_name] )
+			        ,CONCATENATEX (
+			            CALCULATETABLE ( VALUES ( dim_segment[segment_name] ), KEEPFILTERS ( dim_segment[entity_code] = _view ) )
+			            ,dim_segment[segment_name]
+			            ,", "
+			            ,dim_segment[segment_name], ASC
+			        )
+			    )
+			VAR _is_services  = _view = "S"
+			VAR _slices       =
+			    IF (
+			        ISBLANK ( _channels ) && ISBLANK ( _lines ) && ISBLANK ( _segments )
+			        ,"All slices"
+			        ,IF ( _is_services, "Sales motion: ", "Channel: " ) & IF ( ISBLANK ( _channels ), "All", _channels )
+			            & " - " & IF ( _is_services, "Service line: ", "Category: " ) & IF ( ISBLANK ( _lines ), "All", _lines )
+			            & " - " & IF ( _is_services, "Segment: ", "Price tier: " ) & IF ( ISBLANK ( _segments ), "All", _segments )
+			    )
+			RETURN
+			    SWITCH (
+			        _row
+			        ,"COMPANY"
+			            ,SWITCH ( _view, "S", "Commerce Cloud", "GROUP", "ACME Group (consolidated)", "Consumer Products" )
+			        ,"FY"
+			            ,"FY" & [_Sel FY]
+			        ,"PERIOD"
+			            ,_anchor_label
+			        ,"TIME"
+			            ,[_Window Label]
+			        ,"VERSIONS"
+			            ,_versions
+			        ,"CURRENCY"
+			            ,[_Sel Currency]
+			        ,"FX"
+			            ,IF ( [_Sel FX Basis] = "CC", "Constant currency (FY" & [_Sel FY] & " budget rates)", "Actual rates" )
+			        ,"UNITS"
+			            ,IF ( [_Sel Units] = "K", "Thousands", "Millions" )
+			        ,"REGIONS"
+			            ,_regions
+			        ,"SLICES"
+			            ,IF ( _view = "GROUP", "Consolidated: channel, category and segment do not apply", _slices )
+			    )
+		displayFolder: Design
+		lineageTag: 7ca50019-fd24-4ef7-893f-c70dbb3e3786
+
+	/// Why the Profitability view is empty: blank when the selected breakdown applies to the company, else e.g. Channel does not apply to ACME Group - pick Region or Company. The breakdown slicer keeps its selection when the company changes, and Breakdown Allowed hides the kept item.
+	measure '_Breakdown Hint' =
+			VAR _order        = SELECTEDVALUE ( param_breakdown_field[Breakdown Order] )
+			VAR _view         = [_Sel Entity]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _order ) && ISBLANK ( [Breakdown Allowed] )
+			        ,IF (
+			            _view = "GROUP"
+			            ,[_Breakdown Short] & " does not apply to ACME Group - pick Region or Company"
+			            ,"Company applies only to ACME Group - pick another breakdown"
+			        )
+			    )
+		isHidden
+		displayFolder: Design
+		lineageTag: 713cec0f-09c9-4c67-9f61-8de460e31736
 
 	/// Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks).
 	measure 'Info Bridge 1' =
@@ -3372,11 +3383,6 @@ table _measures
 			    "For each " & _bd & ", the share of its revenue that is left after the direct costs of making, selling and delivering: the contribution margin %."
 		displayFolder: Design
 		lineageTag: 3a3bb9ab-4cbe-4573-a8ad-013d6586b677
-
-	/// Favourability sign of the KPI tile in context from dim_kpi.better_when: 1 higher is better, -1 lower is better, 0 neutral; blank without a KPI row, so it never adds tiles. No engine call; input of the rules that colour the tile deltas.
-	measure 'KPI Fav Sign' = SWITCH ( SELECTEDVALUE ( dim_kpi[better_when] ), "Higher", 1, "Lower", -1, "Neutral", 0 )
-		displayFolder: Design
-		lineageTag: edc55d76-8e28-5836-9c69-110dffce9126
 
 	/// 1 on the effective tax rate ratio row, whose deltas are never coloured; blank elsewhere. No engine call; input of the rules that colour the statement deltas.
 	measure 'PL Fav Off' = IF ( NOT ISINSCOPE ( dim_pl_row[account_label] ) && SELECTEDVALUE ( dim_pl_row[line_code] ) = "ETR_PCT", 1 )

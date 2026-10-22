@@ -156,64 +156,40 @@ export interface StatementRow {
   neutralDelta: boolean;
 }
 
-export interface KpiDelta {
+/**
+ * The diverging bar of a comparison row (docs/design/kpi-card-v2.md): one
+ * shared scale for every card in a row (±20 % on amount KPIs, ±5 pp on
+ * percent KPIs, `model/compare-bar.ts`), right = favourable on every tile.
+ */
+export interface CompareBar {
+  /** Signed share of the half-track in [−1, 1]: > 0 grows right (favourable, or a neutral KPI), < 0 grows left (unfavourable). */
+  fraction: number;
+  /** |Δ| exceeds the scale: the bar ends at the track with a chevron. */
+  capped: boolean;
+}
+
+/** One "vs Budget" / "vs Prior year" row on a tile (K-20, K-21). */
+export interface KpiCompare {
   name: string;
+  /** Δ % on amount KPIs, Δ pp on percent KPIs; "n/a" when either side is blank. */
   text: string;
   tone: Tone;
-  arrow: boolean;
-}
-
-/** A tick on the target bar (K-25): one comparison's value, named. */
-export interface KpiTargetMark {
-  name: string;
-  value: number | null;
-  /** The value in the tile's own format ('' when blank), for the description. */
-  text: string;
-}
-
-/** Target bar inputs (K-25): the base value as the bar, the comparisons as ticks. */
-export interface KpiTarget {
-  base: number | null;
-  marks: KpiTargetMark[];
+  /** Null when there is no Δ: the row shows "n/a" and no bar. */
+  bar: CompareBar | null;
 }
 
 export interface KpiTile {
-  /** Key of the tile's trend in `Figures.trends` (the model's kpi_code when live). */
+  /** The model's kpi_code when live (the label on sample tiles). */
   code: string;
   label: string;
+  /** The one-line definition, the label's tooltip. */
   hint: string;
   value: string;
-  deltas: KpiDelta[];
-  /** Null on growth KPIs and tiles without a comparison: sparkline only (K-25). */
-  target: KpiTarget | null;
+  /** Lines under the value (margin, reported growth); none on most tiles. */
+  sublines: string[];
+  /** One row per Compare that is not None, in order; none on growth KPIs (K-20). */
+  compares: KpiCompare[];
 }
-
-/** One month of a KPI's 13-month series (K-24). `value` null = blank (open month or no data). */
-export interface KpiTrendPoint {
-  /** Month key `YYYY-MM`. */
-  month: string;
-  value: number | null;
-  /** The value in the tile's own format ('' when blank), for descriptions and tooltips. */
-  text: string;
-  /** Open (not closed) Actual month: plotted blank. */
-  isOpen: boolean;
-}
-
-/** The KPI's monthly value for the 13 months ending at the selected month (K-24); the last point is the selected month. */
-export interface KpiTrend {
-  code: string;
-  points: KpiTrendPoint[];
-}
-
-/**
- * Where a tile's trend stands. Trends load after the tile values (K-25) and
- * each settles on its own; `unavailable` names the reason instead of showing
- * numbers that were not read (LSN-002).
- */
-export type KpiTrendState =
-  | { kind: 'loading' }
-  | { kind: 'ready'; trend: KpiTrend }
-  | { kind: 'unavailable'; reason: string };
 
 export interface BridgeStep {
   label: string;
@@ -289,8 +265,6 @@ export interface Figures {
   statement: StatementRow[];
   financial: KpiTile[];
   operational: KpiTile[];
-  /** Per-tile trends by `KpiTile.code`; a tile with no entry is still loading (K-24, K-25). */
-  trends: Record<string, KpiTrendState>;
   bridge: Bridge;
   drivers: Driver[];
   profitability: Profitability;

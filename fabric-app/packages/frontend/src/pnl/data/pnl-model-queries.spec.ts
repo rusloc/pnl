@@ -12,14 +12,12 @@ import {
   buildContextQuery,
   buildDriversQuery,
   buildKpiMetaQuery,
-  buildKpiTrendQuery,
   buildKpiValuesQuery,
   buildProfitabilityQuery,
   buildStatementQuery,
   daxString,
   filterVars,
   kpiAliases,
-  KPI_TREND_LIMIT,
   PnlQueryError,
   selectedBreakdown,
   VISIBLE_ENTITIES_QUERY,
@@ -176,28 +174,6 @@ describe('KPI queries (Q2)', () => {
     expect(() => buildKpiValuesQuery(defaults, reference, ['NR"; EVALUATE'])).toThrow(PnlQueryError);
     expect(() => buildKpiValuesQuery(defaults, reference, ['nr'])).toThrow(/Unknown KPI code/);
     expect(() => buildKpiValuesQuery(defaults, reference, [])).toThrow(/Empty KPI chunk/);
-  });
-});
-
-describe('buildKpiTrendQuery (Q7, K-24)', () => {
-  it('reads KPI Trend by kpi_code x month for the batch, with the common filter vars and the explicit _kpis filter (about 2x faster than without)', () => {
-    const dax = buildKpiTrendQuery(defaults, reference, ['NR', 'GM_PCT']);
-    oneEvaluate(dax);
-    expect(dax).toContain('VAR _kpis   = TREATAS ( { "NR", "GM_PCT" }, dim_kpi[kpi_code] )');
-    expect(dax).toContain('SUMMARIZECOLUMNS (\n    dim_kpi[kpi_code]\n    ,dim_month[month_index]\n    ,dim_month[month_key]\n    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units, _kpis\n    ,"@v", CONVERT ( [KPI Trend], DOUBLE )\n)');
-    expect(dax.endsWith('ORDER BY dim_kpi[kpi_code], dim_month[month_index]')).toBe(true);
-    expect(dax).not.toContain('[KPI Value]');
-    expect(KPI_TREND_LIMIT).toBeGreaterThanOrEqual(156);
-  });
-
-  it('carries region and slice filters like the KPI values (K-22) and refuses bad codes or an empty batch', () => {
-    const sliced: FilterState = { ...defaults, regions: ['NA'], slices: { ...defaults.slices, P: { channel: ['Own D2C webstore'], line: null, segment: null } } };
-    const dax = buildKpiTrendQuery(sliced, reference, ['NR']);
-    expect(dax).toContain('_regions');
-    expect(dax).toContain('_channels');
-    expect(dax).toMatch(/,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units, _regions, _channels, _kpis\n/);
-    expect(() => buildKpiTrendQuery(defaults, reference, ['nr'])).toThrow(/Unknown KPI code/);
-    expect(() => buildKpiTrendQuery(defaults, reference, [])).toThrow(/Empty KPI trend batch/);
   });
 });
 

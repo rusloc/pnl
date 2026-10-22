@@ -31,6 +31,19 @@ The showcase audience is mostly non-finance visitors. The statement toolbar carr
 - Track C: the vosk.dev agent gets a spec-change note in `.sync/`; the skeleton's toolbar already shows only Variance / By function.
 - Acceptance tests: T-04 dropped. T-01 / T-02 stay (checked through measures and tests, no longer through the Entity columns layout).
 
+## 3a. Amendment — USER review, 2026-10-22 (evening)
+
+Decided by the USER after reviewing the first build:
+
+1. **Key figures cards v2** (`docs/design/kpi-card-v2.md`) replace K-24 and K-25 in Tracks A and B. No sparklines, no target bars. Each tile shows label, value, sub-line, and two diverging comparison rows (vs Compare A / vs Compare B): right = favourable, one shared scale of ±20 % / ±5 pp, ▲/▼ with sign. Growth KPIs show no rows. The `KPI Trend` measures stay in the model, unused, pending a later clean-up.
+2. **Track B only (Track A follows the USER's app review):**
+   - The notice strip (L-05) is removed from every view.
+   - The context line under the title (L-04) is replaced by an applied-filters pop-up opened from a funnel button next to the title.
+   - The title row carries a right-aligned status line: company - Management reporting - closed through - refreshed.
+   - Display separators use " - " instead of " · ".
+   - Statement top-level rows are numbered and in capitals ("01. GROSS REVENUE" … "29. NET MARGIN %") via `dim_pl_row[line_display]`.
+3. **Profitability:** a breakdown that is not allowed for the selected company (e.g. Channel in ACME Group) now shows an explanation instead of an empty view. The default breakdown is Region.
+
 ## 4. Alternatives considered
 
 | Alternative | Why not |

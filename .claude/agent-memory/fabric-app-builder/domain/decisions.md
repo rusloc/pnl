@@ -101,4 +101,4 @@
 **Reversal cost:** low (loader + batching only; the view reads `KpiTrendState`)
 **Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, kpi-trend, k-24, performance, batching, parity, adr-0007
 **Last-verified:** 2026-10-22 · **Related:** LSN-005, LSN-006, QRK-004, CNV-001, DEC-003
-**Status:** active
+**Status:** archived 2026-10-22 — the USER's Key figures review (docs/design/kpi-card-v2.md) removed the sparkline and the target bar the same day; Q7 builder, trend loader, fixtures, parity spec and probes deleted from the app (deploy-20261022165340). Tiles now draw two diverging comparison rows from the Q2b values alone (`pnl/model/compare-bar.ts`: ±20 % / ±5 pp shared scale, right = favourable, Lower-is-better flips the side, Neutral right by |Δ|). The query-shape findings above stay valid if a trend ever returns; the `KPI Trend` measure's fate is bip's / the main agent's.

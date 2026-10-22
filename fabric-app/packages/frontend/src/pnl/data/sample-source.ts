@@ -4,16 +4,16 @@
 // "sample data" chip while this source is active. Used only when no backend can
 // be reached (rayfin dev, tests); deployed, every zone is read from the semantic
 // model (ADR-0006).
+import { barOnScale } from '../model/compare-bar';
 import { parseSampleNumber, toneOf } from '../model/format';
-import { TREND_SAMPLE_REASON } from '../model/sample-mode';
 import type {
   Bridge,
   Driver,
   EntityCode,
   Figures,
   FilterState,
+  KpiCompare,
   KpiTile,
-  KpiTrendState,
   Profitability,
   ReferenceData,
   StatementRow,
@@ -106,28 +106,29 @@ export function sampleToneCodes(r: SampleRow): string {
   return r[7];
 }
 
+/** The mockup's "vs …" lines are the comparison rows; its other lines (margin, reported growth, drivers) are sub-lines. */
+function isCompareLine(name: string): boolean {
+  return name.startsWith('vs ');
+}
+
+/** A comparison row from the mockup's pre-formatted Δ text: the bar reads the printed number back, never invents one (LSN-002). */
+function toCompare([name, text, code]: SampleTile['s'][number]): KpiCompare {
+  const n = parseSampleNumber(text);
+  const pp = text.endsWith('pp');
+  const t = tone(code);
+  return { name, text, tone: t, bar: n === null ? null : barOnScale(pp ? n : n / 100, pp, t === 'unf' ? -1 : 1) };
+}
+
 function toTile(t: SampleTile): KpiTile {
   return {
-    // The mockup has no kpi_code: the label keys the (unavailable) trend.
+    // The mockup has no kpi_code: the label keys the tile.
     code: t.l,
     label: t.l,
     hint: t.h,
     value: t.v,
-    deltas: t.s.map(([name, text, code]) => ({
-      name,
-      text,
-      tone: tone(code),
-      // The mockup shows no arrow on plain reference lines (margin, operating profit).
-      arrow: !(name === 'Margin' || name === 'Operating profit'),
-    })),
-    // Sample tiles carry text only; no numbers are invented for a target bar (LSN-002).
-    target: null,
+    sublines: t.s.filter(([name]) => !isCompareLine(name)).map(([name, text]) => `${name} ${text}`),
+    compares: t.s.filter(([name]) => isCompareLine(name)).map(toCompare),
   };
-}
-
-/** Every sample tile's trend is unavailable: there is no model to read a series from (K-24). */
-function sampleTrends(tiles: readonly KpiTile[]): Record<string, KpiTrendState> {
-  return Object.fromEntries(tiles.map((t) => [t.code, { kind: 'unavailable', reason: TREND_SAMPLE_REASON } as KpiTrendState]));
 }
 
 function toBridge(entity: EntityCode): Bridge {
@@ -201,7 +202,6 @@ export function sampleFigures(filter: FilterState): Figures {
     statement: d.rows.map(toStatementRow),
     financial: d.kpis.map(toTile),
     operational: d.ops.map(toTile),
-    trends: sampleTrends([...d.kpis, ...d.ops].map(toTile)),
     bridge: toBridge(entity),
     drivers: toDrivers(entity),
     profitability: toProfitability(entity),

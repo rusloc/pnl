@@ -28,9 +28,7 @@
       "kpi_tb_fav",
       "kpi_tb_unf",
       "kpi_lbl_fin",
-      "kpi_fin",
       "kpi_lbl_ops",
-      "kpi_ops",
       "grp_view_analysis",
       "analysis_tabsel",
       "analysis_tabline",
@@ -61,10 +59,6 @@
       "cm_bars",
       "pl_btn_expand",
       "pl_btn_collapse",
-      "kpi_fin2",
-      "kpi_fin_trend",
-      "kpi_fin2_trend",
-      "kpi_ops_trend",
       "info_btn_bridge",
       "info_btn_var",
       "info_btn_prof",
@@ -114,7 +108,26 @@
       "info_cm_02",
       "info_cm_03",
       "info_cm_04",
-      "info_cm_05"
+      "info_cm_05",
+      "kpi_s01",
+      "kpi_s02",
+      "kpi_s03",
+      "kpi_s04",
+      "kpi_s05",
+      "kpi_s06",
+      "kpi_s07",
+      "kpi_s08",
+      "kpi_s09",
+      "kpi_s10",
+      "kpi_s11",
+      "kpi_s12",
+      "grp_info_filters",
+      "info_filters_toggle",
+      "info_filters_panel",
+      "info_filters_title",
+      "info_filters_close",
+      "info_filters_rule",
+      "info_filters_table"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -293,25 +306,9 @@
               }
             }
           },
-          "kpi_fin": {
-            "singleVisual": {
-              "visualType": "cardVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
           "kpi_lbl_ops": {
             "singleVisual": {
               "visualType": "textbox",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "kpi_ops": {
-            "singleVisual": {
-              "visualType": "cardVisual",
               "display": {
                 "mode": "hidden"
               }
@@ -494,38 +491,6 @@
           "pl_btn_collapse": {
             "singleVisual": {
               "visualType": "actionButton",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "kpi_fin2": {
-            "singleVisual": {
-              "visualType": "cardVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "kpi_fin_trend": {
-            "singleVisual": {
-              "visualType": "image",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "kpi_fin2_trend": {
-            "singleVisual": {
-              "visualType": "image",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "kpi_ops_trend": {
-            "singleVisual": {
-              "visualType": "image",
               "display": {
                 "mode": "hidden"
               }
@@ -892,6 +857,150 @@
                 "mode": "hidden"
               }
             }
+          },
+          "kpi_s01": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s02": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s03": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s04": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s05": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s06": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s07": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s08": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s09": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s10": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s11": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_s12": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_toggle": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_table": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
           }
         },
         "visualContainerGroups": {
@@ -917,6 +1026,9 @@
             "isHidden": true
           },
           "grp_info_cm": {
+            "isHidden": true
+          },
+          "grp_info_filters": {
             "isHidden": true
           }
         }

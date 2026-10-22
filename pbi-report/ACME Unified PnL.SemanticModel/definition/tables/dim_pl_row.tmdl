@@ -32,6 +32,17 @@ table dim_pl_row
 
 		annotation SummarizationSetBy = User
 
+	/// Statement row label for the report matrix: the line's number in display order (all lines, ratio rows included) and its name in capitals, e.g. 01. GROSS REVENUE; leaf rows carry their block's label. Report only: line_label stays the name Track A reads.
+	column line_display
+		dataType: string
+		lineageTag: 94a6ba9f-cdb0-4dd7-b9b5-919b672d9c67
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [line_display]
+		sortByColumn: line_sort
+
+		annotation SummarizationSetBy = User
+
 	column line_sort
 		dataType: int64
 		isHidden
@@ -154,6 +165,12 @@ table dim_pl_row
 				        ,"row_key", dim_report_line[line_code]
 				        ,"line_code", dim_report_line[line_code]
 				        ,"line_label", dim_report_line[line_name]
+				        ,"line_display",
+				            VAR _sort         = dim_report_line[sort_order]
+				            RETURN
+				                FORMAT ( COUNTROWS ( FILTER ( dim_report_line, dim_report_line[sort_order] <= _sort ) ), "00" )
+				                    & ". "
+				                    & UPPER ( dim_report_line[line_name] )
 				        ,"line_sort", dim_report_line[sort_order]
 				        ,"row_type", dim_report_line[row_type]
 				        ,"is_key", dim_report_line[is_key]
@@ -186,6 +203,12 @@ table dim_pl_row
 				        ,"row_key", dim_account[block_code] & "|" & dim_account[account_code]
 				        ,"line_code", dim_account[block_code]
 				        ,"line_label", LOOKUPVALUE ( dim_report_line[line_name], dim_report_line[line_code], dim_account[block_code] )
+				        ,"line_display",
+				            VAR _sort         = LOOKUPVALUE ( dim_report_line[sort_order], dim_report_line[line_code], dim_account[block_code] )
+				            RETURN
+				                FORMAT ( COUNTROWS ( FILTER ( dim_report_line, dim_report_line[sort_order] <= _sort ) ), "00" )
+				                    & ". "
+				                    & UPPER ( LOOKUPVALUE ( dim_report_line[line_name], dim_report_line[line_code], dim_account[block_code] ) )
 				        ,"line_sort", LOOKUPVALUE ( dim_report_line[sort_order], dim_report_line[line_code], dim_account[block_code] )
 				        ,"row_type", "input_block"
 				        ,"is_key", FALSE ()

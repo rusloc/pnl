@@ -1,0 +1,58 @@
+/// Rows of the applied-filters pop-up (header filter button): one row per filter or slicer group; the value comes from the measure Filter Value. Disconnected, report only.
+table dim_filter_row
+	lineageTag: cd66e9d9-4255-45c7-89b9-e2af86a98ab6
+
+	column filter_code
+		dataType: string
+		isHidden
+		lineageTag: 8083fa54-a3f3-4bda-875b-e6654f80c2a7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [filter_code]
+
+		annotation SummarizationSetBy = User
+
+	column filter_label
+		dataType: string
+		lineageTag: 98971caf-fe4f-403c-9c33-3ddb758f5ae0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [filter_label]
+		sortByColumn: filter_sort
+
+		annotation SummarizationSetBy = User
+
+	column filter_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ba39cea6-891d-4cb5-8ca6-19426ad205c6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [filter_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_filter_row = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "filter_sort", INTEGER,
+				    "filter_code", STRING,
+				    "filter_label", STRING,
+				    {
+				        { 1, "COMPANY", "Company" },
+				        { 2, "FY", "Fiscal year" },
+				        { 3, "PERIOD", "Period" },
+				        { 4, "TIME", "Time view" },
+				        { 5, "VERSIONS", "Versions" },
+				        { 6, "CURRENCY", "Currency" },
+				        { 7, "FX", "FX basis" },
+				        { 8, "UNITS", "Units" },
+				        { 9, "REGIONS", "Regions" },
+				        { 10, "SLICES", "Slices" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -4,6 +4,8 @@ Source of truth: `docs/design/P&L statement view/Main.dc.html` (interactive mock
 
 Date: 2026-10-21 · Applies to: Track A (Rayfin app, `fabric-app/`) and Track B (PBIP, `pbi-report/`).
 
+> **Superseded in parts by ADR-0007 (2026-10-22):** the company cards (entity switch moves to the rail brand mark), the statement toolbar (Layout / Cost lens / Detail → Expand all / Collapse all), and the KPI tiles (now `docs/design/kpi-card-v2.md`). Track B only (ADR-0007 §3a): no notice strip, the context line becomes an applied-filters pop-up, a right-aligned status line on the title row, and " - " separators. Where this guide and ADR-0007 disagree, ADR-0007 wins.
+
 ---
 
 ## 1. Principles

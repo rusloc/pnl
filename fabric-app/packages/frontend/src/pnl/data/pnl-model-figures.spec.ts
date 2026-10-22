@@ -10,20 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { defaultFilters } from '../model/filters';
 import type { FilterState } from '../model/types';
 import { PnlModelError } from './pnl-model-client';
-import {
-  bridgeComparison,
-  breakdownOptions,
-  kpiValueText,
-  mapBridge,
-  mapContext,
-  mapDrivers,
-  mapKpiMeta,
-  mapKpiTiles,
-  mapKpiTrends,
-  mapProfitability,
-  trendMonthKeys,
-} from './pnl-model-figures';
-import { Q7_FIN_OPS, Q7_OPEN_MONTHS } from './fixtures/q7-kpi-trend.fixture';
+import { bridgeComparison, breakdownOptions, kpiValueText, mapBridge, mapContext, mapDrivers, mapKpiMeta, mapKpiTiles, mapProfitability } from './pnl-model-figures';
 import { sampleReference } from './sample-reference';
 
 const reference = sampleReference();
@@ -72,30 +59,39 @@ describe('KPI tiles (§5)', () => {
     expect(() => mapKpiMeta(table(KPI_META.columns.map((c) => c.name), [['P', 1, 'X', 'x', 'Other', 'Higher', 'AMT', '']]))).toThrow(PnlModelError);
   });
 
-  it('prints the control total on the net revenue tile with Δ vs Budget and Prior year (K-20, T-06 at the app boundary)', () => {
+  it('prints the control total on the net revenue tile with a comparison row vs Budget and vs Prior year (K-20, T-06 at the app boundary)', () => {
     const { financial } = mapKpiTiles(meta, KPI_VALUES, filter);
     const nr = financial.find((t) => t.label === 'Net revenue')!;
     expect(nr.value).toBe('$3,398.5m');
     expect(nr.hint).toBe('Gross revenue + gross-to-net deductions');
-    expect(nr.deltas).toEqual([
-      { name: 'vs Budget', text: '−1.9%', tone: 'unf', arrow: true },
-      { name: 'vs Prior year', text: '+8.2%', tone: 'fav', arrow: true },
+    expect(nr.sublines).toEqual([]);
+    expect(nr.compares).toMatchObject([
+      { name: 'vs Budget', text: '−1.9%', tone: 'unf', bar: { capped: false } },
+      { name: 'vs Prior year', text: '+8.2%', tone: 'fav', bar: { capped: false } },
     ]);
+    // The bar is the Δ on the ±20 % scale: unfavourable grows left, favourable right (kpi-card-v2).
+    expect(nr.compares[0].bar?.fraction).toBeCloseTo(-0.019129 / 0.2, 4);
+    expect(nr.compares[1].bar?.fraction).toBeCloseTo(0.082469 / 0.2, 4);
   });
 
-  it('shows percent KPIs with pp deltas, inverts the colour when lower is better (K-21) and drops Δ on growth KPIs', () => {
+  it('shows percent KPIs with pp deltas on the ±5 pp scale, inverts colour and side when lower is better (K-21) and drops the rows on growth KPIs', () => {
     const { financial } = mapKpiTiles(meta, KPI_VALUES, filter);
     const gm = financial.find((t) => t.label === 'Gross margin %')!;
     expect(gm.value).toBe('49.4%');
-    expect(gm.deltas.map((d) => d.text)).toEqual(['−0.4 pp', '0.0 pp']);
-    expect(gm.deltas.map((d) => d.tone)).toEqual(['unf', 'neutral']);
+    expect(gm.compares.map((c) => c.text)).toEqual(['−0.4 pp', '0.0 pp']);
+    expect(gm.compares.map((c) => c.tone)).toEqual(['unf', 'neutral']);
+    expect(gm.compares[0].bar?.fraction).toBeCloseTo(-0.41204 / 5, 4);
+    // A Δ that rounds to 0.0 pp is neutral in colour but still sits on its side of the line.
+    expect(gm.compares[1].bar?.fraction).toBeCloseTo(0.030543 / 5, 4);
     const gtn = financial.find((t) => t.label === 'Gross-to-net %')!;
     expect(gtn.value).toBe('21.3%');
-    // +0.3 pp of deductions is unfavourable when lower is better.
-    expect(gtn.deltas[0]).toEqual({ name: 'vs Budget', text: '+0.3 pp', tone: 'unf', arrow: true });
+    // +0.3 pp of deductions is unfavourable when lower is better: left of the line.
+    expect(gtn.compares[0]).toMatchObject({ name: 'vs Budget', text: '+0.3 pp', tone: 'unf' });
+    expect(gtn.compares[0].bar?.fraction).toBeCloseTo(-0.268442 / 5, 4);
     const org = financial.find((t) => t.label === 'Organic growth vs PY')!;
     expect(org.value).toBe('+6.1%');
-    expect(org.deltas).toEqual([{ name: 'Reported', text: '+8.2%', tone: 'neutral', arrow: false }]);
+    expect(org.sublines).toEqual(['Reported +8.2%']);
+    expect(org.compares).toEqual([]);
   });
 
   it('formats counts and prices by value_type and keeps operational tiles apart', () => {
@@ -109,18 +105,30 @@ describe('KPI tiles (§5)', () => {
 
   it('omits a comparison set to None (and does not need its column) and refuses a result without the chunk columns', () => {
     const { financial } = mapKpiTiles(meta, KPI_VALUES, { ...filter, compareB: 'NONE' });
-    expect(financial[0].deltas.map((d) => d.name)).toEqual(['vs Budget']);
+    expect(financial[0].compares.map((c) => c.name)).toEqual(['vs Budget']);
     const noCmpB = KPI_VALUES.map((t) => ({ columns: t.columns.filter((c) => !c.name.endsWith('_cmp_b]')), rows: [t.rows[0].filter((_, i) => !t.columns[i].name.endsWith('_cmp_b]'))] }));
-    expect(mapKpiTiles(meta, noCmpB, { ...filter, compareB: 'NONE' }).financial[0].deltas.map((d) => d.text)).toEqual(['−1.9%']);
+    expect(mapKpiTiles(meta, noCmpB, { ...filter, compareB: 'NONE' }).financial[0].compares.map((c) => c.text)).toEqual(['−1.9%']);
     expect(() => mapKpiTiles(meta, noCmpB, filter)).toThrow(/missing column @NR_cmp_b/);
     expect(() => mapKpiTiles(meta, [KPI_VALUES[0]], filter)).toThrow(/missing column @GTN_PCT/);
   });
 
-  it('shows n/a when the model returns a blank comparison or value (KPI Δ rule: blank, never 0)', () => {
+  it('shows n/a and no bar when the model returns a blank comparison or value (KPI Δ rule: blank, never 0)', () => {
     const blanks = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]'], [[3398.5, null, 0, null]])];
     const [nr] = mapKpiTiles(meta.filter((m) => m.code === 'NR'), blanks, filter).financial;
-    expect(nr.deltas.map((d) => d.text)).toEqual(['n/a', 'n/a']);
-    expect(nr.deltas.map((d) => d.tone)).toEqual(['neutral', 'neutral']);
+    expect(nr.compares).toEqual([
+      { name: 'vs Budget', text: 'n/a', tone: 'neutral', bar: null },
+      { name: 'vs Prior year', text: 'n/a', tone: 'neutral', bar: null },
+    ]);
+  });
+
+  it('caps a comparison beyond the shared scale (±20 % / ±5 pp) at the track end', () => {
+    const wide = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]'], [[3398.5, 2500, 4500, null]])];
+    const [nr] = mapKpiTiles(meta.filter((m) => m.code === 'NR'), wide, filter).financial;
+    expect(nr.compares.map((c) => c.text)).toEqual(['+35.9%', '−24.5%']);
+    expect(nr.compares.map((c) => c.bar)).toEqual([
+      { fraction: 1, capped: true },
+      { fraction: -1, capped: true },
+    ]);
   });
 });
 
@@ -136,81 +144,6 @@ const BRIDGE_G = table(
     ['END', 'Base', 999, 3972.6875],
   ]
 );
-
-describe('KPI trends (K-24, Q7)', () => {
-  const meta = mapKpiMeta(KPI_META);
-  const byCode = (code: string) => meta.find((m) => m.code === code) as (typeof meta)[number];
-
-  it('lists the 13 month keys ending at the selected month (FY + Period), across a year boundary', () => {
-    const keys = trendMonthKeys(filter);
-    expect(keys).toHaveLength(13);
-    expect(keys[0]).toBe('2025-09');
-    expect(keys[12]).toBe('2026-09');
-    expect(trendMonthKeys({ fiscalYear: 2026, month: 1 })).toEqual(['2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01']);
-  });
-
-  it('maps rows to 13 points per KPI of the batch, last = selected month, missing rows blank, stray rows ignored, text in the tile format', () => {
-    const trends = mapKpiTrends(Q7_FIN_OPS, filter, reference, [byCode('NR'), byCode('ORG_GROWTH'), byCode('UNITS')]);
-    expect(Object.keys(trends).sort()).toEqual(['NR', 'ORG_GROWTH', 'UNITS']);
-    const nr = trends.NR;
-    expect(nr.kind).toBe('ready');
-    if (nr.kind !== 'ready') return;
-    expect(nr.trend.code).toBe('NR');
-    expect(nr.trend.points).toHaveLength(13);
-    expect(nr.trend.points[0]).toEqual({ month: '2025-09', value: 352.4, text: '$352.4m', isOpen: false });
-    expect(nr.trend.points[12]).toEqual({ month: '2026-09', value: 419.9, text: '$419.9m', isOpen: false });
-    expect(nr.trend.points.some((p) => p.month === '2025-08')).toBe(false);
-    expect(nr.trend.points.every((p) => !p.isOpen && p.value !== null)).toBe(true);
-
-    const growth = trends.ORG_GROWTH;
-    if (growth.kind !== 'ready') throw new Error('growth not ready');
-    const march = growth.trend.points.find((p) => p.month === '2026-03');
-    expect(march).toEqual({ month: '2026-03', value: null, text: '', isOpen: false });
-    // Growth comes back as a fraction and is shown signed, like the tile (K-20 secondary line style).
-    expect(growth.trend.points[12]).toMatchObject({ value: 0.069, text: '+6.9%' });
-
-    const units = trends.UNITS;
-    if (units.kind !== 'ready') throw new Error('units not ready');
-    expect(units.trend.points[12]).toMatchObject({ value: 51.4, text: '51.4m' });
-  });
-
-  it('blanks open months under Actual even when the model returned a value, and keeps them under Latest estimate (K-24)', () => {
-    const nov: FilterState = { ...filter, month: 11 };
-    const actual = mapKpiTrends(Q7_OPEN_MONTHS, nov, reference, [byCode('NR')]);
-    if (actual.NR.kind !== 'ready') throw new Error('not ready');
-    const pts = actual.NR.trend.points;
-    expect(pts[0].month).toBe('2025-11');
-    expect(pts[12]).toEqual({ month: '2026-11', value: null, text: '', isOpen: true });
-    expect(pts[11]).toEqual({ month: '2026-10', value: null, text: '', isOpen: true });
-    expect(pts[10]).toMatchObject({ month: '2026-09', value: 419.9, isOpen: false });
-
-    const le = mapKpiTrends(Q7_OPEN_MONTHS, { ...nov, baseVersion: 'LE' }, reference, [byCode('NR')]);
-    if (le.NR.kind !== 'ready') throw new Error('not ready');
-    expect(le.NR.trend.points[12]).toEqual({ month: '2026-11', value: 455.5, text: '$455.5m', isOpen: false });
-  });
-
-  it('follows the display units and currency of the tile (F-12, F-14) and refuses a result without the contract columns', () => {
-    const k = mapKpiTrends(Q7_FIN_OPS, { ...filter, units: 'k', currency: 'EUR' }, reference, [byCode('NR')]);
-    if (k.NR.kind !== 'ready') throw new Error('not ready');
-    expect(k.NR.trend.points[12].text).toBe(kpiValueText(419.9, 'AMT', { units: 'k', currency: 'EUR' }, false));
-    expect(() => mapKpiTrends(table(['dim_kpi[kpi_code]', '[@v]'], []), filter, reference, [byCode('NR')])).toThrow(PnlModelError);
-  });
-
-  it('target marks carry the comparison text in the tile format (K-25)', () => {
-    const tiles = mapKpiTiles(meta, KPI_VALUES, filter);
-    const nr = tiles.financial.find((t) => t.code === 'NR');
-    expect(nr?.target).toEqual({
-      base: 3398.5219426605,
-      marks: [
-        { name: 'Budget', value: 3464.7986884489997, text: '$3,464.8m' },
-        { name: 'Prior year', value: 3139.6026644619997, text: '$3,139.6m' },
-      ],
-    });
-    expect(tiles.financial.find((t) => t.code === 'ORG_GROWTH')?.target).toBeNull();
-    const noB = mapKpiTiles(meta, KPI_VALUES, { ...filter, compareB: 'NONE' });
-    expect(noB.financial.find((t) => t.code === 'NR')?.target?.marks.map((m) => m.name)).toEqual(['Budget']);
-  });
-});
 
 describe('bridge (C-40)', () => {
   it('labels the totals with the versions, formats steps as signed deltas and keeps the model’s step labels', () => {

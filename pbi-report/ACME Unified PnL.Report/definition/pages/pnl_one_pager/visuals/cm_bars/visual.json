@@ -3,9 +3,9 @@
   "name": "cm_bars",
   "position": {
     "x": 854,
-    "y": 189,
+    "y": 133,
     "z": 1400,
-    "height": 519,
+    "height": 575,
     "width": 462,
     "tabOrder": 7900
   },
@@ -20,15 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dim_channel"
+                      "Entity": "dim_region"
                     }
                   },
-                  "Property": "channel_name"
+                  "Property": "region_name"
                 }
               },
-              "queryRef": "dim_channel.channel_name",
-              "nativeQueryRef": "Channel / sales motion",
-              "displayName": "Channel / sales motion",
+              "queryRef": "dim_region.region_name",
+              "nativeQueryRef": "Region",
+              "displayName": "Region",
               "active": true
             }
           ],

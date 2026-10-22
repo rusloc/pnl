@@ -27,7 +27,7 @@
                   "levels": [
                     {
                       "queryRefs": [
-                        "dim_pl_row.line_label"
+                        "dim_pl_row.line_display"
                       ],
                       "isCollapsed": true,
                       "identityKeys": [
@@ -38,7 +38,7 @@
                                 "Entity": "dim_pl_row"
                               }
                             },
-                            "Property": "line_label"
+                            "Property": "line_display"
                           }
                         }
                       ],
@@ -58,7 +58,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Gross revenue'"
+                              "Value": "'01. GROSS REVENUE'"
                             }
                           }
                         ],
@@ -68,7 +68,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Gross-to-net deductions'"
+                              "Value": "'02. GROSS-TO-NET DEDUCTIONS'"
                             }
                           }
                         ],
@@ -78,7 +78,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Cost of revenue'"
+                              "Value": "'04. COST OF REVENUE'"
                             }
                           }
                         ],
@@ -88,7 +88,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Variable selling & cost-to-serve'"
+                              "Value": "'07. VARIABLE SELLING & COST-TO-SERVE'"
                             }
                           }
                         ],
@@ -98,7 +98,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Sales & marketing'"
+                              "Value": "'11. SALES & MARKETING'"
                             }
                           }
                         ],
@@ -108,7 +108,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Research & development'"
+                              "Value": "'12. RESEARCH & DEVELOPMENT'"
                             }
                           }
                         ],
@@ -118,7 +118,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'General & administrative'"
+                              "Value": "'13. GENERAL & ADMINISTRATIVE'"
                             }
                           }
                         ],
@@ -128,7 +128,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Other operating income / (expense)'"
+                              "Value": "'14. OTHER OPERATING INCOME / (EXPENSE)'"
                             }
                           }
                         ],
@@ -138,7 +138,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Depreciation & amortisation'"
+                              "Value": "'17. DEPRECIATION & AMORTISATION'"
                             }
                           }
                         ],
@@ -148,7 +148,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Adjusting items (non-underlying)'"
+                              "Value": "'19. ADJUSTING ITEMS (NON-UNDERLYING)'"
                             }
                           }
                         ],
@@ -158,7 +158,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Investing income'"
+                              "Value": "'22. INVESTING INCOME'"
                             }
                           }
                         ],
@@ -168,7 +168,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Financing expenses'"
+                              "Value": "'24. FINANCING EXPENSES'"
                             }
                           }
                         ],
@@ -178,7 +178,7 @@
                         "identityValues": [
                           {
                             "Literal": {
-                              "Value": "'Income tax expense'"
+                              "Value": "'26. INCOME TAX EXPENSE'"
                             }
                           }
                         ],
