@@ -1,13 +1,14 @@
-// Header (design brief §5.3): eyebrow, title + context line (L-04), company
-// cards (F-01), view tabs (roving arrow keys) and the per-view toolbar.
+// Header (design brief §5.3): eyebrow, title + context line (L-04), view tabs
+// (roving arrow keys) and the per-view toolbar. The company switch lives on the
+// rail brand mark (ADR-0007 §2.4); the statement toolbar is inside the statement
+// card (Expand all / Collapse all, ADR-0007 §2.3).
 import { useRef, type KeyboardEvent } from 'react';
 
 import { cn } from '@/lib/utils';
 
 import { MONTH_SHORT } from '../model/filters';
 import { sampleGate } from '../model/sample-mode';
-import type { CostLens, Detail, EntityCode, FilterState, Layout, ReferenceData, ViewKey } from '../model/types';
-import { COMPANIES, COMPANY_THEME } from '../theme/company';
+import type { FilterState, ReferenceData, ViewKey } from '../model/types';
 import { AnalysisIcon, ProfitabilityIcon, TableIcon, TilesIcon } from './ui/icons';
 import { Segmented } from './ui/segmented';
 
@@ -24,8 +25,7 @@ interface AppHeaderProps {
   contextLine: string;
   view: ViewKey;
   onView: (view: ViewKey) => void;
-  onEntity: (entity: EntityCode) => void;
-  onPatch: (patch: Partial<Pick<FilterState, 'layout' | 'costLens' | 'detail' | 'analysisCompare'>>) => void;
+  onPatch: (patch: Partial<Pick<FilterState, 'analysisCompare'>>) => void;
   onBreakdown: (index: number) => void;
   breakdownOptions: readonly string[];
   /** True while the figures are sample: Compared with / Break down by are off (LSN-002). */
@@ -40,7 +40,6 @@ export function AppHeader({
   contextLine,
   view,
   onView,
-  onEntity,
   onPatch,
   onBreakdown,
   breakdownOptions,
@@ -49,8 +48,6 @@ export function AppHeader({
 }: AppHeaderProps) {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const closed = reference.lastClosed;
-  // Q0 (ADR-0006 §8.2): the Group view needs both entities visible to the user.
-  const groupAllowed = reference.visibleEntities === undefined || reference.visibleEntities.length >= 2;
 
   const onTabKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const delta = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
@@ -60,18 +57,6 @@ export function AppHeader({
     tabRefs.current[next]?.focus();
     onView(TABS[next].key);
   };
-
-  const isGroup = filter.entity === 'G';
-  const layoutOptions: readonly { value: Layout; label: string; disabled?: boolean; title?: string }[] = [
-    { value: 'variance', label: 'Variance' },
-    { value: 'trend', label: 'Trend' },
-    {
-      value: 'entity',
-      label: 'Entity columns',
-      disabled: !isGroup,
-      title: isGroup ? undefined : 'Available in the ACME Group view',
-    },
-  ];
 
   return (
     <header className="flex flex-none flex-col gap-[8px] border-b border-line-200 bg-surface px-[24px] pt-[14px]">
@@ -85,38 +70,6 @@ export function AppHeader({
             <h1 className="m-0 text-[22px] font-semibold leading-[1.25]">Profit &amp; loss</h1>
             <span className="text-[13px] text-slate-600">{contextLine}</span>
           </div>
-        </div>
-        <div role="group" aria-label="Company" className="flex flex-wrap gap-[8px]">
-          {COMPANIES.map((c) => {
-            const selected = c.code === filter.entity;
-            const theme = COMPANY_THEME[c.code];
-            const off = c.code === 'G' && !groupAllowed;
-            return (
-              <button
-                key={c.code}
-                type="button"
-                aria-pressed={selected}
-                disabled={off}
-                title={off ? 'The consolidated view needs access to both companies in the semantic model' : undefined}
-                onClick={() => onEntity(c.code)}
-                className={cn(
-                  'box-border flex min-h-[52px] items-center gap-[10px] rounded-[10px] border py-[6px] pl-[12px] pr-[16px] text-left font-[inherit] text-ink-900',
-                  off ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                )}
-                style={{
-                  borderColor: selected ? theme.acc : '#CDD4DC',
-                  boxShadow: selected ? `0 0 0 1px ${theme.acc}` : 'none',
-                  background: selected ? theme.accT : '#FFFFFF',
-                }}
-              >
-                <span aria-hidden="true" className="h-[12px] w-[12px] flex-none rounded-[6px]" style={{ background: theme.acc }} />
-                <span className="flex flex-col leading-[1.25]">
-                  <span className="text-[15px] font-semibold">{c.name}</span>
-                  <span className="text-[12px] text-slate-600">{c.sub}</span>
-                </span>
-              </button>
-            );
-          })}
         </div>
       </div>
 
@@ -150,32 +103,6 @@ export function AppHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-[8px] pb-[8px]">
-          {view === 'pnl' && (
-            <>
-              <Segmented label="Layout" variant="inline" value={filter.layout} options={layoutOptions} onChange={(layout) => onPatch({ layout })} />
-              <Segmented<CostLens>
-                label="Cost lens"
-                variant="inline"
-                value={filter.costLens}
-                options={[
-                  { value: 'function', label: 'By function' },
-                  { value: 'nature', label: 'By nature' },
-                ]}
-                onChange={(costLens) => onPatch({ costLens })}
-              />
-              <Segmented<Detail>
-                label="Detail"
-                variant="inline"
-                value={filter.detail}
-                options={[
-                  { value: 'summary', label: 'Summary' },
-                  { value: 'standard', label: 'Standard' },
-                  { value: 'full', label: 'Full' },
-                ]}
-                onChange={(detail) => onPatch({ detail })}
-              />
-            </>
-          )}
           {view === 'kpi' && (
             <span className="flex flex-wrap items-center gap-x-[14px] gap-y-[6px] text-[13px] text-slate-600">
               <span>Changes vs Budget and Prior year, same months</span>

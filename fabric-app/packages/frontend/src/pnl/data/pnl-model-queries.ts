@@ -357,6 +357,42 @@ export function buildKpiValuesQuery(filter: FilterState, reference: ReferenceDat
 export const KPI_VALUES_LIMIT = 5;
 
 // ---------------------------------------------------------------------------
+// Q7 — KPI trends (K-24; ADR-0007 §2.5). One query per batch of KPI codes, sent
+// after the tile values (K-25). `KPI Trend` (folder 3 KPIs) is the tile's value
+// with time view = Month at each month of the 13 ending at the selected month
+// (FY + Period), param_eval forced to BASE, every other filter applied; amounts
+// and counts in the pinned units, ratios and growth as fractions. Blank outside
+// the 13 months, for open months when the base is Actual, and for growth
+// before the data history; a missing (kpi, month) row is a blank point.
+
+export const TREND_COLUMNS = { code: 'kpi_code', monthIndex: 'month_index', monthKey: 'month_key', value: '@v' } as const;
+
+/** At most 12 KPIs × 13 months = 156 rows. */
+export const KPI_TREND_LIMIT = 200;
+
+/**
+ * Q7 — `KPI Trend` by kpi_code × month for the given codes. The explicit `_kpis`
+ * filter is required: without it the engine evaluates every dim_kpi row (≈ 5 s
+ * instead of ≈ 2.5 s on the published model).
+ */
+export function buildKpiTrendQuery(filter: FilterState, reference: ReferenceData, codes: readonly string[]): string {
+  if (codes.length === 0) throw new PnlQueryError('Empty KPI trend batch');
+  const vars = [...filterVars(filter, reference), { name: '_kpis', expression: treatas(codes.map(kpiCodeLiteral), 'dim_kpi[kpi_code]') }];
+  return [
+    ...defineBlock(vars),
+    'EVALUATE',
+    'SUMMARIZECOLUMNS (',
+    '    dim_kpi[kpi_code]',
+    '    ,dim_month[month_index]',
+    '    ,dim_month[month_key]',
+    `    ,${varList(vars)}`,
+    `    ,${num('@v', '[KPI Trend]')}`,
+    ')',
+    'ORDER BY dim_kpi[kpi_code], dim_month[month_index]',
+  ].join('\n');
+}
+
+// ---------------------------------------------------------------------------
 // Q3 — net revenue bridge (C-40, T-05).
 
 export const BRIDGE_COLUMNS = { code: 'step_code', label: 'step_label', sort: 'step_sort', value: '@value' } as const;

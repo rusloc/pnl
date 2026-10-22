@@ -2,7 +2,8 @@
 // open this file (or paste it), press Run. Each EVALUATE returns its own result tab.
 // A test passes when every row shows _pass = TRUE. Tolerance: 0.01 USD (amounts are translated in floating point).
 // Expected values: table control_totals_usd = data/acme_pl_dummy_data/checks/control_totals_usd.csv (USD,
-// actual rates for ACT and forecast, budget rates for BUD). Spec IDs: T-01, T-02, T-03, T-05, T-06, T-07, T-10, T-17.
+// actual rates for ACT and forecast, budget rates for BUD). Spec IDs: T-01, T-02, T-03, T-05, T-06, T-07, T-10, T-17, K-24 (KPI trend).
+// T-04 (By nature lens) was dropped by ADR-0007; it never had a test here.
 
 DEFINE
     // One scenario = the slicer state the report would have. Base: A = Actual, B = Budget, LE = Latest estimate.
@@ -397,3 +398,221 @@ FILTER (
         || ( ISBLANK ( [_weight_sum] ) && dim_account[block_code] IN { "COR", "VSC", "SM", "RD", "GA", "OOI" } )
 )
 // T-07 passes when this result is empty.
+
+EVALUATE
+// ---------------------------------------------------------------- K-24 trend point = the Month-view tile, every KPI of every entity, Jul-Sep 2026 (selection: FY2026 Sep, YTD)
+VAR _cases =
+    CROSSJOIN (
+        SELECTCOLUMNS (
+            dim_kpi
+            ,"_entity", dim_kpi[entity_view_code]
+            ,"_kpi", dim_kpi[kpi_code]
+            ,"_type", dim_kpi[value_type]
+        )
+        ,DATATABLE (
+            "_month", INTEGER,
+            {
+                { 7 },
+                { 8 },
+                { 9 }
+            }
+        )
+    )
+VAR _rows =
+    ADDCOLUMNS (
+        _cases
+        ,"_trend",
+            VAR _entity      = [_entity]
+            VAR _kpi         = [_kpi]
+            VAR _month       = [_month]
+            RETURN
+                CALCULATE (
+                    [_KPI Trend Value]
+                    ,TREATAS ( { _kpi }, dim_kpi[kpi_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { 9 }, param_period[month_number] )
+                    ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+                    ,dim_month[fiscal_year] = 2026
+                    ,dim_month[month_number] = _month
+                )
+        ,"_tile_month_view",
+            VAR _entity      = [_entity]
+            VAR _kpi         = [_kpi]
+            VAR _month       = [_month]
+            RETURN
+                CALCULATE (
+                    [_KPI Value]
+                    ,TREATAS ( { _kpi }, dim_kpi[kpi_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { "MTD" }, param_time_view[time_view_code] )
+                )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_test", "K-24 point = Month tile"
+        ,"_entity", [_entity]
+        ,"_kpi", [_kpi]
+        ,"_month", [_month]
+        ,"_trend", [_trend]
+        ,"_tile", [_tile_month_view]
+        ,"_pass",
+            NOT ISBLANK ( [_trend] )
+                && ABS ( [_trend] - [_tile_month_view] ) < IF ( [_type] IN { "AMT", "CNT", "INT" }, 0.01, 0.0000001 )
+    )
+ORDER BY [_entity], [_kpi], [_month]
+
+EVALUATE
+// ---------------------------------------------------------------- K-24 reconciliation: flow KPIs Jul + Aug + Sep = the QTD tile; period-end KPIs (K-23) Sep point = the QTD tile
+VAR _cases =
+    FILTER (
+        SELECTCOLUMNS (
+            dim_kpi
+            ,"_entity", dim_kpi[entity_view_code]
+            ,"_kpi", dim_kpi[kpi_code]
+        )
+        ,[_kpi] IN { "NR", "EBITDA", "OP", "NP", "UNITS", "GMV", "IC_ELIM", "ARR", "MERCHANTS" }
+    )
+VAR _rows =
+    ADDCOLUMNS (
+        _cases
+        ,"_period_end", [_kpi] IN { "ARR", "MERCHANTS" }
+        ,"_trend_q3",
+            VAR _entity      = [_entity]
+            VAR _kpi         = [_kpi]
+            VAR _points      =
+                CALCULATETABLE (
+                    ADDCOLUMNS (
+                        VALUES ( dim_month[month_index] )
+                        ,"@v", [_KPI Trend Value]
+                    )
+                    ,TREATAS ( { _kpi }, dim_kpi[kpi_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { 9 }, param_period[month_number] )
+                    ,TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+                    ,dim_month[fiscal_year] = 2026
+                    ,dim_month[month_number] IN { 7, 8, 9 }
+                )
+            RETURN
+                IF (
+                    _kpi IN { "ARR", "MERCHANTS" }
+                    ,MAXX ( TOPN ( 1, _points, dim_month[month_index], DESC ), [@v] )
+                    ,SUMX ( _points, [@v] )
+                )
+        ,"_tile_qtd",
+            VAR _entity      = [_entity]
+            VAR _kpi         = [_kpi]
+            RETURN
+                CALCULATE (
+                    [_KPI Value]
+                    ,TREATAS ( { _kpi }, dim_kpi[kpi_code] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { 9 }, param_period[month_number] )
+                    ,TREATAS ( { "QTD" }, param_time_view[time_view_code] )
+                )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_test", "K-24 Q3 reconciliation"
+        ,"_entity", [_entity]
+        ,"_kpi", [_kpi]
+        ,"_rule", IF ( [_period_end], "Sep point = QTD tile", "Jul + Aug + Sep = QTD tile" )
+        ,"_trend_q3", [_trend_q3]
+        ,"_tile_qtd", [_tile_qtd]
+        ,"_pass", NOT ISBLANK ( [_trend_q3] ) && ABS ( [_trend_q3] - [_tile_qtd] ) < 0.01
+    )
+ORDER BY [_entity], [_kpi]
+
+EVALUATE
+// ---------------------------------------------------------------- K-24 window: 13 months ending at the selected month (Dec 2026); open Actual months blank, Latest estimate fills them
+VAR _cases =
+    DATATABLE (
+        "_base", STRING,
+        "_expected_points", INTEGER,
+        "_expected_first", INTEGER,
+        "_expected_last", INTEGER,
+        {
+            { "A", 10, 23, 32 },
+            { "LE", 13, 23, 35 }
+        }
+    )
+VAR _rows =
+    ADDCOLUMNS (
+        _cases
+        ,"_points",
+            VAR _base        = [_base]
+            VAR _points      =
+                FILTER (
+                    CALCULATETABLE (
+                        ADDCOLUMNS (
+                            VALUES ( dim_month[month_index] )
+                            ,"@v", [_KPI Trend Value]
+                        )
+                        ,TREATAS ( { "NR" }, dim_kpi[kpi_code] )
+                        ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                        ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                        ,TREATAS ( { 12 }, param_period[month_number] )
+                        ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    )
+                    ,NOT ISBLANK ( [@v] )
+                )
+            RETURN
+                COUNTROWS ( _points )
+        ,"_first_index",
+            VAR _base        = [_base]
+            VAR _points      =
+                FILTER (
+                    CALCULATETABLE (
+                        ADDCOLUMNS (
+                            VALUES ( dim_month[month_index] )
+                            ,"@v", [_KPI Trend Value]
+                        )
+                        ,TREATAS ( { "NR" }, dim_kpi[kpi_code] )
+                        ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                        ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                        ,TREATAS ( { 12 }, param_period[month_number] )
+                        ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    )
+                    ,NOT ISBLANK ( [@v] )
+                )
+            RETURN
+                MINX ( _points, dim_month[month_index] )
+        ,"_last_index",
+            VAR _base        = [_base]
+            VAR _points      =
+                FILTER (
+                    CALCULATETABLE (
+                        ADDCOLUMNS (
+                            VALUES ( dim_month[month_index] )
+                            ,"@v", [_KPI Trend Value]
+                        )
+                        ,TREATAS ( { "NR" }, dim_kpi[kpi_code] )
+                        ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+                        ,TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+                        ,TREATAS ( { 12 }, param_period[month_number] )
+                        ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    )
+                    ,NOT ISBLANK ( [@v] )
+                )
+            RETURN
+                MAXX ( _points, dim_month[month_index] )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_test", "K-24 window"
+        ,"_base", [_base]
+        ,"_points", [_points]
+        ,"_first_index", [_first_index]
+        ,"_last_index", [_last_index]
+        ,"_pass",
+            [_points] = [_expected_points]
+                && [_first_index] = [_expected_first]
+                && [_last_index] = [_expected_last]
+    )

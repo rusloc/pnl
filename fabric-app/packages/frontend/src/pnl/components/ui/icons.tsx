@@ -123,3 +123,13 @@ export function ChevronIcon({ open, ...p }: IconProps & { open: boolean }) {
     </Svg>
   );
 }
+
+/** Neutral (i) glyph in the current text colour, for the info pop-up buttons (L-15). */
+export function InfoCircleIcon(p: IconProps) {
+  return (
+    <Svg size={16} viewBox="0 0 16 16" {...p}>
+      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M8 7v4M8 4.6v.2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </Svg>
+  );
+}

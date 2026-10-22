@@ -37,6 +37,17 @@ export function zoneErrorText(what: string, reason: string): string {
   return `The ${what} could not be read from the semantic model: ${reason}`;
 }
 
+// KPI trends (K-24, K-25; ADR-0007): copy for the per-tile trend states.
+
+/** Shown in the trend area while a tile's 13-month series is in flight. */
+export const TREND_LOADING_TEXT = 'Trend loading…';
+
+/** Shown in the trend area when the series could not be read; the reason is on the element's title. */
+export const TREND_UNAVAILABLE_TEXT = 'Trend not available';
+
+/** Reason on sample figures: there is no model to read a series from. */
+export const TREND_SAMPLE_REASON = 'No semantic model could be reached; sample figures carry no monthly series.';
+
 /** Structural twin of the segmented control's option (model stays free of component imports). */
 interface GatedOption<T extends string> {
   value: T;

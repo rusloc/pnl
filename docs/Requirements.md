@@ -35,23 +35,24 @@ The dashed zone appears only when a notice applies; every other zone stays fixed
 
 | ID | Zone | Content | Behaviour |
 | --- | --- | --- | --- |
-| L-01 | Header | Report title, entity switch (3 buttons: Consumer Products, Commerce Cloud, ACME Group), data status (last closed month, last refresh time) | Entity switch is a single-select toggle. Switching keeps period, version, currency and region selections. |
+| L-01 | Header | Report title, data status (last closed month, last refresh time). Entity switch: picker opened from the brand mark at the top of the filter rail (Consumer Products, Commerce Cloud, ACME Group), mark tinted in the selected company's colour, accessible name "Switch company" (ADR-0007) | Entity switch is single select. Switching keeps period, version, currency and region selections. The context line (L-04) names the current company. |
 | L-02 | Page tabs | Report · Line definitions · Filters & rules | Definitions and rules pages are static reference content generated from the account hierarchy (section 8). |
 | L-03 | Filter band | Three groups: Period & version, Slice, Presentation (section 6) | Wraps to one column below \~900 px. Disabled filters stay visible with a reason. |
 | L-04 | Context line | Entity · time window with actual months · base vs comparisons · currency, units, FX basis · active slice filters | Always visible; plain text so it appears in exports and screenshots. |
 | L-05 | Notices | Cut-off, forecast months included, prior year missing, allocation active, intercompany eliminated | Shown only when the condition applies (section 7). |
 | L-06 | KPI strip | Row 1: 8 financial tiles. Row 2: 4 operational tiles (section 5) | 4 tiles per row on desktop, 2 on tablet, 1 on phone. Each tile: label, value, delta vs Compare A, delta vs Compare B, one-line definition. |
-| L-07 | Income statement | Matrix: rows = unified line structure (section 3), columns = chosen layout (section 4). Toolbar: Layout, Cost lens, Detail | Main zone; full width. Line column frozen on horizontal scroll. |
+| L-07 | Income statement | Matrix: rows = unified line structure (section 3), columns = the Variance layout (section 4). Expand all / Collapse all buttons above the line column (M-20; ADR-0007) | Main zone; full width. Line column frozen on horizontal scroll. |
 | L-08 | Analysis panels | Left: net revenue bridge (waterfall). Right: largest variances (top 8 leaf lines) | Side by side on desktop, stacked on narrow screens. |
 | L-09 | Profitability by slice | Table: one row per value of the chosen breakdown; NR, share, growth, GM %, CM %, Adj. EBITDA %, operating margin % | Breakdown selector: Region, Channel, Category/Service line, Segment (Group: Region, Entity). |
 
 **Layout rules**
 
-- L-10 Same zone order, sizes and column set for every entity. No zone appears or disappears on entity switch, except the Entity columns layout, which is enabled only in the Group view.
+- L-10 Same zone order, sizes and column set for every entity. No zone appears or disappears on entity switch. (Entity columns exception removed, ADR-0007.)
 - L-11 Label slots stay fixed; entity-specific names appear as a secondary label (for example "Cost of revenue · Cost of goods sold").
 - L-12 Numbers right-aligned, tabular figures, negatives with a minus sign, variance colour = favourable/unfavourable, not sign.
 - L-13 Subtotal rows shaded; key subtotals (Net revenue, Adjusted EBITDA, Operating profit, Net profit) shaded stronger. Ratio rows in italics under their subtotal.
 - L-14 Row tags: IFRS 18 (required subtotal), MPM (management-defined measure), Mgmt (management-only subtotal), IFRS 18 category on section rows, IC on intercompany lines, alloc. on allocated lines while a slice filter is on.
+- L-15 Info pop-ups: an (i) button in the title row of the net revenue bridge, largest variances, profitability table and contribution margin chart opens a short explanation (what it shows, how to read it, an example, a watch-out). Shared text: `docs/ADD/features/info-popovers.md` (ADR-0007).
 
 ## 3. Unified P&L line structure
 
@@ -96,13 +97,11 @@ All 73 leaf lines with codes, signs, nature weights and definitions: Line catalo
 
 ## 4. Income statement matrix
 
-The statement keeps the same rows under three column layouts, two cost lenses and three detail levels. Variance is the default for a single entity; Entity columns is the default for ACME Group.
+The statement has one column layout, Variance, for every entity including ACME Group, and one cost lens, By function. Trend, Entity columns and By nature were removed by ADR-0007.
 
 | Layout | Columns, in order | Available for |
 | --- | --- | --- |
 | Variance | Base · % NR · Compare A · Δ · Δ % · Compare B · Δ · Δ % · FY Budget · FY Latest estimate · Δ LE vs Budget | All views |
-| Trend | Jan … Dec (or Q1 … Q4) of the selected year for the base version, each marked A, F or B · FY total · % NR | All views |
-| Entity columns | Consumer Products · Commerce Cloud · Intercompany eliminations · ACME Group · % NR · ACME Group Compare A · Δ · Δ % | Group view only |
 
 **Columns**
 
@@ -112,15 +111,15 @@ The statement keeps the same rows under three column layouts, two cost lenses an
 - M-13 Comparison columns cover exactly the months the base covers (C-03). Show "n/a" when a comparison has no data; leave the cell blank when the line does not belong to that column's entity.
 - M-14 Full-year outlook columns always cover the whole fiscal year, whatever the time view. Toggle: Full-year outlook on/off.
 - M-15 Variance format toggle: amount and %, amount only, % only. % NR toggle: on/off.
-- M-16 Trend: open months are blank for Actual; forecast months in Latest estimate are marked F.
+- M-16 _(removed, ADR-0007: Trend layout dropped)_
 
 **Rows**
 
-- M-20 Detail levels: Summary (blocks and subtotals), Standard (one level down), Full (every leaf). Any row with children also expands or collapses on its own.
-- M-21 Expansion state persists across filter changes and resets when the entity or cost lens changes.
+- M-20 Expand all (every leaf open) and Collapse all (blocks and subtotals only) buttons above the line column; default collapsed. Any row with children also expands or collapses on its own (ADR-0007).
+- M-21 Expansion state persists across filter changes and resets to collapsed when the entity changes.
 - M-22 Hide empty lines (default on): hide leaf and entity rows whose visible columns all round to zero. Blocks and subtotals always show.
-- M-23 Cost lens By function = the spine in section 3. By nature = steps 1–3, then operating costs before D&A regrouped into nine natures, then steps 9–19 unchanged. Gross profit and contribution margin exist only in the By function lens.
-- M-24 Natures: Materials, goods & packaging consumed · Employee benefits · Freight, logistics & outsourced services · Advertising, promotion & media · Technology, hosting & software · Commissions, fees, transaction & credit losses · Energy, facilities & other operating costs · Other operating income & FX · Own work capitalised. Each leaf maps to one or more natures with weights summing to 1. A nature row expands to its contributing leaves, each showing its weight.
+- M-23 _(removed, ADR-0007: one cost lens, By function = the spine in section 3)_
+- M-24 _(removed, ADR-0007; nature weights stay in the data for T-07)_ Natures were: Materials, goods & packaging consumed · Employee benefits · Freight, logistics & outsourced services · Advertising, promotion & media · Technology, hosting & software · Commissions, fees, transaction & credit losses · Energy, facilities & other operating costs · Other operating income & FX · Own work capitalised. Each leaf maps to one or more natures with weights summing to 1. A nature row expands to its contributing leaves, each showing its weight.
 - M-25 Costs shown as negatives (default) or as positives. Display only; Δ and totals are unaffected.
 - M-26 Line column frozen on horizontal scroll; header row sticky when the table is taller than the screen.
 - M-27 Drill-through from any leaf cell to the journal lines behind it (account, cost centre, document number).
@@ -167,6 +166,8 @@ Twelve fixed tile slots: eight financial, four operational. Slots 1–3 and 6–
 - K-21 Δ colour follows the "Better when" column. Neutral KPIs are never coloured.
 - K-22 KPIs follow every filter, including slice filters.
 - K-23 Period-end KPIs (ARR, active merchants) read the last month of the window, not a sum.
+- K-24 Every tile (all 12) shows a sparkline: the KPI's monthly value for the 13 months ending at the selected month, base version, same filters. Open Actual months blank; the selected month marked; period-end KPIs plot month-end values, ratio KPIs the monthly ratio, growth KPIs monthly growth vs prior year (ADR-0007).
+- K-25 Tiles with a Compare A / Compare B value show a thin target bar: base value as the bar, Compare A and B as labelled ticks. Growth KPIs show the sparkline only. Tile values load first; trends fill in after (ADR-0007).
 
 ## 6. Filters
 
@@ -174,7 +175,7 @@ Twenty-one controls in fixed slots. Slice filters keep the same slot for both en
 
 | ID | Filter | Group | Values | Default | Select | Products | Services | Group |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F-01 | Entity | Header | Consumer Products, Commerce Cloud, ACME Group | Consumer Products | Single | ✓ | ✓ | ✓ |
+| F-01 | Entity | Rail brand mark (ADR-0007) | Consumer Products, Commerce Cloud, ACME Group | Consumer Products | Single | ✓ | ✓ | ✓ |
 | F-02 | Fiscal year | Period & version | FY2024 … current FY | Current FY | Single | ✓ | ✓ | ✓ |
 | F-03 | Period | Period & version | Jan … Dec; months after cut-off marked "open" | Last closed month | Single | ✓ | ✓ | ✓ |
 | F-04 | Time view | Period & version | Month, QTD, YTD, LTM, Full year | YTD | Single | ✓ | ✓ | ✓ |
@@ -191,9 +192,9 @@ Twenty-one controls in fixed slots. Slice filters keep the same slot for both en
 | F-15 | Costs shown | Presentation | As negatives, As positives | As negatives | Single | ✓ | ✓ | ✓ |
 | F-16 | Variance format | Presentation | Amount and %, Amount, % | Amount and % | Single | ✓ | ✓ | ✓ |
 | F-17 | Display toggles | Presentation | % of net revenue, Full-year outlook, Classification tags, Hide empty lines | All on | Toggles | ✓ | ✓ | ✓ |
-| F-18 | Layout | Statement toolbar | Variance, Trend (Months / Quarters), Entity columns | Variance; Entity columns in Group | Single | ✓ | ✓ | ✓ |
-| F-19 | Cost lens | Statement toolbar | By function, By nature | By function | Single | ✓ | ✓ | ✓ |
-| F-20 | Detail | Statement toolbar | Summary, Standard, Full | Standard | Single | ✓ | ✓ | ✓ |
+| F-18 | _(removed, ADR-0007: Variance layout only)_ | | | | | | | |
+| F-19 | _(removed, ADR-0007: By function only)_ | | | | | | | |
+| F-20 | Expand / Collapse | Above the statement's line column | Expand all, Collapse all | Collapsed | Buttons | ✓ | ✓ | ✓ |
 | F-21 | Breakdown | Profitability panel | Region, Channel, Category / service line, Segment; Group: Region, Entity | Channel; Group: Entity | Single | ✓ | ✓ | ✓ |
 
 **Interaction rules**
@@ -349,7 +350,7 @@ The build is accepted when every test below passes on full data for at least one
 - [ ] T-01 ACME Group = Consumer Products + Commerce Cloud + eliminations, on every line and every column.
 - [ ] T-02 Eliminations leave contribution margin and every line below it unchanged.
 - [ ] T-03 For each slice dimension, the sum over its values equals the unfiltered total on every line, allocated lines included.
-- [ ] T-04 Adjusted EBITDA is identical in the By function and By nature lenses.
+- [ ] T-04 _(removed, ADR-0007: By nature lens dropped)_
 - [ ] T-05 Bridge: comparison NR + all steps = base NR, to the unit.
 - [ ] T-06 Net revenue, operating profit and net profit for a closed month match the general ledger trial balance per entity.
 - [ ] T-07 Every account has a block, spine step, IFRS 18 category and nature weights summing to 1.

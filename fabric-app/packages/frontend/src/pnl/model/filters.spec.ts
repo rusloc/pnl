@@ -12,8 +12,11 @@ describe('defaultFilters', () => {
       entity: 'P', fiscalYear: 2026, month: 9, timeView: 'ytd',
       baseVersion: 'ACT', compareA: 'BUD', compareB: 'PY',
       regions: null, currency: 'USD', fxBasis: 'actual', units: 'm',
-      layout: 'variance', costLens: 'function', detail: 'standard',
     });
+    // ADR-0007: one layout, one cost lens, no detail level in the filter state.
+    expect(defaults).not.toHaveProperty('layout');
+    expect(defaults).not.toHaveProperty('costLens');
+    expect(defaults).not.toHaveProperty('detail');
   });
 });
 
@@ -41,12 +44,9 @@ describe('filterReducer', () => {
     expect(s.slices.P.channel).toEqual(['y']);
   });
 
-  it('ignores slice toggles in the Group view (F-32) and drops the Entity columns layout outside it (F-18)', () => {
-    let s = filterReducer(defaults, { type: 'entity', entity: 'G' });
+  it('ignores slice toggles in the Group view (F-32)', () => {
+    const s = filterReducer(defaults, { type: 'entity', entity: 'G' });
     expect(filterReducer(s, { type: 'toggleSlice', slot: 'line', code: 'x', all: ['x', 'y'] })).toBe(s);
-    s = filterReducer(s, { type: 'set', patch: { layout: 'entity' } });
-    s = filterReducer(s, { type: 'entity', entity: 'S' });
-    expect(s.layout).toBe('variance');
   });
 
   it('resets one group to its defaults, keeping the entity (F-35)', () => {
@@ -58,9 +58,10 @@ describe('filterReducer', () => {
 });
 
 describe('contextLine (L-04)', () => {
-  it('lists window, versions, currency/units/FX and slices', () => {
+  it('names the company (ADR-0007), then window, versions, currency/units/FX and slices', () => {
     expect(contextLine(defaults, 'All slices')).toBe(
-      'YTD Jan–Sep 2026 · Actual vs Budget and Prior year · USD m, actual rates · All slices'
+      'Consumer Products · YTD Jan–Sep 2026 · Actual vs Budget and Prior year · USD m, actual rates · All slices'
     );
+    expect(contextLine({ ...defaults, entity: 'G' }, 'All regions, consolidated')).toMatch(/^ACME Group · /);
   });
 });

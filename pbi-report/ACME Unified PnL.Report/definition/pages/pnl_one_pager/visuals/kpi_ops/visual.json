@@ -3,9 +3,9 @@
   "name": "kpi_ops",
   "position": {
     "x": 0,
-    "y": 545,
+    "y": 541,
     "z": 900,
-    "height": 175,
+    "height": 179,
     "width": 1328,
     "tabOrder": 5300
   },
@@ -81,7 +81,7 @@
             "autoGrid": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -95,7 +95,7 @@
             "rowPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "12L"
+                  "Value": "0L"
                 }
               }
             },
@@ -103,6 +103,13 @@
               "expr": {
                 "Literal": {
                   "Value": "12L"
+                }
+              }
+            },
+            "orientation": {
+              "expr": {
+                "Literal": {
+                  "Value": "'0'"
                 }
               }
             }
@@ -161,7 +168,7 @@
             "topMargin": {
               "expr": {
                 "Literal": {
-                  "Value": "16L"
+                  "Value": "10L"
                 }
               }
             },
@@ -269,7 +276,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "21D"
+                  "Value": "20D"
                 }
               }
             },
@@ -370,48 +377,6 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "KPI Secondary"
-                }
-              }
-            },
-            "backgroundShow": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "paddingUniform": {
-              "expr": {
-                "Literal": {
-                  "Value": "2L"
-                }
-              }
-            }
-          },
-          "selector": {
-            "data": [
-              {
-                "dataViewWildcard": {
-                  "matchingOption": 1
-                }
-              }
-            ],
-            "metadata": "_measures.KPI Value",
-            "id": "rl_secondary",
-            "order": 0
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_measures"
-                    }
-                  },
                   "Property": "KPI Δ A"
                 }
               }
@@ -426,7 +391,7 @@
             "paddingUniform": {
               "expr": {
                 "Literal": {
-                  "Value": "2L"
+                  "Value": "0L"
                 }
               }
             }
@@ -441,7 +406,7 @@
             ],
             "metadata": "_measures.KPI Value",
             "id": "rl_delta_a",
-            "order": 1
+            "order": 0
           }
         },
         {
@@ -468,7 +433,7 @@
             "paddingUniform": {
               "expr": {
                 "Literal": {
-                  "Value": "2L"
+                  "Value": "0L"
                 }
               }
             }
@@ -483,7 +448,7 @@
             ],
             "metadata": "_measures.KPI Value",
             "id": "rl_delta_b",
-            "order": 2
+            "order": 1
           }
         }
       ],
@@ -493,7 +458,7 @@
             "position": {
               "expr": {
                 "Literal": {
-                  "Value": "'below'"
+                  "Value": "'right'"
                 }
               }
             },
@@ -507,7 +472,7 @@
             "style": {
               "expr": {
                 "Literal": {
-                  "Value": "'tabular'"
+                  "Value": "'sentence'"
                 }
               }
             },
@@ -517,33 +482,46 @@
                   "Value": "'left'"
                 }
               }
+            },
+            "verticalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'middle'"
+                }
+              }
+            },
+            "customizePadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "outerPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "paddingBeforeDivider": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "paddingAfterDivider": {
+              "expr": {
+                "Literal": {
+                  "Value": "2D"
+                }
+              }
             }
           }
         }
       ],
       "referenceLabelTitle": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "data": [
-              {
-                "dataViewWildcard": {
-                  "matchingOption": 1
-                }
-              }
-            ],
-            "metadata": "_measures.KPI Value",
-            "id": "rl_secondary"
-          }
-        },
         {
           "properties": {
             "show": {
@@ -691,53 +669,6 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#4F5C6C'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "data": [
-              {
-                "dataViewWildcard": {
-                  "matchingOption": 1
-                }
-              }
-            ],
-            "metadata": "_measures.KPI Value",
-            "id": "rl_secondary"
-          }
-        },
-        {
-          "properties": {
-            "valueFontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "10D"
-                }
-              }
-            },
-            "valueFontFamily": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Segoe UI Semibold'"
-                }
-              }
-            },
-            "showBlankAs": {
-              "expr": {
-                "Literal": {
-                  "Value": "' '"
-                }
-              }
-            },
-            "valueFontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
                     "Conditional": {
                       "Cases": [
                         {
@@ -1225,6 +1156,76 @@
             "id": "rl_delta_b"
           }
         }
+      ],
+      "smallMultiplesOverFlow": [
+        {
+          "properties": {
+            "overFlowStyle": {
+              "expr": {
+                "Literal": {
+                  "Value": "'1'"
+                }
+              }
+            },
+            "overFlowDirection": {
+              "expr": {
+                "Literal": {
+                  "Value": "'1'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "layout": [
+        {
+          "properties": {
+            "paddingIndividual": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "paddingUniform": {
+              "expr": {
+                "Literal": {
+                  "Value": "4L"
+                }
+              }
+            },
+            "cellPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "cardCalloutArea": [
+        {
+          "properties": {
+            "paddingIndividual": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "paddingUniform": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -1347,7 +1348,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "f_kpi_ops_group",
+        "name": "f_kpi_ops_codes",
         "field": {
           "Column": {
             "Expression": {
@@ -1355,7 +1356,7 @@
                 "Entity": "dim_kpi"
               }
             },
-            "Property": "kpi_group"
+            "Property": "kpi_code"
           }
         },
         "type": "Categorical",
@@ -1363,7 +1364,7 @@
           "Version": 2,
           "From": [
             {
-              "Name": "p",
+              "Name": "k",
               "Entity": "dim_kpi",
               "Type": 0
             }
@@ -1377,10 +1378,10 @@
                       "Column": {
                         "Expression": {
                           "SourceRef": {
-                            "Source": "p"
+                            "Source": "k"
                           }
                         },
-                        "Property": "kpi_group"
+                        "Property": "kpi_code"
                       }
                     }
                   ],
@@ -1388,7 +1389,84 @@
                     [
                       {
                         "Literal": {
-                          "Value": "'Operational'"
+                          "Value": "'UNITS'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'NR_PER_UNIT'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'VOL_GROWTH'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'PRICE_MIX'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'GMV'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'MERCHANTS'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'SUB_GM_PCT'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'RULE40'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'CP_OP_MARGIN'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'CC_OP_MARGIN'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'NP'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'ETR'"
                         }
                       }
                     ]

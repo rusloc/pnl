@@ -15,9 +15,6 @@ export type FxBasis = 'actual' | 'constant';
 export type Units = 'm' | 'k';
 export type CostSign = 'neg' | 'pos';
 export type VarianceFormat = 'both' | 'amount' | 'pct';
-export type Layout = 'variance' | 'trend' | 'entity';
-export type CostLens = 'function' | 'nature';
-export type Detail = 'summary' | 'standard' | 'full';
 export type SliceSlot = 'channel' | 'line' | 'segment';
 export type Tone = 'fav' | 'unf' | 'neutral';
 
@@ -53,11 +50,9 @@ export interface FilterState {
   showFyOutlook: boolean;
   showTags: boolean;
   hideEmpty: boolean;
-  // Statement toolbar (F-18 to F-20)
-  layout: Layout;
-  costLens: CostLens;
-  detail: Detail;
-  // Analysis / profitability toolbars (C-45, F-21)
+  // Analysis / profitability toolbars (C-45, F-21). The statement has one
+  // layout (Variance) and one cost lens (By function); its expansion state is
+  // view state, not a filter (M-20, M-21; ADR-0007).
   analysisCompare: 'BUD' | 'PY';
   breakdown: Record<EntityCode, number>;
 }
@@ -168,12 +163,57 @@ export interface KpiDelta {
   arrow: boolean;
 }
 
+/** A tick on the target bar (K-25): one comparison's value, named. */
+export interface KpiTargetMark {
+  name: string;
+  value: number | null;
+  /** The value in the tile's own format ('' when blank), for the description. */
+  text: string;
+}
+
+/** Target bar inputs (K-25): the base value as the bar, the comparisons as ticks. */
+export interface KpiTarget {
+  base: number | null;
+  marks: KpiTargetMark[];
+}
+
 export interface KpiTile {
+  /** Key of the tile's trend in `Figures.trends` (the model's kpi_code when live). */
+  code: string;
   label: string;
   hint: string;
   value: string;
   deltas: KpiDelta[];
+  /** Null on growth KPIs and tiles without a comparison: sparkline only (K-25). */
+  target: KpiTarget | null;
 }
+
+/** One month of a KPI's 13-month series (K-24). `value` null = blank (open month or no data). */
+export interface KpiTrendPoint {
+  /** Month key `YYYY-MM`. */
+  month: string;
+  value: number | null;
+  /** The value in the tile's own format ('' when blank), for descriptions and tooltips. */
+  text: string;
+  /** Open (not closed) Actual month: plotted blank. */
+  isOpen: boolean;
+}
+
+/** The KPI's monthly value for the 13 months ending at the selected month (K-24); the last point is the selected month. */
+export interface KpiTrend {
+  code: string;
+  points: KpiTrendPoint[];
+}
+
+/**
+ * Where a tile's trend stands. Trends load after the tile values (K-25) and
+ * each settles on its own; `unavailable` names the reason instead of showing
+ * numbers that were not read (LSN-002).
+ */
+export type KpiTrendState =
+  | { kind: 'loading' }
+  | { kind: 'ready'; trend: KpiTrend }
+  | { kind: 'unavailable'; reason: string };
 
 export interface BridgeStep {
   label: string;
@@ -249,6 +289,8 @@ export interface Figures {
   statement: StatementRow[];
   financial: KpiTile[];
   operational: KpiTile[];
+  /** Per-tile trends by `KpiTile.code`; a tile with no entry is still loading (K-24, K-25). */
+  trends: Record<string, KpiTrendState>;
   bridge: Bridge;
   drivers: Driver[];
   profitability: Profitability;

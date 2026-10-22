@@ -1,8 +1,8 @@
 # Measure dictionary — ACME Unified P&L (Track B)
 
-> Generated from `pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22, T-05 fix and query-plan performance pass). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
+> Generated from `pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22: T-05 fix, query-plan performance pass, ADR-0007 KPI trend contract K-24, Key figures trend overlay K-24/K-25, info pop-ups L-15). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
 
-175 measures in table `_measures`; folder `9 Engine` is hidden from report authors.
+186 measures in table `_measures`; folder `9 Engine` is hidden from report authors.
 
 | Folder | Measures | Purpose |
 |---|---:|---|
@@ -10,13 +10,13 @@
 | `1 Statement\Formatting` | 5 | Conditional-format colours for the matrix (L-12, L-13) |
 | `2 Versions` | 7 | Base, comparisons, prior year, full-year outlook (D-31), unscaled |
 | `2 Versions\Subtotals` | 10 | Spine subtotals of the base version (step 1-19), unscaled |
-| `3 KPIs` | 6 | KPI slot measures used by the tiles and the KPI table (§5) |
+| `3 KPIs` | 7 | KPI slot measures used by the tiles, and the monthly KPI trend (§5, K-24) |
 | `3 KPIs\Items` | 24 | One measure per KPI formula, unscaled |
 | `4 Analysis` | 11 | Net revenue bridge (C-40) and largest variances (C-45) |
 | `5 Profitability` | 5 | Profitability by slice (C-46) and slice-member filter |
 | `6 Context` | 5 | Header status, context line, notices, panel notes (L-01, L-04, L-05) |
-| `9 Engine` | 44 | Hidden: selections, time window, translation, entity view, row logic, unscaled statement values |
-| `Design` | 47 | Ledger design helpers: identity colour, header and rail texts, flyout labels, favourability inputs for rules-based colours (no engine calls except Notice Strip, CM Subtitle) |
+| `9 Engine` | 45 | Hidden: selections, time window, translation, entity view, row logic, unscaled statement values |
+| `Design` | 56 | Ledger design helpers: identity colour, header and rail texts, flyout labels, favourability inputs for rules-based colours, Key figures trend overlay (KPI Row SVG), info pop-up paragraphs (no engine calls except Notice Strip, CM Subtitle, KPI Row SVG) |
 
 ## How the engine fits together
 
@@ -92,6 +92,7 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | Measure | Definition | Spec | Format |
 |---|---|---|---|
 | `KPI Value` | Value of the KPI tile in the current dim_kpi row, amounts and counts in the selected units (display only). | §5 K-01..K-12 | dynamic |
+| `KPI Trend` | K-24 monthly trend of the KPI tile in the current dim_kpi row, for the month of dim_month in context (13 months ending at the selected month, base version, same filters); amounts and counts in the selected units like KPI Value (display only). Track A sparklines and the Track B tile sparklines read it. | K-24 | dynamic |
 | `KPI Secondary` | Tile sub-line: reported growth incl. FX for organic growth, margin for the amount tiles. | K-02, K-07, K-08, K-11 | — |
 | `KPI Δ A` | KPI vs Compare A: percent KPIs in percentage points, amount KPIs in %. | K-20 | dynamic |
 | `KPI Δ B` | KPI vs Compare B: percent KPIs in percentage points, amount KPIs in %. | K-20 | dynamic |
@@ -211,6 +212,7 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_PL Δ LE` | Full-year LE - full-year budget, unscaled; ratio rows in pp. | M-14 | — |
 | `_Bridge Value` | Unscaled waterfall value per dim_bridge_step: comparison NR, then the entity's steps; blank for a step of another entity (its dim_bridge_step row is filtered out). Comparison + steps = base NR (T-05). Steps with the same formula share one branch (service lines, entities): every branch adds its measures to the query plan, used or not. | C-40, T-05 | — |
 | `_KPI Value` | Unscaled value of the KPI tile in the current dim_kpi row (slots swap content by entity). Feeds KPI Δ A / Δ B. A code first maps to a family: line amounts (NR, EBITDA, OP, NP) and line ratios (GM %, CM %, GTN %, ETR, Products / Cloud operating margin) share one branch each, because every branch adds its measures to the query plan of a grid over dim_kpi; the simple SWITCH on the family keeps a single-code evaluation as cheap as a direct measure. | §5 K-01..K-12 | — |
+| `_KPI Trend Value` | K-24 trend point (unscaled): the tile value of the dim_kpi row in context for the single month of dim_month in context, i.e. exactly what the tile shows with time view Month at that month (fiscal year and period follow the month, base version, every other filter kept). Blank outside the 13 months ending at the selected month and for open months of Actual (window ends before it starts). Period-end KPIs read that month-end, ratios the monthly ratio, growth KPIs the monthly growth vs prior year. Evaluate it over dim_kpi[kpi_code] x dim_month[month_index] with the entity's codes as a filter: one query, no 156 scalar calls. | K-24, K-22, K-23 | — |
 
 ## Design
 
@@ -232,7 +234,7 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Rail Sum Versions` | Rail summary of the Versions group, e.g. Actual vs Budget, Prior year. | F-05..F-07 | — |
 | `Rail Sum Slice` | Rail summary of the Slice group: All slices, filtered regions / slices, or consolidated in the Group view. | F-08..F-11, F-32 | — |
 | `Rail Sum Display` | Rail summary of the Display group, e.g. USD m · actual rates. | F-12..F-14 | — |
-| `Hdr Context` | Header context line (L-04): window · versions · currency, units and FX basis · slices. | L-04 | — |
+| `Hdr Context` | Header context line (L-04): company (the entity switch moved to the rail brand mark, ADR-0007) · window · versions · currency, units and FX basis · slices. | L-04 | — |
 | `Notice Strip` | Notice strip text (L-05, C-50): full-year outlook basis, Commerce Cloud intercompany revenue, then the conditional notices. | L-05, C-50 | — |
 | `Seg Label` | Short label of a segmented-control item (Label role of the button slicers): versions, FX basis, units, time view, breakdown. | F-03..F-07, F-12..F-14, F-21 | — |
 | `Version Desc` | One-line description of each base-version card in the Versions flyout (Label role). | F-05 | — |
@@ -261,6 +263,15 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Prof Subtitle` | Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions. | C-46 | — |
 | `CM Title` | Contribution margin chart title, e.g. Contribution margin by channel. | C-46 | — |
 | `CM Subtitle` | Contribution margin chart subtitle with the company average CM % (the dashed line). | C-46 | — |
+| `KPI Row SVG` | K-24 / K-25 overlay for one row of KPI tiles (image visual over the tile cards, own query, so the tile values never wait for it): per tile, in the left column of the card (the deltas sit on the right), a 13-month sparkline of _KPI Trend Value above the value, in the company colour with the selected month marked, the tile sub-line (KPI Secondary: margin or reported growth; a 179 px card shows only four reference-label lines) and a target bar below the value (base value as the bar, Compare A / Compare B as labelled ticks; none for growth KPIs or a compare set to None). SVG 1328 x 179 in tile coordinates: 4 tiles of 323 px with 12 px gaps, column = (slot - 1) mod 4. The visual filters dim_kpi[kpi_code] to a literal list, which lets the engine drop the SWITCH branches of other KPIs (about 4x faster than a filter on kpi_group). | K-24, K-25, K-20 | — |
+| `Info Bridge 1` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
+| `Info Bridge 2` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
+| `Info Variances 1` | Info pop-up text of the largest variances table (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims "underneath" because the block is a column of its own. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-45 | — |
+| `Info Variances 2` | Info pop-up text of the largest variances table (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims "underneath" because the block is a column of its own. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-45 | — |
+| `Info Profitability 1` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
+| `Info Profitability 2` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
+| `Info Profitability 3` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 3 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
+| `Info CM 1` | Info pop-up text of the contribution margin chart (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown filled in. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
 | `KPI Fav Sign` | Favourability sign of the KPI tile in context from dim_kpi.better_when: 1 higher is better, -1 lower is better, 0 neutral; blank without a KPI row, so it never adds tiles. No engine call; input of the rules that colour the tile deltas. | K-20, N-07 | — |
 | `PL Fav Off` | 1 on the effective tax rate ratio row, whose deltas are never coloured; blank elsewhere. No engine call; input of the rules that colour the statement deltas. | L-12, N-07 | — |
 
@@ -861,6 +872,49 @@ Folder `3 KPIs` · spec §5 K-01..K-12
 ```dax
 KPI Value =
 VAR _value        = [_KPI Value]
+RETURN
+    IF (
+        SELECTEDVALUE ( dim_kpi[value_type] ) IN { "AMT", "CNT" }
+        ,DIVIDE ( _value, [_Units Divisor] )
+        ,_value
+    )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
+VAR _symbol       = SELECTEDVALUE ( param_reporting_currency[symbol], "$" )
+VAR _units        = [_Sel Units]
+VAR _q            = """"
+VAR _number       = IF ( _units = "K", "#,0", "#,0.0" )
+VAR _suffix       = _q & IF ( _units = "K", " k", " m" ) & _q
+RETURN
+    SWITCH (
+        _type
+        ,"AMT"
+            ,_q & _symbol & _q & _number & _suffix
+        ,"PCT"
+            ,"0.0%"
+        ,"PCT2"
+            ,"0.00%"
+        ,"CNT"
+            ,_number & _suffix
+        ,"INT"
+            ,"#,0"
+        ,"PRICE"
+            ,_q & _symbol & _q & "#,0.00"
+        ,"#,0.0"
+    )
+```
+
+### KPI Trend
+
+Folder `3 KPIs` · spec K-24
+
+```dax
+KPI Trend =
+VAR _value        = [_KPI Trend Value]
 RETURN
     IF (
         SELECTEDVALUE ( dim_kpi[value_type] ) IN { "AMT", "CNT" }
@@ -3022,6 +3076,33 @@ RETURN
     )
 ```
 
+### _KPI Trend Value
+
+Folder `9 Engine` · spec K-24, K-22, K-23
+
+```dax
+_KPI Trend Value =
+VAR _row_index    = SELECTEDVALUE ( dim_month[month_index] )
+VAR _anchor       = [_Anchor Index]
+VAR _fiscal_year  = SELECTEDVALUE ( dim_month[fiscal_year] )
+VAR _month        = SELECTEDVALUE ( dim_month[month_number] )
+RETURN
+    IF (
+        _row_index >= _anchor - 12 && _row_index <= _anchor
+        ,CALCULATE (
+            IF ( [_Win End] >= [_Win Start], [_KPI Value] )
+            ,REMOVEFILTERS ( dim_month )
+            ,REMOVEFILTERS ( param_eval )
+            ,REMOVEFILTERS ( param_time_view )
+            ,TREATAS ( { "MTD" }, param_time_view[time_view_code] )
+            ,REMOVEFILTERS ( param_fiscal_year )
+            ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+            ,REMOVEFILTERS ( param_period )
+            ,TREATAS ( { _month }, param_period[month_number] )
+        )
+    )
+```
+
 ### _Acc
 
 Folder `Design` · spec L-10, F-01
@@ -3324,8 +3405,9 @@ VAR _compares     =
     )
 VAR _versions     = [_Base Name] & IF ( ISBLANK ( _compares ), " only", " vs " & _compares )
 VAR _fx           = IF ( [_Sel FX Basis] = "CC", "constant currency", "actual rates" )
+VAR _company      = SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
 RETURN
-    [_Window Label] & " · " & _versions & " · " & [_Units Short] & ", " & _fx & " · " & [Rail Sum Slice]
+    _company & " · " & [_Window Label] & " · " & _versions & " · " & [_Units Short] & ", " & _fx & " · " & [Rail Sum Slice]
 ```
 
 ### Notice Strip
@@ -3868,6 +3950,222 @@ VAR _entity       =
     SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
 RETURN
     "Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
+```
+
+### KPI Row SVG
+
+Folder `Design` · spec K-24, K-25, K-20
+
+```dax
+KPI Row SVG =
+VAR _acc          = [_Acc]
+VAR _anchor       = [_Anchor Index]
+VAR _cmp_a_name   = SWITCH ( [_Sel Compare A], "B", "Bud", "LE", "LE", "PY", "PY" )
+VAR _cmp_b_name   = SWITCH ( [_Sel Compare B], "B", "Bud", "LE", "LE", "PY", "PY" )
+VAR _months       =
+    FILTER (
+        ALL ( dim_month[month_index] )
+        ,dim_month[month_index] >= _anchor - 12
+            && dim_month[month_index] <= _anchor
+    )
+VAR _kpis         =
+    SUMMARIZECOLUMNS (
+        dim_kpi[slot]
+        ,dim_kpi[kpi_code]
+        ,"@base", [_KPI Value]
+        ,"@cmp_a",
+            IF (
+                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
+                ,CALCULATE (
+                    [_KPI Value]
+                    ,REMOVEFILTERS ( param_eval )
+                    ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
+                )
+            )
+        ,"@cmp_b",
+            IF (
+                NOT ( SELECTEDVALUE ( dim_kpi[kpi_code] ) IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } )
+                ,CALCULATE (
+                    [_KPI Value]
+                    ,REMOVEFILTERS ( param_eval )
+                    ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
+                )
+            )
+        ,"@sec", [KPI Secondary]
+    )
+VAR _points       =
+    SUMMARIZECOLUMNS (
+        dim_kpi[kpi_code]
+        ,dim_month[month_index]
+        ,_months
+        ,"@v", [_KPI Trend Value]
+    )
+VAR _tiles        =
+    CONCATENATEX (
+        _kpis
+        ,VAR _code        = dim_kpi[kpi_code]
+         VAR _x0          = MOD ( dim_kpi[slot] - 1, 4 ) * 335 + 18
+         VAR _w           = 140
+         VAR _top         = 48
+         VAR _h           = 30
+         VAR _series      = FILTER ( _points, dim_kpi[kpi_code] = _code && NOT ISBLANK ( [@v] ) )
+         VAR _lo          = MINX ( _series, [@v] )
+         VAR _hi          = MAXX ( _series, [@v] )
+         VAR _span        = _hi - _lo
+         VAR _path        =
+             CONCATENATEX (
+                 _series
+                 ,VAR _i          = dim_month[month_index]
+                  VAR _prev       = COUNTROWS ( FILTER ( _series, dim_month[month_index] = _i - 1 ) )
+                  VAR _x          = _x0 + ( _i - _anchor + 12 ) * _w / 12
+                  VAR _y          = _top + _h - IF ( _span = 0, _h / 2, ( [@v] - _lo ) / _span * _h )
+                  RETURN
+                      IF ( _prev = 1, "L", "M" ) & FORMAT ( _x, "0.0" ) & " " & FORMAT ( _y, "0.0" )
+                 ," "
+                 ,dim_month[month_index], ASC
+             )
+         VAR _last        = MAXX ( FILTER ( _series, dim_month[month_index] = _anchor ), [@v] )
+         VAR _dot         =
+             IF (
+                 NOT ISBLANK ( _last )
+                 ,"<circle cx='" & FORMAT ( _x0 + _w, "0.0" ) & "' cy='"
+                     & FORMAT ( _top + _h - IF ( _span = 0, _h / 2, ( _last - _lo ) / _span * _h ), "0.0" )
+                     & "' r='2.8' fill='" & _acc & "'/>"
+             )
+         VAR _base        = [@base]
+         VAR _cmp_a       = IF ( NOT ISBLANK ( _cmp_a_name ), [@cmp_a] )
+         VAR _cmp_b       = IF ( NOT ISBLANK ( _cmp_b_name ), [@cmp_b] )
+         VAR _has_bar     = NOT ( _code IN { "ORG_GROWTH", "VOL_GROWTH", "PRICE_MIX" } ) && NOT ISBLANK ( _base ) && ( NOT ISBLANK ( _cmp_a ) || NOT ISBLANK ( _cmp_b ) )
+         VAR _b_lo        = MIN ( 0, MIN ( _base, MIN ( _cmp_a, _cmp_b ) ) )
+         VAR _b_hi        = MAX ( 0, MAX ( _base, MAX ( _cmp_a, _cmp_b ) ) ) * 1.08
+         VAR _b_span      = _b_hi - _b_lo
+         VAR _zero        = _x0 + DIVIDE ( 0 - _b_lo, _b_span ) * _w
+         VAR _base_x      = _x0 + DIVIDE ( _base - _b_lo, _b_span ) * _w
+         VAR _a_x         = _x0 + DIVIDE ( _cmp_a - _b_lo, _b_span ) * _w
+         VAR _b_x         = _x0 + DIVIDE ( _cmp_b - _b_lo, _b_span ) * _w
+         VAR _close       = NOT ISBLANK ( _cmp_a ) && NOT ISBLANK ( _cmp_b ) && ABS ( _a_x - _b_x ) < 24
+         VAR _a_anchor    = IF ( _close, IF ( _a_x <= _b_x, "end", "start" ), "middle" )
+         VAR _a_dx        = IF ( _close, IF ( _a_x <= _b_x, -3, 3 ), 0 )
+         VAR _b_dx        = - _a_dx
+         VAR _b_anchor    = IF ( _close, IF ( _a_x <= _b_x, "start", "end" ), "middle" )
+         VAR _bar         =
+             IF (
+                 _has_bar
+                 ,"<rect x='" & FORMAT ( _x0, "0.0" ) & "' y='150' width='" & _w & "' height='6' rx='3' fill='#EDF0F3'/>"
+                     & "<rect x='" & FORMAT ( MIN ( _zero, _base_x ), "0.0" ) & "' y='150' width='" & FORMAT ( ABS ( _base_x - _zero ), "0.0" ) & "' height='6' rx='3' fill='" & _acc & "'/>"
+                     & IF (
+                         NOT ISBLANK ( _cmp_a )
+                         ,"<rect x='" & FORMAT ( _a_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
+                             & "<text x='" & FORMAT ( _a_x + _a_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _a_anchor & "'>" & _cmp_a_name & "</text>"
+                     )
+                     & IF (
+                         NOT ISBLANK ( _cmp_b )
+                         ,"<rect x='" & FORMAT ( _b_x - 1, "0.0" ) & "' y='146' width='2' height='14' fill='#101B2B'/>"
+                             & "<text x='" & FORMAT ( _b_x + _b_dx, "0.0" ) & "' y='172' font-size='9' fill='#4F5C6C' text-anchor='" & _b_anchor & "'>" & _cmp_b_name & "</text>"
+                     )
+             )
+         RETURN
+             IF ( LEN ( _path ) > 0, "<path d='" & _path & "' fill='none' stroke='" & _acc & "' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round'/>" )
+                 & _dot
+                 & IF ( LEN ( [@sec] ) > 0, "<text x='" & _x0 & "' y='141' font-size='10' fill='#4F5C6C'>" & [@sec] & "</text>" )
+                 & _bar
+        ,""
+    )
+VAR _svg          =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='1328' height='179' viewBox='0 0 1328 179' font-family='Segoe UI, sans-serif'>"
+        & _tiles
+        & "</svg>"
+RETURN
+    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+```
+
+### Info Bridge 1
+
+Folder `Design` · spec L-15, C-40
+
+```dax
+Info Bridge 1 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+RETURN
+    "How net revenue got from " & _cmp & " to the current figure, split into the reasons for the change."
+```
+
+### Info Bridge 2
+
+Folder `Design` · spec L-15, C-40
+
+```dax
+Info Bridge 2 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+RETURN
+    "• The first bar is net revenue in " & _cmp & "; the last bar is net revenue now."
+```
+
+### Info Variances 1
+
+Folder `Design` · spec L-15, C-45
+
+```dax
+Info Variances 1 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+RETURN
+    "The 8 lines of the P&L that differ most from " & _cmp & ", in amount, whether up or down."
+```
+
+### Info Variances 2
+
+Folder `Design` · spec L-15, C-45
+
+```dax
+Info Variances 2 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+RETURN
+    "• Δ is the difference in money; Δ % is that difference as a share of " & _cmp & "."
+```
+
+### Info Profitability 1
+
+Folder `Design` · spec L-15, C-46
+
+```dax
+Info Profitability 1 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+VAR _bd          = LOWER ( [_Breakdown Short] )
+RETURN
+    "How much revenue each " & _bd & " brings in, how it grew against " & _cmp & ", and how much of that revenue is left as profit at each stage of the P&L."
+```
+
+### Info Profitability 2
+
+Folder `Design` · spec L-15, C-46
+
+```dax
+Info Profitability 2 =
+VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
+RETURN
+    "• vs " & _cmp & ": revenue growth of the row; green is better than " & _cmp & ", orange is worse."
+```
+
+### Info Profitability 3
+
+Folder `Design` · spec L-15, C-46
+
+```dax
+Info Profitability 3 =
+VAR _bd          = LOWER ( [_Breakdown Short] )
+RETURN
+    "Costs that are not booked to a " & _bd & " (for example marketing or admin) are shared out by each row's share of revenue, so margins below contribution margin are partly an allocation, not a direct measurement."
+```
+
+### Info CM 1
+
+Folder `Design` · spec L-15, C-46
+
+```dax
+Info CM 1 =
+VAR _bd          = LOWER ( [_Breakdown Short] )
+RETURN
+    "For each " & _bd & ", the share of its revenue that is left after the direct costs of making, selling and delivering: the contribution margin %."
 ```
 
 ### KPI Fav Sign

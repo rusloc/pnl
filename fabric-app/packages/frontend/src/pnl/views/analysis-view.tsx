@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 
 import { VERSION_LABEL } from '../model/filters';
 import type { Figures, FilterState, Tone } from '../model/types';
+import { InfoPopover } from '../components/info-popover';
 import { ZoneChip, ZoneState } from '../components/zone-state';
 
 const TEXT: Record<Tone, string> = { fav: 'text-fav', unf: 'text-unf', neutral: 'text-ink-900' };
@@ -20,7 +21,7 @@ export function AnalysisView({ figures, filter }: { figures: Figures; filter: Fi
         className="box-border flex min-w-0 flex-[1.2_1_520px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
       >
         <h2 id="h-bridge" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Net revenue bridge <ZoneChip status={figures.zones.bridge} />
+          Net revenue bridge <InfoPopover info="bridge" context={{ comparison: compare }} /> <ZoneChip status={figures.zones.bridge} />
         </h2>
         <span className="text-[13px] text-slate-600">
           {compare} to {VERSION_LABEL[filter.baseVersion]}, {filter.currency} {unitsWord}. {bridge.subtitle}
@@ -66,7 +67,7 @@ export function AnalysisView({ figures, filter }: { figures: Figures; filter: Fi
         className="box-border flex min-w-0 flex-[1_1_460px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
       >
         <h2 id="h-var" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Largest variances vs {compare} <ZoneChip status={figures.zones.drivers} />
+          Largest variances vs {compare} <InfoPopover info="variances" context={{ comparison: compare }} align="end" /> <ZoneChip status={figures.zones.drivers} />
         </h2>
         <span className="text-[13px] text-slate-600">Top 8 lines by size of Δ, {filter.currency} {unitsWord}</span>
         <ZoneState status={figures.zones.drivers} what="largest variances" />

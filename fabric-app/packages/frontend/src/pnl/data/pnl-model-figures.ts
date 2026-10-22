@@ -17,7 +17,10 @@ import type {
   Driver,
   FilterState,
   KpiDelta,
+  KpiTarget,
   KpiTile,
+  KpiTrendPoint,
+  KpiTrendState,
   Profitability,
   ProfitabilityRow,
   ReferenceData,
@@ -35,6 +38,7 @@ import {
   kpiAliases,
   NOTICE_SEPARATOR,
   PROFITABILITY_COLUMNS,
+  TREND_COLUMNS,
 } from './pnl-model-queries';
 
 type Reader = (row: unknown[], name: string) => unknown;
@@ -169,22 +173,34 @@ export function mapKpiTiles(meta: readonly KpiMeta[], values: readonly QueryTabl
     const growth = GROWTH_KPIS.has(m.code);
     const value = cellNumber(cells.get(a.value));
     const deltas: KpiDelta[] = [];
+    // K-25: the target bar carries the same numbers the Δ lines are derived from; growth KPIs have none.
+    let target: KpiTarget | null = null;
     const secondary = cellString(cells.get(a.secondary));
     if (secondary !== '') {
       const space = secondary.indexOf(' ');
       deltas.push({ name: space === -1 ? secondary : secondary.slice(0, space), text: space === -1 ? '' : secondary.slice(space + 1), tone: 'neutral', arrow: false });
     }
     if (!growth) {
+      const marks: KpiTarget['marks'] = [];
       for (const [version, alias] of compares) {
-        const d = kpiDelta(value, cellNumber(cells.get(alias)), isPercentKpi(m.valueType), false);
+        const compare = cellNumber(cells.get(alias));
+        const d = kpiDelta(value, compare, isPercentKpi(m.valueType), false);
         deltas.push({ name: compareName(version), text: d === null ? 'n/a' : kpiDeltaText(d, m.valueType), tone: kpiTone(d, m.betterWhen, m.valueType), arrow: true });
+        marks.push({
+          name: VERSION_SHORT[version as Exclude<CompareVersion, 'NONE'>],
+          value: compare,
+          text: compare === null ? '' : kpiValueText(compare, m.valueType, filter, false),
+        });
       }
+      if (marks.length > 0) target = { base: value, marks };
     }
     return {
+      code: m.code,
       label: m.label,
       hint: m.definition,
       value: kpiValueText(value, m.valueType, filter, growth),
       deltas,
+      target,
       group: m.group,
     };
   });
@@ -196,6 +212,49 @@ export function mapKpiTiles(meta: readonly KpiMeta[], values: readonly QueryTabl
     financial: tiles.filter((t) => t.group === 'Financial').map(strip),
     operational: tiles.filter((t) => t.group === 'Operational').map(strip),
   };
+}
+
+// ---------------------------------------------------------------------------
+// KPI trends (K-24; ADR-0007 §2.5).
+
+/** The 13 month keys ending at the selected month (FY + Period), oldest first. */
+export function trendMonthKeys(filter: Pick<FilterState, 'fiscalYear' | 'month'>): string[] {
+  const keys: string[] = [];
+  for (let i = 12; i >= 0; i -= 1) {
+    // Months are calendar-numbered 1–12 within the fiscal year (dim_month.month_key = FY-MM).
+    const n = filter.fiscalYear * 12 + (filter.month - 1) - i;
+    keys.push(`${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}`);
+  }
+  return keys;
+}
+
+const TREND_REQUIRED = Object.values(TREND_COLUMNS);
+
+/**
+ * Q7 rows → one `KpiTrend` per KPI of the batch: 13 points, the last one the
+ * selected month; a missing or blank (kpi, month) row is a blank point; an
+ * Actual month that dim_month marks open is `isOpen` (blank by the model's
+ * rule, K-24). Values carry the tile's own format text (N-06).
+ */
+export function mapKpiTrends(table: QueryTable, filter: FilterState, reference: ReferenceData, meta: readonly KpiMeta[]): Record<string, KpiTrendState> {
+  const read = reader(table, TREND_REQUIRED);
+  const values = new Map<string, number | null>();
+  for (const row of table.rows) {
+    values.set(`${cellString(read(row, TREND_COLUMNS.code))}|${cellString(read(row, TREND_COLUMNS.monthKey))}`, cellNumber(read(row, TREND_COLUMNS.value)));
+  }
+  const closed = new Map(reference.months.map((m) => [m.key, m.isClosed]));
+  const keys = trendMonthKeys(filter);
+  const out: Record<string, KpiTrendState> = {};
+  for (const m of meta) {
+    const growth = GROWTH_KPIS.has(m.code);
+    const points: KpiTrendPoint[] = keys.map((month) => {
+      const isOpen = filter.baseVersion === 'ACT' && closed.get(month) === false;
+      const value = isOpen ? null : (values.get(`${m.code}|${month}`) ?? null);
+      return { month, value, text: value === null ? '' : kpiValueText(value, m.valueType, filter, growth), isOpen };
+    });
+    out[m.code] = { kind: 'ready', trend: { code: m.code, points } };
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------

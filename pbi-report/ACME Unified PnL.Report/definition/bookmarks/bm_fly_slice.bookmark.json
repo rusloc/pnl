@@ -134,7 +134,19 @@
       "re_slice",
       "re_display_sum",
       "re_display",
-      "re_collapse"
+      "re_collapse",
+      "grp_fly_entity",
+      "fly_entity_hl",
+      "fly_entity_ptr",
+      "fly_entity_panel",
+      "fly_entity_title",
+      "fly_entity_sub",
+      "fly_entity_close",
+      "fly_entity_hrule",
+      "hdr_entity",
+      "fly_entity_cap",
+      "fly_entity_frule",
+      "fly_entity_done"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -1052,6 +1064,94 @@
                 "mode": "hidden"
               }
             }
+          },
+          "fly_entity_hl": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_ptr": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_sub": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_hrule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "hdr_entity": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_cap": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_frule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "fly_entity_done": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
           }
         },
         "visualContainerGroups": {
@@ -1071,6 +1171,9 @@
             "isHidden": false
           },
           "grp_rail_e": {
+            "isHidden": true
+          },
+          "grp_fly_entity": {
             "isHidden": true
           }
         }

@@ -1,14 +1,15 @@
 // P&L statement (L-07, §4, design brief §6.1): sticky line column and header,
-// row kinds, expand/collapse, tags, ±15 % bars, footnote. Columns follow the
-// display settings (F-15 to F-17) and the chosen comparisons (F-06, F-07).
+// row kinds, Expand all / Collapse all above the line column (M-20, ADR-0007),
+// tags, ±15 % bars, footnote. Columns follow the display settings (F-15 to F-17)
+// and the chosen comparisons (F-06, F-07).
 import { Fragment, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 
 import { fmtAmount, fmtPct, fmtPp, pctToneOf, toneOf } from '../model/format';
 import { VERSION_LABEL, VERSION_SHORT, windowLabel } from '../model/filters';
-import { visibleRows } from '../model/statement-rows';
-import type { EntityCode, Figures, FilterState, RowKind, StatementRow, Tone } from '../model/types';
+import { expandableCodes, visibleRows } from '../model/statement-rows';
+import type { Figures, FilterState, RowKind, StatementRow, Tone } from '../model/types';
 import { ChevronIcon } from '../components/ui/icons';
 import { ZoneChip, ZoneState } from '../components/zone-state';
 
@@ -135,23 +136,24 @@ function cellText(row: StatementRow, kind: Exclude<ColumnKind, 'bar'>, filter: F
 interface StatementViewProps {
   figures: Figures;
   filter: FilterState;
-  entity: EntityCode;
   openCodes: ReadonlySet<string>;
   onToggleRow: (code: string) => void;
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
 }
 
-export function StatementView({ figures, filter, openCodes, onToggleRow }: StatementViewProps) {
+const EXPAND_BUTTON =
+  'h-[28px] cursor-pointer rounded-[8px] border border-line-300 bg-surface px-[10px] font-ledger text-[12px] font-semibold text-ink-900 disabled:cursor-not-allowed disabled:bg-subtle disabled:text-slate-400';
+
+export function StatementView({ figures, filter, openCodes, onToggleRow, onExpandAll, onCollapseAll }: StatementViewProps) {
   const { columns, groups } = useMemo(() => buildColumns(filter), [filter]);
   const rows = useMemo(() => visibleRows(figures.statement, openCodes, filter), [figures.statement, openCodes, filter]);
   const template = `minmax(300px, 1fr) ${columns.map((c) => `${c.width}px`).join(' ')}`;
   const rowHeight = 28;
   const zone = figures.zones.statement;
-  const unavailable =
-    filter.layout !== 'variance'
-      ? `${filter.layout === 'trend' ? 'Trend' : 'Entity columns'} layout is not built yet; showing Variance.`
-      : filter.costLens === 'nature'
-        ? 'By nature lens is not built yet; showing By function.'
-        : null;
+  const expandable = useMemo(() => expandableCodes(figures.statement), [figures.statement]);
+  const allOpen = expandable.size > 0 && [...expandable].every((c) => openCodes.has(c));
+  const noneOpen = [...expandable].every((c) => !openCodes.has(c));
 
   return (
     <section
@@ -159,15 +161,20 @@ export function StatementView({ figures, filter, openCodes, onToggleRow }: State
       aria-label="Income statement"
       className="flex min-h-[320px] flex-auto flex-col overflow-hidden rounded-[12px] border border-line-200 bg-surface"
     >
-      {unavailable && (
-        <p className="m-0 border-b border-line-100 px-[16px] py-[6px] text-[12px] text-slate-600">{unavailable}</p>
-      )}
       <ZoneState status={zone} what="P&L statement" />
       <div className="min-h-0 flex-auto overflow-auto">
         <div className="min-w-[1180px] font-ledger-condensed tabular-nums">
           <div className="sticky top-0 z-[3] bg-surface">
             <div className="grid text-[12px] font-semibold text-ink-900" style={{ gridTemplateColumns: template }}>
-              <div className="sticky left-0 z-[1] bg-surface" />
+              {/* M-20: Expand all / Collapse all above the line column; rows still toggle on their own. */}
+              <div role="group" aria-label="Statement detail" className="sticky left-0 z-[1] flex items-center gap-[6px] bg-surface py-[6px] pl-[20px] pr-[8px]">
+                <button type="button" className={EXPAND_BUTTON} onClick={onExpandAll} disabled={expandable.size === 0 || allOpen}>
+                  Expand all
+                </button>
+                <button type="button" className={EXPAND_BUTTON} onClick={onCollapseAll} disabled={expandable.size === 0 || noneOpen}>
+                  Collapse all
+                </button>
+              </div>
               {groups.map((g, i) => (
                 <div
                   key={g.title}

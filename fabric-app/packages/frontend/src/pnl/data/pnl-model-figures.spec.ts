@@ -19,8 +19,11 @@ import {
   mapDrivers,
   mapKpiMeta,
   mapKpiTiles,
+  mapKpiTrends,
   mapProfitability,
+  trendMonthKeys,
 } from './pnl-model-figures';
+import { Q7_FIN_OPS, Q7_OPEN_MONTHS } from './fixtures/q7-kpi-trend.fixture';
 import { sampleReference } from './sample-reference';
 
 const reference = sampleReference();
@@ -133,6 +136,81 @@ const BRIDGE_G = table(
     ['END', 'Base', 999, 3972.6875],
   ]
 );
+
+describe('KPI trends (K-24, Q7)', () => {
+  const meta = mapKpiMeta(KPI_META);
+  const byCode = (code: string) => meta.find((m) => m.code === code) as (typeof meta)[number];
+
+  it('lists the 13 month keys ending at the selected month (FY + Period), across a year boundary', () => {
+    const keys = trendMonthKeys(filter);
+    expect(keys).toHaveLength(13);
+    expect(keys[0]).toBe('2025-09');
+    expect(keys[12]).toBe('2026-09');
+    expect(trendMonthKeys({ fiscalYear: 2026, month: 1 })).toEqual(['2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01']);
+  });
+
+  it('maps rows to 13 points per KPI of the batch, last = selected month, missing rows blank, stray rows ignored, text in the tile format', () => {
+    const trends = mapKpiTrends(Q7_FIN_OPS, filter, reference, [byCode('NR'), byCode('ORG_GROWTH'), byCode('UNITS')]);
+    expect(Object.keys(trends).sort()).toEqual(['NR', 'ORG_GROWTH', 'UNITS']);
+    const nr = trends.NR;
+    expect(nr.kind).toBe('ready');
+    if (nr.kind !== 'ready') return;
+    expect(nr.trend.code).toBe('NR');
+    expect(nr.trend.points).toHaveLength(13);
+    expect(nr.trend.points[0]).toEqual({ month: '2025-09', value: 352.4, text: '$352.4m', isOpen: false });
+    expect(nr.trend.points[12]).toEqual({ month: '2026-09', value: 419.9, text: '$419.9m', isOpen: false });
+    expect(nr.trend.points.some((p) => p.month === '2025-08')).toBe(false);
+    expect(nr.trend.points.every((p) => !p.isOpen && p.value !== null)).toBe(true);
+
+    const growth = trends.ORG_GROWTH;
+    if (growth.kind !== 'ready') throw new Error('growth not ready');
+    const march = growth.trend.points.find((p) => p.month === '2026-03');
+    expect(march).toEqual({ month: '2026-03', value: null, text: '', isOpen: false });
+    // Growth comes back as a fraction and is shown signed, like the tile (K-20 secondary line style).
+    expect(growth.trend.points[12]).toMatchObject({ value: 0.069, text: '+6.9%' });
+
+    const units = trends.UNITS;
+    if (units.kind !== 'ready') throw new Error('units not ready');
+    expect(units.trend.points[12]).toMatchObject({ value: 51.4, text: '51.4m' });
+  });
+
+  it('blanks open months under Actual even when the model returned a value, and keeps them under Latest estimate (K-24)', () => {
+    const nov: FilterState = { ...filter, month: 11 };
+    const actual = mapKpiTrends(Q7_OPEN_MONTHS, nov, reference, [byCode('NR')]);
+    if (actual.NR.kind !== 'ready') throw new Error('not ready');
+    const pts = actual.NR.trend.points;
+    expect(pts[0].month).toBe('2025-11');
+    expect(pts[12]).toEqual({ month: '2026-11', value: null, text: '', isOpen: true });
+    expect(pts[11]).toEqual({ month: '2026-10', value: null, text: '', isOpen: true });
+    expect(pts[10]).toMatchObject({ month: '2026-09', value: 419.9, isOpen: false });
+
+    const le = mapKpiTrends(Q7_OPEN_MONTHS, { ...nov, baseVersion: 'LE' }, reference, [byCode('NR')]);
+    if (le.NR.kind !== 'ready') throw new Error('not ready');
+    expect(le.NR.trend.points[12]).toEqual({ month: '2026-11', value: 455.5, text: '$455.5m', isOpen: false });
+  });
+
+  it('follows the display units and currency of the tile (F-12, F-14) and refuses a result without the contract columns', () => {
+    const k = mapKpiTrends(Q7_FIN_OPS, { ...filter, units: 'k', currency: 'EUR' }, reference, [byCode('NR')]);
+    if (k.NR.kind !== 'ready') throw new Error('not ready');
+    expect(k.NR.trend.points[12].text).toBe(kpiValueText(419.9, 'AMT', { units: 'k', currency: 'EUR' }, false));
+    expect(() => mapKpiTrends(table(['dim_kpi[kpi_code]', '[@v]'], []), filter, reference, [byCode('NR')])).toThrow(PnlModelError);
+  });
+
+  it('target marks carry the comparison text in the tile format (K-25)', () => {
+    const tiles = mapKpiTiles(meta, KPI_VALUES, filter);
+    const nr = tiles.financial.find((t) => t.code === 'NR');
+    expect(nr?.target).toEqual({
+      base: 3398.5219426605,
+      marks: [
+        { name: 'Budget', value: 3464.7986884489997, text: '$3,464.8m' },
+        { name: 'Prior year', value: 3139.6026644619997, text: '$3,139.6m' },
+      ],
+    });
+    expect(tiles.financial.find((t) => t.code === 'ORG_GROWTH')?.target).toBeNull();
+    const noB = mapKpiTiles(meta, KPI_VALUES, { ...filter, compareB: 'NONE' });
+    expect(noB.financial.find((t) => t.code === 'NR')?.target?.marks.map((m) => m.name)).toEqual(['Budget']);
+  });
+});
 
 describe('bridge (C-40)', () => {
   it('labels the totals with the versions, formats steps as signed deltas and keeps the model’s step labels', () => {

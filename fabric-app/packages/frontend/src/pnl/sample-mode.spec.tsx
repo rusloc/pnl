@@ -14,6 +14,7 @@ import {
   SAMPLE_FIGURES_NOTICE,
   SAMPLE_INERT_REASON,
   SAMPLE_STATEMENT_ONLY_NOTE,
+  TREND_UNAVAILABLE_TEXT,
   zoneErrorText,
   zoneLoadingText,
 } from './model/sample-mode';
@@ -50,6 +51,12 @@ async function renderApp(initialView: View = 'pnl', source: PnlDataSource = samp
 function openPanel(name: 'Period' | 'Versions' | 'Slice' | 'Display'): HTMLElement {
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${name}:`) }));
   return screen.getByRole('dialog', { name: `${name} filters` });
+}
+
+/** ADR-0007: the company switch is the rail brand mark → picker → one option. */
+function switchCompany(name: 'Consumer Products' | 'Commerce Cloud' | 'ACME Group') {
+  fireEvent.click(screen.getByRole('button', { name: 'Switch company' }));
+  fireEvent.click(within(screen.getByRole('dialog', { name: 'Switch company' })).getByRole('radio', { name: new RegExp(name) }));
 }
 
 function expectOff(el: HTMLElement) {
@@ -123,7 +130,7 @@ describe('sample mode', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(screen.queryByText(/allocated by net revenue share and tagged/)).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: /ACME Group/ }));
+    switchCompany('ACME Group');
     dialog = openPanel('Slice');
     expectOff(within(dialog).getByRole('button', { name: 'North America' }));
     expect(within(dialog).getByText('Channel / sales motion')).toBeVisible();
@@ -165,8 +172,8 @@ describe('sample mode', () => {
     expectOff(region);
     fireEvent.click(region);
     expect(screen.getByRole('heading', { name: /^Profitability by channel/ })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Contribution margin by channel' })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: /Commerce Cloud/ }));
+    expect(screen.getByRole('heading', { name: /^Contribution margin by channel/ })).toBeVisible();
+    switchCompany('Commerce Cloud');
     expect(await screen.findByRole('heading', { name: /^Profitability by sales motion/ })).toBeVisible();
     expectOff(screen.getByRole('button', { name: 'Region' }));
   });
@@ -180,17 +187,18 @@ describe('sample mode', () => {
     }
   });
 
-  it('keeps company cards, view tabs, layout, cost lens and detail working', async () => {
+  it('keeps the company switch, view tabs and Expand all / Collapse all working', async () => {
     await renderApp();
-    for (const name of ['Trend', 'By nature', 'Full']) {
-      expect(screen.getByRole('button', { name })).toBeEnabled();
-    }
-    fireEvent.click(screen.getByRole('button', { name: 'Full' }));
-    expect(screen.getByRole('button', { name: 'Full' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(screen.getByRole('button', { name: /Commerce Cloud/ }));
-    expect(screen.getByRole('button', { name: /Commerce Cloud/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Expand all' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Expand all' }));
+    expect(screen.getByRole('button', { name: 'Collapse all' })).toBeEnabled();
+    switchCompany('Commerce Cloud');
+    expect(screen.getByText(/^Commerce Cloud · /)).toBeVisible();
     fireEvent.click(screen.getByRole('tab', { name: 'Key figures' }));
     expect(screen.getByRole('region', { name: 'Key figures' })).toBeVisible();
+    // Sample tiles carry no monthly series: every trend is honestly unavailable (LSN-002, K-24).
+    expect(screen.getAllByText(TREND_UNAVAILABLE_TEXT).length).toBe(12);
+    expect(screen.queryByTestId('sparkline')).toBeNull();
   });
 });
 
@@ -263,16 +271,18 @@ describe('live mode', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Live · semantic model');
   });
 
-  it('disables the Group card when the model shows the user one company only (Q0, N-04)', async () => {
+  it('disables the Group option of the picker when the model shows the user one company only (Q0, N-04)', async () => {
     const oneEntity: PnlDataSource = {
       loadReference: async () => ({ reference: { ...sampleReference(), visibleEntities: ['P'] } }),
       loadFigures: liveSource.loadFigures,
     };
     await renderApp('pnl', oneEntity);
-    const group = screen.getByRole('button', { name: /ACME Group/ });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch company' }));
+    const picker = screen.getByRole('dialog', { name: 'Switch company' });
+    const group = within(picker).getByRole('radio', { name: /ACME Group/ });
     expect(group).toBeDisabled();
     expect(group).toHaveAttribute('title', expect.stringMatching(/both companies/));
-    expect(screen.getByRole('button', { name: /Commerce Cloud/ })).toBeEnabled();
+    expect(within(picker).getByRole('radio', { name: /Commerce Cloud/ })).toBeEnabled();
   });
 
   it('says so when the model shows the user no company at all', async () => {

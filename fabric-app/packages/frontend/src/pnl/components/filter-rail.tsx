@@ -1,8 +1,11 @@
 // Filter rail (design brief §5.1): 64 px collapsed / 248 px expanded, Ink 900,
-// brand mark, four filter groups, and a collapse/expand control at the bottom.
+// brand mark (= the company switch, ADR-0007 §2.4), four filter groups, and a
+// collapse/expand control at the bottom.
 import { cn } from '@/lib/utils';
 
-import type { PanelKey } from '../model/types';
+import type { EntityCode, PanelKey } from '../model/types';
+import { COMPANY_THEME } from '../theme/company';
+import { BRAND_MARK_ID } from './entity-picker';
 import { RAIL_GROUPS, RAIL_WIDTH, railItemId } from './rail-groups';
 import { RailToggleIcon } from './ui/icons';
 
@@ -12,9 +15,12 @@ interface FilterRailProps {
   openPanel: PanelKey | null;
   onTogglePanel: (key: PanelKey) => void;
   summaries: Record<PanelKey, string>;
+  entity: EntityCode;
+  pickerOpen: boolean;
+  onTogglePicker: () => void;
 }
 
-export function FilterRail({ wide, onToggleWide, openPanel, onTogglePanel, summaries }: FilterRailProps) {
+export function FilterRail({ wide, onToggleWide, openPanel, onTogglePanel, summaries, entity, pickerOpen, onTogglePicker }: FilterRailProps) {
   return (
     <nav
       aria-label="Filters and tools"
@@ -23,16 +29,30 @@ export function FilterRail({ wide, onToggleWide, openPanel, onTogglePanel, summa
       style={{ width: wide ? RAIL_WIDTH.expanded : RAIL_WIDTH.collapsed }}
     >
       <div className="mb-[12px] flex h-[44px] items-center gap-[10px] px-[4px]">
-        <div
-          aria-hidden="true"
-          className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-[8px] bg-acc text-[16px] font-bold text-surface"
+        {/* The mark carries the selected company's colour (`bg-acc`) and opens the picker (L-01, F-01). */}
+        <button
+          id={BRAND_MARK_ID}
+          type="button"
+          aria-label="Switch company"
+          title="Switch company"
+          aria-haspopup="dialog"
+          aria-expanded={pickerOpen}
+          onClick={onTogglePicker}
+          className="relative flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-[8px] border-0 bg-acc p-0 text-[16px] font-bold text-surface"
+          data-entity={entity}
         >
-          A
-        </div>
+          <span aria-hidden="true">A</span>
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-[3px] -right-[3px] flex h-[13px] w-[13px] items-center justify-center rounded-full border border-ink-900 bg-surface text-[8px] leading-none text-ink-900"
+          >
+            ▾
+          </span>
+        </button>
         {wide && (
           <div className="flex min-w-0 flex-col leading-[1.2]">
             <span className="whitespace-nowrap text-[15px] font-semibold text-surface">ACME P&amp;L</span>
-            <span className="whitespace-nowrap text-[12px] text-rail-muted">Management reporting</span>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-rail-muted">{COMPANY_THEME[entity].short}</span>
           </div>
         )}
       </div>

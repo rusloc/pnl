@@ -19,6 +19,8 @@
 - [2026-10-22] Translation is row-group SUMX with 2 LOOKUPVALUEs per month x functional currency x version (_Amt Raw); CC uses the selected FY's January BUDGET rate -> pre-translation needs 3 ACT + 9 CC (3 FY x 3 ccy) columns or a default-path-only column (source: observed)
 - [2026-10-22] fact_pl has 5,304 counterparty rows (936 at entity x month x version x region x account x ccy); fact_pl_allocated has none; control totals have no ELIM line codes (elims sit in GROUP GR/VSC/NR) (source: observed)
 
+- [2026-10-22] Second in-place update (KPI Trend + _KPI Trend Value, additions only): 177 measures = local; rows unchanged; all _pass TRUE incl. K-24 108/108, 15/15, Dec window 2/2. Q7 trend (default filters FY2026 Sep YTD, 12 KPIs x 13 months = 156 rows, 0 blanks) service: P 8.4-8.6 s, S 8.9-9.4 s, GROUP 5.5-5.6 s (source: observed)
+
 ## Decisions
 - [2026-10-21] Faithful to source names (no RU→EN in TMDL); bip renames later (source: user)
 - [2026-10-21] Parquet for all extracted tables: exact types, null vs empty string, no ru-RU decimal parsing (source: inferred)

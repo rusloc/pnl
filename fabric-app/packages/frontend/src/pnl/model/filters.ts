@@ -8,6 +8,7 @@ import type {
   SliceSelection,
   SliceSlot,
 } from './types';
+import { COMPANY_THEME } from '../theme/company';
 
 export const SLICE_SLOTS: readonly SliceSlot[] = ['channel', 'line', 'segment'];
 
@@ -34,9 +35,6 @@ export function defaultFilters(reference: Pick<ReferenceData, 'lastClosed'>): Fi
     showFyOutlook: true,
     showTags: true,
     hideEmpty: true,
-    layout: 'variance',
-    costLens: 'function',
-    detail: 'standard',
     analysisCompare: 'BUD',
     breakdown: { P: 1, S: 1, G: 1 },
   };
@@ -73,15 +71,8 @@ export function filterReducer(state: FilterState, action: FilterAction): FilterS
     case 'entity': {
       if (action.entity === state.entity) return state;
       // F-31: period, versions, currency, region and display carry across;
-      // F-30: each entity's own slices are kept in `slices` untouched;
-      // F-18: Entity columns exists only in the Group view.
-      const layout =
-        action.entity === 'G'
-          ? state.layout
-          : state.layout === 'entity'
-            ? 'variance'
-            : state.layout;
-      return { ...state, entity: action.entity, layout };
+      // F-30: each entity's own slices are kept in `slices` untouched.
+      return { ...state, entity: action.entity };
     }
     case 'set':
       return { ...state, ...action.patch };
@@ -193,7 +184,7 @@ export function windowLabel(state: FilterState, long = false): string {
   }
 }
 
-/** Context line (L-04): window · versions · currency/units/FX · slices. */
+/** Context line (L-04): company · window · versions · currency/units/FX · slices. */
 export function contextLine(state: FilterState, sliceSummary: string): string {
   const compares = [state.compareA, state.compareB]
     .filter((c): c is Exclude<FilterState['compareA'], 'NONE'> => c !== 'NONE')
@@ -203,7 +194,7 @@ export function contextLine(state: FilterState, sliceSummary: string): string {
       ? VERSION_LABEL[state.baseVersion]
       : `${VERSION_LABEL[state.baseVersion]} vs ${compares.join(' and ')}`;
   const fx = state.fxBasis === 'actual' ? 'actual rates' : 'constant currency';
-  return `${windowLabel(state, true)} · ${versions} · ${state.currency} ${state.units}, ${fx} · ${sliceSummary}`;
+  return `${COMPANY_THEME[state.entity].short} · ${windowLabel(state, true)} · ${versions} · ${state.currency} ${state.units}, ${fx} · ${sliceSummary}`;
 }
 
 /** Rail summaries (§5.1). */

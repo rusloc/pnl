@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { windowLabel } from '../model/filters';
 import { SAMPLE_WINDOW_LONG } from '../model/sample-mode';
 import type { Figures, FilterState, Tone } from '../model/types';
+import { InfoPopover } from '../components/info-popover';
 import { ZoneChip, ZoneState } from '../components/zone-state';
 import { COMPANY_THEME } from '../theme/company';
 
@@ -17,6 +18,8 @@ export function ProfitabilityView({ figures, filter }: { figures: Figures; filte
   // The heading names the breakdown the numbers show: the live mapper derives `by` from the filter;
   // the sample path keeps its own (LSN-002, F-21).
   const by = p.by;
+  // L-15: `{comparison}` is the one the table's "vs …" column uses (C-40), `{breakdown}` the heading's.
+  const info = { comparison: p.compareLabel, breakdown: by };
   const cmBars = p.rows.filter((r) => r.cm !== '');
   const cmPos = Math.min(100, (p.cmAveragePct / 60) * 100);
   const unitsWord = filter.units === 'm' ? 'millions' : 'thousands';
@@ -27,7 +30,7 @@ export function ProfitabilityView({ figures, filter }: { figures: Figures; filte
         className="box-border flex min-w-0 flex-[1.7_1_640px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
       >
         <h2 id="h-prof" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Profitability by {by} <ZoneChip status={zone} />
+          Profitability by {by} <InfoPopover info="profitability" context={info} /> <ZoneChip status={zone} />
         </h2>
         {/* LSN-002: while sample, the subtitle names the window the numbers actually show. */}
         <span className="text-[13px] text-slate-600">
@@ -81,8 +84,8 @@ export function ProfitabilityView({ figures, filter }: { figures: Figures; filte
         aria-labelledby="h-cm"
         className="box-border flex min-w-0 flex-[1_1_340px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
       >
-        <h2 id="h-cm" className="m-0 text-[17px] font-semibold">
-          Contribution margin by {by}
+        <h2 id="h-cm" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
+          Contribution margin by {by} <InfoPopover info="cm" context={info} align="end" />
         </h2>
         <span className="text-[13px] text-slate-600">
           Dashed line: {COMPANY_THEME[filter.entity].short} average {p.cmAverageText || 'n/a'}. Scale 0–60%.

@@ -1,7 +1,11 @@
-// Key figures (L-06, §5, design brief §6.2): 8 financial + 4 operational tiles.
+// Key figures (L-06, §5, design brief §6.2): 8 financial + 4 operational tiles,
+// each with a 13-month sparkline and a target bar (K-24, K-25; ADR-0007). The
+// tile values render as soon as the KPI zone settles; the trends fill in after,
+// each with its own state, and never hold the values back.
 import { cn } from '@/lib/utils';
 
-import type { Figures, KpiTile, Tone } from '../model/types';
+import { TrendArea } from '../components/kpi-trend';
+import type { Figures, KpiTile, KpiTrendState, Tone } from '../model/types';
 import { ZoneChip, ZoneState } from '../components/zone-state';
 
 const PILL: Record<Tone, string> = {
@@ -14,9 +18,10 @@ function arrowFor(text: string): string {
   return text.startsWith('+') ? '▲' : text.startsWith('−') ? '▼' : '';
 }
 
-function Tile({ tile, operational }: { tile: KpiTile; operational: boolean }) {
+function Tile({ tile, trend, operational }: { tile: KpiTile; trend: KpiTrendState | undefined; operational: boolean }) {
   return (
     <article
+      aria-label={tile.label}
       className={cn(
         'box-border flex min-h-0 flex-col justify-between rounded-[12px] border border-line-200',
         operational ? 'gap-[6px] bg-subtle px-[18px] py-[14px]' : 'gap-[8px] bg-surface px-[18px] py-[16px]'
@@ -44,6 +49,7 @@ function Tile({ tile, operational }: { tile: KpiTile; operational: boolean }) {
           </div>
         ))}
       </div>
+      <TrendArea state={trend} target={tile.target} baseText={tile.value} />
     </article>
   );
 }
@@ -60,13 +66,13 @@ export function KeyFiguresView({ figures }: { figures: Figures }) {
       <ZoneState status={zone} what="key figures" />
       <div className={cn(GRID, 'flex-[2_1_0] [grid-auto-rows:minmax(150px,1fr)]')}>
         {figures.financial.map((t) => (
-          <Tile key={t.label} tile={t} operational={false} />
+          <Tile key={t.code} tile={t} trend={figures.trends[t.code]} operational={false} />
         ))}
       </div>
       <h2 className="m-0 mt-[4px] flex-none text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-600">Operational</h2>
       <div className={cn(GRID, 'flex-auto [grid-auto-rows:minmax(132px,1fr)]')}>
         {figures.operational.map((t) => (
-          <Tile key={t.label} tile={t} operational />
+          <Tile key={t.code} tile={t} trend={figures.trends[t.code]} operational />
         ))}
       </div>
     </section>

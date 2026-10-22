@@ -1,5 +1,5 @@
 # Decisions (durable) — lessons folded in while short
-<!-- next-id: DEC-004 · next-id: LSN-007 -->
+<!-- next-id: DEC-004 · next-id: LSN-008 -->
 
 ### LSN-004 · The Track B `1 Statement` measures gate on `ISINSCOPE ( dim_pl_row[account_label] )`; a flat SUMMARIZECOLUMNS that groups by the account columns drops every line, subtotal and ratio row · 2026-10-21
 **What:** `_PL Base`, `_PL Is Ratio`, `PL Fav Off` test `NOT ISINSCOPE ( dim_pl_row[account_label] )` to tell a line from a leaf — a matrix-level test. In a `SUMMARIZECOLUMNS` that groups by `row_key … account_label, is_leaf`, every row has `account_label` in scope, so line rows evaluate as blank leaves and SUMMARIZECOLUMNS removes them: the first live Q1 returned 44 rows, all leaves. Fix: Q1 is two halves — `_lines` grouped without the four account columns (`TREATAS ( { FALSE () }, dim_pl_row[is_leaf] )`, constants projected for `account_code/label`, `is_leaf`, `account_sort`) and `_leaves` with all eleven columns — `UNION`ed in one `EVALUATE`, `ORDER BY [line_sort], [account_sort]`. Result: 73 rows (29 lines + 44 leaves), NR/EBITDA/OP/NP base and Compare A equal `control_totals_usd` to the cent.
@@ -92,3 +92,13 @@
 **Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, performance, n-01, derive, parity, adr-0006, kpi
 **Last-verified:** 2026-10-22 · **Related:** DEC-003, LSN-005, QRK-004
 **Status:** active — not applied to Q4 (TOPN by |Δ| is server-side), Q5 (`Prof NR Δ %` needs a comparison NR column that is not fetched), Q3 (no Δ). Follow-ups: skip the compare columns for growth KPIs (`ORG_GROWTH`, `VOL_GROWTH`, `PRICE_MIX`, tiles show no Δ); re-time after bip's republish.
+
+### LSN-007 · Q7 `KPI Trend` (K-24): send fin8 + ops4 in parallel, keep the explicit `_kpis` filter; the selected-month point equals the Month-view tile value exactly · 2026-10-22
+**What:** bip's `KPI Trend` measure (folder 3 KPIs, republished by ginee 2026-10-22) returns the tile's value with time view = Month per `dim_month` row; the app reads it with `buildKpiTrendQuery` (SUMMARIZECOLUMNS over `dim_kpi[kpi_code]` × `dim_month[month_index|month_key]`, the common filter vars plus `_kpis = TREATAS ( { codes }, dim_kpi[kpi_code] )`, `CONVERT ( [KPI Trend], DOUBLE )`, limit 200) only after the KPI zone settled, as two batches by `kpi_group` (`trendBatches`), each emitted on its own; `mapKpiTrends` builds 13 points from `trendMonthKeys` (FY + Period, calendar arithmetic), blanks open months under Actual itself, and formats point text with `kpiValueText`. Service is ≈ 3.5× slower than bip's local numbers; the explicit `_kpis` list halves the time (bip: 5 s → 2.5 s locally).
+**Why / Evidence:** `connector invoke` 2026-10-22 (wall incl. ≈ 5 s CLI start): P all12 11.9 s / fin8 7.2 s / ops4 7.9 s; S 12.5 / 8.2 / 8.8 s; GROUP 10.0 / 10.4 / 6.5 s → split in parallel ≈ 3–5 s engine vs 5–7.5 s as one query. 156 rows each, 0 blank points 2025-09..2026-09. Parity: Q7 2026-09 point = Q2b with `_tv = "MTD"` for NR 405.8977985163, ORG_GROWTH 0.0587187895801, GM_PCT 0.489188929941, GTN_PCT 0.213543009019 (equal to the double) → `pnl-model-trends.parity.spec.ts` on `fixtures/q7-kpi-trend-live.fixture.ts`.
+**Where:** `fabric-app/packages/frontend/src/pnl/data/{pnl-model-queries,pnl-model-figures,data-source}.ts`, `rayfin/probes/{make-q7-probes.py,q7-kpi-trend-smoke.query.json}`, captures `rayfin/.temp/q7-*.out`, `q2b-p-mtd.out`.
+**Versions:** rayfin-connector-fabric-semanticmodel 1.36.2 · model republished 2026-10-22 (177 measures)
+**Reversal cost:** low (loader + batching only; the view reads `KpiTrendState`)
+**Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, kpi-trend, k-24, performance, batching, parity, adr-0007
+**Last-verified:** 2026-10-22 · **Related:** LSN-005, LSN-006, QRK-004, CNV-001, DEC-003
+**Status:** active

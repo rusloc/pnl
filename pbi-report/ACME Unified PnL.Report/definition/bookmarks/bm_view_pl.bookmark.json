@@ -8,22 +8,6 @@
       "grp_view_pl",
       "pl_tabsel",
       "pl_tabline",
-      "tb_layout_frame",
-      "tb_layout_variance",
-      "tb_layout_div1",
-      "tb_layout_trend",
-      "tb_layout_div2",
-      "tb_layout_entityco",
-      "tb_lens_frame",
-      "tb_lens_byfuncti",
-      "tb_lens_div1",
-      "tb_lens_bynature",
-      "tb_detail_frame",
-      "tb_detail_summary",
-      "tb_detail_div1",
-      "tb_detail_standard",
-      "tb_detail_div2",
-      "tb_detail_full",
       "pl_card",
       "pl_h_units",
       "pl_h_base",
@@ -74,7 +58,63 @@
       "prof_card_c",
       "cm_title",
       "cm_sub",
-      "cm_bars"
+      "cm_bars",
+      "pl_btn_expand",
+      "pl_btn_collapse",
+      "kpi_fin2",
+      "kpi_fin_trend",
+      "kpi_fin2_trend",
+      "kpi_ops_trend",
+      "info_btn_bridge",
+      "info_btn_var",
+      "info_btn_prof",
+      "info_btn_cm",
+      "grp_info_bridge",
+      "info_bridge_panel",
+      "info_bridge_title",
+      "info_bridge_close",
+      "info_bridge_rule",
+      "info_bridge_01",
+      "info_bridge_02",
+      "info_bridge_03",
+      "info_bridge_04",
+      "info_bridge_05",
+      "info_bridge_06",
+      "info_bridge_07",
+      "grp_info_var",
+      "info_var_panel",
+      "info_var_title",
+      "info_var_close",
+      "info_var_rule",
+      "info_var_01",
+      "info_var_02",
+      "info_var_03",
+      "info_var_04",
+      "info_var_05",
+      "info_var_06",
+      "grp_info_prof",
+      "info_prof_panel",
+      "info_prof_title",
+      "info_prof_close",
+      "info_prof_rule",
+      "info_prof_01",
+      "info_prof_02",
+      "info_prof_03",
+      "info_prof_04",
+      "info_prof_05",
+      "info_prof_06",
+      "info_prof_07",
+      "info_prof_08",
+      "grp_info_cm",
+      "info_cm_panel",
+      "info_cm_title",
+      "info_cm_close",
+      "info_cm_rule",
+      "info_cm_01",
+      "info_cm_02",
+      "info_cm_03",
+      "info_cm_04",
+      "info_cm_05"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -93,86 +133,6 @@
           "pl_tabline": {
             "singleVisual": {
               "visualType": "shape"
-            }
-          },
-          "tb_layout_frame": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_layout_variance": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_layout_div1": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_layout_trend": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_layout_div2": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_layout_entityco": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_lens_frame": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_lens_byfuncti": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_lens_div1": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_lens_bynature": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_detail_frame": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_detail_summary": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_detail_div1": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_detail_standard": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "tb_detail_div2": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "tb_detail_full": {
-            "singleVisual": {
-              "visualType": "actionButton"
             }
           },
           "pl_card": {
@@ -519,6 +479,416 @@
                 "mode": "hidden"
               }
             }
+          },
+          "pl_btn_expand": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "pl_btn_collapse": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "kpi_fin2": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_fin_trend": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_fin2_trend": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "kpi_ops_trend": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_btn_bridge": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_btn_var": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_btn_prof": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_btn_cm": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_01": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_02": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_03": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_04": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_05": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_06": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_bridge_07": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_01": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_02": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_03": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_04": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_05": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_var_06": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_title": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_01": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_02": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_03": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_04": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_05": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_06": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_07": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_prof_08": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_title": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_01": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_02": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_03": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_04": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_cm_05": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
           }
         },
         "visualContainerGroups": {
@@ -532,6 +902,18 @@
             "isHidden": true
           },
           "grp_view_prof": {
+            "isHidden": true
+          },
+          "grp_info_bridge": {
+            "isHidden": true
+          },
+          "grp_info_var": {
+            "isHidden": true
+          },
+          "grp_info_prof": {
+            "isHidden": true
+          },
+          "grp_info_cm": {
             "isHidden": true
           }
         }

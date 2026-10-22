@@ -5,6 +5,7 @@
 // be reached (rayfin dev, tests); deployed, every zone is read from the semantic
 // model (ADR-0006).
 import { parseSampleNumber, toneOf } from '../model/format';
+import { TREND_SAMPLE_REASON } from '../model/sample-mode';
 import type {
   Bridge,
   Driver,
@@ -12,6 +13,7 @@ import type {
   Figures,
   FilterState,
   KpiTile,
+  KpiTrendState,
   Profitability,
   ReferenceData,
   StatementRow,
@@ -106,6 +108,8 @@ export function sampleToneCodes(r: SampleRow): string {
 
 function toTile(t: SampleTile): KpiTile {
   return {
+    // The mockup has no kpi_code: the label keys the (unavailable) trend.
+    code: t.l,
     label: t.l,
     hint: t.h,
     value: t.v,
@@ -116,7 +120,14 @@ function toTile(t: SampleTile): KpiTile {
       // The mockup shows no arrow on plain reference lines (margin, operating profit).
       arrow: !(name === 'Margin' || name === 'Operating profit'),
     })),
+    // Sample tiles carry text only; no numbers are invented for a target bar (LSN-002).
+    target: null,
   };
+}
+
+/** Every sample tile's trend is unavailable: there is no model to read a series from (K-24). */
+function sampleTrends(tiles: readonly KpiTile[]): Record<string, KpiTrendState> {
+  return Object.fromEntries(tiles.map((t) => [t.code, { kind: 'unavailable', reason: TREND_SAMPLE_REASON } as KpiTrendState]));
 }
 
 function toBridge(entity: EntityCode): Bridge {
@@ -190,6 +201,7 @@ export function sampleFigures(filter: FilterState): Figures {
     statement: d.rows.map(toStatementRow),
     financial: d.kpis.map(toTile),
     operational: d.ops.map(toTile),
+    trends: sampleTrends([...d.kpis, ...d.ops].map(toTile)),
     bridge: toBridge(entity),
     drivers: toDrivers(entity),
     profitability: toProfitability(entity),

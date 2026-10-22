@@ -27,6 +27,7 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-22 (delegated): second update (+KPI Trend), tests green incl. K-24, Q7 timings in models.md
 - 2026-10-22 (delegated): updateDefinition of ACME Unified PnL in RAW (measures only), no refresh needed, all tests green, probe timings before/after in models.md; Ops → ops.md
 - 2026-10-21 (delegated): Spark notebook rejected → load_acme_pl.py; dry-run + write + SQL verify green. Notebook draft in _removed/.
 - 2026-10-21 (delegated): Trucks model export → Trucks.SemanticModel (Import/Parquet), report rebound byPath, live baseline tests self-tested green; read-only on the Service.

@@ -1,8 +1,10 @@
 // ACME Unified P&L — the "Ledger" shell (docs/design/design-requirements.md).
-// One 16:9 window: filter rail · header · notice strip · one view at a time.
+// One 16:9 window: filter rail (brand mark = company switch) · header · notice
+// strip · one view at a time.
 import { useCallback, useMemo, useReducer, useState } from 'react';
 
 import { AppHeader } from './components/app-header';
+import { EntityPicker } from './components/entity-picker';
 import { FilterFlyout } from './components/filter-flyout';
 import { FilterRail } from './components/filter-rail';
 import { NoticeStrip } from './components/notice-strip';
@@ -11,24 +13,14 @@ import { breakdownOptions } from './data/pnl-model-figures';
 import { useFigures, useReference } from './hooks/use-pnl-data';
 import { contextLine, defaultFilters, filterReducer, railSummaries, type FilterAction } from './model/filters';
 import { SAMPLE_FIGURES_NOTICE } from './model/sample-mode';
+import { COLLAPSED, expandableCodes, toggleOpen } from './model/statement-rows';
 import { filterNotices, sliceSummary } from './model/summary';
-import type { EntityCode, FilterState, PanelKey, PnlDataSource, ReferenceData, ViewKey } from './model/types';
+import type { FilterState, PanelKey, PnlDataSource, ReferenceData, ViewKey } from './model/types';
 import { themeVars } from './theme/company';
 import { AnalysisView } from './views/analysis-view';
 import { KeyFiguresView } from './views/key-figures-view';
 import { ProfitabilityView } from './views/profitability-view';
 import { StatementView } from './views/statement-view';
-
-/** Default open blocks (M-20): GR, GTN, COR, VSC, OPEX; Group: GR, VSC, OPEX. */
-const DEFAULT_OPEN: Record<EntityCode, readonly string[]> = {
-  P: ['GR', 'GTN', 'COR', 'VSC', 'OPEX'],
-  S: ['GR', 'GTN', 'COR', 'VSC', 'OPEX'],
-  G: ['GR', 'VSC', 'OPEX'],
-};
-
-function defaultOpen(): Record<EntityCode, ReadonlySet<string>> {
-  return { P: new Set(DEFAULT_OPEN.P), S: new Set(DEFAULT_OPEN.S), G: new Set(DEFAULT_OPEN.G) };
-}
 
 export interface PnlAppProps {
   source?: PnlDataSource;
@@ -67,40 +59,36 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
   const [view, setView] = useState<ViewKey>(initialView);
   const [wide, setWide] = useState(false);
   const [panel, setPanel] = useState<PanelKey | null>(null);
-  const [open, setOpen] = useState(defaultOpen);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // M-20 / M-21: collapsed by default; persists across filter changes; resets on entity change.
+  const [open, setOpen] = useState<ReadonlySet<string>>(COLLAPSED);
   const figures = useFigures(source, filter, reference);
 
   const closePanel = useCallback(() => setPanel(null), []);
-  const togglePanel = useCallback((key: PanelKey) => setPanel((p) => (p === key ? null : key)), []);
+  const togglePanel = useCallback((key: PanelKey) => {
+    setPickerOpen(false);
+    setPanel((p) => (p === key ? null : key));
+  }, []);
+  const closePicker = useCallback(() => setPickerOpen(false), []);
+  const togglePicker = useCallback(() => {
+    setPanel(null);
+    setPickerOpen((o) => !o);
+  }, []);
 
   const dispatchFilter = useCallback(
     (action: FilterAction) => {
       dispatch(action);
-      // M-21: expansion state resets when the cost lens changes; Full opens everything.
-      if (action.type === 'set' && (action.patch.costLens !== undefined || action.patch.detail !== undefined)) {
-        setOpen(defaultOpen());
-      }
+      if (action.type === 'entity' && action.entity !== filter.entity) setOpen(COLLAPSED);
     },
-    []
-  );
-
-  const toggleRow = useCallback(
-    (code: string) =>
-      setOpen((prev) => {
-        const next = new Set(prev[filter.entity]);
-        if (next.has(code)) next.delete(code);
-        else next.add(code);
-        return { ...prev, [filter.entity]: next };
-      }),
     [filter.entity]
   );
 
-  const openCodes = useMemo(() => {
-    if (filter.detail !== 'full' || !figures) return open[filter.entity];
-    const all = new Set(open[filter.entity]);
-    for (const r of figures.statement) if (r.parent) all.add(r.parent);
-    return all;
-  }, [filter.detail, filter.entity, figures, open]);
+  const toggleRow = useCallback((code: string) => setOpen((prev) => toggleOpen(prev, code)), []);
+  const expandAll = useCallback(() => setOpen(expandableCodes(figures?.statement ?? [])), [figures]);
+  const collapseAll = useCallback(() => setOpen(COLLAPSED), []);
+
+  // Q0 (ADR-0006 §8.2): the Group view needs both entities visible to the user.
+  const groupAllowed = reference.visibleEntities === undefined || reference.visibleEntities.length >= 2;
 
   const slices = sliceSummary(filter, reference);
   const summaries = railSummaries(filter, slices);
@@ -131,7 +119,19 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
         openPanel={panel}
         onTogglePanel={togglePanel}
         summaries={summaries}
+        entity={filter.entity}
+        pickerOpen={pickerOpen}
+        onTogglePicker={togglePicker}
       />
+      {pickerOpen && (
+        <EntityPicker
+          entity={filter.entity}
+          groupAllowed={groupAllowed}
+          wide={wide}
+          onSelect={(entity) => dispatchFilter({ type: 'entity', entity })}
+          onClose={closePicker}
+        />
+      )}
       {panel && (
         <FilterFlyout
           panel={panel}
@@ -151,7 +151,6 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
           contextLine={contextLine(filter, slices)}
           view={view}
           onView={setView}
-          onEntity={(entity) => dispatchFilter({ type: 'entity', entity })}
           onPatch={(patch) => dispatchFilter({ type: 'set', patch })}
           onBreakdown={(index) => dispatchFilter({ type: 'breakdown', index })}
           breakdownOptions={breakdown}
@@ -166,9 +165,10 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
             <StatementView
               figures={figures}
               filter={filter}
-              entity={filter.entity}
-              openCodes={openCodes}
+              openCodes={open}
               onToggleRow={toggleRow}
+              onExpandAll={expandAll}
+              onCollapseAll={collapseAll}
             />
           ) : view === 'kpi' ? (
             <KeyFiguresView figures={figures} />

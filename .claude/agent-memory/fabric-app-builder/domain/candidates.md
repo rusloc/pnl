@@ -6,7 +6,7 @@
 **Why:** CLAUDE.md "connectors work only in the deployed app" + the USER's "clearly flagged as sample data" instruction.
 **Where:** `pnl/data/data-source.ts`, `pnl/components/sample-chip.tsx`, `pnl/pnl-app.spec.tsx` (tests inject an offline source).
 **Second sighting 2026-10-22:** the same seam now carries the per-zone model path (`loadFigures(filter, reference, onUpdate)` emitting a snapshot per settled zone, `Figures.zones[zone]: ZoneStatus` = sample | loading | live | error; sample only when `getClient` throws). Promotion to conventions.md deferred (entry budget this run); **Hits:** 2.
-**Expires:** 2027-01-19 · **Tags:** data-source, fallback, sample, testing, zones · **Promote-to:** conventions.md (CNV) at the next curation.
+**Expires:** 2027-01-19 · **Tags:** data-source, fallback, sample, testing, zones · **Promoted-to:** CNV-001 on 2026-10-22 (third sighting: the ADR-0007 `KpiTrendLoader` seam).
 
 ### CAND-002 · Fixed Decimal measures through `fabric-semanticmodel` can arrive as scaled integers → wrap amounts in `CONVERT ( [M], DOUBLE )` · 2026-10-21
 **What:** The installed `.agents/skills/dax-authoring/SKILL.md` (1.36.2) mandates `CONVERT([Measure], DOUBLE)` for currency/decimal measures: "a total of 2,613,203.85 renders as 26,132,038,531 … This has now shipped twice." Track B's amounts are Fixed Decimal (`docs/model/semantic-model.md`), so every amount column in ADR-0006 §8 is wrapped. Not reproduced here yet; the `fabric-apps-rayfin` skill's `connectors.md` is silent on it.
