@@ -1,22 +1,23 @@
 // Honest sample mode (LSN-002): while the figures are sample, every control
 // that would re-label them is off with a reason, the strip says so once, no
 // title ever contradicts the numbers, and everything that works stays on.
-// All of it disappears when the figures source reports `sample: false`.
+// All of it disappears when the figures are live from the semantic model
+// (ADR-0006 phase 2), where each zone carries its own state instead.
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { sampleReference } from './data/sample-reference';
 import { loadSampleFigures } from './data/sample-source';
 import {
-  LIVE_STATEMENT_DETAIL,
-  MIXED_FIGURES_NOTICE,
-  MONTH_LIVE_NOTE,
+  LIVE_ZONE_DETAIL,
   SAMPLE_FIGURES_DETAIL,
   SAMPLE_FIGURES_NOTICE,
   SAMPLE_INERT_REASON,
   SAMPLE_STATEMENT_ONLY_NOTE,
+  zoneErrorText,
+  zoneLoadingText,
 } from './model/sample-mode';
-import type { FilterState, PnlDataSource } from './model/types';
+import type { Figures, FilterState, PnlDataSource, ZoneKey, ZoneStatus } from './model/types';
 import { PnlApp } from './pnl-app';
 
 const sampleSource: PnlDataSource = {
@@ -24,10 +25,19 @@ const sampleSource: PnlDataSource = {
   loadFigures: loadSampleFigures,
 };
 
-const liveLikeSource: PnlDataSource = {
-  loadReference: sampleSource.loadReference,
-  loadFigures: async (filter, reference) => ({ ...(await loadSampleFigures(filter, reference)), sample: false }),
-};
+/** The sample numbers re-flagged as live zones: the gates must vanish (the numbers themselves are not under test). */
+function liveLike(status: (zone: ZoneKey) => ZoneStatus): PnlDataSource {
+  return {
+    loadReference: sampleSource.loadReference,
+    loadFigures: async (filter, reference) => {
+      const f = await loadSampleFigures(filter, reference);
+      const zones = Object.fromEntries((Object.keys(f.zones) as ZoneKey[]).map((z) => [z, status(z)])) as Figures['zones'];
+      return { ...f, sample: false, zones, notices: ['Notice from the model'], dataStatus: 'Closed through Sep 2026  ·  Refreshed 21 Oct 2026 18:00' };
+    },
+  };
+}
+
+const liveSource = liveLike(() => ({ kind: 'live', requestId: 'req-1' }));
 
 type View = 'pnl' | 'kpi' | 'ana' | 'prof';
 
@@ -97,7 +107,6 @@ describe('sample mode', () => {
     expect(screen.queryByText('vs Latest estimate')).toBeNull();
     expect(screen.getByText('vs Budget')).toBeVisible();
     expect(screen.getByText('vs Prior year')).toBeVisible();
-    // The only "Latest est." title left is the full-year outlook column, which is what the sample holds.
     expect(screen.getAllByText('Latest est.')).toHaveLength(1);
     expect(screen.getByText('Full year 2026')).toBeVisible();
   });
@@ -146,7 +155,7 @@ describe('sample mode', () => {
     const prior = screen.getByRole('button', { name: 'Prior year' });
     expectOff(prior);
     fireEvent.click(prior);
-    expect(screen.getByRole('heading', { name: 'Largest variances vs Budget' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: /^Largest variances vs Budget/ })).toBeVisible();
     expect(screen.getByText(/^Budget to Actual, USD millions/)).toBeVisible();
   });
 
@@ -165,8 +174,8 @@ describe('sample mode', () => {
   it('gives every view the same sample caveat', async () => {
     for (const view of ['pnl', 'kpi', 'ana', 'prof'] as const) {
       const { unmount } = render(<PnlApp source={sampleSource} initialView={view} />);
-      const chip = await screen.findByRole('status');
-      expect(chip).toHaveTextContent(`Sample data · ${SAMPLE_FIGURES_DETAIL}`);
+      const chips = await screen.findAllByRole('status');
+      expect(chips[0]).toHaveTextContent(`Sample data · ${SAMPLE_FIGURES_DETAIL}`);
       unmount();
     }
   });
@@ -183,102 +192,95 @@ describe('sample mode', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Key figures' }));
     expect(screen.getByRole('region', { name: 'Key figures' })).toBeVisible();
   });
+});
 
-  it('drops the notice and every gate as soon as the figures are not sample', async () => {
-    await renderApp('pnl', liveLikeSource);
-    expect(screen.queryByRole('status')).toBeNull();
+// ADR-0006 phase 2: live zones — no gates, the model's notices and status, a chip per zone,
+// and a loading / error panel where a zone has no numbers to show.
+describe('live mode', () => {
+  it('drops the notice and every gate, shows the model’s notices and data status, and flags each zone live', async () => {
+    await renderApp('pnl', liveSource);
     expect(screen.queryByText(SAMPLE_FIGURES_NOTICE)).toBeNull();
+    expect(screen.getByRole('note')).toHaveTextContent('Notice from the model');
+    expect(screen.getByText(/Refreshed 21 Oct 2026 18:00/)).toBeVisible();
+    expect(screen.getByRole('status')).toHaveTextContent(`Live · semantic model · ${LIVE_ZONE_DETAIL}`);
     let dialog = openPanel('Period');
     expect(within(dialog).getByRole('button', { name: 'FY2025' })).toBeEnabled();
+    expect(within(dialog).getByRole('button', { name: 'Jun' })).toBeEnabled();
+    expect(within(dialog).getByRole('button', { name: 'LTM' })).toBeEnabled();
     expect(within(dialog).getByRole('group', { name: 'Fiscal year' })).not.toHaveAttribute('aria-describedby');
     dialog = openPanel('Versions');
     expect(within(dialog).getByRole('radio', { name: /^Latest estimate/ })).toBeEnabled();
+    expect(within(within(dialog).getByRole('group', { name: 'Compare B' })).getByRole('button', { name: 'None' })).toBeEnabled();
     dialog = openPanel('Slice');
     expect(within(dialog).getByRole('button', { name: 'Own D2C webstore' })).toBeEnabled();
+    expect(within(dialog).getByRole('button', { name: 'North America' })).toBeEnabled();
     dialog = openPanel('Display');
     expect(within(dialog).getByRole('button', { name: 'EUR' })).toBeEnabled();
+    expect(within(dialog).getByRole('button', { name: 'Constant currency' })).toBeEnabled();
     expect(within(dialog).queryByText(SAMPLE_STATEMENT_ONLY_NOTE)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Analysis' }));
     expect(screen.getByRole('button', { name: 'Prior year' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Profitability' }));
+    expect(screen.getByRole('button', { name: 'Region' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Price tier' })).toBeEnabled();
   });
-});
 
-// ADR-0006 phase 1: the statement is live from the semantic model and follows the
-// month; every other zone is still sample, so its gates and copy stay exactly as above.
-describe('mixed mode: live statement, sample elsewhere', () => {
-  function liveStatementSource(calls: FilterState[]): PnlDataSource {
-    return {
-      loadReference: sampleSource.loadReference,
-      loadFigures: async (filter, reference) => {
+  it('re-titles the live statement from the filters and re-queries on a filter change', async () => {
+    const calls: FilterState[] = [];
+    const source: PnlDataSource = {
+      loadReference: liveSource.loadReference,
+      loadFigures: (filter, reference, onUpdate) => {
         calls.push(filter);
-        const figures = await loadSampleFigures(filter, reference);
-        return { ...figures, liveStatement: { source: 'semantic model', requestId: `req-${calls.length}` } };
+        return liveSource.loadFigures(filter, reference, onUpdate);
       },
     };
-  }
-
-  const fallbackSource: PnlDataSource = {
-    loadReference: sampleSource.loadReference,
-    loadFigures: async (filter, reference) => ({
-      ...(await loadSampleFigures(filter, reference)),
-      liveFallbackReason: 'Row limit of 1000 exceeded',
-    }),
-  };
-
-  it('un-gates the month only, re-queries on a month change and re-titles the live statement', async () => {
-    const calls: FilterState[] = [];
-    await renderApp('pnl', liveStatementSource(calls));
-    expect(screen.getByRole('status')).toHaveTextContent(`Live · semantic model · ${LIVE_STATEMENT_DETAIL}`);
-    const strip = screen.getByRole('note');
-    expect(strip).toHaveTextContent(MIXED_FIGURES_NOTICE);
-    expect(strip).not.toHaveTextContent(SAMPLE_FIGURES_NOTICE);
-
+    await renderApp('pnl', source);
     const dialog = openPanel('Period');
-    const jun = within(dialog).getByRole('button', { name: 'Jun' });
-    expect(jun).toBeEnabled();
-    expect(jun).not.toHaveAttribute('title');
-    const monthGroup = within(dialog).getByRole('group', { name: 'Month' });
-    expect(document.getElementById(monthGroup.getAttribute('aria-describedby') as string)).toHaveTextContent(MONTH_LIVE_NOTE);
-    expectOff(within(dialog).getByRole('button', { name: 'FY2025' }));
-    expectOff(within(dialog).getByRole('button', { name: 'Month' }));
-    expectDescribedByReason(within(dialog).getByRole('group', { name: 'Fiscal year' }));
-    expectDescribedByReason(within(dialog).getByRole('group', { name: 'Time view' }));
-
-    fireEvent.click(jun);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Jun' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'QTD' }));
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    await waitFor(() => expect(calls.at(-1)?.month).toBe(6));
-    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: YTD · Jun 2026');
-    expect(await screen.findByText('YTD Jun 2026 · Actual')).toBeVisible();
+    await waitFor(() => expect(calls.at(-1)).toMatchObject({ month: 6, timeView: 'qtd' }));
+    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: QTD · Jun 2026');
+    expect(await screen.findByText('Q2 2026 · Actual')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: /^Versions:/ }));
+    fireEvent.click(within(within(screen.getByRole('dialog')).getByRole('group', { name: 'Compare A' })).getByRole('button', { name: 'Latest est.' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    await waitFor(() => expect(calls.at(-1)?.compareA).toBe('LE'));
+    expect(screen.getByText('vs Latest estimate')).toBeVisible();
+  });
+
+  it('shows a loading panel while a zone is in flight and an error panel with the reason when the model could not answer', async () => {
+    const mixed = liveLike((zone) =>
+      zone === 'kpi' ? { kind: 'loading' } : zone === 'bridge' ? { kind: 'error', reason: 'Row limit of 20 exceeded', requestId: 'req-9' } : { kind: 'live', requestId: 'req-1' }
+    );
+    await renderApp('kpi', mixed);
+    expect(screen.getByRole('status')).toHaveTextContent(zoneLoadingText('key figures'));
+    fireEvent.click(screen.getByRole('tab', { name: 'Analysis' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(zoneErrorText('net revenue bridge', 'Row limit of 20 exceeded'));
+    expect(screen.getByRole('alert')).toHaveTextContent('request req-9');
+    // The variances card next to it is live and keeps its chip.
     expect(screen.getByRole('status')).toHaveTextContent('Live · semantic model');
   });
 
-  it('keeps the sample chip, the version gates and the fixed window on the sample zones', async () => {
-    const calls: FilterState[] = [];
-    await renderApp('prof', liveStatementSource(calls));
-    fireEvent.click(screen.getByRole('button', { name: /^Period:/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Jun' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    await waitFor(() => expect(calls.at(-1)?.month).toBe(6));
-    // Profitability still shows the sample window, not the live month (LSN-002).
-    expect(screen.getByText('YTD Jan–Sep 2026, USD millions')).toBeVisible();
-    expect(screen.getByRole('status')).toHaveTextContent(`Sample data · ${SAMPLE_FIGURES_DETAIL}`);
-    expectOff(screen.getByRole('button', { name: 'Region' }));
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Key figures' }));
-    expect(screen.getByRole('status')).toHaveTextContent('Sample data');
-    const dialog = openPanel('Versions');
-    expect(within(dialog).getByRole('radio', { name: /^Latest estimate/ })).toBeDisabled();
+  it('disables the Group card when the model shows the user one company only (Q0, N-04)', async () => {
+    const oneEntity: PnlDataSource = {
+      loadReference: async () => ({ reference: { ...sampleReference(), visibleEntities: ['P'] } }),
+      loadFigures: liveSource.loadFigures,
+    };
+    await renderApp('pnl', oneEntity);
+    const group = screen.getByRole('button', { name: /ACME Group/ });
+    expect(group).toBeDisabled();
+    expect(group).toHaveAttribute('title', expect.stringMatching(/both companies/));
+    expect(screen.getByRole('button', { name: /Commerce Cloud/ })).toBeEnabled();
   });
 
-  it('says why when the model could not be read and keeps everything gated', async () => {
-    await renderApp('pnl', fallbackSource);
-    expect(screen.getByRole('note')).toHaveTextContent(
-      'The P&L statement could not be read from the semantic model (Row limit of 1000 exceeded); showing sample figures instead.'
-    );
-    expect(screen.getByRole('note')).toHaveTextContent(SAMPLE_FIGURES_NOTICE);
-    expect(screen.getByRole('status')).toHaveTextContent('Sample data');
-    const dialog = openPanel('Period');
-    expectOff(within(dialog).getByRole('button', { name: 'Jun' }));
+  it('says so when the model shows the user no company at all', async () => {
+    const none: PnlDataSource = {
+      loadReference: async () => ({ reference: { ...sampleReference(), visibleEntities: [] } }),
+      loadFigures: liveSource.loadFigures,
+    };
+    await renderApp('pnl', none);
+    expect(screen.getByRole('note')).toHaveTextContent(/no P&L access/);
   });
 });

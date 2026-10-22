@@ -1,9 +1,8 @@
 // Key figures (L-06, §5, design brief §6.2): 8 financial + 4 operational tiles.
 import { cn } from '@/lib/utils';
 
-import { SAMPLE_FIGURES_DETAIL } from '../model/sample-mode';
 import type { Figures, KpiTile, Tone } from '../model/types';
-import { SampleChip } from '../components/sample-chip';
+import { ZoneChip, ZoneState } from '../components/zone-state';
 
 const PILL: Record<Tone, string> = {
   fav: 'bg-fav-tint text-fav',
@@ -52,11 +51,13 @@ function Tile({ tile, operational }: { tile: KpiTile; operational: boolean }) {
 const GRID = 'grid min-h-0 gap-[12px] [grid-template-columns:repeat(auto-fill,minmax(max(240px,calc((100%-36px)/4)),1fr))]';
 
 export function KeyFiguresView({ figures }: { figures: Figures }) {
+  const zone = figures.zones.kpi;
   return (
     <section id="view-kpi" aria-label="Key figures" className="flex min-h-[520px] flex-auto flex-col gap-[10px]">
       <h2 className="m-0 flex flex-none items-center gap-[10px] text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-600">
-        Financial {figures.sample && <SampleChip detail={SAMPLE_FIGURES_DETAIL} />}
+        Financial <ZoneChip status={zone} />
       </h2>
+      <ZoneState status={zone} what="key figures" />
       <div className={cn(GRID, 'flex-[2_1_0] [grid-auto-rows:minmax(150px,1fr)]')}>
         {figures.financial.map((t) => (
           <Tile key={t.label} tile={t} operational={false} />

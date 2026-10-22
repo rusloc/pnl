@@ -67,6 +67,9 @@ async function createClient(): Promise<AppClient> {
     {
       baseUrl: resolved.baseUrl,
       publishableKey: resolved.publishableKey,
+      // Semantic-model zones take 10–30 s each on the current model (ADR-0006
+      // §9, N-01 open); the SDK default of 30 s would cut them off.
+      timeout: 120_000,
       authStorage: true,
       runtimeConfig: resolved.runtimeConfig,
       connectors: connectorConfigs,

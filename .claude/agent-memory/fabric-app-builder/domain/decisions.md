@@ -1,5 +1,5 @@
 # Decisions (durable) — lessons folded in while short
-<!-- next-id: DEC-004 · next-id: LSN-005 -->
+<!-- next-id: DEC-004 · next-id: LSN-006 -->
 
 ### LSN-004 · The Track B `1 Statement` measures gate on `ISINSCOPE ( dim_pl_row[account_label] )`; a flat SUMMARIZECOLUMNS that groups by the account columns drops every line, subtotal and ratio row · 2026-10-21
 **What:** `_PL Base`, `_PL Is Ratio`, `PL Fav Off` test `NOT ISINSCOPE ( dim_pl_row[account_label] )` to tell a line from a leaf — a matrix-level test. In a `SUMMARIZECOLUMNS` that groups by `row_key … account_label, is_leaf`, every row has `account_label` in scope, so line rows evaluate as blank leaves and SUMMARIZECOLUMNS removes them: the first live Q1 returned 44 rows, all leaves. Fix: Q1 is two halves — `_lines` grouped without the four account columns (`TREATAS ( { FALSE () }, dim_pl_row[is_leaf] )`, constants projected for `account_code/label`, `is_leaf`, `account_sort`) and `_leaves` with all eleven columns — `UNION`ed in one `EVALUATE`, `ORDER BY [line_sort], [account_sort]`. Result: 73 rows (29 lines + 44 leaves), NR/EBITDA/OP/NP base and Compare A equal `control_totals_usd` to the cent.
@@ -7,8 +7,8 @@
 **Where:** `fabric-app/packages/frontend/src/pnl/data/pnl-model-queries.ts` (`statementPart`), `pnl-model-queries.spec.ts`
 **Versions:** rayfin-connector-fabric-semanticmodel 1.36.2 · model as published 2026-10-21
 **Reversal cost:** low (query shape only)
-**Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, summarizecolumns, isinscope, dim_pl_row, adr-0006
-**Last-verified:** 2026-10-21 · **Related:** DEC-003, CAND-002
+**Hits:** 2 · **Confidence:** high · **Tags:** dax, semantic-model, summarizecolumns, isinscope, dim_pl_row, adr-0006
+**Last-verified:** 2026-10-22 (Q1 with name-based slice filters, QTD/LE/EUR/CC: 72 rows, lines and leaves both present) · **Related:** DEC-003, LSN-005, CAND-002
 **Status:** active
 
 ### LSN-001 · `rayfin up` refused the first real bundle: TC39 decorators reached dist untransformed · 2026-10-21
@@ -50,7 +50,7 @@
 **Reversal cost:** medium (connector swap is cheap; the RLS roles, demo accounts and the measure contract with bip are the sunk part)
 **Hits:** 1 · **Confidence:** high · **Tags:** connector, semantic-model, delegated, rls, n-04, dax, adr-0006
 **Last-verified:** 2026-10-21 · **Related:** DEC-001, DEC-002, LSN-002, LSN-003, QRK-001, CAND-002
-**Status:** active — ADR-0006 accepted for phase 1 by the main agent under USER delegation (2026-10-21): connector `pnlModel` deployed, the statement live on the `PL *` measures (Number, pre-divided by `param_units` pinned to `M`; not the `9 Engine` Currency twins), Month the one un-gated filter, no RLS yet. ADR-0006 §3.14 (OBO + RLS) remains [I] until a demo Viewer sees filtered rows. Unit rule: the app never divides again (`fmtAmount` treats values as millions).
+**Status:** active — phase 2 (2026-10-22): every zone live (statement Q1; KPIs Q2a = `dim_kpi` rows + Q2b = scalar `CALCULATE ( [KPI Value], TREATAS ( { code }, dim_kpi[kpi_code] ) )` in chunks of 3; bridge Q3 with an END row = `[Prof Net Revenue]`; variances Q4; profitability Q5 via `Slice Member In View`; context Q6 = `Data Status` / `Notices` / `Profitability Note` / `KPI CM %`; Q0 visible entities), every filter un-gated, one query per zone in parallel, raw tables cached per query key (display settings never re-query), per-zone loading / error state instead of a sample fallback (sample only when no client at all). Units still pinned M on the display measures (`PL *`, `KPI Value`, `Bridge Value`, `LV *`, `Prof Net Revenue`); the app never divides. Analysis "Compared with" = Compare A override in Q3/Q4 only; Profitability follows C-40 (A, else B, else PY). ADR-0005 artefacts deleted (prototype, fx.ts, FactPl/FactFxRate, #probe). No RLS yet; ADR-0006 §3.14 still [I]. Last-refined 2026-10-22.
 
 ### LSN-002 · Sample figures that ignore the filter state read as a broken app · 2026-10-21
 **What:** The Ledger shell shipped with mockup numbers keyed only by entity (`SAMPLE_DATA[entity]`), while the rail, versions, slice and toolbar controls wrote state the figures path never read. The USER's first deployed-app report was "every filter except company and tabs is broken", not "sample data". A "Sample data" chip per view, with the caveat only in the statement footer, was not enough; worse, the version and breakdown pickers re-titled columns and headings over unchanged sample numbers (Budget figures under a "Latest est." title).
@@ -72,3 +72,13 @@
 **Hits:** 1 · **Confidence:** high · **Tags:** functions, identity, data-agent, rls, n-04, ai-chat
 **Last-verified:** 2026-10-21 · **Related:** DEC-001, QRK-002
 **Status:** active
+
+### LSN-005 · Model query shapes that work through the connector, and the ones that do not · 2026-10-22
+**What:** (a) `SUMMARIZECOLUMNS ( dim_kpi[…], …, "@v", [KPI Value] )` never finishes in 30 s for any entity or slot subset: `_KPI Value` is a 24-branch SWITCH over measures and the engine evaluates every branch for every row (× Δ A / Δ B). Scalar `CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) )` in one ROW evaluates one branch and keeps the model's rules (value scaled, Δ in pp or fraction, Secondary text) — the app reads the `dim_kpi` rows without measures (4 s) and then the values in chunks of 3 codes (11–28 s each under load). (b) `SUMMARIZECOLUMNS ( dim_bridge_step[…], …, [Bridge Value], [Net Revenue] )` returns all 15 step codes because an always-non-blank measure keeps the other entities' rows; drop the extra measure, `FILTER ( …, NOT ISBLANK ( [@value] ) )`, then UNION a ROW for the base total. Likewise `Slice Member In View` = 1 on the blank member in the Group-by-entity profitability query → `NOT ISBLANK ( <code column> )`. (c) The model's `Notices` / `Context Line` detect slices with `ISFILTERED ( dim_channel[channel_name] )` etc.: a TREATAS on `channel_code` filters the numbers but not the notices — filter the *name* columns like Track B's slicers (codes validated against the reference, names emitted). (d) Engine cost on the published Import model (F64, 1.2 M rows): ~0.7–1 s per `_Amt Window` evaluation; 9 cheap measures 10 s, P bridge (Bridge Volume SUMX) 12–27 s, Q1 statement 26 s to > 30 s on 2026-10-22 — N-01 (< 2 s) is a model problem for bip, not a query-shape one.
+**Why / Evidence:** probes 2026-10-22 `rayfin/.temp/{t1-kpi-value-only,k1-fin-a,k2-ops,t2-cheap-items,t3-growth,t4-bridge-kpis,t5-bridge-p,q3-bridge,q6-context,b-*}.json`; `_measures.tmdl` (`_KPI Value`, `Notices`, `Slice Member In View`). Currency-typed measures (`Prof Net Revenue`, `LV *`, `Bridge Value`, `KPI ARR`) arrived as plain doubles — CAND-002 closed negative.
+**Where:** `fabric-app/packages/frontend/src/pnl/data/pnl-model-queries.ts` (`buildKpiValuesQuery`, `buildBridgeQuery`, `buildProfitabilityQuery`, `filterVars`), `pnl-model-queries.spec.ts`, `rayfin/probes/q2…q6-*-smoke.query.json`; template `domain/templates/LSN-005.kpi-scalar.dax`
+**Versions:** rayfin-connector-fabric-semanticmodel 1.36.2 · model as published 2026-10-21/22
+**Reversal cost:** low (query shapes) · medium for (d) (model performance work is bip's)
+**Hits:** 1 · **Confidence:** high · **Tags:** dax, semantic-model, switch, summarizecolumns, isfiltered, performance, n-01, adr-0006
+**Last-verified:** 2026-10-22 · **Related:** DEC-003, LSN-004, QRK-004, CAND-002
+**Status:** active — (d) handed to bip as a measure-contract item (performance); (a)–(c) are the app's standing query rules

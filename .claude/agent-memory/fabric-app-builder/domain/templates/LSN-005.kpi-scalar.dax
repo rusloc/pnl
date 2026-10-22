@@ -1,0 +1,25 @@
+// Template for LSN-005 · Last-tested: 2026-10-22 · Against: rayfin-connector-fabric-semanticmodel 1.36.2 / model "ACME Unified PnL" (RAW)
+// KPI values without the SWITCH fan-out: one ROW, one scalar CALCULATE per kpi_code,
+// 3 codes per call (~10–28 s each under load; a SUMMARIZECOLUMNS over dim_kpi never finishes in 30 s).
+DEFINE
+    VAR _entity = TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 9 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "YTD" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+EVALUATE
+CALCULATETABLE (
+    ROW (
+        "@NR",   CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@NR_a", CONVERT ( CALCULATE ( [KPI Δ A], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@NR_b", CONVERT ( CALCULATE ( [KPI Δ B], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@NR_s", CALCULATE ( [KPI Secondary], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) )
+    )
+    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units
+)
+// Observed 2026-10-22 (P, FY2026 YTD Sep): 3398.5219426605 | -0.0191285993 | 0.0824688045 | (blank)

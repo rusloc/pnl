@@ -1,5 +1,6 @@
-// Loads reference data once, then figures whenever the filter changes. Both
-// loads are cancellable so a stale response never overwrites a newer one.
+// Loads reference data once, then figures whenever the filter changes. A source
+// that reads zones independently reports each zone as it settles; a stale
+// response never overwrites a newer one.
 import { useEffect, useState } from 'react';
 
 import type { Figures, FilterState, PnlDataSource, ReferenceData } from '../model/types';
@@ -26,9 +27,10 @@ export function useFigures(source: PnlDataSource, filter: FilterState, reference
   const [figures, setFigures] = useState<Figures | null>(null);
   useEffect(() => {
     let cancelled = false;
-    source.loadFigures(filter, reference).then((f) => {
+    const update = (f: Figures) => {
       if (!cancelled) setFigures(f);
-    });
+    };
+    source.loadFigures(filter, reference, update).then(update);
     return () => {
       cancelled = true;
     };

@@ -1,8 +1,9 @@
 // SAMPLE figures source: adapts the mockup's `DATA`/`META` (sample-data.ts) to
 // the typed `Figures` shape. The numbers are fixed at "YTD Sep 2026 · Actual
 // vs Budget and Prior year · USD m" whatever the filters say; the UI shows a
-// "sample data" chip while this source is active. Replaced by an lhraw source
-// after ADR-0005.
+// "sample data" chip while this source is active. Used only when no backend can
+// be reached (rayfin dev, tests); deployed, every zone is read from the semantic
+// model (ADR-0006).
 import { parseSampleNumber, toneOf } from '../model/format';
 import type {
   Bridge,
@@ -15,6 +16,8 @@ import type {
   ReferenceData,
   StatementRow,
   Tone,
+  ZoneKey,
+  ZoneStatus,
 } from '../model/types';
 import { SAMPLE_DATA } from './sample-data';
 import type { SampleRow, SampleTile } from './sample-types';
@@ -151,6 +154,7 @@ function toProfitability(entity: EntityCode): Profitability {
     by: m.profBy,
     column: m.profCol,
     options: m.profOpts,
+    compareLabel: 'Budget',
     note: m.profNote,
     rows: d.prof.map(([name, nrText, shareText, sharePct, deltaPctText, code, gm, cm, ebitda, op]) => ({
       name, nrText, shareText, sharePct: Math.max(0, Math.min(100, sharePct)), deltaPctText,
@@ -161,13 +165,28 @@ function toProfitability(entity: EntityCode): Profitability {
   };
 }
 
+/** A profitability zone with nothing in it (a live zone still loading or failed). */
+export function emptyProfitability(): Profitability {
+  return { by: '', column: '', options: [], compareLabel: '', note: '', rows: [], cmAverageText: '', cmAveragePct: 0 };
+}
+
+const SAMPLE_ZONES: Record<ZoneKey, ZoneStatus> = {
+  statement: { kind: 'sample' },
+  kpi: { kind: 'sample' },
+  bridge: { kind: 'sample' },
+  drivers: { kind: 'sample' },
+  profitability: { kind: 'sample' },
+  context: { kind: 'sample' },
+};
+
 export function sampleFigures(filter: FilterState): Figures {
   const entity = filter.entity;
   const d = SAMPLE_DATA[entity];
   return {
     sample: true,
+    zones: SAMPLE_ZONES,
     notices: SAMPLE_META[entity].notices,
-    sliceSummary: SAMPLE_META[entity].sliceNote,
+    dataStatus: null,
     statement: d.rows.map(toStatementRow),
     financial: d.kpis.map(toTile),
     operational: d.ops.map(toTile),
@@ -182,7 +201,9 @@ export function derivedTone(delta: number | null): Tone {
   return toneOf(delta);
 }
 
-export async function loadSampleFigures(filter: FilterState, _reference: ReferenceData): Promise<Figures> {
+export async function loadSampleFigures(filter: FilterState, _reference: ReferenceData, onUpdate?: (figures: Figures) => void): Promise<Figures> {
   void _reference;
-  return sampleFigures(filter);
+  const figures = sampleFigures(filter);
+  onUpdate?.(figures);
+  return figures;
 }

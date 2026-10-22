@@ -4,7 +4,7 @@ import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 import { MONTH_SHORT } from '../../model/filters';
-import { MONTH_LIVE_NOTE, SAMPLE_INERT_REASON, sampleGate } from '../../model/sample-mode';
+import { SAMPLE_INERT_REASON, sampleGate } from '../../model/sample-mode';
 import type { TimeView } from '../../model/types';
 import { Caption, PanelGroup, type PanelProps } from '../filter-flyout';
 import { Segmented } from '../ui/segmented';
@@ -17,18 +17,14 @@ const TIME_VIEWS: readonly { value: TimeView; label: string }[] = [
   { value: 'fy', label: 'FY' },
 ];
 
-export function PeriodPanel({ filter, reference, dispatch, sample, monthLive = false }: PanelProps) {
+export function PeriodPanel({ filter, reference, dispatch, sample }: PanelProps) {
   const noteId = useId();
-  const monthNoteId = useId();
   const years = [...new Set(reference.months.map((m) => m.fiscalYear))].sort();
   const monthsOfYear = reference.months.filter((m) => m.fiscalYear === filter.fiscalYear);
-  // ADR-0006 phase 1: the month drives the live statement; year and time view stay off while sample.
-  const monthOff = sample && !monthLive;
   return (
     <>
       {/* LSN-002: the sample figures are fixed at YTD Sep 2026, so the period pickers are off. */}
       {sample && <Caption id={noteId}>{SAMPLE_INERT_REASON}</Caption>}
-      {sample && monthLive && <Caption id={monthNoteId}>{MONTH_LIVE_NOTE}</Caption>}
       <PanelGroup label="Fiscal year">
         <Segmented
           label="Fiscal year"
@@ -46,7 +42,7 @@ export function PeriodPanel({ filter, reference, dispatch, sample, monthLive = f
         <div
           role="group"
           aria-label="Month"
-          aria-describedby={monthOff ? noteId : sample && monthLive ? monthNoteId : undefined}
+          aria-describedby={sample ? noteId : undefined}
           className="grid grid-cols-4 gap-[6px]"
         >
           {MONTH_SHORT.map((label, i) => {
@@ -60,12 +56,12 @@ export function PeriodPanel({ filter, reference, dispatch, sample, monthLive = f
                 type="button"
                 aria-pressed={selected}
                 aria-label={open ? `${label} (open month)` : label}
-                disabled={monthOff}
-                title={monthOff ? SAMPLE_INERT_REASON : undefined}
+                disabled={sample}
+                title={sample ? SAMPLE_INERT_REASON : undefined}
                 onClick={() => dispatch({ type: 'set', patch: { month: n } })}
                 className={cn(
                   'h-[40px] rounded-[8px] border font-[inherit] text-[14px]',
-                  monthOff ? 'cursor-not-allowed' : 'cursor-pointer',
+                  sample ? 'cursor-not-allowed' : 'cursor-pointer',
                   selected
                     ? 'border-acc bg-acc font-semibold text-surface'
                     : open

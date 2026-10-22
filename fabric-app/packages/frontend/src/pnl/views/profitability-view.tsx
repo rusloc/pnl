@@ -3,9 +3,9 @@
 import { cn } from '@/lib/utils';
 
 import { windowLabel } from '../model/filters';
-import { SAMPLE_FIGURES_DETAIL, SAMPLE_WINDOW_LONG } from '../model/sample-mode';
+import { SAMPLE_WINDOW_LONG } from '../model/sample-mode';
 import type { Figures, FilterState, Tone } from '../model/types';
-import { SampleChip } from '../components/sample-chip';
+import { ZoneChip, ZoneState } from '../components/zone-state';
 import { COMPANY_THEME } from '../theme/company';
 
 const TEXT: Record<Tone, string> = { fav: 'text-fav', unf: 'text-unf', neutral: 'text-ink-900' };
@@ -13,10 +13,13 @@ const COLS = 'grid-cols-[minmax(190px,1.4fr)_90px_minmax(130px,1fr)_84px_84px_96
 
 export function ProfitabilityView({ figures, filter }: { figures: Figures; filter: FilterState }) {
   const p = figures.profitability;
-  // LSN-002: while sample, the heading names the breakdown the numbers actually show (F-21).
-  const by = figures.sample ? p.by : (p.options[filter.breakdown[filter.entity]]?.toLowerCase() ?? p.by);
+  const zone = figures.zones.profitability;
+  // The heading names the breakdown the numbers show: the live mapper derives `by` from the filter;
+  // the sample path keeps its own (LSN-002, F-21).
+  const by = p.by;
   const cmBars = p.rows.filter((r) => r.cm !== '');
   const cmPos = Math.min(100, (p.cmAveragePct / 60) * 100);
+  const unitsWord = filter.units === 'm' ? 'millions' : 'thousands';
   return (
     <div id="view-prof" className="flex min-h-[420px] flex-auto flex-wrap gap-[16px]">
       <section
@@ -24,51 +27,54 @@ export function ProfitabilityView({ figures, filter }: { figures: Figures; filte
         className="box-border flex min-w-0 flex-[1.7_1_640px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
       >
         <h2 id="h-prof" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Profitability by {by} {figures.sample && <SampleChip detail={SAMPLE_FIGURES_DETAIL} />}
+          Profitability by {by} <ZoneChip status={zone} />
         </h2>
-        {/* LSN-002: while sample, the subtitle names the window the numbers actually show (the month may be live elsewhere). */}
+        {/* LSN-002: while sample, the subtitle names the window the numbers actually show. */}
         <span className="text-[13px] text-slate-600">
-          {figures.sample ? SAMPLE_WINDOW_LONG : windowLabel(filter, true)}, {filter.currency} millions
+          {figures.sample ? SAMPLE_WINDOW_LONG : windowLabel(filter, true)}, {filter.currency} {unitsWord}
         </span>
-        <div className="mt-[12px] overflow-x-auto">
-          <div className="min-w-[760px] tabular-nums">
-            <div className={cn('grid border-b border-line-300 text-[12px] font-semibold text-slate-600', COLS)}>
-              <div className="py-[6px] pr-[8px]">{p.column}</div>
-              <div className="px-[8px] py-[6px] text-right">Net revenue</div>
-              <div className="px-[8px] py-[6px]">Share</div>
-              <div className="px-[8px] py-[6px] text-right">vs Budget</div>
-              <div className="border-l border-group-rule px-[8px] py-[6px] text-right">Gross</div>
-              <div className="px-[8px] py-[6px] text-right">Contribution</div>
-              <div className="px-[8px] py-[6px] text-right">Adj. EBITDA</div>
-              <div className="px-[8px] py-[6px] text-right">Operating</div>
-            </div>
-            <div className={cn('grid text-[11px] text-slate-600', COLS)}>
-              <div />
-              <div />
-              <div />
-              <div />
-              <div className="col-span-4 border-l border-group-rule px-[8px] py-[2px] text-center">margin, % of net revenue</div>
-            </div>
-            {p.rows.map((r) => (
-              <div key={r.name} className={cn('grid min-h-[48px] items-center border-t border-line-100 text-[14px]', COLS)}>
-                <div className="py-[6px] pr-[8px] font-medium">{r.name}</div>
-                <div className="px-[8px] py-[6px] text-right">{r.nrText}</div>
-                <div className="flex items-center gap-[8px] px-[8px] py-[6px]">
-                  <div aria-hidden="true" className="h-[8px] flex-auto overflow-hidden rounded-[4px] bg-line-100">
-                    <div className="h-full bg-acc" style={{ width: `${r.sharePct}%` }} />
-                  </div>
-                  <span className="w-[48px] text-right text-ink-700">{r.shareText}</span>
-                </div>
-                <div className={cn('px-[8px] py-[6px] text-right font-semibold', TEXT[r.tone])}>{r.deltaPctText}</div>
-                <div className="border-l border-group-rule px-[8px] py-[6px] text-right">{r.gm}</div>
-                <div className="px-[8px] py-[6px] text-right">{r.cm}</div>
-                <div className="px-[8px] py-[6px] text-right">{r.ebitda}</div>
-                <div className="px-[8px] py-[6px] text-right">{r.op}</div>
+        <ZoneState status={zone} what="profitability table" />
+        {p.rows.length > 0 && (
+          <div className="mt-[12px] overflow-x-auto">
+            <div className="min-w-[760px] tabular-nums">
+              <div className={cn('grid border-b border-line-300 text-[12px] font-semibold text-slate-600', COLS)}>
+                <div className="py-[6px] pr-[8px]">{p.column}</div>
+                <div className="px-[8px] py-[6px] text-right">Net revenue</div>
+                <div className="px-[8px] py-[6px]">Share</div>
+                <div className="px-[8px] py-[6px] text-right">vs {p.compareLabel}</div>
+                <div className="border-l border-group-rule px-[8px] py-[6px] text-right">Gross</div>
+                <div className="px-[8px] py-[6px] text-right">Contribution</div>
+                <div className="px-[8px] py-[6px] text-right">Adj. EBITDA</div>
+                <div className="px-[8px] py-[6px] text-right">Operating</div>
               </div>
-            ))}
+              <div className={cn('grid text-[11px] text-slate-600', COLS)}>
+                <div />
+                <div />
+                <div />
+                <div />
+                <div className="col-span-4 border-l border-group-rule px-[8px] py-[2px] text-center">margin, % of net revenue</div>
+              </div>
+              {p.rows.map((r) => (
+                <div key={r.name} className={cn('grid min-h-[48px] items-center border-t border-line-100 text-[14px]', COLS)}>
+                  <div className="py-[6px] pr-[8px] font-medium">{r.name}</div>
+                  <div className="px-[8px] py-[6px] text-right">{r.nrText}</div>
+                  <div className="flex items-center gap-[8px] px-[8px] py-[6px]">
+                    <div aria-hidden="true" className="h-[8px] flex-auto overflow-hidden rounded-[4px] bg-line-100">
+                      <div className="h-full bg-acc" style={{ width: `${r.sharePct}%` }} />
+                    </div>
+                    <span className="w-[48px] text-right text-ink-700">{r.shareText}</span>
+                  </div>
+                  <div className={cn('px-[8px] py-[6px] text-right font-semibold', TEXT[r.tone])}>{r.deltaPctText}</div>
+                  <div className="border-l border-group-rule px-[8px] py-[6px] text-right">{r.gm}</div>
+                  <div className="px-[8px] py-[6px] text-right">{r.cm}</div>
+                  <div className="px-[8px] py-[6px] text-right">{r.ebitda}</div>
+                  <div className="px-[8px] py-[6px] text-right">{r.op}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <span className="mt-[10px] text-[12px] text-slate-600">{p.note}</span>
+        )}
+        {p.note && <span className="mt-[10px] text-[12px] text-slate-600">{p.note}</span>}
       </section>
 
       <section
@@ -79,7 +85,7 @@ export function ProfitabilityView({ figures, filter }: { figures: Figures; filte
           Contribution margin by {by}
         </h2>
         <span className="text-[13px] text-slate-600">
-          Dashed line: {COMPANY_THEME[filter.entity].short} average {p.cmAverageText}. Scale 0–60%.
+          Dashed line: {COMPANY_THEME[filter.entity].short} average {p.cmAverageText || 'n/a'}. Scale 0–60%.
         </span>
         <div className="mt-[16px] flex flex-col gap-[14px]">
           {cmBars.map((r) => {

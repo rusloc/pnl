@@ -1,6 +1,6 @@
 // Domain types for the ACME Unified P&L app (spec docs/Requirements.md).
 // Every view renders from these shapes; the data source behind them is
-// swappable (sample today, lhraw after ADR-0005).
+// swappable (the semantic model when deployed, ADR-0006; sample offline).
 
 export type EntityCode = 'P' | 'S' | 'G';
 export type OperatingEntity = Exclude<EntityCode, 'G'>;
@@ -106,6 +106,12 @@ export interface SliceSet {
 export interface ReferenceData {
   source: 'lhraw' | 'sample';
   entities: EntityRef[];
+  /**
+   * Operating entities the signed-in user can see in the semantic model (Q0,
+   * ADR-0006 §8.2: RLS probe). The Group view needs both. Absent when the model
+   * could not be asked (offline), in which case nothing is gated on it.
+   */
+  visibleEntities?: OperatingEntity[];
   months: MonthRef[];
   /** Last month with is_closed = TRUE (N-03). */
   lastClosed: MonthRef;
@@ -117,7 +123,8 @@ export interface ReferenceData {
 }
 
 // ---------------------------------------------------------------------------
-// Figures (numbers) — sample today, lhraw after ADR-0005.
+// Figures (numbers) — from the semantic model zone by zone (ADR-0006 phase 2);
+// the sample figures remain the offline fallback.
 
 export type RowKind = 'sec' | 'grp' | 'leaf' | 'ent' | 'sub' | 'memo' | 'key' | 'ratio';
 
@@ -208,30 +215,37 @@ export interface Profitability {
   by: string;
   column: string;
   options: string[];
+  /** Short name of the comparison behind "vs …" (C-46: the bridge comparison). */
+  compareLabel: string;
   note: string;
   rows: ProfitabilityRow[];
   cmAverageText: string;
   cmAveragePct: number;
 }
 
-/** A zone whose numbers were read from the semantic model (ADR-0006). */
-export interface LiveStatement {
-  source: 'semantic model';
-  requestId: string;
-}
+/** The zones of the one-window layout, each read by its own model query (ADR-0006 §8). */
+export type ZoneKey = 'statement' | 'kpi' | 'bridge' | 'drivers' | 'profitability' | 'context';
+
+/**
+ * Where a zone's numbers stand. `sample` = illustrative mockup figures (offline
+ * only); `loading` = the model query is in flight; `live` = read from the
+ * semantic model; `error` = the model could not answer, and the zone shows the
+ * reason rather than numbers that would not match the filters (LSN-002).
+ */
+export type ZoneStatus =
+  | { kind: 'sample' }
+  | { kind: 'loading' }
+  | { kind: 'live'; requestId: string }
+  | { kind: 'error'; reason: string; requestId?: string };
 
 export interface Figures {
-  /** True when the numbers are illustrative (mockup) rather than read from lh_raw. */
+  /** True when every zone is illustrative (mockup) because no backend could be reached. */
   sample: boolean;
-  /**
-   * Set when `statement` came from the semantic model (ADR-0006 phase 1) while
-   * the other zones are still sample. Absent on an all-sample or all-live result.
-   */
-  liveStatement?: LiveStatement;
-  /** Set when the model read failed and `statement` fell back to the sample rows. */
-  liveFallbackReason?: string;
+  zones: Record<ZoneKey, ZoneStatus>;
+  /** Notices (C-50): the model's `Notices` when live, the mockup's when sample. */
   notices: string[];
-  sliceSummary: string;
+  /** Header data status (N-02): last closed month and refresh time, from the model when live. */
+  dataStatus: string | null;
   statement: StatementRow[];
   financial: KpiTile[];
   operational: KpiTile[];
@@ -249,5 +263,10 @@ export interface ReferenceLoadResult {
 /** The one interface the views depend on. Swap the implementation, not the UI. */
 export interface PnlDataSource {
   loadReference(): Promise<ReferenceLoadResult>;
-  loadFigures(filter: FilterState, reference: ReferenceData): Promise<Figures>;
+  /**
+   * Figures for a filter state. A source that reads zones independently calls
+   * `onUpdate` with a fresh snapshot each time a zone settles (zones still in
+   * flight are `loading`); the returned promise resolves with the final snapshot.
+   */
+  loadFigures(filter: FilterState, reference: ReferenceData, onUpdate?: (figures: Figures) => void): Promise<Figures>;
 }

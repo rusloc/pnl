@@ -12,8 +12,6 @@ import { DimRegion } from './DimRegion.js';
 import { DimReportLine } from './DimReportLine.js';
 import { DimSegment } from './DimSegment.js';
 import { DimVersion } from './DimVersion.js';
-import { FactFxRate } from './FactFxRate.js';
-import { FactPl } from './FactPl.js';
 
 export { DimAccount } from './DimAccount.js';
 export { DimChannel } from './DimChannel.js';
@@ -24,9 +22,8 @@ export { DimRegion } from './DimRegion.js';
 export { DimReportLine } from './DimReportLine.js';
 export { DimSegment } from './DimSegment.js';
 export { DimVersion } from './DimVersion.js';
-export { FactFxRate } from './FactFxRate.js';
-export { FactPl } from './FactPl.js';
 
+// Dimensions only: the facts are read through the semantic model (ADR-0006).
 const entities = {
   DimAccount,
   DimChannel,
@@ -37,8 +34,6 @@ const entities = {
   DimReportLine,
   DimSegment,
   DimVersion,
-  FactFxRate,
-  FactPl,
 };
 
 // `as const satisfies` keeps the connector and operations literals; `operations`

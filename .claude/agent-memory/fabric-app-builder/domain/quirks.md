@@ -1,5 +1,5 @@
 # Quirks (version-bound)
-<!-- next-id: QRK-004 -->
+<!-- next-id: QRK-005 -->
 
 ### QRK-001 · `connector inspect --name` does not interpolate `${VAR}` in `connectors[].config` · 2026-10-21
 **What:** With `workspaceId: ${LH_RAW_WORKSPACE_ID}` in `rayfin.yml`, `npx rayfin connector inspect --name lhraw --entity acme_pl.dim_entity` fails `Fabric API error: 400 Bad Request`. Same command with literal IDs returns rows. `connector list --json` and `up --dry-run` DO resolve the placeholders.
@@ -29,3 +29,13 @@
 **Hits:** 1 · **Confidence:** high (typings + package docs) · **Tags:** connector, aggregation, dab, groupBy, skill-gap
 **Last-verified:** 2026-10-21 · **Related:** DEC-002
 **Status:** active — skill-patch candidate: add an "Aggregate" section to `data-client.md` and `connectors.md` (chain order, numeric-only, no paging, DAB `in`/`isNull` filters). Bump to 2 hits once the deployed probe returns rows.
+
+### QRK-004 · Every connector request shares rayfin-lib `ApiClient`'s 30 s default timeout; the browser client can raise it, the CLI cannot · 2026-10-22
+**What:** `ApiClient` sets `defaultTimeout = config.timeout || 30000` and aborts each fetch at that limit ("Request timed out after 30000ms", category `network`, misleading hint "The request never reached the service"). The semantic-model connector's browser transport (`SemanticConnectorClient.standaloneTransport` → `apiClient.requestRaw`) and the CLI direct path (`connector invoke`) both run through it. `RayfinClientConfig extends ApiClientConfig`, so `new ConnectorsRayfinClient({ …, timeout: 120_000 })` lifts the limit in the app; `connector invoke` exposes no timeout option, so any DAX slower than ~27 s cannot be probed from the CLI (on 2026-10-22 the Q1 statement with default filters and every `dim_kpi` SUMMARIZECOLUMNS probe timed out there; the sliced Q1 came back in 26 s).
+**Why / Evidence:** `node_modules/@microsoft/rayfin-lib/dist/ApiClient.js:183,445,703`, `ApiClient.d.ts:36` (`timeout?: number`), `rayfin-client/dist/client.d.ts:26`; probes `rayfin/.temp/{q2-*,t1-kpi-value-only,q1-time}.json` 2026-10-22 (all "timed out after 30000ms" at 33–34 s wall). ADR-0006 §3.16 had the deployed timeout as unknown — it is this one.
+**Workaround:** app: `timeout: 120_000` in `packages/frontend/src/lib/rayfin-client.ts`; CLI: split probes into chunks that finish < 25 s, or trust the unit tests + deployed app for the slow shapes.
+**Where:** `fabric-app/packages/frontend/src/lib/rayfin-client.ts`, `fabric-app/rayfin/probes/q2-kpi-smoke.query.json` (the shape that never finishes)
+**Versions:** rayfin-lib 1.36.2 · rayfin-cli 1.36.2 · rayfin-connector-fabric-semanticmodel 1.36.2
+**Hits:** 1 · **Confidence:** high · **Tags:** timeout, api-client, connector-invoke, semantic-model, n-01
+**Last-verified:** 2026-10-22 · **Related:** DEC-003, LSN-005, QRK-001
+**Status:** active — skill-patch candidate (connectors.md: "long DAX needs `timeout` on the client config; `connector invoke` has none")

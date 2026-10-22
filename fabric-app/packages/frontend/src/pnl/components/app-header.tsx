@@ -30,6 +30,8 @@ interface AppHeaderProps {
   breakdownOptions: readonly string[];
   /** True while the figures are sample: Compared with / Break down by are off (LSN-002). */
   sample: boolean;
+  /** Header data status from the model (N-02): "Closed through … · Refreshed …"; null while unknown. */
+  dataStatus: string | null;
 }
 
 export function AppHeader({
@@ -43,9 +45,12 @@ export function AppHeader({
   onBreakdown,
   breakdownOptions,
   sample,
+  dataStatus,
 }: AppHeaderProps) {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const closed = reference.lastClosed;
+  // Q0 (ADR-0006 §8.2): the Group view needs both entities visible to the user.
+  const groupAllowed = reference.visibleEntities === undefined || reference.visibleEntities.length >= 2;
 
   const onTabKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const delta = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
@@ -73,8 +78,8 @@ export function AppHeader({
       <div className="flex flex-wrap items-center justify-between gap-x-[24px] gap-y-[10px]">
         <div className="flex min-w-0 flex-col gap-[2px]">
           <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-slate-600">
-            ACME Group · Management reporting · Actuals closed through {MONTH_SHORT[closed.monthNumber - 1]}{' '}
-            {closed.fiscalYear}
+            ACME Group · Management reporting ·{' '}
+            {dataStatus ?? `Actuals closed through ${MONTH_SHORT[closed.monthNumber - 1]} ${closed.fiscalYear}`}
           </span>
           <div className="flex flex-wrap items-baseline gap-x-[14px] gap-y-[2px]">
             <h1 className="m-0 text-[22px] font-semibold leading-[1.25]">Profit &amp; loss</h1>
@@ -85,13 +90,19 @@ export function AppHeader({
           {COMPANIES.map((c) => {
             const selected = c.code === filter.entity;
             const theme = COMPANY_THEME[c.code];
+            const off = c.code === 'G' && !groupAllowed;
             return (
               <button
                 key={c.code}
                 type="button"
                 aria-pressed={selected}
+                disabled={off}
+                title={off ? 'The consolidated view needs access to both companies in the semantic model' : undefined}
                 onClick={() => onEntity(c.code)}
-                className="box-border flex min-h-[52px] cursor-pointer items-center gap-[10px] rounded-[10px] border py-[6px] pl-[12px] pr-[16px] text-left font-[inherit] text-ink-900"
+                className={cn(
+                  'box-border flex min-h-[52px] items-center gap-[10px] rounded-[10px] border py-[6px] pl-[12px] pr-[16px] text-left font-[inherit] text-ink-900',
+                  off ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                )}
                 style={{
                   borderColor: selected ? theme.acc : '#CDD4DC',
                   boxShadow: selected ? `0 0 0 1px ${theme.acc}` : 'none',

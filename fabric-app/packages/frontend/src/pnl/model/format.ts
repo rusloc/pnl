@@ -2,7 +2,7 @@
 // we produce the text — thousands separators, U+2212 minus, "+" on deltas,
 // 1 decimal in millions, 0 in thousands, 1 decimal on percentages, "pp" on
 // ratio deltas.
-import type { Tone, Units } from './types';
+import type { Currency, Tone, Units } from './types';
 
 export const MINUS = '−';
 
@@ -30,6 +30,21 @@ function signed(value: number, decimals: number, plus: boolean): string {
 export function fmtAmount(value: number | null, units: Units, plus = false): string {
   if (value === null || Number.isNaN(value)) return '';
   return units === 'm' ? signed(value, 1, plus) : signed(value * 1000, 0, plus);
+}
+
+/** Whole number with thousands separators (138726 → "138,726"). */
+export function fmtInt(value: number | null): string {
+  if (value === null || Number.isNaN(value)) return '';
+  return signed(value, 0, false);
+}
+
+/** Currency symbol on KPI tiles and bridge totals (N-06). */
+export const CURRENCY_SYMBOL: Record<Currency, string> = { USD: '$', EUR: '€', GBP: '£' };
+
+/** Amount in display units with its unit letter: 3398.52 → "3,398.5m" / "3,398,522k". */
+export function fmtAmountUnits(value: number | null, units: Units, plus = false): string {
+  const text = fmtAmount(value, units, plus);
+  return text === '' ? '' : `${text}${units}`;
 }
 
 /** Percentage from a value already expressed in percent (49.4 → "49.4%"). */

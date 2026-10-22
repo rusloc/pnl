@@ -7,9 +7,10 @@ import { FilterFlyout } from './components/filter-flyout';
 import { FilterRail } from './components/filter-rail';
 import { NoticeStrip } from './components/notice-strip';
 import { appDataSource } from './data/data-source';
+import { breakdownOptions } from './data/pnl-model-figures';
 import { useFigures, useReference } from './hooks/use-pnl-data';
 import { contextLine, defaultFilters, filterReducer, railSummaries, type FilterAction } from './model/filters';
-import { liveFallbackNotice, MIXED_FIGURES_NOTICE, SAMPLE_FIGURES_NOTICE } from './model/sample-mode';
+import { SAMPLE_FIGURES_NOTICE } from './model/sample-mode';
 import { filterNotices, sliceSummary } from './model/summary';
 import type { EntityCode, FilterState, PanelKey, PnlDataSource, ReferenceData, ViewKey } from './model/types';
 import { themeVars } from './theme/company';
@@ -106,18 +107,17 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
   // LSN-002: while the figures are sample, the pickers that would re-label them are off and
   // the strip says so once (F-34 is not met by the sample path).
   const sample = figures?.sample === true;
-  // ADR-0006 phase 1: the statement is live and follows the month; the other zones stay sample.
-  const monthLive = figures?.liveStatement !== undefined;
+  // C-50: live, the notices are the model's (`Notices`); offline, the sample's plus the filter rules.
+  const noAccess = reference.visibleEntities !== undefined && reference.visibleEntities.length === 0;
   const notices = [
     ...(fallbackReason
       ? [`Reference data (months, versions, regions, slices) is sample: lh_raw could not be read — ${fallbackReason}`]
       : []),
-    ...(figures?.liveFallbackReason ? [liveFallbackNotice(figures.liveFallbackReason)] : []),
-    ...(sample ? [monthLive ? MIXED_FIGURES_NOTICE : SAMPLE_FIGURES_NOTICE] : []),
-    ...filterNotices(filter, reference),
+    ...(noAccess ? ['You have no P&L access: the semantic model shows you no company. Ask for a role on the model.'] : []),
+    ...(sample ? [SAMPLE_FIGURES_NOTICE, ...filterNotices(filter, reference)] : []),
     ...(figures?.notices ?? []),
   ];
-  const breakdownOptions = figures?.profitability.options ?? [];
+  const breakdown = sample ? (figures?.profitability.options ?? []) : breakdownOptions(filter, reference);
 
   return (
     <div
@@ -142,7 +142,6 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
           reference={reference}
           dispatch={dispatchFilter}
           sample={sample}
-          monthLive={monthLive}
         />
       )}
       <div className="flex min-w-0 flex-auto flex-col">
@@ -155,8 +154,9 @@ function PnlShell({ source, reference, fallbackReason, initialView }: ShellProps
           onEntity={(entity) => dispatchFilter({ type: 'entity', entity })}
           onPatch={(patch) => dispatchFilter({ type: 'set', patch })}
           onBreakdown={(index) => dispatchFilter({ type: 'breakdown', index })}
-          breakdownOptions={breakdownOptions}
+          breakdownOptions={breakdown}
           sample={sample}
+          dataStatus={figures?.dataStatus ?? null}
         />
         <div className="box-border flex min-h-0 flex-auto flex-col gap-[12px] overflow-auto px-[24px] pb-[16px] pt-[14px]">
           <NoticeStrip notices={notices} />

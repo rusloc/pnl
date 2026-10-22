@@ -18,8 +18,6 @@ export interface PanelProps {
   dispatch: (action: FilterAction) => void;
   /** True while the figures are sample: pickers that would re-label them are off (LSN-002). */
   sample: boolean;
-  /** True while the P&L statement is live from the semantic model: the month stays on (ADR-0006 phase 1). */
-  monthLive?: boolean;
 }
 
 const TITLES: Record<PanelKey, [string, (reference: ReferenceData, filter: FilterState) => string]> = {
@@ -45,7 +43,7 @@ interface FilterFlyoutProps extends PanelProps {
   onClose: () => void;
 }
 
-export function FilterFlyout({ panel, wide, defaults, onClose, filter, reference, dispatch, sample, monthLive = false }: FilterFlyoutProps) {
+export function FilterFlyout({ panel, wide, defaults, onClose, filter, reference, dispatch, sample }: FilterFlyoutProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -70,7 +68,7 @@ export function FilterFlyout({ panel, wide, defaults, onClose, filter, reference
   const index = RAIL_GROUPS.findIndex((g) => g.key === panel);
   const [title, subtitle] = TITLES[panel];
   const railWidth = wide ? RAIL_WIDTH.expanded : RAIL_WIDTH.collapsed;
-  const panelProps: PanelProps = { filter, reference, dispatch, sample, monthLive };
+  const panelProps: PanelProps = { filter, reference, dispatch, sample };
   const body: ReactNode =
     panel === 'period' ? (
       <PeriodPanel {...panelProps} />

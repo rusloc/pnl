@@ -5,15 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-import { ConnectionProbe } from './components/connection-probe.component';
 import { PnlApp } from './pnl/pnl-app';
 
-// The P&L report (spec docs/Requirements.md, design docs/design/). Open the app
-// with `#probe` to reach the lhraw connection + aggregation probe instead
-// (manual check for ADR-0005 after a deploy).
+// The P&L report (spec docs/Requirements.md, design docs/design/).
 function App() {
-  const probe = typeof window !== 'undefined' && window.location.hash === '#probe';
-  return probe ? <ConnectionProbe /> : <PnlApp />;
+  return <PnlApp />;
 }
 
 export default App;

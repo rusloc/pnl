@@ -1,0 +1,4 @@
+{
+  "query": "EVALUATE\nSELECTCOLUMNS (\n    INFO.VIEW.MEASURES ()\n    ,\"name\", [Name]\n    ,\"data_type\", [DataType]\n    ,\"folder\", [DisplayFolder]\n    ,\"format\", [FormatString]\n)\nORDER BY [folder], [name]",
+  "resultSetRowCountLimit": 500
+}

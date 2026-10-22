@@ -7,12 +7,10 @@ import { cn } from '@/lib/utils';
 
 import { fmtAmount, fmtPct, fmtPp, pctToneOf, toneOf } from '../model/format';
 import { VERSION_LABEL, VERSION_SHORT, windowLabel } from '../model/filters';
-import { LIVE_STATEMENT_DETAIL, SAMPLE_FIGURES_DETAIL } from '../model/sample-mode';
 import { visibleRows } from '../model/statement-rows';
 import type { EntityCode, Figures, FilterState, RowKind, StatementRow, Tone } from '../model/types';
-import { LiveChip } from '../components/live-chip';
-import { SampleChip } from '../components/sample-chip';
 import { ChevronIcon } from '../components/ui/icons';
+import { ZoneChip, ZoneState } from '../components/zone-state';
 
 const KIND_CLASS: Record<RowKind, string> = {
   sec: 'bg-surface font-medium text-[14px] text-ink-900 border-t-group-rule',
@@ -147,6 +145,7 @@ export function StatementView({ figures, filter, openCodes, onToggleRow }: State
   const rows = useMemo(() => visibleRows(figures.statement, openCodes, filter), [figures.statement, openCodes, filter]);
   const template = `minmax(300px, 1fr) ${columns.map((c) => `${c.width}px`).join(' ')}`;
   const rowHeight = 28;
+  const zone = figures.zones.statement;
   const unavailable =
     filter.layout !== 'variance'
       ? `${filter.layout === 'trend' ? 'Trend' : 'Entity columns'} layout is not built yet; showing Variance.`
@@ -163,6 +162,7 @@ export function StatementView({ figures, filter, openCodes, onToggleRow }: State
       {unavailable && (
         <p className="m-0 border-b border-line-100 px-[16px] py-[6px] text-[12px] text-slate-600">{unavailable}</p>
       )}
+      <ZoneState status={zone} what="P&L statement" />
       <div className="min-h-0 flex-auto overflow-auto">
         <div className="min-w-[1180px] font-ledger-condensed tabular-nums">
           <div className="sticky top-0 z-[3] bg-surface">
@@ -280,11 +280,7 @@ export function StatementView({ figures, filter, openCodes, onToggleRow }: State
           Actual at monthly average rates, budget at budget rates · costs negative · Δ positive when favourable · bar = Δ %
           vs Budget on a ±15% scale · IFRS 18 required subtotal · MPM management-defined measure · IC intercompany
         </span>
-        {figures.liveStatement ? (
-          <LiveChip detail={LIVE_STATEMENT_DETAIL} />
-        ) : (
-          figures.sample && <SampleChip detail={SAMPLE_FIGURES_DETAIL} />
-        )}
+        <ZoneChip status={zone} />
       </p>
     </section>
   );
