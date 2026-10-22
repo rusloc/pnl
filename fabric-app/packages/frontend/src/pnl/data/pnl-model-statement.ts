@@ -1,9 +1,11 @@
-// Live statement (ADR-0006 phase 1): Q1 rows from the semantic model → `StatementRow[]`.
-// The model owns every §7 rule; this file only reshapes rows and scales units:
-// amount cells arrive in millions (param_units pinned to M), ratios as fractions
-// (0.494 → 49.4 %), ratio-row deltas already in percentage points.
+// Live statement (ADR-0006 phase 1, §16): Q1 rows from the semantic model → `StatementRow[]`.
+// The model owns every §7 rule; this file reshapes rows, scales units and derives
+// the variance columns (Δ, Δ %, % NR) from the five level columns with the model's
+// own rules (`model/derive.ts`). Amount cells arrive in millions (param_units
+// pinned to M), ratios as fractions (0.494 → 49.4 %).
 import type { QueryTable } from '@microsoft/rayfin-connector-fabric-semanticmodel';
 
+import { plDelta, plDeltaPct, plPctNr } from '../model/derive';
 import type { FilterState, ReferenceData, RowKind, StatementRow, StatementValues } from '../model/types';
 import {
   cellBoolean,
@@ -36,6 +38,9 @@ const NEUTRAL_DELTA_LINE = 'ETR_PCT';
 
 const REQUIRED = Object.values(C);
 
+/** The line whose Base is the `% NR` denominator (`PL % NR`: `dim_pl_row[line_code] = "NR"`, lines only). */
+const NET_REVENUE_LINE = 'NR';
+
 function scaled(value: number | null, factor: number): number | null {
   return value === null ? null : value * factor;
 }
@@ -49,6 +54,10 @@ export interface LiveStatementResult {
 export function mapStatementRows(table: QueryTable): StatementRow[] {
   const col = indexColumns(table, REQUIRED);
   const read = (row: unknown[], name: string) => row[col.get(name) as number];
+
+  // `PL % NR` divides by the NR line's Base of the same column (same filters, dim_pl_row removed).
+  const nrRow = table.rows.find((row) => cellString(read(row, C.lineCode)) === NET_REVENUE_LINE && !cellBoolean(read(row, C.isLeaf)));
+  const netRevenue = nrRow === undefined ? null : cellNumber(read(nrRow, C.base));
 
   const mapped = table.rows.map((row) => {
     const lineCode = cellString(read(row, C.lineCode));
@@ -67,19 +76,26 @@ export function mapStatementRows(table: QueryTable): StatementRow[] {
     const ratio = kind === 'ratio';
     const num = (name: string) => cellNumber(read(row, name));
     // Ratio rows: levels are fractions → percent; Δ already in pp; no Δ % and no % NR (M-11).
-    const level = (name: string) => (ratio ? scaled(num(name), 100) : num(name));
+    // Derive on the model's raw values (fractions on ratio rows), then scale for display:
+    // ratio levels → percent; Δ on ratio rows is already in pp; Δ % and % NR → percent.
+    const base = num(C.base);
+    const cmpA = num(C.cmpA);
+    const cmpB = num(C.cmpB);
+    const fyBud = num(C.fyBud);
+    const fyLe = num(C.fyLe);
+    const level = (value: number | null) => (ratio ? scaled(value, 100) : value);
     const values: StatementValues = {
-      base: level(C.base),
-      pctNr: ratio ? null : scaled(num(C.pctNr), 100),
-      cmpA: level(C.cmpA),
-      dA: num(C.dA),
-      dApct: ratio ? null : scaled(num(C.dApct), 100),
-      cmpB: level(C.cmpB),
-      dB: num(C.dB),
-      dBpct: ratio ? null : scaled(num(C.dBpct), 100),
-      fyBud: level(C.fyBud),
-      fyLe: level(C.fyLe),
-      fyD: num(C.fyD),
+      base: level(base),
+      pctNr: scaled(plPctNr(base, netRevenue, ratio), 100),
+      cmpA: level(cmpA),
+      dA: plDelta(base, cmpA, ratio),
+      dApct: scaled(plDeltaPct(base, cmpA, ratio), 100),
+      cmpB: level(cmpB),
+      dB: plDelta(base, cmpB, ratio),
+      dBpct: scaled(plDeltaPct(base, cmpB, ratio), 100),
+      fyBud: level(fyBud),
+      fyLe: level(fyLe),
+      fyD: plDelta(fyLe, fyBud, ratio),
     };
     const barFraction =
       values.dApct === null ? null : Math.max(-1, Math.min(1, values.dApct / BAR_SCALE_PCT));

@@ -14,6 +14,11 @@
 - [2026-10-21] Service tests: T-06 headline 24/24 and full 552/552 PASS (max diff 0.0053 USD; 8 ADJ rows BLANK = expected 0); T-01/02, T-03, T-10, T-17, T-07 PASS by value; T-05 FAIL for GROUP only (steps sum 106.30 M short; ELIM step looks like a level, not a delta) → bip (source: observed)
 - [2026-10-21] executeQueries returns Currency measures unscaled (Net Revenue raw = CONVERT DOUBLE); PL * measures are already divided by param_units[divisor] (default 1e6, USD m) (source: observed)
 
+- [2026-10-22] ACME Unified PnL in RAW updated in place (updateDefinition, same item, 43 parts, no .platform) to bip's measures change (T-05 GROUP fix): 175 measures = local; rows unchanged 1,246,392; T-06 24/24 + 552/552, T-05/T-10 54/54 PASS; ELIM bridge step -106.39 M -> -0.09 M (source: observed)
+- [2026-10-22] Service probe timings (executeQueries wall time, warm, 2 runs) before -> after: q1-statement-sliced 20.5-20.9 -> 22.5-25.2 s; q2-kpi-smoke (all 12 KPIs, unchunked) 161-192 -> 87-99 s; q3-bridge-smoke 8.6-8.7 -> 6.6-7.2 s; q3-bridge-p-py 8.9-9.4 -> 6.2-6.6 s (source: observed)
+- [2026-10-22] Translation is row-group SUMX with 2 LOOKUPVALUEs per month x functional currency x version (_Amt Raw); CC uses the selected FY's January BUDGET rate -> pre-translation needs 3 ACT + 9 CC (3 FY x 3 ccy) columns or a default-path-only column (source: observed)
+- [2026-10-22] fact_pl has 5,304 counterparty rows (936 at entity x month x version x region x account x ccy); fact_pl_allocated has none; control totals have no ELIM line codes (elims sit in GROUP GR/VSC/NR) (source: observed)
+
 ## Decisions
 - [2026-10-21] Faithful to source names (no RU→EN in TMDL); bip renames later (source: user)
 - [2026-10-21] Parquet for all extracted tables: exact types, null vs empty string, no ru-RU decimal parsing (source: inferred)

@@ -252,30 +252,104 @@ RETURN
     )
 
 EVALUATE
-// ---------------------------------------------------------------- T-05 bridge: comparison NR + steps = base NR; T-10 FX step = 0 at constant currency
-ADDCOLUMNS (
-    SELECTCOLUMNS ( param_entity_view, "_entity", param_entity_view[entity_view_code] )
-    ,"_test", "T-05/T-10"
-    ,"_base_nr",
-        VAR _entity = [_entity]
-        RETURN
-            CALCULATE ( [Net Revenue], TREATAS ( { _entity }, param_entity_view[entity_view_code] ) )
-    ,"_comparison_plus_steps",
-        VAR _entity = [_entity]
-        RETURN
-            CALCULATE (
-                SUMX ( dim_bridge_step, [_Bridge Value] )
-                ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
-            )
-    ,"_fx_step_constant_currency",
-        VAR _entity = [_entity]
-        RETURN
-            CALCULATE (
-                [Bridge FX]
-                ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
-                ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
-            )
-)
+// ---------------------------------------------------------------- T-05 bridge: comparison NR + steps = base NR for every entity, test window and comparison; T-10 FX step = 0 at constant currency
+VAR _windows =
+    DISTINCT (
+        SELECTCOLUMNS (
+            _scenarios
+            ,"_fiscal_year", [_fiscal_year]
+            ,"_month", [_month]
+            ,"_time_view", [_time_view]
+            ,"_base", [_base]
+        )
+    )
+VAR _cases =
+    CROSSJOIN (
+        _windows
+        ,SELECTCOLUMNS ( param_entity_view, "_entity", param_entity_view[entity_view_code] )
+        ,DATATABLE (
+            "_compare", STRING,
+            {
+                { "B" },
+                { "PY" },
+                { "LE" }
+            }
+        )
+    )
+VAR _rows =
+    ADDCOLUMNS (
+        _cases
+        ,"_end_nr",
+            VAR _entity      = [_entity]
+            VAR _fiscal_year = [_fiscal_year]
+            VAR _month       = [_month]
+            VAR _time_view   = [_time_view]
+            VAR _base        = [_base]
+            VAR _compare     = [_compare]
+            RETURN
+                CALCULATE (
+                    [Net Revenue]
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { _time_view }, param_time_view[time_view_code] )
+                    ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    ,TREATAS ( { _compare }, param_compare_a[choice_code] )
+                )
+        ,"_start_plus_steps",
+            VAR _entity      = [_entity]
+            VAR _fiscal_year = [_fiscal_year]
+            VAR _month       = [_month]
+            VAR _time_view   = [_time_view]
+            VAR _base        = [_base]
+            VAR _compare     = [_compare]
+            RETURN
+                CALCULATE (
+                    SUMX ( dim_bridge_step, [_Bridge Value] )
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { _time_view }, param_time_view[time_view_code] )
+                    ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    ,TREATAS ( { _compare }, param_compare_a[choice_code] )
+                )
+        ,"_fx_step_constant_currency",
+            VAR _entity      = [_entity]
+            VAR _fiscal_year = [_fiscal_year]
+            VAR _month       = [_month]
+            VAR _time_view   = [_time_view]
+            VAR _base        = [_base]
+            VAR _compare     = [_compare]
+            RETURN
+                CALCULATE (
+                    [Bridge FX]
+                    ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                    ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
+                    ,TREATAS ( { _month }, param_period[month_number] )
+                    ,TREATAS ( { _time_view }, param_time_view[time_view_code] )
+                    ,TREATAS ( { _base }, param_base_version[choice_code] )
+                    ,TREATAS ( { _compare }, param_compare_a[choice_code] )
+                    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+                )
+    )
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_test", "T-05/T-10"
+        ,"_entity", [_entity]
+        ,"_fiscal_year", [_fiscal_year]
+        ,"_month", [_month]
+        ,"_time_view", [_time_view]
+        ,"_base", [_base]
+        ,"_compare_a", [_compare]
+        ,"_end_nr_m", ROUND ( [_end_nr] / 1e6, 1 )
+        ,"_diff_usd", [_start_plus_steps] - [_end_nr]
+        ,"_fx_step_cc_usd", [_fx_step_constant_currency]
+        ,"_pass",
+            ABS ( [_start_plus_steps] - [_end_nr] ) < 0.01
+                && ABS ( [_fx_step_constant_currency] ) < 0.01
+    )
+ORDER BY [_entity], [_fiscal_year], [_time_view], [_base], [_compare_a]
 
 EVALUATE
 // ---------------------------------------------------------------- T-17 period-end KPIs read the last month, not a sum (CC, FY2026)

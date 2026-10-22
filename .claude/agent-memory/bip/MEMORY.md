@@ -6,6 +6,6 @@
 
 ## Open threads
 - 2026-10-21 Trucks redesign BUILT (tests green, validator 0/0). Open: USER first open + Refresh, click-test Reset bookmark, confirm main-agent defaults, re-save to refresh diagram layout
-- 2026-10-21 perf: P&L 12-col matrix ~7.7 s (+2 s open blocks), KPI view ~45 s per tile set; N-01 2 s far away — perf round 2 (visual-calc deltas, KPI deltas)
+- 2026-10-22 perf pass applied (T-05 fix, Bridge Volume set-based, merged SWITCH branches, FY LE one window). Open: ginee republish; physical asks (pre-translated amounts, elimination rows); fin option Q1 = 5 base columns; N-01 not reachable on this design
 - 2026-10-21 USER first open after the Ledger rebuild: checklist in `docs/ADD/features/pbi-report-layout.md`; button-slicer selected style unresolved
-- USER to run `tests/control-totals.dax` in Desktop (every `_pass` TRUE)
+- `tests/control-totals.dax` all TRUE on 2026-10-22 (T-06 552/552, T-05 54/54) via ADOMD; USER re-run in Desktop optional

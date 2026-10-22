@@ -19,12 +19,15 @@
 - Verify on MS Learn: Direct Lake decimal mapping
 - ACME Unified PnL in RAW: refreshed OK (28 s) via connection acme-lh_raw-sql-dev; T-06 green; T-05 GROUP fails → bip; CLAUDE.md row proposed, not written. Ask USER if acme_gql is the app's
 - Per-table docs in docs/model/ not written
+- ADR pending (USER): (a) pre-translated amounts, (b) materialised ELIM rows — notes in models.md 2026-10-22
 
 ## Handoffs to bip
-- [2026-10-21] T-05 GROUP: comparison + steps 106.30 M short of base NR; ELIM step -106.39 M looks like a level, not a delta
+- [2026-10-22] Bridge Value now returns unrounded values (was 4 dp) after the T-05 change: confirm intended
+- [2026-10-21] (fixed 2026-10-22, 54/54) T-05 GROUP: comparison + steps 106.30 M short of base NR; ELIM step -106.39 M looks like a level, not a delta
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-22 (delegated): updateDefinition of ACME Unified PnL in RAW (measures only), no refresh needed, all tests green, probe timings before/after in models.md; Ops → ops.md
 - 2026-10-21 (delegated): Spark notebook rejected → load_acme_pl.py; dry-run + write + SQL verify green. Notebook draft in _removed/.
 - 2026-10-21 (delegated): Trucks model export → Trucks.SemanticModel (Import/Parquet), report rebound byPath, live baseline tests self-tested green; read-only on the Service.
 - 2026-10-21 (delegated): PnL model created in RAW via REST (create-only); first refresh failed on missing explicit connection; 48 Currency measures listed for fin (CAND-002).

@@ -24,6 +24,10 @@
 - [2026-10-21] Fabric Create Connection API cannot create OAuth2 credentials; SQL type allows Basic / OAuth2 / ServicePrincipal / WorkspaceIdentity, Fabric SQL endpoints take Entra only, RAW has no workspace identity → OAuth2 binding = portal sign-in (source: observed)
 - [2026-10-21] executeQueries on a never-refreshed model: INFO.VIEW.MEASURES works (DataType per measure), queries touching calculated tables fail "calculated table ... does not" (not processed) (source: observed)
 
+- [2026-10-22] updateDefinition (Fabric REST) on an Import model, measures-only change: LRO Succeeded, `/result` returns 400 OperationHasNoResult (normal); data stays processed, calculated tables recalculate (NOW() moved), connection binding kept; no refresh needed (source: observed)
+- [2026-10-22] getDefinition re-serialises TMDL (measure order, quoting like _Acc vs '_Acc'): compare measure by measure, not with diff (source: observed)
+- [2026-10-22] az and fab both signed in as the RAW Admin identity in the work tenant (bip's "az = other account" did not hold today) (source: observed)
+
 ## Decisions
 - [2026-10-21] No Spark for the data layer (cost) (source: user)
 

@@ -115,7 +115,7 @@ describe('filterVars', () => {
 });
 
 describe('buildStatementQuery (Q1)', () => {
-  it('reads dim_pl_row as a lines half and a leaves half (ISINSCOPE contract) and the eleven statement measures through CONVERT ( …, DOUBLE )', () => {
+  it('reads dim_pl_row as a lines half and a leaves half (ISINSCOPE contract) and only the five level measures through CONVERT ( …, DOUBLE ) — Δ, Δ % and % NR are derived in the app (ADR-0006 §16)', () => {
     const dax = buildStatementQuery(defaults, reference);
     expect(dax).toContain('    VAR _lines =\n        SELECTCOLUMNS (\n            SUMMARIZECOLUMNS (\n                dim_pl_row[row_key]\n                ,dim_pl_row[line_code]');
     expect(dax).toContain(',TREATAS ( { FALSE () }, dim_pl_row[is_leaf] )');
@@ -131,36 +131,43 @@ describe('buildStatementQuery (Q1)', () => {
     expect(dax).toContain('EVALUATE\nUNION ( _lines, _leaves )');
     for (const [alias, measure] of [
       ['@base', 'PL Base'],
-      ['@pct_nr', 'PL % NR'],
       ['@cmp_a', 'PL Compare A'],
-      ['@d_a', 'PL Δ A'],
-      ['@d_a_pct', 'PL Δ A %'],
       ['@cmp_b', 'PL Compare B'],
-      ['@d_b', 'PL Δ B'],
-      ['@d_b_pct', 'PL Δ B %'],
       ['@fy_bud', 'PL FY Budget'],
       ['@fy_le', 'PL FY LE'],
-      ['@fy_d', 'PL Δ LE vs Budget'],
     ]) {
       expect(dax).toContain(`,"${alias}", CONVERT ( [${measure}], DOUBLE )`);
     }
+    for (const measure of ['PL Δ A', 'PL Δ A %', 'PL Δ B', 'PL Δ B %', 'PL % NR', 'PL Δ LE vs Budget']) {
+      expect(dax).not.toContain(`[${measure}]`);
+    }
+    expect(dax.match(/CONVERT \(/g)).toHaveLength(10);
     expect(dax.endsWith('\nORDER BY [line_sort], [account_sort]')).toBe(true);
     oneEvaluate(dax);
   });
 });
 
 describe('KPI queries (Q2)', () => {
-  it('reads the entity’s dim_kpi rows without measures, then values as one scalar CALCULATE per code (no SWITCH fan-out)', () => {
+  it('reads the entity’s dim_kpi rows without measures, then values as one scalar CALCULATE per code (no SWITCH fan-out) with the comparison values instead of KPI Δ (ADR-0006 §16)', () => {
     expect(buildKpiMetaQuery('G')).toBe('EVALUATE\nFILTER ( dim_kpi, dim_kpi[entity_view_code] = "GROUP" )\nORDER BY dim_kpi[slot]');
     const dax = buildKpiValuesQuery(defaults, reference, ['NR', 'GM_PCT']);
     oneEvaluate(dax);
     expect(dax).not.toContain('SUMMARIZECOLUMNS');
+    expect(dax).not.toContain('[KPI Δ');
     expect(dax).toContain('"@NR", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )');
-    expect(dax).toContain('"@NR_a", CONVERT ( CALCULATE ( [KPI Δ A], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )');
-    expect(dax).toContain('"@GM_PCT_b", CONVERT ( CALCULATE ( [KPI Δ B], TREATAS ( { "GM_PCT" }, dim_kpi[kpi_code] ) ), DOUBLE )');
+    expect(dax).toContain('"@NR_cmp_a", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ), DOUBLE )');
+    expect(dax).toContain('"@GM_PCT_cmp_b", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "GM_PCT" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ) ), DOUBLE )');
     expect(dax).toContain('"@GM_PCT_s", CALCULATE ( [KPI Secondary], TREATAS ( { "GM_PCT" }, dim_kpi[kpi_code] ) )');
     expect(dax.endsWith(')\n    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units\n)')).toBe(true);
-    expect(kpiAliases('ARR')).toEqual({ value: '@ARR', dA: '@ARR_a', dB: '@ARR_b', secondary: '@ARR_s' });
+    expect(kpiAliases('ARR')).toEqual({ value: '@ARR', cmpA: '@ARR_cmp_a', cmpB: '@ARR_cmp_b', secondary: '@ARR_s' });
+  });
+
+  it('skips the comparison column of a Compare set to None (the model’s KPI Δ is blank there anyway)', () => {
+    const dax = buildKpiValuesQuery({ ...defaults, compareB: 'NONE' }, reference, ['NR']);
+    expect(dax).toContain('"@NR_cmp_a"');
+    expect(dax).not.toContain('"@NR_cmp_b"');
+    expect(dax).not.toContain('CMP_B');
+    expect(buildKpiValuesQuery({ ...defaults, compareA: 'NONE', compareB: 'NONE' }, reference, ['NR']).match(/CALCULATE \(/g)).toHaveLength(2);
   });
 
   it('refuses a kpi_code that is not the model’s shape and an empty chunk', () => {

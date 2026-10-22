@@ -1,9 +1,11 @@
-// Q1 rows → StatementRow[] (ADR-0006 phase 1). The fixture carries the model's
-// unscaled-to-millions `PL *` values for Consumer Products, FY2026 YTD Sep, Actual
-// vs Budget, taken from data/acme_pl_dummy_data/checks/control_totals_usd.csv
+// Q1 rows → StatementRow[] (ADR-0006 phase 1, §16). The fixture carries the model's
+// unscaled-to-millions `PL *` level values for Consumer Products, FY2026 YTD Sep,
+// Actual vs Budget, taken from data/acme_pl_dummy_data/checks/control_totals_usd.csv
 // (rows `P,ACT,FY2026 YTD Sep,*` and `P,BUD,FY2026 YTD Sep,*`), so the mapped
-// statement must print the same figures as the control totals and as the sample
-// statement ("3,398.5", "−66.3" in pnl-app.spec) — T-06 at the app boundary.
+// statement — Δ, Δ % and % NR derived in the app — must print the same figures as
+// the control totals and as the sample statement ("3,398.5", "−66.3" in
+// pnl-app.spec) — T-06 at the app boundary. Parity with the model's own `PL Δ *`
+// columns is proven in pnl-model-statement.parity.spec.ts.
 import type { ExecuteQueryInput, QueryTable, SemanticModelQueryResult } from '@microsoft/rayfin-connector-fabric-semanticmodel';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -25,8 +27,7 @@ const M = 1_000_000;
 const COLUMNS = [
   'dim_pl_row[row_key]', 'dim_pl_row[line_code]', 'dim_pl_row[line_label]', 'dim_pl_row[row_type]', 'dim_pl_row[is_key]',
   'dim_pl_row[tag]', 'dim_pl_row[account_code]', 'dim_pl_row[account_label]', 'dim_pl_row[is_leaf]', 'dim_pl_row[line_sort]',
-  'dim_pl_row[account_sort]', '[@base]', '[@pct_nr]', '[@cmp_a]', '[@d_a]', '[@d_a_pct]', '[@cmp_b]', '[@d_b]', '[@d_b_pct]',
-  '[@fy_bud]', '[@fy_le]', '[@fy_d]',
+  'dim_pl_row[account_sort]', '[@base]', '[@cmp_a]', '[@cmp_b]', '[@fy_bud]', '[@fy_le]',
 ].map((name) => ({ name, dataType: 'String' }));
 
 interface Spec {
@@ -44,18 +45,15 @@ interface Spec {
   ratio?: boolean;
 }
 
-/** What the model returns for one row: amounts in millions (units pinned to M), ratios as fractions, pp on ratio Δ. */
+/** What the model returns for one row: level columns only — amounts in millions (units pinned to M), ratios as fractions. */
 function row(s: Spec): unknown[] {
   const leaf = s.account !== undefined;
   const scale = s.ratio ? 1 : 1 / M;
   const base = s.act === null ? null : s.act * scale;
   const cmpA = s.bud === null ? null : s.bud * scale;
-  const dA = base === null || cmpA === null ? null : s.ratio ? (base - cmpA) * 100 : base - cmpA;
-  const dApct = s.ratio || base === null || cmpA === null ? null : (base - cmpA) / Math.abs(cmpA);
-  const pctNr = s.ratio || base === null ? null : s.act! / CT.ACT.NR;
   return [
     s.key, s.line, s.label, s.type, s.isKey ?? false, s.tag ?? '', s.account?.[0] ?? '', s.account?.[1] ?? '', leaf, s.sort,
-    s.account?.[2] ?? 0, base, pctNr, cmpA, dA, dApct, null, null, null, null, null, null,
+    s.account?.[2] ?? 0, base, cmpA, null, null, null,
   ];
 }
 

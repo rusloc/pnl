@@ -36,6 +36,6 @@
 **Workaround:** app: `timeout: 120_000` in `packages/frontend/src/lib/rayfin-client.ts`; CLI: split probes into chunks that finish < 25 s, or trust the unit tests + deployed app for the slow shapes.
 **Where:** `fabric-app/packages/frontend/src/lib/rayfin-client.ts`, `fabric-app/rayfin/probes/q2-kpi-smoke.query.json` (the shape that never finishes)
 **Versions:** rayfin-lib 1.36.2 · rayfin-cli 1.36.2 · rayfin-connector-fabric-semanticmodel 1.36.2
-**Hits:** 1 · **Confidence:** high · **Tags:** timeout, api-client, connector-invoke, semantic-model, n-01
-**Last-verified:** 2026-10-22 · **Related:** DEC-003, LSN-005, QRK-001
+**Hits:** 2 · **Confidence:** high · **Tags:** timeout, api-client, connector-invoke, semantic-model, n-01
+**Last-verified:** 2026-10-22 (16:05: the full old-shape default Q1 timed out again at 30 s; captured as its `_lines` / `_leaves` halves instead — the split-under-25-s workaround holds) · **Related:** DEC-003, LSN-005, LSN-006, QRK-001
 **Status:** active — skill-patch candidate (connectors.md: "long DAX needs `timeout` on the client config; `connector invoke` has none")

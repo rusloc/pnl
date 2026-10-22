@@ -45,14 +45,19 @@ const KPI_META = table(
 );
 
 // --- Q2b: values (probe k1-fin-a: NR, ORG_GROWTH, GM_PCT, GTN_PCT; t2: UNITS, NR_PER_UNIT) ---
+// Since ADR-0006 §16 the query returns the comparison values (`KPI Value` under
+// CMP_A / CMP_B) instead of `KPI Δ A/B`; the comparisons below are the ones that
+// reproduce the deltas the model returned on 2026-10-22 (−1.9 % / +8.2 % on NR,
+// −0.41 pp / +0.03 pp on GM %, …). Parity with the model's `KPI Δ *` is proven in
+// pnl-model-figures.parity.spec.ts.
 const KPI_VALUES: QueryTable[] = [
   table(
-    ['[@NR]', '[@NR_a]', '[@NR_b]', '[@NR_s]', '[@ORG_GROWTH]', '[@ORG_GROWTH_a]', '[@ORG_GROWTH_b]', '[@ORG_GROWTH_s]', '[@GM_PCT]', '[@GM_PCT_a]', '[@GM_PCT_b]', '[@GM_PCT_s]'],
-    [[3398.5219426605, -0.019128599306347662, 0.08246880445391276, null, 0.060786957516311135, -3.016150456932576, 6.0786957516311135, 'Reported +8.2%', 0.4941001143709982, -0.41203953323923903, 0.03054340767127961, null]]
+    ['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]', '[@ORG_GROWTH]', '[@ORG_GROWTH_cmp_a]', '[@ORG_GROWTH_cmp_b]', '[@ORG_GROWTH_s]', '[@GM_PCT]', '[@GM_PCT_cmp_a]', '[@GM_PCT_cmp_b]', '[@GM_PCT_s]'],
+    [[3398.5219426605, 3464.7986884489997, 3139.6026644619997, null, 0.060786957516311135, 0.0909484620856369, 0, 'Reported +8.2%', 0.4941001143709982, 0.4982205097033906, 0.4937946802942854, null]]
   ),
   table(
-    ['[@GTN_PCT]', '[@GTN_PCT_a]', '[@GTN_PCT_b]', '[@GTN_PCT_s]', '[@UNITS]', '[@UNITS_a]', '[@UNITS_b]', '[@UNITS_s]', '[@NR_PER_UNIT]', '[@NR_PER_UNIT_a]', '[@NR_PER_UNIT_b]', '[@NR_PER_UNIT_s]'],
-    [[0.21348738290488004, 0.2684416640451187, 0.07506272058351582, null, 419.838143, -0.0171, 0.039, null, 8.094838449827318, -0.002, 0.042, null]]
+    ['[@GTN_PCT]', '[@GTN_PCT_cmp_a]', '[@GTN_PCT_cmp_b]', '[@GTN_PCT_s]', '[@UNITS]', '[@UNITS_cmp_a]', '[@UNITS_cmp_b]', '[@UNITS_s]', '[@NR_PER_UNIT]', '[@NR_PER_UNIT_cmp_a]', '[@NR_PER_UNIT_cmp_b]', '[@NR_PER_UNIT_s]'],
+    [[0.21348738290488004, 0.21080296626442885, 0.21273675569904488, null, 419.838143, 427.1422759182012, 404.0790596727623, null, 8.094838449827318, 8.111060570969256, 7.768558972962877, null]]
   ),
 ];
 
@@ -99,10 +104,20 @@ describe('KPI tiles (§5)', () => {
     expect(kpiValueText(null, 'AMT', filter, false)).toBe('n/a');
   });
 
-  it('omits a comparison set to None and refuses a result without the chunk columns', () => {
+  it('omits a comparison set to None (and does not need its column) and refuses a result without the chunk columns', () => {
     const { financial } = mapKpiTiles(meta, KPI_VALUES, { ...filter, compareB: 'NONE' });
     expect(financial[0].deltas.map((d) => d.name)).toEqual(['vs Budget']);
+    const noCmpB = KPI_VALUES.map((t) => ({ columns: t.columns.filter((c) => !c.name.endsWith('_cmp_b]')), rows: [t.rows[0].filter((_, i) => !t.columns[i].name.endsWith('_cmp_b]'))] }));
+    expect(mapKpiTiles(meta, noCmpB, { ...filter, compareB: 'NONE' }).financial[0].deltas.map((d) => d.text)).toEqual(['−1.9%']);
+    expect(() => mapKpiTiles(meta, noCmpB, filter)).toThrow(/missing column @NR_cmp_b/);
     expect(() => mapKpiTiles(meta, [KPI_VALUES[0]], filter)).toThrow(/missing column @GTN_PCT/);
+  });
+
+  it('shows n/a when the model returns a blank comparison or value (KPI Δ rule: blank, never 0)', () => {
+    const blanks = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]'], [[3398.5, null, 0, null]])];
+    const [nr] = mapKpiTiles(meta.filter((m) => m.code === 'NR'), blanks, filter).financial;
+    expect(nr.deltas.map((d) => d.text)).toEqual(['n/a', 'n/a']);
+    expect(nr.deltas.map((d) => d.tone)).toEqual(['neutral', 'neutral']);
   });
 });
 

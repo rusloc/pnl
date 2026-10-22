@@ -43,9 +43,16 @@ Keys and technical columns are hidden; the field list shows only slicer labels a
 | C-36, D-33 Group | `_Amt Entity` + `_Elim Amount`: both entities plus minus the counterparty rows of blocks GR and VSC (only where their `ELIM_*` account is in the filter), so leaves keep entity amounts and eliminations show on their own rows. |
 | C-31 allocation | Below-CM lines come from `fact_pl_allocated`, so every slice filter reconciles (T-03). |
 | K-23 period-end KPIs | ARR and active merchants re-evaluate the base at the last month of the window. |
+| C-40 bridge, T-05 | `_Bridge Value` per `dim_bridge_step`: comparison NR, then volume and price / mix (Consumer Products; `Bridge Volume` is one grouped pass over the 300 lowest slices), service lines (Commerce Cloud) or entities plus eliminations (ACME Group; `_Bridge Elim Change` = change of the eliminated IC revenue at constant currency), then FX. Comparison + steps = base NR for every entity, test window and comparison (T-05 test, 2026-10-22). |
 | F-14, N-06 display units | Format strings never scale (Power BI renders Excel-style trailing commas literally). Measures bound to visuals divide by `_Units Divisor` (`param_units[divisor]`) and use plain formats: millions `#,0.0`, thousands `#,0`, % 1 dp, take rate 2 dp, ratio-row Δ in pp. Engine measures, ratios, Δ % and the DAX tests stay unscaled. |
 
 An offline replica of these rules in Python reconciles all 552 rows of `control_totals_usd.csv` to within 0.01 USD (2026-10-21). The same check runs in the model via `pbi-report/tests/control-totals.dax`.
+
+## Query performance (measured 2026-10-22, Desktop)
+
+- Every query is formula-engine bound (storage engine < 10 %). A large share is query-plan building: each measure reference is expanded into its full engine chain, and every SWITCH / IF branch adds its chain to the plan whether it runs or not (a grid over `dim_kpi` with an empty result still costs ~5 s; the statement query with an empty result ~5 s). Keep branches few: steps or KPIs with the same formula share one branch.
+- Statement measures do not share work: `PL Δ A` re-evaluates `_PL Base` and `_PL Compare A`, so one statement row costs about 19 engine evaluations for the 11 columns.
+- Per evaluation, the month × currency × version translation iterator in `_Amt Raw` and the Group elimination branch in `_Amt Entity` are the largest costs; both only shrink with a physical change (pre-translated amounts, materialised elimination rows), proposed to ginee on 2026-10-22 (physical layer, ADR-worthy).
 
 ## Not in this draft
 

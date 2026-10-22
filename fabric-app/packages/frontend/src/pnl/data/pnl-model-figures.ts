@@ -3,11 +3,13 @@
 // this file reshapes rows, applies display units / signs / formats (F-14 … F-16,
 // N-06) and derives favourable / unfavourable from the sign the model returns.
 // Amounts arrive in millions (param_units pinned to M), ratios as fractions
-// (0.494 → 49.4 %), percent-KPI deltas already in percentage points.
+// (0.494 → 49.4 %); KPI Δ are derived from the value / comparison pairs with the
+// model's `KPI Δ *` rule (`model/derive.ts`, ADR-0006 §16).
 import type { QueryTable } from '@microsoft/rayfin-connector-fabric-semanticmodel';
 
 import { VERSION_SHORT } from '../model/filters';
 import { bridgeGeometry, type BridgeInput } from '../model/bridge-geometry';
+import { kpiDelta } from '../model/derive';
 import { CURRENCY_SYMBOL, fmtAmount, fmtAmountUnits, fmtInt, fmtPct, fmtPp, roundTo, toneOf } from '../model/format';
 import type {
   Bridge,
@@ -128,7 +130,12 @@ function price(value: number): string {
 
 /** Δ text by value type: percent KPIs in pp, amount KPIs in % (K-20). */
 function kpiDeltaText(delta: number | null, valueType: string): string {
-  return valueType === 'PCT' || valueType === 'PCT2' ? fmtPp(delta) : fmtPct(delta === null ? null : delta * 100, true);
+  return isPercentKpi(valueType) ? fmtPp(delta) : fmtPct(delta === null ? null : delta * 100, true);
+}
+
+/** `dim_kpi.value_type` of the percent KPIs: Δ in pp (the test the model's `KPI Δ *` make). */
+function isPercentKpi(valueType: string): boolean {
+  return valueType === 'PCT' || valueType === 'PCT2';
 }
 
 /** Δ colour follows better_when (K-21); neutral KPIs are never coloured. */
@@ -155,10 +162,12 @@ export function mapKpiTiles(meta: readonly KpiMeta[], values: readonly QueryTabl
   }
   const tiles = meta.map((m): KpiTile & { group: KpiMeta['group'] } => {
     const a = kpiAliases(m.code);
-    for (const alias of [a.value, a.dA, a.dB, a.secondary]) {
+    const compares = ([[filter.compareA, a.cmpA], [filter.compareB, a.cmpB]] as const).filter(([version]) => version !== 'NONE');
+    for (const alias of [a.value, a.secondary, ...compares.map(([, alias]) => alias)]) {
       if (!cells.has(alias)) throw new PnlModelError('query', `KPI values: missing column ${alias}`);
     }
     const growth = GROWTH_KPIS.has(m.code);
+    const value = cellNumber(cells.get(a.value));
     const deltas: KpiDelta[] = [];
     const secondary = cellString(cells.get(a.secondary));
     if (secondary !== '') {
@@ -166,16 +175,15 @@ export function mapKpiTiles(meta: readonly KpiMeta[], values: readonly QueryTabl
       deltas.push({ name: space === -1 ? secondary : secondary.slice(0, space), text: space === -1 ? '' : secondary.slice(space + 1), tone: 'neutral', arrow: false });
     }
     if (!growth) {
-      for (const [version, alias] of [[filter.compareA, a.dA], [filter.compareB, a.dB]] as const) {
-        if (version === 'NONE') continue;
-        const d = cellNumber(cells.get(alias));
+      for (const [version, alias] of compares) {
+        const d = kpiDelta(value, cellNumber(cells.get(alias)), isPercentKpi(m.valueType), false);
         deltas.push({ name: compareName(version), text: d === null ? 'n/a' : kpiDeltaText(d, m.valueType), tone: kpiTone(d, m.betterWhen, m.valueType), arrow: true });
       }
     }
     return {
       label: m.label,
       hint: m.definition,
-      value: kpiValueText(cellNumber(cells.get(a.value)), m.valueType, filter, growth),
+      value: kpiValueText(value, m.valueType, filter, growth),
       deltas,
       group: m.group,
     };

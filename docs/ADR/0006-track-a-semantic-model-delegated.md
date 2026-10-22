@@ -1,6 +1,6 @@
 # ADR-0006 — Track A reads the P&L through a semantic model (`fabric-semanticmodel`, delegated auth, RLS in the model)
 
-- **Status:** accepted, phase 1 only (one filter, no RLS); decided by the main agent under USER delegation, 2026-10-21. Phase 1 = `fabric-semanticmodel` connector `pnlModel` (delegated), Track B model reused in RAW, the P&L statement live and driven by the Month filter; RLS roles, demo users, Build grants and the remaining zones/filters are later phases. Supersedes ADR-0005 (see §12; status edit there not yet applied).
+- **Status:** accepted, phase 1 only (one filter, no RLS); decided by the main agent under USER delegation, 2026-10-21. Phase 1 = `fabric-semanticmodel` connector `pnlModel` (delegated), Track B model reused in RAW, the P&L statement live and driven by the Month filter; RLS roles, demo users, Build grants and the remaining zones/filters are later phases. Supersedes ADR-0005 (see §12; status edit applied 2026-10-22). Amended 2026-10-22 (§16): Q1 / Q2b fetch level columns only, variances derived client-side with parity tests; connector failure shows an error panel, never sample numbers.
 - **Date:** 2026-10-21
 - **Decider:** USER
 - **Spec:** `docs/Requirements.md` §5 (K-01 … K-23), §6 (F-01 … F-37, esp. F-30 … F-36), §7 (C-01 … C-50), §8 (D-21, D-30 … D-33), N-01, N-04, §10 (T-01 … T-06, T-14, T-15, T-18) · ADR-0003 (lh_raw.acme_pl) · ADR-0004 (one-window layout) · ADR-0005 (superseded)
@@ -299,9 +299,9 @@ Every call carries `resultSetRowCountLimit` (Q1: 500; Q2: 50; Q3: 20; Q4: 20; Q5
 | `fabric-semanticmodel` with `application` auth | Not allowed by the platform (§3.2) and would defeat N-04. |
 | New app-only model | Duplicate engine and tests (§4). |
 
-## 12. Supersession of ADR-0005 (proposed edit, not applied)
+## 12. Supersession of ADR-0005 (edit applied 2026-10-22)
 
-Replace the status line of `docs/ADR/0005-track-a-pnl-data-access.md` with:
+The status line of `docs/ADR/0005-track-a-pnl-data-access.md` now reads:
 
 ```markdown
 - **Status:** superseded by ADR-0006 on 2026-10-21 — the USER chose option (c) (semantic-model connector, delegated auth, RLS in the model). Option (a) was prototyped (`pnl/data/pnl-aggregate.prototype.ts`, `pnl/model/fx.ts`) and never deployed.
@@ -366,3 +366,30 @@ Total: about 1.5 to 2 working days of fin effort once bip's contract and ginee's
 3. Phase 1 static entity roles now, dynamic `sec_user_scope` (entity × region) later — agreed?
 4. May fin's own identity hold Build on the model for the CLI probe loop (§14 step 4)?
 5. After the switch: approve removing the ADR-0005 prototype code and, after phase 2, the `lhraw` connector?
+
+## 16. Amendments (2026-10-22, main agent under USER delegation)
+
+### 16.1 Q1 / Q2b contract: level columns only, variances derived in the app
+
+**Finding (bip, Performance Analyzer on the published model):** every query is formula-engine bound and most of the cost is plan building. The statement columns share nothing — `PL Δ A` re-evaluates both `_PL Base` and `_PL Compare A`, `PL Δ A %` again, `PL % NR` adds the NR line — so one Q1 row cost about 19 engine evaluations; the number of group-by columns makes no difference.
+
+**Decision.** Q1 requests only the five level measures `PL Base`, `PL Compare A`, `PL Compare B`, `PL FY Budget`, `PL FY LE`. Q2b requests `KPI Value` plus the same measure under `param_eval` `CMP_A` / `CMP_B` (one column per Compare that is not None) instead of `KPI Δ A` / `KPI Δ B`. The app derives `Δ A`, `Δ A %`, `Δ B`, `Δ B %`, `% NR`, `Δ LE vs Budget` and the KPI Δ in `packages/frontend/src/pnl/model/derive.ts` — pure functions that copy the model's rules verbatim from `_measures.tmdl`:
+
+| Model measure | Rule reproduced |
+|---|---|
+| `_PL Δ A` / `_PL Δ B` / `_PL Δ LE` | blank comparison → blank; otherwise base − comparison on signed values (positive is favourable on every line; the sign lives in the amounts, there is no per-line flip); ratio rows × 100 (pp); a blank base counts as 0 (`BLANK () − c = −c`) |
+| `PL Δ A %` / `PL Δ B %` | blank on ratio rows and blank comparison; (base − c) ÷ \|c\|; c = 0 → blank (`DIVIDE`) |
+| `PL % NR` | blank on ratio rows; row value ÷ the NR line's value of the same column; blank value or NR blank / 0 → blank |
+| `KPI Δ A` / `KPI Δ B` | Compare None, blank value or blank comparison → blank; `value_type` PCT / PCT2 → (v − c) × 100 pp; otherwise (v − c) ÷ \|c\|, c = 0 → blank |
+
+The display measures divide amounts by `_Units Divisor` before the variance measures subtract; the app subtracts after. Both are linear, so the results agree to floating-point noise (≤ 1e-9 relative in the parity tests).
+
+**Evidence.** `pnl-model-statement.parity.spec.ts` and `pnl-model-figures.parity.spec.ts` replay live captures of both query shapes (`fixtures/q1-statement-parity.fixture.ts`, `fixtures/q2-kpi-parity.fixture.ts`, 2026-10-22, default and sliced filters): every derived cell equals the model's own column, blank for blank. Timings through `connector invoke` the same afternoon (wall clock incl. ≈ 5 s CLI start-up; model `_meta_refresh` = 2026-10-21 18:00 UTC): Q1 default 31.3 s / 24.4 s / timed out at the CLI's 30 s (old shape; QRK-004) → 8.9 s / 8.3 s / 12.1 s (new); Q1 sliced 29.4 s → 8.2 s; Q2b 4 KPIs 12.7 s → 9.4 s. Net of CLI start-up Q1 drops from ≈ 20–27 s to ≈ 3.5–7 s, in line with bip's −76 %. Whether bip's measure speed-ups were already published at probe time cannot be told from the app side (a metadata-only republish leaves `refreshed_at` unchanged); the before/after pairs above were taken minutes apart against the same model state.
+
+**Not changed.** Q4 largest variances keep `LV Δ` / `LV Δ %` in DAX because the `TOPN` by |Δ| runs server-side; Q5 profitability keeps `Prof NR Δ %` (its comparison NR is not a fetched column); Q3 has no variance column. `KPI Secondary` stays a model measure (text).
+
+**Consequences.** `model/derive.ts` is the only TypeScript that computes a number from other numbers; any change to the model's variance rules must land there too (the parity fixtures catch a drift when re-captured). The measure contract in `docs/model/measure-dictionary.md` can drop `PL Δ *`, `PL % NR` and `KPI Δ *` from the app-contract list — they remain Track B report measures.
+
+### 16.2 Connector failure shows an error panel, never sample numbers
+
+Decided 2026-10-22 with phase 2 (restates the practice in `pnl/data/data-source.ts`): when a zone's query fails or the connector cannot be reached, that zone renders its reason and request id; sample figures are used only when no backend exists at all (`rayfin dev`, tests), flagged `sample: true` with the LSN-002 gating. Numbers that ignore the active filters are never shown under a live-looking header (fin LSN-002).

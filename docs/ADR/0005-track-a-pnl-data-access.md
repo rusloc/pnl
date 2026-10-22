@@ -1,6 +1,6 @@
 # ADR-0005 — Track A: how the Rayfin app gets the P&L numbers
 
-- **Status:** proposed (draft by fin, 2026-10-21). The USER decides.
+- **Status:** superseded by ADR-0006 on 2026-10-21 — the USER chose option (c) (semantic-model connector, delegated auth, RLS in the model). Option (a) was prototyped (`pnl/data/pnl-aggregate.prototype.ts`, `pnl/model/fx.ts`) and never deployed.
 - **Date:** 2026-10-21
 - **Decider:** USER
 - **Spec:** `docs/Requirements.md` §7 (C-01 … C-50), §8 (D-01 … D-35), N-01, N-04, §10 (T-01 … T-06, T-18) · data contract `data/acme_pl_dummy_data/README.md` · ADR-0003 (lh_raw.acme_pl) · ADR-0004 / design brief (one-window layout)

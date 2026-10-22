@@ -187,16 +187,10 @@ export const STATEMENT_COLUMNS = {
   lineSort: 'line_sort',
   accountSort: 'account_sort',
   base: '@base',
-  pctNr: '@pct_nr',
   cmpA: '@cmp_a',
-  dA: '@d_a',
-  dApct: '@d_a_pct',
   cmpB: '@cmp_b',
-  dB: '@d_b',
-  dBpct: '@d_b_pct',
   fyBud: '@fy_bud',
   fyLe: '@fy_le',
-  fyD: '@fy_d',
 } as const;
 
 export const STATEMENT_LIMIT = 500;
@@ -216,22 +210,19 @@ const ROW_COLUMNS = [
 ] as const;
 
 /**
- * Statement measures (`1 Statement` folder): already in the pinned units for amount
- * rows, raw ratios on ratio rows, Δ in pp on ratio rows. They return Number, but every
- * amount is still wrapped in CONVERT ( …, DOUBLE ) in case a measure goes Fixed Decimal.
+ * Statement level measures (`1 Statement` folder): already in the pinned units for
+ * amount rows, raw ratios on ratio rows. Only these five are fetched; Δ, Δ % and % NR
+ * are derived in the app (`model/derive.ts`, ADR-0006 §16) — the model's `PL Δ *` /
+ * `PL % NR` re-evaluate their inputs, so asking for them roughly quadrupled the
+ * engine work per row. They return Number, but every amount is still wrapped in
+ * CONVERT ( …, DOUBLE ) in case a measure goes Fixed Decimal.
  */
 const STATEMENT_MEASURES: readonly [alias: string, measure: string][] = [
   ['@base', 'PL Base'],
-  ['@pct_nr', 'PL % NR'],
   ['@cmp_a', 'PL Compare A'],
-  ['@d_a', 'PL Δ A'],
-  ['@d_a_pct', 'PL Δ A %'],
   ['@cmp_b', 'PL Compare B'],
-  ['@d_b', 'PL Δ B'],
-  ['@d_b_pct', 'PL Δ B %'],
   ['@fy_bud', 'PL FY Budget'],
   ['@fy_le', 'PL FY LE'],
-  ['@fy_d', 'PL Δ LE vs Budget'],
 ];
 
 /** Columns the line part does not group by: the statement measures test `ISINSCOPE ( dim_pl_row[account_label] )`. */
@@ -269,7 +260,7 @@ function statementPart(leaves: boolean, vars: readonly FilterVar[], indent: stri
   ];
 }
 
-/** Q1 — the statement (ADR-0006 §8.2): one row per dim_pl_row line or account, lines first within each line_sort. */
+/** Q1 — the statement (ADR-0006 §8.2, §16): one row per dim_pl_row line or account, lines first within each line_sort; level columns only. */
 export function buildStatementQuery(filter: FilterState, reference: ReferenceData): string {
   const vars = filterVars(filter, reference);
   return [
@@ -312,7 +303,7 @@ export function buildKpiMetaQuery(entity: EntityCode): string {
   ].join('\n');
 }
 
-/** KPI codes per values call; each code costs value + Δ A + Δ B + secondary evaluations. */
+/** KPI codes per values call; each code costs value + one comparison per active Compare + secondary evaluations. */
 export const KPI_CHUNK = 3;
 
 /** Allow-list for a `kpi_code` before it becomes a DAX literal: the model's codes are `[A-Z0-9_]+`. */
@@ -321,27 +312,34 @@ export function kpiCodeLiteral(code: string): string {
   return daxString(code);
 }
 
-/** Aliases a KPI values result carries per code: `@<code>`, `@<code>_a`, `@<code>_b`, `@<code>_s`. */
-export function kpiAliases(code: string): { value: string; dA: string; dB: string; secondary: string } {
-  return { value: `@${code}`, dA: `@${code}_a`, dB: `@${code}_b`, secondary: `@${code}_s` };
+/** Aliases a KPI values result carries per code: `@<code>`, `@<code>_cmp_a`, `@<code>_cmp_b`, `@<code>_s`. */
+export function kpiAliases(code: string): { value: string; cmpA: string; cmpB: string; secondary: string } {
+  return { value: `@${code}`, cmpA: `@${code}_cmp_a`, cmpB: `@${code}_cmp_b`, secondary: `@${code}_s` };
 }
+
+/** `KPI Value` under the comparison evaluation — the `_compare` of the model's `KPI Δ A` / `KPI Δ B`. */
+const KPI_COMPARE_EVAL = { cmpA: 'CMP_A', cmpB: 'CMP_B' } as const;
 
 /**
  * Q2b — values for a chunk of KPI codes in one ROW: `KPI Value` (amounts and counts
- * already divided by the pinned units; ratios as fractions), `KPI Δ A` / `KPI Δ B`
- * (pp × 100 on percent KPIs, a fraction on amount KPIs — the model's rule, K-20) and
- * the `KPI Secondary` sub-line. One row, 4 × chunk columns.
+ * already divided by the pinned units; ratios as fractions), the same value under
+ * `param_eval` CMP_A / CMP_B for each Compare that is not None (the app derives the
+ * Δ with the model's `KPI Δ *` rule, `model/derive.ts`, ADR-0006 §16) and the
+ * `KPI Secondary` sub-line. One row, (2 + active compares) × chunk columns.
  */
 export function buildKpiValuesQuery(filter: FilterState, reference: ReferenceData, codes: readonly string[]): string {
   if (codes.length === 0) throw new PnlQueryError('Empty KPI chunk');
   const vars = filterVars(filter, reference);
+  const compares = (['cmpA', 'cmpB'] as const).filter((c) => filter[c === 'cmpA' ? 'compareA' : 'compareB'] !== 'NONE');
   const cols: string[] = [];
   for (const code of codes) {
     const k = treatas([kpiCodeLiteral(code)], 'dim_kpi[kpi_code]');
     const a = kpiAliases(code);
     cols.push(num(a.value, `CALCULATE ( [KPI Value], ${k} )`));
-    cols.push(num(a.dA, `CALCULATE ( [KPI Δ A], ${k} )`));
-    cols.push(num(a.dB, `CALCULATE ( [KPI Δ B], ${k} )`));
+    for (const c of compares) {
+      const evalFilter = treatas([daxString(KPI_COMPARE_EVAL[c])], 'param_eval[eval_code]');
+      cols.push(num(a[c], `CALCULATE ( [KPI Value], ${k}, REMOVEFILTERS ( param_eval ), ${evalFilter} )`));
+    }
     cols.push(`"${a.secondary}", CALCULATE ( [KPI Secondary], ${k} )`);
   }
   return [

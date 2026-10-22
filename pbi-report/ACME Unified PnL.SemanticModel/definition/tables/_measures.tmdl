@@ -287,8 +287,11 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: c140a1fd-3372-5d99-92f3-3c28c16b3a7d
 
-	/// Group eliminations: minus the counterparty-tagged amounts of every block whose elimination account (ELIM_GR, ELIM_VSC) is in the current account filter. A leaf like GR_S1 gets no elimination; block GR, net revenue and every subtotal below do. Contribution margin and below are unchanged (T-02).
+	/// Group eliminations: minus the counterparty-tagged amounts of every block whose elimination account (ELIM_GR, ELIM_VSC) is in the current account filter. A leaf like GR_S1 gets no elimination; block GR, net revenue and every subtotal below do. Contribution margin and below are unchanged (T-02). Translated like _Amt Raw (P&L amounts of fact_pl only: no metric switch, no allocated table), so the Group branch of _Amt Entity adds a small expression to every query plan.
 	measure '_Elim Amount' =
+			VAR _rep_currency = [_Sel Currency]
+			VAR _is_cc        = [_Sel FX Basis] = "CC"
+			VAR _cc_month     = FORMAT ( [_Sel FY], "0" ) & "-01"
 			VAR _elim_blocks  =
 			    CALCULATETABLE (
 			        VALUES ( dim_account[block_code] )
@@ -298,7 +301,33 @@ table _measures
 			    )
 			VAR _ic_amount    =
 			    CALCULATE (
-			        [_Amt Raw]
+			        SUMX (
+			            CROSSJOIN (
+			                VALUES ( dim_month[month_key] )
+			                ,VALUES ( dim_region[functional_currency] )
+			                ,VALUES ( dim_version[version_key] )
+			            )
+			            ,VAR _currency    = dim_region[functional_currency]
+			             VAR _version     = dim_version[version_key]
+			             VAR _rate_type   = IF ( _is_cc || _version = "BUD", "BUDGET", "ACTUAL_AVG" )
+			             VAR _rate_month  = IF ( _is_cc, _cc_month, dim_month[month_key] )
+			             VAR _local_rate  =
+			                 LOOKUPVALUE (
+			                     fact_fx_rate[local_per_usd]
+			                     ,fact_fx_rate[currency_code], _currency
+			                     ,fact_fx_rate[month_key], _rate_month
+			                     ,fact_fx_rate[rate_type], _rate_type
+			                 )
+			             VAR _rep_rate    =
+			                 LOOKUPVALUE (
+			                     fact_fx_rate[local_per_usd]
+			                     ,fact_fx_rate[currency_code], _rep_currency
+			                     ,fact_fx_rate[month_key], _rate_month
+			                     ,fact_fx_rate[rate_type], _rate_type
+			                 )
+			             RETURN
+			                 CALCULATE ( SUM ( fact_pl[amount_local] ) ) * DIVIDE ( _rep_rate, _local_rate )
+			        )
 			        ,REMOVEFILTERS ( dim_account )
 			        ,TREATAS ( _elim_blocks, dim_account[block_code] )
 			        ,dim_account[is_direct] = TRUE ()
@@ -466,28 +495,6 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 6255e108-fe97-51bf-a34a-0252b0c0ce16
 
-	/// Latest estimate: Actual for closed months plus the latest forecast (is_latest_forecast) for open months.
-	measure '_Amt LE' =
-			VAR _closed       =
-			    CALCULATE (
-			        [_Amt Row]
-			        ,REMOVEFILTERS ( dim_version )
-			        ,dim_version[version_key] = "ACT"
-			        ,KEEPFILTERS ( dim_month[is_closed] = TRUE () )
-			    )
-			VAR _open         =
-			    CALCULATE (
-			        [_Amt Row]
-			        ,REMOVEFILTERS ( dim_version )
-			        ,dim_version[is_latest_forecast] = TRUE ()
-			        ,KEEPFILTERS ( dim_month[is_closed] = FALSE () )
-			    )
-			RETURN
-			    _closed + _open
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 967f9972-b6af-5a00-95a6-43c62b5c9643
-
 	/// Base version amount over the window, in the reporting currency, unscaled. Row-aware on the statement. Re-evaluates as Compare A / B when param_eval is overridden (used for KPI deltas).
 	measure 'Base Amount' = [_Amt Window]
 		formatString: #,0;-#,0;0
@@ -543,15 +550,17 @@ table _measures
 		displayFolder: 2 Versions
 		lineageTag: 277d212d-094b-532d-a379-16d2e4ae1667
 
-	/// Latest estimate for the whole selected fiscal year.
+	/// Latest estimate for the whole selected fiscal year: _Amt Window with base Latest estimate over the full year, so Actual on closed months plus the latest forecast on open months in one evaluation.
 	measure 'FY LE Amount' =
-			VAR _fiscal_year  = [_Sel FY]
-			RETURN
-			    CALCULATE (
-			        [_Amt LE]
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[fiscal_year] = _fiscal_year
-			    )
+			CALCULATE (
+			    [_Amt Window]
+			    ,REMOVEFILTERS ( param_eval )
+			    ,TREATAS ( { "BASE" }, param_eval[eval_code] )
+			    ,REMOVEFILTERS ( param_base_version )
+			    ,TREATAS ( { "LE" }, param_base_version[choice_code] )
+			    ,REMOVEFILTERS ( param_time_view )
+			    ,TREATAS ( { "FY" }, param_time_view[time_view_code] )
+			)
 		formatString: #,0;-#,0;0
 		displayFolder: 2 Versions
 		lineageTag: 0f33f4ea-bf4f-59a8-9247-16047aceaa2d
@@ -1309,8 +1318,142 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 604292cc-91d5-59bb-a94a-c7336ff537ea
 
-	/// Consumer Products volume step, per lowest slice k (region x channel x category x tier): (U base - U comparison) x NRcc comparison / U comparison. A slice without comparison units counts entirely as volume.
+	/// Eliminations step of the Group bridge (C-40): change at constant currency of the eliminated intercompany revenue (account ELIM_GR, base - comparison). Consumer Products + Commerce Cloud + this step = the Group NR change at constant currency, so comparison + steps = base NR (T-05).
+	measure '_Bridge Elim Change' =
+			VAR _elim_base    =
+			    CALCULATE (
+			        [Base Amount]
+			        ,REMOVEFILTERS ( dim_pl_row )
+			        ,KEEPFILTERS ( TREATAS ( { "ELIM_GR" }, dim_account[account_code] ) )
+			        ,REMOVEFILTERS ( param_fx_basis )
+			        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+			    )
+			VAR _elim_cmp     =
+			    CALCULATE (
+			        [Bridge Comparison Amount]
+			        ,REMOVEFILTERS ( dim_pl_row )
+			        ,KEEPFILTERS ( TREATAS ( { "ELIM_GR" }, dim_account[account_code] ) )
+			        ,REMOVEFILTERS ( param_fx_basis )
+			        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+			    )
+			RETURN
+			    _elim_base - _elim_cmp
+		formatString: #,0;-#,0;0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: a76db673-6fb0-5236-8777-50a6f87e4566
+
+	/// Consumer Products volume step, per lowest slice k (region x channel x category x tier): (U base - U comparison) x NRcc comparison / U comparison. A slice without comparison units counts entirely as volume. Set-based: one grouped pass over the slices with the base window (_Amt Window rules, read from param_eval) and the bridge comparison window (Bridge Comparison Amount rules), NR at constant currency (budget rate of the selected year, per region currency). Same result as evaluating the engine per slice.
 	measure 'Bridge Volume' =
+			VAR _view         = [_Sel Entity]
+			VAR _eval         = [_Sel Eval]
+			VAR _compare_a    = [_Sel Compare A]
+			VAR _compare_b    = [_Sel Compare B]
+			VAR _base_choice  =
+			    SWITCH (
+			        _eval
+			        ,"CMP_A"
+			            ,_compare_a
+			        ,"CMP_B"
+			            ,_compare_b
+			        ,[_Sel Base Version]
+			    )
+			VAR _cmp_choice   =
+			    SWITCH (
+			        TRUE ()
+			        ,_compare_a = "NONE" && _compare_b <> "NONE"
+			            ,_compare_b
+			        ,_compare_a = "NONE"
+			            ,"PY"
+			        ,_compare_a
+			    )
+			VAR _start        = [_Win Start]
+			VAR _end          = [_Win End]
+			VAR _base_shift   = IF ( _base_choice = "PY", 12, 0 )
+			VAR _cmp_shift    = IF ( _cmp_choice = "PY", 12, 0 )
+			VAR _versions     = ALL ( dim_version[version_key], dim_version[is_latest_forecast] )
+			VAR _months       = ALL ( dim_month[month_key], dim_month[month_index], dim_month[is_closed] )
+			VAR _base_pairs   =
+			    SELECTCOLUMNS (
+			        FILTER (
+			            CROSSJOIN ( _versions, _months )
+			            ,_base_choice <> "NONE"
+			                && dim_month[month_index] >= _start - _base_shift
+			                && dim_month[month_index] <= _end - _base_shift
+			                && SWITCH (
+			                    _base_choice
+			                    ,"B"
+			                        ,dim_version[version_key] = "BUD"
+			                    ,"LE"
+			                        ,( dim_version[version_key] = "ACT" && dim_month[is_closed] )
+			                            || ( dim_version[is_latest_forecast] && NOT dim_month[is_closed] )
+			                    ,dim_version[version_key] = "ACT"
+			                )
+			        )
+			        ,"@version_key", dim_version[version_key]
+			        ,"@month_key", dim_month[month_key]
+			    )
+			VAR _cmp_pairs    =
+			    SELECTCOLUMNS (
+			        FILTER (
+			            CROSSJOIN ( _versions, _months )
+			            ,dim_month[month_index] >= _start - _cmp_shift
+			                && dim_month[month_index] <= _end - _cmp_shift
+			                && SWITCH (
+			                    _cmp_choice
+			                    ,"B"
+			                        ,dim_version[version_key] = "BUD"
+			                    ,"LE"
+			                        ,( dim_version[version_key] = "ACT" && dim_month[is_closed] )
+			                            || ( dim_version[is_latest_forecast] && NOT dim_month[is_closed] )
+			                    ,dim_version[version_key] = "ACT"
+			                )
+			        )
+			        ,"@version_key", dim_version[version_key]
+			        ,"@month_key", dim_month[month_key]
+			    )
+			VAR _nr_sort      =
+			    CALCULATE (
+			        MAX ( dim_pl_row[line_sort] )
+			        ,REMOVEFILTERS ( dim_pl_row )
+			        ,dim_pl_row[line_code] = "NR"
+			    )
+			VAR _nr_blocks    =
+			    CALCULATETABLE (
+			        VALUES ( dim_report_line[block_code] )
+			        ,REMOVEFILTERS ( dim_report_line )
+			        ,dim_report_line[row_type] = "input_block"
+			        ,dim_report_line[sort_order] < _nr_sort
+			    )
+			VAR _nr_accounts  =
+			    CALCULATETABLE (
+			        VALUES ( dim_account[account_code] )
+			        ,REMOVEFILTERS ( dim_account )
+			        ,TREATAS ( _nr_blocks, dim_account[block_code] )
+			    )
+			VAR _rep_currency = [_Sel Currency]
+			VAR _cc_month     = FORMAT ( [_Sel FY], "0" ) & "-01"
+			VAR _rep_rate     =
+			    LOOKUPVALUE (
+			        fact_fx_rate[local_per_usd]
+			        ,fact_fx_rate[currency_code], _rep_currency
+			        ,fact_fx_rate[month_key], _cc_month
+			        ,fact_fx_rate[rate_type], "BUDGET"
+			    )
+			VAR _factors      =
+			    ADDCOLUMNS (
+			        ALL ( dim_region[region_code], dim_region[functional_currency] )
+			        ,"@factor",
+			            VAR _local_rate  =
+			                LOOKUPVALUE (
+			                    fact_fx_rate[local_per_usd]
+			                    ,fact_fx_rate[currency_code], dim_region[functional_currency]
+			                    ,fact_fx_rate[month_key], _cc_month
+			                    ,fact_fx_rate[rate_type], "BUDGET"
+			                )
+			            RETURN
+			                DIVIDE ( _rep_rate, _local_rate )
+			    )
 			VAR _slices       =
 			    CALCULATETABLE (
 			        SUMMARIZE (
@@ -1325,13 +1468,54 @@ table _measures
 			        ,REMOVEFILTERS ( dim_month )
 			        ,REMOVEFILTERS ( dim_version )
 			    )
+			VAR _rows         =
+			    CALCULATETABLE (
+			        ADDCOLUMNS (
+			            _slices
+			            ,"@units_base",
+			                CALCULATE (
+			                    SUM ( fact_operational[units_sold] )
+			                    ,TREATAS ( _base_pairs, dim_version[version_key], dim_month[month_key] )
+			                )
+			            ,"@units_cmp",
+			                CALCULATE (
+			                    SUM ( fact_operational[units_sold] )
+			                    ,TREATAS ( _cmp_pairs, dim_version[version_key], dim_month[month_key] )
+			                )
+			            ,"@nr_base",
+			                CALCULATE (
+			                    CALCULATE (
+			                        SUM ( fact_pl[amount_local] )
+			                        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
+			                    )
+			                        + SUM ( fact_pl_allocated[amount_local] )
+			                    ,TREATAS ( _base_pairs, dim_version[version_key], dim_month[month_key] )
+			                    ,TREATAS ( _nr_accounts, dim_account[account_code] )
+			                )
+			            ,"@nr_cmp",
+			                CALCULATE (
+			                    CALCULATE (
+			                        SUM ( fact_pl[amount_local] )
+			                        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
+			                    )
+			                        + SUM ( fact_pl_allocated[amount_local] )
+			                    ,TREATAS ( _cmp_pairs, dim_version[version_key], dim_month[month_key] )
+			                    ,TREATAS ( _nr_accounts, dim_account[account_code] )
+			                )
+			        )
+			        ,KEEPFILTERS ( TREATAS ( { "P" }, dim_entity[entity_code] ) )
+			        ,REMOVEFILTERS ( dim_month )
+			        ,REMOVEFILTERS ( dim_version )
+			    )
 			VAR _volume       =
 			    SUMX (
-			        _slices
-			        ,VAR _units_base  = [_Units Base]
-			         VAR _units_cmp   = [_Units Bridge Cmp]
-			         VAR _nr_cc_base  = [_NR CC Base]
-			         VAR _nr_cc_cmp   = [_NR CC Bridge Cmp]
+			        _rows
+			        ,VAR _region      = dim_region[region_code]
+			         VAR _factor      = MAXX ( FILTER ( _factors, dim_region[region_code] = _region ), [@factor] )
+			         VAR _units_base  = [@units_base]
+			         VAR _units_cmp   = [@units_cmp]
+			         VAR _nr_cc_base  = CONVERT ( [@nr_base], DOUBLE ) * _factor
+			         VAR _nr_cc_cmp   = CONVERT ( [@nr_cmp], DOUBLE ) * _factor
 			         RETURN
 			             IF (
 			                 _units_cmp = 0
@@ -1340,7 +1524,7 @@ table _measures
 			             )
 			    )
 			RETURN
-			    IF ( [_Sel Entity] = "P", _volume )
+			    IF ( _view = "P", _volume )
 		formatString: #,0;-#,0;0
 		displayFolder: 4 Analysis
 		lineageTag: 09b158ce-61a2-53bc-93e2-3a892555c3c5
@@ -1649,16 +1833,16 @@ table _measures
 		displayFolder: 5 Profitability
 		lineageTag: 8a962a24-464b-5ebf-9b5b-f2bce7c04c67
 
-	/// 1 when the slice value in context belongs to the selected entity (unassigned members excluded). Region always; entity rows only in the Group view; channel / category / segment never in the Group view. Used as visual-level filter on slicers and the profitability table.
+	/// 1 when the slice value in context belongs to the selected entity (unassigned and blank members excluded). Region always; entity rows only in the Group view; channel / category / segment never in the Group view. Used as visual-level filter on slicers and the profitability table.
 	measure 'Slice Member In View' =
 			VAR _view         = [_Sel Entity]
 			RETURN
 			    SWITCH (
 			        TRUE ()
 			        ,ISINSCOPE ( dim_region[region_name] )
-			            ,1
+			            ,IF ( NOT ISBLANK ( SELECTEDVALUE ( dim_region[region_name] ) ), 1 )
 			        ,ISINSCOPE ( dim_entity[short_name] )
-			            ,IF ( _view = "GROUP", 1 )
+			            ,IF ( _view = "GROUP" && NOT ISBLANK ( SELECTEDVALUE ( dim_entity[short_name] ) ), 1 )
 			        ,ISINSCOPE ( dim_channel[channel_name] )
 			            ,IF (
 			                _view <> "GROUP"
@@ -2117,65 +2301,94 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 4a8d1cb5-09a8-5e9e-99ac-b746820e2dcd
 
-	/// Unscaled waterfall value per dim_bridge_step: comparison NR, then the entity's steps. Comparison + steps = base NR (T-05).
+	/// Unscaled waterfall value per dim_bridge_step: comparison NR, then the entity's steps; blank for a step of another entity (its dim_bridge_step row is filtered out). Comparison + steps = base NR (T-05). Steps with the same formula share one branch (service lines, entities): every branch adds its measures to the query plan, used or not.
 	measure '_Bridge Value' =
 			VAR _step         = SELECTEDVALUE ( dim_bridge_step[step_code] )
 			RETURN
 			    SWITCH (
-			        _step
-			        ,"START"
+			        TRUE ()
+			        ,_step = "START"
 			            ,[Bridge Comparison NR]
-			        ,"VOL"
-			            ,[Bridge Volume]
-			        ,"PRICE"
-			            ,[Bridge Price Mix]
-			        ,"FX"
+			        ,_step = "FX"
 			            ,[Bridge FX]
-			        ,"SVC_SUB"
-			            ,CALCULATE ( [_Bridge NR CC Change], KEEPFILTERS ( TREATAS ( { "SUB" }, dim_line[line_code] ) ) )
-			        ,"SVC_PAY"
-			            ,CALCULATE ( [_Bridge NR CC Change], KEEPFILTERS ( TREATAS ( { "PAY" }, dim_line[line_code] ) ) )
-			        ,"SVC_APP"
-			            ,CALCULATE ( [_Bridge NR CC Change], KEEPFILTERS ( TREATAS ( { "APP" }, dim_line[line_code] ) ) )
-			        ,"SVC_PS"
-			            ,CALCULATE ( [_Bridge NR CC Change], KEEPFILTERS ( TREATAS ( { "PS" }, dim_line[line_code] ) ) )
-			        ,"ENT_P"
+			        ,_step = "VOL"
+			            ,[Bridge Volume]
+			        ,_step = "PRICE"
+			            ,[Bridge Price Mix]
+			        ,_step IN { "SVC_SUB", "SVC_PAY", "SVC_APP", "SVC_PS" }
+			            ,CALCULATE (
+			                [_Bridge NR CC Change]
+			                ,KEEPFILTERS ( TREATAS ( { MID ( _step, 5, 3 ) }, dim_line[line_code] ) )
+			            )
+			        ,_step IN { "ENT_P", "ENT_S" }
 			            ,CALCULATE (
 			                [_Bridge NR CC Change]
 			                ,REMOVEFILTERS ( param_entity_view )
-			                ,TREATAS ( { "P" }, param_entity_view[entity_view_code] )
+			                ,TREATAS ( { RIGHT ( _step, 1 ) }, param_entity_view[entity_view_code] )
 			            )
-			        ,"ENT_S"
-			            ,CALCULATE (
-			                [_Bridge NR CC Change]
-			                ,REMOVEFILTERS ( param_entity_view )
-			                ,TREATAS ( { "S" }, param_entity_view[entity_view_code] )
-			            )
-			        ,"ELIM"
-			            ,CALCULATE ( [_Bridge NR CC Change], KEEPFILTERS ( TREATAS ( { "ELIM_GR" }, dim_account[account_code] ) ) )
+			        ,_step = "ELIM"
+			            ,[_Bridge Elim Change]
 			    )
 		isHidden
 		displayFolder: 9 Engine
 		lineageTag: c7b84287-88c7-5e84-bb58-aaccb297cca8
 
-	/// Unscaled value of the KPI tile in the current dim_kpi row (slots swap content by entity). Feeds KPI Δ A / Δ B.
+	/// Unscaled value of the KPI tile in the current dim_kpi row (slots swap content by entity). Feeds KPI Δ A / Δ B. A code first maps to a family: line amounts (NR, EBITDA, OP, NP) and line ratios (GM %, CM %, GTN %, ETR, Products / Cloud operating margin) share one branch each, because every branch adds its measures to the query plan of a grid over dim_kpi; the simple SWITCH on the family keeps a single-code evaluation as cheap as a direct measure.
 	measure '_KPI Value' =
 			VAR _kpi          = SELECTEDVALUE ( dim_kpi[kpi_code] )
-			RETURN
+			VAR _family       =
 			    SWITCH (
 			        _kpi
-			        ,"NR", [Net Revenue]
+			        ,"NR", "LINE"
+			        ,"EBITDA", "LINE"
+			        ,"OP", "LINE"
+			        ,"NP", "LINE"
+			        ,"GM_PCT", "RATIO"
+			        ,"CM_PCT", "RATIO"
+			        ,"GTN_PCT", "RATIO"
+			        ,"ETR", "RATIO"
+			        ,"CP_OP_MARGIN", "RATIO"
+			        ,"CC_OP_MARGIN", "RATIO"
+			        ,_kpi
+			    )
+			RETURN
+			    SWITCH (
+			        _family
+			        ,"LINE"
+			            ,CALCULATE (
+			                [Base Amount]
+			                ,REMOVEFILTERS ( dim_pl_row )
+			                ,TREATAS ( { _kpi }, dim_pl_row[line_code] )
+			            )
+			        ,"RATIO"
+			            ,VAR _num         = SWITCH ( _kpi, "GM_PCT", "GP", "CM_PCT", "CM", "GTN_PCT", "GTN", "ETR", "TAX", "OP" )
+			             VAR _den         = SWITCH ( _kpi, "GTN_PCT", "GR", "ETR", "PBT", "NR" )
+			             VAR _sign        = IF ( _kpi IN { "GTN_PCT", "ETR" }, -1, 1 )
+			             VAR _entity      = SWITCH ( _kpi, "CP_OP_MARGIN", "P", "CC_OP_MARGIN", "S", [_Sel Entity] )
+			             RETURN
+			                 CALCULATE (
+			                     DIVIDE (
+			                         _sign
+			                             * CALCULATE (
+			                                 [Base Amount]
+			                                 ,REMOVEFILTERS ( dim_pl_row )
+			                                 ,TREATAS ( { _num }, dim_pl_row[line_code] )
+			                             )
+			                         ,CALCULATE (
+			                             [Base Amount]
+			                             ,REMOVEFILTERS ( dim_pl_row )
+			                             ,TREATAS ( { _den }, dim_pl_row[line_code] )
+			                         )
+			                     )
+			                     ,REMOVEFILTERS ( param_entity_view )
+			                     ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+			                 )
 			        ,"ORG_GROWTH", [KPI Organic Growth]
-			        ,"GM_PCT", [KPI Gross Margin %]
-			        ,"GTN_PCT", [KPI Gross-to-Net %]
 			        ,"ARR", [KPI ARR]
 			        ,"SVC_SHARE", [KPI Services Share]
 			        ,"AP_PCT", [KPI A&P % NR]
 			        ,"TAKE_RATE", [KPI Payments Take Rate]
 			        ,"IC_ELIM", [KPI IC Eliminated]
-			        ,"CM_PCT", [KPI CM %]
-			        ,"EBITDA", [Adjusted EBITDA]
-			        ,"OP", [Operating Profit]
 			        ,"UNITS", [KPI Units Sold]
 			        ,"NR_PER_UNIT", [KPI NR per Unit]
 			        ,"VOL_GROWTH", [KPI Volume Growth]
@@ -2184,10 +2397,6 @@ table _measures
 			        ,"MERCHANTS", [KPI Active Merchants]
 			        ,"SUB_GM_PCT", [KPI Subscription GM %]
 			        ,"RULE40", [KPI Rule of 40]
-			        ,"CP_OP_MARGIN", [KPI CP Operating Margin]
-			        ,"CC_OP_MARGIN", [KPI CC Operating Margin]
-			        ,"NP", [Net Profit]
-			        ,"ETR", [KPI Effective Tax Rate]
 			    )
 		isHidden
 		displayFolder: 9 Engine
