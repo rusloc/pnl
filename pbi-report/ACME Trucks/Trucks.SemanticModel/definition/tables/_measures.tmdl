@@ -3253,6 +3253,18 @@ table _measures
 		displayFolder: 3 Design
 		lineageTag: f99ee63d-cd0a-40e3-80c5-843386f3135d
 
+	/// Category name of the hovered waterfall row (title of the tooltip page tt_time_structure); blank unless one category is in context.
+	measure '_TT Category' = SELECTEDVALUE ( dim_time_category[category_name] )
+		isHidden
+		displayFolder: 3 Design
+		lineageTag: 990e3447-9321-4252-8748-3aed39cc0b23
+
+	/// Fact minus plan share of the waterfall row in percentage points, rounded to 0.01 pp like the Δ pill (shown in the tooltip page).
+	measure 'WF Δ pp' = ROUND ( COALESCE ( [Time Share Δ], 0 ) * 100, 2 )
+		formatString: +0.00 "pp";"−"0.00 "pp";0.00 "pp"
+		displayFolder: 3 Design
+		lineageTag: 78afd46d-6425-4329-beee-a78b2714080a
+
 	partition _measures-af740960-5f3e-40ba-9525-5934467d7cf6 = m
 		mode: import
 		source =

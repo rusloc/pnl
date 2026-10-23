@@ -8,7 +8,8 @@
 //              plus the table's visual filters (is_shown = "1", is_included = "да").
 //   week 9   = the same with week "9 (25.2-3.3)" (the week the old page had saved), for comparison with the baseline.
 // Tabs: 1 waterfall default | 2 waterfall week 9 | 3 waterfall chain (bars meet) | 4 KPI tiles vs table rows |
-//       5 Δ colour rule | 6 KPI noise rule (_KPI Noise) | 7 header context and the dropped contractor filter.
+//       5 Δ colour rule | 6 KPI noise rule (_KPI Noise) | 7 header context and the dropped contractor filter |
+//       8 tooltip page tt_time_structure (2026-10-23): _TT Category and WF Δ pp per table row.
 
 DEFINE
     // Deterministic units of the four noisy KPI measures (same DAX with _KPI Noise = 1)
@@ -616,3 +617,32 @@ RETURN
         ,ROW ( "_check", "loaders with and without contractor both in the fact data", "_pass", _contractors = 2 )
     )
 ORDER BY [_pass], [_check]
+
+EVALUATE
+// ---------------------------------------------------------------- 8 tooltip page (tt_time_structure): title = row category, Δ pp = fact % - plan %
+// of the row in percentage points, rounded to 0.01 like the Δ pill, and the pill prints the same number.
+VAR _r =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,dim_time_category[category_name]
+        ,_f_included, _f_plan_type, _f_calculation, _f_work_type, _v_shown, _v_included
+        ,"_title", [_TT Category]
+        ,"_plan", [WF Plan %]
+        ,"_fact", [WF Fact %]
+        ,"_pp", [WF Δ pp]
+        ,"_pill", [WF Δ Pill]
+    )
+RETURN
+    SELECTCOLUMNS (
+        _r
+        ,"_category_sort", dim_time_category[sort_order]
+        ,"_pp", [_pp]
+        ,"_pass",
+            VAR _expected = ROUND ( ( [_fact] - [_plan] ) * 100, 2 )
+            VAR _number   = FORMAT ( ABS ( [_pp] ), "0.00", "en-US" )
+            RETURN
+                [_title] = dim_time_category[category_name]
+                    && ABS ( [_pp] - _expected ) <= 1e-9
+                    && CONTAINSSTRING ( [_pill], _number & "</text>" )
+    )
+ORDER BY [_pass], [_category_sort]
