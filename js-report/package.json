@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "next dev",
     "build:data": "node scripts/build-data.ts",
-    "prebuild": "npm run build:data",
+    "build:sales-data": "node scripts/build-sales-data.ts",
+    "export:chat-tools": "node scripts/export-chat-tools.ts",
+    "prebuild": "npm run build:data && npm run build:sales-data",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

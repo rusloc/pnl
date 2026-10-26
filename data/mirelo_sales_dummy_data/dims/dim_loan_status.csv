@@ -1,0 +1,9 @@
+status_code,status_name,status_group,dpd_min,dpd_max,is_active,is_overdue_30,is_bad_90,sort_order
+CURRENT,Current,Active,0,0,TRUE,FALSE,FALSE,1
+DPD_1_29,1-29 days past due,Active,1,29,TRUE,FALSE,FALSE,2
+DPD_30_59,30-59 days past due,Active,30,59,TRUE,TRUE,FALSE,3
+DPD_60_89,60-89 days past due,Active,60,89,TRUE,TRUE,FALSE,4
+DPD_90P,90+ days past due,Active,90,179,TRUE,TRUE,TRUE,5
+REPAID,Repaid,Closed,,,FALSE,FALSE,FALSE,6
+WRITTEN_OFF,Written off (180 DPD),Closed,,,FALSE,FALSE,TRUE,7
+AFTER_CLOSE,Disbursed after the last closed month,Not in snapshot,,,FALSE,FALSE,FALSE,8

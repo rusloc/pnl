@@ -1,0 +1,11 @@
+stage_code,stage_name,sort_order,is_terminal,outcome,fact_column,sla_hours
+LEAD,Lead,1,FALSE,Progress,leads,
+STARTED,Application started,2,FALSE,Progress,apps_started,168
+SUBMITTED,Submitted,3,FALSE,Progress,apps_submitted,2
+KYC_PASSED,KYC passed,4,FALSE,Progress,kyc_passed,1
+APPROVED,Credit approved,5,FALSE,Progress,approved,24
+DISBURSED,Disbursed,6,TRUE,Won,disbursed,
+ABANDONED,Abandoned,7,TRUE,Lost,apps_started - apps_submitted,
+DECLINED_KYC,Declined at KYC,8,TRUE,Lost,apps_submitted - kyc_passed,
+DECLINED_CREDIT,Declined by credit,9,TRUE,Lost,kyc_passed - approved,
+NOT_TAKEN_UP,Not taken up,10,TRUE,Lost,approved - disbursed,

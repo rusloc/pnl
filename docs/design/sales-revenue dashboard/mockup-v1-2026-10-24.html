@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirelo Sales &amp; revenue - mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* DRAFT mockup - projection state - concept for USER approval, nothing built.
+   Tokens from docs/design/design-requirements.md; identity colour = Mirelo mulberry. */
+:root{
+  --ink900:#101B2B;--ink700:#2B3748;--slate600:#4F5C6C;--slate400:#8592A3;
+  --line300:#CDD4DC;--line200:#DEE3E9;--line100:#EDF0F3;--ground:#F2F4F7;--subtle:#F6F8FA;--surface:#FFFFFF;
+  --railText:#C9D3E0;--railSum:#AEB9C7;--railDiv:#3A475A;--grpRule:#E3E8ED;--subRule:#D5DCE3;
+  --acc:#9B2360;--accT:#F8E8F0;--keyRule:#E5BBD0;--accPY:#D9A8C2;
+  --fav:#06603F;--favBar:#3BA37B;--favTint:#E4F3EC;--unf:#C2410C;--unfBar:#E2804A;--unfTint:#FCEDE5;
+  --noticeBg:#FBF4E4;--noticeBd:#EBD9AE;--noticeTx:#3D3216;--noticeIc:#8A5A00;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#E6E9EE;font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.45;color:var(--ink900)}
+body{padding:20px 0 40px}
+.caption{width:1440px;margin:0 auto 10px;font-size:12px;color:var(--slate600)}
+.caption b{color:var(--ink900);font-weight:600}
+.num,.kv,.kd,td.n,.fc,.cm-v{font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- artboard ---------- */
+.board{width:1440px;height:810px;margin:0 auto;display:flex;overflow:hidden;background:var(--ground);box-shadow:0 2px 12px rgba(16,27,43,.12)}
+
+/* ---------- rail ---------- */
+.rail{flex:none;width:64px;display:flex;flex-direction:column;gap:4px;padding:12px 10px;background:var(--ink900);color:var(--railText)}
+.brand{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-bottom:12px;padding:0;border:0;background:transparent}
+.brand span{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--acc);color:#fff;font-size:16px;font-weight:700;letter-spacing:-.02em}
+.brand span small{font-size:9px;margin-left:1px;opacity:.9}
+.rdiv{display:block;width:24px;height:1px;margin:0 auto 4px;background:var(--railDiv)}
+.ritem{display:flex;align-items:center;justify-content:center;width:44px;min-height:48px;border:0;border-radius:8px;background:transparent;color:var(--railText)}
+.ritem:hover{background:var(--ink700);color:#fff}
+.ritem svg{width:20px;height:20px}
+.rexp{margin-top:auto;font-size:16px;color:var(--slate400)}
+
+/* ---------- main ---------- */
+.main{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+.hdr{flex:none;background:var(--surface);border-bottom:1px solid var(--line200);padding:14px 24px 0}
+.trow{display:flex;align-items:center;gap:10px;min-height:36px}
+.trow h1{margin:0;font-size:22px;font-weight:600;line-height:1.25}
+.fbtn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;border-radius:8px;background:var(--ground);color:var(--slate600)}
+.fbtn svg{width:16px;height:16px}
+.status{margin-left:auto;font-size:12px;color:var(--slate600);white-space:nowrap}
+.tabsrow{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:6px}
+.tabs{display:flex;gap:4px}
+.tab{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:transparent;font-size:15px;font-weight:500;color:var(--slate600)}
+.tab svg{width:18px;height:18px}
+.tab[aria-selected="true"]{color:var(--ink900);font-weight:600;border-bottom-color:var(--acc)}
+.toolbar{display:flex;align-items:center;gap:10px;padding-bottom:12px;font-size:12px;color:var(--slate600)}
+.pill{display:inline-flex;align-items:center;padding:1px 10px;border-radius:12px;background:var(--line100);font-size:11px;font-weight:500;color:var(--ink900)}
+.seg{display:inline-flex;height:36px;border:1px solid var(--line300);border-radius:8px;overflow:hidden;background:#fff}
+.seg span{display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--ink900);border-left:1px solid var(--line300)}
+.seg span:first-child{border-left:0}
+.seg span.on{background:var(--accT);color:var(--acc);font-weight:600}
+.content{flex:1 1 0;min-height:0;padding:14px 24px 16px;display:flex;flex-direction:column}
+.view{display:none;flex:1 1 0;min-height:0;flex-direction:column;gap:12px}
+.view.active{display:flex}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:14px 16px;min-width:0;display:flex;flex-direction:column}
+.card h3{margin:0;font-size:17px;font-weight:600;line-height:1.3;display:flex;align-items:center;gap:8px}
+.card .sub{font-size:13px;color:var(--slate600);margin-top:2px}
+.info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line300);font-size:11px;font-weight:600;color:var(--slate600);margin-left:auto}
+.row2{flex:none;height:250px;display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.row3{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+/* ---------- KPI card v2 ---------- */
+.kpis{flex:none;height:150px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.kpi.op{background:var(--subtle)}
+.kl{font-size:13px;font-weight:500;color:var(--slate600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv{font-size:28px;font-weight:600;line-height:1.15;margin-top:2px}
+.ks{font-size:11px;color:var(--slate600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kr{display:flex;align-items:center;gap:8px;margin-top:6px}
+.kr+.kr{margin-top:5px}
+.kn{flex:none;width:66px;font-size:11px;color:var(--slate600)}
+.kb{position:relative;flex:1 1 0;height:8px;border-radius:2px;background:var(--line100)}
+.kb i{position:absolute;left:50%;top:-2px;width:1px;height:12px;background:rgba(16,27,43,.4)}
+.kb b{position:absolute;top:0;height:8px;border-radius:2px}
+.kb b.f{left:50%;background:var(--favBar)}
+.kb b.u{right:50%;background:var(--unfBar)}
+.kb b.n{left:50%;background:var(--slate400)}
+.kb em{position:absolute;top:-4px;font-style:normal;font-size:11px;line-height:1;color:var(--slate400)}
+.kd{flex:none;width:58px;text-align:right;font-size:12px;font-weight:600}
+.fav{color:var(--fav)}.unf{color:var(--unf)}.neu{color:var(--ink900)}.na{color:var(--slate400);font-weight:400}
+
+/* ---------- chart bits ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font-size:11px;color:var(--slate600)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:14px;height:10px;border-radius:2px}
+.plot{flex:1 1 0;min-height:0;display:flex;align-items:flex-end}
+svg text{font-family:inherit}
+.note{font-size:11px;color:var(--slate600);margin-top:4px}
+
+/* funnel */
+.fun{flex:1 1 0;display:flex;flex-direction:column;justify-content:space-around;margin-top:6px}
+.fr{display:grid;grid-template-columns:86px 1fr 52px 78px;align-items:center;gap:8px;font-size:12px}
+.fr .fn{color:var(--ink900);white-space:nowrap}
+.fr .fb{height:14px;border-radius:2px;background:var(--line100);position:relative}
+.fr .fb b{display:block;height:14px;border-radius:2px;background:var(--acc)}
+.fr .fc{text-align:right;font-weight:600}
+.fr .fx{text-align:right;color:var(--slate600);white-space:nowrap}
+.fr .fx b{font-weight:600;margin-left:4px}
+
+/* table */
+table{border-collapse:collapse;width:100%;font-size:12px;margin-top:8px}
+th{font-size:11px;font-weight:600;color:var(--slate600);text-align:right;padding:4px 6px;border-bottom:2px solid var(--ink900);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+td{padding:5px 6px;border-top:1px solid var(--line100);text-align:right;white-space:nowrap}
+td b{font-weight:600}
+tr.key td{background:var(--accT);border-top:1px solid var(--keyRule);font-weight:700}
+tr.key td:first-child{border-radius:6px 0 0 6px;padding-left:6px}
+tr.key td:last-child{border-radius:0 6px 6px 0}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* channel mix */
+.cm{flex:1 1 0;display:flex;flex-direction:column;justify-content:space-around;margin-top:4px}
+.cmr{display:grid;grid-template-columns:78px 1fr 84px 46px;align-items:center;gap:8px;font-size:12px}
+.cmb{display:flex;flex-direction:column;gap:2px}
+.cmb b{display:block;height:7px;border-radius:2px}
+.cmb b.y1{background:var(--accPY)}.cmb b.y2{background:var(--acc)}
+.cm-v{text-align:right;color:var(--slate600)}
+.cm-v strong{color:var(--ink900);font-weight:600}
+.cm-d{text-align:right;font-weight:600}
+
+/* ---------- blocked-out views ---------- */
+.grid2{flex:1 1 0;min-height:0;display:grid;gap:12px}
+.zone{border:1px dashed var(--line300);border-radius:12px;background:var(--subtle);padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.zone h4{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.zone .tag{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--accT);border-radius:4px;padding:1px 6px}
+.zone p{margin:4px 0 0;font-size:12px;color:var(--slate600)}
+.zone .sk{flex:1 1 0;min-height:0;margin-top:8px;border-radius:8px;background:repeating-linear-gradient(135deg,#fff 0 10px,var(--line100) 10px 12px);border:1px solid var(--line200)}
+.zone .sk.kpi-sk{background:repeating-linear-gradient(90deg,#fff 0 calc(16.66% - 8px),var(--ground) calc(16.66% - 8px) 16.66%)}
+.zk{flex:none;height:150px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.zk .kpi{border-style:dashed;border-color:var(--line300);background:var(--subtle)}
+.zk .kv{color:var(--slate400)}
+</style>
+</head>
+<body>
+<p class="caption"><b>DRAFT - projection state.</b> Mirelo Sales &amp; revenue - one-window frame (ADR-0004, period picker v2 Part 2) - artboard 1440 × 810 - Overview populated with the dataset story (FY2026 YTD Sep, Actual, EUR, all markets); the other three tabs are blocked-out layouts. Identity colour: Mirelo mulberry #9B2360.</p>
+
+<div class="board">
+  <!-- ================= RAIL ================= -->
+  <nav class="rail" aria-label="Filters and tools">
+    <button class="brand" title="Switch market - All markets" aria-label="Switch market"><span>M<small>▾</small></span></button>
+    <span class="rdiv" aria-hidden="true"></span>
+    <button class="ritem" title="Period - Showing Jan – Sep 2026 - year to date" aria-label="Period">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5h14M7 2.5v4M13 2.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <button class="ritem" title="Versions - Actual vs Budget, Prior year" aria-label="Versions">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 17h15M5 15V9.5M10 15V4.5M15 15V7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button class="ritem" title="Slice - All products, channels, segments, agents" aria-label="Slice">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="ritem" title="Display - EUR m - actual rates" aria-label="Display">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h8.5M15.5 6H17M3 14h2.5M9.5 14H17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="13.5" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7.5" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <button class="ritem rexp" title="Expand" aria-label="Expand the rail">»</button>
+  </nav>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <header class="hdr">
+      <div class="trow">
+        <h1>Sales &amp; revenue</h1>
+        <button class="fbtn" title="Applied filters" aria-label="Applied filters"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12l-4.5 5.2V13l-3-1.4V8.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+        <span class="status">Mirelo - All markets - Sales &amp; revenue - Closed through Sep 2026 - Refreshed 24 Oct 2026 08:10</span>
+      </div>
+      <div class="tabsrow">
+        <div class="tabs" role="tablist" aria-label="View">
+          <button class="tab" role="tab" data-tab="v1" aria-selected="true"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="2" width="6" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Overview</button>
+          <button class="tab" role="tab" data-tab="v2" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 3h14M4 7h10M6 11h6M7.5 15h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Funnel &amp; originations</button>
+          <button class="tab" role="tab" data-tab="v3" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 14l4-5 3.5 3L16 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4h4v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Revenue &amp; customers</button>
+          <button class="tab" role="tab" data-tab="v4" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="6" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 15c0-2.5 1.8-4 4-4s4 1.5 4 4M10.5 13.5c.4-1.8 1.4-2.7 2.7-2.7 1.5 0 2.8 1.2 2.8 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Channels &amp; agents</button>
+        </div>
+        <div class="toolbar" id="toolbar">
+          <span>Changes vs Budget and Prior year, same months</span>
+          <span class="pill">▲ up / ▼ down - green = favourable, orange = unfavourable</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ================= VIEW 1 - OVERVIEW ================= -->
+      <section class="view active" id="v1" aria-label="Overview">
+        <div class="kpis">
+          <div class="kpi" title="Disbursed principal, translated per month and currency at monthly average rates.">
+            <div class="kl">Originations</div>
+            <div class="kv">€138.4m</div>
+            <div class="ks">349k loans - repeat share 57.8%</div>
+            <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:7.75%"></b></span><span class="kd unf">▼ −3.1%</span></div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:46.5%"></b></span><span class="kd fav">▲ +18.6%</span></div>
+          </div>
+          <div class="kpi" title="Interest income + fees + card interchange + subscriptions.">
+            <div class="kl">Revenue</div>
+            <div class="kv">€41.7m</div>
+            <div class="ks">Interest 60% - fees 21% - cards 8% - subs 11%</div>
+            <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:4.5%"></b></span><span class="kd unf">▼ −1.8%</span></div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:50%"></b><em style="right:-3px">›</em></span><span class="kd fav">▲ +22.4%</span></div>
+          </div>
+          <div class="kpi" title="Revenue ÷ Budget revenue, same months. Pace = attainment of the target elapsed so far in the open month.">
+            <div class="kl">Target attainment</div>
+            <div class="kv">98.2%</div>
+            <div class="ks">Pace 101% in Sep - coverage 1.3×</div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:24%"></b></span><span class="kd fav">▲ +2.4pp</span></div>
+            <div class="kr"><span class="kn">LE full year</span><span class="kb"><i></i><b class="n" style="width:19%"></b></span><span class="kd neu">98.1%</span></div>
+          </div>
+          <div class="kpi" title="Credit-approved ÷ applications submitted. Capped by credit policy - a rise is not always good.">
+            <div class="kl">Approval rate</div>
+            <div class="kv">41.3%</div>
+            <div class="ks">Take-up 86.7% of approved</div>
+            <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:27%"></b></span><span class="kd unf">▼ −2.7pp</span></div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="u" style="width:29%"></b></span><span class="kd unf">▼ −2.9pp</span></div>
+          </div>
+          <div class="kpi op" title="Median hours from application submitted to money on the account. Lower is favourable.">
+            <div class="kl">Time to cash</div>
+            <div class="kv">3.4 h</div>
+            <div class="ks">median, submitted → disbursed</div>
+            <div class="kr"><span class="kn">vs Budget</span><span class="kb"></span><span class="kd na">n/a</span></div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:50%"></b><em style="right:-3px">›</em></span><span class="kd fav">▼ −33.3%</span></div>
+          </div>
+          <div class="kpi" title="Month-end paying subscribers × tier price, net of discounts. Period-end KPI: last closed month of the window.">
+            <div class="kl">MRR</div>
+            <div class="kv">€0.58m</div>
+            <div class="ks">118.4k paying subscribers - Sep 2026</div>
+            <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="f" style="width:3%"></b></span><span class="kd fav">▲ +1.2%</span></div>
+            <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:35%"></b></span><span class="kd fav">▲ +14.0%</span></div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="card">
+            <h3>Revenue by month - 2026 <span class="info" title="What it shows - how to read it - example - watch-out">i</span></h3>
+            <div class="sub">Actual vs Budget vs Prior year, EUR millions - Oct – Dec from the latest estimate (forecast 9+3)</div>
+            <div class="plot"><svg id="trend" width="840" height="150" role="img" aria-label="Revenue by month 2026: actual columns Jan to Sep, latest estimate Oct to Dec, budget tick marks, prior-year line"></svg></div>
+            <div class="legend">
+              <span><i class="sw" style="background:var(--acc)"></i>Actual</span>
+              <span><i class="sw" style="background:var(--accT);border:1.5px dashed var(--acc)"></i>Latest estimate</span>
+              <span><i class="sw" style="height:2px;background:var(--ink900)"></i>Budget</span>
+              <span><i class="sw" style="height:2px;background:var(--accPY)"></i>Prior year</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Originations bridge <span class="info" title="Budget to Actual: loans × ticket × product mix × FX">i</span></h3>
+            <div class="sub">Budget to Actual, EUR millions - YTD Sep 2026</div>
+            <div class="plot"><svg id="bridge" width="400" height="140" role="img" aria-label="Originations bridge from budget 142.8 to actual 138.4 million euro"></svg></div>
+            <div class="note">The axis starts at €130m - volume = loans disbursed, ticket = average principal, mix = product share, FX = PLN and RON at actual rates.</div>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div class="card">
+            <h3>Application funnel <span class="info" title="Counts per stage, share of the previous stage, change in pp vs prior year">i</span></h3>
+            <div class="sub">YTD Sep 2026, applications - % of previous stage - Δ pp vs Prior year</div>
+            <div class="fun">
+              <div class="fr"><span class="fn">Leads</span><span class="fb"><b style="width:100%"></b></span><span class="fc">2.84m</span><span class="fx">—</span></div>
+              <div class="fr"><span class="fn">Started</span><span class="fb"><b style="width:42.6%"></b></span><span class="fc">1.21m</span><span class="fx">43% <b class="fav">▲+1.2</b></span></div>
+              <div class="fr"><span class="fn">Submitted</span><span class="fb"><b style="width:34.3%"></b></span><span class="fc">974k</span><span class="fx">80% <b class="fav">▲+0.8</b></span></div>
+              <div class="fr"><span class="fn">KYC passed</span><span class="fb"><b style="width:30.3%"></b></span><span class="fc">861k</span><span class="fx">88% <b class="unf">▼−1.5</b></span></div>
+              <div class="fr"><span class="fn">Approved</span><span class="fb"><b style="width:14.2%"></b></span><span class="fc">402k</span><span class="fx">47% <b class="unf">▼−2.9</b></span></div>
+              <div class="fr"><span class="fn">Disbursed</span><span class="fb"><b style="width:12.3%"></b></span><span class="fc">349k</span><span class="fx">87% <b class="fav">▲+0.6</b></span></div>
+            </div>
+            <div class="note">Bars = share of leads. Declined 459k - abandoned 236k - not taken up 53k.</div>
+          </div>
+          <div class="card">
+            <h3>Where the gap is - by market</h3>
+            <div class="sub">Revenue YTD Sep 2026, EUR millions - click a market to switch to it</div>
+            <table aria-label="Revenue gap by market">
+              <thead><tr><th>Market</th><th>Revenue</th><th>vs Budget</th><th>const. ccy</th><th>vs Prior year</th></tr></thead>
+              <tbody>
+                <tr title="Poland - PLN"><td><i class="dot" style="background:var(--acc)"></i>Poland</td><td class="n"><b>21.4</b></td><td class="n unf">▼ −2.3%</td><td class="n fav">▲ +1.9%</td><td class="n fav">▲ +19.8%</td></tr>
+                <tr title="Romania - RON"><td><i class="dot" style="background:var(--acc);opacity:.65"></i>Romania</td><td class="n"><b>9.8</b></td><td class="n unf">▼ −11.7%</td><td class="n unf">▼ −10.9%</td><td class="n fav">▲ +9.6%</td></tr>
+                <tr title="Portugal - EUR"><td><i class="dot" style="background:var(--acc);opacity:.35"></i>Portugal</td><td class="n"><b>10.5</b></td><td class="n fav">▲ +11.0%</td><td class="n fav">▲ +11.0%</td><td class="n fav">▲ +44.4%</td></tr>
+                <tr class="key"><td>All markets</td><td class="n">41.7</td><td class="n unf">▼ −1.8%</td><td class="n fav">▲ +0.6%</td><td class="n fav">▲ +22.4%</td></tr>
+              </tbody>
+            </table>
+            <div class="note">Romania: credit policy tightened Mar 2026 (approval rate −6 pp). Poland: PLN −6% vs EUR since Jun 2026 - beats Budget in constant currency.</div>
+          </div>
+          <div class="card">
+            <h3>Channel mix shift</h3>
+            <div class="sub">Share of originations, YTD Sep 2025 → YTD Sep 2026</div>
+            <div class="cm">
+              <div class="cmr"><span>App</span><span class="cmb"><b class="y1" style="width:77.5%"></b><b class="y2" style="width:95%"></b></span><span class="cm-v">31% → <strong>38%</strong></span><span class="cm-d">+7 pp</span></div>
+              <div class="cmr"><span>Web</span><span class="cmb"><b class="y1" style="width:37.5%"></b><b class="y2" style="width:35%"></b></span><span class="cm-v">15% → <strong>14%</strong></span><span class="cm-d">−1 pp</span></div>
+              <div class="cmr"><span>Partner</span><span class="cmb"><b class="y1" style="width:30%"></b><b class="y2" style="width:47.5%"></b></span><span class="cm-v">12% → <strong>19%</strong></span><span class="cm-d">+7 pp</span></div>
+              <div class="cmr"><span>Agents</span><span class="cmb"><b class="y1" style="width:45%"></b><b class="y2" style="width:42.5%"></b></span><span class="cm-v">18% → <strong>17%</strong></span><span class="cm-d">−1 pp</span></div>
+              <div class="cmr"><span>Marketplace</span><span class="cmb"><b class="y1" style="width:60%"></b><b class="y2" style="width:30%"></b></span><span class="cm-v">24% → <strong>12%</strong></span><span class="cm-d">−12 pp</span></div>
+            </div>
+            <div class="legend"><span><i class="sw" style="background:var(--acc)"></i>YTD 2026</span><span><i class="sw" style="background:var(--accPY)"></i>YTD 2025</span><span>Marketplace bids cut from May 2026 - mix has no favourable side</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 2 - FUNNEL & ORIGINATIONS ================= -->
+      <section class="view" id="v2" aria-label="Funnel and originations">
+        <div class="grid2" style="grid-template-columns:7fr 5fr;grid-template-rows:1fr 1fr">
+          <div class="zone"><h4>Application funnel <span class="tag">bar-style funnel</span></h4><p>Six stages in order, value + % of previous stage + Δ pp vs Prior year; Declined / Abandoned / Not taken up as grey side bars. Toolbar "Count by": Applications / Principal. (i) info pop-up.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Stage cycle time <span class="tag">horizontal bars vs SLA</span></h4><p>Median hours per stage, worst stage first, SLA marker from dim_stage.sla_hours; Time to cash 3.4 h total (PY 5.1 h). Instant-payout rollout Oct 2025 as a note.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Originations by product - 13 months <span class="tag">stacked columns + budget outline</span></h4><p>Five loan products in a 5-step identity ramp with direct labels; Budget as outline; "Step 12 launch" markers Apr 2026 (PL) and Jul 2026 (RO). Switches with "Count by".</p><div class="sk"></div></div>
+          <div class="zone"><h4>Approval rate by market <span class="tag">small multiples × 3</span></h4><p>Shared y axis 30 – 55 %, PY as light line, policy-change marker Mar 2026 in Romania; the same chart answers "is the miss a credit decision or a demand problem?".</p><div class="sk"></div></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 3 - REVENUE & CUSTOMERS ================= -->
+      <section class="view" id="v3" aria-label="Revenue and customers">
+        <div class="zk">
+          <div class="kpi"><div class="kl">Revenue</div><div class="kv">€41.7m</div><div class="ks">KPI card v2</div></div>
+          <div class="kpi"><div class="kl">MRR</div><div class="kv">€0.58m</div><div class="ks">period-end</div></div>
+          <div class="kpi"><div class="kl">ARPU</div><div class="kv">€6.90</div><div class="ks">per active account, month</div></div>
+          <div class="kpi"><div class="kl">Paying subscribers</div><div class="kv">118.4k</div><div class="ks">Plus 91.2k - Pro 27.2k</div></div>
+          <div class="kpi op"><div class="kl">30+ DPD ratio (context)</div><div class="kv">4.6%</div><div class="ks">grey rows - no favourable side shown</div></div>
+          <div class="kpi op"><div class="kl">Cost of risk (context)</div><div class="kv">7.9%</div><div class="ks">annualised, of avg. principal</div></div>
+        </div>
+        <div class="grid2" style="grid-template-columns:7fr 5fr;grid-template-rows:1fr 1fr">
+          <div class="zone"><h4>Revenue by stream - 13 months <span class="tag">stacked columns</span></h4><p>Interest / Fees / Interchange / Subscriptions (4-step identity ramp, direct labels), Budget outline, Prior-year line; Plus-tier price rise Jan 2026 as a marker.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Stream × market matrix <span class="tag">matrix, diverging data bars</span></h4><p>Actual - vs Budget Δ / Δ % - constant-currency Δ % - vs Prior year Δ %; rows = streams, columns grouped per market; All markets as key subtotal row (accT tint).</p><div class="sk"></div></div>
+          <div class="zone"><h4>Subscriptions <span class="tag">two panels, one axis each</span></h4><p>Left: MRR line + subscribers by tier stacked. Right: monthly churn % (spike 4.1 % Feb – Mar 2026). No dual axis.</p><div class="sk"></div></div>
+          <div class="zone"><h4>New vs repeat borrowers <span class="tag">share bars + trend</span></h4><p>Repeat share by product (bars on a grey track, identity fill, dashed marker at the company average 57.8 %) and the 13-month repeat-share line.</p><div class="sk"></div></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 4 - CHANNELS & AGENTS ================= -->
+      <section class="view" id="v4" aria-label="Channels and agents">
+        <div class="grid2" style="grid-template-columns:5fr 7fr;grid-template-rows:1fr 1fr">
+          <div class="zone"><h4>Attainment by channel <span class="tag">bullet bars</span></h4><p>Originations bar vs target marker, % label, sorted; callout "23 of 40 agents at ≥ 100 % (PY 19)". Toolbar: "Break down by" Channel / Agent / Partner - "Measure" Originations / Loans.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Agent &amp; partner leaderboard <span class="tag">table, data bars</span></h4><p>Name - market - originations - target - attainment % (bar) - pace % - approval rate - loans; Jan 2026 ramp cohort tagged; 52 rows, sorted by attainment; own row highlighted when RLS is on.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Channel mix by month <span class="tag">100 % stacked columns</span></h4><p>13 months, 5 channels in the identity ramp with direct labels; Marketplace share falling from May 2026 after the bid cut.</p><div class="sk"></div></div>
+          <div class="zone"><h4>Approval rate × average ticket per agent <span class="tag">scatter, bubble = originations</span></h4><p>Coaching view: high approval + low ticket vs low approval + high ticket; market by shape, not colour; quadrant lines at the company medians.</p><div class="sk"></div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ---------- tabs ---------- */
+  var TB={v1:'<span>Changes vs Budget and Prior year, same months</span><span class="pill">▲ up / ▼ down - green = favourable, orange = unfavourable</span>',
+          v2:'<span>Count by</span><span class="seg"><span class="on">Applications</span><span>Principal</span></span>',
+          v3:'<span>Changes vs Budget and Prior year, same months</span><span class="pill">▲ up / ▼ down - green = favourable, orange = unfavourable</span>',
+          v4:'<span>Break down by</span><span class="seg"><span class="on">Channel</span><span>Agent</span><span>Partner</span></span><span>Measure</span><span class="seg"><span class="on">Originations</span><span>Loans</span></span>'};
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('active',v.id===t.dataset.tab);});
+    document.getElementById('toolbar').innerHTML=TB[t.dataset.tab];
+  });});
+
+  var css=getComputedStyle(document.documentElement), C=function(n){return css.getPropertyValue(n).trim();};
+  var ACC=C('--acc'),ACCT=C('--accT'),PY=C('--accPY'),INK=C('--ink900'),SL6=C('--slate600'),SL4=C('--slate400'),L1=C('--line100'),L3=C('--line300'),FAV=C('--favBar'),UNF=C('--unfBar'),FAVT=C('--fav'),UNFT=C('--unf');
+  var NS='http://www.w3.org/2000/svg';
+  function el(svg,tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;svg.appendChild(e);return e;}
+
+  /* ---------- revenue trend (EUR m, 2026) ---------- */
+  (function(){
+    var svg=document.getElementById('trend');if(!svg)return;
+    var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var act=[4.12,3.86,4.38,4.52,4.64,4.70,4.77,4.98,5.73], le=[5.31,5.52,5.95];
+    var bud=[4.20,4.02,4.45,4.58,4.72,4.80,4.86,5.02,5.81,5.40,5.65,6.10];
+    var py=[3.41,3.20,3.58,3.66,3.78,3.84,3.90,4.05,4.65,4.30,4.52,4.95];
+    var W=840,H=150,ml=34,mr=8,mt=14,mb=20,pw=W-ml-mr,ph=H-mt-mb,slot=pw/12,bw=30,ymax=7;
+    var y=function(v){return mt+ph-(v/ymax)*ph;}, x=function(i){return ml+slot*i+slot/2;};
+    [0,2,4,6].forEach(function(g){el(svg,'line',{x1:ml,x2:W-mr,y1:y(g),y2:y(g),stroke:L1,'stroke-width':1});el(svg,'text',{x:ml-6,y:y(g)+4,'text-anchor':'end','font-size':11,fill:SL4},String(g));});
+    /* close marker between Sep and Oct */
+    var xc=ml+slot*9; el(svg,'line',{x1:xc,x2:xc,y1:mt-6,y2:mt+ph,stroke:L3,'stroke-width':1,'stroke-dasharray':'3 3'});
+    el(svg,'text',{x:xc+4,y:mt+2,'font-size':10,fill:SL4},'close');
+    act.forEach(function(v,i){el(svg,'rect',{x:x(i)-bw/2,y:y(v),width:bw,height:y(0)-y(v),rx:2,fill:ACC});});
+    le.forEach(function(v,j){var i=9+j;el(svg,'rect',{x:x(i)-bw/2,y:y(v),width:bw,height:y(0)-y(v),rx:2,fill:ACCT,stroke:ACC,'stroke-width':1.5,'stroke-dasharray':'4 2'});});
+    bud.forEach(function(v,i){el(svg,'line',{x1:x(i)-bw/2-3,x2:x(i)+bw/2+3,y1:y(v),y2:y(v),stroke:INK,'stroke-width':2});});
+    var pts=py.map(function(v,i){return x(i)+','+y(v);}).join(' ');
+    el(svg,'polyline',{points:pts,fill:'none',stroke:PY,'stroke-width':2,'stroke-linejoin':'round'});
+    py.forEach(function(v,i){el(svg,'circle',{cx:x(i),cy:y(v),r:2.5,fill:'#fff',stroke:PY,'stroke-width':1.5});});
+    /* selective direct labels */
+    [[0,act[0],INK,600],[8,act[8],INK,600],[11,le[2],SL6,500]].forEach(function(d){el(svg,'text',{x:x(d[0]),y:y(d[1])-5,'text-anchor':'middle','font-size':11,'font-weight':d[3],fill:d[2]},d[1].toFixed(2));});
+    el(svg,'text',{x:x(1),y:y(py[1])+14,'text-anchor':'middle','font-size':10,fill:SL6},'PY '+py[1].toFixed(2));
+    M.forEach(function(m,i){el(svg,'text',{x:x(i),y:H-5,'text-anchor':'middle','font-size':11,fill:i>8?SL4:SL6},m);});
+    el(svg,'line',{x1:ml,x2:W-mr,y1:y(0),y2:y(0),stroke:L3,'stroke-width':1});
+  })();
+
+  /* ---------- originations bridge (EUR m) ---------- */
+  (function(){
+    var svg=document.getElementById('bridge');if(!svg)return;
+    var steps=[{l:'Budget',v:142.8,t:'total'},{l:'Volume',v:-4.9},{l:'Ticket size',v:2.6},{l:'Product mix',v:1.1},{l:'FX',v:-3.2},{l:'Actual',v:138.4,t:'total'}];
+    var W=400,H=140,mt=18,mb=26,ph=H-mt-mb,base=130,top=145,slot=W/6,bw=40;
+    var y=function(v){return mt+ph-((v-base)/(top-base))*ph;};
+    el(svg,'line',{x1:0,x2:W,y1:y(base),y2:y(base),stroke:L3,'stroke-width':1});
+    var run=0;
+    steps.forEach(function(s,i){
+      var cx=slot*i+slot/2,a,b,fill,lab,col;
+      if(s.t==='total'){a=base;b=s.v;run=s.v;fill=ACC;lab=s.v.toFixed(1);col=INK;}
+      else{a=run;b=run+s.v;run=b;fill=s.v>=0?FAV:UNF;lab=(s.v>=0?'+':'−')+Math.abs(s.v).toFixed(1);col=s.v>=0?FAVT:UNFT;}
+      var yt=y(Math.max(a,b)),yb=y(Math.min(a,b));
+      el(svg,'rect',{x:cx-bw/2,y:yt,width:bw,height:Math.max(2,yb-yt),rx:2,fill:fill});
+      if(i<steps.length-1){el(svg,'line',{x1:cx+bw/2,x2:cx+slot-bw/2,y1:y(run),y2:y(run),stroke:L3,'stroke-width':1});}
+      el(svg,'text',{x:cx,y:yt-5,'text-anchor':'middle','font-size':12,'font-weight':600,fill:col},lab);
+      el(svg,'text',{x:cx,y:H-8,'text-anchor':'middle','font-size':11,fill:'#2B3748'},s.l);
+    });
+    el(svg,'text',{x:2,y:y(base)-3,'font-size':10,fill:SL4},'130');
+  })();
+})();
+</script>
+</body>
+</html>

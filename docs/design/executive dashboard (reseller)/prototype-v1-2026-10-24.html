@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reseller executive dashboard - prototype</title>
+<meta name="description" content="Nordmark Retail executive dashboard prototype: metric map, metric lineage, visual flow, new design direction with a Week 43 landing-page frame, tri-track feasibility and open questions. DRAFT for USER approval; illustrative data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..700&display=swap" rel="stylesheet">
+<style>
+/* ===== tokens: "Trading sheet" (Nordmark) - deliberately not the Ledger set ===== */
+:root{
+  --ground:#EFECE4; --tile:#FCFBF8; --subtle:#F5F2EB; --ink:#1E1A17; --muted:#6B645C; --soft:#8C847A;
+  --line:#DCD6CA; --line2:#E9E4DA; --band:#1E1A17; --band-ink:#F4F1EA; --band-muted:#B8AFA3;
+  --acc:#2048C6; --accT:#E4EAF9; --accD:#173A9E;
+  --good:#136C3A; --goodF:#2E9E5B; --goodT:#E1F0E5;
+  --watch:#9A5B00; --watchF:#E3A52A; --watchT:#FBEFD6;
+  --off:#C0272D; --offF:#D9534F; --offT:#FAE3E3;
+  --na:#6B645C; --naT:#F5F2EB;
+  --store:#2048C6; --online:#0E7F7B; --whsl:#C9922A;
+  --col:#B9B2A6; --tgt:#6B645C;
+  --t1:#2048C6; --t2:#FCFBF8; --t3:#F5F2EB; --fact:#1E1A17;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--ground)}
+body{font-family:"Archivo","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+a{color:var(--acc)}
+code{font-family:ui-monospace,Consolas,"Segoe UI Mono",monospace;font-size:12.5px;background:var(--subtle);padding:0 4px;border-radius:3px}
+h1{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+h2{font-size:24px;font-weight:700;letter-spacing:-.015em;margin:0 0 6px}
+h3{font-size:16px;font-weight:700;margin:22px 0 8px}
+h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+p{max-width:880px;margin:0 0 10px}
+ul,ol{max-width:880px;margin:0 0 10px 20px}
+li{margin-bottom:4px}
+.doc{max-width:1536px;margin:0 auto;padding:32px 32px 80px}
+.byline{font-size:13px;color:var(--muted);margin:10px 0 0}
+.draft{display:inline-block;background:var(--watchT);color:var(--watch);border:1px solid #E7CE93;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-bottom:10px}
+nav.idx{position:sticky;top:0;z-index:5;background:var(--band);color:var(--band-ink);margin:20px -32px 28px;padding:0 32px;height:44px;display:flex;align-items:center;gap:4px;font-size:13px}
+nav.idx a{color:var(--band-ink);text-decoration:none;padding:0 12px;height:44px;display:flex;align-items:center;border-bottom:3px solid transparent}
+nav.idx a:hover{border-bottom-color:var(--watchF)}
+nav.idx .sp{margin-left:auto;color:var(--band-muted);font-size:12px}
+section{margin:0 0 44px;padding-top:12px;border-top:2px solid var(--ink);scroll-margin-top:60px}
+section>.sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+section>.sec-h .k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:15px;max-width:880px}
+.callout{background:var(--tile);border:1px solid var(--line);border-left:4px solid var(--acc);padding:12px 16px;border-radius:4px;max-width:880px;margin:12px 0}
+.callout.warn{border-left-color:var(--watchF)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--tile);border:1px solid var(--line)}
+table.t th{background:var(--subtle);text-align:left;font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:7px 8px;border-bottom:1px solid var(--line);position:sticky;top:44px}
+table.t td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:top;line-height:1.35}
+table.t tr:last-child td{border-bottom:0}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap}
+table.t td.c{text-align:center;white-space:nowrap}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;letter-spacing:.02em}
+.chip.t1{background:var(--acc);color:#fff}
+.chip.t2{background:var(--tile);color:var(--acc);border:1px solid var(--acc)}
+.chip.t3{background:var(--subtle);color:var(--muted);border:1px solid var(--line)}
+.chip.star{background:var(--ink);color:var(--band-ink)}
+.chip.good{background:var(--goodT);color:var(--good)} .chip.watch{background:var(--watchT);color:var(--watch)} .chip.off{background:var(--offT);color:var(--off)} .chip.na{background:var(--naT);color:var(--na);border:1px dashed var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:8px 0 12px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:5px;border:1px solid var(--line)}
+.legend i.fact{background:var(--fact)} .legend i.dim{background:var(--tile);border:1px dashed var(--ink)} .legend i.base{background:var(--t3)} .legend i.t2{background:var(--tile);border:1.5px solid var(--acc)} .legend i.t1{background:var(--t1)}
+svg.dag{width:100%;height:auto;display:block;background:var(--tile);border:1px solid var(--line);border-radius:4px}
+svg.dag text{font-family:inherit}
+svg.dag .nd rect{stroke-width:1}
+svg.dag .nd.fact rect{fill:var(--fact);stroke:var(--fact)} svg.dag .nd.fact text{fill:var(--band-ink)}
+svg.dag .nd.dim rect{fill:var(--tile);stroke:var(--ink);stroke-dasharray:3 2}
+svg.dag .nd.base rect{fill:var(--t3);stroke:var(--line)}
+svg.dag .nd.t2 rect{fill:var(--tile);stroke:var(--acc);stroke-width:1.5}
+svg.dag .nd.t1 rect{fill:var(--t1);stroke:var(--accD)} svg.dag .nd.t1 text{fill:#fff;font-weight:700}
+svg.dag .nd.mid rect{fill:var(--accT);stroke:var(--acc)}
+svg.dag .nd text{font-size:11px;fill:var(--ink)}
+svg.dag .nd .sub{font-size:9.5px;fill:var(--muted)}
+svg.dag .nd.fact .sub,svg.dag .nd.t1 .sub{fill:rgba(255,255,255,.75)}
+svg.dag .ed{fill:none;stroke:#A39B8E;stroke-width:1;opacity:.85}
+svg.dag .ed.hi{stroke:var(--acc);stroke-width:1.6;opacity:1}
+svg.dag .el{font-size:9.5px;fill:var(--muted);paint-order:stroke;stroke:var(--tile);stroke-width:3px;stroke-linejoin:round}
+svg.dag .col-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;fill:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.fl{background:var(--tile);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.fl .fh{background:var(--band);color:var(--band-ink);padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.fl .fh span{font-size:11px;color:var(--band-muted);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.step{padding:12px 14px 12px;border-bottom:1px solid var(--line2);position:relative}
+.step:last-child{border-bottom:0}
+.step .tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--acc);display:inline-block;padding:2px 7px;border-radius:3px;margin-bottom:6px}
+.step.next .tag{background:var(--ink)} .step.finish .tag{background:var(--muted)}
+.step b.ttl{display:block;font-size:14px;margin-bottom:4px}
+.step p{font-size:12.5px;margin:0 0 4px;max-width:none}
+.step .meta{font-size:11.5px;color:var(--muted);line-height:1.4}
+.step .meta b{color:var(--ink);font-weight:700}
+.step::after{content:"▼";position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);font-size:11px;color:var(--soft);background:var(--tile);padding:0 6px;z-index:1}
+.step:last-child::after{content:none}
+.sb{background:var(--band);color:var(--band-ink);padding:16px 20px;border-radius:4px;font-family:ui-monospace,Consolas,"Segoe UI Mono",monospace;font-size:12.5px;line-height:1.6;white-space:pre;overflow:auto;margin:12px 0 16px}
+.sb b{color:var(--watchF)}
+.tok{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:10px 0 14px}
+.sw{background:var(--tile);border:1px solid var(--line);border-radius:4px;overflow:hidden;font-size:11.5px}
+.sw i{display:block;height:44px}
+.sw div{padding:6px 8px;line-height:1.35}
+.sw b{display:block;font-size:12px}
+.anat{background:var(--tile);border:1px solid var(--line);border-radius:4px;padding:16px;display:grid;grid-template-columns:332px 1fr;gap:24px;align-items:start}
+.anat ol{font-size:12.5px;margin-left:18px}
+.frame-wrap{overflow:auto;border:1px solid var(--line);border-radius:4px;background:#D9D4C8;padding:16px}
+.q{counter-reset:q}
+.q li{list-style:none;margin:0 0 10px;padding-left:34px;position:relative;max-width:880px}
+.q li::before{counter-increment:q;content:counter(q);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:4px;background:var(--ink);color:var(--band-ink);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.q li b{display:block}
+.q li em{display:block;font-style:normal;color:var(--muted);font-size:12.5px}
+.small{font-size:12px;color:var(--muted)}
+
+/* ===== the landing-page frame (1440 x 810) ===== */
+.fr{width:1440px;height:810px;background:var(--ground);position:relative;overflow:hidden;font-size:13px;box-shadow:0 20px 50px rgba(30,26,23,.25);border-radius:4px}
+.fr *{font-family:"Archivo","Segoe UI",system-ui,sans-serif}
+.band{position:absolute;left:0;top:0;right:0;height:72px;background:var(--band);color:var(--band-ink);display:flex;align-items:center;padding:0 32px;gap:24px}
+.wm{font-weight:700;font-size:18px;letter-spacing:.14em;text-transform:uppercase;line-height:1;display:flex;flex-direction:column;gap:3px}
+.wm small{font-size:10.5px;letter-spacing:.1em;color:var(--band-muted);font-weight:500}
+.wk{border-left:1px solid #3A3430;padding-left:24px;line-height:1.25}
+.wk b{font-size:17px;font-weight:700;display:block;letter-spacing:-.01em}
+.wk span{font-size:12px;color:var(--band-muted)}
+.ctl{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ctl .c{height:32px;border:1px solid #4A433D;border-radius:4px;padding:0 10px;display:flex;align-items:center;gap:8px;font-size:12.5px;white-space:nowrap}
+.ctl .c span{color:var(--band-muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.ctl .c.on{border-color:var(--watchF);box-shadow:inset 0 0 0 1px var(--watchF)}
+.ctl .rf{font-size:11.5px;color:var(--band-muted);margin-left:8px;white-space:nowrap}
+.ticker{position:absolute;left:0;right:0;top:72px;height:32px;background:var(--tile);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 32px;gap:10px;font-size:12.5px}
+.cnt{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 7px;border-radius:3px;font-weight:700;font-size:11.5px;white-space:nowrap;flex:none}
+.cnt.good{background:var(--goodT);color:var(--good)} .cnt.watch{background:var(--watchT);color:var(--watch)} .cnt.off{background:var(--offT);color:var(--off)}
+.ticker .sen{padding-left:12px;border-left:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticker .sen b{color:var(--off);font-weight:700}
+.ticker .rt{margin-left:auto;font-size:11.5px;color:var(--muted);white-space:nowrap;display:flex;gap:14px}
+.ticker .rt .pv{border:1px solid var(--line);border-radius:3px;padding:0 5px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);line-height:16px}
+.body{position:absolute;left:32px;right:32px;top:120px;bottom:0}
+.hero-row{display:grid;grid-template-columns:912px 448px;gap:16px;height:140px}
+.erow{margin-top:12px}
+.eyebrow{height:18px;display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.eyebrow span{font-weight:500;letter-spacing:0;text-transform:none;color:var(--soft)}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+.tiles{display:grid;grid-template-columns:repeat(4,332px);gap:16px;height:132px}
+.tiles.sp{grid-template-columns:332px 332px 564px}
+.k{background:var(--tile);border:1px solid var(--line);border-radius:6px;padding:9px 14px 8px;position:relative;overflow:hidden;display:flex;flex-direction:column;text-align:left;cursor:pointer}
+.k::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line)}
+.k.good::after{background:var(--goodF)} .k.watch::after{background:var(--watchF)} .k.off::after{background:var(--offF)}
+.k:hover{border-color:var(--ink)}
+.kt{display:flex;align-items:center;gap:6px;height:18px}
+.kl{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kl span{font-weight:400;color:var(--muted)}
+.pv{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);line-height:14px;flex:none}
+.st{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:.02em}
+.st.good{background:var(--goodT);color:var(--good)} .st.watch{background:var(--watchT);color:var(--watch)} .st.off{background:var(--offT);color:var(--off)}
+.km{display:flex;justify-content:space-between;align-items:flex-start;height:38px;margin-top:3px}
+.kv{font-size:30px;font-weight:700;line-height:36px;letter-spacing:-.02em;white-space:nowrap}
+.kv small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px;letter-spacing:0}
+.kv .sub{font-size:11.5px;font-weight:500;color:var(--muted);display:block;line-height:12px;margin-top:-2px;letter-spacing:0}
+svg.wk13{width:112px;height:36px;flex:none;display:block;overflow:visible}
+svg.wk13 rect{fill:var(--col)}
+svg.wk13 rect.cur{fill:var(--ink)}
+.good svg.wk13 rect.cur{fill:var(--good)} .watch svg.wk13 rect.cur{fill:var(--watch)} .off svg.wk13 rect.cur{fill:var(--off)}
+svg.wk13 path{fill:none;stroke:var(--tgt);stroke-width:1;stroke-dasharray:2 2}
+.kd{font-size:12.5px;font-weight:700;line-height:18px;white-space:nowrap;margin-top:1px}
+.good .kd{color:var(--good)} .watch .kd{color:var(--watch)} .off .kd{color:var(--off)}
+.kr{font-size:11.5px;color:var(--muted);line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kn{margin-top:auto;display:flex;align-items:center;gap:8px;height:16px;font-size:11.5px;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden}
+.kn span{overflow:hidden;text-overflow:ellipsis}
+.own{margin-left:auto;flex:none;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink);border:1px solid var(--ink);border-radius:3px;padding:0 4px;line-height:14px}
+/* hero */
+.hero{display:grid;grid-template-columns:300px 1fr 150px;gap:20px;padding:10px 18px 8px}
+.hero .kv{font-size:40px;line-height:44px}
+.hero .kd{font-size:14px}
+.hero .ptd{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.hcap{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);height:16px}
+.hcap span i{display:inline-block;width:10px;height:8px;background:var(--col);margin-right:4px;vertical-align:baseline}
+.hcap span i.b{width:12px;height:0;border-top:1px dashed var(--tgt);vertical-align:middle;background:none}
+svg.hcols{width:100%;height:84px;display:block;overflow:visible}
+svg.hcols rect{fill:var(--col)} svg.hcols rect.cur{fill:var(--ink)}
+svg.hcols path{fill:none;stroke:var(--tgt);stroke-width:1.2;stroke-dasharray:3 3}
+svg.hcols text{font-size:9px;fill:var(--muted);font-family:inherit}
+svg.hcols text.cur{font-weight:700;fill:var(--ink)}
+.hside{display:flex;flex-direction:column;gap:6px;padding-top:2px}
+.hside .st{margin-left:0;height:20px;font-size:11px}
+.hside .note{font-size:11.5px;color:var(--muted);font-style:italic;line-height:15px}
+.hside .who{margin-top:auto;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
+/* channel mix */
+.mix{padding:10px 16px 8px}
+.mixbar{display:flex;height:22px;border-radius:3px;overflow:hidden;margin-top:6px;gap:2px}
+.mixbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11.5px}
+.mixbar .s{background:var(--store)} .mixbar .o{background:var(--online)} .mixbar .w{background:var(--whsl)}
+.plan{position:relative;height:8px;margin-top:3px}
+.plan i{position:absolute;top:0;width:2px;height:8px;background:var(--ink)}
+.plan i::after{content:attr(data-l);position:absolute;top:8px;left:-10px;font-size:9px;color:var(--muted);font-style:normal}
+.mixrows{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:18px;font-size:11.5px}
+.mixrows div b{display:block;font-size:13px;font-weight:700}
+.mixrows div i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+.mixrows .d{color:var(--muted)}
+/* movers */
+.mv{padding:9px 14px 8px}
+.mvg{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;row-gap:3px;margin-top:4px}
+.mr{display:grid;grid-template-columns:118px 1fr 44px;align-items:center;gap:6px;font-size:11.5px;height:18px}
+.mr .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mr .bar{position:relative;height:8px}
+.mr .bar::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.mr .bar b{position:absolute;top:0;bottom:0;border-radius:2px}
+.mr .bar b.up{left:50%;background:var(--goodF)} .mr .bar b.dn{right:50%;background:var(--offF)}
+.mr .v{text-align:right;font-weight:700}
+.mr .v.up{color:var(--good)} .mr .v.dn{color:var(--off)}
+.ffoot{position:absolute;left:32px;right:32px;bottom:26px;height:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--muted);padding-top:5px}
+.ffoot .r{margin-left:auto;display:flex;gap:14px}
+.ffoot a{color:var(--acc);text-decoration:underline;text-underline-offset:2px}
+@media (max-width:1100px){.grid2,.grid3,.flow{grid-template-columns:1fr}.tok{grid-template-columns:repeat(3,1fr)}.anat{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<div class="draft">Draft - projection state - design prototype for USER approval - nothing built</div>
+<h1>Executive dashboard for a consumer-goods reseller<br><span style="color:var(--muted);font-weight:500">metric map → metric flow → design direction → Week 43 frame</span></h1>
+<p class="byline">2026-10-24 · Nordmark Retail (fictional) · spec <code>docs/specs/2026-10-24-executive-dashboard-consumer-goods-reseller-spec.md</code> · supersedes the ACME executive scorecard concept · every number on this page is illustrative</p>
+
+<nav class="idx">
+  <a href="#map">a. Metric map</a><a href="#dag">b. Lineage</a><a href="#flow">c. Flow</a><a href="#design">d. Design direction</a><a href="#frame">d. Week 43 frame</a><a href="#tracks">e. Tri-track</a><a href="#open">f. Open questions</a>
+  <span class="sp">Nordmark Retail - 142 stores - online - wholesale - NL + BE - EUR</span>
+</nav>
+
+<!-- ============================================================ a. METRIC MAP -->
+<section id="map">
+  <div class="sec-h"><span class="k">a</span><h2>Metric map - 32 KPIs, three tiers, one page that hangs on three numbers</h2></div>
+  <p class="lede">A reseller makes money on three levers: <b>sell more at the right price</b>, <b>keep more of each sale</b>, <b>turn stock faster than it costs to hold</b>. The page hangs on one number per lever. Everything else on the landing page is an <em>explanation</em> of those three; everything on the drill pages is an explanation of the explanations.</p>
+
+  <div class="callout">
+    <b>Tier 1 - the three numbers the page hangs on</b>
+    <ol style="margin-top:6px;margin-bottom:0">
+      <li><b>Net sales</b> (THE number) - the top line every other metric divides by or adds up to; it is what the CEO is asked about first on Monday, and LFL, mix, pace and the category movers all exist to explain it.</li>
+      <li><b>Total margin %</b> (front + back) - "keep more of each sale" in one figure. Front margin alone hides the supplier-funded half of a reseller's profit; back margin alone is provisional. Together they are the margin the business actually keeps, and markdown, shrink and category mix explain its movement.</li>
+      <li><b>Weeks of cover (forward)</b> - the operational stock-health number: it decides this week's actions (stop buying, bring intake forward, mark down). Availability (too little stock) and markdown (too much) are its two failure modes; sell-through and GMROI are its slower, financial readings. GMROI was the alternative; it is R12M and moves slowly, so it serves better as a Tier-2 explanation. See open question 5.</li>
+    </ol>
+  </div>
+  <p><b>Tier 2</b> = the 12 landing tiles (★) that explain Tier 1, grouped in three bands: Margin, Stock, Supply &amp; profit, plus the two "where" visuals (channel mix, top category movers). <b>Tier 3</b> = the bench, shipped inactive in the <code>kpi</code> table and switched on per client. Comparators: <b>B</b> budget · <b>LY</b> last year same retail week (LY week key, not date) · <b>LW</b> last week · <b>F</b> forecast. Direction: ↑ higher is better, ↓ lower is better, ◦ context (band around target).</p>
+  <div class="legend"><span><span class="chip t1">Tier 1</span> hangs the page</span><span><span class="chip t2">Tier 2</span> landing tile ★</span><span><span class="chip t3">Tier 3</span> bench, inactive</span><span>Owners: CE CEO · CF CFO · CM Commercial / merchandising · SC Supply chain · RO Retail ops · EC E-commerce · MK Marketing · BI BI / finance</span></div>
+  <table class="t" id="kpi-table">
+    <thead><tr><th>#</th><th>Tier</th><th>Domain</th><th>KPI</th><th>Definition</th><th>Native grain / basis</th><th class="c">Dir.</th><th>Comparator</th><th>Cadence</th><th>Status rule (Watch band)</th><th>Owner</th><th>Drill page</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ============================================================ b. LINEAGE -->
+<section id="dag">
+  <div class="sec-h"><span class="k">b</span><h2>Metric lineage - from five facts to the three Tier-1 numbers</h2></div>
+  <p class="lede">Left to right: facts and dimensions → base measures (additive sums, last-snapshot values, accruals) → intermediate money and stock amounts → ratios (the Tier-2 tiles) → the Tier-1 numbers. Edge labels name the operation. Hover a node for its definition; cobalt edges are the Tier-1 paths.</p>
+  <div class="legend"><span><i class="fact"></i>fact</span><span><i class="dim"></i>dimension (filter / key)</span><span><i class="base"></i>base measure</span><span><i style="background:var(--accT);border-color:var(--acc)"></i>intermediate amount</span><span><i class="t2"></i>Tier-2 ratio</span><span><i class="t1"></i>Tier-1</span><span>labels: Σ sum · ÷ ratio · − / + arithmetic · last snap · LY key · accrual · fcst</span></div>
+  <svg class="dag" id="dagsvg" viewBox="0 0 1376 640" aria-label="Metric lineage graph"></svg>
+  <div class="grid2" style="margin-top:14px">
+    <div class="callout"><b>Where the margins meet.</b> Front margin = Net sales − COGS at landed cost (POS lines). Back margin = contract rate × qualifying purchases, accrued weekly from the supplier-income fact and flagged provisional until the monthly true-up. <b>Total margin € = front + back</b>; Total margin % divides it by Net sales. Markdown is already inside Net sales (it reduces the sell price), so it never enters the margin sum twice: it is shown as <em>markdown % of gross sales</em> and as a step in the margin bridge. Shrink is a cost below total margin: <b>EBITDA = Total margin − shrink − store OpEx − central OpEx − fulfilment</b>, then ÷ Net sales for the margin %.</div>
+    <div class="callout warn"><b>Two keys that decide whether the numbers are right.</b> (1) <b>LY week key</b> on the retail calendar - every LY comparison joins week 43 to LY week 43, never to the same dates; the 53-week year is restated per policy (open question 1). (2) <b>LFL flag</b> on the store - recalculated monthly (open ≥ 13 months, not refitted); LFL growth filters <em>both</em> current and LY sales to the same store set, so new stores, closures and refits sit in the non-LFL bridge step, not in the ratio.</div>
+  </div>
+</section>
+
+<!-- ============================================================ c. FLOW -->
+<section id="flow">
+  <div class="sec-h"><span class="k">c</span><h2>Visual and semantic flow - START at the top, explain downwards, FINISH at the lowest grain</h2></div>
+  <p class="lede">The reader's path is the same for each Tier-1 number: the tile at the top (value, Δ vs comparator, pace, 13-week trend), the explanation band below it on the landing page, then one click into the drill page whose hero repeats the number and whose detail table ends at the lowest level worth showing an executive - and from there, where it makes sense, one more step to the transactional grain held in the domain model.</p>
+
+  <div class="flow">
+    <!-- NET SALES -->
+    <div class="fl">
+      <div class="fh">Net sales <span>Tier 1 · sell more</span></div>
+      <div class="step"><span class="tag">Start</span><b class="ttl">Hero tile, row 1</b>
+        <p>€61.4m week 43 · −€1.5m (−2.4%) vs budget · vs LY +3.8% · pace n/a (week closed) · PTD line · 13 retail-week columns with the budget line.</p>
+        <div class="meta"><b>Reads:</b> are we selling what we planned, and is the week-on-week shape healthy? <b>Click:</b> opens the Sales page with week 43 and the comparator carried.</div></div>
+      <div class="step next"><span class="tag">Next</span><b class="ttl">Explanation on the landing page</b>
+        <p><b>LFL growth %</b> (same-store truth), <b>Channel mix</b> (where it sold vs plan), <b>Top category movers</b> Δ vs LY (what sold). Together they answer "is the miss stores, channel or category?".</p>
+        <div class="meta"><b>Sales page hero:</b> weekly net sales actual vs budget vs LY, 13–26 weeks. <b>Supporting:</b> LFL vs non-LFL bridge (LY → LFL growth → new stores → closures → online → wholesale → actual); sales by category vs LY sorted bar with Δ % colour; channel × region small multiples; online funnel sessions → orders → AOV. <b>Filters carried:</b> period, region/format, comparator; category, store, channel as drill fields.</div></div>
+      <div class="step finish"><span class="tag">Finish</span><b class="ttl">Lowest grain</b>
+        <p><b>Store ranking table</b> (142 rows): net sales, Δ vs budget, LFL %, basket value, items per basket, traffic, front GM %, rank change vs last week. Click a store → <b>store × category × week</b> matrix; click a cell → <b>SKU-store-day</b> rows (units, net sales, markdown, on-hand) from the Sales aggregation; "open receipt lines" hands the SKU-store-day key to the POS domain model.</p>
+        <div class="meta"><b>Grain chain:</b> week × store → week × store × category → day × store × SKU → receipt line (domain model only).</div></div>
+    </div>
+    <!-- TOTAL MARGIN -->
+    <div class="fl">
+      <div class="fh">Total margin % <span>Tier 1 · keep more</span></div>
+      <div class="step"><span class="tag">Start</span><b class="ttl">Margin band, first tile after the worst</b>
+        <p>36.3% (front 30.1% + back 6.3%) · +0.1 pp vs budget · vs LY −0.2 pp · provisional badge until true-up · 13-week columns.</p>
+        <div class="meta"><b>Reads:</b> are we keeping what we planned of each sale? <b>Click:</b> Margin page with the KPI selected.</div></div>
+      <div class="step next"><span class="tag">Next</span><b class="ttl">Explanation on the landing page</b>
+        <p>The Margin band: <b>Markdown % of sales</b> (the price we gave away), <b>Front GM %</b> (price minus landed cost), <b>Back margin €</b> (what suppliers fund), <b>LFL</b> for volume context. Worst first, so an off-track markdown sits at the left.</p>
+        <div class="meta"><b>Margin page hero:</b> margin bridge LY margin % → price → mix → landed cost → markdown → back margin → current. <b>Supporting:</b> margin % by category vs plan (dumbbell); markdown by promo type (TPR, multibuy, clearance, loyalty); back-margin accrual vs contract target by supplier. <b>Filters carried:</b> period, region/format, comparator; category, promotion, supplier as drill fields.</div></div>
+      <div class="step finish"><span class="tag">Finish</span><b class="ttl">Lowest grain</b>
+        <p><b>Category × subcategory matrix</b>: net sales, front %, back %, total %, markdown %, shrink %, Δ pp vs plan with colour. Click a subcategory → <b>SKU × promotion</b> list (sell price, landed cost, markdown €, promo funding, margin €); click a supplier-funded promo → <b>contract accrual lines</b> (rate, qualifying purchases, accrued, invoiced, provisional flag).</p>
+        <div class="meta"><b>Grain chain:</b> period × category → period × subcategory → SKU × promo → contract × period accrual line / receipt line for COGS.</div></div>
+    </div>
+    <!-- WEEKS OF COVER -->
+    <div class="fl">
+      <div class="fh">Weeks of cover <span>Tier 1 · turn faster</span></div>
+      <div class="step"><span class="tag">Start</span><b class="ttl">Stock band, second tile</b>
+        <p>11.4 weeks forward · +1.9 vs target 9.5 (band ±2) · vs LW +0.3 · stock at cost €168m · 13-week columns.</p>
+        <div class="meta"><b>Reads:</b> do we hold the right amount of stock for the forecast? <b>Click:</b> Inventory page with cover selected.</div></div>
+      <div class="step next"><span class="tag">Next</span><b class="ttl">Explanation on the landing page</b>
+        <p>The Stock band: <b>Availability %</b> (too little, where it hurts sales), <b>Sell-through %</b> (is the season clearing), <b>GMROI</b> (is the stock earning its keep). Supplier OTIF in the next band explains inbound.</p>
+        <div class="meta"><b>Inventory page hero:</b> stock at cost by category vs target cover (bars with target markers, over/under coloured). <b>Supporting:</b> sell-through by season × category; aged stock buckets 0–30 / 31–90 / 91–180 / 180+ days; availability by store cluster heatmap; GMROI by category. <b>Filters carried:</b> period (snapshot date), region/format; category, location, supplier as drill fields.</div></div>
+      <div class="step finish"><span class="tag">Finish</span><b class="ttl">Lowest grain</b>
+        <p><b>SKU exception list</b> in three tabs: out-of-stock top sellers (lost sales estimate), overstock (cover &gt; 26 weeks, € at cost), delisted with stock. Click a SKU → <b>SKU-store-day snapshot</b> (on-hand, on-order, in transit, first-receipt date, last sale) and its open <b>PO lines</b> (due date, supplier, OTIF status).</p>
+        <div class="meta"><b>Grain chain:</b> snapshot × category → snapshot × SKU → SKU × location × day → PO line × receipt.</div></div>
+    </div>
+  </div>
+
+  <h3>Page-level fan-out - what the landing page opens and what travels with the click</h3>
+  <svg class="dag" id="fanout" viewBox="0 0 1376 330" aria-label="Landing page fan-out to five drill pages"></svg>
+  <p class="small" style="margin-top:8px">Period, region / format and comparator are synced on every page. The KPI clicked is pre-selected on its page; category, store, supplier and promotion are drill-through fields that carry when the click starts on a visual that has them (category movers → Sales page filtered to the category; channel mix segment → Channel page filtered to the channel).</p>
+
+  <h3>Interaction per step</h3>
+  <table class="t">
+    <thead><tr><th style="width:150px">Step</th><th>Click / key</th><th>What opens</th><th>Filters carried</th><th>Power BI (Track B)</th><th>Fabric App / Next.js (A, C)</th></tr></thead>
+    <tbody>
+      <tr><td>Status ticker sentence</td><td>Click an off-track KPI name</td><td>That KPI's drill page, KPI selected</td><td>period, region, comparator</td><td>Measure-bound button per off-track slot → drillthrough bookmark; or the sentence as text and the tiles as the click targets</td><td>Inline links in the sentence</td></tr>
+      <tr><td>Tile (Tier 1 / 2)</td><td>Click, Enter</td><td>Drill page with its hero and the KPI selected</td><td>period, region, comparator + KPI key</td><td>Card visual → drillthrough page (hidden), back button; one page per domain, KPI selected by a drill field</td><td>Same window: the content area swaps to the drill view with a breadcrumb (ADR-0004 pattern); browser back returns</td></tr>
+      <tr><td>Hero 13-week column</td><td>Click a week</td><td>Sales page at that week</td><td>+ week</td><td>Column chart drillthrough on the calendar week</td><td>Native</td></tr>
+      <tr><td>Channel mix segment</td><td>Click Store / Online / Wholesale</td><td>Channel &amp; customer page filtered to the channel</td><td>+ channel</td><td>100 % stacked bar drillthrough on channel</td><td>Native</td></tr>
+      <tr><td>Category mover bar</td><td>Click a category</td><td>Sales page, category selected; second click on the page → Margin page for the same category</td><td>+ category</td><td>Bar chart drillthrough on category; cross-page drill keeps the category</td><td>Native, category in the URL state</td></tr>
+      <tr><td>Drill page detail row</td><td>Click a store / subcategory / SKU / supplier</td><td>Next grain (matrix → list → transactional rows) in a side panel</td><td>all above + the row key</td><td>Matrix expand (hierarchy) then a second drillthrough page for SKU-store-day; receipt / PO lines via a "details" DirectQuery page on the domain model</td><td>Side panel with a virtualised table; the last step calls the domain model (DAX connector in A, Parquet shard or API in C)</td></tr>
+      <tr><td>Comparator / period mode</td><td>Band controls</td><td>Re-reads every Δ and the window; status stays vs target</td><td>global</td><td>Field parameter (comparator) and calculation group (period mode), synced slicers</td><td>Global state in the URL</td></tr>
+      <tr><td>Board export</td><td>Footer link</td><td>Letter portrait table + two trends</td><td>period</td><td>Hidden Letter page, subscription PDF Monday 07:00</td><td>Print stylesheet of the same table</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ d. DESIGN DIRECTION -->
+<section id="design">
+  <div class="sec-h"><span class="k">d</span><h2>Design direction - "Trading sheet": a Monday-meeting page, not a finance ledger</h2></div>
+  <p class="lede">The P&amp;L is read like a ledger: cool, white, navy rail, condensed statement type. A trading dashboard is read like the Monday trading sheet on a retailer's wall: a dark header strip with the week and the refresh time, warm paper underneath, big numbers in a sturdy grotesk, weekly columns rather than smooth lines, status as a coloured rail under each tile. Nothing from the Ledger token set is reused: new type family, new ground, new accent, new status set, new tile anatomy, new grid.</p>
+
+  <div class="sb">SUBJECT  Monday trading dashboard for a reseller's leadership (CEO, CFO, Commercial, Supply chain, Retail ops, E-com); purpose inform + decide; lifespan system (3 tracks)
+STYLE    <b>G1 Swiss / International</b> + modifier <b>trading sheet</b> (dark ticker band, warm paper body, weekly columns) · mood brisk, warm, matter-of-fact · build HTML/CSS (A, C), PBIR theme + native visuals (B)
+PALETTE  ground #EFECE4 tile #FCFBF8 ink #1E1A17 muted #6B645C accent #2048C6 band #1E1A17 · status good #136C3A / watch #9A5B00 / off #C0272D · checks PASS (fills #2E9E5B #E3A52A #D9534F FILL-ONLY)
+TYPE     display <b>Archivo 700</b> (tnum, wdth 100) · text Archivo 400/500 · tables Archivo wdth 85 · scale 11/12/13/15/18/24/30/40 · fallback Segoe UI / Segoe UI Semibold (Bahnschrift optional) · subsets latin
+CANVAS   1440×810 · grid 8 px / 12 cols × 100 + 16 gutter / 32 margin · stroke 1 px rules, 3 px status rail · composition band → ticker → hero → three explanation bands → footer; focal point = net sales value</div>
+
+  <div class="grid2">
+    <div>
+      <h4>Why this direction</h4>
+      <ul>
+        <li><b>Retail reads in weeks.</b> Thirteen weekly columns on every tile and in the hero carry the trading rhythm (promo weeks, events) better than a smoothed line; the current week is solid, the rest stone grey, the budget a dotted line.</li>
+        <li><b>The band is the meeting agenda.</b> One charcoal strip holds the week, the refresh stamp and the three controls, so a screenshot always says <em>which</em> week and <em>which</em> comparator it was. The ticker underneath states the agenda: counts and the off-track sentence.</li>
+        <li><b>Warm paper, not cool grey.</b> Stone ground and off-white tiles separate it from the Ledger at a glance, project well, and keep the three status hues vivid without saturating the page.</li>
+        <li><b>Archivo</b> is an open-licence grotesk with tabular figures and a width axis: wide and heavy for the hero value, narrow for the dense drill tables, one family for everything. In Power BI it falls back to Segoe UI / Segoe UI Semibold at the same sizes; Bahnschrift (installed on Windows 10+) is an optional closer match if the USER accepts a Windows-only fallback.</li>
+        <li><b>Status is a rail, a chip and a word.</b> Each tile ends in a 3 px rail in the status fill, carries a square chip with glyph + word top-right, and colours only the Δ line - never colour alone, and one hue per tile.</li>
+      </ul>
+      <h4>Alternatives considered (one line each)</h4>
+      <ul>
+        <li><b>"Departures board"</b> - full charcoal page, amber tabular numerals in a mono (JetBrains Mono), for a screen on the trading-room wall; strongest character, weakest in Power BI and print.</li>
+        <li><b>"Retail broadsheet"</b> - editorial: Fraunces / Newsreader headlines, paper ground, hairlines and small caps; calm and board-pack friendly, less "Monday 8 a.m.".</li>
+        <li><b>"Fluent native"</b> - Power BI defaults (Segoe, white, Fluent status greens / reds); fastest in Track B, least distinct from every other Power BI report.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Tokens (contrast on the tile surface, computed)</h4>
+      <div class="tok">
+        <div class="sw"><i style="background:#EFECE4"></i><div><b>Ground</b>#EFECE4</div></div>
+        <div class="sw"><i style="background:#FCFBF8"></i><div><b>Tile</b>#FCFBF8</div></div>
+        <div class="sw"><i style="background:#1E1A17"></i><div><b>Ink / band</b>#1E1A17 · 16.7:1</div></div>
+        <div class="sw"><i style="background:#6B645C"></i><div><b>Muted</b>#6B645C · 5.6:1</div></div>
+        <div class="sw"><i style="background:#2048C6"></i><div><b>Accent cobalt</b>#2048C6 · 7.2:1</div></div>
+        <div class="sw"><i style="background:#DCD6CA"></i><div><b>Line</b>#DCD6CA</div></div>
+        <div class="sw"><i style="background:#136C3A"></i><div><b>On track</b>#136C3A · 6.3:1 · fill #2E9E5B · tint #E1F0E5</div></div>
+        <div class="sw"><i style="background:#9A5B00"></i><div><b>Watch</b>#9A5B00 · 5.2:1 · fill #E3A52A · tint #FBEFD6</div></div>
+        <div class="sw"><i style="background:#C0272D"></i><div><b>Off track</b>#C0272D · 5.7:1 · fill #D9534F · tint #FAE3E3</div></div>
+        <div class="sw"><i style="background:#2048C6"></i><div><b>Store</b>#2048C6 (fill)</div></div>
+        <div class="sw"><i style="background:#0E7F7B"></i><div><b>Online</b>#0E7F7B (fill)</div></div>
+        <div class="sw"><i style="background:#C9922A"></i><div><b>Wholesale</b>#C9922A (fill)</div></div>
+      </div>
+      <p class="small">Every text role is ≥ 4.5:1 on ground, tile and every tint it sits on (script-checked). Fills (bars, rails, channel segments) are fill-only: text beside them wears ink or muted, labels name the channel, the glyph names the status. Dark band text #F4F1EA 15.3:1, band muted #B8AFA3 8.0:1, amber focus ring #F2B632 9.5:1.</p>
+      <h4>Type scale</h4>
+      <table class="t" style="font-size:12px">
+        <thead><tr><th>Role</th><th>Archivo</th><th class="n">px</th><th>Power BI</th></tr></thead>
+        <tbody>
+          <tr><td>Hero value</td><td>700, wdth 100, tnum, −0.02 em</td><td class="n">40</td><td>Segoe UI Bold 30 pt</td></tr>
+          <tr><td>Tile value</td><td>700, tnum</td><td class="n">30</td><td>Segoe UI Bold 22 pt</td></tr>
+          <tr><td>Band week / page title</td><td>700</td><td class="n">17–18</td><td>Segoe UI Semibold 13 pt</td></tr>
+          <tr><td>Tile label</td><td>600</td><td class="n">12.5</td><td>Segoe UI Semibold 9.5 pt</td></tr>
+          <tr><td>Δ line</td><td>700, status colour</td><td class="n">12.5</td><td>Segoe UI Bold 9.5 pt</td></tr>
+          <tr><td>Reference / note / ticker</td><td>400 (note italic)</td><td class="n">11.5–12.5</td><td>Segoe UI 9 pt</td></tr>
+          <tr><td>Eyebrow, chips, owner</td><td>700 uppercase +0.06–0.08 em</td><td class="n">10–11</td><td>Segoe UI Semibold 8 pt</td></tr>
+          <tr><td>Drill tables</td><td>400/600, wdth 85, tnum</td><td class="n">12</td><td>Segoe UI 9 pt</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>Tile anatomy (332 × 132 at 1440; 443 × 176 at 1920) and grid</h3>
+  <div class="anat">
+    <div>
+      <div class="k watch" style="height:132px;width:332px;cursor:default">
+        <div class="kt"><span class="kl">Weeks of cover <span>- forward</span></span><span class="st watch">● Watch</span></div>
+        <div class="km"><div class="kv">11.4<small>wks</small></div><svg class="wk13" data-pts="9.2,9.4,9.6,9.9,10.1,10.3,10.6,10.4,10.8,11.0,11.2,11.1,11.4" data-tgt="9.5" viewBox="0 0 112 36"></svg></div>
+        <div class="kd">+1.9 wks vs target 9.5</div>
+        <div class="kr">Band ±2 wks - vs LW +0.3 - stock at cost €168m</div>
+        <div class="kn"><span>Toys intake landed 2 weeks early; Garden overstock</span><span class="own">SC</span></div>
+      </div>
+    </div>
+    <ol>
+      <li><b>Label row (18 px):</b> KPI name 12.5/600 with the basis after " - " in muted; a <b>PROV.</b> outlined badge when the period is not closed; status chip top-right (square, glyph + word, tinted).</li>
+      <li><b>Value row (38 px):</b> value 30/700 tabular with the unit small; a second line under the value (11.5 muted) for a paired figure (back margin €, EBITDA €); on the right the <b>13-week column sparkline</b> 112 × 36 (stone columns, current week in the status colour, dotted target).</li>
+      <li><b>Δ line (18 px):</b> signed Δ vs the selected comparator, 12.5/700 in the status colour; pp for percentages, wks for cover, × for GMROI.</li>
+      <li><b>Reference line (15 px):</b> tolerance band, second comparator (vs LY or vs LW) and a contextual amount, 11.5 muted.</li>
+      <li><b>Note row (16 px):</b> owner's one-liner, italic, truncated at 60 characters (full text in the tooltip); owner initials as an outlined square at the right.</li>
+      <li><b>Status rail (3 px):</b> the tile's bottom edge in the status fill; Not available = dashed border, grey rail, "—" value and "no data since"; Stale = amber border + ⏱ tag.</li>
+      <li><b>Grid:</b> 12 columns × 100 px + 16 px gutters inside 32 px margins (1376 content width); tiles span 3 columns (332), the hero 8 (912), channel mix 4 (448), category movers 6 (564). Rows: band 72 · ticker 32 · hero 140 · three bands of eyebrow 18 + tiles 132 · footer 22; every vertical position is on the 4 px grid, row pitch 162.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ d. FRAME -->
+<section id="frame">
+  <div class="sec-h"><span class="k">d</span><h2>Landing page - Week 43, mid-fidelity frame (1440 × 810)</h2></div>
+  <p class="lede">Nordmark Retail, retail week 43 (19–25 Oct 2026), comparator Budget, all regions and formats. Tiles are sorted worst first inside each band. Illustrative data: chosen so that every state is visible (7 on track, 3 watch, 2 off track; two provisional tiles). Scroll horizontally if the window is narrower than 1440 px.</p>
+  <div class="frame-wrap"><div class="fr" aria-label="Landing page frame">
+
+    <div class="band">
+      <div class="wm">Nordmark<small>Trading dashboard</small></div>
+      <div class="wk"><b>Week 43 - 19–25 Oct 2026</b><span>Period 10, week 4 of 4 - FY2026 - 4-5-4 calendar</span></div>
+      <div class="ctl">
+        <div class="c"><span>Period</span>Week ▾</div>
+        <div class="c"><span>Region / format</span>All ▾</div>
+        <div class="c on"><span>Compare</span>Budget ▾</div>
+        <div class="c">Reset</div>
+        <div class="rf">Refreshed Mon 26 Oct 05:12</div>
+      </div>
+    </div>
+
+    <div class="ticker">
+      <span class="cnt good">▲ 7 on track</span><span class="cnt watch">● 3 watch</span><span class="cnt off">▼ 2 off track</span>
+      <span class="sen"><b>Off track:</b> Availability 94.1% (−2.9 pp) - Markdown 9.8% of sales (+1.3 pp) - <span style="color:var(--muted)">Watch: Net sales −2.4%, Weeks of cover +1.9, EBITDA flash −5.0%</span></span>
+      <span class="rt"><span><span class="pv">PROV.</span> not closed - true-up 10 Nov</span></span>
+    </div>
+
+    <div class="body">
+      <div class="hero-row">
+        <div class="k watch hero" title="Open the Sales page">
+          <div>
+            <div class="kt"><span class="kl">Net sales <span>- week 43, all channels</span></span></div>
+            <div class="kv">€61.4<small>m</small></div>
+            <div class="kd">−€1.5m (−2.4%) vs budget</div>
+            <div class="kr">vs LY +3.8% - vs LW +2.0% - week closed, pace n/a</div>
+            <div class="ptd">Period 10 to date <b class="num" style="color:var(--ink)">€241.7m</b> (−1.1% vs budget) - YTD €2,318m (+0.6%)</div>
+          </div>
+          <div>
+            <div class="hcap"><span>Net sales by retail week, €m - 13 weeks</span><span><span><i></i>actual</span> <span style="margin-left:10px"><i class="b"></i>budget</span></span></div>
+            <svg class="hcols" id="hcols" viewBox="0 0 440 84" preserveAspectRatio="none" aria-hidden="true"></svg>
+          </div>
+          <div class="hside">
+            <span class="st watch">● Watch</span>
+            <div class="note">Stores −1.2 pp from three closures; online +12% LFL; wholesale order book −4%.</div>
+            <div class="who"><span class="own">CE</span>CEO - daily</div>
+          </div>
+        </div>
+        <div class="k good mix" title="Open the Channel & customer page">
+          <div class="kt"><span class="kl">Channel mix <span>- % of net sales vs plan</span></span><span class="st good">▲ On track</span></div>
+          <div class="mixbar"><div class="s" style="width:68.4%">Store 68.4%</div><div class="o" style="width:19.8%">Online 19.8%</div><div class="w" style="width:11.8%">11.8%</div></div>
+          <div class="plan"><i style="left:70%" data-l="plan 70"></i><i style="left:88%" data-l="88"></i></div>
+          <div class="mixrows">
+            <div><i style="background:var(--store)"></i>Store<b class="num">€42.0m</b><span class="d">plan 70.0% - −1.6 pp</span></div>
+            <div><i style="background:var(--online)"></i>Online<b class="num">€12.2m</b><span class="d">plan 18.0% - +1.8 pp</span></div>
+            <div><i style="background:var(--whsl)"></i>Wholesale<b class="num">€7.2m</b><span class="d">plan 12.0% - −0.2 pp</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="erow">
+        <div class="eyebrow">Margin <span>- keep more of each sale</span></div>
+        <div class="tiles">
+          <div class="k off" title="Open the Margin page">
+            <div class="kt"><span class="kl">Markdown <span>- % of gross sales</span></span><span class="st off">▼ Off track</span></div>
+            <div class="km"><div class="kv">9.8<small>%</small></div><svg class="wk13" data-pts="7.9,8.1,8.4,8.2,8.6,8.9,8.7,9.1,9.4,9.0,9.3,9.6,9.8" data-tgt="8.5" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+1.3 pp vs budget 8.5%</div>
+            <div class="kr">Watch above +1.0 pp - vs LY +1.9 pp - markdown €6.7m</div>
+            <div class="kn"><span>Apparel autumn clearance 4 weeks early; Garden end of season</span><span class="own">CM</span></div>
+          </div>
+          <div class="k good" title="Open the Margin page">
+            <div class="kt"><span class="kl">Front gross margin <span>- % of net sales</span></span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">30.1<small>%</small></div><svg class="wk13" data-pts="29.6,29.8,30.2,30.0,29.7,30.1,30.3,29.9,30.0,30.2,30.4,29.8,30.1" data-tgt="30" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+0.1 pp vs budget 30.0%</div>
+            <div class="kr">Watch below −1.0 pp - vs LY −0.3 pp - front margin €18.5m</div>
+            <div class="kn"><span>H&amp;B and Electronics mix offsets Apparel clearance</span><span class="own">CF</span></div>
+          </div>
+          <div class="k good" title="Open the Margin page">
+            <div class="kt"><span class="kl">Total margin <span>- front + back</span></span><span class="pv">PROV.</span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">36.3<small>%</small></div><svg class="wk13" data-pts="35.9,36.0,36.2,36.1,35.8,36.0,36.4,36.2,36.1,36.3,36.5,36.0,36.3" data-tgt="36.2" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+0.1 pp vs budget 36.2%</div>
+            <div class="kr">Back margin €3.9m (6.3% of NS) - vs LY −0.2 pp</div>
+            <div class="kn"><span>Q4 volume rebates accrued; finance true-up 10 Nov</span><span class="own">CF</span></div>
+          </div>
+          <div class="k good" title="Open the Sales page">
+            <div class="kt"><span class="kl">Like-for-like growth <span>- vs LY week</span></span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">+3.4<small>%</small></div><svg class="wk13" data-pts="2.1,2.4,2.8,3.1,2.6,2.9,3.5,3.0,2.7,3.2,3.6,3.1,3.4" data-tgt="3" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+0.4 pp vs budget LFL 3.0%</div>
+            <div class="kr">Watch below −2 pp - 131 LFL stores - non-LFL −1.2 pp</div>
+            <div class="kn"><span>Online LFL +12.1%; hyper formats +1.8%, convenience +4.0%</span><span class="own">RO</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="erow">
+        <div class="eyebrow">Stock <span>- turn it faster than it costs to hold</span></div>
+        <div class="tiles">
+          <div class="k off" title="Open the Inventory page">
+            <div class="kt"><span class="kl">Availability <span>- top-500 SKUs, weighted</span></span><span class="st off">▼ Off track</span></div>
+            <div class="km"><div class="kv">94.1<small>%</small></div><svg class="wk13" data-pts="96.8,96.5,96.9,96.2,95.9,96.1,95.4,95.0,95.2,94.8,94.6,94.3,94.1" data-tgt="97" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">−2.9 pp vs target 97%</div>
+            <div class="kr">Watch 95–97% - vs LW −0.2 pp - lost sales est. €0.9m</div>
+            <div class="kn"><span>DC Tilburg WMS outage Tue; Fresh top-50 at 91%</span><span class="own">SC</span></div>
+          </div>
+          <div class="k watch" title="Open the Inventory page">
+            <div class="kt"><span class="kl">Weeks of cover <span>- forward</span></span><span class="st watch">● Watch</span></div>
+            <div class="km"><div class="kv">11.4<small>wks</small></div><svg class="wk13" data-pts="9.2,9.4,9.6,9.9,10.1,10.3,10.6,10.4,10.8,11.0,11.2,11.1,11.4" data-tgt="9.5" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+1.9 wks vs target 9.5</div>
+            <div class="kr">Band ±2 wks - vs LW +0.3 - stock €168m incl. on-order</div>
+            <div class="kn"><span>Toys intake landed 2 weeks early; Garden overstock</span><span class="own">SC</span></div>
+          </div>
+          <div class="k good" title="Open the Inventory page">
+            <div class="kt"><span class="kl">Sell-through <span>- A/W season to date</span></span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">63.1<small>%</small></div><svg class="wk13" data-pts="41,44,47,50,52,55,57,58,59,60,61,62,63.1" data-tgt="62" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+1.1 pp vs target 62%</div>
+            <div class="kr">Watch below −5 pp - season week 12 of 20 - vs LY +2.4 pp</div>
+            <div class="kn"><span>Apparel 58% after clearance; Home &amp; kitchen 69%</span><span class="own">CM</span></div>
+          </div>
+          <div class="k good" title="Open the Inventory page">
+            <div class="kt"><span class="kl">GMROI <span>- R12M</span></span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">2.7<small>×</small></div><svg class="wk13" data-pts="2.5,2.5,2.6,2.6,2.6,2.7,2.7,2.7,2.6,2.7,2.7,2.7,2.7" data-tgt="2.5" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+0.2× vs target ≥ 2.5×</div>
+            <div class="kr">Watch 2.0–2.5× - margin €411m ÷ avg stock €152m</div>
+            <div class="kn"><span>Electronics 1.9× below target; H&amp;B 4.1×</span><span class="own">CF</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="erow">
+        <div class="eyebrow">Supply &amp; profit <span>- what came in, what we kept, where it moved</span></div>
+        <div class="tiles sp">
+          <div class="k watch" title="Open the Margin page">
+            <div class="kt"><span class="kl">EBITDA flash <span>- period 10 to date</span></span><span class="pv">PROV.</span><span class="st watch">● Watch</span></div>
+            <div class="km"><div class="kv">€15.3<small>m</small></div><svg class="wk13" data-pts="3.6,3.7,3.8,3.9,3.6,3.8,4.0,3.8,3.7,3.9,4.0,3.7,3.7" data-tgt="3.9" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">−€0.8m (−5.0%) vs budget</div>
+            <div class="kr">Margin 6.3% (budget 6.6%) - Watch to −5% - payroll +0.3 pp</div>
+            <div class="kn"><span>Energy below plan; payroll over on Sunday trading</span><span class="own">CF</span></div>
+          </div>
+          <div class="k good" title="Open the Supplier page">
+            <div class="kt"><span class="kl">Supplier OTIF <span>- inbound, PO lines</span></span><span class="st good">▲ On track</span></div>
+            <div class="km"><div class="kv">95.4<small>%</small></div><svg class="wk13" data-pts="94.0,94.6,95.1,94.8,95.3,95.0,94.7,95.2,95.6,95.1,95.4,95.0,95.4" data-tgt="95" viewBox="0 0 112 36"></svg></div>
+            <div class="kd">+0.4 pp vs target 95%</div>
+            <div class="kr">Watch 92–95% - 4,812 lines due - vs LW +0.4 pp</div>
+            <div class="kn"><span>Two Electronics suppliers below 85%; see scorecard</span><span class="own">SC</span></div>
+          </div>
+          <div class="k mv" style="cursor:pointer" title="Open the Sales page for a category">
+            <div class="kt"><span class="kl">Top category movers <span>- Δ % vs LY week, ranked</span></span><span class="kr" style="margin-left:auto">8 of 9 (Household +0.6%) - €m in brackets - ±12% scale</span><span class="own">CM</span></div>
+            <div class="mvg">
+              <div class="mr"><span class="nm">Health &amp; beauty <span style="color:var(--muted)">(7.9)</span></span><span class="bar"><b class="up" style="width:46%"></b></span><span class="v up">+9.2%</span></div>
+              <div class="mr"><span class="nm">Home &amp; kitchen <span style="color:var(--muted)">(6.1)</span></span><span class="bar"><b class="dn" style="width:8%"></b></span><span class="v dn">−1.5%</span></div>
+              <div class="mr"><span class="nm">Electronics <span style="color:var(--muted)">(8.4)</span></span><span class="bar"><b class="up" style="width:34%"></b></span><span class="v up">+6.8%</span></div>
+              <div class="mr"><span class="nm">Toys &amp; leisure <span style="color:var(--muted)">(4.2)</span></span><span class="bar"><b class="dn" style="width:20%"></b></span><span class="v dn">−3.9%</span></div>
+              <div class="mr"><span class="nm">Fresh &amp; chilled <span style="color:var(--muted)">(11.3)</span></span><span class="bar"><b class="up" style="width:21%"></b></span><span class="v up">+4.1%</span></div>
+              <div class="mr"><span class="nm">Apparel &amp; footwear <span style="color:var(--muted)">(5.6)</span></span><span class="bar"><b class="dn" style="width:37%"></b></span><span class="v dn">−7.4%</span></div>
+              <div class="mr"><span class="nm">Grocery ambient <span style="color:var(--muted)">(12.8)</span></span><span class="bar"><b class="up" style="width:10%"></b></span><span class="v up">+2.0%</span></div>
+              <div class="mr"><span class="nm">Garden &amp; DIY <span style="color:var(--muted)">(2.7)</span></span><span class="bar"><b class="dn" style="width:50%"></b></span><span class="v dn">−11.2%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ffoot"><span><b style="color:var(--ink)">Illustrative data</b> - EUR, NL + BE - LY = same retail week - status vs budget unless the KPI names a target - worst first in each band - PROV. = provisional until close</span><span class="r"><a href="#" onclick="return false">Definitions</a><a href="#" onclick="return false">Owners</a><a href="#" onclick="return false">Board export</a></span></div>
+    </div>
+  </div></div>
+  <p class="small" style="margin-top:10px">Not in the frame (drill pages, board page, mobile): built to the same tokens; drill-page heroes repeat the Tier-1 tile at the top of their page so the reader never loses the number they clicked.</p>
+</section>
+
+<!-- ============================================================ e. TRI-TRACK -->
+<section id="tracks">
+  <div class="sec-h"><span class="k">e</span><h2>Tri-track feasibility - what this design needs, top risks only</h2></div>
+  <table class="t">
+    <thead><tr><th style="width:220px">Element</th><th>Power BI (Track B)</th><th>Fabric App / Next.js (A, C)</th><th style="width:90px">Risk</th></tr></thead>
+    <tbody>
+      <tr><td>Dark band + ticker</td><td>Theme JSON (page background #EFECE4, visual backgrounds #FCFBF8, text classes); the band is a rectangle shape with text buttons; the controls are button slicers (period), a field-parameter slicer (comparator) and a hierarchy slicer (region / format), synced across pages</td><td>Tokens as CSS variables; band is a layout component</td><td><span class="chip t3">low</span></td></tr>
+      <tr><td>Archivo</td><td><b>Not available</b> on viewers' machines → Segoe UI / Segoe UI Semibold at the pt sizes above (Bahnschrift optional, Windows only)</td><td>Google Fonts or self-hosted (OFL)</td><td><span class="chip t3">accepted</span></td></tr>
+      <tr><td>Tile = label, value, Δ, reference, note, owner, chip, rail</td><td>New Card visual: label + callout + 3 reference labels with fx colours; the chip and the PROV. badge as reference-label text; the 3 px rail and the chip tint as fx-filled shapes behind the card (one scalar query each)</td><td>One component</td><td><span class="chip t2">medium</span></td></tr>
+      <tr><td>13-week column sparkline</td><td>The card's built-in sparkline is a line only → <b>SVG measure image</b> (columns + dotted target), one image per tile; 13 weeks × 12 tiles per refresh, same pattern as the P&amp;L's <code>KPI Tile SVG</code></td><td>Inline SVG</td><td><span class="chip t2">medium</span></td></tr>
+      <tr><td>Hero 13-week columns + budget line</td><td>Column chart + line on one axis (same unit) or an SVG measure</td><td>Native</td><td><span class="chip t3">low</span></td></tr>
+      <tr><td>Worst-first sort in each band</td><td>Slot pattern: one card per slot bound to a <code>RANKX</code> measure on severity then Δ % (as in the P&amp;L Key figures)</td><td>Array sort</td><td><span class="chip t2">medium</span></td></tr>
+      <tr><td>Retail calendar 4-5-4, LY week key, 53-week restatement</td><td>Calendar table built upstream (ginee) with <code>ly_week_key</code>; all LY measures use <code>TREATAS</code> on the key, never <code>DATEADD</code>; period-mode calculation group (WTD / PTD / QTD / YTD / R12M / R13W)</td><td>Same calendar table shipped as Parquet / entity; the engine joins on the key</td><td><span class="chip t1">high</span></td></tr>
+      <tr><td>Drill pages ×5 with KPI pre-selected</td><td>Drillthrough pages with the KPI key, category, store, supplier, promotion as drill fields; back button; slicers synced; the page navigator hidden</td><td>Same window, breadcrumb, URL state (ADR-0004 pattern)</td><td><span class="chip t3">low</span></td></tr>
+      <tr><td>Lowest grain (SKU-store-day, PO line, receipt line)</td><td>Executive model stays day × store × category (≤ 500 MB); SKU grain only on drill pages via aggregation tables or a DirectQuery "details" page on the domain model; receipt lines never in the exec model</td><td>A: DAX connector to the domain model; C: Parquet shards per category, or no transactional step (hand-off)</td><td><span class="chip t1">high</span></td></tr>
+      <tr><td>Back margin provisional + OLS on supplier cost</td><td>Accrual measure with a provisional flag from the supplier-income fact; OLS hides landed cost and back margin from store roles; RLS by region and category manager</td><td>Same rules in the API layer</td><td><span class="chip t2">medium</span></td></tr>
+      <tr><td>Board export</td><td>Hidden Letter page, table + two trends, subscription PDF Monday 07:00</td><td>Print stylesheet</td><td><span class="chip t3">low</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn" style="max-width:none;margin-top:12px"><b>Top three risks.</b> (1) <b>The retail calendar</b> - every LY figure, LFL and "same week" claim depends on the LY week key and the 53-week policy; get it wrong and the whole page is wrong quietly. (2) <b>Grain and size</b> - 3 years × 142 stores × 68k SKUs × days is far beyond an executive model; the design relies on a day × store × category aggregation for the landing page and SKU grain only behind a click, with the transactional step outside the model. (3) <b>Card visual limits</b> - column sparklines, status chip tints and rails all become SVG measures and fx shapes; proven in the P&amp;L, but each adds a query, so the N-01 budget (≤ 5 s per view) must be measured on the first build.</div>
+</section>
+
+<!-- ============================================================ f. OPEN QUESTIONS -->
+<section id="open">
+  <div class="sec-h"><span class="k">f</span><h2>Open questions for the USER (each with a default)</h2></div>
+  <ol class="q">
+    <li><b>Retail calendar</b> - 4-5-4 or calendar months, week start, 53-week handling? <em>Default: 4-5-4 with weeks Mon–Sun, FY starting on the Monday nearest 1 Feb (week 43 = 19–25 Oct 2026 as in the frame), 53rd week every 5–6 years restated against LY week 1 per Nordmark's policy; LY always by week key.</em></li>
+    <li><b>Countries and currency</b> - one country or several, and which reporting currency? <em>Default: Netherlands + Belgium, EUR only, no FX layer on this report (keeps the model and the parity tests simple; a multi-currency version reuses the P&amp;L's translation rules later).</em></li>
+    <li><b>Private label</b> - split private label from branded on the landing page or only on the drill pages? <em>Default: PL flag on the product dimension; PL share of sales and PL margin on the Margin and Sales pages; one bench KPI "Private-label share %" switched off on the landing page.</em></li>
+    <li><b>Back-margin method</b> - contract-rate accrual weekly with a monthly true-up, or finance-posted amounts only? <em>Default: accrual = contract rate × qualifying purchases, weekly, shown with the PROV. badge; the monthly true-up replaces the accrual and clears the badge; earned vs invoiced on the Supplier page.</em></li>
+    <li><b>THE number</b> - which Tier-1 is the one the page is named after: Net sales, Total margin % or Weeks of cover (or GMROI)? <em>Default: Net sales in the hero; Total margin % and Weeks of cover lead their bands; GMROI stays Tier 2. If the USER prefers a profit-first page, Total margin € becomes the hero and Net sales moves to the Margin band.</em></li>
+    <li><b>Availability definition</b> - all ranged SKUs or the top sellers, weighted? <em>Default: top-500 SKUs by LY sales, weighted by sales, measured as SKU-store-days in stock ÷ ranged; all-SKU availability on the Inventory page.</em></li>
+    <li><b>Channels and formats in scope</b> - store, online, wholesale; marketplace? three formats? <em>Default: Store (hyper, super, convenience), Online, Wholesale; marketplace off (bench); region = NL / BE.</em></li>
+    <li><b>Landed cost</b> - standard cost with PPV, or actual landed cost including freight and duty? <em>Default: standard landed cost on the POS line (front margin stable week to week) plus the purchase price variance KPI on the Supplier page; actual cost at month-end close.</em></li>
+  </ol>
+  <p class="small">Not asked (decided by the spec): three header slicers only; status vs target independent of the comparator; 12 landing tiles; drill pages hidden from navigation; daily 05:00 refresh.</p>
+</section>
+
+</div>
+
+<script>
+/* ---------- a. metric map ---------- */
+const KPI=[
+ [1,1,'Sales','Net sales ★','Gross sales − returns − discounts − VAT, from POS / order lines','day × store/channel × SKU → Σ','↑','B · LY · LW · F','daily','−3% to 0% (Watch), Off beyond','CE / CM','Sales'],
+ [2,2,'Sales','Like-for-like growth % ★','Net sales of stores/sites open ≥ 13 months ÷ their LY week sales − 1','LFL store set, current and LY week key','↑','B (LFL budget) · LY','daily','−2 pp','RO','Sales'],
+ [3,3,'Sales','Sales pace vs budget %','Net sales to date ÷ (budget × elapsed trading-days share)','WTD / PTD, trading-day calendar','↑','B','daily','95–100%','CM','Sales'],
+ [4,3,'Sales','Units & average selling price','Σ units; Net sales ÷ units','Σ units; ÷','↑','B · LY','daily','−3%','CM','Sales'],
+ [5,2,'Sales','Channel mix % ★','Channel net sales ÷ total, vs plan mix','Σ by channel ÷ total','◦','Plan · LY','daily','±2 pp','CE','Channel & customer'],
+ [6,3,'Sales','Online conversion % & AOV','Orders ÷ sessions; Net sales ÷ orders','day × site (web fact)','↑','Target · LY','daily','−0.3 pp / −5%','EC','Channel & customer'],
+ [7,3,'Sales','Store traffic & basket','Footfall; items ÷ transactions; Net sales ÷ transactions','day × store (counters + POS)','↑','LY · LW','daily','−3%','RO','Sales'],
+ [8,2,'Margin','Front gross margin % ★','(Net sales − COGS at landed cost) ÷ Net sales','POS line COGS Σ','↑','B · LY','daily','−1 pp','CF','Margin'],
+ [9,1,'Margin','Back margin & total margin % ★','Rebates + promo funding + listing fees accrued; (front + back) ÷ Net sales','contract × period accrual; provisional until true-up','↑','B · LY','weekly accrual, monthly true-up','−5% abs / −1 pp','CF / CM','Margin'],
+ [10,2,'Margin','Markdown % of sales ★','Markdown value (permanent + promo) ÷ gross sales','POS line markdown Σ ÷ gross Σ','↓','B · LY','daily','+1 pp','CM','Margin'],
+ [11,3,'Margin','Promo share % & uplift','Promo sales ÷ Net sales; promo units ÷ baseline − 1','promo flag on sales line; baseline R8W','◦','Plan','weekly','+3 pp','CM','Margin'],
+ [12,3,'Margin','Shrink %','(Book stock − counted stock) at cost ÷ Net sales','count cycle × location; R12M','↓','≤ 1% fixed','monthly','1–1.5%','RO','Margin'],
+ [13,3,'Margin','Category margin mix','Margin % by category vs plan; contribution to total margin','period × category','↑','Plan','weekly','−1 pp','CM','Margin'],
+ [14,1,'Inventory','Weeks of cover (forward) ★','(On-hand + on-order at cost) ÷ forecast weekly COGS (fallback R4W average)','last snapshot × location; forecast from planning','◦','Target by category','daily','±2 weeks','SC','Inventory'],
+ [15,2,'Inventory','Sell-through % ★','Units sold in period ÷ (opening stock + receipts)','season × category; Σ units, opening snapshot, receipts Σ','↑','Target by season','weekly','−5 pp','CM','Inventory'],
+ [16,2,'Inventory','GMROI ★','Total margin R12M ÷ average inventory at cost','R12M Σ margin ÷ avg of monthly snapshots','↑','≥ 2.5 (by category)','weekly','2.0–2.5','CF / SC','Inventory'],
+ [17,2,'Inventory','Availability / in-stock % ★','SKU-store-days in stock ÷ ranged, top-500 SKUs weighted','SKU × store × day snapshot','↑','≥ 97% fixed','daily','95–97%','SC','Inventory'],
+ [18,3,'Inventory','Aged / excess stock %','Stock at cost older than 90 days or > 26 weeks cover ÷ total','snapshot × SKU with first-receipt date','↓','≤ 10%','weekly','10–15%','SC','Inventory'],
+ [19,3,'Inventory','Inventory turns','R12M COGS ÷ average inventory at cost','R12M','↑','Target','monthly','−0.5','SC','Inventory'],
+ [20,2,'Supplier','Supplier OTIF % ★','PO lines received on time and in full ÷ PO lines due','PO line × receipt','↑','≥ 95% fixed','daily','92–95%','SC','Supplier'],
+ [21,3,'Supplier','Top-10 supplier concentration %','Top-10 suppliers\' COGS ÷ total COGS','R12M by supplier','↓','Policy cap','monthly','+2 pp','CM','Supplier'],
+ [22,3,'Supplier','Purchase price variance %','(Actual landed − standard) ÷ standard × units','PO line × receipt','↓','0%','weekly','+1%','CF','Supplier'],
+ [23,3,'Cost','Store operating cost % of sales','Store OpEx (payroll, rent, utilities) ÷ Net sales','GL account × cost centre × period','↓','B','monthly','+0.5 pp','RO','Channel & customer'],
+ [24,3,'Cost','Cost to serve online per order','Fulfilment + delivery + returns ÷ orders','GL × period ÷ orders Σ','↓','B','weekly','+5%','EC','Channel & customer'],
+ [25,2,'Profit','EBITDA & margin % ★ (flash)','Total margin − shrink − OpEx; ÷ Net sales','GL × period; weekly flash provisional','↑','B · LY','monthly (weekly flash)','−5% / −1 pp','CF','Margin'],
+ [26,3,'Cash','Cash conversion cycle (days)','DIO + DSO (wholesale) − DPO','point in time, balance sheet','↓','Target','monthly','+5 days','CF','—'],
+ [27,3,'Cash','Cash balance & headroom','Period-end balances vs covenant / policy','point in time','↑','Policy','weekly','per policy','CF','—'],
+ [28,3,'Customer','Returns rate % (online)','Returned units ÷ sold units, lagged 30 days','order line, lag 30 d','↓','≤ target','weekly','+2 pp','EC','Channel & customer'],
+ [29,3,'Customer','Active loyalty customers & repeat rate','Members with ≥ 1 purchase R12M; ≥ 2 purchases ÷ active','customer (aggregated)','↑','Target','monthly','−3%','MK','Channel & customer'],
+ [30,3,'Customer','NPS / review score','Survey or review-platform export, latest wave','wave','↑','Target','monthly','−5 pts','MK','Channel & customer'],
+ [31,3,'People','Store payroll hours vs plan & sales per labour hour','Hours worked ÷ planned; Net sales ÷ hours','week × store','◦','Plan','weekly','±3%','RO','Sales'],
+ [32,3,'Risk','Data-quality score','% sources refreshed on schedule and reconciled (POS vs GL, stock vs WMS)','source × day','↑','100%','daily','95–100%','BI','—'],
+];
+(function(){
+  const tb=document.querySelector('#kpi-table tbody');
+  tb.innerHTML=KPI.map(r=>`<tr><td class="n">${r[0]}</td><td class="c"><span class="chip t${r[1]}">T${r[1]}</span>${r[3].includes('★')?' <span class="chip star">★</span>':''}</td><td>${r[2]}</td><td><b>${r[3].replace(' ★','')}</b></td><td>${r[4]}</td><td>${r[5]}</td><td class="c">${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td class="c">${r[10]}</td><td>${r[11]}</td></tr>`).join('');
+})();
+
+/* ---------- b. lineage DAG ---------- */
+(function(){
+  const cols=[
+   {x:0,w:196,h:'Facts & dimensions'},{x:290,w:200,h:'Base measures'},{x:584,w:196,h:'Intermediate amounts'},{x:874,w:196,h:'Ratios - Tier 2'},{x:1168,w:208,h:'Tier 1 · profit'}];
+  const N={};
+  const add=(c,id,t,s,cls,tip)=>{(N[c]=N[c]||[]).push({c,id,t,s,cls,tip})};
+  add(0,'FS','Sales','POS / order lines','fact','Day × store/channel × SKU: gross, discounts, returns, units, COGS landed, markdown, promo flag, transactions');
+  add(0,'FI','Inventory snapshot','WMS / ERP','fact','Day × location × SKU: on-hand, on-order, in transit, first-receipt date; semi-additive');
+  add(0,'FP','Purchases / receipts','ERP','fact','PO line × receipt: ordered, received, due / received dates, standard and actual cost');
+  add(0,'FU','Supplier income','contracts','fact','Contract × period: rebate accrual, promo funding, listing fees, earned vs invoiced');
+  add(0,'FG','GL / OpEx','Actual · Budget · Fcst','fact','Account × cost centre × period × scenario');
+  add(0,'FT','Traffic & web','counters, analytics','fact','Day × store or site: footfall, sessions, orders');
+  add(0,'DC','Retail calendar','LY week key','dim','FY → quarter → period (4-5-4) → week → day; trading-day flag; LY same-week key');
+  add(0,'DS','Store','LFL flag · channel','dim','Channel → region → format → store; open date, LFL flag (monthly), cluster');
+  add(0,'DP','Product','category · PL','dim','Division → category → subcategory → brand → SKU; private label, price band, season');
+  add(0,'DU','Supplier','contract · terms','dim','Group → supplier → contract; rebate scheme, lead time');
+  add(1,'GS','Gross sales','Σ','base','Σ gross sales value');
+  add(1,'RT','Returns','Σ','base','Σ returns value');
+  add(1,'DI','Discounts','Σ','base','Σ discounts and VAT adjustments');
+  add(1,'UN','Units','Σ','base','Σ units sold');
+  add(1,'CG','COGS landed','Σ','base','Σ cost of goods at landed cost on the sales line');
+  add(1,'MD','Markdown value','Σ','base','Σ permanent + promo markdown value');
+  add(1,'TX','Transactions','Σ','base','Σ receipts / orders');
+  add(1,'OH','On-hand at cost','last snapshot','base','MAX snapshot date in the window, ALLEXCEPT location, SKU');
+  add(1,'OO','On-order at cost','last snapshot','base','Open PO value at the last snapshot');
+  add(1,'RC','Receipts','Σ units, cost','base','Σ received units and cost');
+  add(1,'OL','PO lines due / OTIF','count','base','Lines due in the window; lines on time and in full');
+  add(1,'AC','Rebate accrual','contract × purchases','base','Contract rate × qualifying purchases; provisional flag');
+  add(1,'OX','OpEx','Σ store + central + fulfilment','base','Σ GL OpEx by cost type');
+  add(1,'SH','Shrink','book − count','base','Stock-count variance at cost');
+  add(1,'BL','Budget / LY values','scenario, LY key','base','Same measures under scenario Budget / Forecast, or current week → LY week key');
+  add(1,'SE','Sessions / footfall','Σ','base','Σ sessions and footfall');
+  add(2,'NS','Net sales €','GS − RT − DI','t1','Tier 1 · the top line');
+  add(2,'FM','Front margin €','NS − COGS','mid','Net sales − COGS at landed cost');
+  add(2,'BM','Back margin €','accrual','mid','Supplier income accrued for the period');
+  add(2,'TM','Total margin €','front + back','mid','Front + back margin');
+  add(2,'SK','Stock at cost','OH + OO','mid','On-hand + on-order at the last snapshot');
+  add(2,'AI','Avg inventory R12M','avg of snapshots','mid','Average of month-end on-hand at cost, R12M');
+  add(2,'FC','Forecast weekly COGS','fcst / R4W','mid','Planning forecast; fallback rolling 4-week average COGS');
+  add(2,'LS','LFL sales cur / LY','LFL store set','mid','Net sales filtered to LFL stores, current and LY week');
+  add(2,'BN','Budget net sales','scenario','mid','Budget for the window and the elapsed-share pace base');
+  add(3,'LF','LFL growth %','÷ − 1','t2','LFL current ÷ LFL LY − 1');
+  add(3,'PC','Pace %','÷ elapsed share','t2','Net sales to date ÷ (budget × elapsed trading-day share)');
+  add(3,'MX','Channel mix %','÷ by channel','t2','Channel net sales ÷ total');
+  add(3,'FGP','Front GM %','÷ NS','t2','Front margin ÷ net sales');
+  add(3,'MP','Markdown %','÷ gross sales','t2','Markdown value ÷ gross sales');
+  add(3,'SP','Shrink %','÷ NS','t2','Shrink ÷ net sales');
+  add(3,'ST','Sell-through %','÷ opening + receipts','t2','Units ÷ (opening stock units + received units)');
+  add(3,'GM','GMROI','R12M ÷','t2','Total margin R12M ÷ average inventory');
+  add(3,'AV','Availability %','days in stock ÷ ranged','t2','SKU-store-days in stock ÷ ranged, top-500 weighted');
+  add(3,'OT','Supplier OTIF %','÷ lines due','t2','On-time-in-full lines ÷ lines due');
+  add(3,'CV','Online conversion / basket','÷','t2','Orders ÷ sessions; net sales ÷ transactions');
+  add(4,'TP','Total margin %','TM ÷ NS','t1','Tier 1 · keep more of each sale');
+  add(4,'WC','Weeks of cover','SK ÷ FC','t1','Tier 1 · stock health, forward');
+  add(4,'EB','EBITDA & margin %','TM − SH − OX','t2','Total margin − shrink − OpEx; ÷ net sales');
+  const E=[
+   ['FS','GS','Σ'],['FS','RT','Σ'],['FS','DI','Σ'],['FS','UN','Σ'],['FS','CG','Σ'],['FS','MD','Σ'],['FS','TX','Σ'],
+   ['FI','OH','last snap'],['FI','OO','last snap'],['FI','SH','count'],['FP','RC','Σ'],['FP','OL','count'],['FU','AC','accrual'],['FG','OX','Σ'],['FG','BL','scenario'],['FT','SE','Σ'],
+   ['DC','BL','LY key'],['DS','LS','LFL flag'],['DU','AC','contract rate'],['DP','FC','category fcst'],
+   ['GS','NS','−',1],['RT','NS','',1],['DI','NS','',1],['GS','MP','÷'],['MD','MP',''],['UN','ST','÷'],['RC','ST',''],['OH','ST','opening'],
+   ['CG','FM','−',1],['AC','BM','',1],['OH','SK','+',1],['OO','SK','',1],['OH','AI','avg R12M'],['CG','FC','fcst / R4W',1],['OH','AV','days in stock'],['OL','OT','÷'],['SH','SP','÷'],['OX','EB','−'],['SH','EB',''],['BL','BN',''],['BL','LS','LY'],['SE','CV','÷'],['TX','CV',''],
+   ['NS','FM','',1],['FM','TM','+',1],['BM','TM','',1],['TM','TP','÷ NS',1],['NS','TP','',1],['SK','WC','÷',1],['FC','WC','',1],['TM','GM','R12M'],['AI','GM','÷'],['NS','LS',''],['LS','LF','÷ − 1'],['NS','PC','÷'],['BN','PC',''],['NS','MX','÷ channel'],['FM','FGP','÷'],['NS','FGP',''],['NS','SP',''],['TM','EB',''],
+  ];
+  const H=640,top=28,nh=30;
+  const pos={};
+  cols.forEach((c,ci)=>{const arr=N[ci]||[];const pitch=Math.min(42,(H-top-20-nh)/Math.max(1,arr.length-1));const start=top+((H-top-20)-(pitch*(arr.length-1)+nh))/2;arr.forEach((n,i)=>{pos[n.id]={x:c.x,y:start+i*pitch,w:c.w,h:nh,n}})});
+  let s='';
+  cols.forEach(c=>{s+=`<text class="col-h" x="${c.x}" y="16">${c.h}</text>`});
+  const bez=(a,b)=>{const x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2,dx=Math.max(40,(x2-x1)*0.45);return{d:`M${x1} ${y1} C${x1+dx} ${y1},${x2-dx} ${y2},${x2} ${y2}`,mx:(x1+3*(x1+dx)+3*(x2-dx)+x2)/8,my:(y1+3*y1+3*y2+y2)/8}};
+  E.forEach(e=>{const a=pos[e[0]],b=pos[e[1]];if(!a||!b)return;const p=bez(a,b);s+=`<path class="ed${e[3]?' hi':''}" d="${p.d}"/>`});
+  E.forEach(e=>{if(!e[2])return;const a=pos[e[0]],b=pos[e[1]];if(!a||!b)return;const p=bez(a,b);s+=`<text class="el" x="${p.mx.toFixed(0)}" y="${(p.my+3).toFixed(0)}" text-anchor="middle">${e[2]}</text>`});
+  Object.values(pos).forEach(p=>{const n=p.n;s+=`<g class="nd ${n.cls}"><title>${n.t} - ${n.tip}</title><rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="3"/><text x="${p.x+8}" y="${p.y+13}">${n.t}</text><text class="sub" x="${p.x+8}" y="${p.y+24}">${n.s}</text></g>`});
+  document.getElementById('dagsvg').innerHTML=s;
+})();
+
+/* ---------- c. fan-out ---------- */
+(function(){
+  const W=1376;let s='';
+  const box=(x,y,w,h,cls,lines)=>{s+=`<g class="nd ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`;lines.forEach((l,i)=>{s+=`<text class="${i?'sub':''}" x="${x+10}" y="${y+16+i*13}">${l}</text>`});s+='</g>'};
+  box(488,8,400,52,'t1',['LANDING PAGE - Week 43','Tier 1 hero + Tier 2 bands; three slicers: period, region / format, comparator','click = tile / segment / bar / ticker name']);
+  const pages=[
+   ['Sales','net sales hero, LFL bridge, category bar, channel × region, online funnel','Store ranking → store × category × week → SKU-store-day → receipt line','Net sales, LFL, movers, hero week'],
+   ['Margin','margin bridge, category dumbbell, markdown by promo, back-margin by supplier','Category × subcategory matrix → SKU × promo → contract accrual line','Total margin %, Front GM %, Markdown %, EBITDA flash'],
+   ['Inventory','stock at cost vs cover target, sell-through, aged buckets, availability heatmap, GMROI','SKU exception list → SKU-store-day snapshot → PO line','Weeks of cover, Availability, Sell-through, GMROI'],
+   ['Supplier','OTIF trend and by supplier, PPV, rebate earned vs accrued, Pareto','Supplier scorecard → contract → PO line × receipt','Supplier OTIF, back margin by supplier'],
+   ['Channel & customer','mix trend, online conversion / AOV / returns, wholesale order book, loyalty','Channel P&L matrix → store format / site → order line','Channel mix, cost to serve']];
+  const bw=256,gap=24,x0=(W-(5*bw+4*gap))/2;
+  pages.forEach((p,i)=>{const x=x0+i*(bw+gap);
+    s+=`<path class="ed hi" d="M${688} 60 C688 100,${x+bw/2} 90,${x+bw/2} 130"/>`;
+    s+=`<text class="el" x="${x+bw/2}" y="${112}" text-anchor="middle">${p[3]}</text>`;
+    box(x,130,bw,70,'t2',[p[0].toUpperCase()+' PAGE',...wrap(p[1],44)]);
+    s+=`<path class="ed" d="M${x+bw/2} 200 L${x+bw/2} 224"/>`;
+    box(x,224,bw,70,'base',['LOWEST GRAIN',...wrap(p[2],44)]);
+  });
+  s+=`<text class="el" x="${W/2}" y="322" text-anchor="middle">carried everywhere: period · region / format · comparator · KPI clicked   |   drill fields: category · store · supplier · promotion · channel</text>`;
+  function wrap(t,n){const w=t.split(' '),o=[];let l='';w.forEach(x=>{if((l+' '+x).trim().length>n){o.push(l.trim());l=x}else l+=' '+x});if(l.trim())o.push(l.trim());return o.slice(0,3)}
+  document.getElementById('fanout').innerHTML=s;
+})();
+
+/* ---------- d. 13-week column sparklines and the hero ---------- */
+document.querySelectorAll('svg.wk13').forEach(sv=>{
+  const p=sv.dataset.pts.split(',').map(Number),t=sv.dataset.tgt?+sv.dataset.tgt:null,W=112,H=36,n=p.length,g=2,bw=(W-g*(n-1))/n;
+  let lo=Math.min(...p,t??Infinity),hi=Math.max(...p,t??-Infinity);const r=(hi-lo)||1;lo-=r*0.6;hi+=r*0.15;
+  const y=v=>H-(v-lo)/(hi-lo)*H;let h='';
+  p.forEach((v,i)=>{h+=`<rect x="${(i*(bw+g)).toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H-y(v)).toFixed(1)}" rx="1"${i===n-1?' class="cur"':''}/>`});
+  if(t!==null)h+=`<path d="M0 ${y(t).toFixed(1)} H${W}"/>`;
+  sv.innerHTML=h;
+});
+(function(){
+  const act=[57.8,58.4,59.1,60.3,58.9,59.6,61.2,60.4,59.8,60.9,61.7,60.2,61.4],bud=[58.5,59.0,59.6,60.8,59.5,60.2,61.0,61.3,60.6,61.9,62.4,62.1,62.9];
+  const W=440,H=84,base=70,n=13,g=10,bw=(W-g*(n-1))/n,lo=54,hi=64.5;const y=v=>base-(v-lo)/(hi-lo)*(base-4);let s='';
+  act.forEach((v,i)=>{const x=i*(bw+g);s+=`<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(base-y(v)).toFixed(1)}" rx="1"${i===n-1?' class="cur"':''}/><text x="${(x+bw/2).toFixed(1)}" y="${H-2}" text-anchor="middle"${i===n-1?' class="cur"':''}>W${31+i}</text>`});
+  s+=`<path d="${bud.map((v,i)=>(i?'L':'M')+(i*(bw+g)+bw/2).toFixed(1)+' '+y(v).toFixed(1)).join(' ')}"/>`;
+  s+=`<line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="#DCD6CA"/>`;
+  document.getElementById('hcols').innerHTML=s;
+})();
+</script>
+</body>
+</html>

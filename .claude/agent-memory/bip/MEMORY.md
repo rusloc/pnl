@@ -1,10 +1,17 @@
 - [Track B PBIP draft](project_track_b_draft.md) — one-window layout, Ledger rebuild applied 2026-10-21 16:17, open checks after the rebuild
 - [PBIR authoring notes](pbir-authoring-notes.md) — validator rules, Desktop render findings (show flags, card padding, button slicer states), DAX query tips
-- [Track B engine](project_track_b_engine.md) — engine chain, measured bottlenecks incl. Ledger timings, display-units layer, DAX tests
+- [Track B engine](project_track_b_engine.md) — engine chain, bottlenecks, ADR-0008 baseline per view + physical prototype gains, DAX tests
 - [Desktop open rule](feedback_desktop_open.md) — no PBIP edits while Desktop has it open; prove plans with DEFINE MEASURE
 - [ACME Trucks report](project_trucks_report.md) — 2nd showcase report: Time util redesign + RU→EN rename plan, waits for ginee export; real-name risk Q-01
+- [Track B Copilot](project_track_b_copilot.md) — no anonymous Copilot chat; param-table window breaks naive Copilot DAX; prep limits (2026-10-23)
+- [Mirelo Sales report](project_mirelo_report.md) — ADR-0011 Track B PBIP draft: model shape, generator in scratch, 2,560 tests TRUE, placeholders
 
 ## Open threads
+- 2026-10-27 Mirelo Sales PBIP built (validator 0/0, tests 2,560 TRUE, all views render-checked in scratch). Open: USER first open + Refresh + tab/drill click-test; USER closes Desktop PIDs 19876 / 4732 / 2088 (mine, untitled + scratch copies); open questions Q1-Q6 in the hand-back; ADR-0011 still Proposed
+- 2026-10-23 ADR-0008 model step + parity fixes applied (validator 0/0, tests 12 sets TRUE, views 2.3-4.3 s local). Open: ginee service rollout (steps 6-8), USER records bm_pl_expand (still hand-written root.children form), M-22 rounding-hide not doable natively, Track A could add fx_basis_name TREATAS for pruning (fin)
+- 2026-10-23 Trucks: original page re-added as "Time util (original)" (validator 0/0, tests 409/536/194 TRUE, render-checked). Open: divider line vs long caption, "Произв-сть" display name, USER first open
+- 2026-10-23 Trucks: tooltip page tt_time_structure added (validator 0/0, tests 409/409 + 536/536), how-it-works doc + speed table (new 1.2-1.3 s vs old 0.7 s, wf_table bottleneck). Open: USER hover-check, USER Performance Analyzer on old pbix, wf_table perf fix offered
+- 2026-10-23 Period flyout v2 + notice rows in the filters pop-up applied (validator 0/0, tests ALL PASS, render-checked in scratch). KPI Trend dropped. ADR-0008 baseline + §4 prototype measured (engine memory). Open: USER hover-checks rail tooltip, records bm_pl_expand; ginee republish; ADR-0008 §4 merge by main agent
 - 2026-10-22 20:36 review batch applied (notice strip out, numbered statement, KPI card v2, header status + filters pop-up, Profitability Region default + hint, ' - '). Open: USER records bm_pl_expand (line_display), first-open checklist in pbi-report-layout.md; ginee republish; ADR-0007 / design guide §5.3-5.4 still describe sparklines / notice strip (main agent)
 - 2026-10-22 ADR-0007 built (tests green, validator 0/0, render-checked). Open: USER records bm_pl_expand in Desktop; ginee republish (KPI Trend contract live for fin); ops row Key figures still ~16 s
 - 2026-10-21 Trucks redesign BUILT (tests green, validator 0/0). Open: USER first open + Refresh, click-test Reset bookmark, confirm main-agent defaults, re-save to refresh diagram layout

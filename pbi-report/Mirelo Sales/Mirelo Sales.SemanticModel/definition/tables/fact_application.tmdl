@@ -1,0 +1,150 @@
+/// Funnel counts per submission day x market x channel x product x new / repeat (cumulative stages). month_key derived on load.
+table fact_application
+	lineageTag: 656216b9-0439-5b17-b7c4-e7b13f8011ad
+
+	column date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 9e67c828-0932-5268-9d5f-7ecc98d43583
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 32c96bf2-4b65-59fa-be50-ae390f2e6c9e
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 633a82e6-8116-5f67-8016-49f5b1d2602d
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: fb303390-3953-59da-bf9e-d87053587067
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column is_repeat
+		dataType: boolean
+		isHidden
+		lineageTag: 4738cc2d-9e2a-564c-ae0e-a4c37280fab3
+		summarizeBy: none
+		sourceColumn: is_repeat
+
+		annotation SummarizationSetBy = User
+
+	column leads
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9b66d6a8-cd52-5588-a569-214bf7e2b6c0
+		summarizeBy: none
+		sourceColumn: leads
+
+		annotation SummarizationSetBy = User
+
+	column apps_started
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1f124e90-f6f7-5237-a1bf-75db755141d8
+		summarizeBy: none
+		sourceColumn: apps_started
+
+		annotation SummarizationSetBy = User
+
+	column apps_submitted
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2c6910cf-097e-5847-97de-88cad017386c
+		summarizeBy: none
+		sourceColumn: apps_submitted
+
+		annotation SummarizationSetBy = User
+
+	column kyc_passed
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 694d13bc-3242-5fc5-959b-605681de100e
+		summarizeBy: none
+		sourceColumn: kyc_passed
+
+		annotation SummarizationSetBy = User
+
+	column approved
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e3b39bc3-9e94-50f1-adaf-46f83373e1ad
+		summarizeBy: none
+		sourceColumn: approved
+
+		annotation SummarizationSetBy = User
+
+	column disbursed
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6d6a2454-adaf-5497-b6b5-a58d73920450
+		summarizeBy: none
+		sourceColumn: disbursed
+
+		annotation SummarizationSetBy = User
+
+	/// Month of the submission day (joins dim_month).
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: f74cbbaf-ef30-53c1-bf12-d6f9cc691292
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	partition fact_application = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_application.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"market_code", type text},
+				            {"channel_code", type text},
+				            {"product_code", type text},
+				            {"is_repeat", type logical},
+				            {"leads", Int64.Type},
+				            {"apps_started", Int64.Type},
+				            {"apps_submitted", Int64.Type},
+				            {"kyc_passed", Int64.Type},
+				            {"approved", Int64.Type},
+				            {"disbursed", Int64.Type}
+				        }
+				    ),
+				    mk = Table.AddColumn(typed, "month_key", each Date.ToText([date], [Format = "yyyy-MM", Culture = "en-US"]), type text)
+				in
+				    mk
+
+	annotation PBI_ResultType = Table

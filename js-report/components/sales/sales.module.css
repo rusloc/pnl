@@ -1,0 +1,831 @@
+/* Flat Ledger tokens (docs/design/sales-revenue dashboard/design-tokens.md §2–§5), scoped to the /sales route so the
+   P&L's Ledger tokens in app/globals.css stay untouched. Geometry: layout-spec §0 (1440 × 810 board, px-exact). */
+.page {
+  --ground: #f3f2ef;
+  --panel: #e9e8e4;
+  --panel2: #deddd8;
+  --line: #cfcdc6;
+  --marker: #2f2f2d;
+  --ink: #111111;
+  --g600: #5c5c58;
+  --g400: #7f7e79;
+  --g300: #bdbbb5;
+  --white: #ffffff;
+  --accent: #ffd54a;
+  --accent2: #ffe58a;
+  --teal: #128c94;
+  --good: #176b3d;
+  --good-t: #d6ebdc;
+  --watch: #8a5a00;
+  --watch-t: #ffeba8;
+  --off: #b3261e;
+  --off-t: #f4d4d1;
+  min-height: 100vh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+  font-feature-settings:
+    'tnum' 1,
+    'cv11' 1;
+}
+
+.page button,
+.page select {
+  font-family: inherit;
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.board {
+  position: relative;
+  width: 1440px;
+  height: 810px;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+.abs {
+  position: absolute;
+}
+
+/* ---------- header ---------- */
+.wedge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 64px;
+  pointer-events: none;
+}
+.brand {
+  left: 32px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 24px;
+  text-align: center;
+}
+.title {
+  left: 64px;
+  top: 14px;
+  height: 28px;
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.pline {
+  left: 64px;
+  top: 42px;
+  width: 680px;
+  height: 16px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seg {
+  display: flex;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.seg button {
+  height: 26px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 26px;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.seg button:last-child {
+  border-right: 0;
+}
+.seg button[aria-checked='true'] {
+  background: var(--ink);
+  color: var(--white);
+}
+.select {
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel);
+  padding: 0 6px 0 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.tabs {
+  left: 32px;
+  top: 64px;
+  height: 36px;
+  display: flex;
+}
+.tabs button {
+  height: 36px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--g600);
+  cursor: pointer;
+}
+.tabs button:hover {
+  background: var(--accent2);
+  color: var(--ink);
+}
+.tabs button[aria-selected='true'] {
+  background: var(--accent);
+  color: var(--ink);
+}
+.tabrule {
+  left: 0;
+  top: 100px;
+  width: 1440px;
+  height: 1px;
+  background: var(--line);
+}
+.tabright {
+  right: 32px;
+  top: 72px;
+  height: 20px;
+  display: flex;
+  gap: 16px;
+}
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--g600);
+  cursor: pointer;
+}
+.linkBtn:hover {
+  color: var(--ink);
+}
+.icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  font-style: normal;
+}
+
+/* ---------- view region ---------- */
+.panel {
+  position: absolute;
+  left: 0;
+  top: 116px;
+  width: 1440px;
+  height: 694px;
+}
+
+/* ---------- cards ---------- */
+.card {
+  position: absolute;
+  background: var(--panel);
+}
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  background: var(--marker);
+}
+.ct {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  right: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ct h3 {
+  margin: 0;
+  font: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--g600);
+  font-size: 12px;
+  font-weight: 600;
+}
+.lab {
+  position: absolute;
+  left: 16px;
+  top: 24px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--g600);
+  white-space: nowrap;
+}
+
+/* hero (Overview, 332 × 192): the whole card is a button that opens the metric's view */
+.hero {
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+.hero:hover {
+  background: #e4e3df;
+}
+.heroVal {
+  position: absolute;
+  left: 16px;
+  top: 44px;
+  height: 48px;
+  font-size: 44px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.heroVal small {
+  margin-left: 12px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.sub {
+  position: absolute;
+  left: 16px;
+  top: 100px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+}
+.spark {
+  position: absolute;
+  left: 196px;
+  top: 44px;
+  width: 120px;
+  height: 44px;
+}
+.cr {
+  position: absolute;
+  left: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  line-height: 16px;
+}
+.crName {
+  width: 84px;
+  font-weight: 500;
+  color: var(--g600);
+  white-space: nowrap;
+}
+.crDelta {
+  width: 64px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.diff {
+  position: relative;
+  width: 80px;
+  height: 6px;
+  margin-left: 8px;
+  background: var(--panel2);
+}
+.diff i {
+  position: absolute;
+  left: 39px;
+  top: -2px;
+  width: 1px;
+  height: 10px;
+  background: var(--marker);
+}
+.diff b {
+  position: absolute;
+  top: 0;
+  height: 6px;
+}
+.good {
+  color: var(--good);
+}
+.watch {
+  color: var(--watch);
+}
+.off {
+  color: var(--off);
+}
+.neutral {
+  color: var(--g600);
+  font-weight: 500;
+}
+.bgGood {
+  background: var(--good);
+}
+.bgWatch {
+  background: var(--watch);
+}
+.bgOff {
+  background: var(--off);
+}
+.bgNeutral {
+  background: var(--g400);
+}
+
+/* KPI (views 2–5, 216 × 120): the other comparator shows on hover / focus */
+.kpiVal {
+  position: absolute;
+  left: 16px;
+  top: 44px;
+  height: 32px;
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.kpi .cr {
+  top: 80px;
+}
+.kpi .crName {
+  width: auto;
+  min-width: 84px;
+  padding-right: 6px;
+}
+.kpi .crDelta {
+  width: auto;
+}
+.kpiSub {
+  position: absolute;
+  left: 16px;
+  right: 8px;
+  top: 100px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--g600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alt {
+  visibility: hidden;
+}
+.kpi:hover .main,
+.kpi:focus-within .main {
+  visibility: hidden;
+}
+.kpi:hover .alt,
+.kpi:focus-within .alt {
+  visibility: visible;
+}
+
+.chart {
+  position: absolute;
+  left: 16px;
+  top: 40px;
+}
+.chart text {
+  font-family: inherit;
+}
+.legend {
+  position: absolute;
+  left: 16px;
+  bottom: 8px;
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--g600);
+  white-space: nowrap;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.sw {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+}
+.swSq {
+  width: 10px;
+  height: 10px;
+}
+.callout {
+  position: absolute;
+  max-width: 240px;
+  background: var(--accent);
+  border: 2px solid var(--white);
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.placeholder {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 44px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--g300);
+  padding: 0 24px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  text-align: center;
+}
+.chip {
+  display: inline-block;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip.good {
+  background: var(--good-t);
+}
+.chip.watch {
+  background: var(--watch-t);
+}
+.chip.off {
+  background: var(--off-t);
+}
+.chip.neutral {
+  background: var(--panel2);
+}
+.tag {
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--accent2);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+}
+
+/* ---------- tables ---------- */
+.tableWrap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 36px;
+  bottom: 8px;
+  overflow-y: auto;
+}
+.tableWrapTight {
+  top: 34px;
+  bottom: 0;
+  overflow: hidden;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  line-height: 20px;
+}
+.table th {
+  position: sticky;
+  top: 0;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--panel2);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--g600);
+  text-align: left;
+  white-space: nowrap;
+}
+.table td {
+  height: 21px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tight th {
+  height: 20px;
+}
+.tight td {
+  height: 21px;
+  line-height: 20px;
+}
+.table th.r,
+.table td.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.row {
+  cursor: pointer;
+}
+.row:hover td {
+  background: var(--accent2);
+}
+.row[aria-selected='true'] td {
+  background: var(--accent);
+}
+.attBar {
+  display: inline-block;
+  position: relative;
+  width: 100px;
+  height: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--panel2);
+}
+.attBar b {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 6px;
+  background: var(--ink);
+}
+.attBar i {
+  position: absolute;
+  left: 66px;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--teal);
+}
+.note {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--g600);
+  font-weight: 400;
+}
+
+/* ---------- pop-overs ---------- */
+.infoWrap {
+  position: relative;
+  display: inline-flex;
+}
+.infoBtn {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--g600);
+  cursor: pointer;
+}
+.infoBtn:hover {
+  color: var(--ink);
+}
+.pop {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  z-index: 20;
+  width: 300px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ink);
+  white-space: normal;
+  text-align: left;
+}
+.popUp {
+  top: auto;
+  bottom: 24px;
+}
+.openBtn {
+  border: 0;
+  padding: 0 2px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g600);
+  cursor: pointer;
+}
+.openBtn:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* ---------- slide-over ---------- */
+.scrim {
+  position: absolute;
+  left: 0;
+  top: 100px;
+  width: 720px;
+  height: 710px;
+  border: 0;
+  padding: 0;
+  background: rgba(17, 17, 17, 0.4);
+  cursor: default;
+}
+.so {
+  position: absolute;
+  left: 720px;
+  top: 100px;
+  width: 720px;
+  height: 710px;
+  z-index: 30;
+  background: var(--ground);
+  border-left: 1px solid var(--line);
+}
+.soHd {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 719px;
+  height: 64px;
+  padding: 12px 64px 0 24px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+.soHd h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.soHd p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.soX {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 16px;
+  cursor: pointer;
+}
+.soChips {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 76px;
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+}
+.soChips .chip {
+  background: var(--panel2);
+  color: var(--ink);
+}
+.facts {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 104px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 24px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.facts div {
+  display: flex;
+  gap: 8px;
+}
+.facts dt {
+  flex: none;
+  width: 104px;
+  color: var(--g600);
+}
+.facts dd {
+  margin: 0;
+}
+.soTable {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 108px;
+  bottom: 48px;
+  overflow-y: auto;
+}
+.soTableLow {
+  top: 196px;
+}
+.soTable .table {
+  table-layout: auto; /* 9 columns in 672 px: size to content, not equal shares */
+  font-size: 12px;
+}
+.soTable .table th,
+.soTable .table td {
+  padding: 0 5px;
+}
+.soFoot {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 24px;
+  color: var(--g600);
+}
+.soFoot button {
+  height: 24px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.status {
+  position: absolute;
+  left: 32px;
+  top: 140px;
+  font-size: 14px;
+  color: var(--g600);
+}
+.status button {
+  margin-left: 8px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

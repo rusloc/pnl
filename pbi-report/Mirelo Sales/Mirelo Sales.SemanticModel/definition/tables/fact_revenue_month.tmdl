@@ -1,0 +1,92 @@
+/// Revenue per month x market x product x revenue type, Jan 2024 - Sep 2026; amount_eur at the ACTUAL_AVG rate.
+table fact_revenue_month
+	lineageTag: 829e68ff-e4f4-5d57-9785-c9426975f8b9
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 051d2130-4fde-5a27-b416-b6dbbf388c0b
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: fec12d50-8fef-5674-93e3-32c4329de11e
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: 5e416137-9b9b-5538-9d6d-3c853b013462
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column revenue_type_code
+		dataType: string
+		isHidden
+		lineageTag: 10f3058e-7365-5279-aa59-e1b6f18c30e7
+		summarizeBy: none
+		sourceColumn: revenue_type_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 488fcc56-2c40-5944-ad7f-2060a148132a
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column amount_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: bb85ea97-bb2d-5eb7-ba16-855f2dfc8036
+		summarizeBy: none
+		sourceColumn: amount_local
+
+		annotation SummarizationSetBy = User
+
+	column amount_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 50f839ea-a5c6-51f8-a7bc-d95c90586b31
+		summarizeBy: none
+		sourceColumn: amount_eur
+
+		annotation SummarizationSetBy = User
+
+	partition fact_revenue_month = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_revenue_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"market_code", type text},
+				            {"product_code", type text},
+				            {"revenue_type_code", type text},
+				            {"currency_code", type text},
+				            {"amount_local", type number},
+				            {"amount_eur", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

@@ -15,6 +15,10 @@ TODO: lock North Star
 - **2026-10-22 — Bridge start bar in the totals colour (Track B):** only via a stacked-column rebuild (~2.5× bridge cost); the native waterfall has no per-bar colour.
 - **2026-10-22 — KPI trends may return:** `KPI Trend` (12 × 13 points in one query) stays in the model, unused, after the KPI card v2 decision.
 
+- **2026-10-24 — P&L additions from the SaaS & consumer-goods spec** (`docs/ADD/features/pnl-spec-gap-analysis-2026-10-24.md`): tile sub-lines (P1), Price / Mix bridge split (P3), "of which FX" variances column (P4), statement memo block rows 30–34 (P2, ADR), Prior-period comparison (P5, parked); data: `fact_arr_snapshot` for ARR bridge / NRR / CAC (D-1, ADR), `fact_headcount` (D-5), cost-nature flags on `dim_account` (D-6), SBC accounts (D-7, ADR).
+- **2026-10-24 — Mirelo Sales & Revenue dataset:** `fact_loan` (≈ 1.05 M) + `dim_client` + monthly vintage / DPD table; ×0.6 scale-down if the 1.5 M cap bites; Track A as a `/sales` route with a shared shell; schema `mirelo_sales` in `lh_raw`; identity colour mulberry `#9B2360`.
+- **2026-10-24 — Reseller executive dashboard design alternatives:** "Trading sheet" (recommended), Departures board (dark, mono amber), Retail broadsheet (editorial serif), Fluent native.
+
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
 - **2026-10-21** — This repo delivers assets only; vosk.dev embedding lives in a separate repo. (ADR-0001)
@@ -43,6 +47,11 @@ TODO: lock North Star
 - **2026-10-22** — ADR-0007 §3a (USER review): KPI card v2 (two diverging Δ rows, right = favourable, shared scale) replaces sparklines + target bars in A + B; Track B: no notice strip, applied-filters pop-up instead of the context line, status line on the title row, " - " separator, numbered top-level statement rows; Profitability default breakdown Region.
 - **2026-10-22** — Track B model republish deferred until the report itself is published (Track A doesn't use the new report objects).
 
+- **2026-10-24** — USER specs are saved verbatim under `docs/specs/` (P&L SaaS & consumer goods; Sales & Revenue generic; Executive KPI scorecard; Executive dashboard consumer-goods reseller).
+- **2026-10-24** — P&L keeps the 4-view layout (table, key figures, analysis, profitability); new spec metrics are attributed to it (sub-lines, memo rows, bridge step, variances column), no 13th tile. The IFRS 18 spine stays the reference; the spec is a checklist (Q1 default, USER to confirm).
+- **2026-10-24** — Second showcase = Sales & Revenue for a SaaS microloans / neobanking business (fictional Mirelo), design concept before build; USER's Tier-1 metrics: loans issued, new clients locked in, % returning clients, % bad / overdue loans → credit quality on the top band, five views, loan-level drill.
+- **2026-10-24** — Third showcase = executive dashboard with a **completely separate design** from Ledger, re-based on the Consumer Goods Reseller spec (fictional Nordmark Retail); prototype (metric map → flow) before build. The ACME KPI scorecard concept (Ledger Executive) is superseded, files kept.
+
 ## Features
 ### Planned
 - N-01 decision (relax for the showcase vs physical speed-ups); Track B Performance Analyzer baseline after the decision
@@ -52,6 +61,9 @@ TODO: lock North Star
 - Track B — publish target workspace + model republish (recalc) + report publish; `bm_pl_expand` recorded by the USER
 - Track C — finalize steps 4–9 in the vosk.dev repo from the `.sync/` hand-off (incl. the ADR-0007 note)
 - ACME Trucks — clean report-page tooltips on the waterfall bars; `_KPI Noise` decision; pre-publish (`DataFolder`, embed locale)
+- P&L round 1 from the spec gap analysis (2026-10-24): P1 sub-lines → P3 Price / Mix → P4 FX column → P2 memo block (ADR) → D-1 ARR snapshot
+- Mirelo Sales & Revenue (A + B + C) — after USER approval of the concept + metric flow (2026-10-24)
+- Nordmark reseller executive dashboard (A + B + C, separate "Trading sheet" design) — after USER approval of the prototype (2026-10-24)
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)

@@ -1,0 +1,108 @@
+/// Loan status at the last closed month (fact_loan.status_code); AFTER_CLOSE = disbursed after it.
+table dim_loan_status
+	lineageTag: 0417292d-66ab-5e96-9d9d-90a020abb92f
+
+	column status_code
+		dataType: string
+		lineageTag: cf711587-d58c-5486-bf65-66042508d2af
+		summarizeBy: none
+		sourceColumn: status_code
+
+		annotation SummarizationSetBy = User
+
+	column status_name
+		dataType: string
+		lineageTag: b20fdaea-6775-5358-8ce2-fba89fbcff64
+		summarizeBy: none
+		sourceColumn: status_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column status_group
+		dataType: string
+		lineageTag: 07eb344a-bd47-54aa-9af8-ad416d3d6292
+		summarizeBy: none
+		sourceColumn: status_group
+
+		annotation SummarizationSetBy = User
+
+	column dpd_min
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d05e0796-9897-50c1-bbee-94ec0727ae07
+		summarizeBy: none
+		sourceColumn: dpd_min
+
+		annotation SummarizationSetBy = User
+
+	column dpd_max
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4a45f3e1-cd56-57f0-bebf-fbc06060e701
+		summarizeBy: none
+		sourceColumn: dpd_max
+
+		annotation SummarizationSetBy = User
+
+	column is_active
+		dataType: boolean
+		lineageTag: cc59f2f4-c784-5277-9bae-d19f17500b1b
+		summarizeBy: none
+		sourceColumn: is_active
+
+		annotation SummarizationSetBy = User
+
+	column is_overdue_30
+		dataType: boolean
+		lineageTag: 84f82e8f-86c0-5135-a76d-2812cd8ab23a
+		summarizeBy: none
+		sourceColumn: is_overdue_30
+
+		annotation SummarizationSetBy = User
+
+	column is_bad_90
+		dataType: boolean
+		lineageTag: ea538130-607c-5481-9b88-f7f63d8266e0
+		summarizeBy: none
+		sourceColumn: is_bad_90
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a0bb9df0-1a6d-5028-9541-6297e64b1cb0
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_loan_status = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_loan_status.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"status_code", type text},
+				            {"status_name", type text},
+				            {"status_group", type text},
+				            {"dpd_min", Int64.Type},
+				            {"dpd_max", Int64.Type},
+				            {"is_active", type logical},
+				            {"is_overdue_30", type logical},
+				            {"is_bad_90", type logical},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

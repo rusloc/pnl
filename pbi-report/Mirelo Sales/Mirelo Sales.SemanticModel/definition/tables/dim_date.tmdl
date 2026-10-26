@@ -1,0 +1,154 @@
+/// Calendar day, 2024-01-01 to 2026-12-31 (generator dim_date). Marked as the date table; joins fact_loan.disbursed_date and fact_application.date.
+table dim_date
+	lineageTag: b8e20f54-d714-5558-901f-7f2cd0c8138a
+	dataCategory: Time
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: 5881d244-82ad-5c4c-8b56-c02b3a0d9dd3
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: cd5f64c3-b587-58bc-aa71-7251586b4130
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 3fa91c91-2f7b-55d7-b306-8795c6c31a2c
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: a1b2aeae-f1e9-5021-a31e-e3132c3a83d7
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column year_quarter
+		dataType: string
+		lineageTag: c3aee963-26f3-5f85-ba4e-dafc6da2d126
+		summarizeBy: none
+		sourceColumn: year_quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0a27edd5-5ca3-584f-81d3-87fe58e7f177
+		summarizeBy: none
+		sourceColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: 044a3243-ef62-5632-a382-ccdfce7cb1b1
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	column day_of_month
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dec24675-0254-517f-a435-fbfe7dec3341
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+		annotation SummarizationSetBy = User
+
+	column weekday_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a94e0157-5cdc-5af4-8778-a89ce2e512d4
+		summarizeBy: none
+		sourceColumn: weekday_num
+
+		annotation SummarizationSetBy = User
+
+	column weekday_name
+		dataType: string
+		lineageTag: 4b10a949-8622-5968-9030-c06270bc6375
+		summarizeBy: none
+		sourceColumn: weekday_name
+		sortByColumn: weekday_num
+
+		annotation SummarizationSetBy = User
+
+	column is_weekend
+		dataType: boolean
+		isHidden
+		lineageTag: 6b49d61b-6ca8-5883-ab24-f25763dbc2b4
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = User
+
+	column is_closed
+		dataType: boolean
+		lineageTag: a9725eb9-3124-55ab-b6c5-bffd96699adf
+		summarizeBy: none
+		sourceColumn: is_closed
+
+		annotation SummarizationSetBy = User
+
+	column has_actuals
+		dataType: boolean
+		lineageTag: cef12e0b-34c6-5374-b580-792afbb6f959
+		summarizeBy: none
+		sourceColumn: has_actuals
+
+		annotation SummarizationSetBy = User
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_date.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"month_key", type text},
+				            {"year", Int64.Type},
+				            {"quarter", Int64.Type},
+				            {"year_quarter", type text},
+				            {"month_num", Int64.Type},
+				            {"month_name", type text},
+				            {"day_of_month", Int64.Type},
+				            {"weekday_num", Int64.Type},
+				            {"weekday_name", type text},
+				            {"is_weekend", type logical},
+				            {"is_closed", type logical},
+				            {"has_actuals", type logical}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

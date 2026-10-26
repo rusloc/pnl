@@ -1,0 +1,185 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "loan_detail",
+  "displayName": "Loan detail",
+  "displayOption": "FitToPage",
+  "height": 810,
+  "width": 1440,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f_loan_detail_0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_market"
+              }
+            },
+            "Property": "market_name"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      },
+      {
+        "name": "f_loan_detail_1",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_product"
+              }
+            },
+            "Property": "product_name"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      },
+      {
+        "name": "f_loan_detail_2",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_channel"
+              }
+            },
+            "Property": "channel_name"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      },
+      {
+        "name": "f_loan_detail_3",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_agent"
+              }
+            },
+            "Property": "agent_name"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      }
+    ]
+  },
+  "pageBinding": {
+    "name": "pb_loan_detail",
+    "type": "Drillthrough",
+    "parameters": [
+      {
+        "name": "p_loan_detail_0",
+        "boundFilter": "f_loan_detail_0",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_market"
+              }
+            },
+            "Property": "market_name"
+          }
+        }
+      },
+      {
+        "name": "p_loan_detail_1",
+        "boundFilter": "f_loan_detail_1",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_product"
+              }
+            },
+            "Property": "product_name"
+          }
+        }
+      },
+      {
+        "name": "p_loan_detail_2",
+        "boundFilter": "f_loan_detail_2",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_channel"
+              }
+            },
+            "Property": "channel_name"
+          }
+        }
+      },
+      {
+        "name": "p_loan_detail_3",
+        "boundFilter": "f_loan_detail_3",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_agent"
+              }
+            },
+            "Property": "agent_name"
+          }
+        }
+      }
+    ]
+  },
+  "visibility": "HiddenInViewMode",
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F3F2EF'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F3F2EF'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

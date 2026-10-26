@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirelo Sales &amp; revenue - metric map, lineage and user flow</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* DRAFT - projection state - design document for USER approval, nothing built.
+   Tokens: docs/design/design-requirements.md - identity: Mirelo mulberry. */
+:root{
+  --ink900:#101B2B;--ink700:#2B3748;--slate600:#4F5C6C;--slate400:#8592A3;
+  --line300:#CDD4DC;--line200:#DEE3E9;--line100:#EDF0F3;--ground:#F2F4F7;--subtle:#F6F8FA;--surface:#FFFFFF;
+  --acc:#9B2360;--accT:#F8E8F0;--keyRule:#E5BBD0;--accPY:#D9A8C2;--acc2:#C45C8E;
+  --fav:#06603F;--favBar:#3BA37B;--favTint:#E4F3EC;--unf:#C2410C;--unfBar:#E2804A;--unfTint:#FCEDE5;
+  --noticeBg:#FBF4E4;--noticeBd:#EBD9AE;--noticeTx:#3D3216;--noticeIc:#8A5A00;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--ink900)}
+.page{width:1392px;margin:0 auto;padding:28px 0 60px}
+h1{font-size:26px;font-weight:600;margin:0 0 4px}
+h2{font-size:20px;font-weight:600;margin:40px 0 6px;padding-top:16px;border-top:1px solid var(--line200)}
+h3{font-size:16px;font-weight:600;margin:22px 0 6px}
+p{margin:6px 0}
+.lead{color:var(--slate600);font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+.banner{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:8px;background:var(--noticeBg);border:1px solid var(--noticeBd);color:var(--noticeTx);font-size:13px;margin:8px 0 18px}
+.banner b{color:var(--noticeIc)}
+.card{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:16px 20px;margin-top:12px}
+.tier{display:inline-block;min-width:22px;padding:0 6px;border-radius:4px;font-size:11px;font-weight:600;text-align:center;line-height:18px;vertical-align:middle}
+.t1{background:var(--acc);color:#fff}.t2{background:var(--accT);color:var(--acc);border:1px solid var(--keyRule)}.t3{background:var(--line100);color:var(--slate600)}
+.chg{font-size:11px;font-weight:500;padding:0 6px;border-radius:4px;line-height:18px;display:inline-block;white-space:nowrap}
+.up{background:var(--favTint);color:var(--fav)}.dn{background:var(--unfTint);color:var(--unf)}.nw{background:var(--accT);color:var(--acc)}.same{background:var(--line100);color:var(--slate600)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--slate600);padding:6px 8px;border-bottom:2px solid var(--ink900);white-space:nowrap}
+td{padding:7px 8px;border-top:1px solid var(--line100);vertical-align:top}
+td.c{white-space:nowrap}
+tr.dom td{background:var(--subtle);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate600);border-top:1px solid var(--line300);padding:5px 8px}
+tr.key td{background:var(--accT);border-top:1px solid var(--keyRule)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--slate600);margin:8px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:14px;height:12px;border-radius:3px;border:1px solid transparent}
+svg text{font-family:inherit}
+.note{font-size:12px;color:var(--slate600)}
+
+/* hero cards (Tier 1 START) */
+.heroes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+.hero{background:var(--surface);border:1px solid var(--line200);border-top:3px solid var(--acc);border-radius:12px;padding:12px 14px;min-width:0}
+.hero .kl{font-size:13px;font-weight:500;color:var(--slate600)}
+.hero .kv{font-size:30px;font-weight:600;line-height:1.15}
+.hero .kv small{font-size:15px;font-weight:500;color:var(--slate600);margin-left:6px}
+.hero .ks{font-size:11px;color:var(--slate600)}
+.kr{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px}
+.kn{flex:none;width:72px;color:var(--slate600)}
+.kb{position:relative;flex:1 1 0;height:8px;border-radius:2px;background:var(--line100)}
+.kb i{position:absolute;left:50%;top:-2px;width:1px;height:12px;background:rgba(16,27,43,.4)}
+.kb b{position:absolute;top:0;height:8px;border-radius:2px}
+.kb b.f{left:50%;background:var(--favBar)}.kb b.u{right:50%;background:var(--unfBar)}
+.kd{flex:none;width:60px;text-align:right;font-size:12px;font-weight:600}
+.fav{color:var(--fav)}.unf{color:var(--unf)}
+.spark{margin-top:6px;display:block}
+
+/* flow columns */
+.flows{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.flow{display:flex;flex-direction:column;min-width:0}
+.step{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:12px 14px}
+.step.start{border-top:3px solid var(--acc)}
+.step.explain{background:var(--accT);border-color:var(--keyRule)}
+.step.finish{background:var(--subtle)}
+.step h4{margin:0 0 4px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
+.step h4 .lab{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.step ul{margin:4px 0 0;padding-left:16px;font-size:12px}
+.step li{margin:2px 0}
+.step .q{font-size:12px;color:var(--slate600);font-style:italic}
+.arrow{display:flex;flex-direction:column;align-items:center;padding:4px 0;color:var(--slate600);font-size:11px;text-align:center}
+.arrow::before{content:"";display:block;width:2px;height:16px;background:var(--line300)}
+.arrow::after{content:"▼";font-size:10px;color:var(--slate400);margin-top:-2px}
+.arrow span{background:var(--ground);padding:0 6px;max-width:290px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.kvs{font-size:12.5px}
+.kvs dt{font-weight:600;margin-top:8px}
+.kvs dd{margin:0;color:var(--ink900)}
+.tagn{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--accT);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+code{font-family:Consolas,'IBM Plex Mono',monospace;font-size:12px;background:var(--line100);padding:0 4px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Mirelo Sales &amp; revenue - metric map, lineage and user flow</h1>
+  <p class="lead">Companion to <code>docs/ADD/features/sales-revenue-dashboard-concept.md</code> (§9 addendum) and <code>mockup.html</code>. Re-ranks the KPI set around the USER's four priority metrics (2026-10-24), draws their lineage from the source tables, and fixes the reading path: start at the top, flow down to the explanation, finish at loan and client level.</p>
+  <div class="banner"><b>DRAFT - projection state.</b> Concept for USER approval; nothing built. No track code, PBIP, data or tests are affected by this page.</div>
+
+  <!-- ============================================================ a. METRIC MAP -->
+  <h2>a. Metric map - three tiers</h2>
+  <p class="lead"><span class="tier t1">T1</span> the USER's four priorities - the top band of the Overview and the start of every reading path · <span class="tier t2">T2</span> drivers that explain a Tier-1 movement ("why") - the band under each priority and the breakdown views · <span class="tier t3">T3</span> outcomes and context (revenue, subscriptions, targets, risk cost) - still on the dashboard, never above a Tier-1 metric.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">Tier-1 definitions (chosen, with the alternative stated)</h3>
+    <dl class="kvs">
+      <dt>1 · Loans issued <span class="note">- two numbers on one card: count and disbursed principal</span></dt>
+      <dd><b>Count</b> = loans with <code>disbursed_date</code> in the window (one row of <code>fact_loan</code> each) · <b>Principal</b> = Σ <code>principal_local</code> ÷ rate of the loan's month and currency (actual rates; constant currency = budget rates of the selected year). Account openings are not loans and stay out. Comparators: Budget (target loans / principal) and Prior year. Direction ↑.</dd>
+      <dt>2 · New clients locked in</dt>
+      <dd><b>Chosen:</b> clients whose <b>first loan was disbursed</b> in the window (<code>dim_client.first_loan_date</code> in window = Σ <code>fact_loan.is_first_loan</code>). "Locked in" means money moved: the client passed KYC, credit and take-up. <b>Alternative (not recommended):</b> first <i>credit approval</i> in the window - earlier signal, but 13 % of approvals are never taken up, so it over-counts and does not reconcile to loans. A second alternative, first <i>account opened</i>, is an account metric and stays Tier 3 (New accounts). Comparators: Budget (new-client target), Prior year. Direction ↑.</dd>
+      <dt>3 · Returning clients %</dt>
+      <dd>Two denominators, both kept, one on top: <b>Chosen headline (client-weighted):</b> distinct borrowers in the window with ≥ 1 prior <i>repaid or current</i> loan ÷ distinct borrowers in the window (52.4 % YTD). This is literally "share of clients who took a loan again". <b>Sub-line (loan-weighted):</b> loans to returning clients ÷ loans issued (57.8 % - the concept's "repeat share"); higher because returning clients take more loans per period. A prior loan that was written off does not count as "returning" (the client would not be re-lent anyway; it would flatter the ratio). The cohort view (Tier 2) answers the time question: of clients whose first loan was in month m, the share with a second loan within 90 / 180 days. Comparators: Prior year (pp); no budget. Direction ↑.</dd>
+      <dt>4 · Bad / overdue loans %</dt>
+      <dd><b>Chosen headline:</b> <b>30+ days-past-due ratio by balance</b> = balance of loans ≥ 30 DPD ÷ outstanding principal, at the last closed month of the window (4.6 %). Portfolio standard, comparable across tenors, insensitive to ticket size. <b>Sub-lines:</b> 90+ DPD ratio (2.1 %, "bad"), 30+ DPD by count of active loans (5.3 %, "overdue"), and the <b>vintage bad rate</b> = loans ever 90+ DPD within 6 months of disbursement ÷ loans of the vintage (3.4 %) - the number that ties credit quality back to the sales period in which the loans were issued. Comparators: Budget (planned risk appetite) and Prior year, pp. Direction ↓ (down = favourable, arrow still shows direction).</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <div class="legend"><span>Change vs the concept's previous headline 8:</span><span><i class="chg up">↑ promoted</i></span><span><i class="chg dn">↓ demoted</i></span><span><i class="chg nw">new</i></span><span><i class="chg same">unchanged</i></span></div>
+    <table aria-label="Metric map">
+      <thead><tr><th>Tier</th><th>KPI</th><th>Definition</th><th>Grain</th><th>Dir.</th><th>Comparator</th><th>Home view</th><th>vs concept</th></tr></thead>
+      <tbody>
+        <tr class="dom"><td colspan="8">Loans &amp; originations</td></tr>
+        <tr class="key"><td><span class="tier t1">T1</span></td><td><b>Loans issued</b> (# and €)</td><td>Count of disbursed loans; disbursed principal translated per month × currency</td><td class="c">window, Σ days</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Overview → Loans issued</td><td><span class="chg up">↑ was "Originations" ★ (€ only)</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Average ticket</td><td>Principal ÷ loans</td><td class="c">window</td><td>◦</td><td class="c">Budget, PY</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Loans by product × market × channel</td><td>Loans issued split by the three breakdowns (+ segment new / repeat)</td><td class="c">window × dim</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Originations bridge</td><td>Budget → Actual: volume · ticket · product mix · FX</td><td class="c">window</td><td>—</td><td class="c">Budget</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Pipeline coverage ×</td><td>(approved-not-disbursed principal + open applications × stage probability × avg ticket) ÷ remaining month target</td><td class="c">end of window</td><td>↑ cap</td><td class="c">vs 1.0×</td><td class="c">Loans issued</td><td><span class="chg dn">↓ was ★</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Agent / partner / channel attainment %</td><td>Loans (or principal) ÷ target per agent, partner, channel</td><td class="c">window × agent</td><td>↑</td><td class="c">vs 100 %</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr class="dom"><td colspan="8">Funnel (drivers of loans issued and new clients)</td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Approval rate %</td><td>Credit-approved ÷ submitted, by submission date; split new vs repeat clients</td><td class="c">window</td><td>↑ cap</td><td class="c">Budget, PY (pp)</td><td class="c">Loans issued</td><td><span class="chg dn">↓ was ★</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Take-up rate %</td><td>Disbursed ÷ approved</td><td class="c">window</td><td>↑</td><td class="c">PY (pp)</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Leads · Started · Submitted #, KYC pass %, Abandon %, Stage conversion %</td><td>Funnel counts and step conversions</td><td class="c">window × stage</td><td>↑ / ↓</td><td class="c">Budget, PY</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Time to cash (h), stage cycle time</td><td>Median hours submitted → disbursed; per stage vs SLA</td><td class="c">window</td><td>↓</td><td class="c">PY, SLA</td><td class="c">Loans issued</td><td><span class="chg dn">↓ was ★</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Open applications #</td><td>Not in a terminal stage at end of window</td><td class="c">end of window</td><td>◦</td><td class="c">—</td><td class="c">Loans issued</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr class="dom"><td colspan="8">Clients</td></tr>
+        <tr class="key"><td><span class="tier t1">T1</span></td><td><b>New clients locked in</b></td><td>Clients whose first loan was disbursed in the window</td><td class="c">window, Σ days</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Overview → Clients</td><td><span class="chg nw">new</span></td></tr>
+        <tr class="key"><td><span class="tier t1">T1</span></td><td><b>Returning clients %</b></td><td>Borrowers with ≥ 1 prior repaid / current loan ÷ borrowers in window (sub-line: loan-weighted repeat share)</td><td class="c">window</td><td>↑</td><td class="c">PY (pp)</td><td class="c">Overview → Clients</td><td><span class="chg up">↑ was "Repeat borrower share" ★, redefined client-weighted</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>New clients by channel, product, market</td><td>Tier-1 #2 split by acquisition channel (first loan's channel), first product, market</td><td class="c">window × dim</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Clients</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>New-client approval rate %</td><td>Approved ÷ submitted for first-time applicants (segment *_new)</td><td class="c">window</td><td>↑ cap</td><td class="c">PY (pp)</td><td class="c">Clients</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Cohort repeat rate 90 d / 180 d</td><td>Of clients with first loan in month m, share with a second loan within 90 / 180 days</td><td class="c">cohort month</td><td>↑</td><td class="c">previous cohorts</td><td class="c">Clients</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Loans per returning client · days between loans</td><td>Loans ÷ returning borrowers in window; median gap between consecutive loans</td><td class="c">window</td><td>◦</td><td class="c">PY</td><td class="c">Clients</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Repeat share by product</td><td>Loan-weighted repeat share per product and tenor</td><td class="c">window × product</td><td>↑</td><td class="c">PY (pp)</td><td class="c">Clients</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>New accounts opened #, Active accounts #</td><td>Account-opening funnel completions; accounts with a transaction, month-end</td><td class="c">window / period-end</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Revenue &amp; targets</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr class="dom"><td colspan="8">Portfolio quality (new section)</td></tr>
+        <tr class="key"><td><span class="tier t1">T1</span></td><td><b>Bad / overdue loans %</b></td><td>30+ DPD balance ÷ outstanding principal at the last closed month (sub-lines 90+ DPD %, 30+ by count, vintage 6-month bad rate)</td><td class="c">period-end</td><td>↓</td><td class="c">Budget, PY (pp)</td><td class="c">Overview → Portfolio quality</td><td><span class="chg up">↑ was a context tile</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>DPD buckets</td><td>Balance and count in 1–29 / 30–59 / 60–89 / 90+ DPD</td><td class="c">period-end × bucket</td><td>↓</td><td class="c">PY</td><td class="c">Portfolio quality</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Vintage curves</td><td>Cumulative 30+ / 90+ rate by months since disbursement, one line per disbursement month</td><td class="c">vintage × month-on-book</td><td>↓</td><td class="c">older vintages</td><td class="c">Portfolio quality</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Bad rate by product × market × channel × segment</td><td>Vintage bad rate split; new vs repeat clients the key cut</td><td class="c">vintage × dim</td><td>↓</td><td class="c">PY</td><td class="c">Portfolio quality</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t2">T2</span></td><td>Roll rate 30→60→90 %</td><td>Balance that moves one bucket further in the month ÷ bucket balance a month earlier</td><td class="c">month</td><td>↓</td><td class="c">PY</td><td class="c">Portfolio quality</td><td><span class="chg nw">new</span></td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>Cost of risk %</td><td>Provision charge annualised ÷ average outstanding principal</td><td class="c">window</td><td>↓</td><td class="c">Budget, PY</td><td class="c">Portfolio quality</td><td><span class="chg same">unchanged</span></td></tr>
+        <tr class="dom"><td colspan="8">Revenue, subscriptions, targets (outcomes)</td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>Revenue (+ by stream)</td><td>Interest + fees + interchange + subscriptions</td><td class="c">window, Σ months</td><td>↑</td><td class="c">Budget, PY</td><td class="c">Revenue &amp; targets</td><td><span class="chg dn">↓ was ★ - an outcome of loans issued</span></td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>Target attainment % · pace %</td><td>Revenue (or loans) ÷ target; attainment of the elapsed target in the open month</td><td class="c">window</td><td>↑</td><td class="c">vs 100 %, LE</td><td class="c">Revenue &amp; targets (+ the Δ vs Budget row on every Tier-1 card)</td><td><span class="chg dn">↓ was ★</span></td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>MRR · Paying subscribers · Subscriber churn % · ARPU</td><td>As in the concept</td><td class="c">period-end / window</td><td>↑ / ↓</td><td class="c">Budget, PY</td><td class="c">Revenue &amp; targets</td><td><span class="chg dn">↓ MRR was ★</span></td></tr>
+        <tr><td><span class="tier t3">T3</span></td><td>Portfolio yield %</td><td>Interest income annualised ÷ average outstanding</td><td class="c">window</td><td>◦</td><td class="c">PY</td><td class="c">Revenue &amp; targets</td><td><span class="chg same">unchanged</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note">Rules unchanged from the concept: ratios compare in pp; period-end KPIs take the last closed month / day of the window; every card is KPI card v2 (the four Tier-1 cards use the hero variant of §c); colour never carries meaning alone.</p>
+  </div>
+
+  <!-- ============================================================ b. LINEAGE -->
+  <h2>b. Metric graph - lineage from source columns to the four Tier-1 metrics</h2>
+  <p class="lead">Left to right: source tables and columns → base measures (one operation each) → derived ratios → Tier-1. Edge labels name the operation: <b>Σ</b> sum / count, <b>÷</b> ratio, <b>filter</b>, <b>distinct</b>, <b>snapshot</b> (last closed month of the window), <b>shift −12</b> (prior year), <b>fx</b> (translate per month × currency), <b>cohort</b>. Tables marked <i>new</i> are the dataset additions of §d. Every breakdown dimension (product, market, channel, segment, agent) filters the base measures the same way, so it is drawn once as the grey node at the bottom.</p>
+  <div class="card" style="padding:12px 8px">
+    <div class="legend" style="padding:0 12px">
+      <span><i class="sw" style="background:var(--subtle);border-color:var(--line300)"></i>source table · column</span>
+      <span><i class="sw" style="background:#fff;border-color:var(--ink900)"></i>base measure</span>
+      <span><i class="sw" style="background:var(--accT);border-color:var(--acc)"></i>derived ratio (Tier 2)</span>
+      <span><i class="sw" style="background:var(--acc)"></i>Tier-1 metric</span>
+      <span>edge weight = feeds a Tier-1 value (solid) · explains it (dashed)</span>
+    </div>
+    <svg id="dag" width="1376" height="760" role="img" aria-label="Lineage graph from source tables through base measures and derived ratios to the four Tier-1 metrics"></svg>
+  </div>
+
+  <!-- ============================================================ c. FLOW -->
+  <h2>c. Visual / semantic flow - start at the top, flow down, finish at loan level</h2>
+  <p class="lead">Reading order is the layout: <b>START</b> is the top band of the Overview (four hero cards: value, Δ vs Budget and Prior year, 13-month trend). <b>NEXT</b> is the explanation band directly under each card - the breakdown that answers "why did it move". <b>FINISH</b> is the loan-level and client-level detail table, one drill away from any breakdown mark, with every filter carried over. Progressive disclosure: nothing below a hero card is needed to read the hero card; nothing in the detail table is needed to read the breakdown.</p>
+
+  <h3>START - the Overview top band (hero cards, FY2026 YTD Sep, Actual, EUR, all markets)</h3>
+  <div class="heroes">
+    <div class="hero" title="Count of disbursed loans; disbursed principal at monthly average rates.">
+      <div class="kl">Loans issued</div>
+      <div class="kv num">349k <small>€138.4m</small></div>
+      <div class="ks">avg ticket €397 - 97.6 % of target loans</div>
+      <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:6%"></b></span><span class="kd unf num">▼ −2.4%</span></div>
+      <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:41%"></b></span><span class="kd fav num">▲ +16.4%</span></div>
+      <svg class="spark" width="100%" height="34" viewBox="0 0 300 34" preserveAspectRatio="none" aria-label="13-month trend of loans issued"><polyline points="4,26 27,28 50,22 73,20 96,17 119,19 142,15 165,16 188,12 211,13 234,11 257,9 280,6" fill="none" stroke="#9B2360" stroke-width="2"/><polyline points="4,27 27,29 50,25 73,23 96,21 119,22 142,19 165,20 188,17 211,18 234,16 257,14 280,10" fill="none" stroke="#D9A8C2" stroke-width="1.5"/><circle cx="280" cy="6" r="3" fill="#9B2360"/></svg>
+    </div>
+    <div class="hero" title="Clients whose first loan was disbursed in the window.">
+      <div class="kl">New clients locked in</div>
+      <div class="kv num">147.3k</div>
+      <div class="ks">42.2 % of loans - App 41 % - Partner 22 %</div>
+      <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:10.5%"></b></span><span class="kd unf num">▼ −4.2%</span></div>
+      <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:38%"></b></span><span class="kd fav num">▲ +15.1%</span></div>
+      <svg class="spark" width="100%" height="34" viewBox="0 0 300 34" preserveAspectRatio="none" aria-label="13-month trend of new clients"><polyline points="4,22 27,25 50,20 73,19 96,15 119,18 142,16 165,17 188,14 211,16 234,15 257,12 280,9" fill="none" stroke="#9B2360" stroke-width="2"/><polyline points="4,26 27,28 50,24 73,23 96,21 119,22 142,20 165,21 188,19 211,20 234,18 257,16 280,13" fill="none" stroke="#D9A8C2" stroke-width="1.5"/><circle cx="280" cy="9" r="3" fill="#9B2360"/></svg>
+    </div>
+    <div class="hero" title="Borrowers with at least one prior repaid or current loan, share of borrowers in the window.">
+      <div class="kl">Returning clients</div>
+      <div class="kv num">52.4%</div>
+      <div class="ks">of borrowers - 57.8 % of loans - 180-day repeat 46 %</div>
+      <div class="kr"><span class="kn">vs Budget</span><span class="kb"></span><span class="kd" style="color:var(--slate400);font-weight:400">n/a</span></div>
+      <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="f" style="width:29%"></b></span><span class="kd fav num">▲ +2.9pp</span></div>
+      <svg class="spark" width="100%" height="34" viewBox="0 0 300 34" preserveAspectRatio="none" aria-label="13-month trend of returning clients share"><polyline points="4,20 27,19 50,19 73,17 96,16 119,16 142,14 165,15 188,13 211,12 234,12 257,10 280,9" fill="none" stroke="#9B2360" stroke-width="2"/><polyline points="4,25 27,24 50,24 73,23 96,22 119,22 142,21 165,21 188,20 211,19 234,19 257,18 280,17" fill="none" stroke="#D9A8C2" stroke-width="1.5"/><circle cx="280" cy="9" r="3" fill="#9B2360"/></svg>
+    </div>
+    <div class="hero" title="Balance 30+ days past due as a share of outstanding principal, last closed month. Down is favourable.">
+      <div class="kl">Bad / overdue loans</div>
+      <div class="kv num">4.6%</div>
+      <div class="ks">30+ DPD by balance - 90+ 2.1 % - vintage 6m 3.4 %</div>
+      <div class="kr"><span class="kn">vs Budget</span><span class="kb"><i></i><b class="u" style="width:6%"></b></span><span class="kd unf num">▲ +0.6pp</span></div>
+      <div class="kr"><span class="kn">vs Prior year</span><span class="kb"><i></i><b class="u" style="width:7%"></b></span><span class="kd unf num">▲ +0.7pp</span></div>
+      <svg class="spark" width="100%" height="34" viewBox="0 0 300 34" preserveAspectRatio="none" aria-label="13-month trend of 30+ DPD ratio"><polyline points="4,18 27,16 50,13 73,10 96,8 119,7 142,9 165,12 188,14 211,15 234,16 257,17 280,17" fill="none" stroke="#9B2360" stroke-width="2"/><polyline points="4,22 27,22 50,21 73,21 96,20 119,20 142,20 165,19 188,19 211,19 234,19 257,18 280,18" fill="none" stroke="#D9A8C2" stroke-width="1.5"/><circle cx="280" cy="17" r="3" fill="#9B2360"/></svg>
+    </div>
+  </div>
+  <p class="note">Hero card = KPI card v2 plus a second value (principal) and a 13-month trend line (Actual mulberry, Prior year tint, selected month marked). The trend returns only on these four cards; the other tiles stay sparkline-free (ADR-0007 §3a). Open question Q6.</p>
+
+  <h3>NEXT and FINISH - one vertical flow per Tier-1 metric</h3>
+  <div class="flows">
+    <!-- Flow 1 -->
+    <div class="flow">
+      <div class="step start"><h4><span class="lab">Start</span>Loans issued</h4><p class="q">"Did we issue the loans we planned, and is it volume, ticket or FX?"</p><ul><li>Hero card: 349k loans · €138.4m · Δ vs Budget / PY · trend</li><li>Hover = definition; click = scroll-highlight of its explanation quadrant</li></ul></div>
+      <div class="arrow"><span>click the card or "Open loans issued" - same filters</span></div>
+      <div class="step explain"><h4><span class="lab">Next · explain</span>Loans issued view</h4><ul><li><b>By month vs target</b> (columns, target ticks, PY line) - when</li><li><b>Product × market × channel</b> small multiples / matrix - where</li><li><b>Funnel</b> submitted → approved → disbursed with approval and take-up rate - why fewer</li><li><b>Originations bridge</b> volume · ticket · mix · FX - how much from each cause</li><li>Time to cash, coverage, agent / channel attainment</li></ul><p class="q">Click a mark = filter the view (A/C add a Slice chip; B cross-highlights).</p></div>
+      <div class="arrow"><span>"Show loans" on any mark - carries window, market, product, channel, segment, agent + the clicked month</span></div>
+      <div class="step finish"><h4><span class="lab">Finish · drill</span>Loan detail</h4><ul><li>One row per loan (table, sortable, exportable)</li><li>Row click → client card: all loans of that client</li></ul></div>
+    </div>
+    <!-- Flow 2 -->
+    <div class="flow">
+      <div class="step start"><h4><span class="lab">Start</span>New clients locked in</h4><p class="q">"Are we still acquiring, and through which door?"</p><ul><li>Hero card: 147.3k · Δ vs Budget / PY · trend</li><li>Sub-line: share of loans, top two acquisition channels</li></ul></div>
+      <div class="arrow"><span>click the card or "Open clients"</span></div>
+      <div class="step explain"><h4><span class="lab">Next · explain</span>Clients view - acquisition half</h4><ul><li><b>New clients by acquisition channel</b> (bars, PY ghost) - which door</li><li><b>By first product × market</b> matrix - what they take first</li><li><b>New-client funnel</b>: leads → first application → first approval (new-client approval rate 31 %) → first loan - where first-timers drop</li><li><b>Monthly cohort size</b> columns with Budget outline - trend of the door</li></ul><p class="q">Click a channel bar = filter the matrix and funnel to that channel.</p></div>
+      <div class="arrow"><span>"Show clients" - carries filters + cohort month / channel</span></div>
+      <div class="step finish"><h4><span class="lab">Finish · drill</span>Client detail → loan detail</h4><ul><li>One row per client: id, market, first loan date / product / channel, loans to date, status</li><li>Row click → that client's loans</li></ul></div>
+    </div>
+    <!-- Flow 3 -->
+    <div class="flow">
+      <div class="step start"><h4><span class="lab">Start</span>Returning clients %</h4><p class="q">"Do clients come back, and how fast?"</p><ul><li>Hero card: 52.4 % of borrowers · Δ pp vs PY · trend</li><li>Sub-line: loan-weighted 57.8 %, 180-day repeat 46 %</li></ul></div>
+      <div class="arrow"><span>click the card or "Open clients"</span></div>
+      <div class="step explain"><h4><span class="lab">Next · explain</span>Clients view - retention half</h4><ul><li><b>Cohort retention curve</b>: % with a 2nd loan by days since first loan, one line per quarter cohort (shared axis) - speed of return</li><li><b>Repeat share by product / first product</b> bars with company-average marker - which products create habit</li><li><b>Loans per returning client, days between loans</b> small tiles</li><li><b>Returning % by market × segment</b> matrix (consumer vs micro-business)</li></ul><p class="q">Click a cohort line = that cohort's clients in the matrix.</p></div>
+      <div class="arrow"><span>"Show clients" - carries filters + cohort + product</span></div>
+      <div class="step finish"><h4><span class="lab">Finish · drill</span>Client detail → loan detail</h4><ul><li>Client rows with prior loans count, last loan date, days since</li><li>Row click → the client's loan history in order</li></ul></div>
+    </div>
+    <!-- Flow 4 -->
+    <div class="flow">
+      <div class="step start"><h4><span class="lab">Start</span>Bad / overdue loans %</h4><p class="q">"Is the growth we sell healthy?"</p><ul><li>Hero card: 4.6 % 30+ DPD · Δ pp vs Budget / PY · trend</li><li>Sub-line: 90+ DPD 2.1 %, vintage 6-month bad rate 3.4 %</li></ul></div>
+      <div class="arrow"><span>click the card or "Open portfolio quality"</span></div>
+      <div class="step explain"><h4><span class="lab">Next · explain</span>Portfolio quality view</h4><ul><li><b>DPD buckets</b> stacked balance 1–29 / 30–59 / 60–89 / 90+, 13 months - how overdue</li><li><b>Vintage curves</b> cumulative 30+ rate by month on book, one line per disbursement month - which sales periods went bad</li><li><b>Bad rate by product × market × channel × new / repeat</b> heat matrix - where (Romania, new clients, Marketplace)</li><li><b>Roll rates</b> 30→60→90 and cost of risk tiles; policy-change marker Mar 2026</li></ul><p class="q">Click a bucket or vintage = filter the matrix to it.</p></div>
+      <div class="arrow"><span>"Show loans" - carries filters + DPD bucket + vintage month</span></div>
+      <div class="step finish"><h4><span class="lab">Finish · drill</span>Loan detail (overdue)</h4><ul><li>Loan rows sorted by DPD desc, with status and outstanding</li><li>Row click → client card (other loans, prior repayment behaviour)</li></ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">The lowest grain - loan detail and client detail</h3>
+    <div class="cols">
+      <div>
+        <p><b>Loan detail</b> (one row per loan, from <code>fact_loan</code> joined to its dims):</p>
+        <table aria-label="Loan detail columns"><thead><tr><th>Column</th><th>Source</th></tr></thead><tbody>
+          <tr><td><code>loan_id</code> · <code>client_id</code></td><td>fact_loan</td></tr>
+          <tr><td>product · tenor (days) · market · channel · segment (new / repeat, consumer / business) · agent or partner</td><td>dims via fact_loan keys</td></tr>
+          <tr><td>applied, approved, disbursed timestamps · time to cash (h)</td><td>fact_loan</td></tr>
+          <tr><td>principal (local + reporting currency) · APR · origination fee</td><td>fact_loan + fact_fx_rate</td></tr>
+          <tr><td>status (current / repaid / overdue / written off) · DPD today · max DPD · outstanding · repaid date</td><td>fact_loan (current state)</td></tr>
+          <tr><td>is first loan · prior loans count · vintage month</td><td>fact_loan / dim_client</td></tr>
+        </tbody></table>
+      </div>
+      <div>
+        <p><b>Client detail</b> (one row per client, from <code>dim_client</code>; the loan rows of one client are the final level):</p>
+        <table aria-label="Client detail columns"><thead><tr><th>Column</th><th>Source</th></tr></thead><tbody>
+          <tr><td><code>client_id</code> · market · customer type (consumer / micro-business)</td><td>dim_client</td></tr>
+          <tr><td>first loan date · first product · acquisition channel · cohort month</td><td>dim_client</td></tr>
+          <tr><td>loans to date · principal to date · last loan date · days since last loan</td><td>Σ fact_loan</td></tr>
+          <tr><td>current status (active loan / repaid / overdue / written off) · worst DPD ever</td><td>fact_loan</td></tr>
+          <tr><td>account tier · subscriber since</td><td>dim_client (optional, Tier 3 link)</td></tr>
+        </tbody></table>
+        <p class="note"><b>Filters carried into the drill:</b> period window (closed months only under Actual), market, product, channel, segment, agent / partner, currency and units, plus the clicked context (month, DPD bucket, vintage, cohort, channel). Versions do not apply at loan level (Actual only); the detail title repeats the carried filters as a sentence ("349 loans - Romania - Step 12 - Marketplace - Jul 2026 - 60–89 DPD").</p>
+      </div>
+    </div>
+    <div class="cols3" style="margin-top:12px">
+      <div class="step"><h4>Track B (Power BI)</h4><p class="note">Hidden drill-through pages <code>loan_detail</code> and <code>client_detail</code> (table visuals, ≤ 500 rows shown, "Export data" for more), drill-through fields = the carried filters; native Back button; "Show loans" as a drill-through button on each breakdown card; row click → drill-through again (loan → client). Loan-level table in Import mode stays under 1.1 M rows.</p></div>
+      <div class="step"><h4>Track A (Rayfin)</h4><p class="note">In-window <b>detail panel</b> sliding in from the right (720 px, over the content; rail, title row and tabs stay visible), virtualised table, column sort, "Export CSV", Escape / ✕ closes; filters carried as chips at the top of the panel. Loan rows come from one paged DAX query against the semantic model (filters → query, page size 200).</p></div>
+      <div class="step"><h4>Track C (Next.js)</h4><p class="note">Same panel as A; loan-level Parquet is <b>not</b> in the first load: one file per disbursement month under <code>public/data/sales/loans/</code>, fetched on first drill for the months in the window (≈ 0.4 MB each), cached for the session; "Copy link" encodes the drill state (F-37 analogue).</p></div>
+    </div>
+  </div>
+
+  <h3>Page level - how the four flows share the Overview and where each leaves</h3>
+  <div class="card" style="padding:12px 8px">
+    <svg id="pageflow" width="1376" height="430" role="img" aria-label="Page-level flow: Overview with four hero cards and four explanation quadrants, leaving to four views, then loan and client detail"></svg>
+    <p class="note" style="padding:0 12px">Overview = four hero cards (START) over a 2 × 2 "why" grid, one mini-explanation per Tier-1 metric, each with an "Open …" exit to its view. Revenue &amp; targets (Tier 3) is reached from the tabs row, not from a hero card. Every view reaches the same Loan detail; Clients reaches Client detail first. The tabs row keeps all five views one click away at any depth; the applied-filters pop-up and the rail work at every level.</p>
+  </div>
+
+  <!-- ============================================================ d. IMPACT -->
+  <h2>d. Impact on the concept</h2>
+  <div class="cols">
+    <div class="card">
+      <h3 style="margin-top:0">Views and tiles</h3>
+      <table aria-label="View changes"><thead><tr><th>Concept</th><th>Now</th></tr></thead><tbody>
+        <tr><td>Overview: 6 KPI cards (Originations, Revenue, Attainment, Approval rate, Time to cash, MRR) + trend + bridge + funnel + gap table + channel mix</td><td><b>Overview: 4 hero cards</b> (Loans issued, New clients, Returning %, Bad / overdue %) + 2 × 2 "why" grid: loans by month vs target (with product stack) · new clients by channel · cohort retention mini-curve · 30+ DPD by market trend. Each quadrant has "Open …". Revenue, attainment and MRR leave the top band (they stay as the Δ vs Budget rows and on the Revenue view)</td></tr>
+        <tr><td>Funnel &amp; originations</td><td><b>Loans issued</b>: funnel (now a driver under loans issued), product × market × channel, bridge, time to cash, coverage, agent / channel attainment bullets and the leaderboard (moved here from Channels &amp; agents)</td></tr>
+        <tr><td>Revenue &amp; customers</td><td>Re-cut into two: <b>Clients</b> (acquisition half + retention half, §c flows 2 and 3) and <b>Revenue &amp; targets</b> (revenue by stream, stream × market matrix, MRR / subscribers / churn, attainment and pace, channel mix) - Tier 3</td></tr>
+        <tr><td>Channels &amp; agents</td><td>Dissolved: attainment and leaderboard → Loans issued; channel mix → Revenue &amp; targets</td></tr>
+        <tr><td>—</td><td><b>Portfolio quality</b> (new view, flow 4): DPD buckets, vintage curves, bad-rate matrix, roll rates, cost of risk</td></tr>
+        <tr><td>4 tabs</td><td><b>5 tabs</b>: Overview · Loans issued · Clients · Portfolio quality · Revenue &amp; targets (one over the earlier cap - Q5) + hidden detail level</td></tr>
+        <tr><td>Rail Slice flyout</td><td>+ <b>Client type</b> chips (new / returning) and a <b>DPD bucket</b> chip group; the Market picker on the brand mark is unchanged</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Dataset additions (<code>data/mirelo_sales_dummy_data/</code>)</h3>
+      <table aria-label="Dataset additions"><thead><tr><th>Table</th><th>Grain · key columns</th><th>≈ Rows</th></tr></thead><tbody>
+        <tr><td><code>fact_loan</code> <span class="tagn">new</span></td><td>one row per disbursed loan: loan_id, client_id, application_id, market, product, channel, segment, agent_code, applied_ts, approved_ts, disbursed_date, principal_local, currency, tenor_days, apr, origination_fee_local, is_first_loan, prior_loans, status, dpd_current, max_dpd, outstanding_local, repaid_date, first_overdue_date, vintage_month</td><td class="c num">1.05 M (349 k YTD 2026, 400 k 2025, 300 k 2024)</td></tr>
+        <tr><td><code>dim_client</code> <span class="tagn">new</span></td><td>one row per client: client_id, market, customer_type, first_loan_date, first_product, first_channel, cohort_month, loans_to_date, status</td><td class="c num">480 k</td></tr>
+        <tr><td><code>fact_portfolio_vintage_monthly</code> <span class="tagn">new</span></td><td>snapshot month × vintage month × market × product × segment: loans_active, outstanding_local, balance per DPD bucket (1–29, 30–59, 60–89, 90+), written_off_local, repaid_cum, ever_90_cum</td><td class="c num">90 k</td></tr>
+        <tr><td><code>fact_origination_daily</code></td><td>no longer a source: derived from <code>fact_loan</code> by the generator (kept as a convenience rollup for Tracks A / B)</td><td class="c num">470 k (derived)</td></tr>
+        <tr><td><code>fact_funnel_daily</code></td><td>unchanged; the segment *_new / *_repeat split already separates first-time applicants, so new-client approval rate needs no new column</td><td class="c num">260 k</td></tr>
+        <tr><td><code>fact_portfolio_monthly</code></td><td>loses the DPD columns to the vintage table; keeps accounts, subscribers, MRR</td><td class="c num">4 k</td></tr>
+        <tr><td><code>fact_target_monthly</code></td><td>+ metric <code>NEW_CLIENTS</code>; Budget 30+ DPD appetite as metric <code>DPD30_RATIO</code></td><td class="c num">24 k</td></tr>
+      </tbody></table>
+      <p class="note"><b>Row budget:</b> source facts ≈ 260 k + 1.05 M + 90 k + 90 k revenue + 24 k targets + 7 k other ≈ <b>1.52 M</b>, plus <code>dim_client</code> 480 k - at the 1.5 M cap; the derived rollup is not counted twice. Repayment history stays at the vintage-aggregate grain (a loan × month status table would be ≈ 3.7 M rows and is not needed for a sales dashboard: the loan row carries current DPD, max DPD and first overdue date). Q4 offers the ×0.6 scale-down.</p>
+      <p class="note"><b>Control totals:</b> <code>control_totals_eur.csv</code> gains loans_count, new_clients, returning_pct_clients, returning_pct_loans, dpd30_ratio_balance, dpd30_ratio_count, dpd90_ratio, vintage_bad_rate_6m per market × window; Σ <code>fact_loan</code> must equal Σ <code>fact_origination_daily</code> to the cent and to the loan (generator assertion); the vintage table's outstanding must equal Σ <code>fact_loan.outstanding_local</code> for the last snapshot. The reconciliation gate runs these in every track like T-06.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ e. OPEN QUESTIONS -->
+  <h2>e. Open questions (recommended default in bold)</h2>
+  <div class="card">
+    <table aria-label="Open questions"><thead><tr><th>#</th><th>Question</th><th>Recommended default</th></tr></thead><tbody>
+      <tr><td>Q1</td><td>Returning clients % headline denominator: clients or loans?</td><td><b>Client-weighted on top</b> (52.4 %), loan-weighted as the sub-line (57.8 %); prior written-off loans do not count as "returning"</td></tr>
+      <tr><td>Q2</td><td>New clients locked in: first loan <i>disbursed</i> or first loan <i>approved</i>?</td><td><b>First disbursed</b> - reconciles to loans issued; approvals that are never taken up are shown in the new-client funnel instead</td></tr>
+      <tr><td>Q3</td><td>Bad / overdue headline: 30+ DPD by balance, 90+ DPD, by count, or vintage bad rate?</td><td><b>30+ DPD by balance</b> as the value; 90+ %, 30+ by count and vintage 6-month bad rate as sub-lines; the Budget comparator is the planned risk appetite</td></tr>
+      <tr><td>Q4</td><td>Loan-level fact of ≈ 1.05 M rows + 480 k clients - accept, or scale the business down (×0.6 → ≈ 630 k loans, 290 k clients) to leave headroom under the 1.5 M cap?</td><td><b>Accept 1.05 M</b> - the loan table replaces, not adds to, the daily originations fact; Track C loads loan files lazily per month; revisit if the Import refresh exceeds the P&amp;L's 28 s baseline</td></tr>
+      <tr><td>Q5</td><td>Five tabs (Overview · Loans issued · Clients · Portfolio quality · Revenue &amp; targets) or stay at four by folding Revenue &amp; targets into Loans issued?</td><td><b>Five</b> - Portfolio quality is a new domain and Revenue is an outcome worth its own view; the tabs row fits five at 1440 px</td></tr>
+      <tr><td>Q6</td><td>13-month trend line on the four hero cards (ADR-0007 §3a removed sparklines from the P&amp;L tiles)?</td><td><b>Yes, hero cards only</b> - the USER asked for "value, Δ, trend" at the start; four lines on four cards is readable, twelve were not; the other tiles stay KPI card v2</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<script>
+(function(){
+  var css=getComputedStyle(document.documentElement),C=function(n){return css.getPropertyValue(n).trim();};
+  var ACC=C('--acc'),ACCT=C('--accT'),INK=C('--ink900'),SL6=C('--slate600'),SL4=C('--slate400'),L3=C('--line300'),SUB=C('--subtle'),KEY=C('--keyRule');
+  var NS='http://www.w3.org/2000/svg';
+  function el(svg,tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;svg.appendChild(e);return e;}
+
+  /* ================= b. lineage DAG ================= */
+  (function(){
+    var svg=document.getElementById('dag');if(!svg)return;
+    var colX={src:8,base:356,der:720,t1:1116},colW={src:270,base:260,der:280,t1:252};
+    var N={
+      s_funnel:{c:'src',l:'fact_funnel_daily',s:'apps_submitted - approved - disbursed'},
+      s_loan:{c:'src',l:'fact_loan  (new)',s:'loan_id - client_id - disbursed_date - principal_local - is_first_loan - prior_loans'},
+      s_client:{c:'src',l:'dim_client  (new)',s:'first_loan_date - cohort_month - first_channel'},
+      s_vint:{c:'src',l:'fact_portfolio_vintage_monthly  (new)',s:'outstanding - balance per DPD bucket - ever_90_cum'},
+      s_target:{c:'src',l:'fact_target_monthly',s:'LOANS - ORIG_AMT - NEW_CLIENTS - DPD30_RATIO'},
+      s_fx:{c:'src',l:'fact_fx_rate',s:'local_per_eur - ACTUAL_AVG / BUDGET'},
+      s_date:{c:'src',l:'dim_date - dim_month',s:'window - is_closed - month_index'},
+      s_dims:{c:'src',l:'dim_product - market - channel - segment - agent',s:'breakdown filters on every base measure'},
+      b_sub:{c:'base',l:'Submitted #',s:'Σ apps_submitted'},
+      b_appr:{c:'base',l:'Approved #',s:'Σ approved'},
+      b_loans:{c:'base',l:'Loans #',s:'count fact_loan rows in window'},
+      b_princ:{c:'base',l:'Principal EUR',s:'Σ principal_local ÷ rate (month × ccy)'},
+      b_first:{c:'base',l:'First loans #',s:'filter is_first_loan = TRUE'},
+      b_borr:{c:'base',l:'Borrowers #',s:'distinct client_id'},
+      b_ret:{c:'base',l:'Returning borrowers #',s:'distinct client_id, prior_loans ≥ 1 (repaid / current)'},
+      b_out:{c:'base',l:'Outstanding EUR',s:'snapshot: last closed month'},
+      b_dpd30:{c:'base',l:'30+ DPD balance EUR',s:'filter bucket ≥ 30, snapshot'},
+      b_vbad:{c:'base',l:'Ever 90+ by month 6 #',s:'filter vintage, month-on-book = 6'},
+      b_tgt:{c:'base',l:'Targets',s:'Σ target_value per metric'},
+      b_py:{c:'base',l:'Prior-year values',s:'shift −12 months, Actual'},
+      d_appr:{c:'der',l:'Approval rate %',s:'Approved ÷ Submitted'},
+      d_take:{c:'der',l:'Take-up rate %',s:'Loans ÷ Approved'},
+      d_ticket:{c:'der',l:'Average ticket',s:'Principal ÷ Loans'},
+      d_vsbud:{c:'der',l:'Δ vs Budget % - Δ vs PY %',s:'(value − target) ÷ target - same for PY'},
+      d_retc:{c:'der',l:'Returning % (clients)',s:'Returning borrowers ÷ Borrowers'},
+      d_retl:{c:'der',l:'Repeat loan share %',s:'(Loans − First loans) ÷ Loans'},
+      d_coh:{c:'der',l:'Cohort repeat 90 d / 180 d',s:'2nd loan within n days ÷ cohort clients'},
+      d_dpd:{c:'der',l:'30+ DPD ratio %',s:'30+ DPD balance ÷ Outstanding'},
+      d_vint:{c:'der',l:'Vintage bad rate 6 m %',s:'Ever 90+ by month 6 ÷ vintage loans'},
+      t_loans:{c:'t1',l:'1 · Loans issued',s:'# and € - Δ vs Budget / PY'},
+      t_new:{c:'t1',l:'2 · New clients locked in',s:'= First loans # - Δ vs Budget / PY'},
+      t_ret:{c:'t1',l:'3 · Returning clients %',s:'clients on top - loans as sub-line'},
+      t_bad:{c:'t1',l:'4 · Bad / overdue loans %',s:'30+ DPD by balance - sub-lines'}
+    };
+    var order={src:['s_funnel','s_loan','s_client','s_vint','s_target','s_fx','s_date','s_dims'],
+               base:['b_sub','b_appr','b_loans','b_princ','b_first','b_borr','b_ret','b_out','b_dpd30','b_vbad','b_tgt','b_py'],
+               der:['d_appr','d_take','d_ticket','d_vsbud','d_retc','d_retl','d_coh','d_dpd','d_vint'],
+               t1:['t_loans','t_new','t_ret','t_bad']};
+    var H=760,top=22,bottom=18,nh={src:52,base:44,der:44,t1:56};
+    Object.keys(order).forEach(function(c){var ids=order[c],n=ids.length,h=nh[c];var gap=(H-top-bottom-n*h)/(n-1);ids.forEach(function(id,i){N[id].x=colX[c];N[id].y=top+i*(h+gap);N[id].w=colW[c];N[id].h=h;});});
+    /* edges: [from,to,label,dashed] */
+    var E=[
+      ['s_funnel','b_sub','Σ'],['s_funnel','b_appr','Σ'],
+      ['s_loan','b_loans','Σ count'],['s_loan','b_princ','Σ'],['s_fx','b_princ','fx'],['s_loan','b_first','filter'],['s_loan','b_borr','distinct'],['s_loan','b_ret','filter + distinct'],
+      ['s_client','b_ret','join'],['s_client','d_coh','cohort'],
+      ['s_vint','b_out','snapshot'],['s_vint','b_dpd30','filter + snapshot'],['s_vint','b_vbad','vintage'],
+      ['s_target','b_tgt','Σ'],['s_date','b_py','shift −12'],['s_date','b_loans','window',1],['s_dims','b_loans','breakdown',1],
+      ['b_sub','d_appr','÷'],['b_appr','d_appr','÷'],['b_appr','d_take','÷'],['b_loans','d_take','÷'],
+      ['b_princ','d_ticket','÷'],['b_loans','d_ticket','÷'],
+      ['b_loans','d_vsbud','÷'],['b_tgt','d_vsbud','÷'],['b_py','d_vsbud','÷'],
+      ['b_ret','d_retc','÷'],['b_borr','d_retc','÷'],['b_first','d_retl','÷'],['b_loans','d_retl','÷'],
+      ['b_dpd30','d_dpd','÷'],['b_out','d_dpd','÷'],['b_vbad','d_vint','÷'],['b_loans','d_vint','÷'],
+      ['b_loans','t_loans','value'],['b_princ','t_loans','value'],['d_vsbud','t_loans','Δ rows'],['d_appr','t_loans','explains',1],['d_take','t_loans','explains',1],['d_ticket','t_loans','explains',1],
+      ['b_first','t_new','value'],['d_vsbud','t_new','Δ rows'],
+      ['d_retc','t_ret','value'],['d_retl','t_ret','sub-line'],['d_coh','t_ret','explains',1],
+      ['d_dpd','t_bad','value'],['d_vint','t_bad','sub-line']
+    ];
+    var g=el(svg,'g',{});
+    E.forEach(function(e){
+      var a=N[e[0]],b=N[e[1]];var x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2;var dx=(x2-x1)*0.5;
+      var d='M'+x1+','+y1+' C'+(x1+dx)+','+y1+' '+(x2-dx)+','+y2+' '+x2+','+y2;
+      var strong=(b.c==='t1');
+      var p=el(g,'path',{d:d,fill:'none',stroke:strong?ACC:SL4,'stroke-width':strong?1.8:1.1,'stroke-opacity':strong?.9:.55});
+      if(e[3])p.setAttribute('stroke-dasharray','4 3');
+      /* label at t = .62 of the bezier */
+      var t=.62,mt=1-t;var lx=mt*mt*mt*x1+3*mt*mt*t*(x1+dx)+3*mt*t*t*(x2-dx)+t*t*t*x2;var ly=mt*mt*mt*y1+3*mt*mt*t*y1+3*mt*t*t*y2+t*t*t*y2;
+      var tw=e[2].length*5.6+8;el(svg,'rect',{x:lx-tw/2,y:ly-7,width:tw,height:14,rx:3,fill:'#fff','fill-opacity':.92});
+      el(svg,'text',{x:lx,y:ly+3.5,'text-anchor':'middle','font-size':10,fill:strong?ACC:SL6,'font-weight':strong?600:500},e[2]);
+    });
+    Object.keys(N).forEach(function(id){
+      var n=N[id],fill,stroke,tx,sx;
+      if(n.c==='src'){fill=SUB;stroke=L3;tx=INK;sx=SL6;}else if(n.c==='base'){fill='#fff';stroke=INK;tx=INK;sx=SL6;}else if(n.c==='der'){fill=ACCT;stroke=ACC;tx=INK;sx=SL6;}else{fill=ACC;stroke=ACC;tx='#fff';sx='#F8E8F0';}
+      el(svg,'rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:8,fill:fill,stroke:stroke,'stroke-width':n.c==='t1'?0:1.2});
+      el(svg,'text',{x:n.x+10,y:n.y+(n.c==='src'?17:16),'font-size':n.c==='t1'?13:12,'font-weight':600,fill:tx},n.l);
+      /* wrap sub text to two lines by width */
+      var words=n.s.split(' '),lines=[''],maxc=Math.floor((n.w-20)/5.4);
+      words.forEach(function(w){var cur=lines[lines.length-1];if((cur+' '+w).trim().length>maxc){lines.push(w);}else{lines[lines.length-1]=(cur+' '+w).trim();}});
+      lines.slice(0,2).forEach(function(ln,i){el(svg,'text',{x:n.x+10,y:n.y+(n.c==='src'?31:30)+i*12,'font-size':10,fill:sx},ln);});
+    });
+    [['Source tables · columns',colX.src],['Base measures',colX.base],['Derived ratios · Tier 2',colX.der],['Tier 1',colX.t1]].forEach(function(h){el(svg,'text',{x:h[1],y:12,'font-size':10,'font-weight':600,'letter-spacing':'.08em',fill:SL6},h[0].toUpperCase());});
+  })();
+
+  /* ================= c. page-level flow ================= */
+  (function(){
+    var svg=document.getElementById('pageflow');if(!svg)return;
+    function box(x,y,w,h,fill,stroke,title,sub,tcol){el(svg,'rect',{x:x,y:y,width:w,height:h,rx:10,fill:fill,stroke:stroke,'stroke-width':1.2});el(svg,'text',{x:x+12,y:y+20,'font-size':12,'font-weight':600,fill:tcol||INK},title);if(sub)sub.split('|').forEach(function(s,i){el(svg,'text',{x:x+12,y:y+36+i*13,'font-size':10.5,fill:tcol?'#F8E8F0':SL6},s);});}
+    function arrow(x1,y1,x2,y2,label,dash){var d='M'+x1+','+y1+' C'+x1+','+((y1+y2)/2)+' '+x2+','+((y1+y2)/2)+' '+x2+','+y2;var p=el(svg,'path',{d:d,fill:'none',stroke:ACC,'stroke-width':1.6,'marker-end':'url(#ah)'});if(dash)p.setAttribute('stroke-dasharray','4 3');if(label){var lx=(x1+x2)/2,ly=(y1+y2)/2;var tw=label.length*5.6+8;el(svg,'rect',{x:lx-tw/2,y:ly-7,width:tw,height:14,rx:3,fill:'#fff'});el(svg,'text',{x:lx,y:ly+3.5,'text-anchor':'middle','font-size':10,fill:SL6},label);}}
+    var defs=el(svg,'defs',{});var m=el(defs,'marker',{id:'ah',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'});el(m,'path',{d:'M0,0 L10,5 L0,10 z',fill:ACC});
+    /* overview frame */
+    el(svg,'rect',{x:8,y:8,width:1360,height:168,rx:12,fill:'#fff',stroke:L3,'stroke-width':1.2});
+    el(svg,'text',{x:20,y:26,'font-size':11,'font-weight':600,'letter-spacing':'.08em',fill:SL6},'OVERVIEW  -  ONE WINDOW, TABS ROW ABOVE: Overview · Loans issued · Clients · Portfolio quality · Revenue & targets');
+    var cols=[['Loans issued','349k - €138.4m - Δ - trend'],['New clients locked in','147.3k - Δ - trend'],['Returning clients %','52.4 % - Δ pp - trend'],['Bad / overdue loans %','4.6 % 30+ DPD - Δ pp - trend']];
+    var why=[['Why: loans by month vs target','product stack - "Open loans issued"'],['Why: new clients by channel','PY ghost - "Open clients"'],['Why: cohort retention mini-curve','last 4 quarter cohorts - "Open clients"'],['Why: 30+ DPD by market, 13 m','policy marker - "Open portfolio quality"']];
+    var cw=320,gap=14,x0=24;
+    cols.forEach(function(c,i){var x=x0+i*(cw+gap);box(x,36,cw,54,ACC,ACC,'START  '+c[0],c[1],'#fff');box(x,104,cw,58,ACCT,KEY,'NEXT  '+why[i][0],why[i][1]);el(svg,'line',{x1:x+cw/2,x2:x+cw/2,y1:90,y2:104,stroke:ACC,'stroke-width':1.6});});
+    /* views row */
+    var vy=226,vh=70;
+    var views=[[x0,'Loans issued','funnel - product × market × channel - bridge - time to cash - attainment'],[x0+cw+gap,'Clients - acquisition','by channel - first product × market - new-client funnel'],[x0+2*(cw+gap),'Clients - retention','cohort curves - repeat by product - loans per client'],[x0+3*(cw+gap),'Portfolio quality','DPD buckets - vintage curves - bad-rate matrix - roll rates']];
+    views.forEach(function(v,i){box(v[0],vy,cw,vh,'#fff',INK,'VIEW  '+v[1],v[2]);arrow(v[0]+cw/2,162,v[0]+cw/2,vy,'Open - same filters');});
+    /* bracket for the two client halves */
+    el(svg,'rect',{x:x0+cw+gap-6,y:vy-10,width:2*cw+gap+12,height:vh+20,rx:12,fill:'none',stroke:KEY,'stroke-width':1.2,'stroke-dasharray':'3 3'});
+    el(svg,'text',{x:x0+cw+gap+2,y:vy-14,'font-size':10,fill:ACC,'font-weight':600},'one view: Clients');
+    /* revenue side exit */
+    box(1368-250,vy,242,vh,SUB,L3,'VIEW  Revenue & targets (Tier 3)','revenue by stream - MRR - attainment - channel mix|reached from the tabs row only');
+    /* detail row */
+    var dy=346,dh=62;
+    box(x0,dy,2*cw+gap,dh,SUB,INK,'FINISH  Loan detail','one row per loan - B: drill-through page · A / C: in-window panel - filters + clicked context carried');
+    box(x0+2*(cw+gap),dy,2*cw+gap,dh,SUB,INK,'FINISH  Client detail  →  that client’s loans','one row per client - row click opens the loan list of the client (the lowest level)');
+    arrow(views[0][0]+cw/2,vy+vh,x0+cw/2+40,dy,'Show loans');
+    arrow(views[3][0]+cw/2,vy+vh,x0+2*(cw+gap)+cw+gap/2+60,dy,'Show loans',1);
+    arrow(views[1][0]+cw/2,vy+vh,x0+2*(cw+gap)+120,dy,'Show clients');
+    arrow(views[2][0]+cw/2,vy+vh,x0+2*(cw+gap)+300,dy,'Show clients');
+    arrow(x0+2*(cw+gap)+30,dy+dh/2,x0+2*cw+gap,dy+dh/2+0.01,'client → loans');
+    el(svg,'text',{x:x0,y:dy+dh+22,'font-size':11,fill:SL6},'Depth never hides the frame: rail, title row, applied filters and the five tabs stay visible at every level; Escape / Back returns one level, keeping the filters.');
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+/// X axis of the vintage curves: months on book 0-12.
+table param_mob
+	lineageTag: 8132ad98-1d87-5a39-86fe-7c3a496b037e
+
+	column months_on_book
+		dataType: int64
+		formatString: 0
+		lineageTag: fef849a8-36d5-5bb5-95c9-24d4d074db9e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [months_on_book]
+
+		annotation SummarizationSetBy = User
+
+	partition param_mob = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    GENERATESERIES ( 0, 12, 1 )
+				    ,"months_on_book", [Value]
+				)
+
+	annotation PBI_ResultType = Table

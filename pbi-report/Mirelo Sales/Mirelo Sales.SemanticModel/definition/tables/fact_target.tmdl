@@ -1,0 +1,116 @@
+/// Budget (version BUD): month x market x product x metric, plus month x agent quotas. Derived on load: target_eur = amount metrics / BUDGET rate of month x currency (null for counts and ratios).
+table fact_target
+	lineageTag: 272a9104-8c10-5c65-b621-f1a7cb434e8f
+
+	column version_code
+		dataType: string
+		isHidden
+		lineageTag: 75489784-5e26-53c9-ab41-08b3d8da05a5
+		summarizeBy: none
+		sourceColumn: version_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 2a7121fa-371c-500e-a799-eaad0aae5af6
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 81b95d23-731a-5234-bf5d-a11b4888cb8a
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: 1c4d77e7-43d8-5fa7-82d7-3eabdb7661df
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column agent_code
+		dataType: string
+		isHidden
+		lineageTag: ca1a4b15-6eb1-5153-8aa0-b2026cb7eba5
+		summarizeBy: none
+		sourceColumn: agent_code
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: 26b59e5b-b2cb-566c-8785-773f78a5a027
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: d541b793-5207-5c7a-ac12-ce1618181860
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column target_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a778b1ec-2175-5562-9db2-028f00d3234c
+		summarizeBy: none
+		sourceColumn: target_value
+
+		annotation SummarizationSetBy = User
+
+	/// Amount targets translated at the BUDGET rate of month x currency; null for counts and ratios.
+	column target_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 74381294-7b3b-54ac-ae37-2bbcec65a6bd
+		summarizeBy: none
+		sourceColumn: target_eur
+
+		annotation SummarizationSetBy = User
+
+	partition fact_target = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_target.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"version_code", type text},
+				            {"month_key", type text},
+				            {"market_code", type text},
+				            {"product_code", type text},
+				            {"agent_code", type text},
+				            {"metric_code", type text},
+				            {"currency_code", type text},
+				            {"target_value", type number}
+				        }
+				    ),
+				    fx = Table.NestedJoin(typed, {"currency_code", "month_key"}, fx_budget, {"currency_code", "month_key"}, "fx", JoinKind.LeftOuter),
+				    rate = Table.ExpandTableColumn(fx, "fx", {"local_per_eur"}, {"_rate_bud"}),
+				    eur = Table.AddColumn(rate, "target_eur", each if List.Contains({"PRINCIPAL_LOCAL", "REVENUE_LOCAL", "AGENT_PRINCIPAL_LOCAL"}, [metric_code]) then [target_value] / [_rate_bud] else null, type number),
+				    out = Table.RemoveColumns(eur, {"_rate_bud"})
+				in
+				    out
+
+	annotation PBI_ResultType = Table

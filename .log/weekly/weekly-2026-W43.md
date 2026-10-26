@@ -1,0 +1,16 @@
+# Weekly — 2026-W43 (19–25 Oct 2026)
+
+## Summary
+- **Init → three tracks:** repo set up (2026-10-21), dataset loaded to `lh_raw` (ADR-0003), Track B PBIP built to the Ledger design and published to RAW, Track A moved to the semantic model with delegated auth (ADR-0006) and deployed — [daily-2026-10-21](../daily/daily-2026-10-21.md)
+- **P&L in all three tracks:** Track A phase 2 live on the model; Track B T-05 fix + perf; Track C skeleton (ADR-0002) handed off via `.sync/`; ADR-0007 simplification (Variance only, Expand / Collapse, KPI card v2) — [daily-2026-10-22](../daily/daily-2026-10-22.md)
+- **Speed + sync:** ADR-0008 (pre-translated amounts + `fact_pl_elim`; every view ≤ 5 s locally; service rollout pending); period picker v2 + one page top + parity rules across A / B / C — [daily-2026-10-23](../daily/daily-2026-10-23.md)
+- **AI chat:** ADR-0009 accepted — Track A built behind a switch (Azure OpenAI, Entra), Track C tool layer + cheap-backend plan, Track B no chat for the embed — [daily-2026-10-23](../daily/daily-2026-10-23.md)
+- **ACME Trucks:** local Import rebuild + English redesign, tooltip fix, original page back as page 2 — [daily-2026-10-21](../daily/daily-2026-10-21.md), [daily-2026-10-23](../daily/daily-2026-10-23.md)
+- **Two more showcases scoped (analysis / design only):** P&L gap analysis vs the SaaS & consumer-goods spec (29 / 21 / 11; build order P1 → P3 → P4 → P2 ADR; ARR snapshot the one data gap worth adding); Mirelo Sales & Revenue concept + metric flow around the USER's four Tier-1 metrics; Nordmark reseller executive dashboard prototype with a separate "Trading sheet" design (ACME scorecard concept superseded) — [daily-2026-10-24](../daily/daily-2026-10-24.md)
+
+## Comments
+- **Issues:** N-01 (< 2 s) isn't reachable on this design; the showcase target ≤ 5 s per view is met locally after ADR-0008 and still has to be proven on the service. The service model lags the PBIP until the rollout. The Rayfin app can't be embedded publicly (video for the blog); Copilot can't run for anonymous visitors.
+- **Findings:** the model is formula-engine bound and plan-size dominated; unused SWITCH branches inflate every plan, and `SELECTEDVALUE` on the slicer columns lets the engine prune them. Hash-encoded double columns cost ~20 MB each on 1.2 M rows. Rayfin functions are TypeScript and can't read the semantic model (RLS-safe chat by construction).
+- **Process:** agents still ran git commands despite the rule (AP-003); spec rows and `.sync` notes drifted after ADR amendments (CAND-013 / 014); parity between three tracks needs written rules plus a shared check, not reviews alone.
+- **Ideas parked:** spec v1 redesign of Key figures / Analysis / Profitability; Copilot demo with Prep data for AI; shared parity check; RLS / demo users.
+- **Findings (24 Oct):** USER specs can contradict themselves (three conflicts in the P&L spec) → list conflicts first, keep the house definition; the P&L generator is Node.js, not Python (brief assumed wrong); a presentational concept built on the house design system was superseded within hours because the USER wanted a separate identity (CAND-019: ask "same design system or separate?" first); Power BI card visuals need SVG measures for target-line sparklines and fx shapes for status chrome, and a 4-5-4 retail calendar needs LY by week key via `TREATAS`.

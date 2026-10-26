@@ -10,4 +10,4 @@
 | Track C test strategy (T-01…T-18 mapping) | 2026-10-22 | ADR-0002 §2.7 | 2027-04-22 |
 | Vercel project setup for Track C | 2026-10-22 — moved out of this repo | DEC-003 · ADR-0002 §5 Q4: hosting + embedding belong to the vosk.dev repo via `.sync/` hand-off | n/a here (re-check the hand-off status in `.sync/README.md` by 2026-12-21) |
 | Track C `.sync/` hand-off content (embed contract, env names, data path, slices 4–9) | 2026-10-22 (specified in ADR-0002 §2.6; file written by nerd) | DEC-003 | 2027-04-22 (security-adjacent: frame-ancestors origins) |
-| AI chat path (Track A/C) | (not reviewed) | mentioned in `.log/plan/plan-2026-10-22.md` as a later ADR | open |
+| AI chat path (Track A/C) | 2026-10-23 (USER decided ADR-0009 §8; Track C backend note in `.sync/`) | DEC-004 (cheapest LLM, self-hosted CPU VM + EU API fallback); relay + browser tools pattern per ADR-0009 §4 | 2027-04-23 (security-adjacent: bearer key on the VM, relay limits) |

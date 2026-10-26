@@ -1,0 +1,159 @@
+/// Subscribers and subscription revenue per month x market x tier (FREE / PLUS / PRO), Jan 2024 - Sep 2026.
+table fact_subscription_month
+	lineageTag: fd178bfd-8f95-5bf3-aace-5e9818f47701
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: b658dd49-93d6-5e8f-85e3-138572e50442
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 7644c8c8-fea7-5f9b-8207-10db1874a25d
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: aef64785-a2a8-54b1-bd5c-e023a1f84119
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: c076f8a3-e23a-55da-8f52-a5b965f21be8
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column subscribers_start
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 93894332-c1bb-554d-9ee0-60a965bbfbb8
+		summarizeBy: none
+		sourceColumn: subscribers_start
+
+		annotation SummarizationSetBy = User
+
+	column subscribers_new
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9e7982f1-a62f-535e-baff-aeef8639fa6d
+		summarizeBy: none
+		sourceColumn: subscribers_new
+
+		annotation SummarizationSetBy = User
+
+	column subscribers_churned
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4c0c3429-e02d-51f7-9e0b-757a50578175
+		summarizeBy: none
+		sourceColumn: subscribers_churned
+
+		annotation SummarizationSetBy = User
+
+	column subscribers_end
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6ab4d719-10c4-5e7f-811c-481332ffc93a
+		summarizeBy: none
+		sourceColumn: subscribers_end
+
+		annotation SummarizationSetBy = User
+
+	column price_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: aa6eca5f-98f6-5d3a-8ba1-16c3f02aa73e
+		summarizeBy: none
+		sourceColumn: price_local
+
+		annotation SummarizationSetBy = User
+
+	column revenue_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 638833ec-a780-50d9-a765-2ba49c66b8da
+		summarizeBy: none
+		sourceColumn: revenue_local
+
+		annotation SummarizationSetBy = User
+
+	column mrr_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 356df852-2adc-58d2-be4b-46f15da49181
+		summarizeBy: none
+		sourceColumn: mrr_local
+
+		annotation SummarizationSetBy = User
+
+	column revenue_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 9514acef-c7e6-5dbf-b0d7-4694850a2712
+		summarizeBy: none
+		sourceColumn: revenue_eur
+
+		annotation SummarizationSetBy = User
+
+	column mrr_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 1f8e3125-e3a0-5787-be62-08d77f9ac886
+		summarizeBy: none
+		sourceColumn: mrr_eur
+
+		annotation SummarizationSetBy = User
+
+	partition fact_subscription_month = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_subscription_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"market_code", type text},
+				            {"product_code", type text},
+				            {"currency_code", type text},
+				            {"subscribers_start", Int64.Type},
+				            {"subscribers_new", Int64.Type},
+				            {"subscribers_churned", Int64.Type},
+				            {"subscribers_end", Int64.Type},
+				            {"price_local", type number},
+				            {"revenue_local", type number},
+				            {"mrr_local", type number},
+				            {"revenue_eur", type number},
+				            {"mrr_eur", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

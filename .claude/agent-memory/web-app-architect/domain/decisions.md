@@ -1,4 +1,4 @@
-<!-- next-id: DEC-004 -->
+<!-- next-id: DEC-005 -->
 
 # Decisions (durable)
 
@@ -36,4 +36,16 @@
 **Confidence:** high
 **Last-verified:** 2026-10-22
 **Related:** DEC-001
+**Status:** active
+
+### DEC-004 · Track C public chat: cheapest third-party LLM, self-hosted small model preferred, answer quality not the goal · 2026-10-23
+**Decision:** the Track C chat (public vosk.dev showcase) runs on the cheapest viable LLM: primary a small open-weight model (Qwen3-4B Q4_K_M, 1.7B as speed fallback) on a CPU VM the USER hosts (Hetzner CX33-class, llama-server, OpenAI-compatible, bearer key, Caddy TLS); fallback a cheap EU API (OVH gpt-oss-20b / Scaleway mistral-small-3.2). The relay and VM live outside this repo; this repo ships only the tool layer + `.sync/` contract. Hallucinations are acceptable: the chat tests the setup and the flow.
+**Why:** USER decision, ADR-0009 §8.4 (2026-10-23), overriding archi's quality-first proposal (Mistral Medium 3.5 primary, ~$40–65/month). Showcase budget; sovereignty story is "self-hosted in the EU". Consequence I derived: on CPU the prompt-processing of the fixed prefix (system prompt + tool schemas) dominates turn latency (≈ 20–60 s/turn), so the tool contract must keep the prefix ≤ ~1.2k tokens, trim history, cap tool results (~400 tokens) and the relay must stream, allow ≥ 120 s per call and 429 when both llama-server slots are busy.
+**Reversal cost:** low — four relay env values (`LLM_PROVIDER/BASE_URL/API_KEY/MODEL`) switch backend; VM is hourly-billed.
+**Applied at:** `docs/ADR/0009-ai-chat-track-a.md` §8.4; `.sync/2026-10-23-track-c-chat-backend.md` (archi); `.sync/2026-10-23-track-c-chat-contract.md` (nerd)
+**Hits:** 1
+**Tags:** track-c, ai-chat, llm, self-host, llama-cpp, qwen3, cost, sovereignty, relay
+**Confidence:** high
+**Last-verified:** 2026-10-23
+**Related:** DEC-003
 **Status:** active

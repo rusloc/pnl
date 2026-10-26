@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirelo Sales &amp; revenue - flat mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* DRAFT - projection state. Flat mockup of the Mirelo Sales & Revenue draft (ADR-0011, Proposed).
+   Contract: design-tokens.md + layout-spec.md. Overview populated (Sep 2026 - Month - All markets - EUR, x0.6 scale);
+   views 2-5 are structural wireframes with real card titles and placeholder chart shapes. */
+:root{
+  --ground:#F3F2EF;--panel:#E9E8E4;--panel2:#DEDDD8;--line:#CFCDC6;--marker:#2F2F2D;--ink:#111111;
+  --g600:#5C5C58;--g400:#7F7E79;--g300:#BDBBB5;--white:#FFFFFF;
+  --accent:#FFD54A;--accent2:#FFE58A;--teal:#128C94;--teal2:#9ED9DD;
+  --good:#176B3D;--goodT:#D6EBDC;--watch:#8A5A00;--watchT:#FFEBA8;--off:#B3261E;--offT:#F4D4D1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#D9D8D3;font-family:Inter,"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:20px;color:var(--ink);font-feature-settings:"tnum" 1,"cv11" 1}
+body{padding:20px 0 40px}
+.caption{width:1440px;margin:0 auto 10px;font-size:12px;line-height:16px;color:var(--g600)}
+.caption b{color:var(--ink);font-weight:600}
+button{font-family:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- frame ---------- */
+.board{position:relative;width:1440px;height:810px;margin:0 auto;overflow:hidden;background:var(--ground)}
+.abs{position:absolute}
+
+/* ---------- header ---------- */
+.wedge{position:absolute;left:0;top:0;width:1440px;height:64px;pointer-events:none}
+.brand{left:32px;top:20px;width:24px;height:24px;background:var(--ink);color:#fff;font-size:14px;font-weight:800;line-height:24px;text-align:center}
+.title{left:64px;top:14px;height:28px;font-size:22px;line-height:28px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.pline{left:64px;top:42px;height:16px;font-size:12px;line-height:16px;color:var(--g600);white-space:nowrap}
+.seg{display:flex;height:28px;border:1px solid var(--line);background:var(--panel)}
+.seg button{height:26px;border:0;border-right:1px solid var(--line);background:transparent;padding:0 8px;font-size:13px;font-weight:600;line-height:26px;color:var(--ink);white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg.dd button{width:100%;text-align:left;padding:0 10px}
+.tabs{left:32px;top:64px;height:36px;display:flex;gap:0}
+.tabs button{height:36px;border:0;background:transparent;padding:0 16px;font-size:14px;font-weight:600;color:var(--g600)}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--ink)}
+.tabrule{left:0;top:100px;width:1440px;height:1px;background:var(--line)}
+.tabright{right:32px;top:72px;height:20px;display:flex;gap:16px;font-size:12px;line-height:20px;color:var(--g600)}
+.tabright span{display:inline-flex;align-items:center;gap:4px}
+.icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;border:1.5px solid var(--g600);border-radius:50%;font-size:10px;font-weight:700;line-height:1;color:var(--g600)}
+
+/* ---------- views ---------- */
+.view{position:absolute;left:0;top:116px;width:1440px;height:694px;display:none}
+.view.on{display:block}
+
+/* ---------- cards ---------- */
+.card{position:absolute;background:var(--panel)}
+.card::before{content:"";position:absolute;left:0;top:0;width:16px;height:16px;background:var(--marker)}
+.ct{position:absolute;left:16px;top:16px;right:16px;height:16px;font-size:13px;line-height:16px;font-weight:600;white-space:nowrap;display:flex;justify-content:space-between;align-items:center}
+.ct .acts{display:flex;gap:8px;color:var(--g600);font-size:12px;font-weight:600}
+.ct .acts .icon{border-color:var(--g600)}
+.lab{position:absolute;left:16px;top:24px;font-size:12px;line-height:16px;font-weight:500;color:var(--g600)}
+.hero .val{position:absolute;left:16px;top:44px;height:48px;font-size:44px;line-height:48px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.hero .val small{font-size:18px;line-height:24px;font-weight:700;margin-left:12px;letter-spacing:0;vertical-align:baseline}
+.hero .sub{position:absolute;left:16px;top:100px;font-size:12px;line-height:16px;color:var(--g600);white-space:nowrap}
+.hero .spark{position:absolute;left:196px;top:44px;width:120px;height:44px}
+.cr{position:absolute;left:16px;height:16px;display:flex;align-items:center;font-size:12px;line-height:16px}
+.cr .n{width:84px;font-weight:500;color:var(--g600);white-space:nowrap}
+.cr .d{width:64px;text-align:right;font-size:13px;font-weight:700;white-space:nowrap}
+.cr .bar{position:relative;width:80px;height:6px;background:var(--panel2);margin-left:8px}
+.cr .bar i{position:absolute;left:39px;top:-2px;width:1px;height:10px;background:var(--marker)}
+.cr .bar b{position:absolute;top:0;height:6px}
+.good{color:var(--good)}.watch{color:var(--watch)}.off{color:var(--off)}.neu{color:var(--g600);font-weight:500}
+.bg-good{background:var(--good)}.bg-watch{background:var(--watch)}.bg-off{background:var(--off)}
+.kpi .val{position:absolute;left:16px;top:44px;height:32px;font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.kpi .cr{top:82px}
+.kpi .sub{position:absolute;left:16px;top:100px;font-size:11px;line-height:14px;color:var(--g600);white-space:nowrap}
+.chart{position:absolute;left:16px;top:44px}
+.legend{position:absolute;left:16px;bottom:10px;display:flex;gap:14px;font-size:11px;line-height:14px;color:var(--g600)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{display:inline-block;width:12px;height:3px;background:var(--ink)}
+.sw.t{background:var(--teal)}.sw.g{background:var(--g400)}.sw.g3{background:var(--g300)}
+.sw.sq{height:12px}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--g400) 0 4px,transparent 4px 7px)}
+.callout{position:absolute;background:var(--accent);border:2px solid var(--white);padding:4px 8px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.chip{display:inline-block;height:16px;padding:0 6px;border-radius:2px;font-size:11px;line-height:16px;font-weight:600}
+.chip.good{background:var(--goodT)}.chip.watch{background:var(--watchT)}.chip.off{background:var(--offT)}
+
+/* ---------- tables ---------- */
+table{position:absolute;left:16px;top:40px;right:16px;border-collapse:collapse;width:1344px;font-size:13px;line-height:20px}
+th{height:24px;padding:2px 8px;background:var(--panel2);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--g600);text-align:left;white-space:nowrap}
+td{height:24px;padding:2px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+tr.sel td{background:var(--accent)}
+tr:hover td{background:var(--accent2)}
+.wf td{color:var(--g600)}
+.ph-note{font-size:11px;line-height:16px;font-weight:400;color:var(--g400)}
+
+/* ---------- slide-over (shown on demand) ---------- */
+.scrim{position:absolute;left:0;top:100px;width:720px;height:710px;background:rgba(17,17,17,.4);display:none}
+.so{position:absolute;left:720px;top:100px;width:720px;height:710px;background:var(--ground);border-left:1px solid var(--line);display:none}
+.so.on,.scrim.on{display:block}
+.so .hd{position:absolute;left:0;top:0;width:720px;height:64px;background:var(--white);border-bottom:1px solid var(--line);padding:12px 24px}
+.so .hd h2{margin:0;font-size:16px;line-height:20px;font-weight:700}
+.so .hd p{margin:4px 0 0;font-size:12px;line-height:16px;color:var(--g600)}
+.so .x{position:absolute;right:16px;top:16px;width:32px;height:32px;border:1px solid var(--line);background:var(--white);font-size:16px}
+.so .chips{position:absolute;left:24px;top:76px;display:flex;gap:6px}
+.so .chips .chip{background:var(--panel2);color:var(--ink)}
+.so table{left:24px;top:108px;width:672px}
+.so .foot{position:absolute;left:24px;bottom:12px;font-size:11px;color:var(--g600)}
+.so .foot button{height:24px;border:1px solid var(--line);background:var(--white);font-size:11px;font-weight:600;padding:0 8px;margin-right:8px}
+svg text{font-family:inherit}
+</style>
+</head>
+<body>
+<div class="caption"><b>DRAFT - projection state.</b> Mirelo Sales &amp; revenue - flat mockup, 1440 x 810. Overview populated (Sep 2026 - Month - All markets - EUR, business scale x0.6); Loans issued, Clients, Portfolio quality and Revenue &amp; targets are structural wireframes. Click the tabs; click a table row in the Overview to see the slide-over. Contract: <b>design-tokens.md</b>, <b>layout-spec.md</b>, ADR-0011.</div>
+
+<div class="board" id="board">
+  <!-- ======================= header ======================= -->
+  <svg class="wedge" viewBox="0 0 1440 64" aria-hidden="true"><polygon points="760,0 1440,0 1440,64" fill="#FFD54A"/></svg>
+  <div class="abs brand" title="Mirelo">M</div>
+  <div class="abs title">Mirelo - Sales &amp; revenue</div>
+  <div class="abs pline" id="pline">Showing Sep 2026 - Month - Actual vs Budget and Prior year - Closed through Sep 2026</div>
+
+  <div class="abs seg" style="left:744px;top:20px;width:232px" role="radiogroup" aria-label="Market">
+    <button aria-pressed="true" style="width:88px">All markets</button><button style="width:48px">PL</button><button style="width:48px">RO</button><button style="width:48px">PT</button>
+  </div>
+  <div class="abs seg" style="left:988px;top:20px;width:196px" role="radiogroup" aria-label="Period">
+    <button aria-pressed="true" style="width:49px">Month</button><button style="width:49px">QTD</button><button style="width:49px">YTD</button><button style="width:49px">R12M</button>
+  </div>
+  <div class="abs seg dd" style="left:1192px;top:20px;width:104px"><button>Sep 2026 &#9662;</button></div>
+  <div class="abs seg" style="left:1304px;top:20px;width:104px" role="radiogroup" aria-label="Comparator">
+    <button aria-pressed="true" style="width:56px">Budget</button><button style="width:46px">PY</button>
+  </div>
+
+  <div class="abs tabs" role="tablist" id="tabs">
+    <button role="tab" aria-selected="true" data-view="v1" style="width:104px">Overview</button>
+    <button role="tab" aria-selected="false" data-view="v2" style="width:128px">Loans issued</button>
+    <button role="tab" aria-selected="false" data-view="v3" style="width:88px">Clients</button>
+    <button role="tab" aria-selected="false" data-view="v4" style="width:156px">Portfolio quality</button>
+    <button role="tab" aria-selected="false" data-view="v5" style="width:164px">Revenue &amp; targets</button>
+  </div>
+  <div class="abs tabright"><span><i class="icon">i</i> How to read</span><span>&#x2750; Copy link</span></div>
+  <div class="abs tabrule"></div>
+
+  <!-- ======================= VIEW 1 - OVERVIEW ======================= -->
+  <section class="view on" id="v1" role="tabpanel">
+    <!-- hero cards: y 116 -> 0 inside the view -->
+    <div class="card hero" style="left:32px;top:0;width:332px;height:192px" title="Count of disbursed loans and disbursed principal, translated per month x currency at actual rates.">
+      <div class="lab">Loans issued</div>
+      <div class="val num">25.6k<small>&euro;10.2m</small></div>
+      <div class="sub">avg ticket &euro;398 - 97.6 % of target loans</div>
+      <svg class="spark" data-spark="22,21.4,24.6,26.9,20.8,19.6,22.1,22.9,23.3,23.6,23,24.4,25.6|18.9,18.4,21.1,23.1,17.9,16.8,19,19.7,20,20.3,19.8,21,22"></svg>
+      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d watch num">&#9660; &minus;2.4%</span><span class="bar"><i></i><b class="bg-watch" style="right:41px;width:5px"></b></span></div>
+      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +16.4%</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:33px"></b></span></div>
+    </div>
+    <div class="card hero" style="left:380px;top:0;width:332px;height:192px" title="Clients whose first loan was disbursed in the window.">
+      <div class="lab">New clients locked in</div>
+      <div class="val num">10.8k</div>
+      <div class="sub">42.2 % of loans - App 41 % - Partner 22 %</div>
+      <svg class="spark" data-spark="9.2,8.9,10.3,11.2,8.6,8.1,9.3,9.6,9.8,10,9.7,10.3,10.8|8,7.7,8.9,9.7,7.5,7,8,8.3,8.4,8.6,8.4,8.9,9.4"></svg>
+      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d watch num">&#9660; &minus;4.2%</span><span class="bar"><i></i><b class="bg-watch" style="right:41px;width:8px"></b></span></div>
+      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +15.1%</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:30px"></b></span></div>
+    </div>
+    <div class="card hero" style="left:728px;top:0;width:332px;height:192px" title="Borrowers with at least one prior repaid or current loan, share of borrowers in the window.">
+      <div class="lab">Returning clients</div>
+      <div class="val num">52.4%</div>
+      <div class="sub">of borrowers - 57.8 % of loans - 180-day repeat 46 %</div>
+      <svg class="spark" data-spark="49.5,49.8,49.9,50.3,50.6,50.6,51.1,51,51.4,51.7,51.8,52.1,52.4|46.6,46.8,46.9,47.2,47.5,47.6,48,48,48.3,48.6,48.7,49,49.5"></svg>
+      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d neu">n/a</span><span class="bar" style="background:transparent"></span></div>
+      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +2.9pp</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:23px"></b></span></div>
+    </div>
+    <div class="card hero" style="left:1076px;top:0;width:332px;height:192px" title="Balance 30+ days past due as a share of outstanding principal, last closed month. Down is favourable.">
+      <div class="lab">Bad / overdue loans</div>
+      <div class="val num">4.6%</div>
+      <div class="sub">30+ DPD by balance - 90+ 2.1 % - vintage 6m 3.4 %</div>
+      <svg class="spark" data-spark="4.3,4.4,4.5,4.6,4.7,4.7,4.6,4.6,4.6,4.6,4.6,4.6,4.6|3.8,3.8,3.9,3.9,3.9,4,4,4,4,4,3.9,3.9,3.9"></svg>
+      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d off num">&#9650; +0.6pp</span><span class="bar"><i></i><b class="bg-off" style="right:41px;width:10px"></b></span></div>
+      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d off num">&#9650; +0.7pp</span><span class="bar"><i></i><b class="bg-off" style="right:41px;width:11px"></b></span></div>
+    </div>
+
+    <!-- why grid: y 324 -> 208 ; y 500 -> 384 -->
+    <div class="card" style="left:32px;top:208px;width:680px;height:160px">
+      <div class="ct"><span>Loans issued by month vs Budget</span><span class="acts"><i class="icon">i</i><span>Open loans issued &#8599;</span></span></div>
+      <svg class="chart" id="c-o5" width="648" height="84"></svg>
+      <div class="legend"><span><i class="sw"></i>Actual</span><span><i class="sw t"></i>Budget</span><span><i class="sw dash"></i>Prior year</span><span><i class="sw sq" style="background:var(--accent);border:1px solid var(--ink);width:10px;height:10px"></i>selected month</span></div>
+    </div>
+    <div class="card" style="left:728px;top:208px;width:680px;height:160px">
+      <div class="ct"><span>New clients by acquisition channel</span><span class="acts"><i class="icon">i</i><span>Open clients &#8599;</span></span></div>
+      <svg class="chart" id="c-o6" width="648" height="92"></svg>
+      <div class="legend"><span><i class="sw sq"></i>Sep 2026</span><span><i class="sw sq" style="background:transparent;border:1px solid var(--g400)"></i>Prior year</span></div>
+    </div>
+    <div class="card" style="left:32px;top:384px;width:680px;height:160px">
+      <div class="ct"><span>Returning clients - cohort repeat curve</span><span class="acts"><i class="icon">i</i><span>Open clients &#8599;</span></span></div>
+      <svg class="chart" id="c-o7" width="648" height="84"></svg>
+      <div class="legend"><span><i class="sw"></i>Cohort Q3 2026</span><span><i class="sw t"></i>Q2 2026</span><span><i class="sw dash"></i>Q3 2025</span></div>
+    </div>
+    <div class="card" style="left:728px;top:384px;width:680px;height:160px">
+      <div class="ct"><span>30+ DPD by market, 13 months</span><span class="acts"><i class="icon">i</i><span>Open portfolio quality &#8599;</span></span></div>
+      <svg class="chart" id="c-o8" width="648" height="84"></svg>
+      <div class="callout" style="left:300px;top:40px">RO credit policy tightened Mar 2026</div>
+      <div class="legend"><span><i class="sw"></i>Poland</span><span><i class="sw t"></i>Romania</span><span><i class="sw dash"></i>Portugal</span></div>
+    </div>
+
+    <!-- table: y 676 -> 560 -->
+    <div class="card" style="left:32px;top:560px;width:1376px;height:118px">
+      <div class="ct"><span>Markets - Sep 2026</span><span class="acts"><span>Show loans &#8599;</span></span></div>
+      <table id="mkt" aria-label="Markets">
+        <thead><tr><th style="width:160px">Market</th><th class="r" style="width:120px">Loans</th><th class="r" style="width:120px">vs Budget</th><th class="r" style="width:140px">Principal &euro;</th><th class="r" style="width:140px">New clients</th><th class="r" style="width:120px">Returning %</th><th class="r" style="width:120px">30+ DPD %</th><th style="width:96px">Status</th><th></th></tr></thead>
+        <tbody>
+          <tr data-m="Poland"><td>Poland</td><td class="r">13.1k</td><td class="r watch">&#9660; &minus;2.3%</td><td class="r">&euro;5.3m</td><td class="r">5.2k</td><td class="r">56.1%</td><td class="r">4.6%</td><td><span class="chip watch">&#9660; Watch</span></td><td></td></tr>
+          <tr data-m="Romania"><td>Romania</td><td class="r">6.0k</td><td class="r off">&#9660; &minus;12.0%</td><td class="r">&euro;2.4m</td><td class="r">2.4k</td><td class="r">50.2%</td><td class="r">4.9%</td><td><span class="chip off">&#9660; Off</span></td><td></td></tr>
+          <tr data-m="Portugal"><td>Portugal</td><td class="r">6.5k</td><td class="r good">&#9650; +11.0%</td><td class="r">&euro;2.5m</td><td class="r">3.2k</td><td class="r">44.8%</td><td class="r">4.2%</td><td><span class="chip good">&#9650; Good</span></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= VIEW 2 - LOANS ISSUED (wireframe) ======================= -->
+  <section class="view" id="v2" role="tabpanel"></section>
+  <!-- ======================= VIEW 3 - CLIENTS (wireframe) ======================= -->
+  <section class="view" id="v3" role="tabpanel"></section>
+  <!-- ======================= VIEW 4 - PORTFOLIO QUALITY (wireframe) ======================= -->
+  <section class="view" id="v4" role="tabpanel"></section>
+  <!-- ======================= VIEW 5 - REVENUE & TARGETS (wireframe) ======================= -->
+  <section class="view" id="v5" role="tabpanel"></section>
+
+  <!-- ======================= slide-over ======================= -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="so" id="so" aria-label="Loan detail">
+    <div class="hd"><h2 id="so-title">6,012 loans - Romania - Sep 2026</h2><p>Loan grain - Actual only - filters carried from the Overview</p><button class="x" id="so-x" aria-label="Close">&#10005;</button></div>
+    <div class="chips"><span class="chip">Sep 2026 - Month</span><span class="chip" id="so-chip">Romania</span><span class="chip">All products</span><span class="chip">All channels</span></div>
+    <table aria-label="Loans">
+      <thead><tr><th>Loan id</th><th>Client</th><th>Product</th><th>Channel</th><th>Disbursed</th><th class="r">Principal</th><th class="r">Outstanding</th><th class="r">DPD</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>L-26-091204</td><td>C-412 887</td><td>Step 12</td><td>App</td><td>29 Sep 2026</td><td class="r">&euro;640</td><td class="r">&euro;640</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-091188</td><td>C-388 102</td><td>Flex 30</td><td>Marketplace</td><td>29 Sep 2026</td><td class="r">&euro;210</td><td class="r">&euro;210</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-091151</td><td>C-201 554</td><td>Biz Boost</td><td>Agents</td><td>28 Sep 2026</td><td class="r">&euro;1,850</td><td class="r">&euro;1,850</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-090976</td><td>C-455 310</td><td>Flex 90</td><td>Partner</td><td>26 Sep 2026</td><td class="r">&euro;300</td><td class="r">&euro;300</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-090851</td><td>C-109 988</td><td>Step 6</td><td>Web</td><td>24 Sep 2026</td><td class="r">&euro;420</td><td class="r">&euro;350</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-090702</td><td>C-377 420</td><td>Flex 30</td><td>App</td><td>22 Sep 2026</td><td class="r">&euro;180</td><td class="r">&euro;180</td><td class="r">4</td><td>Current</td></tr>
+        <tr><td>L-26-090655</td><td>C-290 017</td><td>Step 12</td><td>App</td><td>21 Sep 2026</td><td class="r">&euro;600</td><td class="r">&euro;550</td><td class="r">0</td><td>Current</td></tr>
+        <tr><td>L-26-090611</td><td>C-122 870</td><td>Flex 90</td><td>Marketplace</td><td>20 Sep 2026</td><td class="r">&euro;250</td><td class="r">&euro;250</td><td class="r">12</td><td>Overdue</td></tr>
+      </tbody>
+    </table>
+    <div class="foot"><button>Export CSV</button><button>Sort: disbursed &#9662;</button>Showing 8 of 6,012 rows - row click opens the client card</div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var C={ink:'#111111',teal:'#128C94',g600:'#5C5C58',g400:'#7F7E79',g300:'#BDBBB5',line:'#CFCDC6',panel2:'#DEDDD8',accent:'#FFD54A',white:'#FFFFFF',marker:'#2F2F2D'};
+  function el(p,t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+  function txt(p,x,y,s,o){o=o||{};return el(p,'text',{x:x,y:y,'font-size':o.fs||11,fill:o.fill||C.g600,'text-anchor':o.anchor||'start','font-weight':o.fw||400},s);}
+  var MONTHS=['Sep','Oct','Nov','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+
+  /* ---- line chart: series [{v:[..],color,dash,dots}] ---- */
+  function lineChart(svg,o){
+    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height');
+    var padL=o.padL||34,padR=8,padT=6,padB=16;
+    var pw=W-padL-padR,ph=H-padT-padB;
+    var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v);});});
+    var min=o.min!=null?o.min:Math.min.apply(null,all),max=o.max!=null?o.max:Math.max.apply(null,all);
+    if(max===min)max=min+1;
+    var n=o.n||o.series[0].v.length;
+    var X=function(i){return padL+i*(pw/(n-1));},Y=function(v){return padT+(1-(v-min)/(max-min))*ph;};
+    el(svg,'line',{x1:padL,x2:W-padR,y1:Y(min),y2:Y(min),stroke:C.line});
+    var ticks=o.ticks||[min,max];
+    ticks.forEach(function(t){txt(svg,padL-6,Y(t)+4,o.fmt?o.fmt(t):t,{anchor:'end'});});
+    var sparse=pw/(n-1)<36;
+    (o.xl||[]).forEach(function(l,i){if(l&&!(sparse&&i%2))txt(svg,X(i),H-3,l,{anchor:i===0?'start':(i===n-1?'end':'middle')});});
+    o.series.forEach(function(s){
+      var pts=[];s.v.forEach(function(v,i){if(v!=null)pts.push(X(i).toFixed(1)+','+Y(v).toFixed(1));});
+      var a={points:pts.join(' '),fill:'none',stroke:s.color,'stroke-width':s.w||2,'stroke-linejoin':'round'};
+      if(s.dash)a['stroke-dasharray']='4 3';
+      el(svg,'polyline',a);
+      if(s.dots)s.v.forEach(function(v,i){if(v!=null)el(svg,'circle',{cx:X(i),cy:Y(v),r:3,fill:s.color});});
+    });
+    if(o.sel!=null){var s0=o.series[0];el(svg,'circle',{cx:X(o.sel),cy:Y(s0.v[o.sel]),r:4.5,fill:C.accent,stroke:C.ink,'stroke-width':1});}
+    if(o.marker!=null){el(svg,'line',{x1:X(o.marker),x2:X(o.marker),y1:padT,y2:padT+ph,stroke:C.marker,'stroke-dasharray':'2 2'});}
+  }
+  /* ---- horizontal bars with ghost ---- */
+  function barsH(svg,o){
+    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height');
+    var labW=o.labW||84,valW=o.valW||110,rowH=H/o.rows.length,max=o.max||Math.max.apply(null,o.rows.map(function(r){return Math.max(r.v,r.py||0);}));
+    var pw=W-labW-valW;
+    o.rows.forEach(function(r,i){
+      var y=i*rowH,bh=Math.min(10,rowH-6),cy=y+rowH/2;
+      txt(svg,0,cy+4,r.l,{fill:C.ink,fs:12,fw:500});
+      el(svg,'rect',{x:labW,y:cy-bh/2,width:pw,height:bh,fill:C.panel2});
+      el(svg,'rect',{x:labW,y:cy-bh/2,width:pw*r.v/max,height:bh,fill:r.hl?C.accent:C.ink,stroke:r.hl?C.ink:'none'});
+      if(r.py!=null)el(svg,'rect',{x:labW+.5,y:cy-bh/2-2.5,width:pw*r.py/max,height:bh+5,fill:'none',stroke:C.g400});
+      txt(svg,labW+pw+8,cy+4,r.t,{fill:C.ink,fs:12,fw:600});
+    });
+  }
+  /* ---- sparkline ---- */
+  function spark(svg){
+    var d=svg.getAttribute('data-spark').split('|').map(function(s){return s.split(',').map(Number);});
+    svg.setAttribute('viewBox','0 0 120 44');
+    var all=d[0].concat(d[1]),min=Math.min.apply(null,all),max=Math.max.apply(null,all);if(max===min)max=min+1;
+    var X=function(i){return 2+i*(116/12);},Y=function(v){return 4+(1-(v-min)/(max-min))*36;};
+    [1,0].forEach(function(k){var s=d[k];el(svg,'polyline',{points:s.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' '),fill:'none',stroke:k?C.g400:C.ink,'stroke-width':k?1:1.5,'stroke-dasharray':k?'3 2':'none'});});
+    el(svg,'circle',{cx:X(12),cy:Y(d[0][12]),r:3,fill:C.ink});
+  }
+  /* ---- placeholder shapes for wireframes ---- */
+  function ph(svg,type){
+    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height'),i,n;
+    var g=C.g300,g2=C.g400;
+    if(type==='line'){lineChart(svg,{series:[{v:[5,6,7,8,6,5,7,8,8,9,9,10,11],color:g2,dots:true},{v:[6,6,7,8,7,6,7,8,9,9,9,10,11],color:g,dots:true}],xl:MONTHS,ticks:[],padL:8});}
+    else if(type==='cols'){n=13;var bw=(W-16)/n*0.6;for(i=0;i<n;i++){var h=20+((i*37)%50);el(svg,'rect',{x:8+i*(W-16)/n,y:H-14-h,width:bw,height:h,fill:g2});}el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
+    else if(type==='stack'){n=13;var bw2=(W-16)/n*0.6;for(i=0;i<n;i++){var base=H-14,hs=[18+((i*13)%14),12+((i*7)%10),8+((i*5)%8),6];var cols=[g2,g,C.panel2,'none'];hs.forEach(function(h,k){el(svg,'rect',{x:8+i*(W-16)/n,y:base-h,width:bw2,height:h,fill:cols[k],stroke:cols[k]==='none'?g2:'none'});base-=h;});}el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
+    else if(type==='barsH'){var vals=[1,.82,.68,.5,.36],lab=['Stage 1','Stage 2','Stage 3','Stage 4','Stage 5'];barsH(svg,{rows:vals.map(function(v,k){return {l:lab[k],v:v,t:'—'};}),max:1,labW:64,valW:40});svg.querySelectorAll('rect[fill="#111111"]').forEach(function(r){r.setAttribute('fill',g2);});}
+    else if(type==='bullets'){var rows=['A','B','C','D','E'],rh=H/rows.length;rows.forEach(function(r,k){var cy=k*rh+rh/2;txt(svg,0,cy+4,'Item '+r,{fill:C.ink,fs:12});el(svg,'rect',{x:70,y:cy-4,width:W-120,height:8,fill:C.panel2});el(svg,'rect',{x:70,y:cy-4,width:(W-120)*(0.55+k*0.09),height:8,fill:g2});el(svg,'rect',{x:70+(W-120)*0.8,y:cy-7,width:2,height:14,fill:g});});}
+    else if(type==='bridge'){var steps=[[0,60,'Budget'],[60,48,'volume'],[48,55,'ticket'],[55,58,'mix'],[58,52,'FX'],[0,52,'Actual']],sw=(W-16)/steps.length*0.6;steps.forEach(function(s,k){var x=8+k*(W-16)/steps.length,y0=H-14-Math.max(s[0],s[1]),hh=Math.abs(s[1]-s[0]);if(k===0||k===5){y0=H-14-s[1];hh=s[1];}el(svg,'rect',{x:x,y:y0,width:sw,height:hh,fill:(k===0||k===5)?g2:(s[1]>s[0]?g:C.panel2),stroke:g2});txt(svg,x+sw/2,H-2,s[2],{anchor:'middle'});});el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
+    else if(type==='bubble'){var bs=[[.2,.6,22],[.35,.3,14],[.5,.5,30],[.65,.72,10],[.8,.4,18],[.3,.8,8],[.72,.2,12]];el(svg,'line',{x1:24,x2:W,y1:H-14,y2:H-14,stroke:C.line});el(svg,'line',{x1:24,x2:24,y1:0,y2:H-14,stroke:C.line});bs.forEach(function(b,k){el(svg,'circle',{cx:24+b[0]*(W-40),cy:(1-b[1])*(H-24)+6,r:b[2]/2,fill:k===2?C.accent:(k%2?g:g2),stroke:C.ink,'stroke-opacity':.6});});}
+    else if(type==='heat'){var rws=5,cls=3,cw=(W-80)/cls,rh2=(H-16)/rws;for(i=0;i<rws;i++){txt(svg,0,16+i*rh2+rh2/2+4,'Row '+(i+1),{fill:C.ink,fs:12});for(var j=0;j<cls;j++){var v=(i*3+j*5)%4;el(svg,'rect',{x:80+j*cw,y:16+i*rh2,width:cw-2,height:rh2-2,fill:[C.panel2,g,g2,C.ink][v]});txt(svg,80+j*cw+cw/2,16+i*rh2+rh2/2+4,'—',{anchor:'middle',fill:v>1?C.white:C.ink});}}for(var j2=0;j2<cls;j2++)txt(svg,80+j2*cw+cw/2,10,'Col '+(j2+1),{anchor:'middle'});}
+    else if(type==='curves'){lineChart(svg,{series:[{v:[0,8,19,28,34,38,42,46,48],color:g2},{v:[0,7,17,26,32,36,40,43,45],color:g},{v:[0,6,15,23,29,34,38,41,43],color:g,dash:true}],xl:['0','','60 d','','120 d','','180 d','',''],ticks:[],padL:8,n:9});}
+  }
+  function card(view,x,y,w,h,title,type,acts){
+    var d=document.createElement('div');d.className='card';d.style.cssText='left:'+x+'px;top:'+(y-116)+'px;width:'+w+'px;height:'+h+'px';
+    d.innerHTML='<div class="ct"><span>'+title+'</span><span class="acts">'+(type?'<span class="ph-note">wireframe - '+type+'</span>':'')+(acts||'<i class="icon">i</i>')+'</span></div>';
+    if(type){var s=document.createElementNS(NS,'svg');s.setAttribute('class','chart');s.setAttribute('width',w-32);s.setAttribute('height',h-60);d.appendChild(s);ph(s,type);}
+    view.appendChild(d);return d;
+  }
+  function kpi(view,x,title,val,cr,sub){
+    var d=document.createElement('div');d.className='card kpi';d.style.cssText='left:'+x+'px;top:0;width:216px;height:120px';
+    d.innerHTML='<div class="lab">'+title+'</div><div class="val num">'+val+'</div><div class="cr"><span class="n">'+cr[0]+'</span><span class="d '+cr[1]+' num">'+cr[2]+'</span></div>'+(sub?'<div class="sub">'+sub+'</div>':'');
+    view.appendChild(d);
+  }
+  function wfTable(view,title,cols,rows){
+    var d=document.createElement('div');d.className='card';d.style.cssText='left:32px;top:492px;width:1376px;height:186px';
+    var h='<div class="ct"><span>'+title+'</span><span class="acts"><span>Show rows &#8599;</span></span></div><table class="wf"><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
+    for(var i=0;i<rows;i++)h+='<tr>'+cols.map(function(){return '<td>—</td>';}).join('')+'</tr>';
+    d.innerHTML=h+'</tbody></table>';view.appendChild(d);
+  }
+  var X6=[32,264,496,728,960,1192],X3=[32,496,960],X2=[32,728];
+
+  /* ===== view 1 charts ===== */
+  lineChart(document.getElementById('c-o5'),{series:[
+    {v:[22,21.4,24.6,26.9,20.8,19.6,22.1,22.9,23.3,23.6,23,24.4,25.6],color:C.ink,dots:true},
+    {v:[21.5,21.8,24,26.2,21,20.4,22.6,23.4,23.9,24.1,23.8,25.1,26.2],color:C.teal,dots:true},
+    {v:[18.9,18.4,21.1,23.1,17.9,16.8,19,19.7,20,20.3,19.8,21,22],color:C.g400,w:1.5,dash:true}],
+    xl:MONTHS,min:15,max:28,ticks:[15,20,25],fmt:function(t){return t+'k';},sel:12});
+  barsH(document.getElementById('c-o6'),{rows:[
+    {l:'App',v:4.4,py:3.6,t:'4.4k - 41 %'},{l:'Partner',v:2.4,py:1.5,t:'2.4k - 22 %'},{l:'Web',v:1.9,py:1.8,t:'1.9k - 18 %'},{l:'Agents',v:1.1,py:1.0,t:'1.1k - 10 %'},{l:'Marketplace',v:1.0,py:1.5,t:'1.0k - 9 %'}],max:4.8});
+  lineChart(document.getElementById('c-o7'),{series:[
+    {v:[0,8,19,28,34,null,null,null,null],color:C.ink,dots:true},
+    {v:[0,7,18,27,33,38,42,46,48],color:C.teal,dots:true},
+    {v:[0,6,15,23,29,34,38,41,43],color:C.g400,w:1.5,dash:true}],
+    n:9,xl:['0 d','','60 d','90 d','','','180 d','',''],min:0,max:50,ticks:[0,25,50],fmt:function(t){return t+'%';}});
+  lineChart(document.getElementById('c-o8'),{series:[
+    {v:[4,4,4.1,4.2,4.3,4.4,4.5,4.5,4.6,4.6,4.6,4.6,4.6],color:C.ink,dots:true},
+    {v:[5.8,5.9,6,6.1,6.1,6,5.8,5.6,5.4,5.3,5.1,5,4.9],color:C.teal,dots:true},
+    {v:[3.6,3.6,3.7,3.8,3.9,3.9,4,4,4.1,4.1,4.2,4.2,4.2],color:C.g400,w:1.5,dash:true}],
+    xl:MONTHS,min:3,max:6.5,ticks:[3,4.5,6],fmt:function(t){return t.toFixed(1)+'%';},marker:6});
+  document.querySelectorAll('svg.spark').forEach(spark);
+
+  /* ===== view 2 - Loans issued ===== */
+  var v2=document.getElementById('v2');
+  kpi(v2,X6[0],'Loans','25.6k',['vs Budget','watch','&#9660; &minus;2.4%'],'PY 22.0k');
+  kpi(v2,X6[1],'Principal','&euro;10.2m',['vs Budget','watch','&#9660; &minus;3.1%'],'coverage 1.3&times; of remaining target');
+  kpi(v2,X6[2],'Avg ticket','&euro;398',['vs Budget','neu','&#9650; +1.9%'],'Step 12 share 14 %');
+  kpi(v2,X6[3],'Approval rate','41.3%',['vs Budget','off','&#9660; &minus;2.7pp'],'new clients 31.0 %');
+  kpi(v2,X6[4],'Take-up rate','86.8%',['vs Prior year','watch','&#9660; &minus;0.4pp'],'disbursed &divide; approved');
+  kpi(v2,X6[5],'Time to cash','3.4 h',['vs Prior year','good','&#9660; &minus;1.7 h'],'median submitted &rarr; disbursed');
+  card(v2,X3[0],252,448,162,'Loans by month vs Budget','cols');
+  card(v2,X3[1],252,448,162,'Application funnel','barsH');
+  card(v2,X3[2],252,448,162,'Originations bridge Budget &rarr; Actual','bridge');
+  card(v2,X3[0],430,448,162,'Loans by product &times; market','stack');
+  card(v2,X3[1],430,448,162,'Attainment by channel','bullets');
+  card(v2,X3[2],430,448,162,'Stage cycle time vs SLA','bullets');
+  wfTable(v2,'Agent &amp; partner leaderboard - Sep 2026',['Name','Type','Market','Loans','Target','Attainment %','Principal &euro;','Approval %','Pace','Status'],6);
+
+  /* ===== view 3 - Clients ===== */
+  var v3=document.getElementById('v3');
+  kpi(v3,X6[0],'New clients','10.8k',['vs Budget','watch','&#9660; &minus;4.2%'],'first loan disbursed in window');
+  kpi(v3,X6[1],'Returning clients %','52.4%',['vs Prior year','good','&#9650; +2.9pp'],'of borrowers');
+  kpi(v3,X6[2],'Repeat share (loans)','57.8%',['vs Prior year','good','&#9650; +3.2pp'],'of loans');
+  kpi(v3,X6[3],'New-client approval rate','31.0%',['vs Prior year','watch','&#9660; &minus;1.1pp'],'first-time applicants');
+  kpi(v3,X6[4],'180-day repeat','46.0%',['vs prev. cohort','good','&#9650; +1.4pp'],'cohort Mar 2026');
+  kpi(v3,X6[5],'Days between loans','71 d',['vs Prior year','neu','&#9660; &minus;4 d'],'median gap');
+  card(v3,X2[0],252,680,162,'New clients by channel, 13 months','stack');
+  card(v3,X2[1],252,680,162,'New-client funnel','barsH');
+  card(v3,X2[0],430,680,162,'Cohort repeat curves (quarter cohorts)','curves');
+  card(v3,X2[1],430,680,162,'Returning % by market &times; segment - repeat share by product','heat');
+  wfTable(v3,'Clients - Sep 2026 cohort',['Client id','Market','Type','First loan','First product','Channel','Loans to date','Principal to date','Last loan','Days since','Status'],6);
+
+  /* ===== view 4 - Portfolio quality ===== */
+  var v4=document.getElementById('v4');
+  kpi(v4,X6[0],'30+ DPD %','4.6%',['vs Budget','off','&#9650; +0.6pp'],'by balance - Sep 2026');
+  kpi(v4,X6[1],'90+ DPD %','2.1%',['vs Prior year','watch','&#9650; +0.3pp'],'by balance');
+  kpi(v4,X6[2],'30+ by count','5.3%',['vs Prior year','watch','&#9650; +0.5pp'],'of active loans');
+  kpi(v4,X6[3],'Vintage 6m bad rate','3.4%',['vs PY vintage','watch','&#9650; +0.4pp'],'vintage Mar 2026');
+  kpi(v4,X6[4],'Roll rate 30&rarr;60','38.2%',['vs Prior year','off','&#9650; +2.0pp'],'balance rolling one bucket');
+  kpi(v4,X6[5],'Cost of risk','3.9%',['vs Budget','watch','&#9650; +0.3pp'],'annualised');
+  card(v4,X3[0],252,448,162,'DPD buckets, 13 months','stack');
+  card(v4,X3[1],252,448,162,'Vintage curves','curves');
+  card(v4,X3[2],252,448,162,'Bad rate by product &times; market','heat');
+  card(v4,X3[0],430,448,162,'30+ DPD by market','line');
+  card(v4,X3[1],430,448,162,'Roll rates by month','line');
+  card(v4,X3[2],430,448,162,'Segments: size &times; DPD','bubble');
+  wfTable(v4,'Overdue loans - Sep 2026',['Loan id','Client id','Market','Product','Channel','Disbursed','Principal','Outstanding','DPD','Bucket','Max DPD','Status'],6);
+
+  /* ===== view 5 - Revenue & targets ===== */
+  var v5=document.getElementById('v5');
+  kpi(v5,X6[0],'Revenue','&euro;2.98m',['vs Budget','watch','&#9660; &minus;1.8%'],'interest + fees + interchange + subs');
+  kpi(v5,X6[1],'Attainment','98.2%',['vs 100 %','watch','&#9660; &minus;1.8pp'],'pace 101 % - LE FY 98.1 %');
+  kpi(v5,X6[2],'Interest income','&euro;1.79m',['vs Budget','watch','&#9660; &minus;2.4%'],'60 % of revenue');
+  kpi(v5,X6[3],'Fees','&euro;0.63m',['vs Budget','good','&#9650; +0.8%'],'origination + late fees');
+  kpi(v5,X6[4],'MRR','&euro;348k',['vs Budget','good','&#9650; +1.2%'],'+14.0 % YoY');
+  kpi(v5,X6[5],'Paying subscribers','58.6k',['vs Prior year','good','&#9650; +9.8%'],'Plus 44.1k - Pro 14.5k');
+  card(v5,X3[0],252,448,162,'Revenue by month vs Budget vs PY','line');
+  card(v5,X3[1],252,448,162,'Revenue by stream, 13 months','stack');
+  card(v5,X3[2],252,448,162,'Attainment by market','bullets');
+  card(v5,X3[0],430,448,162,'MRR and subscribers by tier','stack');
+  card(v5,X3[1],430,448,162,'Subscriber churn %','line');
+  card(v5,X3[2],430,448,162,'Channel mix, share of loans','stack');
+  wfTable(v5,'Stream &times; market - Sep 2026',['Stream','Market','Actual &euro;','Budget &euro;','&Delta; &euro;','&Delta; %','PY &euro;','&Delta; vs PY %','Status'],6);
+
+  /* ===== tabs ===== */
+  var tabs=document.querySelectorAll('#tabs [role=tab]');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(o){o.setAttribute('aria-selected',o===t?'true':'false');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.id===t.dataset.view);});
+    closeSo();
+  });});
+  var h=location.hash.replace('#','');if(/^v[1-5]$/.test(h))document.querySelector('#tabs [data-view='+h+']').click();
+  /* ===== segmented controls (visual only) ===== */
+  document.querySelectorAll('.seg[role=radiogroup]').forEach(function(g){g.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){g.querySelectorAll('button').forEach(function(o){o.setAttribute('aria-pressed',o===b?'true':'false');});});});});
+  /* ===== slide-over ===== */
+  var so=document.getElementById('so'),scrim=document.getElementById('scrim');
+  function closeSo(){so.classList.remove('on');scrim.classList.remove('on');document.querySelectorAll('#mkt tr.sel').forEach(function(r){r.classList.remove('sel');});}
+  document.querySelectorAll('#mkt tbody tr').forEach(function(r){r.addEventListener('click',function(){
+    document.querySelectorAll('#mkt tr.sel').forEach(function(x){x.classList.remove('sel');});r.classList.add('sel');
+    var m=r.dataset.m,loans=r.children[1].textContent;
+    document.getElementById('so-title').textContent=loans+' loans - '+m+' - Sep 2026';document.getElementById('so-chip').textContent=m;
+    so.classList.add('on');scrim.classList.add('on');
+  });});
+  document.getElementById('so-x').addEventListener('click',closeSo);scrim.addEventListener('click',closeSo);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSo();});
+})();
+</script>
+</body>
+</html>

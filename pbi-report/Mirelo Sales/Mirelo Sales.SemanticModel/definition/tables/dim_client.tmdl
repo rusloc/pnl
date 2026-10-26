@@ -1,0 +1,189 @@
+/// Client with at least one loan disbursed 2024-01-01 to 2026-10-25. Derived on load: cohort indexes and the date of the first repeat loan (cohort repeat curves, 180-day repeat).
+table dim_client
+	lineageTag: 51f8b038-6e05-5f4f-9749-e1b266eb5197
+
+	column client_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 47f70a2b-96b9-5662-99b2-4ed56be0ab35
+		summarizeBy: none
+		sourceColumn: client_id
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		lineageTag: 5840c98f-f44d-5787-8fa2-415e922896d8
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		lineageTag: b6d80ffe-4d3f-5e9a-b647-8e421d41569b
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column acquisition_channel_code
+		dataType: string
+		lineageTag: 411ba61a-47b8-5dfe-b857-d3bfd5cacbab
+		summarizeBy: none
+		sourceColumn: acquisition_channel_code
+
+		annotation SummarizationSetBy = User
+
+	column acquisition_agent_code
+		dataType: string
+		isHidden
+		lineageTag: 4cb7559d-7413-59a0-9575-2b40a28beb62
+		summarizeBy: none
+		sourceColumn: acquisition_agent_code
+
+		annotation SummarizationSetBy = User
+
+	column first_loan_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 1255892b-e72e-54f8-acab-04be453211ba
+		summarizeBy: none
+		sourceColumn: first_loan_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column first_product_code
+		dataType: string
+		lineageTag: 2257c5b0-52a5-5cb0-a47a-50cc98d5b0cd
+		summarizeBy: none
+		sourceColumn: first_product_code
+
+		annotation SummarizationSetBy = User
+
+	column cohort_month
+		dataType: string
+		lineageTag: 7505bd43-ad02-55c5-841e-002046bfe025
+		summarizeBy: none
+		sourceColumn: cohort_month
+
+		annotation SummarizationSetBy = User
+
+	column birth_year_band
+		dataType: string
+		lineageTag: 21f02f11-609a-506b-8084-38dfe946deb3
+		summarizeBy: none
+		sourceColumn: birth_year_band
+
+		annotation SummarizationSetBy = User
+
+	column city_tier
+		dataType: int64
+		formatString: 0
+		lineageTag: 81dc316b-128f-5c85-a91b-ca13a4c2f5a3
+		summarizeBy: none
+		sourceColumn: city_tier
+
+		annotation SummarizationSetBy = User
+
+	column loans_before_2024
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dece724c-b4e7-5870-829d-c4994604c73d
+		summarizeBy: none
+		sourceColumn: loans_before_2024
+
+		annotation SummarizationSetBy = User
+
+	/// Disbursement date of the client's first repeat loan in fact_loan (null = none yet).
+	column second_loan_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 34ec721b-42ab-549d-92f9-2ac121646587
+		summarizeBy: none
+		sourceColumn: second_loan_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	/// Days from first_loan_date to second_loan_date (null = no repeat loan yet).
+	column days_to_second_loan
+		dataType: int64
+		formatString: 0
+		lineageTag: 598bdf50-1e64-54e8-8f5a-619210dd97da
+		summarizeBy: none
+		sourceColumn: days_to_second_loan
+
+		annotation SummarizationSetBy = User
+
+	/// cohort_month on the dim_month index scale (2024-01 = 1; the opening base is 0 or below).
+	column cohort_month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b6acb07c-b4da-5f7a-b97f-9c3dd823324b
+		summarizeBy: none
+		sourceColumn: cohort_month_index
+
+		annotation SummarizationSetBy = User
+
+	/// Cohort quarter on a quarter scale (2024-Q1 = 0).
+	column cohort_quarter_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 09c48790-4e98-54ab-87de-5fa13480bdea
+		summarizeBy: none
+		sourceColumn: cohort_quarter_index
+
+		annotation SummarizationSetBy = User
+
+	/// Cohort quarter label, e.g. 2026-Q3.
+	column cohort_quarter
+		dataType: string
+		lineageTag: d7b5b02f-f690-5fa8-a465-f295210068d7
+		summarizeBy: none
+		sourceColumn: cohort_quarter
+
+		annotation SummarizationSetBy = User
+
+	partition dim_client = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_client.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"client_id", Int64.Type},
+				            {"market_code", type text},
+				            {"segment_code", type text},
+				            {"acquisition_channel_code", type text},
+				            {"acquisition_agent_code", type text},
+				            {"first_loan_date", type date},
+				            {"first_product_code", type text},
+				            {"cohort_month", type text},
+				            {"birth_year_band", type text},
+				            {"city_tier", Int64.Type},
+				            {"loans_before_2024", Int64.Type}
+				        }
+				    ),
+				    loans = Parquet.Document(File.Contents(DataFolder & "\fact_loan.parquet")),
+				    repeat_loans = Table.SelectRows(Table.SelectColumns(loans, {"client_id", "disbursed_date", "is_repeat"}), each [is_repeat] = true),
+				    second = Table.Group(repeat_loans, {"client_id"}, {{"second_loan_date", each List.Min([disbursed_date]), type date}}),
+				    joined = Table.NestedJoin(typed, {"client_id"}, second, {"client_id"}, "r", JoinKind.LeftOuter),
+				    expanded = Table.ExpandTableColumn(joined, "r", {"second_loan_date"}),
+				    days = Table.AddColumn(expanded, "days_to_second_loan", each if [second_loan_date] = null then null else Duration.Days([second_loan_date] - [first_loan_date]), Int64.Type),
+				    cm_index = Table.AddColumn(days, "cohort_month_index", each (Number.FromText(Text.Start([cohort_month], 4)) - 2024) * 12 + Number.FromText(Text.End([cohort_month], 2)), Int64.Type),
+				    cq_index = Table.AddColumn(cm_index, "cohort_quarter_index", each (Number.FromText(Text.Start([cohort_month], 4)) - 2024) * 4 + Number.RoundUp(Number.FromText(Text.End([cohort_month], 2)) / 3) - 1, Int64.Type),
+				    cq_label = Table.AddColumn(cq_index, "cohort_quarter", each Text.Start([cohort_month], 4) & "-Q" & Text.From(Number.RoundUp(Number.FromText(Text.End([cohort_month], 2)) / 3)), type text)
+				in
+				    cq_label
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,50 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup Helpers
+
+	annotation PBI_QueryGroupOrder = 1
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder", "fx_actual", "fx_budget", "dim_date", "dim_month", "dim_market", "dim_product", "dim_channel", "dim_agent", "dim_client", "dim_loan_status", "dim_funnel_stage", "dim_revenue_type", "fact_loan", "fact_application", "fact_loan_month", "fact_subscription_month", "fact_revenue_month", "fact_target", "param_fx", "param_thresholds"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_date
+ref table dim_month
+ref table dim_market
+ref table dim_product
+ref table dim_channel
+ref table dim_agent
+ref table dim_client
+ref table dim_loan_status
+ref table dim_funnel_stage
+ref table dim_revenue_type
+ref table fact_loan
+ref table fact_application
+ref table fact_loan_month
+ref table fact_subscription_month
+ref table fact_revenue_month
+ref table fact_target
+ref table param_fx
+ref table param_thresholds
+ref table param_anchor_month
+ref table param_period
+ref table param_comparator
+ref table param_market
+ref table param_days
+ref table param_mob
+ref table param_cohort_slot
+ref table dim_bridge_step
+ref table _measures

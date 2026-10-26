@@ -28,8 +28,16 @@
 - [2026-10-22] getDefinition re-serialises TMDL (measure order, quoting like _Acc vs '_Acc'): compare measure by measure, not with diff (source: observed)
 - [2026-10-22] az and fab both signed in as the RAW Admin identity in the work tenant (bip's "az = other account" did not hold today) (source: observed)
 
+- [2026-10-23] lh_raw SQL endpoint after an overwrite with schema change (new columns + new table): sync took ~24 min; until then a batch referencing new columns fails to compile (Msg 207). Poll INFORMATION_SCHEMA.COLUMNS; the refreshMetadata API is a write, don't use it unasked. Delta log read via deltalake (venv) shows the truth meanwhile (source: observed)
+- [2026-10-23] fabric-data/perf/: run-queries.py (executeQueries timer, ids via --workspace/--dataset or FABRIC_WORKSPACE/PBI_DATASET) + gen-queries.ts (run with fabric-app/node_modules/.bin/tsx) + frozen queries-2026-10-23/ + baseline-2026-10-23.txt (source: observed)
+- [2026-10-23] Application Control (Smart App Control) blocks freshly built unsigned .NET dlls in the scratchpad; an older tmdlcheck build still runs. Workaround: PowerShell 7 + Add-Type of the Microsoft-signed AS dlls (Tabular, Core, AdomdClient from a NuGet build output) (source: observed)
+- [2026-10-23] Local refresh without clicking: open a STAGED PBIP copy (no cache.abf) with PBIDesktop.exe, find msmdsrv by ParentProcessId = my PBIDesktop pid, port from <workspace>\Data\msmdsrv.port.txt, TOM RequestRefresh(Full)+SaveChanges: works with Desktop's cached credentials. Desktop engine is diskless (no Backup); kill my pid + its msmdsrv afterwards (source: observed)
+
 ## Decisions
 - [2026-10-21] No Spark for the data layer (cost) (source: user)
 
 ## Pending
 - Confirm Direct Lake decimal mapping on MS Learn
+- [2026-10-26] Windows Application Control (Smart App Control) blocks pandas 3.1.0 native DLLs on this machine (ImportError "An Application Control policy has blocked this file"); pandas 2.3.3 + numpy 2.5.4 + pyarrow 26.0.0 load fine. Mirelo venv: data/mirelo_sales_dummy_data/generator/.venv (source: observed)
+- [2026-10-26] fabric-data/.venv has pyarrow but no numpy/pandas (source: observed)
+- [2026-10-26] Bash tool truncates very long heredoc commands silently: write long scripts with Write, then run them (source: observed)

@@ -1,4 +1,4 @@
-<!-- next-id: PG-003 -->
+<!-- next-id: PG-005 -->
 
 # Platform gotchas
 
@@ -20,4 +20,24 @@
 **Confidence:** high — reproduced
 **Last-verified:** 2026-10-22
 **Related:** —
+**Status:** active
+
+### PG-003 · CSS-module lookups are `string | undefined` under noUncheckedIndexedAccess · 2026-10-23
+**Symptom:** `tsc` fails "Type 'string | undefined' is not assignable to type 'string'" when `styles.foo` is passed to a prop typed `className: string`.
+**Cause:** Next's `*.module.css` typing is an index signature; with `noUncheckedIndexedAccess` every lookup may be undefined.
+**Fix:** type component `className` props as optional (`className?: string`), never `!` / `as string` on the lookup.
+**Seen:** js-report/components/primitives.tsx ChoiceGroup (2026-10-23, uncommitted)
+**Confidence:** high — reproduced
+**Last-verified:** 2026-10-23
+**Related:** —
+**Status:** active
+
+### PG-004 · Stopped background `next start` keeps the port on Windows · 2026-10-27
+**Symptom:** after TaskStop of a backgrounded `npx next start -p N` and a rebuild, a new `next start` dies with EADDRINUSE; the orphaned server keeps serving a mix of old and new `.next` output, so a headless check fails with a timeout that looks like a code bug.
+**Cause:** stopping the npx shell does not kill the node child on Windows.
+**Fix:** before restarting, free the port (PowerShell, only for your own server): `Get-NetTCPConnection -LocalPort N -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`. Also: never put backticks inside a double-quoted bash `node -e` string, because bash runs them as commands.
+**Seen:** js-report /sales headless checks, 2026-10-27 (twice in one session)
+**Confidence:** high — reproduced
+**Last-verified:** 2026-10-27
+**Related:** PG-001
 **Status:** active

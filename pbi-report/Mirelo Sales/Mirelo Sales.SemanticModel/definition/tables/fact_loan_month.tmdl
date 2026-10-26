@@ -1,0 +1,448 @@
+/// Monthly portfolio snapshot per month-end x vintage x market x product x channel x new / repeat (cell grain, not per loan). Derived on load (ADR-0008 analogue): every balance and flow translated at the ACTUAL_AVG rate of its month x currency (*_eur), plus vintage_index, months_on_book and vintage_quarter_index.
+table fact_loan_month
+	lineageTag: 7a19e82c-a6a2-56f6-9c0e-c640150e2f58
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: d47be9aa-7e23-57f2-a41e-2043f3b95d47
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column vintage_month
+		dataType: string
+		isHidden
+		lineageTag: 9d251662-0099-5f8f-b97c-b455b2483dc2
+		summarizeBy: none
+		sourceColumn: vintage_month
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: cca39279-da25-5cef-bf30-c8464be0766e
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: 95bb9d51-df3c-5b67-9ff0-e9d7507e700a
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 3bab4020-6c72-5d91-a0f7-8451da88a0e0
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column is_repeat
+		dataType: boolean
+		isHidden
+		lineageTag: 9cc73429-5faa-5023-ad9d-078538528832
+		summarizeBy: none
+		sourceColumn: is_repeat
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 4b989143-ea45-5d9c-8233-ef05227f27fe
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column loans_disbursed
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 063e82d8-7700-5927-8236-0f04daef0987
+		summarizeBy: none
+		sourceColumn: loans_disbursed
+
+		annotation SummarizationSetBy = User
+
+	column loans_active
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dda54335-ad78-5658-88c5-a33967ee3108
+		summarizeBy: none
+		sourceColumn: loans_active
+
+		annotation SummarizationSetBy = User
+
+	column loans_dpd_30p
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 650fce89-3c4b-599d-94fb-a39d0bb94e08
+		summarizeBy: none
+		sourceColumn: loans_dpd_30p
+
+		annotation SummarizationSetBy = User
+
+	column loans_first_30p
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 96bd8fb5-1a11-5206-afbb-d073330012f6
+		summarizeBy: none
+		sourceColumn: loans_first_30p
+
+		annotation SummarizationSetBy = User
+
+	column loans_first_90p
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f93f4a7d-7baf-5ffa-9b47-03c3a5404b71
+		summarizeBy: none
+		sourceColumn: loans_first_90p
+
+		annotation SummarizationSetBy = User
+
+	column principal_disbursed_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a99c8352-5e60-5d13-bc96-ff592b766e6c
+		summarizeBy: none
+		sourceColumn: principal_disbursed_local
+
+		annotation SummarizationSetBy = User
+
+	column outstanding_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 4ce10b63-3f30-594a-9fd1-3fbd230850a2
+		summarizeBy: none
+		sourceColumn: outstanding_local
+
+		annotation SummarizationSetBy = User
+
+	column bal_current_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 89b19a25-0653-57d5-9869-f6a3c8dcddd2
+		summarizeBy: none
+		sourceColumn: bal_current_local
+
+		annotation SummarizationSetBy = User
+
+	column bal_dpd_1_29_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 23428dae-bd8a-5cf5-bcdb-9b69f18d596a
+		summarizeBy: none
+		sourceColumn: bal_dpd_1_29_local
+
+		annotation SummarizationSetBy = User
+
+	column bal_dpd_30_59_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 405d5792-d5d9-5e5d-961d-2f1d0d4ff285
+		summarizeBy: none
+		sourceColumn: bal_dpd_30_59_local
+
+		annotation SummarizationSetBy = User
+
+	column bal_dpd_60_89_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: d30cc230-76fe-5e1e-80bd-935ef6c308a1
+		summarizeBy: none
+		sourceColumn: bal_dpd_60_89_local
+
+		annotation SummarizationSetBy = User
+
+	column bal_dpd_90p_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c110fb80-3c79-59b2-ae85-fc7fa43ac796
+		summarizeBy: none
+		sourceColumn: bal_dpd_90p_local
+
+		annotation SummarizationSetBy = User
+
+	column principal_repaid_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 40921f52-50b4-54ed-a04f-0e9f8e1da3bc
+		summarizeBy: none
+		sourceColumn: principal_repaid_local
+
+		annotation SummarizationSetBy = User
+
+	column written_off_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ed375813-5d1e-5370-b62e-b58fcfcc547a
+		summarizeBy: none
+		sourceColumn: written_off_local
+
+		annotation SummarizationSetBy = User
+
+	column provision_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 1a3afe85-65e3-56ac-a634-be67f88993b1
+		summarizeBy: none
+		sourceColumn: provision_local
+
+		annotation SummarizationSetBy = User
+
+	column interest_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 7d577634-e6c1-51b7-a085-2b4fd0120839
+		summarizeBy: none
+		sourceColumn: interest_local
+
+		annotation SummarizationSetBy = User
+
+	column fee_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 501c7618-cf65-5871-8daa-83a553c71e3f
+		summarizeBy: none
+		sourceColumn: fee_local
+
+		annotation SummarizationSetBy = User
+
+	/// outstanding_local / ACTUAL_AVG rate of month x currency.
+	column outstanding_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 928569d0-1df6-53b8-af28-b499b46e4a21
+		summarizeBy: none
+		sourceColumn: outstanding_eur
+
+		annotation SummarizationSetBy = User
+
+	/// bal_current_local / ACTUAL_AVG rate of month x currency.
+	column bal_current_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 6d59d930-82c0-55c8-9501-9cf3662016ae
+		summarizeBy: none
+		sourceColumn: bal_current_eur
+
+		annotation SummarizationSetBy = User
+
+	/// bal_dpd_1_29_local / ACTUAL_AVG rate of month x currency.
+	column bal_dpd_1_29_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 3ac40a31-bf8a-5855-95f9-7c2d0a308ad8
+		summarizeBy: none
+		sourceColumn: bal_dpd_1_29_eur
+
+		annotation SummarizationSetBy = User
+
+	/// bal_dpd_30_59_local / ACTUAL_AVG rate of month x currency.
+	column bal_dpd_30_59_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c7f225a2-b374-533f-ac3c-bd3019f4a15d
+		summarizeBy: none
+		sourceColumn: bal_dpd_30_59_eur
+
+		annotation SummarizationSetBy = User
+
+	/// bal_dpd_60_89_local / ACTUAL_AVG rate of month x currency.
+	column bal_dpd_60_89_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 2f860dee-70f0-5e49-96a1-c4fefb9326f3
+		summarizeBy: none
+		sourceColumn: bal_dpd_60_89_eur
+
+		annotation SummarizationSetBy = User
+
+	/// bal_dpd_90p_local / ACTUAL_AVG rate of month x currency.
+	column bal_dpd_90p_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c67c38f9-98d2-56ba-a01f-15927e1a493b
+		summarizeBy: none
+		sourceColumn: bal_dpd_90p_eur
+
+		annotation SummarizationSetBy = User
+
+	/// principal_repaid_local / ACTUAL_AVG rate of month x currency.
+	column principal_repaid_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 4da089bb-3ee6-5781-97cb-0fe302643321
+		summarizeBy: none
+		sourceColumn: principal_repaid_eur
+
+		annotation SummarizationSetBy = User
+
+	/// written_off_local / ACTUAL_AVG rate of month x currency.
+	column written_off_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: b28e12c7-1a6b-5765-8d41-bbcee0a20b2a
+		summarizeBy: none
+		sourceColumn: written_off_eur
+
+		annotation SummarizationSetBy = User
+
+	/// provision_local / ACTUAL_AVG rate of month x currency.
+	column provision_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 592c9b51-7c75-592b-bbd2-56e1efc8cbfe
+		summarizeBy: none
+		sourceColumn: provision_eur
+
+		annotation SummarizationSetBy = User
+
+	/// interest_local / ACTUAL_AVG rate of month x currency.
+	column interest_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: f92e4776-e078-5c3f-a381-36a185d285d5
+		summarizeBy: none
+		sourceColumn: interest_eur
+
+		annotation SummarizationSetBy = User
+
+	/// fee_local / ACTUAL_AVG rate of month x currency.
+	column fee_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a3455359-9b58-5f84-a301-b85593a7cd76
+		summarizeBy: none
+		sourceColumn: fee_eur
+
+		annotation SummarizationSetBy = User
+
+	/// Vintage month on the dim_month index scale (2024-01 = 1; 2023 vintages are 0 or below).
+	column vintage_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2387d1b6-1399-5e24-9426-3575c657010c
+		summarizeBy: none
+		sourceColumn: vintage_index
+
+		annotation SummarizationSetBy = User
+
+	/// Snapshot month minus vintage month, in months.
+	column months_on_book
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fb66091c-3122-528b-a982-3eba77502a43
+		summarizeBy: none
+		sourceColumn: months_on_book
+
+		annotation SummarizationSetBy = User
+
+	/// Vintage quarter on the quarter scale (2024-Q1 = 0).
+	column vintage_quarter_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 582f6d4a-2a5e-56a4-9b17-0f7b6d52a72f
+		summarizeBy: none
+		sourceColumn: vintage_quarter_index
+
+		annotation SummarizationSetBy = User
+
+	partition fact_loan_month = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_loan_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"vintage_month", type text},
+				            {"market_code", type text},
+				            {"product_code", type text},
+				            {"channel_code", type text},
+				            {"is_repeat", type logical},
+				            {"currency_code", type text},
+				            {"loans_disbursed", Int64.Type},
+				            {"loans_active", Int64.Type},
+				            {"loans_dpd_30p", Int64.Type},
+				            {"loans_first_30p", Int64.Type},
+				            {"loans_first_90p", Int64.Type},
+				            {"principal_disbursed_local", type number},
+				            {"outstanding_local", type number},
+				            {"bal_current_local", type number},
+				            {"bal_dpd_1_29_local", type number},
+				            {"bal_dpd_30_59_local", type number},
+				            {"bal_dpd_60_89_local", type number},
+				            {"bal_dpd_90p_local", type number},
+				            {"principal_repaid_local", type number},
+				            {"written_off_local", type number},
+				            {"provision_local", type number},
+				            {"interest_local", type number},
+				            {"fee_local", type number}
+				        }
+				    ),
+				    fx = Table.NestedJoin(typed, {"currency_code", "month_key"}, fx_actual, {"currency_code", "month_key"}, "fx", JoinKind.LeftOuter),
+				    rate = Table.ExpandTableColumn(fx, "fx", {"local_per_eur"}, {"_rate"}),
+				    outstanding_eur = Table.AddColumn(rate, "outstanding_eur", each [outstanding_local] / [_rate], type number),
+				    bal_current_eur = Table.AddColumn(outstanding_eur, "bal_current_eur", each [bal_current_local] / [_rate], type number),
+				    bal_dpd_1_29_eur = Table.AddColumn(bal_current_eur, "bal_dpd_1_29_eur", each [bal_dpd_1_29_local] / [_rate], type number),
+				    bal_dpd_30_59_eur = Table.AddColumn(bal_dpd_1_29_eur, "bal_dpd_30_59_eur", each [bal_dpd_30_59_local] / [_rate], type number),
+				    bal_dpd_60_89_eur = Table.AddColumn(bal_dpd_30_59_eur, "bal_dpd_60_89_eur", each [bal_dpd_60_89_local] / [_rate], type number),
+				    bal_dpd_90p_eur = Table.AddColumn(bal_dpd_60_89_eur, "bal_dpd_90p_eur", each [bal_dpd_90p_local] / [_rate], type number),
+				    principal_repaid_eur = Table.AddColumn(bal_dpd_90p_eur, "principal_repaid_eur", each [principal_repaid_local] / [_rate], type number),
+				    written_off_eur = Table.AddColumn(principal_repaid_eur, "written_off_eur", each [written_off_local] / [_rate], type number),
+				    provision_eur = Table.AddColumn(written_off_eur, "provision_eur", each [provision_local] / [_rate], type number),
+				    interest_eur = Table.AddColumn(provision_eur, "interest_eur", each [interest_local] / [_rate], type number),
+				    fee_eur = Table.AddColumn(interest_eur, "fee_eur", each [fee_local] / [_rate], type number),
+				    no_rate = Table.RemoveColumns(fee_eur, {"_rate"}),
+				    v_index = Table.AddColumn(no_rate, "vintage_index", each (Number.FromText(Text.Start([vintage_month], 4)) - 2024) * 12 + Number.FromText(Text.End([vintage_month], 2)), Int64.Type),
+				    mob = Table.AddColumn(v_index, "months_on_book", each (Number.FromText(Text.Start([month_key], 4)) - 2024) * 12 + Number.FromText(Text.End([month_key], 2)) - [vintage_index], Int64.Type),
+				    vq_index = Table.AddColumn(mob, "vintage_quarter_index", each (Number.FromText(Text.Start([vintage_month], 4)) - 2024) * 4 + Number.RoundUp(Number.FromText(Text.End([vintage_month], 2)) / 3) - 1, Int64.Type)
+				in
+				    vq_index
+
+	annotation PBI_ResultType = Table

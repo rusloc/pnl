@@ -1,0 +1,286 @@
+/// One row per disbursed loan (634 k). Loan-level state (*_close, status_code) is as of the last closed month (2026-09-30). Derived on load: month_key and principal at the BUDGET rate (constant currency, bridge FX step). application_id and submitted_ts are not loaded (not used; saves memory).
+table fact_loan
+	lineageTag: 41a70cd2-393c-5b85-bb90-8b2e44b3945c
+
+	column loan_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f87fe8d-e6e7-5e3e-8fdf-380523862638
+		summarizeBy: none
+		sourceColumn: loan_id
+
+		annotation SummarizationSetBy = User
+
+	column client_id
+		dataType: int64
+		formatString: 0
+		lineageTag: db9d6c36-9d83-50ae-a35d-41da7fe55716
+		summarizeBy: none
+		sourceColumn: client_id
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 80337751-deec-572a-9127-d8ba38bd287e
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column product_code
+		dataType: string
+		isHidden
+		lineageTag: d1788144-b5ad-5cae-a3a4-18da8cd6d7ca
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: e6dad467-a6e8-5071-9eac-43447d28f7cb
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column agent_code
+		dataType: string
+		isHidden
+		lineageTag: efbd6826-8e00-5208-9686-110b40ed7025
+		summarizeBy: none
+		sourceColumn: agent_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: f7328562-6cd6-5ae3-ab4e-c59a9b0285c2
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column hours_to_approve
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 7c21e73d-d808-57d2-a86a-3e791ab99699
+		summarizeBy: none
+		sourceColumn: hours_to_approve
+
+		annotation SummarizationSetBy = User
+
+	column hours_to_cash
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 879a5e16-b026-55e4-9bdb-616ee0240b60
+		summarizeBy: none
+		sourceColumn: hours_to_cash
+
+		annotation SummarizationSetBy = User
+
+	column disbursed_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: e9e63664-58d9-534d-aee3-4ef8924a535d
+		summarizeBy: none
+		sourceColumn: disbursed_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column principal_local
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 5c6371d1-336f-529e-887d-b536e1f82427
+		summarizeBy: none
+		sourceColumn: principal_local
+
+		annotation SummarizationSetBy = User
+
+	column principal_eur
+		dataType: double
+		formatString: #,0.00
+		lineageTag: d9ff0dd9-4c22-5c29-89ec-76a6ba26d6b2
+		summarizeBy: none
+		sourceColumn: principal_eur
+
+		annotation SummarizationSetBy = User
+
+	column term_months
+		dataType: int64
+		formatString: 0
+		lineageTag: f170fb86-a697-5c87-802b-5368bc21331a
+		summarizeBy: none
+		sourceColumn: term_months
+
+		annotation SummarizationSetBy = User
+
+	column apr
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 8f9df8a6-7867-5ecc-80c9-2ca80c3c9217
+		summarizeBy: none
+		sourceColumn: apr
+
+		annotation SummarizationSetBy = User
+
+	column origination_fee_local
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 220bdc7a-085b-5375-8792-2b2d3de91922
+		summarizeBy: none
+		sourceColumn: origination_fee_local
+
+		annotation SummarizationSetBy = User
+
+	column is_first_loan
+		dataType: boolean
+		isHidden
+		lineageTag: 92269aff-acb3-5667-bddb-4cedf9a3fe35
+		summarizeBy: none
+		sourceColumn: is_first_loan
+
+		annotation SummarizationSetBy = User
+
+	column is_repeat
+		dataType: boolean
+		isHidden
+		lineageTag: d8204baf-fbd2-5014-b887-8dbc800b8a73
+		summarizeBy: none
+		sourceColumn: is_repeat
+
+		annotation SummarizationSetBy = User
+
+	column prior_loans
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 53cc67c6-25a4-5269-945c-3e778acf225a
+		summarizeBy: none
+		sourceColumn: prior_loans
+
+		annotation SummarizationSetBy = User
+
+	column status_code
+		dataType: string
+		isHidden
+		lineageTag: e20c7b60-98f7-5801-9538-601f592771a0
+		summarizeBy: none
+		sourceColumn: status_code
+
+		annotation SummarizationSetBy = User
+
+	column dpd_days_close
+		dataType: int64
+		formatString: 0
+		lineageTag: 04a5dd01-1ab9-5662-9409-c66229f73684
+		summarizeBy: none
+		sourceColumn: dpd_days_close
+
+		annotation SummarizationSetBy = User
+
+	column outstanding_local_close
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ca1c93f0-4c41-5a8f-8814-dcbb0356cd6e
+		summarizeBy: none
+		sourceColumn: outstanding_local_close
+
+		annotation SummarizationSetBy = User
+
+	column max_dpd_close
+		dataType: int64
+		formatString: 0
+		lineageTag: bb84d0e8-6138-56b9-970b-b0809760b3dd
+		summarizeBy: none
+		sourceColumn: max_dpd_close
+
+		annotation SummarizationSetBy = User
+
+	column repaid_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 5aa7597d-8a6a-5ea8-bdb2-2fae82120c31
+		summarizeBy: none
+		sourceColumn: repaid_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	/// Disbursement month (joins dim_month).
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 2259554f-d2d4-520a-9395-42ca1ce51e97
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	/// principal_local / BUDGET rate of the disbursement month x currency (constant currency).
+	column principal_eur_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 33d1a1c3-230e-5c59-92fc-632b0d6363d5
+		summarizeBy: none
+		sourceColumn: principal_eur_bud
+
+		annotation SummarizationSetBy = User
+
+	partition fact_loan = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_loan.parquet")),
+				    kept = Table.RemoveColumns(src, {"application_id", "submitted_ts"}),
+				    typed = Table.TransformColumnTypes(
+				        kept,
+				        {
+				            {"loan_id", Int64.Type},
+				            {"client_id", Int64.Type},
+				            {"market_code", type text},
+				            {"product_code", type text},
+				            {"channel_code", type text},
+				            {"agent_code", type text},
+				            {"currency_code", type text},
+				            {"hours_to_approve", type number},
+				            {"hours_to_cash", type number},
+				            {"disbursed_date", type date},
+				            {"principal_local", type number},
+				            {"principal_eur", type number},
+				            {"term_months", Int64.Type},
+				            {"apr", type number},
+				            {"origination_fee_local", type number},
+				            {"is_first_loan", type logical},
+				            {"is_repeat", type logical},
+				            {"prior_loans", Int64.Type},
+				            {"status_code", type text},
+				            {"dpd_days_close", Int64.Type},
+				            {"outstanding_local_close", type number},
+				            {"max_dpd_close", Int64.Type},
+				            {"repaid_date", type date}
+				        }
+				    ),
+				    mk = Table.AddColumn(typed, "month_key", each Date.ToText([disbursed_date], [Format = "yyyy-MM", Culture = "en-US"]), type text),
+				    fx = Table.NestedJoin(mk, {"currency_code", "month_key"}, fx_budget, {"currency_code", "month_key"}, "fx", JoinKind.LeftOuter),
+				    rate = Table.ExpandTableColumn(fx, "fx", {"local_per_eur"}, {"_rate_bud"}),
+				    bud = Table.AddColumn(rate, "principal_eur_bud", each [principal_local] / [_rate_bud], type number),
+				    out = Table.RemoveColumns(bud, {"_rate_bud"})
+				in
+				    out
+
+	annotation PBI_ResultType = Table
