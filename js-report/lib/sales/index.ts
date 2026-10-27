@@ -1,5 +1,5 @@
 import { clientsView } from './clients.ts';
-import { TITLE, periodLine } from './copy.ts';
+import { TITLE, howToRead, periodLine } from './copy.ts';
 import { createCube } from './cube.ts';
 import { indexDetail, slideOver } from './detail.ts';
 import type { DetailIndex } from './detail.ts';
@@ -27,6 +27,7 @@ export function createSalesEngine(base: SalesBase) {
     header: (sel: SalesSelection): HeaderVM => ({
       title: TITLE,
       periodLine: periodLine(sel, cube.closed, cube.first),
+      howToRead: howToRead(sel, cube.closed, cube.first),
       months: months.map((i) => ({ value: monthKey(i), label: monthLabel(i) })),
     }),
     overview: (sel: SalesSelection): OverviewVM => overview(ctx, sel),

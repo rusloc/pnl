@@ -19,6 +19,11 @@ export const SAMPLE_INERT_REASON = 'Off while sample figures are shown: they are
 /** Display controls that the sample path only honours in the statement. */
 export const SAMPLE_STATEMENT_ONLY_NOTE = 'While sample figures are shown, units, costs shown and variance format apply to the P&L statement only.';
 
+/** Note on a redesigned zone the mockup has no figures for (LSN-002: nothing invented). */
+export function sampleEmptyText(what: string): string {
+  return `No sample figures for the ${what}: it reads the semantic model when deployed.`;
+}
+
 /** The window the sample figures are fixed at, for headings over sample numbers (LSN-002). */
 export const SAMPLE_WINDOW_LONG = 'YTD Jan–Sep 2026';
 

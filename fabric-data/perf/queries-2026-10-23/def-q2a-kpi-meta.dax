@@ -1,0 +1,3 @@
+EVALUATE
+FILTER ( dim_kpi, dim_kpi[entity_view_code] = "P" )
+ORDER BY dim_kpi[slot]

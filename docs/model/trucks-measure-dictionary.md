@@ -15,6 +15,10 @@ Notes
   `"Месяц"`, `"Линейно"`, `"Взвешенно"`, `"Проверка"`). These are data values and stay as they are (USER decision 1); the
   slicers show the English captions from the calculated columns `plan_type_name` / `calculation_name` / `category_name`.
 - Values in the live model were unchanged by the rename: `tests/baseline-live-en.dax` passes 536/536 on the renamed model.
+- 2026-10-23: the original page "Time util (original)" is back as a second page. It binds to 14 existing measures under their
+  new names (`_WF Plan/Fact Subtotal`, `_WF Plan/Fact Base`, `_WF Plan/Fact Loss`, `Time Share Plan/Fact %`, `Time Share Δ`,
+  `_Zero`, `Performance per Truck Plan/Fact`, `Rock Mass by Truck Plan/Fact`; the "Was" column gives the old name). No measure
+  was re-added, so there is no "Legacy page" folder. Test: `tests/time-util-original.dax`.
 
 ## 1 KPI
 

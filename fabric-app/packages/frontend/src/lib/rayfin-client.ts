@@ -9,6 +9,7 @@ import {
   ConnectorsRayfinClient,
   resolveRayfinConfig,
 } from '@microsoft/rayfin-client';
+import type { AppFunctionsSchema } from '@rayfin-app/functions/types';
 import type { UniversalAppSchema } from '@rayfin-app/shared';
 import {
   connectorConfigs,
@@ -16,9 +17,10 @@ import {
   type AppConnectorsSchema,
 } from './connectors';
 
+// Functions pack (ADR-0009): the generated `AppFunctionsSchema` types `client.functions.<name>.invoke`.
 export type AppClient = ConnectorsRayfinClient<
   UniversalAppSchema,
-  Record<string, never>,
+  AppFunctionsSchema,
   AppConnectorsSchema
 >;
 
@@ -31,7 +33,7 @@ export class MissingRayfinConfigError extends Error {
   }
 }
 
-/** Returns the app's typed data, auth, and connector client. */
+/** Returns the app's typed data, auth, functions, and connector client. */
 export async function getRayfinClient(): Promise<AppClient> {
   if (!_client) {
     _client = createClient().catch((error) => {
@@ -61,7 +63,7 @@ async function createClient(): Promise<AppClient> {
 
   return new ConnectorsRayfinClient<
     UniversalAppSchema,
-    Record<string, never>,
+    AppFunctionsSchema,
     AppConnectorsSchema
   >(
     {

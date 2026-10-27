@@ -1,8 +1,8 @@
 # Measure dictionary — ACME Unified P&L (Track B)
 
-> Generated from `pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22: T-05 fix, query-plan performance pass, ADR-0007 KPI trend contract K-24, Key figures trend overlay K-24/K-25, info pop-ups L-15; review batch: KPI card v2 tile body, header status and applied-filters list, notice strip removed, Profitability breakdown hint). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
+> Generated from `pbi-report/ACME Unified PnL/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl` (draft, updated 2026-10-22: T-05 fix, query-plan performance pass, ADR-0007 KPI trend contract K-24, Key figures trend overlay K-24/K-25, info pop-ups L-15; review batch: KPI card v2 tile body, header status and applied-filters list, notice strip removed, Profitability breakdown hint; 2026-10-23: KPI Trend / _KPI Trend Value dropped, Period flyout v2 measures, notice rows of the applied-filters pop-up; ADR-0008: _Amt Raw / _Rep Sum on pre-translated columns, _Elim Amount on fact_pl_elim; parity rules: Prof Subtitle, Filter Value slice order, expanded-rail period sentence); 2026-10-27: P&L redesign v4 — Vitals, Analysis and Profitability in two pages each, ADR-0012 ⓘ per card and panel: 65 measures added, 15 orphans removed, NR bridge steps gated on Bridge Step In View, mix heatmap per company; parity check B vs C, same day: Vitals status vs Budget only, Profitability at constant currency, heatmap colour = column GM %, Revenue mix card Sub % / Pay %, profit-bridge GM rate over the company's own lines, _Vitals Parts, Track C info copy, 12 measures added). Owner of every measure: **bip**. If you change a measure in Desktop, update this file in the same commit (CLAUDE.md › Track B: dictionary in lockstep with the model).
 
-186 measures in table `_measures`; folder `9 Engine` is hidden from report authors.
+253 measures in table `_measures`; folder `9 Engine` is hidden from report authors.
 
 | Folder | Measures | Purpose |
 |---|---:|---|
@@ -10,13 +10,16 @@
 | `1 Statement\Formatting` | 5 | Conditional-format colours for the matrix (L-12, L-13) |
 | `2 Versions` | 7 | Base, comparisons, prior year, full-year outlook (D-31), unscaled |
 | `2 Versions\Subtotals` | 10 | Spine subtotals of the base version (step 1-19), unscaled |
-| `3 KPIs` | 7 | KPI slot measures used by the tiles, and the monthly KPI trend (§5, K-24) |
-| `3 KPIs\Items` | 24 | One measure per KPI formula, unscaled |
-| `4 Analysis` | 11 | Net revenue bridge (C-40) and largest variances (C-45) |
-| `5 Profitability` | 5 | Profitability by slice (C-46) and slice-member filter |
+| `3 KPIs` | 6 | KPI slot measures used by the tiles (§5) |
+| `3 KPIs\Items` | 38 | One measure per KPI formula, unscaled; v4 adds Opex % NR, S&M / R&D / G&A % NR, subscription and payments shares, payments GM %, GMV per merchant, net new ARR, FY outlook vs budget; v4 adds Opex % NR, S&M / R&D / G&A % NR, subscription and payments shares, payments GM %, GMV per merchant, net new ARR, FY outlook vs budget; v4 adds Opex % NR, S&M / R&D / G&A % NR, subscription and payments shares, payments GM %, GMV per merchant, net new ARR, FY outlook vs budget; v4 adds Opex % NR, S&M / R&D / G&A % NR, subscription and payments shares, payments GM %, GMV per merchant, net new ARR, FY outlook vs budget |
+| `3 KPIs\Vitals` | 4 | Vitals card body (one SVG per card: value, Δ rows, status chip), status inputs and the ⓘ sub-line (redesign v4, ADR-0012) |
+| `4 Analysis` | 15 | Net revenue bridge (C-40) with the constant-currency subtotal bar and in-view gating, largest variances (C-45), pager and bridge titles |
+| `4 Analysis\Profit bridge` | 2 | Profit bridge Budget Adj. EBITDA → … → operating profit, D&A and adjusting items as steps (redesign v4) |
+| `4 Analysis\Variances` | 9 | Largest variances v4: Δ vs PY, of which FX, n.m. text, alloc. tag, coverage footers (C-45) |
+| `5 Profitability` | 18 | Profitability by region (C-46): 8-column table with CM Δ status dot, concentration shares, growth × margin inputs, mix heatmap cells |
 | `6 Context` | 5 | Data status, context line, notices, panel notes (L-01, L-04, L-05); Track A reads them, the report does not |
-| `9 Engine` | 45 | Hidden: selections, time window, translation, entity view, row logic, unscaled statement values |
-| `Design` | 56 | Ledger design helpers: identity colour, header status and applied-filters list, rail texts, flyout labels, favourability inputs for rules-based colours, Key figures tile body (KPI Tile SVG), info pop-up paragraphs (no engine calls except CM Subtitle, KPI Tile SVG) |
+| `9 Engine` | 53 | Hidden: selections, time window, translation, entity view, row logic, unscaled statement values |
+| `Design` | 70 | Ledger design helpers: identity colour, header status and applied-filters list, rail texts, flyout labels, favourability inputs for rules-based colours, Key figures tile body (KPI Tile SVG), info pop-up paragraphs, Period flyout v2 (summary sentence, grid label, month labels, covered-months strip, open-month hint), notice rows of the applied-filters pop-up (no engine calls except CM Subtitle, KPI Tile SVG) |
 
 ## How the engine fits together
 
@@ -27,7 +30,9 @@ PL Base / PL Δ A / KPI Value / Bridge Value / LV ... display layer: amounts / _
           └ _Amt Window     version x window as one (version, month) filter; LE = Actual closed months + latest forecast open months
               └ _Amt Row    statement row -> one account filter: block / subtotal / leaf account (D-32)
                   └ _Amt Entity  entity view as filter tables; ACME Group = both entities + eliminations (C-36)
-                      └ _Amt Raw     translation per month x currency x version (D-30)
+                  │   └ _Elim Amount  ACME Group only: SUM over fact_pl_elim under the account filter (ADR-0008 (b))
+                      └ _Amt Raw     units / merchants: _Local Sum; constant currency: 4 currencies x FY budget factor; else _Rep Sum
+                          ├ _Rep Sum     pre-translated amount_usd / _eur / _gbp (gmv_*) sums (ADR-0008 (a), D-30)
                           └ _Local Sum   fact_pl (direct) + fact_pl_allocated (below CM) | operational metrics
 ```
 
@@ -92,7 +97,6 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | Measure | Definition | Spec | Format |
 |---|---|---|---|
 | `KPI Value` | Value of the KPI tile in the current dim_kpi row, amounts and counts in the selected units (display only). | §5 K-01..K-12 | dynamic |
-| `KPI Trend` | K-24 monthly trend of the KPI tile in the current dim_kpi row, for the month of dim_month in context (13 months ending at the selected month, base version, same filters); amounts and counts in the selected units like KPI Value (display only). Track A sparklines and the Track B tile sparklines read it. | K-24 | dynamic |
 | `KPI Secondary` | Tile sub-line: reported growth incl. FX for organic growth, margin for the amount tiles. | K-02, K-07, K-08, K-11 | — |
 | `KPI Δ A` | KPI vs Compare A: percent KPIs in percentage points, amount KPIs in %. | K-20 | dynamic |
 | `KPI Δ B` | KPI vs Compare B: percent KPIs in percentage points, amount KPIs in %. | K-20 | dynamic |
@@ -127,6 +131,29 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `KPI CC Operating Margin` | Commerce Cloud standalone operating margin. | K-10 (Group) | `0.0%` |
 | `KPI Volume Growth` | Bridge volume vs prior year / prior-year NR at constant currency. | K-11 (Products) | `+0.0%;-0.0%;0.0%` |
 | `KPI Price Mix` | Bridge price / mix vs prior year / prior-year NR at constant currency. | K-12 (Products) | `+0.0%;-0.0%;0.0%` |
+| `KPI Opex % NR` | Opex % of net revenue: -(sales & marketing + R&D + G&A) / NR = -(OPEX - OOI) / NR. Excludes other operating items, D&A and adjusting items (spec KPI §5 1.3). Lower is better. | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI S&M % NR` | S&M expense as a share of net revenue (Opex % NR sub-metric). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI R&D % NR` | R&D expense as a share of net revenue (Opex % NR sub-metric). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI G&A % NR` | G&A expense as a share of net revenue (Opex % NR sub-metric). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI Subscription Share` | Platform subscriptions net revenue / net revenue (Commerce Cloud revenue mix). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI Payments Share` | Payments net revenue / net revenue (Commerce Cloud revenue mix). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI Payments GM %` | Gross profit / NR, Payments (same pattern as KPI Subscription GM %). | §5 Vitals, redesign v4 | `0.0%` |
+| `KPI GMV per Merchant` | GMV processed / active merchants at the window end, reporting currency per merchant. | §5 Vitals, redesign v4 | `#,0` |
+| `KPI Net New ARR` | ARR (run-rate) minus ARR evaluated as Compare B (prior year end by default), unscaled. | §5 Vitals, redesign v4 | `#,0;-#,0;0` |
+| `KPI FY Outlook NR` | Latest estimate of net revenue for the whole selected fiscal year (closed months actual + latest forecast, C-02), unscaled. | §5 Vitals, redesign v4 | `#,0;-#,0;0` |
+| `KPI FY Budget NR` | Budget net revenue for the whole selected fiscal year, unscaled. | §5 Vitals, redesign v4 | `#,0;-#,0;0` |
+| `KPI FY Outlook EBITDA` | Latest estimate of Adjusted EBITDA for the whole fiscal year, unscaled. | §5 Vitals, redesign v4 | `#,0;-#,0;0` |
+| `KPI FY Budget EBITDA` | Budget Adjusted EBITDA for the whole fiscal year, unscaled. | §5 Vitals, redesign v4 | `#,0;-#,0;0` |
+| `KPI FY Attainment` | FY outlook NR / FY budget NR. | §5 Vitals, redesign v4 | `0.0%` |
+
+## 3 KPIs\Vitals
+
+| Measure | Definition | Spec | Format |
+|---|---|---|---|
+| `KPI Status` | Status word of the KPI vs Budget (lower case as the v4 HTML chipTxt, parity PV-08): on track, ahead, watch, off track; blank when neutral. | §6, ADR-0012 | — |
+| `Vitals Card SVG` | Vitals card (v4, ADR-0012): title, status chip vs Budget (lower-case word, PV-01 / PV-08), value, rows vs Compare A / B; face text from _Vitals Parts. Tier sizes: hero 335 x 320, secondary 292 x 155, driver 257 x 279. | §5, ADR-0012 | — |
+| `KPI Info Sub` | Vitals info sub-values as Track C's value lists (js-report/lib/engine/vitals.ts, parity PV-09 / PV-10): label: value pairs joined by ' - '. | §5, ADR-0012 | — |
+| `_Vitals Parts` | Vitals card face, PATHITEM-separated: 1 value · 2-5 row 1 (name, Δ amount, Δ % or pp or on plan, ink) · 6-9 row 2 · 10 status (vs Budget, PV-01). Rows: Compare A and Compare B; only the row whose comparison is Budget is coloured (build-brief §0); FY outlook: vs FY Budget and EBITDA vs FY budget. Revenue mix (MIX): Sub % / Pay %, one row Sub / Pay vs PY in pp, neutral (PV-04). Read by Vitals Card SVG and the parity tests. The base, Compare A, Compare B and Budget values come from one 4-row iteration (one query plan; 2.5x faster than four CALCULATEs). | redesign v4 | — |
 
 ## 4 Analysis
 
@@ -143,6 +170,31 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `LV Δ %` | (Base - comparison) / /comparison/ on unscaled values. | C-45 | `+0.0%;−0.0%;0.0%` |
 | `LV Abs Δ` | /base - comparison/, unscaled — ranks the top 8 leaf lines (TopN filter of the variances table). | C-45 | `#,0;-#,0;0` |
 | `LV Δ Color` | Green favourable / red unfavourable for the variances table (sign of base - comparison). | L-12, N-07 | — |
+| `Bridge Step Delta` | Net revenue bridge chart input: the step's change (START = the comparison level, CC_SUB and END = 0, their bar is the running level); blank for steps of another company. The chart builds the running level with a visual calculation (RUNNINGSUM). | C-40, redesign v4 | dynamic |
+| `Bridge Is Total` | 1 for the level bars of the net revenue bridge (comparison, constant-currency subtotal, actual), 0 for change steps, blank for steps of another company (so the chart drops them; the visual calculations would keep a row with any non-blank field). | C-40, redesign v4 | `0` |
+| `Bridge Axis Min` | Start of the bridge value axis (truncated, design: the axis does not start at zero): lowest level minus 1.5 x the spread of the levels and /FX/, in the selected units. | C-40, redesign v4 | dynamic |
+| `Bridge Step In View` | 1 when the bridge step on the axis belongs to the selected company (Bridge Is Total reads it, so steps of another company drop out of the redesigned NR bridge). | C-40, redesign v4 | `0` |
+
+## 4 Analysis\Profit bridge
+
+| Measure | Definition | Spec | Format |
+|---|---|---|---|
+| `Profit Step Delta` | Profit bridge chart input in the selected units: BUD = comparison Adj. EBITDA, then the changes, ACT and OP = 0 (their bar is the running level), DA and ADJ = actual levels. | C-46, redesign v4 | dynamic |
+| `Profit Is Total` | 1 for the level bars of the profit bridge (comparison EBITDA, actual EBITDA, operating profit). | C-46, redesign v4 | `0` |
+
+## 4 Analysis\Variances
+
+| Measure | Definition | Spec | Format |
+|---|---|---|---|
+| `LV Δ B` | Leaf line vs Compare B (prior year by default), signed (positive = favourable), in the selected units. | C-45, redesign v4 | dynamic |
+| `LV FX` | Of which FX: the translation part of the leaf line's Δ = (base - base at CC) - (comparison - comparison at CC), in the selected units (gap analysis P4). Δ - FX is the business change. | C-45, redesign v4 | dynamic |
+| `LV Δ % Text` | Δ % of the leaf line as text: n.m. when /comparison/ < 2.0 in the selected units or /Δ %/ > 50 %; blank when the line has no data in either version (both blank or both exactly 0: the line is hidden, parity PV-23). | C-45, redesign v4 | — |
+| `LV Alloc Tag` | 'alloc.' on leaf lines below contribution margin when the cut is Sales motion, Service line or Segment: opex and below are booked by region and allocated by NR share to those slices (C-31). | C-45, redesign v4 | — |
+| `LV Coverage 8` | Variances footer for Top 8: shown lines, coverage Σ/Δ shown/ / Σ/Δ all/ over the leaf accounts down to operating profit, the Δ of all other lines and the total P&L Δ at operating profit (Σ of every leaf Δ). Line count = every leaf line to OP in scope (PV-12). | C-45, redesign v4 | — |
+| `LV Coverage 12` | Variances footer for Top 12: shown lines, coverage Σ/Δ shown/ / Σ/Δ all/ over the leaf accounts down to operating profit, the Δ of all other lines and the total P&L Δ at operating profit (Σ of every leaf Δ). Line count = every leaf line to OP in scope (PV-12). | C-45, redesign v4 | — |
+| `LV Coverage All` | Variances footer for Top All: shown lines, coverage Σ/Δ shown/ / Σ/Δ all/ over the leaf accounts down to operating profit, the Δ of all other lines and the total P&L Δ at operating profit (Σ of every leaf Δ). Line count = every leaf line to OP in scope (PV-12). | C-45, redesign v4 | — |
+| `LV Coverage Value` | Coverage of the Top 8 lines: Σ/Δ/ of the 8 largest leaf variances / Σ/Δ/ of all leaf lines down to operating profit (test and Track A value). | C-45, redesign v4 | `0.0%` |
+| `LV Leaf Count` | Leaf lines of the P&L down to operating profit that are shown: lines with data in the base or the comparison (both blank or both exactly 0 = hidden, Track C's rule); the denominator of the variances footer (parity PV-12 / PV-23). | C-45, redesign v4 | `0` |
 
 ## 5 Profitability
 
@@ -152,7 +204,20 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Prof NR Δ %` | Net revenue growth vs the bridge comparison. | C-46 | `+0.0%;−0.0%;0.0%` |
 | `Prof NR Δ Color` | Green / red for net revenue growth. | L-12, N-07 | — |
 | `Slice Member In View` | 1 when the slice value in context belongs to the selected entity (unassigned and blank members excluded). Region always; entity rows only in the Group view; channel / category / segment never in the Group view. Used as visual-level filter on slicers and the profitability table. | F-09..F-11, F-21, F-32 | `0` |
-| `Prof Net Revenue` | Net revenue of the slice in the selected units (display only; the profitability table column). | C-46, F-14, N-06 | dynamic |
+| `Prof Net Revenue` | Net revenue of the slice at constant currency (selected year's budget rates) in the selected units: Profitability is always at CC (parity PV-02, Track C rule). | C-46, F-14, N-06 | — |
+| `Prof NR Δ % CC` | Net revenue vs the bridge comparison at constant currency (budget rates of the selected year), the default when comparing to Budget / PY (README decision 7). | C-46, redesign v4 | `+0.0%;−0.0%;0.0%` |
+| `Prof CM Δ pp` | CM % minus the comparison's CM %, in pp, at constant currency (PV-02); the only status column of the table. | C-46, redesign v4 | `+0.0" pp";−0.0" pp";0.0" pp` |
+| `Prof CM Dot` | Status dot of the CM Δ column (colour from Prof CM Dot Color). | C-46, redesign v4 | — |
+| `Prof Contribution` | Contribution margin of the slice at constant currency in the selected units (PV-02). | C-46, redesign v4 | — |
+| `Prof Adj EBITDA` | Adjusted EBITDA of the slice at constant currency in the selected units (PV-02; by region opex is booked, C-31). | C-46, redesign v4 | — |
+| `Conc Share` | Concentration: the region's share of net revenue, contribution or Adj. EBITDA (dim_conc_level) at constant currency (PV-02). | C-46, redesign v4 | `0.0%` |
+| `Prof Company Growth` | Company organic growth (reference line of the growth x margin chart). | C-46, redesign v4 | `+0.0%;−0.0%;0.0%` |
+| `Prof Company CM %` | Company CM % at constant currency: the horizontal reference line of the growth x margin chart (PV-02). | C-46, redesign v4 | `0.0%` |
+| `_Heat Cell Raw` | Mix heatmap cell text before the company switch: net revenue at constant currency (display units) over its share of the region (PV-02). | C-46, redesign v4 | — |
+| `Heat Cell` | Mix heatmap cell: net revenue and share of the region (two lines). Company view: its own service lines / categories. Group view: both companies' lines, each computed in its own company (share = of that company's revenue in the region). | C-46, redesign v4 | — |
+| `Prof GM %` | Gross margin % of the slice at constant currency (Profitability table, PV-02). | C-46, redesign v4 | `0.0%` |
+| `Prof CM %` | Contribution margin % of the slice at constant currency (Profitability table and growth x margin y axis, PV-02). | C-46, redesign v4 | `0.0%` |
+| `_Heat Colour GM` | Mix heatmap colour basis: gross margin % of the column (service line / category) over all regions, at constant currency (parity PV-03, build-brief §3). | C-46, redesign v4 | `0.0%` |
 
 ## 6 Context
 
@@ -186,9 +251,10 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_Win End Raw` | Last month index of the window before the close cut-off (Dec for Full year). | §7 Time windows | — |
 | `_Win End` | Last month index the base covers: Actual never runs past the last close; comparisons reuse these months. | C-01, C-03 | — |
 | `_Local Sum` | Local-currency sum for the current filter context. P&L: direct accounts from fact_pl plus below-CM accounts from fact_pl_allocated (never fact_pl's _UNASSIGNED rows). Other metrics read fact_operational. | D-01, D-02, D-03 | — |
-| `_Amt Raw` | Translates month by month and currency by currency before summing: local / local_per_usd x rate of the reporting currency, same month and rate type. Actual and forecast use ACTUAL_AVG, budget uses BUDGET; constant currency uses the BUDGET rate of the selected fiscal year for every version. Units and merchants are not translated. | D-30, C-10, C-11, C-12, C-13 | — |
-| `_Elim Amount` | Group eliminations: minus the counterparty-tagged amounts of every block whose elimination account (ELIM_GR, ELIM_VSC) is in the current account filter. A leaf like GR_S1 gets no elimination; block GR, net revenue and every subtotal below do. Contribution margin and below are unchanged (T-02). Translated like _Amt Raw (P&L amounts of fact_pl only: no metric switch, no allocated table), so the Group branch of _Amt Entity adds a small expression to every query plan. | C-35, C-36, D-33 | — |
-| `_Amt Entity` | Applies the entity view in one evaluation. Consumer Products / Commerce Cloud: that entity only; a slice selection that holds only the other entity's values is ignored (it comes back when you switch back). ACME Group: both entities plus eliminations, channel / category / segment filters off. Entity and slices are passed as filter tables, so no branch evaluates the engine twice. | F-01, C-36, F-30, F-32 | — |
+| `_Amt Raw` | Amount in the reporting currency (ADR-0008 §4.2). Units and merchants: _Local Sum, not translated. Constant currency (C-12): per functional currency, the local sum x the BUDGET rate of the reporting currency / the BUDGET rate of that currency, both for the selected fiscal year; C-10 gives one BUDGET rate per currency and year, so this equals translating month by month. Otherwise _Rep Sum: plain sums of the loader's pre-translated columns (each row at its version's own rate type: ACTUAL_AVG for actual and forecast, BUDGET for budget; C-11, C-13). The FX basis is read with SELECTEDVALUE on fx_basis_name, the column the report slicer filters: with a literal filter on that column the engine drops the unused branch from the query plan (statement -40 %, profitability -55 %, ADR-0008 §5.2). Nothing selected = actual rates (the default); filters on fx_basis_code (Track A, CC measures) still resolve the name. If param_fx_basis renames the constant-currency row, change the literal here and in _Elim Amount (the ADR-0008 FX paths test fails until then). | D-30, C-10, C-11, C-12, C-13 | — |
+| `_Rep Sum` | Sum of the loader's pre-translated columns in the reporting currency (ADR-0008 (a)): amount_usd / amount_eur / amount_gbp on the P&L facts (direct accounts of fact_pl plus fact_pl_allocated, as _Local Sum), gmv_usd / gmv_eur / gmv_gbp on fact_operational. Each row is translated at its version's own rate type, so one column serves every version. The currency is SELECTEDVALUE on param_reporting_currency[currency_code] (the column the slicer and Track A filter, so unused branches leave the plan), USD when nothing is selected (the is_default row). Blank for units, merchants and any other currency. | D-30, C-11, C-13, ADR-0008 | — |
+| `_Elim Amount` | Group eliminations, read from fact_pl_elim (ADR-0008 (b)): the loader writes every counterparty-tagged fact_pl row there, negated, on its block's elimination account (ELIM_GR, ELIM_VSC), so the current account filter picks them directly. A block or subtotal includes its ELIM_* account and gets the elimination; a leaf like GR_S1 does not; the ELIM_* leaf shows it. Contribution margin and below are unchanged (T-02). Reporting currency: the pre-translated column; constant currency: per functional currency, the local sum x the selected year's BUDGET factor. FX basis and currency are read as in _Amt Raw / _Rep Sum (SELECTEDVALUE on the filtered columns, for branch pruning). | C-35, C-36, D-33 | — |
+| `_Amt Entity` | Applies the entity view in one evaluation. Consumer Products / Commerce Cloud: that entity only; a slice selection that holds only the other entity's values is ignored (it comes back when you switch back). ACME Group: both entities plus eliminations (_Elim Amount; fact_pl_elim has no slice relationships), channel / category / segment filters off. Entity and slices are passed as filter tables, so no branch evaluates the engine twice. | F-01, C-36, F-30, F-32 | — |
 | `_Amt Row` | Statement row logic as one account filter. Without a dim_pl_row filter it passes through. Input block: its accounts. Group total (OPEX): its child blocks. Subtotal / memo: every input block above it (signed sums, M-01), which equals the dim_report_line formula. Leaf: the account. Ratio rows get no accounts (handled one level up in the PL measures). | D-32, M-01, M-03 | — |
 | `_Amt Actual` | Version Actual (ACT) for the current months. | C-01, D-31 | — |
 | `_Amt Budget` | Version Budget (BUD) for the current months. | C-05, D-31 | — |
@@ -212,7 +278,14 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_PL Δ LE` | Full-year LE - full-year budget, unscaled; ratio rows in pp. | M-14 | — |
 | `_Bridge Value` | Unscaled waterfall value per dim_bridge_step: comparison NR, then the entity's steps; blank for a step of another entity (its dim_bridge_step row is filtered out). Comparison + steps = base NR (T-05). Steps with the same formula share one branch (service lines, entities): every branch adds its measures to the query plan, used or not. | C-40, T-05 | — |
 | `_KPI Value` | Unscaled value of the KPI tile in the current dim_kpi row (slots swap content by entity). Feeds KPI Δ A / Δ B. A code first maps to a family: line amounts (NR, EBITDA, OP, NP) and line ratios (GM %, CM %, GTN %, ETR, Products / Cloud operating margin) share one branch each, because every branch adds its measures to the query plan of a grid over dim_kpi; the simple SWITCH on the family keeps a single-code evaluation as cheap as a direct measure. | §5 K-01..K-12 | — |
-| `_KPI Trend Value` | K-24 trend point (unscaled): the tile value of the dim_kpi row in context for the single month of dim_month in context, i.e. exactly what the tile shows with time view Month at that month (fiscal year and period follow the month, base version, every other filter kept). Blank outside the 13 months ending at the selected month and for open months of Actual (window ends before it starts). Period-end KPIs read that month-end, ratios the monthly ratio, growth KPIs the monthly growth vs prior year. Evaluate it over dim_kpi[kpi_code] x dim_month[month_index] with the entity's codes as a filter: one query, no 156 scalar calls. | K-24, K-22, K-23 | — |
+| `_KPI Status` | Status code of the KPI vs Budget only, whatever Compare A is (build-brief §0, spec §6, parity PV-01): ontrack within the on-track band (param_kpi_threshold, 1 % / 0.3 pp), ahead when favourable beyond it, watch up to the watch band (3 % / 1 pp), off beyond; neutral for Neutral KPIs or without a Budget. | §6, ADR-0012 | — |
+| `_Profit Step` | Profit bridge step (unscaled): BUD = comparison Adj. EBITDA; VOL = ΔNR at CC x comparison GM % (CC); GM_RATE = Σ lines NR cc x ΔGM %; GM_MIX = ΔGP cc - VOL - GM_RATE; VSC / SM / RD / GA / OOI = Δ at CC; FX = (EBITDA - EBITDA cc) - (comparison - comparison cc); ACT and OP = 0 (level bars); DA and ADJ = actual levels. BUD + changes = Adj. EBITDA; + DA + ADJ = operating profit. | C-40, redesign v4 | — |
+| `_Profit GP CC Change` | Gross profit change at constant currency (base - bridge comparison). | C-40, redesign v4 | `#,0;-#,0;0` |
+| `_Profit Volume` | Profit bridge volume: net revenue change at CC x the comparison gross margin % at CC. | C-40, redesign v4 | `#,0;-#,0;0` |
+| `_Profit GM Rate` | Profit bridge GM rate: Σ over the selected company's service lines / categories of NRcc x ΔGM %, at constant currency (Group: each company's lines in their own company). Lines of the other company were counted before (parity check 2026-10-27: S FY2025 rate -8.4 m instead of -0.03 m; the GM mix remainder absorbed it, so the bridge total was right). | C-40, redesign v4 | `#,0;-#,0;0` |
+| `_Prof CM Status` | Status of CM Δ pp (the only status dot on Profitability): thresholds of param_kpi_threshold PP. | redesign v4 | — |
+| `_KPI Budget Value` | The KPI of the current dim_kpi row under Budget over the same months, whatever Compare A is (status basis, build-brief §0, parity PV-01). FY outlook: the FY budget. | redesign v4 | — |
+| `_Profit GM Rate Line` | GM rate effect of the service line / category in context: NRcc x (GM % - comparison GM %), at constant currency. | C-40, redesign v4 | `#,0;-#,0;0` |
 
 ## Design
 
@@ -228,8 +301,7 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `_Bridge Cmp Name` | Display name of the comparison used by the bridge and largest variances: Compare A, else Compare B, else prior year. | C-40, C-45 | — |
 | `_Units Short` | Currency and unit letter, e.g. USD m. | F-14 | — |
 | `_Units Long` | Currency and unit word, e.g. USD millions. | F-14 | — |
-| `_Window Label` | Time window as text, e.g. YTD Jan–Sep 2026 (months the base covers). | L-04 | — |
-| `Rail Sum Period` | Rail summary of the Period group, e.g. YTD - Sep 2026. | F-02..F-04 | — |
+| `Rail Sum Period` | Rail summary of the Period group (expanded rail): the Period flyout's summary sentence, e.g. Showing Jan – Sep 2026 - year to date (parity rule 7: every period summary starts with Showing). | F-02..F-04 | — |
 | `Rail Sum Versions` | Rail summary of the Versions group, e.g. Actual vs Budget, Prior year. | F-05..F-07 | — |
 | `Rail Sum Slice` | Rail summary of the Slice group: All slices, filtered regions / slices, or consolidated in the Group view. | F-08..F-11, F-32 | — |
 | `Rail Sum Display` | Rail summary of the Display group, e.g. USD m - actual rates. | F-12..F-14 | — |
@@ -237,6 +309,13 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `Version Desc` | One-line description of each base-version card in the Versions flyout (Label role). | F-05 | — |
 | `Month Item Fill` | Month button fill in the Period flyout: open months (after the last close) in Subtle, closed months white. | F-03 | — |
 | `Month Item Font` | Month button text colour in the Period flyout: open months Slate 600, closed months Ink 900. | F-03 | — |
+| `_Time View Name` | Plain name of the selected time view (period picker v2): One month, Quarter to date, Year to date, Last 12 months, Full year. Feeds the time-view buttons (Seg Label), the summary sentence and the applied-filters pop-up. | F-04, period-picker-v2 | — |
+| `Period Summary` | Live summary of the Period flyout (period-picker-v2 Part 1): the months the base covers, in plain words, e.g. Showing Jan – Sep 2026 - year to date; Showing Sep 2026 (one month); Showing Oct 2025 – Sep 2026 - last 12 months. Actual stops at the last close (C-01), so the sentence names the effective window (Full year 2026 closed through Sep: Showing Jan – Sep 2026 - full year); a window with no closed month reads Showing no closed month yet. Same wording as Track A. Also the rail tooltip and the Period row of the applied-filters pop-up. No engine calls. | F-02..F-04, C-01, period-picker-v2 | — |
+| `Period Grid Label` | Label above the month grid of the Period flyout; it follows the time view (period-picker-v2): Month, Up to (quarter / year to date), Ending (last 12 months); Full year replaces it with one line, because Power BI cannot hide the grid. | F-03, period-picker-v2 | — |
+| `Period Open Hint` | Open-month hint of the Period flyout (C-01, period-picker-v2): shown only while the base is Actual and the selected year still has open months; blank otherwise. | C-01, period-picker-v2 | — |
+| `Month Item Label` | Second line of a month button in the Period flyout (Label role, C-01): open months read not closed yet (base Actual), forecast (Latest estimate) or budget (Budget); closed months get a no-break space, so every button keeps the same two-line layout and no item drops out of the slicer query. | F-03, C-01, period-picker-v2 | — |
+| `Period Strip SVG` | Covered-months strip under the month grid of the Period flyout (period-picker-v2): the 12 months of the selected year as cells J … D; covered months in the company tint, the anchor month solid (outlined when Actual stops before it), open months grey while the base is Actual. One scalar, no engine calls. SVG 321 x 21. | F-02..F-04, period-picker-v2 | — |
+| `_Notice Row` | Notice rows of the applied-filters pop-up (C-50, period-picker-v2 Part 2; they replace the removed notice strip): the text of the dim_filter_row notice row in context, blank when its condition does not apply, so the row disappears. Same rules and copy as Notices (Track A): Actual past the close, forecast months included, prior year missing, LTM before the data history, slice allocation on, Group eliminations. | C-50, L-05 | — |
 | `_Slice Sub` | Slice flyout subtitle: which slices apply to the selected company. | F-08..F-11, F-32 | — |
 | `Slice Hdr Region` | Region group label with its count in the Slice flyout, e.g. Region - All 4. | F-08 | — |
 | `Slice Hdr Channel` | Channel / sales motion group label with its count; blank in the Group view. | F-09 | — |
@@ -252,28 +331,36 @@ Display units: format strings never scale (Power BI does not support trailing-co
 | `PL Hdr Cmp A` | Statement column-group title over Compare A (also the KPI tile label), e.g. vs Budget. | L-07, K-20 | — |
 | `PL Hdr Cmp B` | Statement column-group title over Compare B (also the KPI tile label), e.g. vs Prior year. | L-07, K-20 | — |
 | `PL Hdr FY` | Statement column-group title over the full-year columns, e.g. Full year 2026. | L-07 | — |
-| `Kpi Toolbar Caption` | Key figures toolbar caption, e.g. Changes vs Budget and Prior year, same months. | L-06, K-20 | — |
-| `Bridge Subtitle` | Net revenue bridge subtitle: comparison to base, units and the company-specific method note. | C-40 | — |
-| `Var Title` | Largest variances card title, e.g. Largest variances vs Budget. | C-45 | — |
-| `Var Subtitle` | Largest variances card subtitle, e.g. Top 8 lines by size of Δ, USD millions. | C-45 | — |
-| `Prof Title` | Profitability table title, e.g. Profitability by channel. | C-46 | — |
-| `Prof Subtitle` | Profitability table subtitle, e.g. YTD Jan–Sep 2026, USD millions; the breakdown hint instead when the selected breakdown does not apply to the company. | C-46 | — |
-| `CM Title` | Contribution margin chart title, e.g. Contribution margin by channel. | C-46 | — |
-| `CM Subtitle` | Contribution margin chart subtitle with the company average CM % (the dashed line). | C-46 | — |
+| `Var Title` | Largest variances title from the selection: the comparison of the Δ columns and the Compare B of the second Δ column (column headers are static in Power BI, parity PV-06). | C-45 | — |
+| `Prof Title` | Profitability table title (Region only since the breakdown slicer was removed, parity PV-19). | C-46 | — |
 | `KPI Tile SVG` | Key figures tile body (kpi-card-v2, K-20, K-21; replaces the K-24 / K-25 overlay): image of the card visual, evaluated in the tile query itself, no extra query. Sub-line (KPI Secondary) and one diverging comparison row per active comparison: name, a bar from a centre line that grows right when favourable and left when unfavourable (neutral KPIs grey, right, by size), Δ text with ▲ / ▼ and sign. Scale ±20 % for amount KPIs, ±5 pp for percent KPIs, capped with a chevron; n/a without data; no rows for growth KPIs. SVG 300 x 64. | K-20, K-21, kpi-card-v2 | — |
-| `KPI Definition` | Tooltip of a Key figures tile: the KPI definition from dim_kpi (kpi-card-v2: the one-line definition moves to the tooltip). | L-06, kpi-card-v2 | — |
 | `Hdr Status` | Header status on the title row (N-02, N-03): company - Management reporting - last closed month - last refresh, e.g. ACME Group - Management reporting - Closed through Sep 2026 - Refreshed 22 Oct 2026 13:53. | L-01, N-02, N-03 | — |
-| `Filter Value` | Value of a row of the applied-filters pop-up (dim_filter_row): company, fiscal year, period, time view with its window, versions, currency, FX basis, units, regions, slices. Covers everything the former header context line showed (L-04). | L-04, F-01..F-14 | — |
+| `Filter Value` | Value of a row of the applied-filters pop-up (dim_filter_row): company, fiscal year, period (the period-picker-v2 summary sentence), time view, versions, currency, FX basis, units, regions, slices (values in each dimension's sort_order, parity rule 10), then the notice rows (C-50, via _Notice Row; blank rows drop out). Covers everything the former header context line and notice strip showed (L-04, L-05). | L-04, F-01..F-14 | — |
 | `_Breakdown Hint` | Why the Profitability view is empty: blank when the selected breakdown applies to the company, else e.g. Channel does not apply to ACME Group - pick Region or Company. The breakdown slicer keeps its selection when the company changes, and Breakdown Allowed hides the kept item. | F-21, L-09 | — |
-| `Info Bridge 1` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
-| `Info Bridge 2` | Info pop-up text of the net revenue bridge (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims the axis sentence of Watch out because its waterfall axis starts at zero. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-40 | — |
-| `Info Variances 1` | Info pop-up text of the largest variances table (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims "underneath" because the block is a column of its own. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-45 | — |
-| `Info Variances 2` | Info pop-up text of the largest variances table (L-15): shared copy docs/ADD/features/info-popovers.md, comparison filled in. Track B trims "underneath" because the block is a column of its own. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-45 | — |
-| `Info Profitability 1` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
-| `Info Profitability 2` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 2 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
-| `Info Profitability 3` | Info pop-up text of the profitability table (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown and comparison filled in. Paragraph 3 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
-| `Info CM 1` | Info pop-up text of the contribution margin chart (L-15): shared copy docs/ADD/features/info-popovers.md, breakdown filled in. Paragraph 1 (the one with a placeholder; the static paragraphs are text boxes, because a card clamps long text and a button ignores line breaks). | L-15, C-46 | — |
 | `PL Fav Off` | 1 on the effective tax rate ratio row, whose deltas are never coloured; blank elsewhere. No engine call; input of the rules that colour the statement deltas. | L-12, N-07 | — |
+| `Prof CM Dot Color` | Colour of the CM Δ status dot: grey on track, green ahead, amber watch, red off track. | C-46, redesign v4 | — |
+| `Prof Subtitle CC` | Profitability table subtitle as Track C: Constant currency (FY2025 budget rates) - USD m - vs Budget (PV-02, PV-06). | C-46, redesign v4 | — |
+| `Heat GM Fill` | Mix heatmap cell colour by gross margin %, in the colour of the line's company. | C-46, redesign v4 | — |
+| `Heat GM Ink` | Mix heatmap text colour (white on the two dark steps), per the line's company. | C-46, redesign v4 | — |
+| `_Heat GM Fill Raw` | Mix heatmap cell colour before the company switch: company tint (accT) to company colour (acc) in 4 steps by the column's gross margin % (< 30 %, < 50 %, < 70 %, >= 70 %; PV-03). | C-46, redesign v4 | — |
+| `_Heat GM Ink Raw` | Mix heatmap text colour before the company switch (white on the two dark steps; column GM %, PV-03). | C-46, redesign v4 | — |
+| `Info Title` | Info tooltip title: panel (dim_pl_info) or Vitals card (dim_kpi.info_title), Track C copy with {cmp} / {line} filled from the selection. | ADR-0012 | — |
+| `Info Text` | Info tooltip: what it is (Track C copy), {cmp} / {line} filled from the selection. | ADR-0012 | — |
+| `Info Detail` | Info tooltip sub-values: the Vitals card's values (KPI Info Sub); blank for panels. | ADR-0012 | — |
+| `Info Glyph` | Text of the info buttons (each is filtered to its dim_kpi codes or dim_pl_info row; hover opens tt_pl_info). | ADR-0012 | — |
+| `Pager Text 1` | Pager counter, page 1. | ADR-0012 | — |
+| `Pager Text 2` | Pager counter, page 2. | ADR-0012 | — |
+| `NR Bridge Title` | Title of the net revenue bridge. | C-40, redesign v4 | — |
+| `Profit Bridge Title` | Profit bridge title as Track C: Profit bridge: Budget Adj. EBITDA → Actual → Operating profit. | C-46, redesign v4 | — |
+| `Bubble X Min` | Growth × margin chart: minimum of the growth axis = the regions' minimum - 35 % of their range, so bubbles and the quadrant labels in the plot corners do not collide. | redesign v4 | `0.0%` |
+| `Bubble X Max` | Growth × margin chart: maximum of the growth axis = the regions' maximum + 35 % of their range, so bubbles and the quadrant labels in the plot corners do not collide. | redesign v4 | `0.0%` |
+| `Bubble Y Min` | Growth × margin chart: minimum of the CM % axis (constant currency) with 35 % of the range as padding, so bubbles and the corner quadrant labels do not collide. | redesign v4 | `0.0%` |
+| `Bubble Y Max` | Growth × margin chart: maximum of the CM % axis (constant currency) with 35 % of the range as padding, so bubbles and the corner quadrant labels do not collide. | redesign v4 | `0.0%` |
+| `Var Compare B Label` | Label of the second Δ column of the variances (Compare B), none when Compare B = None (parity row var.py_column). | redesign v4 | — |
+| `Heat Title` | Mix heatmap title as Track C: Mix - region × service line (Commerce Cloud, Group) or category (Consumer Products). | C-46, redesign v4 | — |
+| `How To Read Showing` | How to read, first line (Track C js-report/lib/engine/view-copy.ts): the period summary - currency and units - vs the comparisons, e.g. Showing Jan – Sep 2026 - year to date - USD m - vs Budget and Prior year. | redesign v4 | — |
+| `Info Formula` | Info tooltip: the formula (Track C copy). | ADR-0012 | — |
+| `Info Source` | Info tooltip: the measures and tables behind it (Track C copy). | ADR-0012 | — |
 
 ## DAX
 
@@ -872,49 +959,6 @@ Folder `3 KPIs` · spec §5 K-01..K-12
 ```dax
 KPI Value =
 VAR _value        = [_KPI Value]
-RETURN
-    IF (
-        SELECTEDVALUE ( dim_kpi[value_type] ) IN { "AMT", "CNT" }
-        ,DIVIDE ( _value, [_Units Divisor] )
-        ,_value
-    )
-```
-
-Format string (dynamic):
-
-```dax
-VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
-VAR _symbol       = SELECTEDVALUE ( param_reporting_currency[symbol], "$" )
-VAR _units        = [_Sel Units]
-VAR _q            = """"
-VAR _number       = IF ( _units = "K", "#,0", "#,0.0" )
-VAR _suffix       = _q & IF ( _units = "K", " k", " m" ) & _q
-RETURN
-    SWITCH (
-        _type
-        ,"AMT"
-            ,_q & _symbol & _q & _number & _suffix
-        ,"PCT"
-            ,"0.0%"
-        ,"PCT2"
-            ,"0.00%"
-        ,"CNT"
-            ,_number & _suffix
-        ,"INT"
-            ,"#,0"
-        ,"PRICE"
-            ,_q & _symbol & _q & "#,0.00"
-        ,"#,0.0"
-    )
-```
-
-### KPI Trend
-
-Folder `3 KPIs` · spec K-24
-
-```dax
-KPI Trend =
-VAR _value        = [_KPI Trend Value]
 RETURN
     IF (
         SELECTEDVALUE ( dim_kpi[value_type] ) IN { "AMT", "CNT" }
@@ -1844,15 +1888,11 @@ Folder `5 Profitability` · spec C-46, F-14, N-06
 
 ```dax
 Prof Net Revenue =
-DIVIDE ( [Net Revenue], [_Units Divisor] )
-```
-
-Format string (dynamic):
-
-```dax
-VAR _units        = [_Sel Units]
-RETURN
-    IF ( _units = "K", "#,0;−#,0;0", "#,0.0;−#,0.0;0.0" )
+CALCULATE (
+    DIVIDE ( [Net Revenue], [_Units Divisor] )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
 ```
 
 ### Data Status
@@ -2340,41 +2380,82 @@ Folder `9 Engine` · spec D-30, C-10, C-11, C-12, C-13
 ```dax
 _Amt Raw =
 VAR _metric       = [_Sel Metric]
-VAR _rep_currency = [_Sel Currency]
-VAR _is_cc        = [_Sel FX Basis] = "CC"
-VAR _cc_month     = FORMAT ( [_Sel FY], "0" ) & "-01"
-VAR _groups       =
-    CROSSJOIN (
-        VALUES ( dim_month[month_key] )
-        ,VALUES ( dim_region[functional_currency] )
-        ,VALUES ( dim_version[version_key] )
-    )
-VAR _translated   =
-    SUMX (
-        _groups
-        ,VAR _currency    = dim_region[functional_currency]
-         VAR _version     = dim_version[version_key]
-         VAR _rate_type   = IF ( _is_cc || _version = "BUD", "BUDGET", "ACTUAL_AVG" )
-         VAR _rate_month  = IF ( _is_cc, _cc_month, dim_month[month_key] )
-         VAR _local_rate  =
-             LOOKUPVALUE (
-                 fact_fx_rate[local_per_usd]
-                 ,fact_fx_rate[currency_code], _currency
-                 ,fact_fx_rate[month_key], _rate_month
-                 ,fact_fx_rate[rate_type], _rate_type
-             )
-         VAR _rep_rate    =
-             LOOKUPVALUE (
-                 fact_fx_rate[local_per_usd]
-                 ,fact_fx_rate[currency_code], _rep_currency
-                 ,fact_fx_rate[month_key], _rate_month
-                 ,fact_fx_rate[rate_type], _rate_type
-             )
-         RETURN
-             [_Local Sum] * DIVIDE ( _rep_rate, _local_rate )
-    )
 RETURN
-    IF ( _metric IN { "UNITS", "MERCHANTS" }, [_Local Sum], _translated )
+    IF (
+        _metric IN { "UNITS", "MERCHANTS" }
+        ,[_Local Sum]
+        ,IF (
+            SELECTEDVALUE ( param_fx_basis[fx_basis_name] ) = "Constant currency (budget rates of selected year)"
+            ,VAR _cc_month    = FORMAT ( [_Sel FY], "0" ) & "-01"
+             VAR _rep_rate    =
+                 LOOKUPVALUE (
+                     fact_fx_rate[local_per_usd]
+                     ,fact_fx_rate[currency_code], [_Sel Currency]
+                     ,fact_fx_rate[month_key], _cc_month
+                     ,fact_fx_rate[rate_type], "BUDGET"
+                 )
+             RETURN
+                 SUMX (
+                     VALUES ( dim_region[functional_currency] )
+                     ,VAR _local_rate  =
+                          LOOKUPVALUE (
+                              fact_fx_rate[local_per_usd]
+                              ,fact_fx_rate[currency_code], dim_region[functional_currency]
+                              ,fact_fx_rate[month_key], _cc_month
+                              ,fact_fx_rate[rate_type], "BUDGET"
+                          )
+                      RETURN
+                          [_Local Sum] * DIVIDE ( _rep_rate, _local_rate )
+                 )
+            ,[_Rep Sum]
+        )
+    )
+```
+
+### _Rep Sum
+
+Folder `9 Engine` · spec D-30, C-11, C-13, ADR-0008
+
+```dax
+_Rep Sum =
+VAR _metric       = [_Sel Metric]
+VAR _currency     = SELECTEDVALUE ( param_reporting_currency[currency_code], "USD" )
+RETURN
+    SWITCH (
+        _metric
+        ,"AMOUNT"
+            ,SWITCH (
+                _currency
+                ,"USD"
+                    ,CALCULATE (
+                        SUM ( fact_pl[amount_usd] )
+                        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
+                    )
+                        + SUM ( fact_pl_allocated[amount_usd] )
+                ,"EUR"
+                    ,CALCULATE (
+                        SUM ( fact_pl[amount_eur] )
+                        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
+                    )
+                        + SUM ( fact_pl_allocated[amount_eur] )
+                ,"GBP"
+                    ,CALCULATE (
+                        SUM ( fact_pl[amount_gbp] )
+                        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
+                    )
+                        + SUM ( fact_pl_allocated[amount_gbp] )
+            )
+        ,"GMV"
+            ,SWITCH (
+                _currency
+                ,"USD"
+                    ,SUM ( fact_operational[gmv_usd] )
+                ,"EUR"
+                    ,SUM ( fact_operational[gmv_eur] )
+                ,"GBP"
+                    ,SUM ( fact_operational[gmv_gbp] )
+            )
+    )
 ```
 
 ### _Elim Amount
@@ -2383,52 +2464,41 @@ Folder `9 Engine` · spec C-35, C-36, D-33
 
 ```dax
 _Elim Amount =
-VAR _rep_currency = [_Sel Currency]
-VAR _is_cc        = [_Sel FX Basis] = "CC"
-VAR _cc_month     = FORMAT ( [_Sel FY], "0" ) & "-01"
-VAR _elim_blocks  =
-    CALCULATETABLE (
-        VALUES ( dim_account[block_code] )
-        ,KEEPFILTERS ( dim_account[is_intercompany] = TRUE () )
-        ,KEEPFILTERS ( dim_account[has_fact_rows] = FALSE () )
-        ,KEEPFILTERS ( dim_account[is_direct] = TRUE () )
-    )
-VAR _ic_amount    =
-    CALCULATE (
-        SUMX (
-            CROSSJOIN (
-                VALUES ( dim_month[month_key] )
-                ,VALUES ( dim_region[functional_currency] )
-                ,VALUES ( dim_version[version_key] )
-            )
-            ,VAR _currency    = dim_region[functional_currency]
-             VAR _version     = dim_version[version_key]
-             VAR _rate_type   = IF ( _is_cc || _version = "BUD", "BUDGET", "ACTUAL_AVG" )
-             VAR _rate_month  = IF ( _is_cc, _cc_month, dim_month[month_key] )
-             VAR _local_rate  =
-                 LOOKUPVALUE (
-                     fact_fx_rate[local_per_usd]
-                     ,fact_fx_rate[currency_code], _currency
-                     ,fact_fx_rate[month_key], _rate_month
-                     ,fact_fx_rate[rate_type], _rate_type
-                 )
-             VAR _rep_rate    =
-                 LOOKUPVALUE (
-                     fact_fx_rate[local_per_usd]
-                     ,fact_fx_rate[currency_code], _rep_currency
-                     ,fact_fx_rate[month_key], _rate_month
-                     ,fact_fx_rate[rate_type], _rate_type
-                 )
-             RETURN
-                 CALCULATE ( SUM ( fact_pl[amount_local] ) ) * DIVIDE ( _rep_rate, _local_rate )
-        )
-        ,REMOVEFILTERS ( dim_account )
-        ,TREATAS ( _elim_blocks, dim_account[block_code] )
-        ,dim_account[is_direct] = TRUE ()
-        ,NOT ISBLANK ( fact_pl[counterparty_entity_code] )
-    )
+VAR _currency     = SELECTEDVALUE ( param_reporting_currency[currency_code], "USD" )
 RETURN
-    - _ic_amount
+    IF (
+        SELECTEDVALUE ( param_fx_basis[fx_basis_name] ) = "Constant currency (budget rates of selected year)"
+        ,VAR _cc_month    = FORMAT ( [_Sel FY], "0" ) & "-01"
+         VAR _rep_rate    =
+             LOOKUPVALUE (
+                 fact_fx_rate[local_per_usd]
+                 ,fact_fx_rate[currency_code], _currency
+                 ,fact_fx_rate[month_key], _cc_month
+                 ,fact_fx_rate[rate_type], "BUDGET"
+             )
+         RETURN
+             SUMX (
+                 VALUES ( dim_region[functional_currency] )
+                 ,VAR _local_rate  =
+                      LOOKUPVALUE (
+                          fact_fx_rate[local_per_usd]
+                          ,fact_fx_rate[currency_code], dim_region[functional_currency]
+                          ,fact_fx_rate[month_key], _cc_month
+                          ,fact_fx_rate[rate_type], "BUDGET"
+                      )
+                  RETURN
+                      CALCULATE ( SUM ( fact_pl_elim[amount_local] ) ) * DIVIDE ( _rep_rate, _local_rate )
+             )
+        ,SWITCH (
+            _currency
+            ,"USD"
+                ,SUM ( fact_pl_elim[amount_usd] )
+            ,"EUR"
+                ,SUM ( fact_pl_elim[amount_eur] )
+            ,"GBP"
+                ,SUM ( fact_pl_elim[amount_gbp] )
+        )
+    )
 ```
 
 ### _Amt Entity
@@ -2497,16 +2567,7 @@ VAR _value        =
         ,REMOVEFILTERS ( dim_segment )
         ,TREATAS ( _segments, dim_segment[segment_code] )
     )
-VAR _elim         =
-    IF (
-        _is_group && [_Sel Metric] = "AMOUNT"
-        ,CALCULATE (
-            [_Elim Amount]
-            ,REMOVEFILTERS ( dim_channel )
-            ,REMOVEFILTERS ( dim_line )
-            ,REMOVEFILTERS ( dim_segment )
-        )
-    )
+VAR _elim         = IF ( _is_group && [_Sel Metric] = "AMOUNT", [_Elim Amount] )
 RETURN
     _value + _elim
 ```
@@ -3073,33 +3134,9 @@ RETURN
         ,"MERCHANTS", [KPI Active Merchants]
         ,"SUB_GM_PCT", [KPI Subscription GM %]
         ,"RULE40", [KPI Rule of 40]
-    )
-```
-
-### _KPI Trend Value
-
-Folder `9 Engine` · spec K-24, K-22, K-23
-
-```dax
-_KPI Trend Value =
-VAR _row_index    = SELECTEDVALUE ( dim_month[month_index] )
-VAR _anchor       = [_Anchor Index]
-VAR _fiscal_year  = SELECTEDVALUE ( dim_month[fiscal_year] )
-VAR _month        = SELECTEDVALUE ( dim_month[month_number] )
-RETURN
-    IF (
-        _row_index >= _anchor - 12 && _row_index <= _anchor
-        ,CALCULATE (
-            IF ( [_Win End] >= [_Win Start], [_KPI Value] )
-            ,REMOVEFILTERS ( dim_month )
-            ,REMOVEFILTERS ( param_eval )
-            ,REMOVEFILTERS ( param_time_view )
-            ,TREATAS ( { "MTD" }, param_time_view[time_view_code] )
-            ,REMOVEFILTERS ( param_fiscal_year )
-            ,TREATAS ( { _fiscal_year }, param_fiscal_year[fiscal_year] )
-            ,REMOVEFILTERS ( param_period )
-            ,TREATAS ( { _month }, param_period[month_number] )
-        )
+        ,"OPEX_PCT", [KPI Opex % NR]
+        ,"MIX", [KPI Subscription Share]
+        ,"FY_OUTLOOK", [KPI FY Outlook NR]
     )
 ```
 
@@ -3231,70 +3268,13 @@ _Units Long =
 [_Sel Currency] & IF ( [_Sel Units] = "K", " thousands", " millions" )
 ```
 
-### _Window Label
-
-Folder `Design` · spec L-04
-
-```dax
-_Window Label =
-VAR _time_code    = [_Sel Time View]
-VAR _time_label   = SWITCH ( _time_code, "MTD", "Month", "FY", "Full year", _time_code )
-VAR _start        = MAX ( [_Win Start], 0 )
-VAR _end          = [_Win End]
-VAR _start_month  =
-    CALCULATE (
-        MAX ( dim_month[month_name] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _start
-    )
-VAR _start_year   =
-    CALCULATE (
-        MAX ( dim_month[fiscal_year] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _start
-    )
-VAR _end_month    =
-    CALCULATE (
-        MAX ( dim_month[month_name] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _end
-    )
-VAR _end_year     =
-    CALCULATE (
-        MAX ( dim_month[fiscal_year] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _end
-    )
-RETURN
-    SWITCH (
-        TRUE ()
-        ,_end < _start
-            ,_time_label & ": no closed months"
-        ,_start = _end
-            ,_time_label & " " & _end_month & " " & _end_year
-        ,_start_year = _end_year
-            ,_time_label & " " & _start_month & "–" & _end_month & " " & _end_year
-        ,_time_label & " " & _start_month & " " & _start_year & "–" & _end_month & " " & _end_year
-    )
-```
-
 ### Rail Sum Period
 
 Folder `Design` · spec F-02..F-04
 
 ```dax
 Rail Sum Period =
-VAR _time_code    = [_Sel Time View]
-VAR _time_label   = SWITCH ( _time_code, "MTD", "Month", "FY", "Full year", _time_code )
-VAR _anchor       = [_Anchor Index]
-VAR _anchor_label =
-    CALCULATE (
-        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _anchor
-    )
-RETURN
-    _time_label & " - " & _anchor_label
+[Period Summary]
 ```
 
 ### Rail Sum Versions
@@ -3392,7 +3372,7 @@ RETURN
         ,ISINSCOPE ( param_units[units_name] )
             ,_symbol & IF ( SELECTEDVALUE ( param_units[units_code] ) = "K", "k", "m" )
         ,ISINSCOPE ( param_time_view[time_view_name] )
-            ,SWITCH ( SELECTEDVALUE ( param_time_view[time_view_code] ), "MTD", "Month", "FY", "FY", SELECTEDVALUE ( param_time_view[time_view_name] ) )
+            ,[_Time View Name]
         ,ISINSCOPE ( param_breakdown_field[Breakdown] )
             ,[_Breakdown Short]
     )
@@ -3483,6 +3463,266 @@ VAR _index        =
     )
 RETURN
     IF ( _index > _last_closed, "#4F5C6C", "#101B2B" )
+```
+
+### _Time View Name
+
+Folder `Design` · spec F-04, period-picker-v2
+
+```dax
+_Time View Name =
+SWITCH (
+    [_Sel Time View]
+    ,"MTD"
+        ,"One month"
+    ,"QTD"
+        ,"Quarter to date"
+    ,"LTM"
+        ,"Last 12 months"
+    ,"FY"
+        ,"Full year"
+    ,"Year to date"
+)
+```
+
+### Period Summary
+
+Folder `Design` · spec F-02..F-04, C-01, period-picker-v2
+
+```dax
+Period Summary =
+VAR _time_view    = [_Sel Time View]
+VAR _start        = MAX ( [_Win Start], 0 )
+VAR _end          = [_Win End]
+VAR _last         = _end
+VAR _start_month  =
+    CALCULATE (
+        MAX ( dim_month[month_name] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _start
+    )
+VAR _start_year   =
+    CALCULATE (
+        MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _start
+    )
+VAR _last_month   =
+    CALCULATE (
+        MAX ( dim_month[month_name] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _last
+    )
+VAR _last_year    =
+    CALCULATE (
+        MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _last
+    )
+VAR _range        =
+    SWITCH (
+        TRUE ()
+        ,_start = _last
+            ,_last_month & " " & _last_year
+        ,_start_year = _last_year
+            ,_start_month & " – " & _last_month & " " & _last_year
+        ,_start_month & " " & _start_year & " – " & _last_month & " " & _last_year
+    )
+VAR _suffix       = IF ( _time_view <> "MTD", " - " & LOWER ( [_Time View Name] ) )
+RETURN
+    IF ( _end < _start, "Showing no closed month yet", "Showing " & _range & _suffix )
+```
+
+### Period Grid Label
+
+Folder `Design` · spec F-03, period-picker-v2
+
+```dax
+Period Grid Label =
+SWITCH (
+    [_Sel Time View]
+    ,"MTD"
+        ,"Month"
+    ,"LTM"
+        ,"Ending"
+    ,"FY"
+        ,"Full year covers January to December."
+    ,"Up to"
+)
+```
+
+### Period Open Hint
+
+Folder `Design` · spec C-01, period-picker-v2
+
+```dax
+Period Open Hint =
+VAR _fiscal_year  = [_Sel FY]
+VAR _year_last    =
+    CALCULATE (
+        MAX ( dim_month[month_index] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[fiscal_year] = _fiscal_year
+    )
+RETURN
+    IF (
+        [_Sel Base Version] = "A" && [_Last Closed Index] < _year_last
+        ,"Switch the base to Latest estimate to include forecast months."
+    )
+```
+
+### Month Item Label
+
+Folder `Design` · spec F-03, C-01, period-picker-v2
+
+```dax
+Month Item Label =
+VAR _fiscal_year  = [_Sel FY]
+VAR _month        = SELECTEDVALUE ( param_period[month_number] )
+VAR _index        =
+    CALCULATE (
+        MAX ( dim_month[month_index] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[fiscal_year] = _fiscal_year
+        ,dim_month[month_number] = _month
+    )
+RETURN
+    IF (
+        _index > [_Last Closed Index]
+        ,SWITCH ( [_Sel Base Version], "LE", "forecast", "B", "budget", "not closed yet" )
+        ,UNICHAR ( 160 )
+    )
+```
+
+### Period Strip SVG
+
+Folder `Design` · spec F-02..F-04, period-picker-v2
+
+```dax
+Period Strip SVG =
+VAR _fiscal_year  = [_Sel FY]
+VAR _start        = [_Win Start]
+VAR _end          = [_Win End]
+VAR _anchor       = [_Anchor Index]
+VAR _last_closed  = [_Last Closed Index]
+VAR _is_actual    = [_Sel Base Version] = "A"
+VAR _acc          = [_Acc]
+VAR _acc_tint     = [_AccT]
+VAR _jan          =
+    CALCULATE (
+        MIN ( dim_month[month_index] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[fiscal_year] = _fiscal_year
+    )
+VAR _cells        =
+    CONCATENATEX (
+        GENERATESERIES ( 1, 12 )
+        ,VAR _index       = _jan + [Value] - 1
+         VAR _x           = ( [Value] - 1 ) * 27 + 1
+         VAR _covered     = _index >= _start && _index <= _end
+         VAR _is_anchor   = _index = _anchor
+         VAR _is_open     = _index > _last_closed
+         VAR _fill        =
+             SWITCH (
+                 TRUE ()
+                 ,_covered && _is_anchor
+                     ,_acc
+                 ,_covered
+                     ,_acc_tint
+                 ,_is_open && _is_actual
+                     ,"#F6F8FA"
+                 ,"#FFFFFF"
+             )
+         VAR _ink         =
+             SWITCH (
+                 TRUE ()
+                 ,_covered && _is_anchor
+                     ,"#FFFFFF"
+                 ,_covered
+                     ,_acc
+                 ,_is_open && _is_actual
+                     ,"#8592A3"
+                 ,"#4F5C6C"
+             )
+         VAR _stroke      = IF ( _is_anchor, _acc, "#CDD4DC" )
+         VAR _width       = IF ( _is_anchor, 2, 1 )
+         RETURN
+             "<rect x='" & _x & "' y='1' width='23' height='19' rx='4' fill='" & _fill & "' stroke='" & _stroke & "' stroke-width='" & _width & "'/>"
+                 & "<text x='" & _x + 12 & "' y='15' text-anchor='middle' font-size='11' fill='" & _ink & "'>" & MID ( "JFMAMJJASOND", [Value], 1 ) & "</text>"
+        ,""
+        ,[Value], ASC
+    )
+VAR _svg          =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='321' height='21' viewBox='0 0 321 21' font-family='Segoe UI, sans-serif'>"
+        & _cells
+        & "</svg>"
+RETURN
+    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+```
+
+### _Notice Row
+
+Folder `Design` · spec C-50, L-05
+
+```dax
+_Notice Row =
+VAR _row          = SELECTEDVALUE ( dim_filter_row[filter_code] )
+VAR _last_closed  = [_Last Closed Index]
+VAR _base         = [_Sel Base Version]
+VAR _start        = [_Win Start]
+VAR _end_raw      = [_Win End Raw]
+VAR _is_group     = [_Sel Entity] = "GROUP"
+VAR _first_label  =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = 0
+    )
+VAR _closed_label =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _last_closed
+    )
+VAR _open_from    =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = MAX ( _last_closed + 1, _start )
+    )
+VAR _open_to      =
+    CALCULATE (
+        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
+        ,REMOVEFILTERS ( dim_month )
+        ,dim_month[month_index] = _end_raw
+    )
+VAR _forecast     =
+    CALCULATE (
+        MAX ( dim_version[version_name] )
+        ,REMOVEFILTERS ( dim_version )
+        ,dim_version[is_latest_forecast] = TRUE ()
+    )
+VAR _uses_py      = [_Sel Compare A] = "PY" || [_Sel Compare B] = "PY"
+VAR _slice_on     =
+    ISFILTERED ( dim_channel[channel_name] )
+        || ISFILTERED ( dim_line[line_name] )
+        || ISFILTERED ( dim_segment[segment_name] )
+RETURN
+    SWITCH (
+        _row
+        ,"N_CLOSE"
+            ,IF ( _base = "A" && _end_raw > _last_closed, "Actuals closed through " & _closed_label & ": later months excluded; use Latest estimate for the full window" )
+        ,"N_FORECAST"
+            ,IF ( _base = "LE" && _end_raw > _last_closed, "Forecast months included: " & _open_from & " – " & _open_to & " (" & _forecast & ")" )
+        ,"N_PY"
+            ,IF ( _uses_py && _start - 12 < 0, "Prior year n/a before " & _first_label )
+        ,"N_LTM"
+            ,IF ( [_Sel Time View] = "LTM" && _start < 0, "LTM starts before the data history (" & _first_label & ")" )
+        ,"N_ALLOC"
+            ,IF ( _slice_on && NOT _is_group, "Slice filter on: lines from operating expenses down are allocated by net-revenue share" )
+        ,"N_ELIM"
+            ,IF ( _is_group, "ACME Group: Commerce Cloud fees billed to Consumer Products are eliminated" )
+    )
 ```
 
 ### _Slice Sub
@@ -3742,63 +3982,13 @@ PL Hdr FY =
 "Full year " & [_Sel FY]
 ```
 
-### Kpi Toolbar Caption
-
-Folder `Design` · spec L-06, K-20
-
-```dax
-Kpi Toolbar Caption =
-VAR _compare_a    = [_Cmp A Name]
-VAR _compare_b    = [_Cmp B Name]
-RETURN
-    SWITCH (
-        TRUE ()
-        ,ISBLANK ( _compare_a ) && ISBLANK ( _compare_b )
-            ,"No comparison selected"
-        ,ISBLANK ( _compare_b )
-            ,"Changes vs " & _compare_a & ", same months"
-        ,ISBLANK ( _compare_a )
-            ,"Changes vs " & _compare_b & ", same months"
-        ,"Changes vs " & _compare_a & " and " & _compare_b & ", same months"
-    )
-```
-
-### Bridge Subtitle
-
-Folder `Design` · spec C-40
-
-```dax
-Bridge Subtitle =
-VAR _view         = [_Sel Entity]
-VAR _method       =
-    SWITCH (
-        _view
-        ,"S"
-            ,"Change by service line at constant currency; FX is the translation effect."
-        ,"GROUP"
-            ,"Change by company at constant currency; FX is the translation effect."
-        ,"Volume and price / mix at constant currency; FX is the translation effect."
-    )
-RETURN
-    [_Bridge Cmp Name] & " to " & [_Base Name] & ", " & [_Units Long] & ". " & _method
-```
-
 ### Var Title
 
 Folder `Design` · spec C-45
 
 ```dax
 Var Title =
-"Largest variances vs " & [_Bridge Cmp Name]
-```
-
-### Var Subtitle
-
-Folder `Design` · spec C-45
-
-```dax
-Var Subtitle =
-"Top 8 lines by size of Δ, " & [_Units Long]
+"Largest variances vs " & [_Bridge Cmp Name] & IF ( [_Sel Compare B] <> "NONE", " - second Δ vs " & [_Cmp B Name] )
 ```
 
 ### Prof Title
@@ -3807,42 +3997,7 @@ Folder `Design` · spec C-46
 
 ```dax
 Prof Title =
-"Profitability by " & LOWER ( [_Breakdown Short] )
-```
-
-### Prof Subtitle
-
-Folder `Design` · spec C-46
-
-```dax
-Prof Subtitle =
-IF ( ISBLANK ( [_Breakdown Hint] ), [_Window Label] & ", " & [_Units Long], [_Breakdown Hint] )
-```
-
-### CM Title
-
-Folder `Design` · spec C-46
-
-```dax
-CM Title =
-"Contribution margin by " & LOWER ( [_Breakdown Short] )
-```
-
-### CM Subtitle
-
-Folder `Design` · spec C-46
-
-```dax
-CM Subtitle =
-VAR _entity       =
-    SWITCH ( [_Sel Entity], "S", "Commerce Cloud", "GROUP", "ACME Group", "Consumer Products" )
-VAR _hint         = [_Breakdown Hint]
-RETURN
-    IF (
-        ISBLANK ( _hint )
-        ,"Dashed line: " & _entity & " average " & FORMAT ( [KPI CM %], "0.0%" ) & ". Scale 0–60%."
-        ,_hint
-    )
+"Profitability by Region"
 ```
 
 ### KPI Tile SVG
@@ -3945,15 +4100,6 @@ RETURN
     )
 ```
 
-### KPI Definition
-
-Folder `Design` · spec L-06, kpi-card-v2
-
-```dax
-KPI Definition =
-SELECTEDVALUE ( dim_kpi[definition] )
-```
-
 ### Hdr Status
 
 Folder `Design` · spec L-01, N-02, N-03
@@ -3983,13 +4129,6 @@ VAR _row          = SELECTEDVALUE ( dim_filter_row[filter_code] )
 VAR _view         = [_Sel Entity]
 VAR _compare_a    = [_Cmp A Name]
 VAR _compare_b    = [_Cmp B Name]
-VAR _anchor       = [_Anchor Index]
-VAR _anchor_label =
-    CALCULATE (
-        MAX ( dim_month[month_name] ) & " " & MAX ( dim_month[fiscal_year] )
-        ,REMOVEFILTERS ( dim_month )
-        ,dim_month[month_index] = _anchor
-    )
 VAR _versions     =
     [_Base Name]
         & SWITCH (
@@ -4005,37 +4144,42 @@ VAR _versions     =
 VAR _regions      =
     IF (
         ISFILTERED ( dim_region[region_name] ) && COUNTROWS ( VALUES ( dim_region[region_name] ) ) < COUNTROWS ( ALL ( dim_region[region_name] ) )
-        ,CONCATENATEX ( VALUES ( dim_region[region_name] ), dim_region[region_name], ", ", dim_region[region_name], ASC )
+        ,CONCATENATEX (
+            SUMMARIZE ( dim_region, dim_region[region_name], dim_region[sort_order] )
+            ,dim_region[region_name]
+            ,", "
+            ,dim_region[sort_order], ASC
+        )
         ,"All regions"
     )
 VAR _channels     =
     IF (
         ISFILTERED ( dim_channel[channel_name] )
         ,CONCATENATEX (
-            CALCULATETABLE ( VALUES ( dim_channel[channel_name] ), KEEPFILTERS ( dim_channel[entity_code] = _view ) )
+            CALCULATETABLE ( SUMMARIZE ( dim_channel, dim_channel[channel_name], dim_channel[sort_order] ), KEEPFILTERS ( dim_channel[entity_code] = _view ) )
             ,dim_channel[channel_name]
             ,", "
-            ,dim_channel[channel_name], ASC
+            ,dim_channel[sort_order], ASC
         )
     )
 VAR _lines        =
     IF (
         ISFILTERED ( dim_line[line_name] )
         ,CONCATENATEX (
-            CALCULATETABLE ( VALUES ( dim_line[line_name] ), KEEPFILTERS ( dim_line[entity_code] = _view ) )
+            CALCULATETABLE ( SUMMARIZE ( dim_line, dim_line[line_name], dim_line[sort_order] ), KEEPFILTERS ( dim_line[entity_code] = _view ) )
             ,dim_line[line_name]
             ,", "
-            ,dim_line[line_name], ASC
+            ,dim_line[sort_order], ASC
         )
     )
 VAR _segments     =
     IF (
         ISFILTERED ( dim_segment[segment_name] )
         ,CONCATENATEX (
-            CALCULATETABLE ( VALUES ( dim_segment[segment_name] ), KEEPFILTERS ( dim_segment[entity_code] = _view ) )
+            CALCULATETABLE ( SUMMARIZE ( dim_segment, dim_segment[segment_name], dim_segment[sort_order] ), KEEPFILTERS ( dim_segment[entity_code] = _view ) )
             ,dim_segment[segment_name]
             ,", "
-            ,dim_segment[segment_name], ASC
+            ,dim_segment[sort_order], ASC
         )
     )
 VAR _is_services  = _view = "S"
@@ -4053,11 +4197,11 @@ RETURN
         ,"COMPANY"
             ,SWITCH ( _view, "S", "Commerce Cloud", "GROUP", "ACME Group (consolidated)", "Consumer Products" )
         ,"FY"
-            ,"FY" & [_Sel FY]
+            ,FORMAT ( [_Sel FY], "0" )
         ,"PERIOD"
-            ,_anchor_label
+            ,[Period Summary]
         ,"TIME"
-            ,[_Window Label]
+            ,[_Time View Name]
         ,"VERSIONS"
             ,_versions
         ,"CURRENCY"
@@ -4070,6 +4214,7 @@ RETURN
             ,_regions
         ,"SLICES"
             ,IF ( _view = "GROUP", "Consolidated: channel, category and segment do not apply", _slices )
+        ,[_Notice Row]
     )
 ```
 
@@ -4092,95 +4237,6 @@ RETURN
     )
 ```
 
-### Info Bridge 1
-
-Folder `Design` · spec L-15, C-40
-
-```dax
-Info Bridge 1 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-RETURN
-    "How net revenue got from " & _cmp & " to the current figure, split into the reasons for the change."
-```
-
-### Info Bridge 2
-
-Folder `Design` · spec L-15, C-40
-
-```dax
-Info Bridge 2 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-RETURN
-    "• The first bar is net revenue in " & _cmp & "; the last bar is net revenue now."
-```
-
-### Info Variances 1
-
-Folder `Design` · spec L-15, C-45
-
-```dax
-Info Variances 1 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-RETURN
-    "The 8 lines of the P&L that differ most from " & _cmp & ", in amount, whether up or down."
-```
-
-### Info Variances 2
-
-Folder `Design` · spec L-15, C-45
-
-```dax
-Info Variances 2 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-RETURN
-    "• Δ is the difference in money; Δ % is that difference as a share of " & _cmp & "."
-```
-
-### Info Profitability 1
-
-Folder `Design` · spec L-15, C-46
-
-```dax
-Info Profitability 1 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-VAR _bd          = LOWER ( [_Breakdown Short] )
-RETURN
-    "How much revenue each " & _bd & " brings in, how it grew against " & _cmp & ", and how much of that revenue is left as profit at each stage of the P&L."
-```
-
-### Info Profitability 2
-
-Folder `Design` · spec L-15, C-46
-
-```dax
-Info Profitability 2 =
-VAR _cmp         = LOWER ( [_Bridge Cmp Name] )
-RETURN
-    "• vs " & _cmp & ": revenue growth of the row; green is better than " & _cmp & ", orange is worse."
-```
-
-### Info Profitability 3
-
-Folder `Design` · spec L-15, C-46
-
-```dax
-Info Profitability 3 =
-VAR _bd          = LOWER ( [_Breakdown Short] )
-RETURN
-    "Costs that are not booked to a " & _bd & " (for example marketing or admin) are shared out by each row's share of revenue, so margins below contribution margin are partly an allocation, not a direct measurement."
-```
-
-### Info CM 1
-
-Folder `Design` · spec L-15, C-46
-
-```dax
-Info CM 1 =
-VAR _bd          = LOWER ( [_Breakdown Short] )
-RETURN
-    "For each " & _bd & ", the share of its revenue that is left after the direct costs of making, selling and delivering: the contribution margin %."
-```
-
 ### PL Fav Off
 
 Folder `Design` · spec L-12, N-07
@@ -4188,4 +4244,1684 @@ Folder `Design` · spec L-12, N-07
 ```dax
 PL Fav Off =
 IF ( NOT ISINSCOPE ( dim_pl_row[account_label] ) && SELECTEDVALUE ( dim_pl_row[line_code] ) = "ETR_PCT", 1 )
+```
+
+### KPI Opex % NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI Opex % NR =
+VAR _opex         =
+    CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "OPEX"
+    )
+VAR _ooi          =
+    CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "OOI"
+    )
+RETURN
+    DIVIDE ( -( _opex - _ooi ), [Net Revenue] )
+```
+
+### KPI S&M % NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI S&M % NR =
+DIVIDE (
+    -CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "SM"
+    )
+    ,[Net Revenue]
+)
+```
+
+### KPI R&D % NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI R&D % NR =
+DIVIDE (
+    -CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "RD"
+    )
+    ,[Net Revenue]
+)
+```
+
+### KPI G&A % NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI G&A % NR =
+DIVIDE (
+    -CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "GA"
+    )
+    ,[Net Revenue]
+)
+```
+
+### KPI Subscription Share
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI Subscription Share =
+DIVIDE (
+    CALCULATE (
+        [Net Revenue]
+        ,REMOVEFILTERS ( dim_line )
+        ,TREATAS ( { "SUB" }, dim_line[line_code] )
+    )
+    ,[Net Revenue]
+)
+```
+
+### KPI Payments Share
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI Payments Share =
+DIVIDE (
+    CALCULATE (
+        [Net Revenue]
+        ,REMOVEFILTERS ( dim_line )
+        ,TREATAS ( { "PAY" }, dim_line[line_code] )
+    )
+    ,[Net Revenue]
+)
+```
+
+### KPI Payments GM %
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI Payments GM % =
+CALCULATE (
+    DIVIDE ( [Gross Profit], [Net Revenue] )
+    ,REMOVEFILTERS ( dim_line )
+    ,TREATAS ( { "PAY" }, dim_line[line_code] )
+)
+```
+
+### KPI GMV per Merchant
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI GMV per Merchant =
+DIVIDE ( [KPI GMV], [KPI Active Merchants] )
+```
+
+### KPI Net New ARR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI Net New ARR =
+VAR _arr          = [KPI ARR]
+VAR _arr_b        =
+    CALCULATE (
+        [KPI ARR]
+        ,REMOVEFILTERS ( param_eval )
+        ,TREATAS ( { "CMP_B" }, param_eval[eval_code] )
+    )
+RETURN
+    IF ( NOT ISBLANK ( _arr_b ), _arr - _arr_b )
+```
+
+### KPI FY Outlook NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI FY Outlook NR =
+CALCULATE (
+    [FY LE Amount]
+    ,REMOVEFILTERS ( dim_pl_row )
+    ,dim_pl_row[line_code] = "NR"
+)
+```
+
+### KPI FY Budget NR
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI FY Budget NR =
+CALCULATE (
+    [FY Budget Amount]
+    ,REMOVEFILTERS ( dim_pl_row )
+    ,dim_pl_row[line_code] = "NR"
+)
+```
+
+### KPI FY Outlook EBITDA
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI FY Outlook EBITDA =
+CALCULATE (
+    [FY LE Amount]
+    ,REMOVEFILTERS ( dim_pl_row )
+    ,dim_pl_row[line_code] = "EBITDA"
+)
+```
+
+### KPI FY Budget EBITDA
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI FY Budget EBITDA =
+CALCULATE (
+    [FY Budget Amount]
+    ,REMOVEFILTERS ( dim_pl_row )
+    ,dim_pl_row[line_code] = "EBITDA"
+)
+```
+
+### KPI FY Attainment
+
+Folder `3 KPIs\Items` · spec §5 Vitals, redesign v4
+
+```dax
+KPI FY Attainment =
+DIVIDE ( [KPI FY Outlook NR], [KPI FY Budget NR] )
+```
+
+### _KPI Status
+
+Folder `9 Engine` · spec §6, ADR-0012
+
+```dax
+_KPI Status =
+VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
+VAR _better       = SELECTEDVALUE ( dim_kpi[better_when] )
+VAR _is_pp        = _type IN { "PCT", "PCT2" }
+VAR _value        = [_KPI Value]
+VAR _budget       = [_KPI Budget Value]
+VAR _delta        = IF ( _is_pp, ( _value - _budget ) * 100, DIVIDE ( _value - _budget, ABS ( _budget ) ) )
+VAR _kind         = IF ( _is_pp, "PP", "PCT" )
+VAR _on_track     = LOOKUPVALUE ( param_kpi_threshold[on_track], param_kpi_threshold[delta_kind], _kind )
+VAR _watch        = LOOKUPVALUE ( param_kpi_threshold[watch], param_kpi_threshold[delta_kind], _kind )
+VAR _fav          = IF ( _better = "Lower", -_delta, _delta )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,_better = "Neutral" || ISBLANK ( _value ) || ISBLANK ( _budget )
+            ,"neutral"
+        ,ABS ( _delta ) <= _on_track
+            ,"ontrack"
+        ,_fav > 0
+            ,"ahead"
+        ,ABS ( _delta ) <= _watch
+            ,"watch"
+        ,"off"
+    )
+```
+
+### KPI Status
+
+Folder `3 KPIs\Vitals` · spec §6, ADR-0012
+
+```dax
+KPI Status =
+SWITCH (
+    [_KPI Status]
+    ,"ontrack"
+        ,"on track"
+    ,"ahead"
+        ,"ahead"
+    ,"watch"
+        ,"watch"
+    ,"off"
+        ,"off track"
+)
+```
+
+### Vitals Card SVG
+
+Folder `3 KPIs\Vitals` · spec §5, ADR-0012
+
+```dax
+Vitals Card SVG =
+VAR _label        = SELECTEDVALUE ( dim_kpi[kpi_label] )
+VAR _tier         = SELECTEDVALUE ( dim_kpi[vitals_tier] )
+VAR _w            = SWITCH ( _tier, "Hero", 335, "Secondary", 292, 257 )
+VAR _h            = SWITCH ( _tier, "Hero", 320, "Secondary", 155, 279 )
+VAR _value_size   = SWITCH ( _tier, "Hero", 46, "Secondary", 28, 30 )
+VAR _p            = [_Vitals Parts]
+VAR _status       = PATHITEM ( _p, 10 )
+VAR _rows_svg     =
+    CONCATENATEX (
+        FILTER ( { 1, 2 }, PATHITEM ( _p, [Value] * 4 - 2 ) <> "" )
+        ,VAR _i           = [Value] * 4 - 2
+         VAR _y           = _h - 52 + ( [Value] - 1 ) * 22
+         VAR _abs_text    = PATHITEM ( _p, _i + 1 )
+         VAR _rel_text    = PATHITEM ( _p, _i + 2 )
+         VAR _ink         = PATHITEM ( _p, _i + 3 )
+         RETURN
+             "<text x='16' y='" & _y & "' font-size='13' fill='#4F5C6C'>" & PATHITEM ( _p, _i ) & "</text>"
+                 & IF ( LEN ( _abs_text ) > 0, "<text x='" & _w - 88 & "' y='" & _y & "' font-size='13' font-weight='600' text-anchor='end' fill='" & _ink & "'>" & _abs_text & "</text>" )
+                 & "<text x='" & _w - 16 & "' y='" & _y & "' font-size='13' font-weight='" & IF ( _rel_text = "on plan", "400", "600" ) & "' text-anchor='end' fill='" & IF ( _rel_text = "on plan", "#4F5C6C", _ink ) & "'>" & _rel_text & "</text>"
+        ,""
+        ,[Value], ASC
+    )
+VAR _chip_word    = SWITCH ( _status, "ontrack", "on track", "ahead", "ahead", "watch", "watch", "off", "off track" )
+VAR _chip_w       = SWITCH ( _status, "ontrack", 70, "ahead", 54, "watch", 56, "off", 68, 0 )
+VAR _chip_fill    = SWITCH ( _status, "ahead", "#E4F3EC", "watch", "#FBF4E4", "off", "#FCEDE5", "#EDF0F3" )
+VAR _chip_ink     = SWITCH ( _status, "ahead", "#06603F", "watch", "#8A5A00", "off", "#C2410C", "#101B2B" )
+VAR _chip_dot     = SWITCH ( _status, "ahead", "#3BA37B", "watch", "#D9A441", "off", "#C2410C", "#8592A3" )
+VAR _chip         =
+    IF (
+        _chip_w > 0
+        ,"<rect x='16' y='40' width='" & _chip_w & "' height='20' rx='10' fill='" & _chip_fill & "'/>"
+            & "<circle cx='27' cy='50' r='3.5' fill='" & _chip_dot & "'/>"
+            & "<text x='35' y='54' font-size='11' font-weight='500' fill='" & _chip_ink & "'>" & _chip_word & "</text>"
+    )
+VAR _svg          =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='" & _w & "' height='" & _h & "' viewBox='0 0 " & _w & " " & _h & "' font-family='Segoe UI, sans-serif'>"
+        & "<rect x='0.5' y='0.5' width='" & _w - 1 & "' height='" & _h - 1 & "' rx='12' fill='" & IF ( _tier = "Driver", "#F6F8FA", "#FFFFFF" ) & "' stroke='#DEE3E9'/>"
+        & "<text x='16' y='28' font-size='14' font-weight='500' fill='#4F5C6C'>" & _label & "</text>"
+        & _chip
+        & "<text x='16' y='" & _h - 74 & "' font-size='" & _value_size & "' font-weight='600' fill='#101B2B' style='font-variant-numeric:tabular-nums'>" & PATHITEM ( _p, 1 ) & "</text>"
+        & _rows_svg
+        & "</svg>"
+RETURN
+    IF (
+        _p <> ""
+        ,"data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+    )
+```
+
+### KPI Info Sub
+
+Folder `3 KPIs\Vitals` · spec §5, ADR-0012
+
+```dax
+KPI Info Sub =
+VAR _code         = SELECTEDVALUE ( dim_kpi[kpi_code] )
+VAR _entity       = [_Sel Entity]
+RETURN
+    SWITCH (
+        _code
+        ,"NR"
+            ,"Organic growth vs PY (constant currency): " & IF ( ISBLANK ( [KPI Organic Growth] ), "n/a", FORMAT ( [KPI Organic Growth], "+0.0%;−0.0%;0.0%" ) )
+        & " - " & "Reported growth vs PY: " & IF ( ISBLANK ( [KPI Reported Growth] ), "n/a", FORMAT ( [KPI Reported Growth], "+0.0%;−0.0%;0.0%" ) )
+        ,"EBITDA"
+            ,"Margin: " & IF ( ISBLANK ( [KPI Adj EBITDA Margin] ), "n/a", FORMAT ( [KPI Adj EBITDA Margin], "0.0%" ) ) & IF ( _entity = "S", " - Rule of 40 (organic growth + margin): " & IF ( ISBLANK ( [KPI Rule of 40] ), "n/a", FORMAT ( [KPI Rule of 40], "0.0%" ) ) )
+        ,"OP"
+            ,"Margin: " & IF ( ISBLANK ( [KPI Operating Margin] ), "n/a", FORMAT ( [KPI Operating Margin], "0.0%" ) )
+        & " - " & "Adj. EBITDA: " & IF ( ISBLANK ( [Adjusted EBITDA] ), "n/a", VAR _b = FORMAT ( ABS ( [Adjusted EBITDA] ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( [Adjusted EBITDA] < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "D&A: " & IF ( ISBLANK ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "DA" ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "DA" ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "DA" ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "Adjusting items: " & IF ( ISBLANK ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "ADJ" ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "ADJ" ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "ADJ" ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "Net profit: " & IF ( ISBLANK ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "NP" ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "NP" ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "NP" ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "Net margin: " & IF ( ISBLANK ( [KPI Net Margin] ), "n/a", FORMAT ( [KPI Net Margin], "0.0%" ) )
+        ,"GM_PCT"
+            ,SWITCH (
+                _entity
+                ,"S"
+                    ,"Platform subscriptions: " & IF ( ISBLANK ( [KPI Subscription GM %] ), "n/a", FORMAT ( [KPI Subscription GM %], "0.0%" ) )
+        & " - " & "Payments: " & IF ( ISBLANK ( [KPI Payments GM %] ), "n/a", FORMAT ( [KPI Payments GM %], "0.0%" ) )
+                ,"P"
+                    ,CONCATENATEX (
+                        TOPN (
+                            2
+                            ,FILTER ( ADDCOLUMNS ( VALUES ( dim_line[line_code] ), "@nr", [Net Revenue], "@gm", [KPI Gross Margin %], "@n", CALCULATE ( MAX ( dim_line[line_name] ) ) ), NOT ISBLANK ( [@nr] ) && CALCULATE ( MAX ( dim_line[entity_code] ) ) = "P" && NOT ( dim_line[line_code] IN { "P_UNASSIGNED", "S_UNASSIGNED" } ) )
+                            ,[@nr], DESC
+                        )
+                        ,[@n] & ": " & FORMAT ( [@gm], "0.0%" )
+                        ," - "
+                        ,[@nr], DESC
+                    )
+            )
+        ,"OPEX_PCT"
+            ,"Sales & marketing % NR: " & IF ( ISBLANK ( [KPI S&M % NR] ), "n/a", FORMAT ( [KPI S&M % NR], "0.0%" ) )
+        & " - " & "R&D % NR: " & IF ( ISBLANK ( [KPI R&D % NR] ), "n/a", FORMAT ( [KPI R&D % NR], "0.0%" ) )
+        & " - " & "G&A % NR: " & IF ( ISBLANK ( [KPI G&A % NR] ), "n/a", FORMAT ( [KPI G&A % NR], "0.0%" ) )
+        & " - " & "Opex: " & IF ( ISBLANK ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) ), "n/a", VAR _b = FORMAT ( ABS ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "Opex vs Budget (favourable +): " & IF ( ISBLANK ( ( CALCULATE ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) - ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) ) ) ), "n/a", VAR _b = FORMAT ( ABS ( ( CALCULATE ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) - ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( ( CALCULATE ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) - ( - ( CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "SM" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "RD" ) + CALCULATE (     [Base Amount]     ,REMOVEFILTERS ( dim_pl_row )     ,dim_pl_row[line_code] = "GA" ) ) ) ) < 0, "−", "+" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        ,"GMV"
+            ,"Payments take rate: " & IF ( ISBLANK ( [KPI Payments Take Rate] ), "n/a", FORMAT ( [KPI Payments Take Rate], "0.00%" ) )
+        & " - " & "Take rate vs Budget: " & IF ( ISBLANK ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) ), "n/a", IF ( ROUND ( ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) ) * 10000, 0 ) = 0, "0 bp", FORMAT ( ROUND ( ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "B" }, param_compare_a[choice_code] ) ) ) * 10000, 0 ), "+0;−0" ) & " bp" ) )
+        & " - " & "Take rate vs Prior year: " & IF ( ISBLANK ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ), "n/a", IF ( ROUND ( ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) * 10000, 0 ) = 0, "0 bp", FORMAT ( ROUND ( ( [KPI Payments Take Rate] - CALCULATE ( [KPI Payments Take Rate], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) * 10000, 0 ), "+0;−0" ) & " bp" ) )
+        ,"MERCHANTS"
+            ,"GMV per merchant: " & IF ( ISBLANK ( [KPI GMV per Merchant] ), "n/a", SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & FORMAT ( [KPI GMV per Merchant] / 1000, "#,0.0" ) & " k" )
+        ,"ARR"
+            ,"Net new ARR vs prior-year end: " & IF ( ISBLANK ( ( [KPI ARR] - CALCULATE ( [KPI ARR], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) ), "n/a", VAR _b = FORMAT ( ABS ( ( [KPI ARR] - CALCULATE ( [KPI ARR], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( ( [KPI ARR] - CALCULATE ( [KPI ARR], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) < 0, "−", "+" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        ,"MIX"
+            ,"Platform subscriptions: " & IF ( ISBLANK ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) ) & " (" & IF ( ISBLANK ( DIVIDE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ), CALCULATE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1 ), "n/a", FORMAT ( DIVIDE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ), CALCULATE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "SUB" }, dim_line[line_code] ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1, "+0.0%;−0.0%;0.0%" ) ) & " YoY)"
+        & " - " & "Payments: " & IF ( ISBLANK ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) ) & " (" & IF ( ISBLANK ( DIVIDE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ), CALCULATE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1 ), "n/a", FORMAT ( DIVIDE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ), CALCULATE ( CALCULATE ( [Net Revenue], REMOVEFILTERS ( dim_line ), TREATAS ( { "PAY" }, dim_line[line_code] ) ), REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1, "+0.0%;−0.0%;0.0%" ) ) & " YoY)"
+        ,"UNITS"
+            ,"Volume vs prior year: " & IF ( ISBLANK ( DIVIDE ( [KPI Units Sold], CALCULATE ( [KPI Units Sold], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1 ), "n/a", FORMAT ( DIVIDE ( [KPI Units Sold], CALCULATE ( [KPI Units Sold], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) ) ) - 1, "+0.0%;−0.0%;0.0%" ) )
+        ,"NR_PER_UNIT"
+            ,"Net revenue: " & IF ( ISBLANK ( [Net Revenue] ), "n/a", VAR _b = FORMAT ( ABS ( [Net Revenue] ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( [Net Revenue] < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "Units sold: " & IF ( ISBLANK ( [KPI Units Sold] ), "n/a", FORMAT ( [KPI Units Sold], "#,0" ) )
+        ,"GTN_PCT"
+            ,"Gross-to-net deductions: " & IF ( ISBLANK ( [Gross-to-Net Deductions] ), "n/a", VAR _b = FORMAT ( ABS ( [Gross-to-Net Deductions] ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( [Gross-to-Net Deductions] < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        ,"AP_PCT"
+            ,"A&P spend: " & IF ( ISBLANK ( CALCULATE ( [Base Amount], KEEPFILTERS ( TREATAS ( { "SM_P1", "SM_P2" }, dim_account[account_code] ) ) ) ), "n/a", VAR _b = FORMAT ( ABS ( CALCULATE ( [Base Amount], KEEPFILTERS ( TREATAS ( { "SM_P1", "SM_P2" }, dim_account[account_code] ) ) ) ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( CALCULATE ( [Base Amount], KEEPFILTERS ( TREATAS ( { "SM_P1", "SM_P2" }, dim_account[account_code] ) ) ) < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        ,"FY_OUTLOOK"
+            ,"Revenue attainment: " & IF ( ISBLANK ( [KPI FY Attainment] ), "n/a", FORMAT ( [KPI FY Attainment], "0.0%" ) )
+        & " - " & "Adj. EBITDA, FY LE: " & IF ( ISBLANK ( [KPI FY Outlook EBITDA] ), "n/a", VAR _b = FORMAT ( ABS ( [KPI FY Outlook EBITDA] ) / [_Units Divisor], IF ( [_Sel Units] = "K", "#,0", "#,0.0" ) ) RETURN IF ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _b, "0", "" ), ".", "" ), ",", "" ) = "", "", IF ( [KPI FY Outlook EBITDA] < 0, "−", "" ) ) & SELECTEDVALUE ( param_reporting_currency[symbol], "$" ) & _b & IF ( [_Sel Units] = "K", " k", " m" ) )
+        & " - " & "EBITDA attainment: " & IF ( ISBLANK ( DIVIDE ( [KPI FY Outlook EBITDA], [KPI FY Budget EBITDA] ) ), "n/a", FORMAT ( DIVIDE ( [KPI FY Outlook EBITDA], [KPI FY Budget EBITDA] ), "0.0%" ) )
+    )
+```
+
+### Bridge Step Delta
+
+Folder `4 Analysis` · spec C-40, redesign v4
+
+```dax
+Bridge Step Delta =
+VAR _step         = SELECTEDVALUE ( dim_bridge_step[step_code] )
+RETURN
+    IF (
+        [Bridge Step In View] = 1
+        ,IF (
+            _step IN { "CC_SUB", "END" }
+            ,0
+            ,[Bridge Value]
+        )
+    )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _units        = [_Sel Units]
+RETURN
+    IF ( _units = "K", "#,0;−#,0;0", "#,0.0;−#,0.0;0.0" )
+```
+
+### Bridge Is Total
+
+Folder `4 Analysis` · spec C-40, redesign v4
+
+```dax
+Bridge Is Total =
+IF (
+    [Bridge Step In View] = 1
+    ,IF (
+        SELECTEDVALUE ( dim_bridge_step[step_code] ) IN { "START", "CC_SUB", "END" }
+        ,1
+        ,0
+    )
+)
+```
+
+### Bridge Axis Min
+
+Folder `4 Analysis` · spec C-40, redesign v4
+
+```dax
+Bridge Axis Min =
+VAR _levels       =
+    {
+        [Bridge Comparison NR]
+        ,[Net Revenue]
+        ,[Net Revenue] - [Bridge FX]
+    }
+VAR _low          = MINX ( _levels, [Value] )
+VAR _high         = MAXX ( _levels, [Value] )
+RETURN
+    DIVIDE ( MAX ( _low - ( _high - _low ) * 1.5 - ABS ( [Bridge FX] ), 0 ), [_Units Divisor] )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _units        = [_Sel Units]
+RETURN
+    IF ( _units = "K", "#,0;−#,0;0", "#,0.0;−#,0.0;0.0" )
+```
+
+### _Profit Step
+
+Folder `9 Engine` · spec C-40, redesign v4
+
+```dax
+_Profit Step =
+VAR _step         = SELECTEDVALUE ( dim_profit_step[step_code] )
+VAR _cmp_ebitda   =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "EBITDA"
+    )
+RETURN
+    SWITCH (
+        _step
+        ,"BUD"
+            ,_cmp_ebitda
+        ,"VOL"
+            ,[_Profit Volume]
+        ,"GM_RATE"
+            ,[_Profit GM Rate]
+        ,"GM_MIX"
+            ,[_Profit GP CC Change] - [_Profit Volume] - [_Profit GM Rate]
+        ,"FX"
+            ,VAR _ebitda      = [Adjusted EBITDA]
+             VAR _ebitda_cc   =
+                 CALCULATE (
+                     [Adjusted EBITDA]
+                     ,REMOVEFILTERS ( param_fx_basis )
+                     ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+                 )
+             VAR _cmp_cc      =
+                 CALCULATE (
+                     [Bridge Comparison Amount]
+                     ,REMOVEFILTERS ( dim_pl_row )
+                     ,dim_pl_row[line_code] = "EBITDA"
+                     ,REMOVEFILTERS ( param_fx_basis )
+                     ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+                 )
+             RETURN
+                 ( _ebitda - _ebitda_cc ) - ( _cmp_ebitda - _cmp_cc )
+        ,"ACT"
+            ,0
+        ,"OP"
+            ,0
+        ,VAR _line        = _step
+         VAR _base_cc     =
+             CALCULATE (
+                 [Base Amount]
+                 ,REMOVEFILTERS ( dim_pl_row )
+                 ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                 ,REMOVEFILTERS ( param_fx_basis )
+                 ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+             )
+         VAR _cmp_cc      =
+             CALCULATE (
+                 [Bridge Comparison Amount]
+                 ,REMOVEFILTERS ( dim_pl_row )
+                 ,TREATAS ( { _line }, dim_pl_row[line_code] )
+                 ,REMOVEFILTERS ( param_fx_basis )
+                 ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+             )
+         VAR _level       =
+             CALCULATE (
+                 [Base Amount]
+                 ,REMOVEFILTERS ( dim_pl_row )
+                 ,TREATAS ( { _line }, dim_pl_row[line_code] )
+             )
+         RETURN
+             IF ( _step IN { "DA", "ADJ" }, _level, _base_cc - _cmp_cc )
+    )
+```
+
+### _Profit GP CC Change
+
+Folder `9 Engine` · spec C-40, redesign v4
+
+```dax
+_Profit GP CC Change =
+VAR _gp_cc        =
+    CALCULATE (
+        [Gross Profit]
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+VAR _cmp_gp_cc    =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "GP"
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+RETURN
+    _gp_cc - _cmp_gp_cc
+```
+
+### _Profit Volume
+
+Folder `9 Engine` · spec C-40, redesign v4
+
+```dax
+_Profit Volume =
+VAR _cmp_gp_cc    =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "GP"
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+RETURN
+    [_Bridge NR CC Change] * DIVIDE ( _cmp_gp_cc, [_NR CC Bridge Cmp] )
+```
+
+### _Profit GM Rate
+
+Folder `9 Engine` · spec C-40, redesign v4
+
+```dax
+_Profit GM Rate =
+VAR _view         = [_Sel Entity]
+RETURN
+    SUMX (
+        FILTER (
+            VALUES ( dim_line[line_code] )
+            ,_view = "GROUP"
+                || CALCULATE ( MAX ( dim_line[entity_code] ) ) = _view
+        )
+        ,VAR _entity      = CALCULATE ( MAX ( dim_line[entity_code] ) )
+         RETURN
+             IF (
+                 _view = "GROUP"
+                 ,CALCULATE (
+                     [_Profit GM Rate Line]
+                     ,REMOVEFILTERS ( param_entity_view )
+                     ,TREATAS ( { _entity }, param_entity_view[entity_view_code] )
+                 )
+                 ,[_Profit GM Rate Line]
+             )
+    )
+```
+
+### Profit Step Delta
+
+Folder `4 Analysis\Profit bridge` · spec C-46, redesign v4
+
+```dax
+Profit Step Delta =
+DIVIDE ( [_Profit Step], [_Units Divisor] )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _units        = [_Sel Units]
+RETURN
+    IF ( _units = "K", "#,0;−#,0;0", "#,0.0;−#,0.0;0.0" )
+```
+
+### Profit Is Total
+
+Folder `4 Analysis\Profit bridge` · spec C-46, redesign v4
+
+```dax
+Profit Is Total =
+IF (
+    SELECTEDVALUE ( dim_profit_step[step_code] ) IN { "BUD", "ACT", "OP" }
+    ,1
+    ,0
+)
+```
+
+### LV Δ B
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Δ B =
+VAR _base         = [Base Amount]
+VAR _compare      = [Compare B Amount]
+RETURN
+    IF (
+        [_Sel Compare B] <> "NONE" && NOT ( ISBLANK ( _base ) && ISBLANK ( _compare ) )
+        ,DIVIDE ( _base - _compare, [_Units Divisor] )
+    )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _units        = [_Sel Units]
+RETURN
+    IF ( _units = "K", "+#,0;−#,0;0", "+#,0.0;−#,0.0;0.0" )
+```
+
+### LV FX
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV FX =
+VAR _base         = [Base Amount]
+VAR _compare      = [Bridge Comparison Amount]
+VAR _base_cc      =
+    CALCULATE (
+        [Base Amount]
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+VAR _compare_cc   =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+RETURN
+    IF (
+        NOT ( ISBLANK ( _base ) && ISBLANK ( _compare ) )
+        ,DIVIDE ( ( _base - _base_cc ) - ( _compare - _compare_cc ), [_Units Divisor] )
+    )
+```
+
+Format string (dynamic):
+
+```dax
+VAR _units        = [_Sel Units]
+RETURN
+    IF ( _units = "K", "+#,0;−#,0;0", "+#,0.0;−#,0.0;0.0" )
+```
+
+### LV Δ % Text
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Δ % Text =
+VAR _base         = [Base Amount]
+VAR _compare      = [Bridge Comparison Amount]
+VAR _pct          = DIVIDE ( _base - _compare, ABS ( _compare ) )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,( ISBLANK ( _base ) || _base = 0 ) && ( ISBLANK ( _compare ) || _compare = 0 )
+            ,BLANK ()
+        ,ABS ( DIVIDE ( _compare, [_Units Divisor] ) ) < 2 || ABS ( _pct ) > 0.5
+            ,"n.m."
+        ,FORMAT ( _pct, "+0.0%;−0.0%;0.0%" )
+    )
+```
+
+### LV Alloc Tag
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Alloc Tag =
+VAR _cut          = SELECTEDVALUE ( param_var_cut[Cut Order], 0 )
+VAR _account      = SELECTEDVALUE ( dim_pl_row[account_code] )
+VAR _below_cm     = LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], _account )
+RETURN
+    IF (
+        LEN ( _account ) > 0
+            && _below_cm = TRUE ()
+            && NOT ( _cut IN { 0, 1, 5 } )
+        ,"alloc."
+    )
+```
+
+### LV Coverage 8
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Coverage 8 =
+VAR _n            = 8
+VAR _accounts     =
+    ADDCOLUMNS (
+        CALCULATETABLE (
+            VALUES ( dim_account[account_code] )
+            ,NOT ( dim_account[block_code] IN { "INV", "FIN", "TAX" } )
+        )
+        ,"@abs", [LV Abs Δ]
+        ,"@d", [Base Amount] - [Bridge Comparison Amount]
+    )
+VAR _lines        = FILTER ( _accounts, NOT ISBLANK ( [@abs] ) && [@abs] <> 0 )
+VAR _shown        = TOPN ( _n, _lines, [@abs], DESC )
+VAR _shown_abs    = SUMX ( _shown, [@abs] )
+VAR _all_abs      = SUMX ( _lines, [@abs] )
+VAR _total_d      = SUMX ( _lines, [@d] )
+VAR _shown_n      = MIN ( _n, COUNTROWS ( _lines ) )
+VAR _units        = IF ( [_Sel Units] = "K", " k", " m" )
+VAR _fmt          = IF ( [_Sel Units] = "K", "+#,0;−#,0;0", "+#,0.0;−#,0.0;0.0" )
+RETURN
+    "Shown " & _shown_n & " of " & [LV Leaf Count] & " lines - coverage "
+        & FORMAT ( DIVIDE ( _shown_abs, _all_abs ), "0%" ) & " of |Δ| - all other lines "
+        & FORMAT ( DIVIDE ( SUMX ( _shown, [@d] ) - _total_d, -[_Units Divisor] ), _fmt ) & _units
+        & " - total P&L Δ at operating profit " & FORMAT ( DIVIDE ( _total_d, [_Units Divisor] ), _fmt ) & _units
+```
+
+### LV Coverage 12
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Coverage 12 =
+VAR _n            = 12
+VAR _accounts     =
+    ADDCOLUMNS (
+        CALCULATETABLE (
+            VALUES ( dim_account[account_code] )
+            ,NOT ( dim_account[block_code] IN { "INV", "FIN", "TAX" } )
+        )
+        ,"@abs", [LV Abs Δ]
+        ,"@d", [Base Amount] - [Bridge Comparison Amount]
+    )
+VAR _lines        = FILTER ( _accounts, NOT ISBLANK ( [@abs] ) && [@abs] <> 0 )
+VAR _shown        = TOPN ( _n, _lines, [@abs], DESC )
+VAR _shown_abs    = SUMX ( _shown, [@abs] )
+VAR _all_abs      = SUMX ( _lines, [@abs] )
+VAR _total_d      = SUMX ( _lines, [@d] )
+VAR _shown_n      = MIN ( _n, COUNTROWS ( _lines ) )
+VAR _units        = IF ( [_Sel Units] = "K", " k", " m" )
+VAR _fmt          = IF ( [_Sel Units] = "K", "+#,0;−#,0;0", "+#,0.0;−#,0.0;0.0" )
+RETURN
+    "Shown " & _shown_n & " of " & [LV Leaf Count] & " lines - coverage "
+        & FORMAT ( DIVIDE ( _shown_abs, _all_abs ), "0%" ) & " of |Δ| - all other lines "
+        & FORMAT ( DIVIDE ( SUMX ( _shown, [@d] ) - _total_d, -[_Units Divisor] ), _fmt ) & _units
+        & " - total P&L Δ at operating profit " & FORMAT ( DIVIDE ( _total_d, [_Units Divisor] ), _fmt ) & _units
+```
+
+### LV Coverage All
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Coverage All =
+VAR _n            = 1000
+VAR _accounts     =
+    ADDCOLUMNS (
+        CALCULATETABLE (
+            VALUES ( dim_account[account_code] )
+            ,NOT ( dim_account[block_code] IN { "INV", "FIN", "TAX" } )
+        )
+        ,"@abs", [LV Abs Δ]
+        ,"@d", [Base Amount] - [Bridge Comparison Amount]
+    )
+VAR _lines        = FILTER ( _accounts, NOT ISBLANK ( [@abs] ) && [@abs] <> 0 )
+VAR _shown        = TOPN ( _n, _lines, [@abs], DESC )
+VAR _shown_abs    = SUMX ( _shown, [@abs] )
+VAR _all_abs      = SUMX ( _lines, [@abs] )
+VAR _total_d      = SUMX ( _lines, [@d] )
+VAR _shown_n      = MIN ( _n, COUNTROWS ( _lines ) )
+VAR _units        = IF ( [_Sel Units] = "K", " k", " m" )
+VAR _fmt          = IF ( [_Sel Units] = "K", "+#,0;−#,0;0", "+#,0.0;−#,0.0;0.0" )
+RETURN
+    "Shown " & _shown_n & " of " & [LV Leaf Count] & " lines - coverage "
+        & FORMAT ( DIVIDE ( _shown_abs, _all_abs ), "0%" ) & " of |Δ| - all other lines "
+        & FORMAT ( DIVIDE ( SUMX ( _shown, [@d] ) - _total_d, -[_Units Divisor] ), _fmt ) & _units
+        & " - total P&L Δ at operating profit " & FORMAT ( DIVIDE ( _total_d, [_Units Divisor] ), _fmt ) & _units
+```
+
+### LV Coverage Value
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Coverage Value =
+VAR _accounts     =
+    ADDCOLUMNS (
+        CALCULATETABLE (
+            VALUES ( dim_account[account_code] )
+            ,NOT ( dim_account[block_code] IN { "INV", "FIN", "TAX" } )
+        )
+        ,"@abs", [LV Abs Δ]
+    )
+VAR _lines        = FILTER ( _accounts, NOT ISBLANK ( [@abs] ) && [@abs] <> 0 )
+RETURN
+    DIVIDE ( SUMX ( TOPN ( 8, _lines, [@abs], DESC ), [@abs] ), SUMX ( _lines, [@abs] ) )
+```
+
+### Prof NR Δ % CC
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof NR Δ % CC =
+DIVIDE ( [_Bridge NR CC Change], ABS ( [_NR CC Bridge Cmp] ) )
+```
+
+### Prof CM Δ pp
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof CM Δ pp =
+CALCULATE (
+    VAR _cm_pct       = [KPI CM %]
+    VAR _cmp_cm       =
+        CALCULATE (
+            [Bridge Comparison Amount]
+            ,REMOVEFILTERS ( dim_pl_row )
+            ,dim_pl_row[line_code] = "CM"
+        )
+    VAR _cmp_pct      = DIVIDE ( _cmp_cm, [Bridge Comparison NR] )
+    RETURN
+        IF ( NOT ISBLANK ( _cmp_pct ) && NOT ISBLANK ( _cm_pct ), ( _cm_pct - _cmp_pct ) * 100 )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### _Prof CM Status
+
+Folder `9 Engine` · spec redesign v4
+
+```dax
+_Prof CM Status =
+VAR _d            = [Prof CM Δ pp]
+VAR _on_track     = LOOKUPVALUE ( param_kpi_threshold[on_track], param_kpi_threshold[delta_kind], "PP" )
+VAR _watch        = LOOKUPVALUE ( param_kpi_threshold[watch], param_kpi_threshold[delta_kind], "PP" )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,ISBLANK ( _d )
+            ,"neutral"
+        ,ABS ( _d ) <= _on_track
+            ,"ontrack"
+        ,_d > 0
+            ,"ahead"
+        ,ABS ( _d ) <= _watch
+            ,"watch"
+        ,"off"
+    )
+```
+
+### Prof CM Dot
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof CM Dot =
+IF ( NOT ISBLANK ( [Prof CM Δ pp] ), "●" )
+```
+
+### Prof CM Dot Color
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Prof CM Dot Color =
+SWITCH (
+    [_Prof CM Status]
+    ,"ahead"
+        ,"#3BA37B"
+    ,"watch"
+        ,"#D9A441"
+    ,"off"
+        ,"#C2410C"
+    ,"#8592A3"
+)
+```
+
+### Prof Contribution
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof Contribution =
+CALCULATE (
+    DIVIDE ( [Contribution Margin], [_Units Divisor] )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Prof Adj EBITDA
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof Adj EBITDA =
+CALCULATE (
+    DIVIDE ( [Adjusted EBITDA], [_Units Divisor] )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Prof Subtitle CC
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Prof Subtitle CC =
+"Constant currency (FY" & [_Sel FY] & " budget rates) - " & [_Units Short] & " - vs " & [_Bridge Cmp Name]
+```
+
+### Conc Share
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Conc Share =
+CALCULATE (
+    VAR _level        = SELECTEDVALUE ( dim_conc_level[level_code] )
+    VAR _value        =
+        SWITCH (
+            _level
+            ,"NR"
+                ,[Net Revenue]
+            ,"CM"
+                ,[Contribution Margin]
+            ,"EBITDA"
+                ,[Adjusted EBITDA]
+        )
+    VAR _total        =
+        CALCULATE (
+            SWITCH (
+                _level
+                ,"NR"
+                    ,[Net Revenue]
+                ,"CM"
+                    ,[Contribution Margin]
+                ,"EBITDA"
+                    ,[Adjusted EBITDA]
+            )
+            ,ALLSELECTED ( dim_region )
+        )
+    RETURN
+        DIVIDE ( _value, _total )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Prof Company Growth
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof Company Growth =
+CALCULATE (
+    [KPI Organic Growth]
+    ,ALLSELECTED ( dim_region )
+)
+```
+
+### Prof Company CM %
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof Company CM % =
+CALCULATE (
+    CALCULATE (
+        [KPI CM %]
+        ,ALLSELECTED ( dim_region )
+    )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Heat GM Fill
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Heat GM Fill =
+VAR _view         = [_Sel Entity]
+VAR _line_entity  = SELECTEDVALUE ( dim_line[entity_code] )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,NOT ISINSCOPE ( dim_line[line_name] )
+            ,[_Heat GM Fill Raw]
+        ,SELECTEDVALUE ( dim_line[is_unassigned] ) = TRUE ()
+            ,BLANK ()
+        ,_view = "GROUP"
+            ,CALCULATE (
+                [_Heat GM Fill Raw]
+                ,REMOVEFILTERS ( param_entity_view )
+                ,TREATAS ( { _line_entity }, param_entity_view[entity_view_code] )
+            )
+        ,_line_entity = _view
+            ,[_Heat GM Fill Raw]
+    )
+```
+
+### Heat GM Ink
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Heat GM Ink =
+VAR _view         = [_Sel Entity]
+VAR _line_entity  = SELECTEDVALUE ( dim_line[entity_code] )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,NOT ISINSCOPE ( dim_line[line_name] )
+            ,[_Heat GM Ink Raw]
+        ,SELECTEDVALUE ( dim_line[is_unassigned] ) = TRUE ()
+            ,BLANK ()
+        ,_view = "GROUP"
+            ,CALCULATE (
+                [_Heat GM Ink Raw]
+                ,REMOVEFILTERS ( param_entity_view )
+                ,TREATAS ( { _line_entity }, param_entity_view[entity_view_code] )
+            )
+        ,_line_entity = _view
+            ,[_Heat GM Ink Raw]
+    )
+```
+
+### _Heat Cell Raw
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+_Heat Cell Raw =
+CALCULATE (
+    VAR _nr           = [Net Revenue]
+    VAR _region_nr    =
+        CALCULATE (
+            [Net Revenue]
+            ,REMOVEFILTERS ( dim_line )
+        )
+    VAR _format       = IF ( [_Sel Units] = "K", "#,0;−#,0;0", "#,0.0;−#,0.0;0.0" )
+    RETURN
+        IF (
+            NOT ISBLANK ( _nr )
+            ,FORMAT ( DIVIDE ( _nr, [_Units Divisor] ), _format ) & UNICHAR ( 10 ) & FORMAT ( DIVIDE ( _nr, _region_nr ), "0%" )
+        )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Heat Cell
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Heat Cell =
+VAR _view         = [_Sel Entity]
+VAR _line_entity  = SELECTEDVALUE ( dim_line[entity_code] )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,NOT ISINSCOPE ( dim_line[line_name] )
+            ,[_Heat Cell Raw]
+        ,SELECTEDVALUE ( dim_line[is_unassigned] ) = TRUE ()
+            ,BLANK ()
+        ,_view = "GROUP"
+            ,CALCULATE (
+                [_Heat Cell Raw]
+                ,REMOVEFILTERS ( param_entity_view )
+                ,TREATAS ( { _line_entity }, param_entity_view[entity_view_code] )
+            )
+        ,_line_entity = _view
+            ,[_Heat Cell Raw]
+    )
+```
+
+### _Heat GM Fill Raw
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+_Heat GM Fill Raw =
+VAR _gm           = [_Heat Colour GM]
+VAR _t            =
+    SWITCH (
+        TRUE ()
+        ,ISBLANK ( _gm )
+            ,-1
+        ,_gm < 0.3
+            ,0.15
+        ,_gm < 0.5
+            ,0.4
+        ,_gm < 0.7
+            ,0.65
+        ,0.9
+    )
+VAR _from         = [_AccT]
+VAR _to           = [_Acc]
+VAR _hex          = "0123456789ABCDEF"
+VAR _channel      =
+    ADDCOLUMNS (
+        { 2, 4, 6 }
+        ,"@from", ( SEARCH ( MID ( _from, [Value], 1 ), _hex ) - 1 ) * 16 + SEARCH ( MID ( _from, [Value] + 1, 1 ), _hex ) - 1
+        ,"@to", ( SEARCH ( MID ( _to, [Value], 1 ), _hex ) - 1 ) * 16 + SEARCH ( MID ( _to, [Value] + 1, 1 ), _hex ) - 1
+    )
+VAR _mixed        =
+    CONCATENATEX (
+        _channel
+        ,VAR _c           = ROUND ( [@from] + ( [@to] - [@from] ) * _t, 0 )
+         RETURN
+             MID ( _hex, INT ( _c / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _c, 16 ) + 1, 1 )
+        ,""
+        ,[Value], ASC
+    )
+RETURN
+    IF ( _t >= 0, "#" & _mixed, "#FFFFFF" )
+```
+
+### _Heat GM Ink Raw
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+_Heat GM Ink Raw =
+VAR _gm           = [_Heat Colour GM]
+RETURN
+    IF ( _gm >= 0.5, "#FFFFFF", "#101B2B" )
+```
+
+### Info Title
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Title =
+SUBSTITUTE ( SUBSTITUTE ( COALESCE ( SELECTEDVALUE ( dim_pl_info[title] ), SELECTEDVALUE ( dim_kpi[info_title] ) ), "{cmp}", [_Bridge Cmp Name] ), "{line}", IF ( [_Sel Entity] = "P", "category", "service line" ) )
+```
+
+### Info Text
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Text =
+SUBSTITUTE ( SUBSTITUTE ( COALESCE ( SELECTEDVALUE ( dim_pl_info[what] ), SELECTEDVALUE ( dim_kpi[definition] ) ), "{cmp}", [_Bridge Cmp Name] ), "{line}", IF ( [_Sel Entity] = "P", "category", "service line" ) )
+```
+
+### Info Detail
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Detail =
+IF ( NOT ISFILTERED ( dim_pl_info[info_code] ), [KPI Info Sub] )
+```
+
+### Info Glyph
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Glyph =
+"i"
+```
+
+### Pager Text 1
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Pager Text 1 =
+"1 / 2"
+```
+
+### Pager Text 2
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Pager Text 2 =
+"2 / 2"
+```
+
+### NR Bridge Title
+
+Folder `Design` · spec C-40, redesign v4
+
+```dax
+NR Bridge Title =
+"Net revenue bridge - " & [_Bridge Cmp Name] & " to Actual - " & [_Units Short]
+```
+
+### Profit Bridge Title
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Profit Bridge Title =
+"Profit bridge: " & [_Bridge Cmp Name] & " Adj. EBITDA → Actual → Operating profit"
+```
+
+### Bridge Step In View
+
+Folder `4 Analysis` · spec C-40, redesign v4
+
+```dax
+Bridge Step In View =
+VAR _view        = [_Sel Entity]
+RETURN
+    IF (
+        NOT ISEMPTY ( FILTER ( VALUES ( dim_bridge_step[entity_view_code] ), dim_bridge_step[entity_view_code] = _view ) )
+        ,1
+    )
+```
+
+### Bubble X Min
+
+Folder `Design` · spec redesign v4
+
+```dax
+Bubble X Min =
+VAR _points       =
+    FILTER (
+        ADDCOLUMNS (
+            ALLSELECTED ( dim_region[region_name] )
+            ,"@v", [KPI Organic Growth]
+        )
+        ,NOT ISBLANK ( [@v] )
+    )
+VAR _lo           = MINX ( _points, [@v] )
+VAR _hi           = MAXX ( _points, [@v] )
+VAR _pad          = MAX ( ( _hi - _lo ) * 0.35, 0.002 )
+RETURN
+    _lo - _pad
+```
+
+### Bubble X Max
+
+Folder `Design` · spec redesign v4
+
+```dax
+Bubble X Max =
+VAR _points       =
+    FILTER (
+        ADDCOLUMNS (
+            ALLSELECTED ( dim_region[region_name] )
+            ,"@v", [KPI Organic Growth]
+        )
+        ,NOT ISBLANK ( [@v] )
+    )
+VAR _lo           = MINX ( _points, [@v] )
+VAR _hi           = MAXX ( _points, [@v] )
+VAR _pad          = MAX ( ( _hi - _lo ) * 0.35, 0.002 )
+RETURN
+    _hi + _pad
+```
+
+### Bubble Y Min
+
+Folder `Design` · spec redesign v4
+
+```dax
+Bubble Y Min =
+VAR _points       =
+    FILTER (
+        ADDCOLUMNS (
+            ALLSELECTED ( dim_region[region_name] )
+            ,"@v", [Prof CM %]
+        )
+        ,NOT ISBLANK ( [@v] )
+    )
+VAR _lo           = MINX ( _points, [@v] )
+VAR _hi           = MAXX ( _points, [@v] )
+VAR _pad          = MAX ( ( _hi - _lo ) * 0.35, 0.002 )
+RETURN
+    _lo - _pad
+```
+
+### Bubble Y Max
+
+Folder `Design` · spec redesign v4
+
+```dax
+Bubble Y Max =
+VAR _points       =
+    FILTER (
+        ADDCOLUMNS (
+            ALLSELECTED ( dim_region[region_name] )
+            ,"@v", [Prof CM %]
+        )
+        ,NOT ISBLANK ( [@v] )
+    )
+VAR _lo           = MINX ( _points, [@v] )
+VAR _hi           = MAXX ( _points, [@v] )
+VAR _pad          = MAX ( ( _hi - _lo ) * 0.35, 0.002 )
+RETURN
+    _hi + _pad
+```
+
+### Var Compare B Label
+
+Folder `Design` · spec redesign v4
+
+```dax
+Var Compare B Label =
+IF ( [_Sel Compare B] = "NONE", "none", "vs " & SWITCH ( [_Sel Compare B], "B", "Budget", "LE", "LE", "PY", "PY" ) )
+```
+
+### _KPI Budget Value
+
+Folder `9 Engine` · spec redesign v4
+
+```dax
+_KPI Budget Value =
+VAR _code         = SELECTEDVALUE ( dim_kpi[kpi_code] )
+RETURN
+    IF (
+        _code = "FY_OUTLOOK"
+        ,[KPI FY Budget NR]
+        ,CALCULATE (
+            [_KPI Value]
+            ,REMOVEFILTERS ( param_eval )
+            ,TREATAS ( { "CMP_A" }, param_eval[eval_code] )
+            ,REMOVEFILTERS ( param_compare_a )
+            ,TREATAS ( { "B" }, param_compare_a[choice_code] )
+        )
+    )
+```
+
+### _Vitals Parts
+
+Folder `3 KPIs\Vitals` · spec redesign v4
+
+```dax
+_Vitals Parts =
+VAR _code         = SELECTEDVALUE ( dim_kpi[kpi_code] )
+VAR _type         = SELECTEDVALUE ( dim_kpi[value_type] )
+VAR _divisor      = [_Units Divisor]
+VAR _units        = IF ( [_Sel Units] = "K", " k", " m" )
+VAR _symbol       = SELECTEDVALUE ( param_reporting_currency[symbol], "$" )
+VAR _is_pp        = _type IN { "PCT", "PCT2" }
+VAR _is_fy        = _code = "FY_OUTLOOK"
+VAR _better       = IF ( _is_fy, "Higher", SELECTEDVALUE ( dim_kpi[better_when] ) )
+VAR _on_pct       = LOOKUPVALUE ( param_kpi_threshold[on_track], param_kpi_threshold[delta_kind], "PCT" )
+VAR _on_pp        = LOOKUPVALUE ( param_kpi_threshold[on_track], param_kpi_threshold[delta_kind], "PP" )
+VAR _watch_pct    = LOOKUPVALUE ( param_kpi_threshold[watch], param_kpi_threshold[delta_kind], "PCT" )
+VAR _watch_pp     = LOOKUPVALUE ( param_kpi_threshold[watch], param_kpi_threshold[delta_kind], "PP" )
+VAR _sel_a        = [_Sel Compare A]
+VAR _evals        =
+    ADDCOLUMNS (
+        DATATABLE ( "e", STRING, "a", STRING, "k", INTEGER, { { "BASE", "", 0 }, { "CMP_A", "", 1 }, { "CMP_B", "", 2 }, { "CMP_A", "B", 3 } } )
+        ,"@v",
+            VAR _a            = IF ( [a] = "", _sel_a, [a] )
+            RETURN
+                CALCULATE (
+                    [_KPI Value]
+                    ,REMOVEFILTERS ( param_eval )
+                    ,TREATAS ( { [e] }, param_eval[eval_code] )
+                    ,REMOVEFILTERS ( param_compare_a )
+                    ,TREATAS ( { _a }, param_compare_a[choice_code] )
+                )
+    )
+VAR _value        = MAXX ( FILTER ( _evals, [k] = 0 ), [@v] )
+VAR _base_1       = _value
+VAR _cmp_1        = IF ( _is_fy, [KPI FY Budget NR], MAXX ( FILTER ( _evals, [k] = 1 ), [@v] ) )
+VAR _base_2       = IF ( _is_fy, [KPI FY Outlook EBITDA], _value )
+VAR _cmp_2        = IF ( _is_fy, [KPI FY Budget EBITDA], MAXX ( FILTER ( _evals, [k] = 2 ), [@v] ) )
+VAR _budget       = IF ( _is_fy, [KPI FY Budget NR], MAXX ( FILTER ( _evals, [k] = 3 ), [@v] ) )
+VAR _name_1       = IF ( _is_fy, "vs FY Budget", IF ( [_Sel Compare A] <> "NONE", "vs " & [_Cmp A Name] ) )
+VAR _name_2       = IF ( _is_fy, "EBITDA vs FY Bud", IF ( [_Sel Compare B] <> "NONE", "vs " & [_Cmp B Name] ) )
+VAR _colour_1     = _is_fy || [_Sel Compare A] = "B"
+VAR _colour_2     = _is_fy || [_Sel Compare B] = "B"
+VAR _value_text   =
+    SWITCH (
+        _type
+        ,"AMT"
+            ,_symbol & FORMAT ( DIVIDE ( _value, _divisor ), IF ( _units = " k", "#,0", "#,0.0" ) ) & _units
+        ,"PCT"
+            ,FORMAT ( _value, "0.0%" )
+        ,"PCT2"
+            ,FORMAT ( _value, "0.00%" )
+        ,"CNT"
+            ,FORMAT ( DIVIDE ( _value, _divisor ), "#,0.0" ) & _units
+        ,"PRICE"
+            ,_symbol & FORMAT ( _value, "#,0.00" )
+        ,FORMAT ( _value, "#,0" )
+    )
+VAR _row1        =
+    VAR _d            = _base_1 - _cmp_1
+    VAR _d_pct        = DIVIDE ( _d, ABS ( _cmp_1 ) )
+    VAR _zero         = IF ( _is_pp, ROUND ( _d * 100, 1 ) = 0, ROUND ( _d_pct, 3 ) = 0 )
+    VAR _sign         = IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) )
+    VAR _abs_text     =
+        SWITCH (
+            _type
+            ,"AMT"
+                ,_sign & FORMAT ( ABS ( DIVIDE ( _d, _divisor ) ), IF ( _units = " k", "#,0", "#,0.0" ) )
+            ,"CNT"
+                ,_sign & FORMAT ( ABS ( DIVIDE ( _d, _divisor ) ), "#,0.0" )
+            ,"INT"
+                ,_sign & FORMAT ( ABS ( _d ), "#,0" )
+            ,"PRICE"
+                ,_sign & FORMAT ( ABS ( _d ), "#,0.00" )
+        )
+    VAR _rel_text     = IF ( _is_pp, _sign & FORMAT ( ABS ( _d * 100 ), "0.0" ) & " pp", _sign & FORMAT ( ABS ( _d_pct ), "0.0%" ) )
+    VAR _status       =
+        SWITCH (
+            TRUE ()
+            ,_better = "Neutral"
+                ,"neutral"
+            ,ABS ( IF ( _is_pp, _d * 100, _d_pct ) ) <= IF ( _is_pp, _on_pp, _on_pct )
+                ,"ontrack"
+            ,IF ( _better = "Lower", -_d, _d ) > 0
+                ,"ahead"
+            ,ABS ( IF ( _is_pp, _d * 100, _d_pct ) ) <= IF ( _is_pp, _watch_pp, _watch_pct )
+                ,"watch"
+            ,"off"
+        )
+    VAR _ink          = IF ( _colour_1, SWITCH ( _status, "ahead", "#06603F", "watch", "#8A5A00", "off", "#C2410C", "#101B2B" ), "#101B2B" )
+    RETURN
+        IF (
+            NOT ISBLANK ( _name_1 ) && NOT ISBLANK ( _base_1 ) && NOT ISBLANK ( _cmp_1 )
+            ,_name_1 & "|" & IF ( _zero, "", _abs_text ) & "|" & IF ( _zero, "on plan", _rel_text ) & "|" & _ink
+            ,IF ( NOT ISBLANK ( _name_1 ), _name_1 & "|" & "" & "|" & "n/a" & "|" & "#101B2B", "|||" )
+        )
+VAR _row2        =
+    VAR _d            = _base_2 - _cmp_2
+    VAR _d_pct        = DIVIDE ( _d, ABS ( _cmp_2 ) )
+    VAR _zero         = IF ( _is_pp, ROUND ( _d * 100, 1 ) = 0, ROUND ( _d_pct, 3 ) = 0 )
+    VAR _sign         = IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) )
+    VAR _abs_text     =
+        SWITCH (
+            _type
+            ,"AMT"
+                ,_sign & FORMAT ( ABS ( DIVIDE ( _d, _divisor ) ), IF ( _units = " k", "#,0", "#,0.0" ) )
+            ,"CNT"
+                ,_sign & FORMAT ( ABS ( DIVIDE ( _d, _divisor ) ), "#,0.0" )
+            ,"INT"
+                ,_sign & FORMAT ( ABS ( _d ), "#,0" )
+            ,"PRICE"
+                ,_sign & FORMAT ( ABS ( _d ), "#,0.00" )
+        )
+    VAR _rel_text     = IF ( _is_pp, _sign & FORMAT ( ABS ( _d * 100 ), "0.0" ) & " pp", _sign & FORMAT ( ABS ( _d_pct ), "0.0%" ) )
+    VAR _status       =
+        SWITCH (
+            TRUE ()
+            ,_better = "Neutral"
+                ,"neutral"
+            ,ABS ( IF ( _is_pp, _d * 100, _d_pct ) ) <= IF ( _is_pp, _on_pp, _on_pct )
+                ,"ontrack"
+            ,IF ( _better = "Lower", -_d, _d ) > 0
+                ,"ahead"
+            ,ABS ( IF ( _is_pp, _d * 100, _d_pct ) ) <= IF ( _is_pp, _watch_pp, _watch_pct )
+                ,"watch"
+            ,"off"
+        )
+    VAR _ink          = IF ( _colour_2, SWITCH ( _status, "ahead", "#06603F", "watch", "#8A5A00", "off", "#C2410C", "#101B2B" ), "#101B2B" )
+    RETURN
+        IF (
+            NOT ISBLANK ( _name_2 ) && NOT ISBLANK ( _base_2 ) && NOT ISBLANK ( _cmp_2 )
+            ,_name_2 & "|" & IF ( _zero, "", _abs_text ) & "|" & IF ( _zero, "on plan", _rel_text ) & "|" & _ink
+            ,IF ( NOT ISBLANK ( _name_2 ), _name_2 & "|" & "" & "|" & "n/a" & "|" & "#101B2B", "|||" )
+        )
+VAR _status       =
+    VAR _d            = IF ( _is_pp, ( _value - _budget ) * 100, DIVIDE ( _value - _budget, ABS ( _budget ) ) )
+    VAR _on           = IF ( _is_pp, _on_pp, _on_pct )
+    VAR _watch        = IF ( _is_pp, _watch_pp, _watch_pct )
+    RETURN
+        SWITCH (
+            TRUE ()
+            ,_better = "Neutral" || ISBLANK ( _value ) || ISBLANK ( _budget )
+                ,"neutral"
+            ,ABS ( _d ) <= _on
+                ,"ontrack"
+            ,IF ( _better = "Lower", -_d, _d ) > 0
+                ,"ahead"
+            ,ABS ( _d ) <= _watch
+                ,"watch"
+            ,"off"
+        )
+VAR _sub          = [KPI Subscription Share]
+VAR _pay          = [KPI Payments Share]
+VAR _sub_py       = CALCULATE ( [KPI Subscription Share], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) )
+VAR _pay_py       = CALCULATE ( [KPI Payments Share], REMOVEFILTERS ( param_eval ) ,TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ,REMOVEFILTERS ( param_compare_a ) ,TREATAS ( { "PY" }, param_compare_a[choice_code] ) )
+VAR _mix          =
+    IF ( ISBLANK ( _sub ), "n/a", FORMAT ( _sub, "0.0%" ) ) & " / " & IF ( ISBLANK ( _pay ), "n/a", FORMAT ( _pay, "0.0%" ) )
+        & "|Sub / Pay vs PY||" & IF ( ISBLANK ( _sub - _sub_py ), "n/a", FORMAT ( ( _sub - _sub_py ) * 100, "+0.0;−0.0;0.0" ) & " pp" ) & " / " & IF ( ISBLANK ( _pay - _pay_py ), "n/a", FORMAT ( ( _pay - _pay_py ) * 100, "+0.0;−0.0;0.0" ) & " pp" ) & "|#101B2B|||||neutral"
+RETURN
+    IF (
+        NOT ISBLANK ( _code )
+        ,IF (
+            _code = "MIX"
+            ,_mix
+            ,_value_text & "|" & _row1 & "|" & _row2 & "|" & _status
+        )
+    )
+```
+
+### _Profit GM Rate Line
+
+Folder `9 Engine` · spec C-40, redesign v4
+
+```dax
+_Profit GM Rate Line =
+VAR _nr_cc       =
+    CALCULATE (
+        [Net Revenue]
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+VAR _gp_cc       =
+    CALCULATE (
+        [Gross Profit]
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+VAR _cmp_nr_cc   =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "NR"
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+VAR _cmp_gp_cc   =
+    CALCULATE (
+        [Bridge Comparison Amount]
+        ,REMOVEFILTERS ( dim_pl_row )
+        ,dim_pl_row[line_code] = "GP"
+        ,REMOVEFILTERS ( param_fx_basis )
+        ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    )
+RETURN
+    IF (
+        NOT ISBLANK ( _cmp_nr_cc ) && _cmp_nr_cc <> 0
+        ,_nr_cc * ( DIVIDE ( _gp_cc, _nr_cc ) - DIVIDE ( _cmp_gp_cc, _cmp_nr_cc ) )
+    )
+```
+
+### LV Leaf Count
+
+Folder `4 Analysis\Variances` · spec C-45, redesign v4
+
+```dax
+LV Leaf Count =
+VAR _accounts     =
+    CALCULATETABLE (
+        VALUES ( dim_account[account_code] )
+        ,NOT ( dim_account[block_code] IN { "INV", "FIN", "TAX" } )
+    )
+RETURN
+    COUNTROWS (
+        FILTER (
+            _accounts
+            ,VAR _base        = [Base Amount]
+             VAR _compare     = [Bridge Comparison Amount]
+             RETURN
+                 NOT ( ( ISBLANK ( _base ) || _base = 0 ) && ( ISBLANK ( _compare ) || _compare = 0 ) )
+        )
+    )
+```
+
+### Prof GM %
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof GM % =
+CALCULATE (
+    [KPI Gross Margin %]
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Prof CM %
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+Prof CM % =
+CALCULATE (
+    [KPI CM %]
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Heat Title
+
+Folder `Design` · spec C-46, redesign v4
+
+```dax
+Heat Title =
+"Mix - region × " & IF ( [_Sel Entity] = "P", "category", "service line" )
+```
+
+### How To Read Showing
+
+Folder `Design` · spec redesign v4
+
+```dax
+How To Read Showing =
+[Period Summary] & " - " & [_Units Short] & " - vs " & IF ( [_Sel Compare A] = "NONE" && [_Sel Compare B] = "NONE", "Prior year", IF ( [_Sel Compare A] <> "NONE", [_Cmp A Name] ) & IF ( [_Sel Compare A] <> "NONE" && [_Sel Compare B] <> "NONE", " and " ) & IF ( [_Sel Compare B] <> "NONE", [_Cmp B Name] ) )
+```
+
+### _Heat Colour GM
+
+Folder `5 Profitability` · spec C-46, redesign v4
+
+```dax
+_Heat Colour GM =
+CALCULATE (
+    CALCULATE (
+        [KPI Gross Margin %]
+        ,REMOVEFILTERS ( dim_region )
+    )
+    ,REMOVEFILTERS ( param_fx_basis )
+    ,TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+)
+```
+
+### Info Formula
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Formula =
+SUBSTITUTE ( SUBSTITUTE ( COALESCE ( SELECTEDVALUE ( dim_pl_info[formula] ), SELECTEDVALUE ( dim_kpi[info_formula] ) ), "{cmp}", [_Bridge Cmp Name] ), "{line}", IF ( [_Sel Entity] = "P", "category", "service line" ) )
+```
+
+### Info Source
+
+Folder `Design` · spec ADR-0012
+
+```dax
+Info Source =
+"Source: " & SUBSTITUTE ( SUBSTITUTE ( COALESCE ( SELECTEDVALUE ( dim_pl_info[source] ), SELECTEDVALUE ( dim_kpi[info_source] ) ), "{cmp}", [_Bridge Cmp Name] ), "{line}", IF ( [_Sel Entity] = "P", "category", "service line" ) )
 ```

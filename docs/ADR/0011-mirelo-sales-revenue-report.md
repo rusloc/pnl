@@ -1,6 +1,6 @@
 # ADR-0011 — Mirelo Sales & Revenue dashboard: draft build in two tracks (Power BI + JS)
 
-- **Status:** **Proposed** (the USER decides; nothing built until accepted). Drafted by the design agent for the main agent.
+- **Status:** **Accepted** 2026-10-27 — the USER accepted every default in §2 and §5 ("all decision forks: accept defaults"); drafts built 2026-10-26/27 in both tracks. Amended by ADR-0012 (visual first: no applied-filters banner, no card corner marker, no in-card sparklines). Originally proposed 2026-10-26 by the design agent for the main agent.
 - **Date:** 2026-10-26
 - **Decider:** USER
 - **Inputs:** concept `docs/ADD/features/sales-revenue-dashboard-concept.md` (§1–§8 and the §9 addendum of 2026-10-24) · metric map `docs/design/sales-revenue dashboard/metric-flow.html` (accepted by the USER for a draft build) · USER directives of 2026-10-26 (flat design after the supplied reference sheet, one page = many views, two tracks that look identical) · precedents ADR-0002 (Track C architecture), ADR-0003 / ADR-0008 (lakehouse loader), the `pbi-report/ACME Trucks/` report (PBIP importing Parquet files through a `DataFolder` parameter).

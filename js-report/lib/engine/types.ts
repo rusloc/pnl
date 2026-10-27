@@ -23,6 +23,21 @@ export interface PlColumns {
   cents: Float64Array; // integer cents, local currency, signed (M-01)
 }
 
+/** Operational facts of both entities, columnar (ops.parquet, D-03): units (P), GMV and active merchants (S). */
+export interface OpsColumns {
+  n: number;
+  entity: Int32Array; // index into manifest.dict.entity
+  monthIdx: Int32Array;
+  version: Int32Array;
+  region: Int32Array;
+  channel: Int32Array;
+  line: Int32Array;
+  segment: Int32Array;
+  units: Int32Array; // flow, sums over months
+  gmvCents: Float64Array; // local currency cents, translated like amounts
+  merchants: Int32Array; // month-end stock, never summed over months (K-23)
+}
+
 /** Validated URL state (F-01 … F-21, ADR-0002 §2.4). */
 export interface Selection {
   entity: EntityView;
@@ -45,9 +60,6 @@ export interface Selection {
   showFyOutlook: boolean;
   showTags: boolean;
   hideEmpty: boolean;
-  layout: 'VAR' | 'TREND_M' | 'TREND_Q' | 'ENTITY';
-  costLens: 'FN' | 'NAT';
-  detail: 'SUM' | 'STD' | 'FULL';
   breakdown: 'REGION' | 'CHANNEL' | 'LINE' | 'SEGMENT' | 'ENTITY';
   view: 'statement' | 'kpi' | 'analysis' | 'profitability';
 }
@@ -88,6 +100,8 @@ export interface SpineRow {
   code: string; // line_code for spine rows, account_code for leaves
   kind: RowKind;
   label: string; // N-11: from dim_report_line / dim_account
+  /** Statement row text (parity rule 11, Track B `dim_pl_row[line_display]`): "01. GROSS REVENUE"; leaves = label. */
+  display: string;
   alias: string | null; // L-11: entity-specific name of a spine line, shown as a secondary label
   parent: string | null;
   level: 0 | 1 | 2;

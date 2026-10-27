@@ -20,7 +20,7 @@ Observed before the load (read-only):
 ## Decision
 
 1. **Schema `acme_pl`** in `lh_raw`. It is one namespace for the SQL endpoint, Direct Lake and Rayfin connectors: `lh_raw.acme_pl.<table>`.
-2. **Table names are the file names** (spec §8 naming): 4 facts, 12 dims (including `bridge_account_nature` and `dim_cost_centre`), 11 params and `control_totals_usd`. Column names and order are the CSV headers.
+2. **Table names are the file names** (spec §8 naming): 4 facts, 12 dims (including `bridge_account_nature` and `dim_cost_centre`), 11 params and `control_totals_usd`. Column names and order are the CSV headers. _Amended 2026-10-23 (ADR-0008): the loader appends 3 pre-translated columns to each fact after the CSV columns (`amount_usd`, `amount_eur`, `amount_gbp`; `gmv_*` on `fact_operational`) and writes one derived table, `fact_pl_elim`; the CSV columns stay first and unchanged._
 3. **Types are explicit and declared once**, in the `TABLES` spec of `fabric-data/lh_raw/load_acme_pl.py`. Nothing is inferred.
 
    | Kind | Delta type | SQL endpoint type | Why |

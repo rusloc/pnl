@@ -29,7 +29,11 @@ services:
   storage:
     enabled: false
   functions:
-    enabled: false
+    enabled: true
+    path: "packages/functions"
+    buildCommand: "npm run build"
+    auth:
+      type: "application"
 connectors:
   - name: lhraw
     type: fabric-sqlanalytics
@@ -51,3 +55,14 @@ connectors:
       type: delegated
     operations:
       - name: executeQuery
+# AI chat (ADR-0009): provider coordinates for the `chatTurn` function. Configuration,
+# not credentials (the resource has key auth disabled; the function uses the owner's
+# Entra token). Values are set per deployment with `npx rayfin secret set <NAME>`
+# after the first `rayfin up`; locally in packages/functions/local.settings.json.
+secrets:
+  - name: AZURE_OPENAI_ENDPOINT
+    description: Azure OpenAI resource endpoint, https://<resource>.openai.azure.com (no path)
+  - name: AZURE_OPENAI_DEPLOYMENT
+    description: Deployment name of the chat model (Data Zone Standard, EU)
+  - name: AZURE_OPENAI_API_VERSION
+    description: Chat-completions API version; optional, default 2024-10-21

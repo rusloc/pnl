@@ -76,6 +76,14 @@ function deltaText(kind: DeltaKind, delta: number): string {
   }
 }
 
+const STEP = { pct: 0.001, pp: 0.001, h: 0.1, d: 1 } as const;
+/** The Δ rounded to what the card shows. */
+export function displayed(kind: DeltaKind, delta: number): number {
+  const step = STEP[UNIT[kind]];
+  const r = Math.round(delta / step) * step;
+  return Object.is(r, -0) ? 0 : r;
+}
+
 export const glyph = (delta: number): string => (delta > 0 ? '▲' : delta < 0 ? '▼' : '◦');
 
 export function cmpRow(
@@ -85,8 +93,11 @@ export function cmpRow(
   ref: number | null,
   withBar = false,
 ): CmpRow {
-  const delta = deltaOf(kind, actual, ref);
-  if (delta === null) return { label, text: NA, status: 'neutral', bar: null };
+  const exact = deltaOf(kind, actual, ref);
+  if (exact === null) return { label, text: NA, status: 'neutral', bar: null };
+  // Band, glyph and bar follow the Δ as displayed (0.1 % / 0.1 pp / 0.1 h / 1 d), so "−0.0%" never reads as a miss
+  // (MS-07, the Track B rule).
+  const delta = displayed(kind, exact);
   const status = statusOf(kind, delta);
   const raw = Math.abs(delta) / BAR_SCALE[UNIT[kind]];
   const favourable = status === 'neutral' ? delta >= 0 : status === 'good';

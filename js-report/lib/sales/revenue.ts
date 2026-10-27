@@ -1,4 +1,5 @@
-import { CHANNEL_SHORT, INFO, MARKET_NAMES, STREAM_NAMES } from './copy.ts';
+import { CHANNEL_SHORT, MARKET_NAMES, STREAM_NAMES, info } from './copy.ts';
+import { chipOf } from './kpis.ts';
 import { fmtCount, fmtDeltaPct, fmtEur, fmtPct } from './format.ts';
 import { CATEGORY_ROLES, kpi } from './loans.ts';
 import { MARKETS } from './manifest.ts';
@@ -15,6 +16,7 @@ import type { Window } from './windows.ts';
 
 const STREAMS = ['INTEREST', 'FEE', 'INTERCHANGE', 'SUBSCRIPTION'] as const;
 const PAYING = ['PLUS', 'PRO'] as const;
+const LOAN_PRODUCTS = ['FLEX30', 'FLEX90', 'STEP6', 'STEP12', 'BIZ'] as const; // dim_product product_line = Microloan
 
 function streamBudget(ctx: Ctx, w: Window, mk: MarketSel, stream: string): number | null | undefined {
   if (stream === 'INTERCHANGE') return ctx.cube.budget(w, mk, 'REVENUE_LOCAL', ['CARD']);
@@ -39,65 +41,94 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const att = bud ? rev / bud : null;
   const attRow = cmpRow('ratioUp', 'vs 100%', att, 1);
 
+  const share = (v: number) => fmtPct(rev ? v / rev : null, 0);
+  const interest = byStream.get('INTEREST') ?? 0;
+  const fees = byStream.get('FEE') ?? 0;
+  const attStatus = attainmentStatus(att, cube.thresholds);
+  const lendingBudget = cube.budget(w, mk, 'REVENUE_LOCAL', LOAN_PRODUCTS);
+  const lendingPy = byStreamPy ? (byStreamPy.get('INTEREST') ?? 0) + (byStreamPy.get('FEE') ?? 0) : null;
+  const interchange = byStream.get('INTERCHANGE') ?? 0;
+  const interchangeBudget = cube.budget(w, mk, 'REVENUE_LOCAL', ['CARD']);
+  const interchangePy = byStreamPy ? (byStreamPy.get('INTERCHANGE') ?? 0) : null;
   const kpis: KpiCard[] = [
     kpi(
       'r1',
       'Revenue',
       fmtEur(rev),
-      'interest + fees + interchange + subs',
+      [
+        { label: 'Interest', value: `${fmtEur(interest)} - ${share(interest)}` },
+        { label: 'Fees', value: `${fmtEur(fees)} - ${share(fees)}` },
+        { label: 'Interchange', value: fmtEur(byStream.get('INTERCHANGE') ?? 0) },
+        { label: 'Subscriptions', value: fmtEur(byStream.get('SUBSCRIPTION') ?? 0) },
+        { label: 'Budget', value: fmtEur(bud) },
+      ],
       'countUp',
       { actual: rev, budget: bud, py: revPy },
       sel.cmp,
-      INFO.r1 ?? '',
     ),
     {
       id: 'r2',
       label: 'Attainment',
-      info: INFO.r2 ?? '',
+      info: info('r2', [
+        { label: 'Revenue', value: fmtEur(rev) },
+        { label: 'Budget', value: fmtEur(bud) },
+      ]),
       value: fmtPct(att),
-      sub: `Budget ${fmtEur(bud)}`,
-      row: { ...attRow, status: attainmentStatus(att, cube.thresholds) },
+      row: { ...attRow, status: attStatus },
       alt: null,
+      status: chipOf({ ...attRow, status: attStatus }),
     },
+    // R3 / R4 per layout-spec v4 §5 (MS-04): the Budget carries interest and fees together per loan product, so R3
+    // is their sum vs that Budget; R4 = interchange vs the CARD Budget.
     kpi(
       'r3',
-      'Interest income',
-      fmtEur(byStream.get('INTEREST') ?? 0),
-      `${fmtPct(rev ? (byStream.get('INTEREST') ?? 0) / rev : null, 0)} of revenue`,
+      'Interest + fees',
+      fmtEur(interest + fees),
+      [
+        { label: 'Interest', value: fmtEur(interest) },
+        { label: 'Fees', value: fmtEur(fees) },
+        { label: 'Budget', value: fmtEur(lendingBudget) },
+        { label: 'Prior year', value: fmtEur(lendingPy) },
+      ],
       'countUp',
-      { actual: byStream.get('INTEREST') ?? 0, py: byStreamPy?.get('INTEREST') ?? null },
+      { actual: interest + fees, budget: lendingBudget, py: lendingPy },
       sel.cmp,
-      INFO.r3 ?? '',
     ),
     kpi(
       'r4',
-      'Fees',
-      fmtEur(byStream.get('FEE') ?? 0),
-      'origination + late fees',
+      'Interchange',
+      fmtEur(interchange),
+      [
+        { label: 'Budget', value: fmtEur(interchangeBudget) },
+        { label: 'Prior year', value: fmtEur(interchangePy) },
+      ],
       'countUp',
-      { actual: byStream.get('FEE') ?? 0, py: byStreamPy?.get('FEE') ?? null },
+      { actual: interchange, budget: interchangeBudget, py: interchangePy },
       sel.cmp,
-      INFO.r4 ?? '',
     ),
     kpi(
       'r5',
       'MRR',
       fmtEur(subs?.mrr ?? null),
-      `Plus ${fmtEur(tiers?.get('PLUS')?.mrr ?? null)} - Pro ${fmtEur(tiers?.get('PRO')?.mrr ?? null)}`,
+      [
+        { label: 'Plus', value: fmtEur(tiers?.get('PLUS')?.mrr ?? null) },
+        { label: 'Pro', value: fmtEur(tiers?.get('PRO')?.mrr ?? null) },
+      ],
       'countUp',
       { actual: subs?.mrr ?? null, py: subsPy?.mrr ?? null },
       sel.cmp,
-      INFO.r5 ?? '',
     ),
     kpi(
       'r6',
       'Paying subscribers',
       fmtCount(subs?.end ?? null),
-      `Plus ${fmtCount(tiers?.get('PLUS')?.end ?? null)} - Pro ${fmtCount(tiers?.get('PRO')?.end ?? null)}`,
+      [
+        { label: 'Plus', value: fmtCount(tiers?.get('PLUS')?.end ?? null) },
+        { label: 'Pro', value: fmtCount(tiers?.get('PRO')?.end ?? null) },
+      ],
       'countUp',
       { actual: subs?.end ?? null, py: subsPy?.end ?? null },
       sel.cmp,
-      INFO.r6 ?? '',
     ),
   ];
 
@@ -109,7 +140,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r7: ChartCard = {
     id: 'r7',
     title: 'Revenue by month vs Budget vs PY',
-    info: INFO.r7 ?? '',
+    info: info('r7'),
     open: null,
     legend: [
       { label: 'Actual', role: 'actual' },
@@ -141,7 +172,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r8: ChartCard = {
     id: 'r8',
     title: 'Revenue by stream, 13 months',
-    info: INFO.r8 ?? '',
+    info: info('r8'),
     open: null,
     legend: STREAMS.map((s, k) => ({ label: STREAM_NAMES[s] ?? s, role: CATEGORY_ROLES[k] ?? 'c4' })),
     chart: {
@@ -167,7 +198,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r9: ChartCard = {
     id: 'r9',
     title: 'Attainment by market',
-    info: INFO.r9 ?? '',
+    info: info('r9'),
     open: null,
     legend: [
       { label: 'Revenue', role: 'actual' },
@@ -191,7 +222,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r10: ChartCard = {
     id: 'r10',
     title: 'MRR and subscribers by tier',
-    info: INFO.r10 ?? '',
+    info: info('r10'),
     open: null,
     legend: [
       { label: 'Plus', role: 'c1' },
@@ -226,7 +257,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r11: ChartCard = {
     id: 'r11',
     title: 'Subscriber churn %',
-    info: INFO.r11 ?? '',
+    info: info('r11'),
     open: null,
     legend: [
       { label: 'Actual', role: 'actual' },
@@ -252,7 +283,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
   const r12: ChartCard = {
     id: 'r12',
     title: 'Channel mix, share of loans',
-    info: INFO.r12 ?? '',
+    info: info('r12'),
     open: null,
     legend: cube.dims.channel.map((c, k) => ({
       label: CHANNEL_SHORT[c.channel_code] ?? c.channel_name,
@@ -349,7 +380,7 @@ function streamTable(ctx: Ctx, sel: SalesSelection): TableCard {
   return {
     id: 'r13',
     title: `Stream × market - ${windowLabel(w)}`,
-    info: INFO.r13 ?? '',
+    info: info('r13'),
     columns: [
       { key: 'stream', label: 'Stream', width: 160, align: 'left' },
       { key: 'market', label: 'Market', width: 100, align: 'left' },
@@ -362,7 +393,7 @@ function streamTable(ctx: Ctx, sel: SalesSelection): TableCard {
       { key: 'status', label: 'Status', width: 96, align: 'left' },
     ],
     rows,
-    note: 'Budget is set per product: interest and fees share the loan-product Budget, so their rows show n/a. Row click lists the market’s loans.',
+    empty: null,
     action: null,
     needsDetail: false,
   };

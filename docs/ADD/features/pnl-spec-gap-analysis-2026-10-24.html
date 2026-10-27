@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P&amp;L update plan — nano summary (2026-10-24)</title>
+<style>
+  :root{--ink:#101B2B;--slate:#4F5C6C;--line:#DEE3E9;--ground:#F2F4F7;--surface:#fff;--acc:#2453A6;--accT:#E8EEF8;--good:#06603F;--goodT:#E4F3EC;--bad:#C2410C;--badT:#FCEDE5;--note:#8A5A00;--noteT:#FBF4E4}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 "IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+  main{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--slate);font-size:13px;margin:0 0 20px}
+  .draft{display:inline-block;background:var(--noteT);color:#3D3216;border:1px solid #EBD9AE;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-bottom:12px}
+  section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 20px;margin:0 0 12px}
+  h2{font-size:15px;margin:0 0 10px;letter-spacing:.01em}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:4px}
+  .kpi{background:var(--ground);border-radius:6px;padding:10px 12px}
+  .kpi b{display:block;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+  .kpi span{font-size:12px;color:var(--slate)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tag{display:inline-block;border-radius:10px;padding:0 8px;font-size:11px;font-weight:600;line-height:18px}
+  .now{background:var(--goodT);color:var(--good)} .later{background:var(--badT);color:var(--bad)} .adr{background:var(--accT);color:var(--acc)} .skip{background:#EDF0F3;color:var(--slate)}
+  ul{margin:0;padding-left:18px} li{margin:2px 0}
+  .q{color:var(--slate)}
+  footer{font-size:12px;color:var(--slate);margin-top:12px}
+  code{font:12px/1 ui-monospace,Consolas,monospace;background:var(--ground);padding:1px 4px;border-radius:3px}
+</style>
+</head>
+<body>
+<main>
+  <span class="draft">DRAFT — plan only, nothing implemented</span>
+  <h1>P&amp;L update plan — nano summary</h1>
+  <p class="sub">Spec "P&amp;L Report Spec — SaaS &amp; Consumer Goods" (61 metrics, 19 dimensions) vs ACME Unified P&amp;L · 2026-10-24 · full analysis: <code>docs/ADD/features/pnl-spec-gap-analysis-2026-10-24.md</code></p>
+
+  <section>
+    <h2>Coverage</h2>
+    <div class="kpis">
+      <div class="kpi"><b>29</b><span>metrics present</span></div>
+      <div class="kpi"><b>21</b><span>metrics partial</span></div>
+      <div class="kpi"><b>11</b><span>metrics missing</span></div>
+      <div class="kpi"><b>4 / 10 / 5</b><span>dimensions present / partial / missing</span></div>
+    </div>
+    <p style="margin:8px 0 0;font-size:13px">The spec contradicts itself in three places (freight out in COGS and in contribution margin; trade spend as deduction and as variable selling; "Total OpEx" excludes items EBITDA needs). The IFRS 18 spine (Requirements §3) stays the reference; the spec is treated as a checklist, not a target.</p>
+  </section>
+
+  <section>
+    <h2>Build now — existing data only (ranked by value ÷ effort)</h2>
+    <table>
+      <tr><th>#</th><th>What</th><th>Where</th><th>Effort</th><th></th></tr>
+      <tr><td>P1</td><td>Sub-lines under existing Key-figures values: trade vs returns, recurring mix, services GM %, GP per unit, NR run-rate</td><td>Key figures (no new tiles)</td><td class="n">B 0.75 d · A 0.25 d</td><td><span class="tag now">now</span></td></tr>
+      <tr><td>P3</td><td>Split the Consumer Products bridge step "Price / mix" into Price and Mix (pure volume at entity total)</td><td>Analysis bridge</td><td class="n">B 1 d · A 0.25 d</td><td><span class="tag now">now</span> spec edit C-40</td></tr>
+      <tr><td>P4</td><td>"of which FX" column in Largest variances (Analysis ≈ 1.3 → 2.3 s)</td><td>Analysis variances</td><td class="n">B 0.5 d · A 0.5 d</td><td><span class="tag now">now</span></td></tr>
+      <tr><td>P2</td><td>Memo block after row 29: reported EBITDA, EBITDA margin %, S&amp;M / R&amp;D / G&amp;A % of NR (rows 30–34); rows 01–29 unchanged</td><td>Statement</td><td class="n">B 1.5 d · ginee 0.25 · A 0.25 · C 0.75</td><td><span class="tag adr">ADR</span> new row_type, Track C contract</td></tr>
+      <tr><td>P5</td><td>"Prior period" comparison (MoM / QoQ); YTD has no clean prior period</td><td>Compare A / B</td><td class="n">≈ 2 d all tracks</td><td><span class="tag skip">not now</span></td></tr>
+      <tr><td>P6</td><td>Rule of 40 / ARR growth on the run-rate ARR proxy</td><td>Key figures slot 12</td><td class="n">B 0.75 d</td><td><span class="tag skip">wait for D-1</span></td></tr>
+      <tr><td>P7 / P9</td><td>Named forecast cycle comparison · constant currency at PY rates (re-adds the translation step ADR-0008 removed)</td><td>—</td><td class="n">—</td><td><span class="tag skip">skip</span></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Later — needs new data</h2>
+    <table>
+      <tr><th>#</th><th>Data</th><th>Unlocks</th><th>Size</th><th></th></tr>
+      <tr><td>D-1</td><td><code>fact_arr_snapshot</code> cohort × month × region × segment × movement type (SaaS only)</td><td>ARR bridge, NRR, contract ARR, CAC, magic number, Rule of 40 per spec</td><td class="n">≈ 47k rows / version</td><td><span class="tag later">high value</span> <span class="tag adr">ADR</span> §11 scope, L-10 placement</td></tr>
+      <tr><td>D-5</td><td><code>fact_headcount</code> cost centre × month</td><td>Revenue per FTE, people-cost memo</td><td class="n">≈ 1.4k rows</td><td><span class="tag later">medium</span></td></tr>
+      <tr><td>D-6</td><td>Cost-nature flags on <code>dim_account</code> (variable / fixed, cash, one-off, add-back)</td><td>Data-driven definitions for P1 / P2</td><td class="n">4 columns</td><td><span class="tag later">medium</span></td></tr>
+      <tr><td>D-7</td><td>Share-based compensation accounts</td><td>Adjusted EBITDA add-back per spec</td><td class="n">changes all control totals</td><td><span class="tag adr">ADR</span> T-06 re-pass in A, B, C</td></tr>
+      <tr><td>D-3</td><td>Deferred revenue balance</td><td>Billings</td><td class="n">≈ 300 rows</td><td><span class="tag skip">low</span></td></tr>
+      <tr><td>—</td><td>Promo, plant / site, SKU, customer, cash flow</td><td>—</td><td class="n">—</td><td><span class="tag skip">not worth it</span></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>End state per view (layout kept)</h2>
+    <table>
+      <tr><th>View</th><th>Change</th></tr>
+      <tr><td>Statement table</td><td>Same 29 numbered rows; memo block rows 30–34 at the bottom (reported EBITDA, margin, S&amp;M / R&amp;D / G&amp;A % of NR); later "of which people cost".</td></tr>
+      <tr><td>Key figures</td><td>Same 12 slots, card v2. New information via the sub-line under the value (P1). After D-1: S slot 4 = contract ARR, S slot 10 = NRR, S slot 12 = Rule of 40 on ARR growth. No 13th tile.</td></tr>
+      <tr><td>Analysis</td><td>Bridge gets a Mix step for Consumer Products (P3); Largest variances gets "of which FX" (P4). ARR bridge only with an ADR (L-10).</td></tr>
+      <tr><td>Profitability</td><td>No change (services GM % and recurring mix are already service-line rows; a per-unit column would be blank for S and Group).</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions needed (defaults in italics)</h2>
+    <ul>
+      <li>Q1 Spec = checklist against the IFRS 18 spine? <span class="q"><i>yes</i></span></li>
+      <li>Q3 Reported EBITDA = Adj. EBITDA + restructuring + M&amp;A one-offs (impairment stays with D&amp;A)? <span class="q"><i>yes</i></span></li>
+      <li>Q4 Accept the statement memo block via an ADR? <span class="q"><i>yes</i></span></li>
+      <li>Q5 / Q6 Keep the ARR run-rate proxy and organic-growth Rule of 40 until D-1? <span class="q"><i>yes</i></span></li>
+      <li>Q7 Split Price / Mix in the bridge? <span class="q"><i>yes</i></span> · Q8 Prior-period comparison? <span class="q"><i>no for now</i></span></li>
+      <li>Q9 Synthetic data additions? <span class="q"><i>D-1 ARR snapshot only; D-5 headcount optional</i></span></li>
+      <li>Q10 Track C? <span class="q"><i>spec note in .sync only until its Key figures / Analysis views exist</i></span></li>
+    </ul>
+  </section>
+
+  <footer>Proposed order: P1 → P3 → P4 → P2 (with ADR) → D-1 generator + load → D-1 tiles. Showcase budget ≤ 5 s per view (ADR-0008) holds for every package listed.</footer>
+</main>
+</body>
+</html>

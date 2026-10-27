@@ -35,7 +35,7 @@ The showcase audience is mostly non-finance visitors. The statement toolbar carr
 
 Decided by the USER after reviewing the first build:
 
-1. **Key figures cards v2** (`docs/design/kpi-card-v2.md`) replace K-24 and K-25 in Tracks A and B. No sparklines, no target bars. Each tile shows label, value, sub-line, and two diverging comparison rows (vs Compare A / vs Compare B): right = favourable, one shared scale of ±20 % / ±5 pp, ▲/▼ with sign. Growth KPIs show no rows. The `KPI Trend` measures stay in the model, unused, pending a later clean-up.
+1. **Key figures cards v2** (`docs/design/kpi-card-v2.md`) replace K-24 and K-25 in Tracks A and B. No sparklines, no target bars. Each tile shows label, value, sub-line, and two diverging comparison rows (vs Compare A / vs Compare B): right = favourable, one shared scale of ±20 % / ±5 pp, ▲/▼ with sign. Growth KPIs show no rows. The `KPI Trend` measures stay in the model, unused, pending a later clean-up (dropped 2026-10-23, USER).
 2. **Track B only (Track A follows the USER's app review):**
    - The notice strip (L-05) is removed from every view.
    - The context line under the title (L-04) is replaced by an applied-filters pop-up opened from a funnel button next to the title.

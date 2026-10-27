@@ -1,8 +1,8 @@
-import { HOW_TO_READ } from '@/lib/sales/copy';
 import type { Comparator, MarketSel, SalesSelection, TimeView, ViewId } from '@/lib/sales/types';
 import type { HeaderVM } from '@/lib/sales/view-model';
 import { monthIndex, monthKey } from '@/lib/sales/windows';
-import { CopyLink, HowToRead, Segmented, Tabs } from './controls';
+import { CopyLink, Segmented, Tabs } from './controls';
+import { HowToReadButton } from './popup';
 import styles from './sales.module.css';
 
 // Header (layout-spec §0.1): identical in every view. Widths and x positions are the spec's px.
@@ -51,9 +51,6 @@ export function Header({
         M
       </div>
       <h1 className={`${styles.abs} ${styles.title}`}>{vm.title}</h1>
-      <p className={`${styles.abs} ${styles.pline}`} aria-live="polite">
-        {vm.periodLine}
-      </p>
       <Segmented
         label="Market"
         options={MARKETS}
@@ -61,7 +58,14 @@ export function Header({
         onChange={(market) => onChange({ market })}
         x={744}
       />
-      <Segmented label="Period" options={PERIODS} value={sel.tv} onChange={(tv) => onChange({ tv })} x={988} />
+      <Segmented
+        label="Period"
+        title={vm.periodLine}
+        options={PERIODS}
+        value={sel.tv}
+        onChange={(tv) => onChange({ tv })}
+        x={988}
+      />
       <label className={styles.srOnly} htmlFor="sales-month">
         Month
       </label>
@@ -81,7 +85,7 @@ export function Header({
       <Segmented label="Comparator" options={CMPS} value={sel.cmp} onChange={(cmp) => onChange({ cmp })} x={1304} />
       <Tabs tabs={TABS} value={sel.view} onChange={(view) => onChange({ view, drill: null })} panelId={panelId} />
       <div className={`${styles.abs} ${styles.tabright}`}>
-        <HowToRead text={HOW_TO_READ} />
+        <HowToReadButton vm={vm.howToRead} />
         <CopyLink />
       </div>
       <div className={`${styles.abs} ${styles.tabrule}`} />

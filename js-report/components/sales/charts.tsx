@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { fmtAxis, fmtUnit } from '@/lib/sales/format';
 import type { Unit } from '@/lib/sales/format';
 import type { Chart, SeriesRole } from '@/lib/sales/view-model';
-import { extent, linear, niceTicks } from './scale';
+import { extent, linear, niceTicks } from '../chart-scale';
 
 // Inline SVG charts (design-tokens §7; no chart library). Geometry only: values, labels and series roles come from
 // lib/sales. Marks are decorative for assistive tech; each chart carries an aria-label and the card title.
@@ -342,7 +342,7 @@ export function ColumnChart({
 }
 
 export function Bars({ chart, width, height }: Size & { chart: Extract<Chart, { kind: 'bars' }> }) {
-  const labW = Math.min(140, Math.round(width * 0.3));
+  const labW = Math.min(150, Math.round(width * 0.35));
   const valW = Math.min(150, Math.round(width * 0.25));
   const pw = width - labW - valW;
   const rowH = height / Math.max(chart.rows.length, 1);
@@ -655,25 +655,6 @@ export function Bubble({ chart, width, height }: Size & { chart: Extract<Chart, 
             </g>
           );
         })}
-    </svg>
-  );
-}
-
-export function Sparkline({ actual, py }: { actual: readonly (number | null)[]; py: readonly (number | null)[] }) {
-  const [lo, hi] = extent([...actual, ...py]);
-  const X = (i: number) => 2 + i * (116 / Math.max(actual.length - 1, 1));
-  const Y = linear(lo, hi === lo ? lo + 1 : hi, 40, 4);
-  const lastIx = actual.length - 1;
-  const last = actual[lastIx];
-  return (
-    <svg viewBox="0 0 120 44" width={120} height={44} aria-hidden="true">
-      {segments(py, X, Y).map((pts, k) => (
-        <polyline key={`p${k}`} points={pts} fill="none" stroke={C.g400} strokeWidth={1} strokeDasharray="3 2" />
-      ))}
-      {segments(actual, X, Y).map((pts, k) => (
-        <polyline key={`a${k}`} points={pts} fill="none" stroke={C.ink} strokeWidth={1.5} />
-      ))}
-      {last !== null && last !== undefined ? <circle cx={X(lastIx)} cy={Y(last)} r={3} fill={C.ink} /> : null}
     </svg>
   );
 }

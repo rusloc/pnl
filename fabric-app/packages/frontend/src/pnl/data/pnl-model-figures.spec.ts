@@ -3,14 +3,32 @@
 // (rayfin/probes/q*-smoke.query.json) for Consumer Products / Group, FY2026 YTD
 // Sep, Actual vs Budget and Prior year, USD, millions — so the mapped texts must
 // equal the control totals (data/acme_pl_dummy_data/checks/control_totals_usd.csv)
-// and the Ledger mockup where both cover the same cell.
+// and the Ledger mockup where both cover the same cell. The redesign-v4 zones use
+// the Commerce Cloud FY2025 numbers of the parity check (§4), so the texts must
+// equal Track C's where both print the same cell.
 import type { QueryTable } from '@microsoft/rayfin-connector-fabric-semanticmodel';
 import { describe, expect, it } from 'vitest';
 
 import { defaultFilters } from '../model/filters';
 import type { FilterState } from '../model/types';
 import { PnlModelError } from './pnl-model-client';
-import { bridgeComparison, breakdownOptions, kpiValueText, mapBridge, mapContext, mapDrivers, mapKpiMeta, mapKpiTiles, mapProfitability } from './pnl-model-figures';
+import {
+  breakdownOptions,
+  driversFromVariances,
+  mapBridge,
+  mapBubble,
+  mapConcentration,
+  mapContext,
+  mapHeat,
+  mapProfitability,
+  mapProfitBridge,
+  mapVarianceLeaves,
+  mapVarianceMembers,
+  mapVitals,
+  mapVitalsInfo,
+  mapVitalsMeta,
+  profitabilitySubtitle,
+} from './pnl-model-figures';
 import { sampleReference } from './sample-reference';
 
 const reference = sampleReference();
@@ -21,216 +39,373 @@ const table = (names: string[], rows: unknown[][]): QueryTable => ({
   rows,
 });
 
-// --- Q2a: dim_kpi rows for P (probe k3-meta) ---------------------------------
-const KPI_META = table(
-  ['dim_kpi[entity_view_code]', 'dim_kpi[slot]', 'dim_kpi[kpi_code]', 'dim_kpi[kpi_label]', 'dim_kpi[kpi_group]', 'dim_kpi[better_when]', 'dim_kpi[value_type]', 'dim_kpi[definition]'],
+// --- QV: Vitals for S, Commerce Cloud FY2025 vs Budget / Prior year (the quoted view;
+// values as the parity check §4 lists them, so the texts must equal Track C's) ----
+const VITALS_META = table(
+  ['dim_kpi[entity_view_code]', 'dim_kpi[vitals_slot]', 'dim_kpi[vitals_tier]', 'dim_kpi[kpi_code]', 'dim_kpi[kpi_label]', 'dim_kpi[better_when]', 'dim_kpi[value_type]', 'dim_kpi[definition]'],
   [
-    ['P', 3, 'GM_PCT', 'Gross margin %', 'Financial', 'Higher', 'PCT', 'Gross profit / NR'],
-    ['P', 1, 'NR', 'Net revenue', 'Financial', 'Higher', 'AMT', 'Gross revenue + gross-to-net deductions'],
-    ['P', 2, 'ORG_GROWTH', 'Organic growth vs PY', 'Financial', 'Higher', 'PCT', 'NR at constant currency / PY NR at the same rates - 1'],
-    ['P', 4, 'GTN_PCT', 'Gross-to-net %', 'Financial', 'Lower', 'PCT', '- gross-to-net deductions / gross revenue'],
-    ['P', 10, 'NR_PER_UNIT', 'Net revenue per unit', 'Operational', 'Higher', 'PRICE', 'NR / units sold'],
-    ['P', 9, 'UNITS', 'Units sold', 'Operational', 'Higher', 'CNT', 'Units shipped in the window'],
+    ['S', 6, 'Driver', 'GMV', 'GMV processed', 'Higher', 'AMT', 'Merchant GMV through Payments, translated'],
+    ['S', 1, 'Hero', 'NR', 'Net revenue', 'Higher', 'AMT', 'Gross revenue + gross-to-net deductions'],
+    ['S', 2, 'Hero', 'EBITDA', 'Adjusted EBITDA', 'Higher', 'AMT', 'Contribution margin + operating expenses (MPM)'],
+    ['S', 3, 'Hero', 'OP', 'Operating profit', 'Higher', 'AMT', 'IFRS 18 operating profit'],
+    ['S', 4, 'Secondary', 'GM_PCT', 'Gross margin %', 'Higher', 'PCT', 'Gross profit / NR'],
+    ['S', 5, 'Secondary', 'OPEX_PCT', 'Opex % of NR', 'Lower', 'PCT', '- (sales & marketing + R&D + G&A) / NR'],
+    ['S', 7, 'Driver', 'MERCHANTS', 'Active merchants (period end)', 'Higher', 'INT', 'Merchants on a paid plan at the last month-end'],
+    ['S', 8, 'Driver', 'ARR', 'ARR (period end)', 'Higher', 'AMT', 'Subscription NR of the last month in the window x 12'],
+    ['S', 9, 'Driver', 'MIX', 'Subscription share of NR', 'Neutral', 'PCT', 'Platform subscriptions NR / NR (revenue mix)'],
+    ['S', 10, 'Driver', 'FY_OUTLOOK', 'FY outlook (net revenue)', 'Higher', 'AMT', 'Latest estimate for the fiscal year'],
   ]
 );
-
-// --- Q2b: values (probe k1-fin-a: NR, ORG_GROWTH, GM_PCT, GTN_PCT; t2: UNITS, NR_PER_UNIT) ---
-// Since ADR-0006 §16 the query returns the comparison values (`KPI Value` under
-// CMP_A / CMP_B) instead of `KPI Δ A/B`; the comparisons below are the ones that
-// reproduce the deltas the model returned on 2026-10-22 (−1.9 % / +8.2 % on NR,
-// −0.41 pp / +0.03 pp on GM %, …). Parity with the model's `KPI Δ *` is proven in
-// pnl-model-figures.parity.spec.ts.
-const KPI_VALUES: QueryTable[] = [
+const VITALS_VALUES = [
   table(
-    ['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]', '[@ORG_GROWTH]', '[@ORG_GROWTH_cmp_a]', '[@ORG_GROWTH_cmp_b]', '[@ORG_GROWTH_s]', '[@GM_PCT]', '[@GM_PCT_cmp_a]', '[@GM_PCT_cmp_b]', '[@GM_PCT_s]'],
-    [[3398.5219426605, 3464.7986884489997, 3139.6026644619997, null, 0.060786957516311135, 0.0909484620856369, 0, 'Reported +8.2%', 0.4941001143709982, 0.4982205097033906, 0.4937946802942854, null]]
+    ['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@EBITDA]', '[@EBITDA_cmp_a]', '[@EBITDA_cmp_b]', '[@OP]', '[@OP_cmp_a]', '[@OP_cmp_b]'],
+    [[667.4, 658.2, 513.8, 82.8, 83.1, 56.0, 48.6, 50.2, 32.9]]
   ),
   table(
-    ['[@GTN_PCT]', '[@GTN_PCT_cmp_a]', '[@GTN_PCT_cmp_b]', '[@GTN_PCT_s]', '[@UNITS]', '[@UNITS_cmp_a]', '[@UNITS_cmp_b]', '[@UNITS_s]', '[@NR_PER_UNIT]', '[@NR_PER_UNIT_cmp_a]', '[@NR_PER_UNIT_cmp_b]', '[@NR_PER_UNIT_s]'],
-    [[0.21348738290488004, 0.21080296626442885, 0.21273675569904488, null, 419.838143, 427.1422759182012, 404.0790596727623, null, 8.094838449827318, 8.111060570969256, 7.768558972962877, null]]
+    ['[@GM_PCT]', '[@GM_PCT_cmp_a]', '[@GM_PCT_cmp_b]', '[@OPEX_PCT]', '[@OPEX_PCT_cmp_a]', '[@OPEX_PCT_cmp_b]', '[@GMV]', '[@GMV_cmp_a]', '[@GMV_cmp_b]'],
+    [[0.56, 0.563, 0.569, 0.39, 0.39, 0.421, 11315.0, 10943.0, 8730.0]]
   ),
+  table(
+    ['[@MERCHANTS]', '[@MERCHANTS_cmp_a]', '[@MERCHANTS_cmp_b]', '[@ARR]', '[@ARR_cmp_a]', '[@ARR_cmp_b]', '[@MIX]', '[@MIX_pay]', '[@MIX_py]', '[@MIX_pay_py]'],
+    [[124291, 128135, 108420, 262.8, 268.1, 215.6, 0.375, 0.453, 0.401, 0.427]]
+  ),
+  table(['[@FY_OUTLOOK]', '[@FY_OUTLOOK_bud]', '[@FY_OUTLOOK_e]', '[@FY_OUTLOOK_e_bud]'], [[667.4, 658.2, 82.8, 83.1]]),
 ];
+const S_FILTER: FilterState = { ...filter, entity: 'S', fiscalYear: 2025, month: 12, timeView: 'fy' };
 
-describe('KPI tiles (§5)', () => {
-  const meta = mapKpiMeta(KPI_META);
+describe('Vitals (redesign v4, build-brief §1)', () => {
+  const meta = mapVitalsMeta(VITALS_META);
 
-  it('orders the slots and validates group / better_when', () => {
-    expect(meta.map((m) => m.slot)).toEqual([1, 2, 3, 4, 9, 10]);
-    expect(() => mapKpiMeta(table(KPI_META.columns.map((c) => c.name), [['P', 1, 'X', 'x', 'Other', 'Higher', 'AMT', '']]))).toThrow(PnlModelError);
+  it('orders the cards by vitals_slot, three tiers, and validates the tier / better_when', () => {
+    expect(meta.map((m) => [m.slot, m.tier])).toEqual([[1, 'hero'], [2, 'hero'], [3, 'hero'], [4, 'secondary'], [5, 'secondary'], [6, 'driver'], [7, 'driver'], [8, 'driver'], [9, 'driver'], [10, 'driver']]);
+    expect(() => mapVitalsMeta(table(VITALS_META.columns.map((c) => c.name), [['S', 1, 'Huge', 'X', 'x', 'Higher', 'AMT', '']]))).toThrow(PnlModelError);
   });
 
-  it('prints the control total on the net revenue tile with a comparison row vs Budget and vs Prior year (K-20, T-06 at the app boundary)', () => {
-    const { financial } = mapKpiTiles(meta, KPI_VALUES, filter);
-    const nr = financial.find((t) => t.label === 'Net revenue')!;
-    expect(nr.value).toBe('$3,398.5m');
-    expect(nr.hint).toBe('Gross revenue + gross-to-net deductions');
-    expect(nr.sublines).toEqual([]);
-    expect(nr.compares).toMatchObject([
-      { name: 'vs Budget', text: '−1.9%', tone: 'unf', bar: { capped: false } },
-      { name: 'vs Prior year', text: '+8.2%', tone: 'fav', bar: { capped: false } },
+  it('prints the quoted Commerce Cloud FY2025 heroes with Δ rows vs Budget / Prior year and the status chip (parity check §4)', () => {
+    const { results, drivers } = mapVitals(meta, VITALS_VALUES, S_FILTER);
+    expect(results.map((c) => [c.label, c.value])).toEqual([
+      ['Net revenue', '$667.4 m'],
+      ['Adjusted EBITDA', '$82.8 m'],
+      ['Operating profit', '$48.6 m'],
+      ['Gross margin %', '56.0%'],
+      ['Opex % of NR', '39.0%'],
     ]);
-    // The bar is the Δ on the ±20 % scale: unfavourable grows left, favourable right (kpi-card-v2).
-    expect(nr.compares[0].bar?.fraction).toBeCloseTo(-0.019129 / 0.2, 4);
-    expect(nr.compares[1].bar?.fraction).toBeCloseTo(0.082469 / 0.2, 4);
-  });
-
-  it('shows percent KPIs with pp deltas on the ±5 pp scale, inverts colour and side when lower is better (K-21) and drops the rows on growth KPIs', () => {
-    const { financial } = mapKpiTiles(meta, KPI_VALUES, filter);
-    const gm = financial.find((t) => t.label === 'Gross margin %')!;
-    expect(gm.value).toBe('49.4%');
-    expect(gm.compares.map((c) => c.text)).toEqual(['−0.4 pp', '0.0 pp']);
-    expect(gm.compares.map((c) => c.tone)).toEqual(['unf', 'neutral']);
-    expect(gm.compares[0].bar?.fraction).toBeCloseTo(-0.41204 / 5, 4);
-    // A Δ that rounds to 0.0 pp is neutral in colour but still sits on its side of the line.
-    expect(gm.compares[1].bar?.fraction).toBeCloseTo(0.030543 / 5, 4);
-    const gtn = financial.find((t) => t.label === 'Gross-to-net %')!;
-    expect(gtn.value).toBe('21.3%');
-    // +0.3 pp of deductions is unfavourable when lower is better: left of the line.
-    expect(gtn.compares[0]).toMatchObject({ name: 'vs Budget', text: '+0.3 pp', tone: 'unf' });
-    expect(gtn.compares[0].bar?.fraction).toBeCloseTo(-0.268442 / 5, 4);
-    const org = financial.find((t) => t.label === 'Organic growth vs PY')!;
-    expect(org.value).toBe('+6.1%');
-    expect(org.sublines).toEqual(['Reported +8.2%']);
-    expect(org.compares).toEqual([]);
-  });
-
-  it('formats counts and prices by value_type and keeps operational tiles apart', () => {
-    const { operational } = mapKpiTiles(meta, KPI_VALUES, filter);
-    expect(operational.map((t) => t.value)).toEqual(['419.8m', '$8.09']);
-    expect(mapKpiTiles(meta, KPI_VALUES, { ...filter, units: 'k', currency: 'EUR' }).financial[0].value).toBe('€3,398,522k');
-    expect(kpiValueText(0.0266, 'PCT2', filter, false)).toBe('2.66%');
-    expect(kpiValueText(138726, 'INT', filter, false)).toBe('138,726');
-    expect(kpiValueText(null, 'AMT', filter, false)).toBe('n/a');
-  });
-
-  it('omits a comparison set to None (and does not need its column) and refuses a result without the chunk columns', () => {
-    const { financial } = mapKpiTiles(meta, KPI_VALUES, { ...filter, compareB: 'NONE' });
-    expect(financial[0].compares.map((c) => c.name)).toEqual(['vs Budget']);
-    const noCmpB = KPI_VALUES.map((t) => ({ columns: t.columns.filter((c) => !c.name.endsWith('_cmp_b]')), rows: [t.rows[0].filter((_, i) => !t.columns[i].name.endsWith('_cmp_b]'))] }));
-    expect(mapKpiTiles(meta, noCmpB, { ...filter, compareB: 'NONE' }).financial[0].compares.map((c) => c.text)).toEqual(['−1.9%']);
-    expect(() => mapKpiTiles(meta, noCmpB, filter)).toThrow(/missing column @NR_cmp_b/);
-    expect(() => mapKpiTiles(meta, [KPI_VALUES[0]], filter)).toThrow(/missing column @GTN_PCT/);
-  });
-
-  it('shows n/a and no bar when the model returns a blank comparison or value (KPI Δ rule: blank, never 0)', () => {
-    const blanks = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]'], [[3398.5, null, 0, null]])];
-    const [nr] = mapKpiTiles(meta.filter((m) => m.code === 'NR'), blanks, filter).financial;
-    expect(nr.compares).toEqual([
-      { name: 'vs Budget', text: 'n/a', tone: 'neutral', bar: null },
-      { name: 'vs Prior year', text: 'n/a', tone: 'neutral', bar: null },
+    expect(drivers.map((c) => c.label)).toEqual(['GMV processed', 'Active merchants (period end)', 'ARR (period end)', 'Subscription share of NR', 'FY outlook (net revenue)']);
+    const nr = results[0];
+    expect(nr.rows).toEqual([
+      { name: 'vs Budget', abs: '+9.2', rel: '+1.4%', tone: 'ahead' },
+      { name: 'vs Prior year', abs: '+153.6', rel: '+29.9%', tone: 'neutral' },
     ]);
+    expect(nr.status).toEqual({ kind: 'ahead', text: 'ahead' });
+    // ⓘ copy from the shared block (docs/ADD/features/info-popovers.md), not the model's definition.
+    expect(nr.info).toMatchObject({ title: 'Net revenue', what: expect.stringMatching(/^Gross revenue less gross-to-net deductions/), formula: 'NR = GR + GTN; Δ = actual − comparison, % of |comparison|', source: expect.stringMatching(/^KPI Value K-01/) });
+    expect(results[4].info.title).toBe('Opex % revenue');
+    expect(results[1]).toMatchObject({ status: { kind: 'ontrack', text: 'on track' }, rows: [{ name: 'vs Budget', abs: '−0.3', rel: '−0.4%', tone: 'plan' }, expect.anything()] });
+    expect(results[2]).toMatchObject({ status: { kind: 'off' }, rows: [{ name: 'vs Budget', abs: '−1.6', rel: '−3.2%', tone: 'off' }, expect.anything()] });
   });
 
-  it('caps a comparison beyond the shared scale (±20 % / ±5 pp) at the track end', () => {
-    const wide = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]'], [[3398.5, 2500, 4500, null]])];
-    const [nr] = mapKpiTiles(meta.filter((m) => m.code === 'NR'), wide, filter).financial;
-    expect(nr.compares.map((c) => c.text)).toEqual(['+35.9%', '−24.5%']);
-    expect(nr.compares.map((c) => c.bar)).toEqual([
-      { fraction: 1, capped: true },
-      { fraction: -1, capped: true },
+  it('ratio cards: pp rows without an amount, "on plan" for a zero Δ, "lower is better" inverted on Opex %', () => {
+    const { results, drivers } = mapVitals(meta, VITALS_VALUES, S_FILTER);
+    expect(results[3].rows).toEqual([
+      { name: 'vs Budget', abs: null, rel: '−0.3 pp', tone: 'plan' },
+      { name: 'vs Prior year', abs: null, rel: '−0.9 pp', tone: 'neutral' },
     ]);
+    expect(results[3].status?.kind).toBe('ontrack');
+    expect(results[4].rows[0]).toEqual({ name: 'vs Budget', abs: null, rel: 'on plan', tone: 'plan' });
+    expect(results[4].rows[1]).toEqual({ name: 'vs Prior year', abs: null, rel: '−3.1 pp', tone: 'neutral' });
+    expect(results[4].status?.kind).toBe('ontrack');
+    // Drivers: GMV ahead (+3.4 %), merchants watch (−3.0 %, an integer KPI), ARR watch (−2.0 %).
+    expect(drivers[0]).toMatchObject({ value: '$11,315.0 m', status: { kind: 'ahead' }, rows: [{ abs: '+372.0', rel: '+3.4%', tone: 'ahead' }, expect.anything()] });
+    expect(drivers[1]).toMatchObject({ value: '124,291', status: { kind: 'watch' }, rows: [{ abs: '−3,844', rel: '−3.0%', tone: 'watch' }, expect.anything()] });
+    expect(drivers[2]).toMatchObject({ value: '$262.8 m', status: { kind: 'watch' }, rows: [{ abs: '−5.3', rel: '−2.0%', tone: 'watch' }, expect.anything()] });
+  });
+
+  it('revenue mix shows Sub % / Pay % with one row vs prior year in pp and no chip (PV-04); FY outlook compares with the FY Budget', () => {
+    const { drivers } = mapVitals(meta, VITALS_VALUES, S_FILTER);
+    expect(drivers[3]).toMatchObject({ value: '37.5% / 45.3%', status: null, rows: [{ name: 'Sub / Pay vs PY', abs: null, rel: '−2.6 pp / +2.6 pp', tone: 'neutral' }] });
+    expect(drivers[4]).toMatchObject({
+      value: '$667.4 m',
+      status: { kind: 'ahead' },
+      rows: [
+        { name: 'vs FY Budget', abs: '+9.2', rel: '+1.4%', tone: 'ahead' },
+        { name: 'EBITDA vs FY Bud', abs: '−0.3', rel: '−0.4%', tone: 'neutral' },
+      ],
+    });
+  });
+
+  it('the chip compares with Budget whatever Compare A is (PV-01): Compare A = Prior year reads the `_bud` column, the Budget row is the coloured one', () => {
+    const f: FilterState = { ...S_FILTER, compareA: 'PY', compareB: 'NONE' };
+    const values = [table(['[@NR]', '[@NR_cmp_a]', '[@NR_bud]'], [[667.4, 513.8, 658.2]])];
+    const { results } = mapVitals(meta.filter((m) => m.code === 'NR'), values, f);
+    expect(results[0].status).toEqual({ kind: 'ahead', text: 'ahead' });
+    expect(results[0].rows).toEqual([{ name: 'vs Prior year', abs: '+153.6', rel: '+29.9%', tone: 'neutral' }]);
+    // Compare B = Budget: the Budget row carries the status colour and no `_bud` column is needed.
+    const g: FilterState = { ...S_FILTER, compareA: 'PY', compareB: 'BUD' };
+    const { results: r2 } = mapVitals(meta.filter((m) => m.code === 'NR'), [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]'], [[667.4, 513.8, 658.2]])], g);
+    expect(r2[0].rows.map((r) => [r.name, r.tone])).toEqual([['vs Prior year', 'neutral'], ['vs Budget', 'ahead']]);
+    expect(() => mapVitals(meta.filter((m) => m.code === 'NR'), [table(['[@NR]', '[@NR_cmp_a]'], [[667.4, 513.8]])], f)).toThrow(/missing column @NR_bud/);
+  });
+
+  it('n/a rows without a chip when a side is blank; the info zone maps the KPI Info Sub texts per code', () => {
+    const { results } = mapVitals(meta.filter((m) => m.code === 'NR'), [table(['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]'], [[667.4, null, 513.8]])], S_FILTER);
+    expect(results[0].rows[0]).toEqual({ name: 'vs Budget', abs: null, rel: 'n/a', tone: 'neutral' });
+    expect(results[0].status).toBeNull();
+    expect(mapVitalsInfo(['NR', 'OP'], [table(['[@NR_i]', '[@OP_i]'], [['Organic growth +27.5%', null]])])).toEqual({ NR: 'Organic growth +27.5%' });
   });
 });
 
-// --- Q3: Group bridge (probe q3-bridge-smoke), steps from the model + END = Net Revenue ---
-const BRIDGE_G = table(
-  ['[step_code]', '[step_label]', '[step_sort]', '[@value]'],
+// --- Q3: net revenue bridge for S, FY2025 (Track C numbers: 658.2 → 655.6 → +11.8 → 667.4) ---
+const BRIDGE_S = table(
+  ['[step_code]', '[step_label]', '[step_sort]', '[@delta]', '[@is_total]'],
   [
-    ['START', 'Comparison NR', 10, 4045.4342],
-    ['ENT_P', 'Consumer Products', 41, -95.7915],
-    ['ENT_S', 'Commerce Cloud', 42, -10.5085],
-    ['ELIM', 'Eliminations', 43, -106.3902],
-    ['FX', 'FX', 90, 33.6434],
-    ['END', 'Base', 999, 3972.6875],
+    ['START', 'Comparison NR', 10, 658.2, 1],
+    ['SVC_SUB', 'Platform subscriptions', 21, -4.6, 0],
+    ['SVC_PAY', 'Payments', 22, 11.0, 0],
+    ['SVC_APP', 'Apps, partners & ads', 23, -3.4, 0],
+    ['SVC_PS', 'Professional services', 24, -5.6, 0],
+    ['CC_SUB', 'Constant-currency NR', 80, 0, 1],
+    ['FX', 'FX', 90, 11.8, 0],
+    ['END', 'Actual NR', 99, 0, 1],
+    ['END', 'Actual NR', 999, 667.4, 2],
   ]
 );
 
-describe('bridge (C-40)', () => {
-  it('labels the totals with the versions, formats steps as signed deltas and keeps the model’s step labels', () => {
-    const bridge = mapBridge(BRIDGE_G, { ...filter, entity: 'G' });
-    expect(bridge.steps.map((s) => s.label)).toEqual(['Budget', 'Consumer Products', 'Commerce Cloud', 'Eliminations', 'FX', 'Actual']);
-    expect(bridge.steps.map((s) => s.valueText)).toEqual(['$4,045.4m', '−95.8', '−10.5', '−106.4', '+33.6', '$3,972.7m']);
-    expect(bridge.steps.map((s) => s.kind)).toEqual(['total', 'unf', 'unf', 'unf', 'fav', 'total']);
-    expect(bridge.subtitle).toMatch(/^Change by company/);
-    expect(bridge.axisText).toMatch(/^\$[\d,]+m$/);
+describe('net revenue bridge (C-40, redesign v4)', () => {
+  it('draws comparison → service lines → constant-currency subtotal → FX → actual, with step % labels and the ⓘ values', () => {
+    const bridge = mapBridge(BRIDGE_S, S_FILTER);
+    expect(bridge.steps.map((s) => s.label)).toEqual(['Budget', 'Platform subscriptions', 'Payments', 'Apps, partners & ads', 'Professional services', 'Constant currency', 'FX', 'Actual']);
+    expect(bridge.steps.map((s) => s.kind)).toEqual(['total', 'unf', 'fav', 'unf', 'unf', 'subtotal', 'fx', 'total']);
+    expect(bridge.steps.map((s) => s.valueText)).toEqual(['$658.2 m', '−4.6', '+11.0', '−3.4', '−5.6', '$655.6 m', '+11.8', '$667.4 m']);
+    expect(bridge.steps.map((s) => s.sub)).toEqual([null, '−0.7%', '+1.7%', '−0.5%', '−0.9%', '−0.4%', null, '+1.4%']);
+    expect(bridge.subtitle).toMatch(/^Change by service line/);
+    expect(bridge.info.what).toMatch(/^Budget to actual: driver steps at constant currency/);
+    expect(bridge.info.formula).toMatch(/^service-line step = NRcc actual − NRcc comparison per line; CC subtotal/);
+    expect(bridge.info.values).toEqual([
+      { label: 'Reported Δ vs Budget', value: '+$9.2 m (+1.4%)' },
+      { label: 'Constant-currency Δ', value: '−$2.6 m (−0.4%)' },
+      { label: 'FX', value: '+$11.8 m' },
+    ]);
+    // The subtotal sits at the running level; FX lifts it to the actual level (T-05).
+    const cc = bridge.steps[5];
+    const fx = bridge.steps[6];
+    expect(fx.bottomPct).toBeCloseTo(cc.heightPct, 1);
+    expect(fx.bottomPct + fx.heightPct).toBeCloseTo(bridge.steps[7].heightPct, 1);
   });
 
-  it('shows the known T-05 gap honestly: the Group steps end 106.3 M short of the Actual total (model bug, bip)', () => {
-    const bridge = mapBridge(BRIDGE_G, { ...filter, entity: 'G' });
-    const stepsSum = 4045.4342 - 95.7915 - 10.5085 - 106.3902 + 33.6434;
-    expect(3972.6875 - stepsSum).toBeCloseTo(106.3, 1);
-    // The last step's top and the Actual bar's top differ: the chart does not pretend they meet.
-    const fx = bridge.steps[4];
-    const actual = bridge.steps[5];
-    expect(Math.abs(fx.bottomPct + fx.heightPct - actual.heightPct)).toBeGreaterThan(5);
-  });
-
-  it('refuses a result without both totals', () => {
-    expect(() => mapBridge(table(BRIDGE_G.columns.map((c) => c.name), [['VOL', 'Volume', 20, -1]]), filter)).toThrow(PnlModelError);
+  it('labels the START total with the C-40 comparison and flags steps that do not reconcile (the Group gap, T-05)', () => {
+    const start = (f: Partial<FilterState>) => mapBridge(BRIDGE_S, { ...S_FILTER, ...f }).steps[0].label;
+    expect(start({ compareA: 'LE' })).toBe('Latest est.');
+    expect(start({ compareA: 'NONE', compareB: 'PY' })).toBe('Prior year');
+    const gap = table(BRIDGE_S.columns.map((c) => c.name), BRIDGE_S.rows.map((r) => (r[0] === 'END' && r[4] === 2 ? ['END', 'Actual NR', 999, 773.7, 2] : r)));
+    expect(mapBridge(gap, S_FILTER).info.values.at(-1)).toEqual({ label: 'Steps not reconciling to the actual level (T-05)', value: '−$106.3 m' });
+    expect(() => mapBridge(table(BRIDGE_S.columns.map((c) => c.name), [['VOL', 'Volume', 20, -1, 0]]), S_FILTER)).toThrow(PnlModelError);
   });
 });
 
-// --- Q4: drivers for P (probe q4-variances-smoke) ---------------------------
-const DRIVERS_P = table(
-  ['dim_pl_row[row_key]', 'dim_pl_row[line_code]', 'dim_pl_row[line_label]', 'dim_pl_row[account_code]', 'dim_pl_row[account_label]', '[@base]', '[@cmp]', '[@d]', '[@d_pct]', '[@abs_d]'],
+// --- QP: profit bridge for S, FY2025 (Track C numbers) ------------------------
+const PROFIT_S = table(
+  ['[step_code]', '[step_label]', '[step_sort]', '[@delta]', '[@is_total]'],
   [
-    ['SM|SM_P1', 'SM', 'Sales & marketing', 'SM_P1', 'Advertising: working media', -221.9509, -240.2039, 18.253, 0.0759895230648985, 18252977.381],
-    ['GR|GR_P1', 'GR', 'Gross revenue', 'GR_P1', 'Gross product sales', 4302.3611, 4371.877, -69.516, -0.015900712753983765, 69515960.7797],
-    ['COR|COR_P2', 'COR', 'Cost of revenue', 'COR_P2', 'Sourced finished goods', -452.3033, -466.8099, 14.5066, 0.031076012525355964, 14506591.4454],
+    ['BUD', 'Comparison Adj. EBITDA', 10, 82.9, 1],
+    ['VOL', 'Revenue volume', 20, -1.5, 0],
+    ['GM_RATE', 'GM rate', 30, 0.0, 0],
+    ['GM_MIX', 'GM mix', 40, -1.4, 0],
+    ['VSC', 'Variable selling', 50, 0.2, 0],
+    ['SM', 'S&M', 60, 0.5, 0],
+    ['RD', 'R&D', 70, 0.5, 0],
+    ['GA', 'G&A', 80, 0.2, 0],
+    ['OOI', 'Other operating', 90, -0.1, 0],
+    ['FX', 'FX', 100, 1.5, 0],
+    ['ACT', 'Adj. EBITDA', 110, 0, 1],
+    ['DA', 'D&A', 120, -31.0, 0],
+    ['ADJ', 'Adjusting items', 130, -3.2, 0],
+    ['OP', 'Operating profit', 140, 0, 1],
+    ['CMP_DA', '', 901, -30.1, 0],
+    ['CMP_ADJ', '', 902, -4.1, 0],
+    ['CMP_OP', '', 903, 50.2, 0],
   ]
 );
 
-describe('largest variances (C-45)', () => {
-  it('ranks by |Δ| and prints the mockup’s cells: Gross product sales −69.5 (−1.6%), working media +18.3 (+7.6%)', () => {
-    const drivers = mapDrivers(DRIVERS_P, filter);
+describe('profit bridge (redesign v4)', () => {
+  it('runs comparison EBITDA → changes → FX → actual EBITDA (subtotal) → D&A, adjusting items (levels) → operating profit, with Δ labels on the levels', () => {
+    const b = mapProfitBridge(PROFIT_S, S_FILTER);
+    expect(b.steps.map((s) => s.kind)).toEqual(['total', 'unf', 'fav', 'unf', 'fav', 'fav', 'fav', 'fav', 'unf', 'fx', 'subtotal', 'level', 'level', 'total']);
+    expect(b.steps[0]).toMatchObject({ label: 'Budget EBITDA', valueText: '$82.9 m', sub: null });
+    expect(b.steps[10]).toMatchObject({ label: 'Adj. EBITDA', valueText: '$82.8 m', sub: 'Δ −0.1' });
+    expect(b.steps[11]).toMatchObject({ label: 'D&A', valueText: '−31.0', sub: 'Δ −0.9' });
+    expect(b.steps[12]).toMatchObject({ label: 'Adjusting items', valueText: '−3.2', sub: 'Δ +0.9' });
+    expect(b.steps[13]).toMatchObject({ label: 'Operating profit', valueText: '$48.6 m', sub: 'Δ −1.6' });
+    expect(b.subtitle).toBe('Budget Adj. EBITDA → Actual → Operating profit');
+    expect(b.info.values).toEqual([
+      { label: 'Adj. EBITDA Δ vs Budget', value: '−$0.1 m' },
+      { label: 'of which FX', value: '+$1.5 m' },
+      { label: 'Δ at constant currency', value: '−$1.6 m' },
+      { label: 'Operating profit Δ vs Budget', value: '−$1.6 m' },
+    ]);
+    expect(() => mapProfitBridge(table(PROFIT_S.columns.map((c) => c.name), [['VOL', 'Revenue volume', 20, -1, 0]]), S_FILTER)).toThrow(PnlModelError);
+  });
+});
+
+// --- QL: variance leaves (three of them) and a cut --------------------------
+const LEAVES = table(
+  ['dim_pl_row[row_key]', 'dim_pl_row[line_code]', 'dim_pl_row[line_label]', 'dim_pl_row[account_code]', 'dim_pl_row[account_label]', 'dim_pl_row[line_sort]', 'dim_pl_row[account_sort]', '[@base]', '[@cmp]', '[@d_b]', '[@fx]', '[@below_cm]'],
+  [
+    ['GR|GR_P1', 'GR', 'Gross revenue', 'GR_P1', 'Gross product sales', 10, 10, 4302.3611, 4371.877, 329.76, 12.1, false],
+    ['SM|SM_P1', 'SM', 'Sales & marketing', 'SM_P1', 'Advertising: working media', 110, 400, -221.9509, -240.2039, -15.3, -0.4, true],
+    ['COR|COR_P2', 'COR', 'Cost of revenue', 'COR_P2', 'Sourced finished goods', 40, 170, -452.3033, -466.8099, -28.4, null, false],
+    ['TAX|TAX_P1', 'TAX', 'Income tax expense', 'TAX_P1', 'Income tax', 260, 900, -125.1, -130.2, -13.9, -0.2, true],
+  ]
+);
+
+describe('largest variances zone (C-45)', () => {
+  it('maps the leaves with their level columns and derives the AI assistant\'s top 8 (Gross product sales −69.5 (−1.6%), working media +18.3 (+7.6%))', () => {
+    const zone = mapVarianceLeaves(LEAVES);
+    expect(zone.leaves).toHaveLength(4);
+    expect(zone.leaves[1]).toMatchObject({ rowKey: 'SM|SM_P1', code: 'SM_P1', block: 'SM', blockName: 'Sales & marketing', base: -221.9509, comparison: -240.2039, deltaB: -15.3, fx: -0.4, belowCm: true });
+    expect(zone.leaves[2].fx).toBeNull();
+    const drivers = driversFromVariances(zone, filter);
     expect(drivers.map((d) => d.name)).toEqual(['Gross product sales', 'Advertising: working media', 'Sourced finished goods']);
     expect(drivers[0]).toMatchObject({ block: 'Gross revenue', deltaText: '−69.5', deltaPctText: '−1.6%', tone: 'unf' });
     expect(drivers[1]).toMatchObject({ block: 'Sales & marketing', deltaText: '+18.3', deltaPctText: '+7.6%', tone: 'fav' });
-    expect(mapDrivers(DRIVERS_P, { ...filter, units: 'k' })[0].deltaText).toBe('−69,516');
+    expect(driversFromVariances(zone, { ...filter, units: 'k' })[0].deltaText).toBe('−69,516');
+  });
+
+  it('maps the cut members in the reference order with their deltas per leaf', () => {
+    const cut = table(
+      ['[row_key]', '[@member]', '[@name]', '[@in_view]', '[@d]'],
+      [
+        ['GR|GR_P1', 'UK', 'UK & Ireland', 1, -10.5],
+        ['GR|GR_P1', 'NA', 'North America', 1, -40.0],
+        ['SM|SM_P1', 'NA', 'North America', 1, 12.0],
+        ['SM|SM_P1', 'XX', 'Unknown', 1, null],
+      ]
+    );
+    const members = mapVarianceMembers(cut, { ...filter, varCut: 'region' }, reference);
+    expect(members.cut).toBe('region');
+    expect(members.members).toEqual([
+      { key: 'NA', label: 'North America' },
+      { key: 'UK', label: 'UK & Ireland' },
+    ]);
+    expect(members.deltas).toEqual({ 'GR|GR_P1': { UK: -10.5, NA: -40.0 }, 'SM|SM_P1': { NA: 12.0 } });
+    expect(() => mapVarianceMembers(cut, filter, reference)).toThrow(PnlModelError);
   });
 });
 
-// --- Q5: profitability by channel for P (probe q5-profitability-smoke) ------
-const PROF_P = table(
-  ['[@code]', '[@name]', '[@in_view]', '[@nr]', '[@share]', '[@nr_d_pct]', '[@gm]', '[@cm]', '[@ebitda]', '[@op]'],
+// --- Q5: profitability by region for S at constant currency (Track C numbers) ----
+const PROF_S = table(
+  ['[@code]', '[@name]', '[@in_view]', '[@nr]', '[@nr_d_pct]', '[@gm]', '[@cm]', '[@cm_d_pp]', '[@contrib]', '[@ebitda]'],
   [
-    ['GRO', 'Grocery & mass retail', 1, 1107.7233, 0.32594267626247236, -0.03789907748124347, 0.4940466351511016, 0.4362466349946812, 0.24564235953228106, 0.206693159078139],
-    ['D2C', 'Own D2C webstore', 1, 484.4905, 0.14255917597660744, 0.012974950232676509, 0.4941349279094561, 0.31933492823429366, 0.12873449534341988, 0.08980006357166674],
+    ['TOTAL', 'Total', 1, 655.6, -0.004, 0.56, 0.513, -0.2, 336.3, 81.3],
+    ['NA', 'North America', 1, 358.0, 0.012, 0.531, 0.509, -1.2, 182.2, 43.0],
+    ['EU', 'Continental Europe', 1, 153.7, -0.049, 0.59, 0.52, 0.4, 79.9, 20.1],
+    [null, null, 1, null, null, null, null, null, null, null],
   ]
 );
 
-describe('profitability by slice (C-46)', () => {
-  it('prints the mockup row for Grocery & mass retail and names the breakdown and comparison', () => {
-    const p = mapProfitability(PROF_P, 0.3914539833181823, 'note from the model', filter, reference);
-    expect(p.by).toBe('channel');
-    expect(p.column).toBe('Channel');
-    expect(p.options).toEqual(['Region', 'Channel', 'Category', 'Price tier']);
-    expect(p.compareLabel).toBe('Budget');
-    expect(p.note).toBe('note from the model');
-    expect(p.rows[0]).toMatchObject({
-      name: 'Grocery & mass retail', nrText: '1,107.7', shareText: '32.6%',
-      deltaPctText: '−3.8%', tone: 'unf', gm: '49.4%', cm: '43.6%', ebitda: '24.6%', op: '20.7%',
-    });
-    expect(p.rows[0].sharePct).toBeCloseTo(32.594, 3);
-    expect(p.rows[1].tone).toBe('fav');
-    expect(p.cmAverageText).toBe('39.1%');
-    expect(p.cmAveragePct).toBeCloseTo(39.145, 2);
+describe('profitability table (C-46, redesign v4)', () => {
+  it('prints the eight columns, the status dot on CM Δ only, the total last and the CC subtitle from the selection', () => {
+    const p = mapProfitability(PROF_S, S_FILTER, reference);
+    expect(p).toMatchObject({ by: 'region', column: 'Region', compareLabel: 'Budget', allocated: false });
+    expect(p.subtitle).toBe('Constant currency (FY2025 budget rates) - USD m - vs Budget - opex booked by region, allocated for other breakdowns');
+    expect(p.rows.map((r) => r.name)).toEqual(['North America', 'Continental Europe', 'Total']);
+    expect(p.rows[0]).toEqual({ key: 'NA', name: 'North America', nrText: '358.0', nrDeltaText: '+1.2%', gm: '53.1%', cm: '50.9%', cmDeltaText: '−1.2 pp', cmStatus: 'off', contributionText: '182.2', ebitdaText: '43.0', total: false });
+    expect(p.rows[1].cmStatus).toBe('ahead');
+    expect(p.rows[2]).toMatchObject({ total: true, nrText: '655.6', nrDeltaText: '−0.4%', cm: '51.3%', cmDeltaText: '−0.2 pp', cmStatus: 'ontrack', ebitdaText: '81.3' });
+    expect(p.info.values[0]).toEqual({ label: 'Comparison', value: 'Budget' });
+    expect(p.info.what).toMatch(/Δ vs Budget % on net revenue/);
+    expect(p.info.formula).toBe('GM % = GP ÷ NR; CM % = contribution ÷ NR; CM Δ = CM % − comparison CM %');
   });
 
-  it('drops the model’s blank member row (Group by entity returned [null, null, 1, …] on 2026-10-22)', () => {
-    const withBlank = table(PROF_P.columns.map((c) => c.name), [...PROF_P.rows, [null, null, 1, null, null, null, null, null, null, null]]);
-    expect(mapProfitability(withBlank, null, '', filter, reference).rows.map((r) => r.name)).toEqual(['Grocery & mass retail', 'Own D2C webstore']);
-  });
-
-  it('follows the breakdown index and the Group options, and resolves the comparison per C-40', () => {
+  it('follows the breakdown index (allocated below Region / Company) and the Group options; the comparison per C-40', () => {
     expect(breakdownOptions({ entity: 'G' }, reference)).toEqual(['Region', 'Company']);
     expect(breakdownOptions({ entity: 'S' }, reference)).toEqual(['Region', 'Sales motion', 'Service line', 'Customer segment']);
-    const byRegion = mapProfitability(PROF_P, null, '', { ...filter, breakdown: { ...filter.breakdown, P: 0 } }, reference);
-    expect(byRegion.by).toBe('region');
-    expect(byRegion.cmAverageText).toBe('');
-    expect(bridgeComparison({ compareA: 'NONE', compareB: 'LE' })).toBe('LE');
-    expect(bridgeComparison({ compareA: 'NONE', compareB: 'NONE' })).toBe('PY');
-    expect(mapProfitability(PROF_P, null, '', { ...filter, compareA: 'NONE', compareB: 'NONE' }, reference).compareLabel).toBe('Prior year');
+    const byLine = mapProfitability(PROF_S, { ...S_FILTER, breakdown: { ...S_FILTER.breakdown, S: 2 } }, reference);
+    expect(byLine).toMatchObject({ by: 'service line', column: 'Service line', allocated: true });
+    expect(mapProfitability(PROF_S, { ...S_FILTER, entity: 'G', breakdown: { ...S_FILTER.breakdown, G: 1 } }, reference)).toMatchObject({ column: 'Company', allocated: false });
+    expect(mapProfitability(PROF_S, { ...S_FILTER, compareA: 'NONE', compareB: 'NONE' }, reference).compareLabel).toBe('Prior year');
+    expect(profitabilitySubtitle({ ...S_FILTER, entity: 'G', currency: 'EUR', units: 'k' })).toBe('Constant currency (FY2025 budget rates) - EUR k - vs Budget');
+  });
+});
+
+// --- QC, QB, QH ------------------------------------------------------------------
+const CONC = table(
+  ['dim_conc_level[level_code]', 'dim_conc_level[level_label]', 'dim_conc_level[level_sort]', 'dim_region[region_code]', 'dim_region[region_name]', '[@share]'],
+  [
+    ['CM', 'Contribution', 2, 'EU', 'Continental Europe', 0.238],
+    ['CM', 'Contribution', 2, 'NA', 'North America', 0.542],
+    ['EBITDA', 'Adj. EBITDA', 3, 'EU', 'Continental Europe', 0.247],
+    ['EBITDA', 'Adj. EBITDA', 3, 'NA', 'North America', 0.524],
+    ['NR', 'Net revenue', 1, 'EU', 'Continental Europe', 0.234],
+    ['NR', 'Net revenue', 1, 'NA', 'North America', 0.546],
+  ]
+);
+
+describe('concentration, growth × margin and the mix heatmap (redesign v4 Profitability)', () => {
+  it('concentration: levels in order, regions by NR share, the drift from NR to EBITDA share in pp', () => {
+    const c = mapConcentration(CONC, S_FILTER);
+    expect(c.levels.map((l) => l.label)).toEqual(['Net revenue', 'Contribution', 'Adj. EBITDA']);
+    expect(c.levels[0].segments.map((s) => [s.key, s.text])).toEqual([
+      ['NA', '54.6%'],
+      ['EU', '23.4%'],
+    ]);
+    expect(c.levels[2].segments[0].share).toBeCloseTo(0.524, 6);
+    expect(c.legend).toEqual([
+      { key: 'NA', label: 'North America', drift: '54.6% → 52.4% (−2.2 pp)' },
+      { key: 'EU', label: 'Continental Europe', drift: '23.4% → 24.7% (+1.3 pp)' },
+    ]);
+    expect(c.info.values[0]).toEqual({ label: 'North America', value: '54.6% / 54.2% / 52.4%' });
+  });
+
+  it('bubble: points by NR with their labels, the company references, no trails yet', () => {
+    const b = mapBubble(
+      table(
+        ['[@code]', '[@name]', '[@growth]', '[@cm]', '[@nr]'],
+        [
+          ['COMPANY', 'Company', 0.275, 0.513, 655.6],
+          ['EU', 'Continental Europe', 0.312, 0.52, 153.7],
+          ['NA', 'North America', 0.278, 0.509, 358.0],
+          ['XX', 'No growth', null, 0.5, 10],
+        ]
+      ),
+      S_FILTER
+    );
+    expect(b.points.map((p) => p.key)).toEqual(['NA', 'EU']);
+    expect(b.points[0]).toMatchObject({ label: 'North America', x: 0.278, y: 0.509, size: 358.0, text: 'CM 50.9% - +27.8%', detail: 'North America: NR $358.0 m, growth +27.8%, CM 50.9%', trail: null });
+    expect(b.ref).toEqual({ x: 0.275, y: 0.513, xText: 'company +27.5%', yText: 'company 51.3%' });
+    expect(b.info.values.at(-1)).toEqual({ label: 'Prior-year trails', value: 'n/a: no per-region prior-year growth measure in the model yet (C-04)' });
+    expect(mapBubble(table(['[@code]', '[@name]', '[@growth]', '[@cm]', '[@nr]'], []), S_FILTER)).toMatchObject({ points: [], ref: null });
+  });
+
+  it('heat: cells with the share of the region, totals from the model, columns with their GM % (the fill), regions by NR', () => {
+    const h = mapHeat(
+      table(
+        ['[@region]', '[@region_name]', '[@line]', '[@line_name]', '[@line_sort]', '[@nr]', '[@gm]'],
+        [
+          ['EU', 'Continental Europe', 'PAY', 'Payments', 2, 60.0, 0.3],
+          ['EU', 'Continental Europe', 'SUB', 'Platform subscriptions', 1, 70.0, 0.8],
+          ['NA', 'North America', 'PAY', 'Payments', 2, 170.0, 0.31],
+          ['NA', 'North America', 'SUB', 'Platform subscriptions', 1, 120.0, 0.82],
+          ['', '', 'PAY', 'Payments', 2, 230.0, 0.306],
+          ['', '', 'SUB', 'Platform subscriptions', 1, 190.0, 0.81],
+          ['EU', 'Continental Europe', '', '', 0, 153.7, 0.59],
+          ['NA', 'North America', '', '', 0, 358.0, 0.531],
+          ['', '', '', '', 0, 655.6, 0.56],
+        ]
+      ),
+      S_FILTER
+    );
+    expect(h.rows.map((r) => r.label)).toEqual(['North America', 'Continental Europe']);
+    expect(h.cols.map((c) => [c.label, c.gm, c.gmText, c.total])).toEqual([
+      ['Platform subscriptions', 0.81, 'GM 81.0%', '190.0'],
+      ['Payments', 0.306, 'GM 30.6%', '230.0'],
+    ]);
+    expect(h.rows[0].cells.map((c) => [c.text, c.share])).toEqual([
+      ['120.0', '34%'],
+      ['170.0', '47%'],
+    ]);
+    expect(h.rows[0].cells[1].detail).toBe('North America × Payments: NR 170.0 m, 47% of the region, GM 31.0%');
+    expect(h.rows[0].total).toBe('358.0');
+    expect(h.grand).toBe('655.6');
   });
 });
 
@@ -255,6 +430,10 @@ describe('context (C-50, N-02)', () => {
     ]);
     expect(c.profitabilityNote).toMatch(/^EBITDA and operating margins/);
     expect(c.cmAverage).toBeCloseTo(0.39145, 4);
+    // `@refreshed` is optional (older captures lack it); when present it is passed through as text.
+    expect(c.refreshedAt).toBeNull();
+    const withRefresh = table([...CONTEXT_P.columns.map((c) => c.name), '[@refreshed]'], [[...CONTEXT_P.rows[0], '2026-10-22T13:53:00']]);
+    expect(mapContext(withRefresh).refreshedAt).toBe('2026-10-22T13:53:00');
     expect(mapContext(table(CONTEXT_P.columns.map((c) => c.name), [['s', '', '', null]])).notices).toEqual([]);
     expect(() => mapContext(table(CONTEXT_P.columns.map((c) => c.name), []))).toThrow(PnlModelError);
   });

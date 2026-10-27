@@ -1,0 +1,63 @@
+{
+  "id": "chatcmpl-recorded",
+  "object": "chat.completion",
+  "created": 1761220000,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "tool_calls",
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_q80",
+            "type": "function",
+            "function": {
+              "name": "get_kpis",
+              "arguments": "{\"entity\":\"P\"}"
+            }
+          },
+          {
+            "id": "call_q81",
+            "type": "function",
+            "function": {
+              "name": "get_kpis",
+              "arguments": "{\"entity\":\"S\"}"
+            }
+          },
+          {
+            "id": "call_q82",
+            "type": "function",
+            "function": {
+              "name": "get_kpis",
+              "arguments": "{\"entity\":\"G\"}"
+            }
+          },
+          {
+            "id": "call_q83",
+            "type": "function",
+            "function": {
+              "name": "get_kpis",
+              "arguments": "{\"entity\":\"P\"}"
+            }
+          },
+          {
+            "id": "call_q84",
+            "type": "function",
+            "function": {
+              "name": "get_kpis",
+              "arguments": "{\"entity\":\"S\"}"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1200,
+    "completion_tokens": 40,
+    "total_tokens": 1240
+  }
+}

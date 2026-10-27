@@ -23,10 +23,7 @@ export function selection(overrides: Partial<Selection> = {}): Selection {
     showFyOutlook: true,
     showTags: true,
     hideEmpty: true,
-    layout: 'VAR',
-    costLens: 'FN',
-    detail: 'STD',
-    breakdown: 'CHANNEL',
+    breakdown: 'REGION',
     view: 'statement',
     ...overrides,
   };

@@ -20,8 +20,9 @@ export interface PanelProps {
   sample: boolean;
 }
 
-const TITLES: Record<PanelKey, [string, (reference: ReferenceData, filter: FilterState) => string]> = {
-  period: ['Period', () => 'Year, month and time view'],
+const TITLES: Record<PanelKey, [string, ((reference: ReferenceData, filter: FilterState) => string) | null]> = {
+  // Period v2: the live summary sentence is the panel's first line, no subtitle.
+  period: ['Period', null],
   compare: ['Versions', () => 'Base and two comparisons'],
   slice: [
     'Slice',
@@ -95,7 +96,7 @@ export function FilterFlyout({ panel, wide, defaults, onClose, filter, reference
         <div className="flex flex-none items-center justify-between gap-[8px] border-b border-line-100 px-[16px] pb-[12px] pt-[14px]">
           <div className="flex min-w-0 flex-col">
             <span className="text-[16px] font-semibold">{title}</span>
-            <span className="text-[12px] text-slate-600">{subtitle(reference, filter)}</span>
+            {subtitle && <span className="text-[12px] text-slate-600">{subtitle(reference, filter)}</span>}
           </div>
           <button
             ref={closeRef}
@@ -116,7 +117,8 @@ export function FilterFlyout({ panel, wide, defaults, onClose, filter, reference
             onClick={() => dispatch({ type: 'resetGroup', group: panel, defaults })}
             className="h-[40px] cursor-pointer border-0 bg-transparent px-[4px] font-[inherit] text-[14px] text-acc underline"
           >
-            Reset this group
+            {/* Period v2: "Back to default" restores Year to date, current year, last closed month (F-35). */}
+            {panel === 'period' ? 'Back to default' : 'Reset this group'}
           </button>
           <button
             type="button"

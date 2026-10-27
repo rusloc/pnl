@@ -1,92 +1,83 @@
-// Period flyout (F-02 to F-04): fiscal year, month grid (open months dashed), time view.
+// Period panel v2 (docs/design/period-picker-v2.md Part 1; F-02 to F-04, C-01):
+// live summary sentence, time view first with plain labels, year without "FY",
+// a month grid whose label follows the time view (hidden for Full year), covered
+// months shaded, open months handled by the base version. The footer ("Back to
+// default" + "Done") is the flyout's.
 import { useId } from 'react';
 
-import { cn } from '@/lib/utils';
-
 import { MONTH_SHORT } from '../../model/filters';
+import { coveredMonths, fiscalYears, FULL_YEAR_LINE, monthGridLabel, monthState, periodSummary, TIME_VIEW_OPTIONS } from '../../model/period';
 import { SAMPLE_INERT_REASON, sampleGate } from '../../model/sample-mode';
-import type { TimeView } from '../../model/types';
 import { Caption, PanelGroup, type PanelProps } from '../filter-flyout';
-import { Segmented } from '../ui/segmented';
-
-const TIME_VIEWS: readonly { value: TimeView; label: string }[] = [
-  { value: 'month', label: 'Month' },
-  { value: 'qtd', label: 'QTD' },
-  { value: 'ytd', label: 'YTD' },
-  { value: 'ltm', label: 'LTM' },
-  { value: 'fy', label: 'FY' },
-];
+import { RadioRow, type RadioOption } from '../ui/radio-row';
 
 export function PeriodPanel({ filter, reference, dispatch, sample }: PanelProps) {
   const noteId = useId();
-  const years = [...new Set(reference.months.map((m) => m.fiscalYear))].sort();
-  const monthsOfYear = reference.months.filter((m) => m.fiscalYear === filter.fiscalYear);
+  const years = fiscalYears(reference);
+  const gridLabel = monthGridLabel(filter.timeView);
+  // Shading shows the selected year's part of the window; the sentence names the full range.
+  const covered = new Set(
+    coveredMonths(filter, reference)
+      .filter((m) => m.fiscalYear === filter.fiscalYear)
+      .map((m) => m.monthNumber)
+  );
+  const months: RadioOption<string>[] = MONTH_SHORT.map((label, i) => {
+    const n = i + 1;
+    const state = monthState({ fiscalYear: filter.fiscalYear, monthNumber: n }, filter.baseVersion, reference);
+    const off = state.open && !state.selectable;
+    return {
+      value: String(n),
+      label,
+      sub: state.open ? state.text : undefined,
+      disabled: sample || off,
+      title: sample ? SAMPLE_INERT_REASON : off ? state.hint : undefined,
+      covered: covered.has(n),
+    };
+  });
+
   return (
     <>
+      <p className="m-0 text-[16px] font-semibold leading-[1.3]" data-testid="period-summary" aria-live="polite">
+        {periodSummary(filter, reference)}
+      </p>
       {/* LSN-002: the sample figures are fixed at YTD Sep 2026, so the period pickers are off. */}
       {sample && <Caption id={noteId}>{SAMPLE_INERT_REASON}</Caption>}
-      <PanelGroup label="Fiscal year">
-        <Segmented
-          label="Fiscal year"
-          value={String(filter.fiscalYear)}
-          options={sampleGate(
-            years.map((y) => ({ value: String(y), label: `FY${y}` })),
-            sample
-          )}
-          onChange={(v) => dispatch({ type: 'set', patch: { fiscalYear: Number(v) } })}
-          fontSize={14}
-          describedBy={sample ? noteId : undefined}
-        />
-      </PanelGroup>
-      <PanelGroup label="Month">
-        <div
-          role="group"
-          aria-label="Month"
-          aria-describedby={sample ? noteId : undefined}
-          className="grid grid-cols-4 gap-[6px]"
-        >
-          {MONTH_SHORT.map((label, i) => {
-            const n = i + 1;
-            const ref = monthsOfYear.find((m) => m.monthNumber === n);
-            const open = ref ? !ref.isClosed : true;
-            const selected = filter.month === n;
-            return (
-              <button
-                key={label}
-                type="button"
-                aria-pressed={selected}
-                aria-label={open ? `${label} (open month)` : label}
-                disabled={sample}
-                title={sample ? SAMPLE_INERT_REASON : undefined}
-                onClick={() => dispatch({ type: 'set', patch: { month: n } })}
-                className={cn(
-                  'h-[40px] rounded-[8px] border font-[inherit] text-[14px]',
-                  sample ? 'cursor-not-allowed' : 'cursor-pointer',
-                  selected
-                    ? 'border-acc bg-acc font-semibold text-surface'
-                    : open
-                      ? 'border-dashed border-line-300 bg-subtle text-slate-600'
-                      : 'border-line-300 bg-surface text-ink-900'
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <Caption>
-          Dashed months are still open. They show figures only with Latest estimate or Budget as the base.
-        </Caption>
-      </PanelGroup>
-      <PanelGroup label="Time view">
-        <Segmented
-          label="Time view"
+      <PanelGroup label="Show">
+        <RadioRow
+          label="Show"
           value={filter.timeView}
-          options={sampleGate(TIME_VIEWS, sample)}
+          options={sampleGate(TIME_VIEW_OPTIONS, sample)}
           onChange={(timeView) => dispatch({ type: 'set', patch: { timeView } })}
           describedBy={sample ? noteId : undefined}
         />
       </PanelGroup>
+      <PanelGroup label="Year">
+        <RadioRow
+          label="Year"
+          value={String(filter.fiscalYear)}
+          options={sampleGate(
+            years.map((y) => ({ value: String(y), label: String(y) })),
+            sample
+          )}
+          onChange={(v) => dispatch({ type: 'set', patch: { fiscalYear: Number(v) } })}
+          describedBy={sample ? noteId : undefined}
+        />
+      </PanelGroup>
+      {gridLabel === null ? (
+        <Caption>{FULL_YEAR_LINE}</Caption>
+      ) : (
+        <PanelGroup label={gridLabel}>
+          <RadioRow
+            label={gridLabel}
+            variant="cells"
+            columns={4}
+            value={String(filter.month)}
+            options={months}
+            onChange={(v) => dispatch({ type: 'set', patch: { month: Number(v) } })}
+            describedBy={sample ? noteId : undefined}
+          />
+        </PanelGroup>
+      )}
     </>
   );
 }

@@ -1,0 +1,208 @@
+/// §5 KPI slots: 12 per entity view (slots 4-5 and 9-12 swap content). Filtered by param_entity_view. Vitals (views redesign v4): vitals_slot 1-10 and vitals_tier; rows OPEX_PCT / MIX / FY_OUTLOOK are Vitals-only (in_key_figures = FALSE, slot 13-15).
+table dim_kpi
+	lineageTag: 709d4578-20b1-5343-9209-0291663969ca
+
+	column entity_view_code
+		dataType: string
+		isHidden
+		lineageTag: 73d95f36-fb20-5f47-82ee-2cb4f5317baa
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_view_code]
+
+		annotation SummarizationSetBy = User
+
+	column slot
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a3d101c0-b036-592f-8fa7-40f4fc8b8a72
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [slot]
+
+		annotation SummarizationSetBy = User
+
+	column kpi_code
+		dataType: string
+		isHidden
+		lineageTag: 1b5dd3f5-dece-5512-94ec-aaf26587200a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [kpi_code]
+
+		annotation SummarizationSetBy = User
+
+	column kpi_label
+		dataType: string
+		lineageTag: 1f541e57-6578-5c70-81c6-c912ff603882
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [kpi_label]
+		sortByColumn: slot
+
+		annotation SummarizationSetBy = User
+
+	column kpi_group
+		dataType: string
+		lineageTag: 1ac3dcf6-8b30-5f6a-87bf-3138d415e569
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [kpi_group]
+
+		annotation SummarizationSetBy = User
+
+	column better_when
+		dataType: string
+		isHidden
+		lineageTag: a09612ff-0e39-5ebe-9391-4bfaef881978
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [better_when]
+
+		annotation SummarizationSetBy = User
+
+	column value_type
+		dataType: string
+		isHidden
+		lineageTag: e22a6e80-a651-511f-9e02-14413c0b69e1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [value_type]
+
+		annotation SummarizationSetBy = User
+
+	column definition
+		dataType: string
+		lineageTag: 12f706bf-3396-5714-83e0-cca9de6b8fec
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [definition]
+
+		annotation SummarizationSetBy = User
+
+	column vitals_slot
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 67577170-1658-58b2-9ad2-bdcf817e5ccc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vitals_slot]
+
+		annotation SummarizationSetBy = User
+
+	column vitals_tier
+		dataType: string
+		isHidden
+		lineageTag: 5b29d136-186e-5dc9-a09e-5a521cd53daf
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vitals_tier]
+
+		annotation SummarizationSetBy = User
+
+	column in_key_figures
+		dataType: boolean
+		isHidden
+		lineageTag: ae4a07eb-08bb-540f-a0ba-0af6d6bad71a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [in_key_figures]
+
+		annotation SummarizationSetBy = User
+
+	column info_title
+		dataType: string
+		lineageTag: 3a639484-e5de-5234-887f-221685f12285
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_title]
+
+		annotation SummarizationSetBy = User
+
+	column info_formula
+		dataType: string
+		lineageTag: 94ffa7ac-0fa8-57d9-864a-601952ad34f2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_formula]
+
+		annotation SummarizationSetBy = User
+
+	column info_source
+		dataType: string
+		lineageTag: 200b21bd-5b38-5f3a-9f50-9f3a6ea7c97b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_source]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_kpi = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "entity_view_code", STRING,
+				    "slot", INTEGER,
+				    "kpi_code", STRING,
+				    "kpi_label", STRING,
+				    "kpi_group", STRING,
+				    "better_when", STRING,
+				    "value_type", STRING,
+				    "definition", STRING,
+				    "vitals_slot", INTEGER,
+				    "vitals_tier", STRING,
+				    "in_key_figures", BOOLEAN,
+				    "info_title", STRING,
+				    "info_formula", STRING,
+				    "info_source", STRING,
+				    {
+				        { "P", 1, "NR", "Net revenue", "Financial", "Higher", "AMT", "Gross revenue less gross-to-net deductions (spine step 3). The chip compares with Budget only; other rows are text.", 1, "Hero", TRUE, "Net revenue", "NR = GR + GTN; Δ = actual − comparison, % of |comparison|", "KPI Value K-01 - KPI Δ A / Δ B - KPI Organic Growth - KPI Reported Growth" },
+				        { "P", 2, "ORG_GROWTH", "Organic growth vs PY", "Financial", "Higher", "PCT", "NR at constant currency / PY NR at the same rates - 1", 0, "", TRUE, "Organic growth vs PY", "", "" },
+				        { "P", 3, "GM_PCT", "Gross margin %", "Financial", "Higher", "PCT", "Gross profit as a share of net revenue. A ratio: variances in percentage points.", 4, "Secondary", TRUE, "Gross margin %", "GM % = GP ÷ NR", "KPI Gross Margin % K-03 - GM % by category (dim_line)" },
+				        { "P", 4, "GTN_PCT", "Gross-to-net %", "Financial", "Lower", "PCT", "Deductions from gross revenue (trade spend, rebates, returns) as a share of gross revenue. Lower is better.", 8, "Driver", TRUE, "Gross-to-net %", "GTN % = − GTN ÷ GR", "KPI Gross-to-Net % K-04 P" },
+				        { "P", 5, "AP_PCT", "A&P % of NR", "Financial", "Neutral", "PCT", "Advertising (working media) and consumer promotions as a share of net revenue. Neutral: no colour.", 9, "Driver", TRUE, "A&P % of NR", "A&P % = − (SM_P1 + SM_P2) ÷ NR", "KPI A&P % NR K-05 P" },
+				        { "P", 6, "CM_PCT", "Contribution margin %", "Financial", "Higher", "PCT", "Contribution margin / NR", 0, "", TRUE, "Contribution margin %", "", "" },
+				        { "P", 7, "EBITDA", "Adjusted EBITDA", "Financial", "Higher", "AMT", "Contribution margin plus operating expenses (spine step 9, management performance measure). Excludes D&A and adjusting items; the data has no share-based compensation.", 2, "Hero", TRUE, "Adjusted EBITDA", "Adj. EBITDA = CM + OPEX", "KPI Value K-07 - KPI Adj EBITDA Margin" },
+				        { "P", 8, "OP", "Operating profit", "Financial", "Higher", "AMT", "IFRS 18 required subtotal (spine step 13).", 3, "Hero", TRUE, "Operating profit", "OP = Adj. EBITDA + D&A + adjusting items (signed)", "KPI Value K-08 - KPI Operating Margin - Net Profit - KPI Net Margin" },
+				        { "P", 9, "UNITS", "Units sold", "Operational", "Higher", "INT", "Units shipped in the window (a flow: sums over the months).", 6, "Driver", TRUE, "Units sold", "units = Σ units_sold", "KPI Units Sold K-09 P" },
+				        { "P", 10, "NR_PER_UNIT", "Net revenue per unit", "Operational", "Higher", "PRICE", "Net revenue divided by units sold: the price / mix lever.", 7, "Driver", TRUE, "Net revenue per unit", "NR per unit = NR ÷ units sold", "KPI NR per Unit K-10 P" },
+				        { "P", 11, "VOL_GROWTH", "Volume growth vs PY", "Operational", "Higher", "PCT", "Bridge volume vs PY / PY NR at constant currency", 0, "", TRUE, "Volume growth vs PY", "", "" },
+				        { "P", 12, "PRICE_MIX", "Price / mix vs PY", "Operational", "Higher", "PCT", "Bridge price / mix vs PY / PY NR at constant currency", 0, "", TRUE, "Price / mix vs PY", "", "" },
+				        { "S", 1, "NR", "Net revenue", "Financial", "Higher", "AMT", "Gross revenue less gross-to-net deductions (spine step 3). The chip compares with Budget only; other rows are text.", 1, "Hero", TRUE, "Net revenue", "NR = GR + GTN; Δ = actual − comparison, % of |comparison|", "KPI Value K-01 - KPI Δ A / Δ B - KPI Organic Growth - KPI Reported Growth" },
+				        { "S", 2, "ORG_GROWTH", "Organic growth vs PY", "Financial", "Higher", "PCT", "NR at constant currency / PY NR at the same rates - 1", 0, "", TRUE, "Organic growth vs PY", "", "" },
+				        { "S", 3, "GM_PCT", "Gross margin %", "Financial", "Higher", "PCT", "Gross profit as a share of net revenue. A ratio: variances in percentage points.", 4, "Secondary", TRUE, "Gross margin %", "GM % = GP ÷ NR", "KPI Gross Margin % K-03 - KPI Subscription GM % - Payments GM % (same pattern on PAY)" },
+				        { "S", 4, "ARR", "ARR (run-rate)", "Financial", "Higher", "AMT", "Platform-subscription net revenue of the last month in the window × 12. A run-rate proxy, not contract ARR.", 8, "Driver", TRUE, "ARR (run-rate)", "ARR = SUB NR (last month) × 12", "KPI ARR K-04 S - new: KPI ARR − KPI ARR as Compare B" },
+				        { "S", 5, "TAKE_RATE", "Payments take rate", "Financial", "Higher", "PCT2", "Payments NR / GMV processed", 0, "", TRUE, "Payments take rate", "", "" },
+				        { "S", 6, "CM_PCT", "Contribution margin %", "Financial", "Higher", "PCT", "Contribution margin / NR", 0, "", TRUE, "Contribution margin %", "", "" },
+				        { "S", 7, "EBITDA", "Adjusted EBITDA", "Financial", "Higher", "AMT", "Contribution margin plus operating expenses (spine step 9, management performance measure). Excludes D&A and adjusting items; the data has no share-based compensation.", 2, "Hero", TRUE, "Adjusted EBITDA", "Adj. EBITDA = CM + OPEX", "KPI Value K-07 - KPI Adj EBITDA Margin - KPI Rule of 40 (K-12 S)" },
+				        { "S", 8, "OP", "Operating profit", "Financial", "Higher", "AMT", "IFRS 18 required subtotal (spine step 13).", 3, "Hero", TRUE, "Operating profit", "OP = Adj. EBITDA + D&A + adjusting items (signed)", "KPI Value K-08 - KPI Operating Margin - Net Profit - KPI Net Margin" },
+				        { "S", 9, "GMV", "GMV processed", "Operational", "Higher", "AMT", "Transaction value processed in the window, translated like amounts.", 6, "Driver", TRUE, "GMV processed", "GMV = Σ gmv_local → reporting currency, per month × currency", "KPI GMV K-09 S - KPI Payments Take Rate K-05 S" },
+				        { "S", 10, "MERCHANTS", "Active merchants", "Operational", "Higher", "INT", "Merchants with an active paid plan at the last month-end of the window; never a sum over months.", 7, "Driver", TRUE, "Active merchants", "merchants = active_merchants_end at the window end (K-23)", "KPI Active Merchants K-10 S - new: KPI GMV ÷ KPI Active Merchants" },
+				        { "S", 11, "SUB_GM_PCT", "Subscription gross margin %", "Operational", "Higher", "PCT", "Gross profit / NR, Platform subscriptions", 0, "", TRUE, "Subscription gross margin %", "", "" },
+				        { "S", 12, "RULE40", "Rule of 40", "Operational", "Higher", "PCT", "Organic growth % + Adjusted EBITDA margin %", 0, "", TRUE, "Rule of 40", "", "" },
+				        { "GROUP", 1, "NR", "Net revenue", "Financial", "Higher", "AMT", "Gross revenue less gross-to-net deductions (spine step 3). The chip compares with Budget only; other rows are text.", 1, "Hero", TRUE, "Net revenue", "NR = GR + GTN; Δ = actual − comparison, % of |comparison|", "KPI Value K-01 - KPI Δ A / Δ B - KPI Organic Growth - KPI Reported Growth" },
+				        { "GROUP", 2, "ORG_GROWTH", "Organic growth vs PY", "Financial", "Higher", "PCT", "NR at constant currency / PY NR at the same rates - 1", 0, "", TRUE, "Organic growth vs PY", "", "" },
+				        { "GROUP", 3, "GM_PCT", "Gross margin %", "Financial", "Higher", "PCT", "Gross profit as a share of net revenue. A ratio: variances in percentage points.", 4, "Secondary", TRUE, "Gross margin %", "GM % = GP ÷ NR", "KPI Gross Margin % K-03 - GM % by category (dim_line)" },
+				        { "GROUP", 4, "SVC_SHARE", "Services share of NR", "Financial", "Neutral", "PCT", "Commerce Cloud NR after eliminations / group NR", 8, "Driver", TRUE, "Services share of NR", "Commerce Cloud NR after eliminations / group NR", "" },
+				        { "GROUP", 5, "IC_ELIM", "Intercompany eliminated", "Financial", "Neutral", "AMT", "Fees billed by Commerce Cloud to Consumer Products", 9, "Driver", TRUE, "Intercompany eliminated", "Fees billed by Commerce Cloud to Consumer Products", "" },
+				        { "GROUP", 6, "CM_PCT", "Contribution margin %", "Financial", "Higher", "PCT", "Contribution margin / NR", 0, "", TRUE, "Contribution margin %", "", "" },
+				        { "GROUP", 7, "EBITDA", "Adjusted EBITDA", "Financial", "Higher", "AMT", "Contribution margin plus operating expenses (spine step 9, management performance measure). Excludes D&A and adjusting items; the data has no share-based compensation.", 2, "Hero", TRUE, "Adjusted EBITDA", "Adj. EBITDA = CM + OPEX", "KPI Value K-07 - KPI Adj EBITDA Margin" },
+				        { "GROUP", 8, "OP", "Operating profit", "Financial", "Higher", "AMT", "IFRS 18 required subtotal (spine step 13).", 3, "Hero", TRUE, "Operating profit", "OP = Adj. EBITDA + D&A + adjusting items (signed)", "KPI Value K-08 - KPI Operating Margin - Net Profit - KPI Net Margin" },
+				        { "GROUP", 9, "CP_OP_MARGIN", "Consumer Products op. margin", "Operational", "Higher", "PCT", "Standalone operating profit / NR", 6, "Driver", TRUE, "Consumer Products op. margin", "Standalone operating profit / NR", "" },
+				        { "GROUP", 10, "CC_OP_MARGIN", "Commerce Cloud op. margin", "Operational", "Higher", "PCT", "Standalone operating profit / NR", 7, "Driver", TRUE, "Commerce Cloud op. margin", "Standalone operating profit / NR", "" },
+				        { "GROUP", 11, "NP", "Net profit", "Operational", "Higher", "AMT", "Net profit for the period", 0, "", TRUE, "Net profit", "", "" },
+				        { "GROUP", 12, "ETR", "Effective tax rate", "Operational", "Neutral", "PCT", "- income tax / profit before tax", 0, "", TRUE, "Effective tax rate", "", "" },
+				        { "P", 13, "OPEX_PCT", "Opex % revenue", "Financial", "Lower", "PCT", "Sales & marketing, R&D and G&A as a share of net revenue. Lower is better, so the colour logic is inverted. Excludes other operating items, D&A and adjusting items.", 5, "Secondary", FALSE, "Opex % revenue", "Opex % = −(SM + RD + GA) ÷ NR", "new: Opex % NR = blocks SM + RD + GA ÷ NR (PL % NR rows) - spec KPI §5 1.3" },
+				        { "P", 15, "FY_OUTLOOK", "FY outlook", "Financial", "Higher", "AMT", "Latest estimate of net revenue for the whole fiscal year: actual closed months plus the latest forecast for open months (C-02). Same card for every company.", 10, "Driver", FALSE, "FY outlook vs Budget", "attainment = FY LE ÷ FY Budget", "FY LE Amount - FY Budget Amount - PL Δ LE vs Budget (M-14)" },
+				        { "S", 13, "OPEX_PCT", "Opex % revenue", "Financial", "Lower", "PCT", "Sales & marketing, R&D and G&A as a share of net revenue. Lower is better, so the colour logic is inverted. Excludes other operating items, D&A and adjusting items.", 5, "Secondary", FALSE, "Opex % revenue", "Opex % = −(SM + RD + GA) ÷ NR", "new: Opex % NR = blocks SM + RD + GA ÷ NR (PL % NR rows) - spec KPI §5 1.3" },
+				        { "S", 14, "MIX", "Revenue mix", "Financial", "Neutral", "PCT", "Platform subscriptions and Payments as shares of net revenue; the rest is apps, partners & ads and professional services. Neutral: no colour.", 9, "Driver", FALSE, "Revenue mix", "share = NR of the service line ÷ NR", "Prof NR Share by dim_line (SUB, PAY) - gap analysis P1" },
+				        { "S", 15, "FY_OUTLOOK", "FY outlook", "Financial", "Higher", "AMT", "Latest estimate of net revenue for the whole fiscal year: actual closed months plus the latest forecast for open months (C-02). Same card for every company.", 10, "Driver", FALSE, "FY outlook vs Budget", "attainment = FY LE ÷ FY Budget", "FY LE Amount - FY Budget Amount - PL Δ LE vs Budget (M-14)" },
+				        { "GROUP", 13, "OPEX_PCT", "Opex % revenue", "Financial", "Lower", "PCT", "Sales & marketing, R&D and G&A as a share of net revenue. Lower is better, so the colour logic is inverted. Excludes other operating items, D&A and adjusting items.", 5, "Secondary", FALSE, "Opex % revenue", "Opex % = −(SM + RD + GA) ÷ NR", "new: Opex % NR = blocks SM + RD + GA ÷ NR (PL % NR rows) - spec KPI §5 1.3" },
+				        { "GROUP", 15, "FY_OUTLOOK", "FY outlook", "Financial", "Higher", "AMT", "Latest estimate of net revenue for the whole fiscal year: actual closed months plus the latest forecast for open months (C-02). Same card for every company.", 10, "Driver", FALSE, "FY outlook vs Budget", "attainment = FY LE ÷ FY Budget", "FY LE Amount - FY Budget Amount - PL Δ LE vs Budget (M-14)" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

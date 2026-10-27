@@ -1,0 +1,73 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "How to read loans: close",
+  "name": "bm_info_loans_close",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_info_loans",
+      "info_loans_panel",
+      "info_loans_title",
+      "info_loans_showing",
+      "info_loans_text",
+      "info_loans_close"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "info_loans_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_loans_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_loans_showing": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_loans_text": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_loans_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_info_loans": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

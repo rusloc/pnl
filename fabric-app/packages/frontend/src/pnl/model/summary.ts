@@ -19,24 +19,26 @@ export function sliceSummary(state: FilterState, reference: ReferenceData): stri
     }
   }
   if (parts.length === 0) return state.entity === 'G' ? 'All regions, consolidated' : 'All slices';
-  return parts.join(' · ');
+  return parts.join(' - ');
 }
 
-/** Notices computed from the filter state (C-50); figure notices are added by the source. */
+/**
+ * Notices computed from the filter state while the figures are sample (C-50), in
+ * the words of Track B's `Notices` measure (parity rule 9); live, the model's
+ * notices are used instead.
+ */
 export function filterNotices(state: FilterState, reference: ReferenceData): string[] {
   const out: string[] = [];
   const selectedKey = `${state.fiscalYear}-${String(state.month).padStart(2, '0')}`;
   if (state.baseVersion === 'ACT' && selectedKey > reference.lastClosed.key) {
     out.push(
-      `Actual stops at ${reference.lastClosed.monthName} ${reference.lastClosed.fiscalYear}, the last closed month; later months are dropped and comparisons use the same months. Choose Latest estimate to include the forecast.`
+      `Actuals closed through ${reference.lastClosed.monthName} ${reference.lastClosed.fiscalYear}: later months excluded; use Latest estimate for the full window`
     );
   }
   const slices = activeSlices(state);
   const sliceOn = slices !== null && SLICE_SLOTS.some((slot) => slices[slot] !== null);
   if (sliceOn) {
-    out.push(
-      'A slice filter is on: lines below contribution margin are allocated by net revenue share and tagged alloc.'
-    );
+    out.push('Slice filter on: lines from operating expenses down are allocated by net-revenue share');
   }
   return out;
 }

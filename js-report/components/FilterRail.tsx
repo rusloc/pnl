@@ -1,10 +1,13 @@
 import type { ComponentType } from 'react';
-import { BarsIcon, CalendarIcon, FunnelIcon, RailToggleIcon, SlidersIcon } from './Icons';
+import { BarsIcon, CalendarIcon, CaretIcon, FunnelIcon, RailToggleIcon, SlidersIcon } from './Icons';
 import styles from './ledger.module.css';
 
-// Filter rail (design guide §5.1): 64 px collapsed / 248 px expanded; four groups, one flyout at a time.
+// Filter rail (design guide §5.1; page top as Track B, docs/design/period-picker-v2.md Part 2): 64 px collapsed /
+// 248 px expanded. The brand mark, tinted in the company colour, opens the company picker (L-01, F-01, ADR-0007);
+// then the four filter groups. One pop-over at a time: a flyout, the company picker or the applied-filters pop-up.
 
 export type PanelKey = 'period' | 'versions' | 'slice' | 'display';
+export type Overlay = PanelKey | 'company' | 'filters';
 
 export const RAIL_WIDTH = { collapsed: 64, expanded: 248 } as const;
 export const RAIL_GROUPS: readonly { key: PanelKey; label: string; Icon: ComponentType }[] = [
@@ -14,6 +17,8 @@ export const RAIL_GROUPS: readonly { key: PanelKey; label: string; Icon: Compone
   { key: 'display', label: 'Display', Icon: SlidersIcon },
 ];
 export const railItemId = (key: PanelKey) => `rail-${key}`;
+export const BRAND_MARK_ID = 'rail-company';
+export const isPanelKey = (key: Overlay): key is PanelKey => RAIL_GROUPS.some((g) => g.key === key);
 
 export function FilterRail({
   wide,
@@ -24,8 +29,8 @@ export function FilterRail({
 }: {
   wide: boolean;
   onToggleWide: () => void;
-  openPanel: PanelKey | null;
-  onTogglePanel: (key: PanelKey) => void;
+  openPanel: Overlay | null;
+  onTogglePanel: (key: Overlay) => void;
   summaries: Record<PanelKey, string>;
 }) {
   return (
@@ -35,9 +40,19 @@ export function FilterRail({
       style={{ width: wide ? RAIL_WIDTH.expanded : RAIL_WIDTH.collapsed }}
     >
       <div className={styles.brand}>
-        <div aria-hidden="true" className={styles.brandMark}>
-          A
-        </div>
+        <button
+          id={BRAND_MARK_ID}
+          type="button"
+          aria-label="Switch company"
+          title="Switch company"
+          aria-haspopup="dialog"
+          aria-expanded={openPanel === 'company'}
+          className={styles.brandMark}
+          onClick={() => onTogglePanel('company')}
+        >
+          <span aria-hidden="true">A</span>
+          <CaretIcon />
+        </button>
         {wide && (
           <div className={styles.brandText}>
             <span className={styles.brandName}>ACME P&amp;L</span>
@@ -56,6 +71,7 @@ export function FilterRail({
           className={styles.railItem}
           aria-expanded={openPanel === key}
           aria-label={`${label}: ${summaries[key]}`}
+          title={summaries[key]}
           onClick={() => onTogglePanel(key)}
         >
           <Icon />

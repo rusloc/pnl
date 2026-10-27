@@ -45,6 +45,13 @@ export const RailToggleIcon = ({ expanded }: { expanded: boolean }) => (
   </Svg>
 );
 
+/** The ▾ on the rail brand mark: it opens the company picker (ADR-0007). */
+export const CaretIcon = () => (
+  <Svg size={10} box={10}>
+    <path d="M2 3.5l3 3 3-3" {...stroke} strokeWidth={1.5} strokeLinejoin="round" />
+  </Svg>
+);
+
 export const TableIcon = () => (
   <Svg size={18}>
     <rect x="3" y="4" width="14" height="12" rx="1.5" {...stroke} />

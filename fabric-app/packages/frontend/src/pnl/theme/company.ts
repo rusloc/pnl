@@ -24,7 +24,7 @@ export interface CompanyCard {
 }
 
 export const COMPANIES: readonly CompanyCard[] = [
-  { code: 'P', name: 'Consumer Products', sub: 'Goods · retail, D2C, marketplaces' },
+  { code: 'P', name: 'Consumer Products', sub: 'Goods - retail, D2C, marketplaces' },
   { code: 'S', name: 'Commerce Cloud', sub: 'E-commerce SaaS services' },
   { code: 'G', name: 'ACME Group', sub: 'Consolidated' },
 ];

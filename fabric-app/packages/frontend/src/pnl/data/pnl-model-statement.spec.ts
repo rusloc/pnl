@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { defaultFilters } from '../model/filters';
 import { fmtAmount, fmtPct, fmtPp } from '../model/format';
 import { PnlModelError } from './pnl-model-client';
-import { loadModelStatement, mapStatementRows } from './pnl-model-statement';
+import { lineDisplay, loadModelStatement, mapStatementRows } from './pnl-model-statement';
 import { sampleReference } from './sample-reference';
 
 /** control_totals_usd.csv, entity P, window "FY2026 YTD Sep", in USD. */
@@ -81,6 +81,14 @@ describe('mapStatementRows', () => {
     expect(byCode.get('GR_P1')).toMatchObject({ kind: 'leaf', parent: 'GR', label: 'Gross product sales', tags: [] });
     expect(byCode.get('SM')).toMatchObject({ kind: 'sec', parent: 'OPEX' });
     expect(byCode.get('GR')?.parent).toBeNull();
+  });
+
+  it('numbers the top level in display order and in capitals like Track B’s line_display; accounts keep their names (parity rule 11)', () => {
+    expect(rows.filter((r) => r.kind !== 'leaf').map((r) => r.label)).toEqual([
+      '01. GROSS REVENUE', '02. NET REVENUE', '03. GROSS MARGIN %', '04. OPERATING EXPENSES', '05. SALES & MARKETING', '06. UNDERLYING OPERATING PROFIT', '07. EFFECTIVE TAX RATE %',
+    ]);
+    expect(rows.filter((r) => r.kind === 'leaf').map((r) => r.label)).toEqual(['Gross product sales', 'Shipping & delivery fees billed']);
+    expect(lineDisplay(29, 'Net margin %')).toBe('29. NET MARGIN %');
   });
 
   it('maps row_type and is_key to the Ledger row kinds and keeps the tag', () => {

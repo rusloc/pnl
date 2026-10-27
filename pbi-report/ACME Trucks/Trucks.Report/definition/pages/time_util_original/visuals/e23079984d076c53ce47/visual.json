@@ -1,0 +1,62 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "e23079984d076c53ce47",
+  "position": {
+    "x": 29.999999999999972,
+    "y": 62.857142857142776,
+    "z": 3000,
+    "height": 58.571428571428577,
+    "width": 308.57142857142861,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Mass loaded per truck",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "14pt",
+                      "color": "#666666"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "right"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "thousands  m",
+                    "textStyle": {
+                      "color": "#666666"
+                    }
+                  },
+                  {
+                    "value": "3",
+                    "textStyle": {
+                      "color": "#666666",
+                      "lineHeight": "0",
+                      "position": "relative",
+                      "verticalAlign": "baseline",
+                      "scriptType": "super",
+                      "top": "-0.25em"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "right"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "parentGroupName": "c731034919c0f8f5e8ef"
+}

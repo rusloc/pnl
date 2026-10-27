@@ -1,0 +1,41 @@
+DEFINE
+    VAR _entity = TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 9 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "LTM" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+EVALUATE
+SELECTCOLUMNS (
+    FILTER (
+        SUMMARIZECOLUMNS (
+            dim_entity[entity_code]
+            ,dim_entity[short_name]
+            ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units
+            ,"@in_view", [Slice Member In View]
+            ,"@nr", CONVERT ( [Prof Net Revenue], DOUBLE )
+            ,"@share", CONVERT ( [Prof NR Share], DOUBLE )
+            ,"@nr_d_pct", CONVERT ( [Prof NR Δ %], DOUBLE )
+            ,"@gm", CONVERT ( [KPI Gross Margin %], DOUBLE )
+            ,"@cm", CONVERT ( [KPI CM %], DOUBLE )
+            ,"@ebitda", CONVERT ( [KPI Adj EBITDA Margin], DOUBLE )
+            ,"@op", CONVERT ( [KPI Operating Margin], DOUBLE )
+        )
+        ,[@in_view] = 1 && NOT ISBLANK ( dim_entity[entity_code] )
+    )
+    ,"@code", dim_entity[entity_code]
+    ,"@name", dim_entity[short_name]
+    ,"@in_view", [@in_view]
+    ,"@nr", [@nr]
+    ,"@share", [@share]
+    ,"@nr_d_pct", [@nr_d_pct]
+    ,"@gm", [@gm]
+    ,"@cm", [@cm]
+    ,"@ebitda", [@ebitda]
+    ,"@op", [@op]
+)
+ORDER BY [@nr] DESC

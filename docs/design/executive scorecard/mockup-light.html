@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive scorecard - light</title>
+<meta name="description" content="ACME Group executive KPI scorecard - design mockup, light direction (Ledger Executive). Illustrative data. Artboard 1440 x 810.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens: Ledger Executive (light) ---------- */
+:root{
+  --ground:#F2F4F7; --surface:#FFFFFF; --subtle:#F6F8FA; --raised:#FFFFFF;
+  --ink:#101B2B; --ink700:#2B3748; --muted:#4F5C6C; --slate400:#8592A3;
+  --line300:#CDD4DC; --line200:#DEE3E9; --line100:#EDF0F3;
+  --acc:#3B4A5E; --accT:#EAEDF1; --acc-products:#2453A6; --acc-cloud:#6B48C8;
+  --good:#06603F; --goodF:#3BA37B; --goodT:#E4F3EC;
+  --watch:#8A5A00; --watchF:#D9A21B; --watchT:#FBF4E4; --watchB:#EBD9AE;
+  --off:#B3261E; --offF:#D9534F; --offT:#FBE9E7;
+  --na:#4F5C6C; --naT:#F6F8FA;
+  --spark:#8592A3; --spark-fill:rgba(133,146,163,.10); --tgt:#4F5C6C; --grid:#EDF0F3;
+  --rail:#101B2B; --rail-item:#2B3748; --rail-text:#C9D3E0; --rail-sub:#AEB9C7; --rail-div:#3A475A;
+  --tile-shadow:none; --tile-hi:none;
+  --focus:#2453A6;
+}
+/* ---------- tokens: Boardroom (dark, high-contrast presentational) ---------- */
+:root[data-theme="dark"]{
+  --ground:#0B111A; --surface:#121A26; --subtle:#0F1621; --raised:#182230;
+  --ink:#EEF2F7; --ink700:#D6DEE8; --muted:#A4B1C2; --slate400:#7D8A9C;
+  --line300:#2E3B50; --line200:#243042; --line100:#1C2636;
+  --acc:#9FB4D0; --accT:#1E2A3B; --acc-products:#7FA3E6; --acc-cloud:#B39DF0;
+  --good:#5FCB9A; --goodF:#3BA37B; --goodT:#163327;
+  --watch:#E8B64A; --watchF:#C9962A; --watchT:#3A2E12; --watchB:#6A5420;
+  --off:#FF8077; --offF:#D9534F; --offT:#3B1C1C;
+  --na:#A4B1C2; --naT:#0F1621;
+  --spark:#5E6E85; --spark-fill:rgba(159,180,208,.08); --tgt:#A4B1C2; --grid:#1C2636;
+  --rail:#070C14; --rail-item:#182230; --rail-text:#C9D3E0; --rail-sub:#8E9AAB; --rail-div:#243042;
+  --tile-shadow:0 1px 0 rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.28); --tile-hi:inset 0 1px 0 rgba(255,255,255,.05);
+  --focus:#9FB4D0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.num,.t-val,.ns-val,.fy-val,.t-delta,.t-ref,td.n,.leg{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+.stage{width:1440px;height:810px;transform-origin:top left;position:relative}
+.caption{font-size:12px;color:var(--muted);max-width:1440px;text-align:center}
+.caption b{color:var(--ink);font-weight:600}
+
+/* ---------- artboard frame: rail + page top (house pattern) ---------- */
+.artboard{position:relative;width:1440px;height:810px;background:var(--ground);overflow:hidden;border:1px solid var(--line200);border-radius:4px}
+.rail{position:absolute;left:0;top:0;bottom:0;width:64px;background:var(--rail);padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.brand{width:36px;height:36px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:1px;margin-bottom:8px}
+:root[data-theme="dark"] .brand{color:#0B111A}
+.brand small{font-size:9px;font-weight:600;margin-top:4px}
+.rail-div{width:24px;height:1px;background:var(--rail-div);margin:6px 0 8px}
+.rail-item{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--rail-text)}
+.rail-item svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rail-item.open{background:var(--rail-item);color:#fff}
+.rail-exp{margin-top:auto;color:var(--rail-sub);font-size:16px;height:40px;display:flex;align-items:center}
+
+.top{position:absolute;left:64px;right:0;top:0;height:122px;background:var(--surface);border-bottom:1px solid var(--line200);padding:0 24px}
+.title-row{height:72px;display:flex;align-items:center;gap:10px}
+.title-row h1{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.funnel{width:32px;height:32px;border-radius:8px;border:1px solid var(--line300);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.funnel svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.status-line{margin-left:auto;font-size:13px;color:var(--muted)}
+.status-line b{color:var(--ink);font-weight:600}
+.tabs-row{height:49px;display:flex;align-items:stretch;gap:4px}
+.tab{min-width:48px;height:48px;padding:0 14px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;position:relative;top:1px}
+.tab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+.toolbar{margin-left:auto;display:flex;align-items:center;gap:12px;padding-bottom:6px}
+.seg{display:flex;height:36px;border:1px solid var(--line300);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{padding:0 14px;font-size:13px;font-weight:500;color:var(--ink);border-right:1px solid var(--line300);min-width:56px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accT);color:var(--acc);font-weight:600}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#EEF2F7}
+.seg-label{font-size:12px;color:var(--muted);margin-right:-4px}
+
+/* ---------- content ---------- */
+.content{position:absolute;left:64px;right:0;top:122px;bottom:0;padding:14px 24px 16px}
+.view{display:none;height:100%;flex-direction:column}
+.view.active{display:flex}
+
+/* status bar */
+.statusbar{height:36px;display:flex;align-items:center;gap:12px;font-size:13px}
+.counts{display:flex;align-items:center;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--goodT);color:var(--good)}
+.pill.watch{background:var(--watchT);color:var(--watch)}
+.pill.off{background:var(--offT);color:var(--off)}
+.pill.na{background:var(--naT);color:var(--na);border:1px dashed var(--line300)}
+.pill .g{font-size:10px}
+.sentence{color:var(--ink);padding-left:12px;border-left:1px solid var(--line300);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sentence b{font-weight:600;color:var(--off)}
+.leg{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.leg span{margin-left:10px}
+.leg .g{font-size:10px}
+.g.good{color:var(--good)} .g.watch{color:var(--watch)} .g.off{color:var(--off)} .g.na{color:var(--na)}
+
+/* rows */
+.ns-row{display:grid;grid-template-columns:880px 432px;gap:16px;height:136px;margin-top:12px}
+.dom-row{display:grid;grid-template-columns:88px repeat(4,294px);gap:16px;height:136px;margin-top:12px}
+.dom-label{padding-top:12px}
+.dom-label .eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dom-label .sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.35}
+.dom-label .sub b{color:var(--ink);font-weight:600}
+
+/* tiles */
+.tile{position:relative;background:var(--raised);border:1px solid var(--line200);border-radius:12px;padding:12px 16px 12px 18px;display:flex;flex-direction:column;box-shadow:var(--tile-shadow),var(--tile-hi);text-align:left;width:100%;height:136px;overflow:hidden;transition:border-color .15s ease,transform .15s ease}
+.tile::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--line300)}
+.tile.s-good::before{background:var(--goodF)} .tile.s-watch::before{background:var(--watchF)} .tile.s-off::before{background:var(--offF)}
+.tile.s-na{background:var(--subtle);border-style:dashed}
+.tile.s-na::before{background:var(--line300)}
+.tile.stale{border-color:var(--watchB)}
+:root[data-theme="dark"] .tile.stale{border-color:var(--watchB)}
+.tile:hover{border-color:var(--acc);transform:translateY(-1px)}
+.t-top{display:flex;align-items:center;gap:8px;height:20px}
+.t-label{font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-label .u{font-weight:400;color:var(--slate400)}
+.t-tag{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:4px;font-size:11px;font-weight:500;border:1px solid var(--watchB);color:var(--watch);background:var(--watchT);white-space:nowrap}
+.t-top .pill{margin-left:auto;height:20px;font-size:11px;padding:0 8px}
+.t-mid{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;height:36px;margin-top:0}
+.t-val{font-size:28px;font-weight:600;line-height:36px;letter-spacing:-.015em;white-space:nowrap}
+.t-val .u{font-size:14px;font-weight:500;color:var(--muted);margin-left:4px;letter-spacing:0}
+.t-val.na{color:var(--slate400);font-weight:500}
+.spark{width:120px;height:36px;flex:none;display:block;overflow:visible}
+.spark .ln{fill:none;stroke:var(--spark);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.spark .ar{fill:var(--spark-fill)}
+.spark .tg{fill:none;stroke:var(--tgt);stroke-width:1;stroke-dasharray:2 3;opacity:.9}
+.spark .lp{stroke:var(--raised);stroke-width:2}
+.s-good .spark .lp{fill:var(--good)} .s-watch .spark .lp{fill:var(--watch)} .s-off .spark .lp{fill:var(--off)}
+.t-delta{font-size:13px;font-weight:600;line-height:18px;white-space:nowrap;margin-top:0}
+.s-good .t-delta{color:var(--good)} .s-watch .t-delta{color:var(--watch)} .s-off .t-delta{color:var(--off)} .s-na .t-delta{color:var(--na);font-weight:500}
+.t-ref{font-size:12px;color:var(--muted);line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-foot{margin-top:auto;display:flex;align-items:center;gap:8px;height:18px;flex:none}
+.t-note{font-size:12px;color:var(--muted);line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.owner{margin-left:auto;flex:none;width:20px;height:20px;border-radius:50%;background:var(--accT);color:var(--acc);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+:root[data-theme="dark"] .owner{color:#EEF2F7}
+
+/* north star + outlook */
+.ns{display:grid;grid-template-columns:292px 1fr 176px;gap:20px;padding:12px 20px 12px 22px;cursor:pointer}
+.ns .t-label{font-size:13px}
+.ns-val{font-size:34px;font-weight:600;line-height:40px;letter-spacing:-.02em;white-space:nowrap}
+.ns-val .u{font-size:14px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.ns .t-delta{font-size:14px}
+.ns-chart{display:flex;flex-direction:column;justify-content:flex-start;padding-top:2px}
+.ns-chart .cap{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:2px}
+.ns-chart .cap span:last-child{display:flex;gap:10px}
+.cols{width:100%;height:78px;display:block;overflow:visible}
+.cols .bar{fill:var(--acc);opacity:.78}
+:root[data-theme="dark"] .cols .bar{opacity:.85}
+.cols .bar.py{fill:var(--slate400);opacity:.55}
+.cols .bar.cur{opacity:1}
+.cols .tg{fill:none;stroke:var(--tgt);stroke-width:1;stroke-dasharray:3 3}
+.cols .mo{font-size:9px;fill:var(--muted);font-family:inherit}
+.cols .mo.cur{font-weight:600;fill:var(--ink)}
+.ns-side{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding-top:2px}
+.ns-side .pill{height:24px;font-size:12px}
+.ns-side .t-note{white-space:normal;font-size:12px;line-height:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.ns-side .who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:auto}
+.ns-side .who .owner{margin-left:0}
+
+.fy{padding:12px 18px 12px 20px}
+.fy-val{font-size:28px;font-weight:600;line-height:36px;letter-spacing:-.015em;white-space:nowrap}
+.fy-val .u{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.bullet{position:relative;height:14px;margin:6px 0 4px;background:var(--line100);border-radius:3px;overflow:visible}
+.bullet .act{position:absolute;left:0;top:0;bottom:0;background:var(--acc);border-radius:3px 0 0 3px}
+.bullet .fc{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,var(--acc) 0 3px,transparent 3px 6px);opacity:.55}
+.bullet .tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}
+.bullet .tick.py{background:var(--slate400)}
+.bullet-cap{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);line-height:14px;white-space:nowrap}
+.bullet-cap i{display:inline-block;width:10px;height:8px;border-radius:2px;background:var(--acc);margin-right:4px;vertical-align:baseline}
+.bullet-cap i.fc{background:repeating-linear-gradient(135deg,var(--acc) 0 2px,transparent 2px 4px);opacity:.6}
+
+/* footer */
+.foot{margin-top:auto;height:22px;display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);border-top:1px solid var(--line200);padding-top:6px}
+.foot a{color:var(--acc);text-decoration:underline;text-underline-offset:2px}
+.foot .right{margin-left:auto;display:flex;gap:14px}
+
+/* ---------- detail view ---------- */
+.d-head{display:flex;align-items:flex-start;gap:14px;height:52px}
+.back{height:32px;padding:0 12px 0 8px;border:1px solid var(--line300);border-radius:8px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ink);background:var(--surface);flex:none}
+.d-title h2{font-size:17px;font-weight:600;line-height:22px}
+.d-title p{font-size:12px;color:var(--muted);line-height:16px;max-width:760px}
+.d-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-link{height:32px;padding:0 12px;border-radius:8px;background:var(--acc);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+:root[data-theme="dark"] .btn-link{color:#0B111A}
+.d-grid{display:grid;grid-template-columns:880px 432px;gap:16px;margin-top:12px}
+.d-grid2{display:grid;grid-template-columns:640px 672px;gap:16px;margin-top:12px}
+.card{background:var(--raised);border:1px solid var(--line200);border-radius:12px;padding:14px 18px;box-shadow:var(--tile-shadow),var(--tile-hi)}
+.card h3{font-size:14px;font-weight:600;line-height:18px}
+.card .sub{font-size:12px;color:var(--muted);line-height:16px}
+.card .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px}
+.card .legend i{display:inline-block;width:14px;height:0;border-top:2px solid var(--acc);margin-right:5px;vertical-align:middle}
+.card .legend i.tg{border-top:1px dashed var(--tgt)} .card .legend i.py{border-top:2px solid var(--slate400)} .card .legend i.fc{border-top:2px dashed var(--acc)}
+.trend{width:100%;height:170px;display:block;overflow:visible;margin-top:6px}
+.trend .gl{stroke:var(--grid);stroke-width:1}
+.trend .ax{font-size:10px;fill:var(--muted);font-family:inherit}
+.trend .act{fill:none;stroke:var(--acc);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.trend .fc{fill:none;stroke:var(--acc);stroke-width:2;stroke-dasharray:4 4;stroke-linejoin:round}
+.trend .py{fill:none;stroke:var(--slate400);stroke-width:2;stroke-linejoin:round;opacity:.9}
+.trend .tg{fill:none;stroke:var(--tgt);stroke-width:1;stroke-dasharray:3 3}
+.trend .dot{fill:var(--watch);stroke:var(--raised);stroke-width:2}
+.trend .lbl{font-size:11px;font-weight:600;fill:var(--ink);font-family:inherit}
+.trend .lbl.m{font-weight:400;fill:var(--muted)}
+.decomp{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.dr{display:grid;grid-template-columns:196px 1fr 120px;gap:10px;align-items:center;font-size:13px}
+.dr .nm{font-weight:500}
+.dr .nm small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.dr .trk{height:12px;background:var(--line100);border-radius:3px;position:relative}
+.dr .trk b{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--acc)}
+.dr .trk b.p{background:var(--acc-products)} .dr .trk b.c{background:var(--acc-cloud)} .dr .trk b.e{background:var(--offF)}
+.dr .v{text-align:right;font-weight:600}
+.dr .v small{display:block;font-size:11px;font-weight:600}
+.dr .v small.good{color:var(--good)} .dr .v small.off{color:var(--off)} .dr .v small.watch{color:var(--watch)}
+.bridge{display:flex;align-items:flex-end;gap:14px;height:118px;margin-top:14px;padding:0 4px}
+.bb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bb .lab{font-size:11px;color:var(--ink700);text-align:center;line-height:13px;height:26px}
+.bb .val{font-size:12px;font-weight:600}
+.bb .val.good{color:var(--good)} .bb .val.off{color:var(--off)}
+.bb .bar{width:100%;max-width:64px;border-radius:2px;background:var(--acc);position:relative}
+.bb .bar.dn{background:var(--offF)} .bb .bar.up{background:var(--goodF)}
+.bb .stem{width:100%;max-width:64px;height:0}
+.axis-note{font-size:11px;color:var(--muted);margin-top:8px}
+table.contrib{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+table.contrib th{font-size:11px;font-weight:600;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line300);text-transform:uppercase;letter-spacing:.04em}
+table.contrib th.n,table.contrib td.n{text-align:right}
+table.contrib td{padding:4px 8px;border-bottom:1px solid var(--line100);line-height:16px}
+table.contrib td small{color:var(--muted);font-size:11px;margin-left:6px}
+table.contrib td.good{color:var(--good);font-weight:600} table.contrib td.off{color:var(--off);font-weight:600}
+table.contrib .bar{display:flex;height:8px;position:relative;width:100%}
+table.contrib .bar::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line300)}
+table.contrib .bar b{position:absolute;top:0;bottom:0;border-radius:2px}
+table.contrib .bar b.up{left:50%;background:var(--goodF)} table.contrib .bar b.dn{right:50%;background:var(--offF)}
+
+/* ---------- board pack preview ---------- */
+.board-wrap{display:flex;gap:24px;align-items:flex-start;margin-top:4px}
+.letter{width:470px;height:608px;background:var(--surface);border:1px solid var(--line200);border-radius:4px;padding:28px 30px;box-shadow:0 14px 36px rgba(16,27,43,.12);overflow:hidden}
+:root[data-theme="dark"] .letter{box-shadow:0 14px 36px rgba(0,0,0,.4)}
+.letter h2{font-size:14px;font-weight:600}
+.letter .sub{font-size:10px;color:var(--muted)}
+.letter table{width:100%;border-collapse:collapse;font-size:9.5px;margin-top:10px}
+.letter th{text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--ink);padding:3px 4px;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em}
+.letter td{padding:3px 4px;border-bottom:1px solid var(--line100);white-space:nowrap}
+.letter td.n,.letter th.n{text-align:right}
+.letter td.dom{font-weight:600;color:var(--muted);font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;padding-top:7px;border-bottom:0}
+.letter .g{font-size:8px;margin-right:3px}
+.letter .fn{font-size:8.5px;color:var(--muted);margin-top:8px;line-height:1.4}
+.board-notes{font-size:13px;color:var(--muted);max-width:520px;line-height:1.5}
+.board-notes h3{font-size:14px;color:var(--ink);font-weight:600;margin-bottom:6px}
+.board-notes li{margin-left:18px;margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<div class="artboard" role="application" aria-label="Executive scorecard mockup">
+
+  <!-- rail (house pattern: brand mark = company picker) -->
+  <aside class="rail" aria-label="Filter rail">
+    <button class="brand" title="Switch company" aria-label="Switch company - ACME Group">A<small>▾</small></button>
+    <div class="rail-div"></div>
+    <button class="rail-item" title="Period - Showing Jan – Sep 2026 - year to date"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/></svg></button>
+    <button class="rail-item" title="Comparator - Budget"><svg viewBox="0 0 20 20"><path d="M4 16V9M10 16V4M16 16v-6"/><path d="M2 16h16"/></svg></button>
+    <button class="rail-item" title="Display - USD m - actual rates"><svg viewBox="0 0 20 20"><path d="M3 6h14M3 10h14M3 14h14"/><circle cx="7" cy="6" r="1.8" fill="currentColor"/><circle cx="13" cy="10" r="1.8" fill="currentColor"/><circle cx="8" cy="14" r="1.8" fill="currentColor"/></svg></button>
+    <div class="rail-exp" title="Expand">»</div>
+  </aside>
+
+  <!-- page top (shared with the P&L: title row + status line, tabs row + view toolbar) -->
+  <header class="top">
+    <div class="title-row">
+      <h1>Executive scorecard</h1>
+      <button class="funnel" title="Applied filters" aria-label="Applied filters"><svg viewBox="0 0 16 16"><path d="M2 3h12l-4.5 5.2V13l-3-1.5V8.2z"/></svg></button>
+      <div class="status-line"><b>ACME Group</b> - Executive scorecard - Closed through Sep 2026 - Refreshed 24 Oct 2026 06:04</div>
+    </div>
+    <div class="tabs-row" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-view="score"><svg viewBox="0 0 18 18"><rect x="2" y="2" width="6" height="6" rx="1.2"/><rect x="10" y="2" width="6" height="6" rx="1.2"/><rect x="2" y="10" width="6" height="6" rx="1.2"/><rect x="10" y="10" width="6" height="6" rx="1.2"/></svg>Scorecard</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="detail"><svg viewBox="0 0 18 18"><path d="M2 13l4-5 3 3 4-6 3 4"/><path d="M2 16h14"/></svg>KPI detail</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="board"><svg viewBox="0 0 18 18"><rect x="3" y="2" width="12" height="14" rx="1.5"/><path d="M6 6h6M6 9h6M6 12h4"/></svg>Board pack</button>
+      <div class="toolbar">
+        <span class="seg-label">Period</span>
+        <div class="seg" role="group" aria-label="Period mode">
+          <button aria-pressed="false">Month</button><button aria-pressed="false">QTD</button><button aria-pressed="true">YTD</button><button aria-pressed="false">R12M</button>
+        </div>
+        <span class="seg-label">Compare with</span>
+        <div class="seg" role="group" aria-label="Comparator" id="cmp">
+          <button aria-pressed="true" data-cmp="bud">Budget</button><button aria-pressed="false" data-cmp="py">Prior year</button><button aria-pressed="false" data-cmp="fc">Forecast</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+  <!-- ================= SCORECARD VIEW ================= -->
+  <section class="view active" id="view-score" aria-label="Scorecard">
+
+    <div class="statusbar" aria-live="polite">
+      <div class="counts">
+        <span class="pill good"><span class="g">▲</span>5 on track</span>
+        <span class="pill watch"><span class="g">●</span>5 watch</span>
+        <span class="pill off"><span class="g">▼</span>3 off track</span>
+        <span class="pill na"><span class="g">○</span>1 not available</span>
+      </div>
+      <div class="sentence"><b>Off track:</b> Pipeline coverage 2.1× (−30%) - Full-year outlook −2.3% - OTIF 92.1% (−2.9 pp)</div>
+      <div class="leg">Worst first in each row<span><span class="g good">▲</span> on track</span><span><span class="g watch">●</span> watch</span><span><span class="g off">▼</span> off track</span></div>
+    </div>
+
+    <!-- north star + full-year outlook -->
+    <div class="ns-row">
+      <button class="tile ns s-watch" data-kpi="NET_REV" aria-label="Net revenue - open KPI detail" onclick="showView('detail')">
+        <div>
+          <div class="t-top"><span class="t-label">Net revenue <span class="u">- YTD Sep 2026</span></span></div>
+          <div class="ns-val">$3,972.7<span class="u">m</span></div>
+          <div class="t-delta" data-bud="−$72.7m (−1.8%) vs budget" data-py="+$166.7m (+4.4%) vs prior year" data-fc="−$18.4m (−0.5%) vs forecast 6+6">−$72.7m (−1.8%) vs budget</div>
+          <div class="t-ref">Target $4,045.4m - Pace 98.2% - tolerance −3%</div>
+        </div>
+        <div class="ns-chart">
+          <div class="cap"><span>Monthly net revenue, 13 months, USD m</span><span><span><i style="display:inline-block;width:10px;height:8px;background:var(--acc);border-radius:2px;margin-right:4px;opacity:.8"></i>actual</span><span><i style="display:inline-block;width:12px;border-top:1px dashed var(--tgt);margin-right:4px;vertical-align:middle"></i>budget</span></span></div>
+          <svg class="cols" id="ns-cols" viewBox="0 0 392 78" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="ns-side">
+          <span class="pill watch"><span class="g">●</span>Watch</span>
+          <div class="t-note">Products 1.9% behind budget on grocery promotions and toys; Cloud payments ahead, services behind.</div>
+          <div class="who"><span class="owner" title="Chief Financial Officer">CF</span>CFO - daily flash</div>
+        </div>
+      </button>
+
+      <article class="tile fy s-off" data-kpi="FY_OUTLOOK" tabindex="0">
+        <div class="t-top"><span class="t-label">Full-year outlook vs budget <span class="u">- FY2026</span></span><span class="pill off"><span class="g">▼</span>Off track</span></div>
+        <div class="fy-val">$5,737.2<span class="u">m latest estimate</span></div>
+        <div class="bullet" aria-hidden="true">
+          <div class="act" style="width:67.7%"></div>
+          <div class="fc" style="left:67.7%;width:30.0%"></div>
+          <div class="tick" style="left:calc(100% - 1px)" title="FY budget $5,869.3m"></div>
+          <div class="tick py" style="left:88.8%" title="Prior year $5,213.0m"></div>
+        </div>
+        <div class="bullet-cap"><span><i></i>YTD actual 3,972.7<i class="fc" style="margin-left:10px"></i>forecast 1,764.5</span><span><span style="color:var(--slate400)">▏</span>PY 5,213.0 <span style="color:var(--ink)">▏</span>budget 5,869.3</span></div>
+        <div class="t-delta" style="margin-top:4px">−$132.1m (−2.3%) vs FY budget <span style="font-weight:400;color:var(--muted)">- tolerance −2%</span></div>
+      </article>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="dom-row">
+      <div class="dom-label"><div class="eyebrow">Finance</div><div class="sub"><b>2</b> watch<br>2 on track<br>owner CFO</div></div>
+
+      <button class="tile s-watch" data-kpi="EBITDA" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Adj. EBITDA <span class="u">- margin 19.1%</span></span><span class="pill watch"><span class="g">●</span>Watch</span></div>
+        <div class="t-mid"><div class="t-val">$760.4<span class="u">m</span></div><svg class="spark" data-pts="78,84,92,88,72,77,84,86,90,87,85,91,88.4" data-tgt="87.1" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−$23.2m (−3.0%) vs budget" data-py="+$61.9m (+8.9%) vs prior year" data-fc="−$4.1m (−0.5%) vs forecast 6+6">−$23.2m (−3.0%) vs budget</div>
+        <div class="t-ref">Target $783.6m - Pace 97.0% - margin −0.2 pp</div>
+        <div class="t-foot"><span class="t-note">Tariffs 2.8 pp of NR in Products; media cut holds the margin</span><span class="owner" title="Chief Financial Officer">CF</span></div>
+      </button>
+
+      <button class="tile s-watch" data-kpi="GM_PCT" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Gross margin %</span><span class="pill watch"><span class="g">●</span>Watch</span></div>
+        <div class="t-mid"><div class="t-val">50.1<span class="u">%</span></div><svg class="spark" data-pts="51.4,51.1,50.8,50.6,50.9,50.6,50.3,50.2,50.0,49.8,49.9,50.1,50.0" data-tgt="50.5" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−0.4 pp vs budget" data-py="−1.1 pp vs prior year" data-fc="−0.1 pp vs forecast 6+6">−0.4 pp vs budget</div>
+        <div class="t-ref">Target 50.5% - tolerance −1.0 pp - Prior year 51.2%</div>
+        <div class="t-foot"><span class="t-note">Payments cost 60.5% of payments revenue; electronics tariffs</span><span class="owner" title="Chief Financial Officer">CF</span></div>
+      </button>
+
+      <button class="tile s-good" data-kpi="OPEX_PCT" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">OpEx vs budget</span><span class="pill good"><span class="g">▲</span>On track</span></div>
+        <div class="t-mid"><div class="t-val">96.7<span class="u">%</span></div><svg class="spark" data-pts="97.5,98.1,99.2,98.4,96.2,96.8,97.4,96.9,96.5,97.1,96.3,96.8,96.7" data-tgt="100" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="+$29.8m (+3.3%) under budget" data-py="+5.4% vs prior year spend" data-fc="+$6.2m (+0.7%) under forecast 6+6">+$29.8m (+3.3%) under budget</div>
+        <div class="t-ref">Budget $903.4m - Actual $873.6m - Watch above 100%</div>
+        <div class="t-foot"><span class="t-note">Working media −6%; data, AI &amp; security step-up in Cloud</span><span class="owner" title="Chief Financial Officer">CF</span></div>
+      </button>
+
+      <button class="tile s-good" data-kpi="CASH" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Cash balance <span class="u">- 30 Sep</span></span><span class="pill good"><span class="g">▲</span>On track</span></div>
+        <div class="t-mid"><div class="t-val">$412.6<span class="u">m</span></div><svg class="spark" data-pts="348,355,371,366,352,361,378,384,391,402,398,409,412.6" data-tgt="350" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="+$62.6m (+17.9%) above policy minimum" data-py="+$71.4m (+20.9%) vs prior year" data-fc="+$9.6m (+2.4%) vs forecast 6+6">+$62.6m (+17.9%) above policy minimum</div>
+        <div class="t-ref">Policy minimum $350m - Runway n/a (cash generative) - Net debt / EBITDA 0.8×</div>
+        <div class="t-foot"><span class="t-note">M&amp;A costs paid in Q3; interim dividend in Nov</span><span class="owner" title="Chief Financial Officer">CF</span></div>
+      </button>
+    </div>
+
+    <!-- GROWTH -->
+    <div class="dom-row">
+      <div class="dom-label"><div class="eyebrow">Growth</div><div class="sub"><b>1</b> off track<br>1 watch<br>owners CRO, CCO</div></div>
+
+      <button class="tile s-off" data-kpi="PIPE_COV" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Pipeline coverage <span class="u">- Q4 FY26</span></span><span class="pill off"><span class="g">▼</span>Off track</span></div>
+        <div class="t-mid"><div class="t-val">2.1<span class="u">×</span></div><svg class="spark" data-pts="3.2,3.1,3.0,2.9,3.1,2.8,2.7,2.6,2.6,2.5,2.4,2.2,2.1" data-tgt="3.0" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−0.9× (−30%) vs target 3.0×" data-py="−0.8× (−28%) vs prior year" data-fc="−0.6× (−22%) vs forecast">−0.9× (−30%) vs target 3.0×</div>
+        <div class="t-ref">Open pipeline $86.1m - Q4 quota $41.0m - Watch 2.5–3.0×</div>
+        <div class="t-foot"><span class="t-note">Two enterprise deals slipped to Q1; CRO review Thursday</span><span class="owner" title="Chief Revenue Officer">CR</span></div>
+      </button>
+
+      <button class="tile s-watch" data-kpi="NRR" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Net revenue retention <span class="u">- R12M</span></span><span class="pill watch"><span class="g">●</span>Watch</span></div>
+        <div class="t-mid"><div class="t-val">103.4<span class="u">%</span></div><svg class="spark" data-pts="106.8,106.4,106.1,105.7,105.2,104.9,104.6,104.4,104.1,103.9,103.7,103.5,103.4" data-tgt="105" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−1.6 pp vs target 105%" data-py="−2.7 pp vs prior year" data-fc="−0.9 pp vs forecast">−1.6 pp vs target 105%</div>
+        <div class="t-ref">Target 105% - Watch 100–105% - Prior year 106.1%</div>
+        <div class="t-foot"><span class="t-note">Mid-market subscription downgrades; payments expansion offsets</span><span class="owner" title="Chief Customer Officer">CC</span></div>
+      </button>
+
+      <button class="tile s-good" data-kpi="BOOKINGS" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Bookings vs quota <span class="u">- Q3</span></span><span class="pill good"><span class="g">▲</span>On track</span></div>
+        <div class="t-mid"><div class="t-val">101.2<span class="u">%</span></div><svg class="spark" data-pts="92,97,104,101,88,94,99,96,100,103,98,101,101.2" data-tgt="100" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="+$0.5m (+1.2%) vs quota" data-py="+$3.8m (+10.1%) vs prior year" data-fc="+$0.2m (+0.5%) vs forecast">+$0.5m (+1.2%) vs quota</div>
+        <div class="t-ref">Quota $41.0m - Closed-won $41.5m - Watch 90–100%</div>
+        <div class="t-foot"><span class="t-note">Payments-led; professional services bookings 8% behind</span><span class="owner" title="Chief Revenue Officer">CR</span></div>
+      </button>
+
+      <button class="tile s-good" data-kpi="ARR" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Ending ARR <span class="u">- net new +$6.1m</span></span><span class="pill good"><span class="g">▲</span>On track</span></div>
+        <div class="t-mid"><div class="t-val">$324.6<span class="u">m</span></div><svg class="spark" data-pts="281,286,290,294,297,301,305,308,311,314,318,318.5,324.6" data-tgt="318" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="+$6.6m (+2.1%) vs budget" data-py="+$43.6m (+15.5%) vs prior year" data-fc="+$2.1m (+0.7%) vs forecast">+$6.6m (+2.1%) vs budget</div>
+        <div class="t-ref">Budget $318.0m - Subscription run-rate, Sep × 12</div>
+        <div class="t-foot"><span class="t-note">Enterprise upsell in NA; two logo churns in UK mid-market</span><span class="owner" title="Chief Revenue Officer">CR</span></div>
+      </button>
+    </div>
+
+    <!-- OPERATIONS & PEOPLE -->
+    <div class="dom-row">
+      <div class="dom-label"><div class="eyebrow">Ops &amp; people</div><div class="sub"><b>1</b> off track<br>1 stale<br>1 not available</div></div>
+
+      <button class="tile s-off" data-kpi="OTIF" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">OTIF <span class="u">- on time in full, Sep</span></span><span class="pill off"><span class="g">▼</span>Off track</span></div>
+        <div class="t-mid"><div class="t-val">92.1<span class="u">%</span></div><svg class="spark" data-pts="95.1,94.8,94.2,94.6,94.0,93.8,93.5,93.9,93.2,92.8,92.6,92.3,92.1" data-tgt="95" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−2.9 pp vs target 95%" data-py="−2.3 pp vs prior year" data-fc="−1.4 pp vs forecast">−2.9 pp vs target 95%</div>
+        <div class="t-ref">Target ≥ 95% - Watch 93–95% - Prior year 94.4%</div>
+        <div class="t-foot"><span class="t-note">Outbound freight capacity in Asia-Pacific; carrier switch from Nov</span><span class="owner" title="Chief Operating Officer">CO</span></div>
+      </button>
+
+      <button class="tile s-watch stale" data-kpi="NPS" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">NPS <span class="u">- wave</span></span><span class="t-tag" title="Source older than its cadence: quarterly wave due 1 Oct">⏱ Stale - 2 Jul</span><span class="pill watch"><span class="g">●</span>Watch</span></div>
+        <div class="t-mid"><div class="t-val">38<span class="u">pts</span></div><svg class="spark" data-pts="41,42,40,43,41,39,40,39,38" data-tgt="40" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="−2 pts vs target 40" data-py="−3 pts vs prior year" data-fc="−2 pts vs target 40">−2 pts vs target 40</div>
+        <div class="t-ref">Target 40 - Watch −5 pts - 9 quarterly waves shown</div>
+        <div class="t-foot"><span class="t-note">Q3 wave not loaded; survey vendor export pending</span><span class="owner" title="Chief Customer Officer">CC</span></div>
+      </button>
+
+      <button class="tile s-good" data-kpi="VOLUME" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Net sales volume <span class="u">- Products</span></span><span class="pill good"><span class="g">▲</span>On track</span></div>
+        <div class="t-mid"><div class="t-val">419.8<span class="u">m units</span></div><svg class="spark" data-pts="44.2,46.8,49.5,48.1,43.0,44.1,46.5,47.2,48.4,47.8,46.9,48.6,47.3" data-tgt="46.4" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta" data-bud="+2.5m units (+0.6%) vs budget" data-py="+11.3m units (+2.8%) vs prior year" data-fc="+0.9m units (+0.2%) vs forecast 6+6">+2.5m units (+0.6%) vs budget</div>
+        <div class="t-ref">Budget 417.3m - Net price $8.10 / unit (budget $8.30)</div>
+        <div class="t-foot"><span class="t-note">D2C +5% and marketplaces +2% ahead; grocery behind on promotions</span><span class="owner" title="Chief Commercial Officer">CC</span></div>
+      </button>
+
+      <button class="tile s-na" data-kpi="HEADCOUNT" onclick="showView('detail')">
+        <div class="t-top"><span class="t-label">Headcount vs plan <span class="u">- FTE</span></span><span class="pill na"><span class="g">○</span>Not available</span></div>
+        <div class="t-mid"><div class="t-val na">—</div><svg class="spark" data-pts="" viewBox="0 0 120 36" aria-hidden="true"></svg></div>
+        <div class="t-delta">No data since 12 Sep 2026</div>
+        <div class="t-ref">Plan 4,860 FTE - HRIS feed failed on 13 Sep - status counts exclude this KPI</div>
+        <div class="t-foot"><span class="t-note">People Analytics re-running the extract; expected Mon</span><span class="owner" title="Chief Human Resources Officer">CH</span></div>
+      </button>
+    </div>
+
+    <div class="foot">
+      <span><b style="font-weight:600;color:var(--ink)">Illustrative data</b> - FY2026 YTD Sep - USD millions at actual rates - status vs budget unless the KPI names a target</span>
+      <span class="right"><a href="#" onclick="return false">Definitions</a><a href="#" onclick="return false">Owners</a><a href="#" onclick="showView('board');return false">Board export</a></span>
+    </div>
+  </section>
+
+  <!-- ================= KPI DETAIL VIEW ================= -->
+  <section class="view" id="view-detail" aria-label="KPI detail">
+    <div class="d-head">
+      <button class="back" onclick="showView('score')">‹ Scorecard</button>
+      <div class="d-title">
+        <h2>Net revenue - YTD Sep 2026 <span class="pill watch" style="vertical-align:2px;margin-left:8px"><span class="g">●</span>Watch</span></h2>
+        <p>Gross revenue less gross-to-net deductions (Consumer Products) plus recognised revenue (Commerce Cloud), intercompany eliminated. Translated month by month at actual rates; budget at budget rates. Target source: budget - tolerance −3% to 0%.</p>
+      </div>
+      <div class="d-right"><span class="owner" title="Chief Financial Officer" style="width:28px;height:28px;font-size:12px">CF</span><span style="font-size:13px;color:var(--muted)">CFO</span><button class="btn-link">Open P&amp;L report ↗</button></div>
+    </div>
+
+    <div class="d-grid">
+      <div class="card">
+        <h3>36-month trend - actual vs budget vs prior year</h3>
+        <div class="sub">USD millions per month - Oct 2023 – Sep 2026 shown as Jan 2024 – Dec 2026 with forecast 9+3 for open months</div>
+        <div class="legend"><span><i></i>Actual</span><span><i class="fc"></i>Forecast 9+3</span><span><i class="tg"></i>Budget 2026</span><span><i class="py"></i>Prior year (shifted)</span></div>
+        <svg class="trend" id="trend" viewBox="0 0 842 170" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+      <div class="card">
+        <h3>By entity</h3>
+        <div class="sub">Net revenue YTD, USD m, Δ vs budget</div>
+        <div class="decomp">
+          <div class="dr"><span class="nm">Consumer Products<small>goods - retail, D2C, marketplaces</small></span><span class="trk"><b class="p" style="width:84%"></b></span><span class="v">3,398.5<small class="watch">−66.3 (−1.9%)</small></span></div>
+          <div class="dr"><span class="nm">Commerce Cloud<small>e-commerce SaaS and payments</small></span><span class="trk"><b class="c" style="width:14.7%"></b></span><span class="v">596.0<small class="watch">−6.2 (−1.0%)</small></span></div>
+          <div class="dr"><span class="nm">Eliminations<small>intercompany D2C webstore, payments</small></span><span class="trk"><b class="e" style="width:0.6%"></b></span><span class="v">−21.8<small style="color:var(--muted)">−0.2</small></span></div>
+          <div class="dr" style="border-top:1px solid var(--line300);padding-top:8px"><span class="nm">ACME Group</span><span class="trk" style="background:transparent"></span><span class="v">3,972.7<small class="watch">−72.7 (−1.8%)</small></span></div>
+        </div>
+        <div class="axis-note">Share bars scaled to the Group total. Products bar in Products blue, Cloud in Cloud violet (identity colours, not status).</div>
+      </div>
+    </div>
+
+    <div class="d-grid2">
+      <div class="card">
+        <h3>Variance bridge - budget to actual</h3>
+        <div class="sub">USD millions, YTD Sep 2026 - additive, so the steps sum to the Δ of −72.7</div>
+        <div class="bridge" aria-hidden="true">
+          <div class="bb"><span class="val">4,045.4</span><div class="bar" style="height:70px"></div><span class="lab">Budget</span></div>
+          <div class="bb"><span class="val off">−38.2</span><div class="stem" style="height:0"></div><div class="bar dn" style="height:26px;margin-bottom:44px"></div><span class="lab">Volume &amp; mix<br>Products</span></div>
+          <div class="bb"><span class="val off">−14.6</span><div class="bar dn" style="height:10px;margin-bottom:34px"></div><span class="lab">Price &amp;<br>promotions</span></div>
+          <div class="bb"><span class="val off">−13.5</span><div class="bar dn" style="height:9px;margin-bottom:25px"></div><span class="lab">FX<br>translation</span></div>
+          <div class="bb"><span class="val off">−6.2</span><div class="bar dn" style="height:4px;margin-bottom:21px"></div><span class="lab">Commerce<br>Cloud</span></div>
+          <div class="bb"><span class="val off">−0.2</span><div class="bar dn" style="height:2px;margin-bottom:19px"></div><span class="lab">Eliminations</span></div>
+          <div class="bb"><span class="val">3,972.7</span><div class="bar" style="height:21px"></div><span class="lab">Actual</span></div>
+        </div>
+        <div class="axis-note">The axis starts at $3,900m so the steps are readable; totals in Group graphite, decreases in the Off-track fill.</div>
+      </div>
+      <div class="card">
+        <h3>Largest contributors to the variance</h3>
+        <div class="sub">Top 6 slices by size of Δ vs budget, USD m - the domain report holds the full list</div>
+        <table class="contrib">
+          <thead><tr><th>Slice</th><th style="width:170px">Unfavourable · Favourable</th><th class="n">Δ</th><th class="n">Δ %</th></tr></thead>
+          <tbody>
+            <tr><td>Grocery &amp; mass retail<small>Products - channel</small></td><td><div class="bar"><b class="dn" style="width:50%"></b></div></td><td class="n off">−31.4</td><td class="n off">−3.6%</td></tr>
+            <tr><td>Toys &amp; leisure<small>Products - category</small></td><td><div class="bar"><b class="dn" style="width:30%"></b></div></td><td class="n off">−18.6</td><td class="n off">−7.1%</td></tr>
+            <tr><td>D2C webstore<small>Products - channel</small></td><td><div class="bar"><b class="up" style="width:23%"></b></div></td><td class="n good">+14.2</td><td class="n good">+5.0%</td></tr>
+            <tr><td>Professional services<small>Cloud - service line</small></td><td><div class="bar"><b class="dn" style="width:16%"></b></div></td><td class="n off">−9.8</td><td class="n off">−8.2%</td></tr>
+            <tr><td>Payments<small>Cloud - service line</small></td><td><div class="bar"><b class="up" style="width:15%"></b></div></td><td class="n good">+9.4</td><td class="n good">+4.9%</td></tr>
+            <tr><td>Electronics accessories<small>Products - category</small></td><td><div class="bar"><b class="dn" style="width:13%"></b></div></td><td class="n off">−8.2</td><td class="n off">−3.1%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="foot"><span><b style="font-weight:600;color:var(--ink)">Illustrative data</b> - the detail view is the same window; Escape or ‹ Scorecard returns</span></div>
+  </section>
+
+  <!-- ================= BOARD PACK PREVIEW ================= -->
+  <section class="view" id="view-board" aria-label="Board pack">
+    <div class="d-head" style="height:40px">
+      <button class="back" onclick="showView('score')">‹ Scorecard</button>
+      <div class="d-title"><h2>Board pack - Letter portrait</h2><p>Static table of every active KPI plus the north-star trend; exported to PDF on the first working day after close.</p></div>
+      <div class="d-right"><button class="btn-link">Export PDF ↓</button></div>
+    </div>
+    <div class="board-wrap">
+      <div class="letter" aria-label="Board pack page preview">
+        <h2>ACME Group - Leadership scorecard - September 2026</h2>
+        <div class="sub">Actuals closed through Sep 2026 - USD millions at actual rates - comparator Budget - prepared 1 Oct 2026</div>
+        <table>
+          <thead><tr><th>KPI</th><th class="n">Actual</th><th class="n">Target</th><th class="n">Δ</th><th class="n">Δ %</th><th class="n">PY</th><th>Status</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td class="dom" colspan="8">North star</td></tr>
+            <tr><td>Net revenue, YTD</td><td class="n">3,972.7</td><td class="n">4,045.4</td><td class="n">−72.7</td><td class="n">−1.8%</td><td class="n">3,806.0</td><td><span class="g" style="color:var(--watch)">●</span>Watch</td><td>CFO</td></tr>
+            <tr><td>Full-year outlook, FY26</td><td class="n">5,737.2</td><td class="n">5,869.3</td><td class="n">−132.1</td><td class="n">−2.3%</td><td class="n">5,213.0</td><td><span class="g" style="color:var(--off)">▼</span>Off track</td><td>CFO</td></tr>
+            <tr><td class="dom" colspan="8">Finance</td></tr>
+            <tr><td>Adj. EBITDA, YTD</td><td class="n">760.4</td><td class="n">783.6</td><td class="n">−23.2</td><td class="n">−3.0%</td><td class="n">698.5</td><td><span class="g" style="color:var(--watch)">●</span>Watch</td><td>CFO</td></tr>
+            <tr><td>Gross margin %</td><td class="n">50.1%</td><td class="n">50.5%</td><td class="n">−0.4 pp</td><td class="n">—</td><td class="n">51.2%</td><td><span class="g" style="color:var(--watch)">●</span>Watch</td><td>CFO</td></tr>
+            <tr><td>OpEx vs budget</td><td class="n">96.7%</td><td class="n">100%</td><td class="n">+29.8</td><td class="n">+3.3%</td><td class="n">—</td><td><span class="g" style="color:var(--good)">▲</span>On track</td><td>CFO</td></tr>
+            <tr><td>Cash balance, 30 Sep</td><td class="n">412.6</td><td class="n">350.0</td><td class="n">+62.6</td><td class="n">+17.9%</td><td class="n">341.2</td><td><span class="g" style="color:var(--good)">▲</span>On track</td><td>CFO</td></tr>
+            <tr><td class="dom" colspan="8">Growth</td></tr>
+            <tr><td>Pipeline coverage, Q4</td><td class="n">2.1×</td><td class="n">3.0×</td><td class="n">−0.9×</td><td class="n">−30%</td><td class="n">2.9×</td><td><span class="g" style="color:var(--off)">▼</span>Off track</td><td>CRO</td></tr>
+            <tr><td>Net revenue retention</td><td class="n">103.4%</td><td class="n">105%</td><td class="n">−1.6 pp</td><td class="n">—</td><td class="n">106.1%</td><td><span class="g" style="color:var(--watch)">●</span>Watch</td><td>CCO</td></tr>
+            <tr><td>Bookings vs quota, Q3</td><td class="n">101.2%</td><td class="n">100%</td><td class="n">+0.5</td><td class="n">+1.2%</td><td class="n">—</td><td><span class="g" style="color:var(--good)">▲</span>On track</td><td>CRO</td></tr>
+            <tr><td>Ending ARR</td><td class="n">324.6</td><td class="n">318.0</td><td class="n">+6.6</td><td class="n">+2.1%</td><td class="n">281.0</td><td><span class="g" style="color:var(--good)">▲</span>On track</td><td>CRO</td></tr>
+            <tr><td class="dom" colspan="8">Operations &amp; people</td></tr>
+            <tr><td>OTIF, Sep</td><td class="n">92.1%</td><td class="n">95%</td><td class="n">−2.9 pp</td><td class="n">—</td><td class="n">94.4%</td><td><span class="g" style="color:var(--off)">▼</span>Off track</td><td>COO</td></tr>
+            <tr><td>NPS, wave 2 Jul (stale)</td><td class="n">38</td><td class="n">40</td><td class="n">−2</td><td class="n">—</td><td class="n">41</td><td><span class="g" style="color:var(--watch)">●</span>Watch</td><td>CCO</td></tr>
+            <tr><td>Net sales volume, m units</td><td class="n">419.8</td><td class="n">417.3</td><td class="n">+2.5</td><td class="n">+0.6%</td><td class="n">408.5</td><td><span class="g" style="color:var(--good)">▲</span>On track</td><td>CCO</td></tr>
+            <tr><td>Headcount vs plan, FTE</td><td class="n">—</td><td class="n">4,860</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td>○ Not available</td><td>CHRO</td></tr>
+          </tbody>
+        </table>
+        <div class="fn">Δ is direction-adjusted: positive is always favourable. Status: On track when the target condition is met; Watch inside the tolerance band; Off track beyond it. Illustrative data.</div>
+      </div>
+      <div class="board-notes">
+        <h3>Export rules</h3>
+        <ul>
+          <li>Letter portrait, one page; a second page carries the north-star 36-month trend and the owners' notes.</li>
+          <li>Values frozen from <code>kpi_history</code> at month-end lock, so the pack reproduces exactly on re-run.</li>
+          <li>Greyscale-safe: the glyph column carries the status without colour.</li>
+          <li>Track B: a hidden Letter page rendered through subscription (PDF). Tracks A and C: print stylesheet of this table.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+</div>
+<p class="caption"><b>Executive scorecard - light direction ("Ledger Executive", recommended).</b> Illustrative figures for a FY2026 YTD Sep view of ACME Group; only the net revenue, gross profit, EBITDA, OpEx, D&amp;A and unit figures come from the P&amp;L control totals. Click the north-star tile for the KPI detail, the comparator buttons to swap the Δ line.</p>
+
+<script>
+/* fit the 1440 x 810 artboard to the window */
+(function fit(){const s=document.getElementById('stage');function go(){const k=Math.min(1,(window.innerWidth-32)/1440);s.style.transform='scale('+k+')';s.style.height=(810*k)+'px';s.style.width=(1440*k)+'px';s.style.marginBottom='0'}window.addEventListener('resize',go);go();})();
+
+/* views (same window; tabs swap the content area) */
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.view===v)))}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')showView('score')});
+if(['#detail','#board'].includes(location.hash))showView(location.hash.slice(1));
+
+/* comparator toggle: swaps the Δ line only (status always measures against the KPI's target source) */
+document.querySelectorAll('#cmp button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#cmp button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');const k=b.dataset.cmp;document.querySelectorAll('.t-delta[data-'+k+']').forEach(d=>d.textContent=d.dataset[k])}));
+
+/* sparklines: 13 periods, grey line, soft area, dotted target, last point in the status colour */
+document.querySelectorAll('svg.spark').forEach(s=>{
+  const raw=(s.dataset.pts||'').trim(); if(!raw){s.innerHTML='<line x1="0" y1="18" x2="120" y2="18" stroke="var(--line300)" stroke-dasharray="2 4"/>';return}
+  const p=raw.split(',').map(Number), t=s.dataset.tgt?+s.dataset.tgt:null, W=120,H=36,pad=4;
+  let lo=Math.min(...p,t??Infinity), hi=Math.max(...p,t??-Infinity); if(hi===lo){hi+=1;lo-=1} const r=(hi-lo)*0.12; lo-=r; hi+=r;
+  const x=i=>pad+i*(W-2*pad)/(p.length-1), y=v=>H-pad-(v-lo)/(hi-lo)*(H-2*pad);
+  const d=p.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  let h='<path class="ar" d="'+d+' L'+x(p.length-1).toFixed(1)+' '+(H-pad)+' L'+pad+' '+(H-pad)+' Z"/>';
+  if(t!==null)h+='<line class="tg" x1="'+pad+'" x2="'+(W-pad)+'" y1="'+y(t).toFixed(1)+'" y2="'+y(t).toFixed(1)+'"/>';
+  h+='<path class="ln" d="'+d+'"/><circle class="lp" cx="'+x(p.length-1).toFixed(1)+'" cy="'+y(p[p.length-1]).toFixed(1)+'" r="3"/>';
+  s.innerHTML=h;
+});
+
+/* north-star 13-month columns with budget line */
+(function(){
+  const act=[430,448,492,467,402,415,438,447,459,452,445,460,454.7], bud=[440,470,520,495,410,422,445,455,468,460,452,468,465];
+  const mo=['S','O','N','D','J','F','M','A','M','J','J','A','S'], W=392,H=78,top=4,base=64,n=act.length,gap=10,bw=(W-gap*(n-1))/n;
+  const hi=Math.max(...act,...bud)*1.02, lo=360; const y=v=>base-(v-lo)/(hi-lo)*(base-top);
+  let h=''; act.forEach((v,i)=>{const x=i*(bw+gap);h+='<rect class="bar'+(i<4?' py':'')+(i===n-1?' cur':'')+'" x="'+x.toFixed(1)+'" y="'+y(v).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(base-y(v)).toFixed(1)+'" rx="2"/>';h+='<text class="mo'+(i===n-1?' cur':'')+'" x="'+(x+bw/2).toFixed(1)+'" y="'+(H-1)+'" text-anchor="middle">'+mo[i]+'</text>'});
+  h+='<path class="tg" d="'+bud.map((v,i)=>(i?'L':'M')+(i*(bw+gap)+bw/2).toFixed(1)+' '+y(v).toFixed(1)).join(' ')+'"/>';
+  h+='<line x1="0" x2="'+W+'" y1="'+base+'" y2="'+base+'" stroke="var(--line300)"/>';
+  document.getElementById('ns-cols').innerHTML=h;
+})();
+
+/* detail view: 36-month trend */
+(function(){
+  const a24=[360,369,391,397,409,403,396,407,401,430,468,445], a25=[388,398,421,428,441,434,427,439,430,448,492,467], a26=[402,415,438,447,459,452,445,460,454.7];
+  const fc26=[454.7,542,628,594.5], b26=[410,422,445,455,468,460,452,468,465,560,650,614];
+  const W=842,H=170,L=40,R=10,T=10,B=24,n=36, lo=340, hi=680;
+  const x=i=>L+i*(W-L-R)/(n-1), y=v=>T+(H-T-B)-(v-lo)/(hi-lo)*(H-T-B);
+  let h='';
+  [400,500,600].forEach(v=>{h+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'"/><text class="ax" x="'+(L-6)+'" y="'+(y(v)+3.5)+'" text-anchor="end">'+v+'</text>'});
+  ['2024','2025','2026'].forEach((yr,k)=>{h+='<text class="ax" x="'+x(k*12)+'" y="'+(H-6)+'">'+yr+'</text><line class="gl" x1="'+x(k*12)+'" x2="'+x(k*12)+'" y1="'+T+'" y2="'+(H-B)+'"/>'});
+  const act=[...a24,...a25,...a26];
+  const path=(arr,off)=>arr.map((v,i)=>(i?'L':'M')+x(i+off).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  h+='<path class="py" d="'+path([...a24,...a25],12)+'"/>';
+  h+='<path class="tg" d="'+path(b26,24)+'"/>';
+  h+='<path class="act" d="'+path(act,0)+'"/>';
+  h+='<path class="fc" d="'+path(fc26,32)+'"/>';
+  h+='<circle class="dot" cx="'+x(32)+'" cy="'+y(454.7)+'" r="4"/>';
+  h+='<text class="lbl" x="'+(x(32)-8)+'" y="'+(y(454.7)-10)+'" text-anchor="end">Sep 26 - 454.7</text>';
+  h+='<text class="lbl m" x="'+(x(34)-10)+'" y="'+(y(650)-2)+'" text-anchor="end">budget Nov 650</text>';
+  h+='<text class="lbl m" x="'+(x(22)+6)+'" y="'+(y(492)-8)+'">Nov 25 - 492</text>';
+  document.getElementById('trend').innerHTML=h;
+})();
+</script>
+</body>
+</html>

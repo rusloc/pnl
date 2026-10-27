@@ -1,16 +1,16 @@
 # `/sales` — Mirelo Sales & Revenue (Track C, draft)
 
-> **DRAFT.** Built per ADR-0011 (c) (Proposed) against `docs/design/sales-revenue dashboard/` (`design-tokens.md`, `layout-spec.md`, `mockup.html`). Fictional company; all data is generated (`data/mirelo_sales_dummy_data/`). Nothing here touches the P&L route, engine or data.
+> **DRAFT.** Mirelo ships in two flavours: this JS app and a Power BI report (USER 2026-10-27). Built per ADR-0011 (c) (Proposed) and ADR-0012 (visual first, minimum text) against `docs/design/sales-revenue dashboard/` (`design-tokens.md`, `layout-spec.md`, `mockup.html`). Fictional company; all data is generated (`data/mirelo_sales_dummy_data/`). Nothing here touches the P&L route, engine or data.
 
 ## Route
 
-| Piece | Where | Notes |
-|---|---|---|
-| Route | `app/sales/page.tsx`, `app/sales/layout.tsx` | Static shell (prerendered), Inter via `next/font` (self-hosted, CSP `font-src 'self'`) |
-| UI | `components/sales/` | `SalesApp.tsx` is the only `'use client'` entry; inline SVG charts (`charts.tsx`), no chart library |
-| Engine | `lib/sales/` | Framework-free; every number and every string on the page |
-| Data build | `scripts/build-sales-data.ts` → `public/data/sales/` | Runs in `prebuild` after the P&L build |
-| Shared tooling | `lib/data/parquet-columns.ts` | Typed hyparquet column reader (new; the P&L loader is unchanged) |
+| Piece          | Where                                                | Notes                                                                                               |
+| -------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Route          | `app/sales/page.tsx`, `app/sales/layout.tsx`         | Static shell (prerendered), Inter via `next/font` (self-hosted, CSP `font-src 'self'`)              |
+| UI             | `components/sales/`                                  | `SalesApp.tsx` is the only `'use client'` entry; inline SVG charts (`charts.tsx`), no chart library |
+| Engine         | `lib/sales/`                                         | Framework-free; every number and every string on the page                                           |
+| Data build     | `scripts/build-sales-data.ts` → `public/data/sales/` | Runs in `prebuild` after the P&L build                                                              |
+| Shared tooling | `lib/data/parquet-columns.ts`                        | Typed hyparquet column reader (new; the P&L loader is unchanged)                                    |
 
 Board: fixed 1440 × 810, px-exact to `layout-spec.md`; the host scales it (design-tokens §4). URL state: `?view=overview|loans|clients|portfolio|revenue &market=all|pl|ro|pt &period=month|qtd|ytd|r12m &month=YYYY-MM &cmp=budget|py &drill=loans[.pl|.ro|.pt]|agent.A001|client.123456`. Defaults are omitted (bare URL = Overview · All markets · Month · Sep 2026 · vs Budget). Each key is validated with Zod (`lib/sales/url-state.ts`); invalid values fall back to the default and the URL is rewritten; unknown keys are dropped.
 
@@ -18,19 +18,19 @@ Board: fixed 1440 × 810, px-exact to `layout-spec.md`; the host scales it (desi
 
 Reads `data/mirelo_sales_dummy_data/parquet/*.parquet` (never the CSVs). `fact_loan` (634 k rows, 19.6 MB) does not ship. The October 2026 open-month loans (20.6 k) are dropped, because only closed months can be selected.
 
-| File | Rows | Size | Load | Grain |
-|---|---:|---:|---|---|
-| `loans-month.parquet` | 2,239 | 19 kB | first paint | month × market × product × channel × new / repeat: loans, principal local |
-| `funnel-month.parquet` | 2,254 | 42 kB | first paint | month × market × product × channel × new / repeat: 6 funnel stages |
-| `portfolio-month.parquet` | 425 | 25 kB | first paint | month-end × market × product: balances by DPD bucket, active / 30+ counts, write-offs, provision |
-| `vintage.parquet` | 1,053 | 5 kB | first paint | vintage × market × months on book 0–12: first 30+ / 90+ |
-| `window-stats.parquet` | 1,584 | 14 kB | first paint | time view × anchor × market × client segment: distinct borrowers, returning clients, MEDIANX hours / days. These do not add up over months, so they are computed per window |
-| `cohort-curve.parquet` | 1,287 | 5 kB | first paint | first-loan month × market × days 0–180: clients with a second loan, observable flag |
-| `agent-month.parquet` | 1,462 | 13 kB | first paint | month × agent: loans, principal, quota |
-| `revenue-month.parquet` / `subs-month.parquet` / `target-month.parquet` | 1,147 / 297 / 2,096 | 29 kB | first paint | copies of the source facts (closed months only) |
-| `detail-loans.parquet` | 48,688 | 586 kB | lazy | capped loan sample (below) |
-| `detail-clients.parquet` | 18,493 | 132 kB | lazy | `dim_client` rows of every client in the sample |
-| `manifest.json` | — | 43 kB | first paint | dims, FX, thresholds, file sizes (strict Zod, `lib/sales/manifest.ts`) |
+| File                                                                    |                Rows |   Size | Load        | Grain                                                                                                                                                                       |
+| ----------------------------------------------------------------------- | ------------------: | -----: | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `loans-month.parquet`                                                   |               2,239 |  19 kB | first paint | month × market × product × channel × new / repeat: loans, principal local                                                                                                   |
+| `funnel-month.parquet`                                                  |               2,254 |  42 kB | first paint | month × market × product × channel × new / repeat: 6 funnel stages                                                                                                          |
+| `portfolio-month.parquet`                                               |                 425 |  25 kB | first paint | month-end × market × product: balances by DPD bucket, active / 30+ counts, write-offs, provision                                                                            |
+| `vintage.parquet`                                                       |               1,053 |   5 kB | first paint | vintage × market × months on book 0–12: first 30+ / 90+                                                                                                                     |
+| `window-stats.parquet`                                                  |               1,584 |  14 kB | first paint | time view × anchor × market × client segment: distinct borrowers, returning clients, MEDIANX hours / days. These do not add up over months, so they are computed per window |
+| `cohort-curve.parquet`                                                  |               1,287 |   5 kB | first paint | first-loan month × market × days 0–180: clients with a second loan, observable flag                                                                                         |
+| `agent-month.parquet`                                                   |               1,462 |  13 kB | first paint | month × agent: loans, principal, quota                                                                                                                                      |
+| `revenue-month.parquet` / `subs-month.parquet` / `target-month.parquet` | 1,147 / 297 / 2,096 |  29 kB | first paint | copies of the source facts (closed months only)                                                                                                                             |
+| `detail-loans.parquet`                                                  |              48,688 | 586 kB | lazy        | capped loan sample (below)                                                                                                                                                  |
+| `detail-clients.parquet`                                                |              18,493 | 132 kB | lazy        | `dim_client` rows of every client in the sample                                                                                                                             |
+| `manifest.json`                                                         |                   — |  43 kB | first paint | dims, FX, thresholds, file sizes (strict Zod, `lib/sales/manifest.ts`)                                                                                                      |
 
 **First paint 197 kB, total 915 kB** (budget 3 MB; the build fails above 4 MB). The build cross-checks: the snapshot's disbursed counts equal `fact_loan` per vintage × market; buckets sum to outstanding; the funnel is monotonic; subscriber roll-forward holds; every file passes a read-back round trip.
 
@@ -42,11 +42,22 @@ Reads `data/mirelo_sales_dummy_data/parquet/*.parquet` (never the CSVs). `fact_l
 
 Tests (`npm test`): `control-totals.test.ts` checks `checks/control_totals_eur.csv` for ALL / PL / RO / PT × Sep 2026, FY2024, FY2025 and FY2026 YTD Sep: loans, principal, new clients, borrowers, returning clients and both returning %, outstanding, 30+ balance, 30+ / 90+ %, and revenue in total and per stream. It also checks every closed month × market. `engine.test.ts` covers hero strings, a sweep of every view × market × time view × comparator (no NaN / undefined), a zero bridge residual, and the detail sample against the raw `fact_loan`. `url-state.test.ts` and `units.test.ts` cover the rest.
 
+## USER review 2026-10-27 (applied)
+
+- No "Showing …" period line under the title. The sentence, including the clipped-window note for R12M before Dec 2024, is the period picker's tooltip and the first line of the "How to read" pop-up (`engine.header().periodLine`).
+- No 16 × 16 corner markers on the cards. The card titles stay at the 16 px padding edge, and nothing else moved.
+- No sparklines in the hero cards (`docs/design/design-requirements.md` §1 "Visual first, minimum text").
+- ADR-0012 card face (follow-up done): every hero / KPI card shows title · value · delta rows · status chip (glyph + word, from the header comparator; hero falls back to the other row when it has no value). The former sub-lines are labelled sub-values inside the card's ⓘ.
+- ⓘ on every card and panel: a plain upright "i" (SVG) at the bottom-left; tables carry it in the title row because their rows reach the bottom edge. The pop-up shows what it is · why it matters · formula in words · sub-values · source table. Copy is in `lib/sales/copy.ts` (`info(id, values)`), and a test checks that every card in every view has all four texts.
+- One "How to read" per view (five), header right: the Showing sentence (incl. the clipped-window note), then top band · grid · table · legend (`engine.header().howToRead`).
+- Table footnotes moved into the table ⓘ; an empty or loading table shows one line in place of rows.
+- Glass pop-ups from the shared `components/glass.tsx` (also used by the P&L views, ADR-0012 §2.5): about 74 % white, 16 px blur, 16 px radius, solid fallback without `backdrop-filter`. One open at a time (a view change closes it); Escape, outside click and × close; focus moves to × and returns to the ⓘ; Tab stays inside. Hero diverging bar 144 × 6 (tokens say 160; 144 keeps the 16 px right padding).
+
 ## What is draft / placeholder
 
 - **Complete:** the Overview (4 heroes, 2 × 2 why grid, market table) and the KPI bands of all five views.
 - **Built with data:** every chart card of views 2–5 except the one below, plus the leaderboard, clients, overdue and stream tables, and the slide-over (loan list → client card, Back, Export CSV, Esc / scrim close, focus trap).
-- **Placeholder:** L11 *Attainment by channel*, because the dataset has no channel targets.
+- **Placeholder:** L11 _Attainment by channel_, because the dataset has no channel targets.
 - **Not built:** mark-click cross-filtering and filter chips, except clicking a month on the trend charts, which sets the selected month. Also the `docs/ADD/features/sales-info-popovers.md` shared ⓘ source; the ⓘ copy lives in `lib/sales/copy.ts` for now.
 
 ## Run

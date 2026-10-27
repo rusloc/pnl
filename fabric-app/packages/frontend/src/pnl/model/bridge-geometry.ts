@@ -1,13 +1,21 @@
-// Net revenue bridge geometry (C-40, §6.3): a truncated axis so the steps stay
-// readable. Decoded from the mockup: axis = lowest cumulative point minus
-// 1.2 × (highest − lowest), rounded down to a whole million; the first total
-// bar is 89.8 % of the chart height.
-import type { BridgeStep } from './types';
+// Bridge geometry (C-40, redesign v4 §2): a truncated axis so the steps stay
+// readable (ADR-0004 README decision 4: Tracks A and C truncate, Track B keeps
+// the native zero axis). Decoded from the mockup: axis = lowest cumulative
+// point minus 1.2 × (highest − lowest), rounded down to a whole unit; the first
+// total bar is 89.8 % of the chart height. Pure: the waterfall component only
+// draws the percentages returned here.
+import type { BridgeKind, BridgeStep } from './types';
 
 export interface BridgeInput {
   label: string;
+  /**
+   * total / subtotal: the level the bar reaches; step / fx / level: the signed
+   * change added to the running level (a `level` is a P&L level such as D&A,
+   * drawn as a step in slate: the bridge continues from it).
+   */
   amount: number;
-  kind: 'total' | 'step';
+  kind: 'total' | 'subtotal' | 'step' | 'fx' | 'level';
+  sub?: string | null;
 }
 
 export interface BridgeGeometry {
@@ -17,13 +25,14 @@ export interface BridgeGeometry {
 
 export function bridgeGeometry(
   input: readonly BridgeInput[],
-  formatValue: (amount: number, kind: 'total' | 'step') => string
+  formatValue: (amount: number, kind: BridgeInput['kind']) => string
 ): BridgeGeometry {
   let running = 0;
   const points: number[] = [];
   const cumulative = input.map((s) => {
-    const start = s.kind === 'total' ? 0 : running;
-    running = s.kind === 'total' ? s.amount : running + s.amount;
+    const isLevel = s.kind === 'total' || s.kind === 'subtotal';
+    const start = isLevel ? 0 : running;
+    running = isLevel ? s.amount : running + s.amount;
     points.push(running);
     return { start, end: running };
   });
@@ -36,14 +45,18 @@ export function bridgeGeometry(
 
   const steps = input.map((s, i) => {
     const { start, end } = cumulative[i];
-    const bottom = s.kind === 'total' ? 0 : pct(Math.min(start, end));
-    const height = s.kind === 'total' ? pct(end) : Math.abs(pct(end) - pct(start));
+    const isLevel = s.kind === 'total' || s.kind === 'subtotal';
+    const bottom = isLevel ? 0 : pct(Math.min(start, end));
+    const height = isLevel ? pct(end) : Math.abs(pct(end) - pct(start));
+    const kind: BridgeKind =
+      s.kind === 'total' ? 'total' : s.kind === 'subtotal' ? 'subtotal' : s.kind === 'fx' ? 'fx' : s.kind === 'level' ? 'level' : s.amount < 0 ? 'unf' : 'fav';
     return {
       label: s.label,
       valueText: formatValue(s.amount, s.kind),
-      kind: s.kind === 'total' ? 'total' : s.amount < 0 ? 'unf' : 'fav',
+      kind,
       bottomPct: Math.round(bottom * 100) / 100,
       heightPct: Math.round(height * 100) / 100,
+      sub: s.sub ?? null,
     } satisfies BridgeStep;
   });
   return { axis, steps };

@@ -1,0 +1,264 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Rail: collapse",
+  "name": "bm_rail_collapse",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_rail_c",
+      "rc_bg",
+      "rc_brand",
+      "rc_div",
+      "rc_period",
+      "rc_versions",
+      "rc_slice",
+      "rc_display",
+      "rc_expand",
+      "grp_rail_e",
+      "re_bg",
+      "re_brand",
+      "re_title",
+      "re_sub",
+      "re_filters",
+      "re_period_sum",
+      "re_period",
+      "re_versions_sum",
+      "re_versions",
+      "re_slice_sum",
+      "re_slice",
+      "re_display_sum",
+      "re_display",
+      "re_collapse",
+      "grp_info_filters",
+      "info_filters_toggle",
+      "info_filters_panel",
+      "info_filters_title",
+      "info_filters_close",
+      "info_filters_rule",
+      "info_filters_table"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {
+          "rc_bg": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "rc_brand": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "rc_div": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "rc_period": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "rc_versions": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "rc_slice": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "rc_display": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "rc_expand": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "re_bg": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_brand": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_sub": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_filters": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_period_sum": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_period": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_versions_sum": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_versions": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_slice_sum": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_slice": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_display_sum": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_display": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "re_collapse": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_toggle": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "info_filters_table": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_rail_c": {
+            "isHidden": false
+          },
+          "grp_rail_e": {
+            "isHidden": true
+          },
+          "grp_info_filters": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

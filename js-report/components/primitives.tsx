@@ -1,5 +1,77 @@
-import type { KeyboardEvent } from 'react';
+import type { CSSProperties, KeyboardEvent, ReactNode } from 'react';
 import styles from './primitives.module.css';
+
+/**
+ * Arrow-key target in a radiogroup (WAI-ARIA radio pattern: → / ↓ next, ← / ↑ previous, wrapping); disabled options
+ * are skipped. null = the key is not an arrow or there is nowhere to go.
+ */
+export function nextChoice(from: number, key: string, count: number, disabled: (i: number) => boolean): number | null {
+  const step = key === 'ArrowRight' || key === 'ArrowDown' ? 1 : key === 'ArrowLeft' || key === 'ArrowUp' ? -1 : 0;
+  if (step === 0) return null;
+  let i = from;
+  for (let n = 1; n < count; n++) {
+    i = (i + step + count) % count;
+    if (!disabled(i)) return i;
+  }
+  return null;
+}
+
+export interface Choice<T extends string> {
+  value: T;
+  content: ReactNode;
+  className?: string; // CSS-module lookups are string | undefined under noUncheckedIndexedAccess
+  style?: CSSProperties;
+  /** Shown on hover; the option stays readable by screen readers (aria-disabled), is skipped and does nothing. */
+  disabledReason?: string;
+}
+
+/**
+ * Radiogroup with manual selection (period picker v2): arrow keys move focus, Space or Enter selects. Only the checked
+ * option is in the tab order (the first enabled one when none is checked).
+ */
+export function ChoiceGroup<T extends string>({
+  labelledBy,
+  value,
+  options,
+  onChange,
+  className,
+}: {
+  labelledBy: string;
+  value: T;
+  options: readonly Choice<T>[];
+  onChange: (value: T) => void;
+  className?: string;
+}) {
+  const tabbable = options.some((o) => o.value === value) ? value : options.find((o) => !o.disabledReason)?.value;
+  const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const radios = [...e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
+    const from = radios.findIndex((r) => r === document.activeElement);
+    const to = nextChoice(Math.max(from, 0), e.key, radios.length, (i) => Boolean(options[i]?.disabledReason));
+    if (to === null) return;
+    e.preventDefault();
+    radios[to]?.focus();
+  };
+  return (
+    <div role="radiogroup" aria-labelledby={labelledBy} className={className} onKeyDown={onKey}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="radio"
+          aria-checked={o.value === value}
+          aria-disabled={o.disabledReason ? true : undefined}
+          tabIndex={o.value === tabbable ? 0 : -1}
+          title={o.disabledReason}
+          className={o.className}
+          style={o.style}
+          onClick={() => !o.disabledReason && onChange(o.value)}
+        >
+          {o.content}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export interface Option<T extends string> {
   value: T;

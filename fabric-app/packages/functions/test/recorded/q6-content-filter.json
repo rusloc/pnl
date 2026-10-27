@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-recorded",
+  "object": "chat.completion",
+  "created": 1761220000,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "content_filter",
+      "message": {
+        "role": "assistant",
+        "content": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1200,
+    "completion_tokens": 40,
+    "total_tokens": 1240
+  }
+}

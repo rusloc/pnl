@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>P&amp;L views redesign</title>
+<meta name="description" content="Assessment page: KPI, Analysis and Profitability views of the ACME Unified P&L restructured on the Ledger design; one page, three views, every panel source-tagged. Draft 2026-10-26, illustrative values.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* ── Ledger tokens (docs/design/design-requirements.md §2–§4) ── */
+:root{
+  --ink900:#101B2B; --ink700:#2B3748; --slate600:#4F5C6C; --slate400:#8592A3;
+  --line300:#CDD4DC; --line200:#DEE3E9; --line100:#EDF0F3; --ground:#F2F4F7; --subtle:#F6F8FA; --surface:#FFFFFF;
+  --railtext:#C9D3E0; --railsub:#AEB9C7; --raildiv:#3A475A; --grprule:#E3E8ED; --subrule:#D5DCE3;
+  --acc:#6B48C8; --accT:#F0EBFB; --keyrule:#CFC2F0;            /* Commerce Cloud — Cloud violet */
+  --fav:#06603F; --favbar:#3BA37B; --favtint:#E4F3EC;
+  --unf:#C2410C; --unfbar:#E2804A; --unftint:#FCEDE5;
+  --amber:#8A5A00; --amberbar:#D9A441; --notice:#FBF4E4; --noticeline:#EBD9AE; --noticetext:#3D3216;
+  --font:'IBM Plex Sans','Segoe UI',system-ui,sans-serif; --cond:'IBM Plex Sans Condensed','IBM Plex Sans','Arial Narrow',sans-serif;
+}
+:root:not([data-theme="light"]){} /* the report has one light theme; dark mode is not part of the Ledger design */
+*{box-sizing:border-box}
+html,body{margin:0;background:#D9DEE5;color:var(--ink900);font-family:var(--font);font-size:14px;line-height:1.45}
+body{padding:24px 0 48px}
+.num{font-variant-numeric:tabular-nums}
+.frame{position:relative;width:1440px;margin:0 auto;background:var(--ground);display:flex;box-shadow:0 14px 36px rgba(16,27,43,.20)}
+/* rail */
+.rail{flex:none;width:64px;background:var(--ink900);color:var(--railtext);display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px}
+.rail .mark{width:36px;height:36px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+.rail .mark small{position:absolute;right:3px;bottom:1px;font-size:9px;font-weight:600}
+.rail .div{width:24px;height:1px;background:var(--raildiv);margin:0 0 8px}
+.rail .it{width:44px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.rail .it svg{width:20px;height:20px}
+.rail .it.open{background:var(--ink700);color:#fff}
+.rail .spacer{flex:1}
+/* header */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.hdr{background:var(--surface);border-bottom:1px solid var(--line200);padding:16px 24px 0}
+.hdr .row1{display:flex;align-items:center;gap:12px}
+.hdr h1{font-size:22px;font-weight:600;margin:0}
+.hdr .funnel{width:32px;height:32px;border-radius:8px;border:1px solid var(--line300);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--slate600)}
+.hdr .status{margin-left:auto;font-size:13px;color:var(--slate600)}
+.tabs{display:flex;align-items:flex-end;gap:4px;margin-top:10px}
+.tab{min-height:48px;padding:0 14px;border:0;background:none;font:inherit;font-size:15px;font-weight:500;color:var(--slate600);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:3px solid transparent}
+.tab svg{width:18px;height:18px}
+.tab[aria-selected="true"]{color:var(--ink900);font-weight:600;border-bottom-color:var(--acc)}
+.tab.dim{opacity:.55;cursor:default}
+.tab .pill{font-size:11px;font-weight:500;padding:1px 8px;border-radius:12px;background:var(--line100);color:var(--ink900)}
+.tabs .right{margin-left:auto;font-size:12px;color:var(--slate600);padding-bottom:14px;display:flex;gap:14px;align-items:center}
+/* content */
+.content{padding:14px 24px 16px;display:flex;flex-direction:column;gap:12px;position:relative}
+.view{display:none;flex-direction:column;gap:12px}
+.view.on{display:flex}
+.band{display:flex;align-items:flex-start;gap:24px;background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:12px 20px}
+.band .meta{font-size:12px;color:var(--slate600);display:flex;gap:0;flex-wrap:wrap}
+.band .meta b{color:var(--ink900);font-weight:600}
+.band .headline{font-size:15.5px;font-weight:600;line-height:1.35;margin-top:4px}
+.band .legend{margin-left:auto;flex:none;font-size:11.5px;color:var(--slate600);text-align:right;white-space:nowrap;line-height:1.6}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate600);margin:2px 0 -4px}
+.grid{display:grid;gap:12px}
+.card{position:relative;background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:16px 18px 14px;display:flex;flex-direction:column;min-width:0}
+.card.subtle{background:var(--subtle)}
+.card .ttl{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--slate600)}
+.card .ttl .def{width:14px;height:14px;border-radius:50%;border:1px solid var(--line300);font-size:9px;color:var(--slate400);display:inline-flex;align-items:center;justify-content:center;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--slate400);margin-left:auto;flex:none}
+.dot.amber{background:var(--amberbar)} .dot.red{background:var(--unf)} .dot.none{visibility:hidden}
+.val{font-weight:600;line-height:1.05;margin-top:6px}
+.hero .val{font-size:38px} .sec .val{font-size:24px;margin-top:2px} .drv .val{font-size:24px}
+.sub{font-size:12px;color:var(--slate600);margin-top:5px;line-height:1.35}
+.body{display:flex;align-items:flex-end;gap:8px;margin-top:8px}
+.vars{display:grid;grid-template-columns:auto auto auto;column-gap:12px;row-gap:2px;font-size:13px;align-items:baseline;flex:1;white-space:nowrap}
+.sec .vars,.drv .vars{font-size:12px;row-gap:0}
+.drv .body{flex-wrap:wrap;margin-top:6px} .drv .spark{margin-left:auto}
+.drv .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drv .swap,.drv .src,.sec .src,.sec .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vars .k{color:var(--slate600)} .vars .a,.vars .p{text-align:right;font-weight:600}
+.vars .py .a,.vars .py .p{color:var(--ink900);font-weight:500}
+.ahead{color:var(--fav)} .adverse{color:var(--unf)} .plan{color:var(--slate600);font-weight:500!important}
+.spark{flex:none;color:var(--ink700)}
+.sec .body{margin-top:4px}
+.src{display:block;margin-top:auto;padding-top:6px;font-size:10px;color:var(--slate400);letter-spacing:.01em;line-height:1.3}
+.src b{font-weight:500;color:var(--slate400)}
+.sec{padding:8px 14px 6px} .sec .ttl{font-size:13px} .sec .val{font-size:22px} .sec .sub{margin-top:2px} .sec .src{padding-top:3px}
+.swap{font-size:10.5px;color:var(--slate400);padding-top:6px;line-height:1.3}
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:12px 16px 10px;position:relative;min-width:0;display:flex;flex-direction:column}
+.panel h2{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:8px}
+.panel h2 .i{width:18px;height:18px;border-radius:50%;border:1px solid var(--line300);font-size:11px;color:var(--slate600);display:inline-flex;align-items:center;justify-content:center;font-weight:600;margin-left:auto}
+.panel .subt{font-size:12px;color:var(--slate600);margin:2px 0 6px;line-height:1.35}
+.panel .foot{font-size:11.5px;color:var(--slate600);border-top:1px solid var(--line100);padding-top:4px;margin-top:6px;line-height:1.35}
+.strip{display:grid;grid-template-columns:repeat(4,1fr) 1.5fr;gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:10px 14px 8px;position:relative;display:flex;flex-direction:column}
+.tile .k{font-size:12px;color:var(--slate600);display:flex;align-items:center;gap:6px}
+.tile .v{font-size:22px;font-weight:600;margin-top:2px;line-height:1.1}
+.tile .v small{font-size:13px;font-weight:600;margin-left:6px}
+.tile .s{font-size:11.5px;color:var(--slate600);margin-top:3px;line-height:1.3}
+.tile.note{background:var(--subtle)}
+.tile.note .h{font-size:13px;font-weight:600;line-height:1.35}
+/* tables */
+table{border-collapse:collapse;width:100%;font-family:var(--cond);font-size:12.5px}
+th{font-size:11px;font-weight:600;color:var(--slate600);text-align:right;padding:3px 4px;border-bottom:1px solid var(--line300);white-space:nowrap}
+th.l,td.l{text-align:left}
+td{padding:4px 4px;text-align:right;border-bottom:1px solid var(--line100);white-space:nowrap}
+tr.total td{font-weight:600;background:var(--subtle);border-top:1px solid var(--subrule)}
+tr.grp th{text-align:center;border-bottom:2px solid var(--ink900);color:var(--ink900);font-size:11.5px;padding-bottom:3px}
+th.gs,td.gs{border-left:1px solid var(--grprule)}
+.blk{font-size:11px;color:var(--slate600);font-weight:400;margin-left:6px}
+table.tight{font-size:11.5px} table.tight th,table.tight td{padding:3px 3px} table.tight .blk{font-size:10px;margin-left:4px}
+.bar{display:inline-block;height:8px;border-radius:2px;background:var(--acc);vertical-align:middle;margin-right:5px}
+.dbar{position:relative;display:inline-block;width:72px;height:8px;vertical-align:middle;background:var(--line100);border-radius:2px}
+.dbar::before{content:"";position:absolute;left:50%;top:-2px;width:1px;height:12px;background:rgba(16,27,43,.4)}
+.dbar i{position:absolute;top:0;height:8px;border-radius:2px}
+.badge{display:inline-block;font-size:10.5px;font-weight:500;padding:1px 7px;border-radius:4px;border:1px dashed var(--slate400);color:var(--slate600);font-family:var(--font)}
+.alloc{color:var(--slate400);font-style:italic}
+.sd{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--slate400);margin-right:6px;vertical-align:1px}
+.sd.amber{background:var(--amberbar)} .sd.red{background:var(--unf)} .sd.none{visibility:hidden}
+.nm{color:var(--slate400)}
+/* chart svg text */
+svg text{font-family:var(--font)}
+.fold{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--unfbar);pointer-events:none}
+.fold span{position:absolute;right:16px;top:-22px;background:var(--notice);border:1px solid var(--noticeline);color:var(--noticetext);font-size:11px;padding:2px 8px;border-radius:8px}
+.chips{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--slate600)}
+.chip{border:1px solid var(--line300);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--ink900);background:#fff}
+.chip small{color:var(--slate400);margin-left:6px}
+.notebox{background:var(--notice);border:1px solid var(--noticeline);color:var(--noticetext);font-size:12px;padding:8px 12px;border-radius:8px}
+.footer{width:1440px;margin:16px auto 0;font-size:12px;color:var(--slate600);line-height:1.6}
+.footer b{color:var(--ink900)}
+.footer code{font-family:var(--cond);background:#fff;padding:0 4px;border-radius:3px;border:1px solid var(--line200)}
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <nav class="rail" aria-label="Filters">
+    <div class="mark" title="Switch company">A<small>▾</small></div>
+    <div class="div"></div>
+    <div class="it open" title="Period"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v4M13 2.5v4" stroke-linecap="round"/></svg></div>
+    <div class="it" title="Versions"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 17h15M5 15V9.5M10 15V4.5M15 15V7.5"/></svg></div>
+    <div class="it" title="Slice"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z"/></svg></div>
+    <div class="it" title="Display"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h8.5M15.5 6H17M3 14h2.5M9.5 14H17"/><circle cx="13.5" cy="6" r="2"/><circle cx="7.5" cy="14" r="2"/></svg></div>
+    <div class="spacer"></div>
+    <div class="it" title="Expand">»</div>
+  </nav>
+  <div class="main">
+    <header class="hdr">
+      <div class="row1">
+        <h1>Profit &amp; loss</h1>
+        <div class="funnel" title="Applied filters"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z"/></svg></div>
+        <div class="status">Commerce Cloud - Management reporting - Closed through Dec 2025 - Refreshed 26 Oct 2026 09:12</div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab dim" role="tab" aria-selected="false" tabindex="-1" title="Unchanged by this redesign"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h14M3 8h14M3 12h10M3 16h7"/></svg>P&amp;L statement <span class="pill">unchanged</span></button>
+        <button class="tab" role="tab" aria-selected="true" data-view="kpi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></svg>Key figures</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="ana"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 17h15M4 14V9M8 14V5M12 14v-3M16 14V7"/></svg>Analysis</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="prof"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 3v7h7"/></svg>Profitability</button>
+        <div class="right"><span>Redesign assessment - draft 2026-10-26</span><span class="pill" style="background:var(--accT);color:var(--acc)">Commerce Cloud · FY 2025 · vs Budget, Prior year</span></div>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- ═══════════════════════ KPI VIEW ═══════════════════════ -->
+      <section class="view on" id="view-kpi" aria-label="Key figures">
+        <div class="band">
+          <div>
+            <div class="meta"><b>FY Jan – Dec 2025 (12M)</b>&nbsp;-&nbsp;USD, $m unless stated&nbsp;-&nbsp;Data as of 26 Oct 2026&nbsp;-&nbsp;Changes vs Budget and Prior year, same months</div>
+            <div class="headline" id="kpi-headline"></div>
+          </div>
+          <div class="legend">Colour only on a breach, vs Budget only<br><span class="sd"></span>on track &nbsp;<span class="sd amber"></span>watch (1–3 % · 0.3–1 pp) &nbsp;<span class="sd red"></span>off track (&gt;3 % · &gt;1 pp) &nbsp;<span class="ahead">green</span> = ahead<br><span style="color:var(--slate400)">spec KPI §6 · thresholds = parameter table</span></div>
+        </div>
+
+        <div class="eyebrow">Results — the P&amp;L cascade, left to right</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr 292px;align-items:stretch">
+          <div class="card hero" id="k-nr"></div>
+          <div class="card hero" id="k-ebitda"></div>
+          <div class="card hero" id="k-op"></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card sec" id="k-gm"></div>
+            <div class="card sec" id="k-opex"></div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Drivers &amp; health — content of these five cards swaps with the company (L-10), like today's slots 4–5 and 9–12</div>
+        <div class="grid" style="grid-template-columns:repeat(5,1fr)">
+          <div class="card drv subtle" id="k-gmv"></div>
+          <div class="card drv subtle" id="k-merch"></div>
+          <div class="card drv subtle" id="k-arr"></div>
+          <div class="card drv subtle" id="k-mix"></div>
+          <div class="card drv subtle" id="k-fy"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════ ANALYSIS VIEW ═══════════════════════ -->
+      <section class="view" id="view-ana" aria-label="Analysis">
+        <div class="band" style="padding:10px 20px">
+          <div class="meta"><b>FY Jan – Dec 2025 (12M)</b>&nbsp;-&nbsp;USD $m&nbsp;-&nbsp;Compared with <b>Budget</b> (Compare A, else Compare B, else Prior year - parity rule 1)&nbsp;-&nbsp;constant currency = FY2025 budget rates (C-12)</div>
+          <div class="legend" style="line-height:1.5">Prior forecast as comparator: no equivalent in the model (not selectable)</div>
+        </div>
+
+        <div class="strip" id="ana-strip"></div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="panel">
+            <h2>Net revenue bridge <span class="i">i</span></h2>
+            <div class="subt">Budget to Actual, USD millions - driver steps at constant currency, then a constant-currency subtotal, then FX. The axis starts at 640.</div>
+            <div id="ch-nrbridge"></div>
+            <div class="foot">Check: 658.2 − 9.0 + 5.7 − 3.4 + 4.2 = 655.7 (CC) + 11.7 = 667.4 ✓ - Reported +1.4 % reads −0.4 % at constant currency (spec DQ-6).</div>
+            <span class="src">Bridge Value · Bridge Comparison NR · _NR CC Base · Bridge FX · C-40 · new step “Constant-currency NR”</span>
+          </div>
+          <div class="panel">
+            <h2>Profit bridge: Budget Adj. EBITDA → Actual → Operating profit <span class="i">i</span></h2>
+            <div class="subt">Steps at constant currency, FX as one step; D&amp;A and adjusting items shown as actual levels with their Δ vs budget as label. The axis starts at 40.</div>
+            <div id="ch-pbridge"></div>
+            <div class="foot">Check: Σ steps = −0.3 = 82.8 − 83.1 ✓ · 82.8 − 30.1 − 4.1 = 48.6 ✓ · No SBC step: not in the data. End toggle EBITDA | Operating profit | Net profit (INV, FIN, TAX rows exist).</div>
+            <span class="src">PL Δ A rows SM RD GA OOI DA ADJ · GP by dim_line · _Bridge NR CC Change · spec Analysis §5.2 · new dim_profit_step</span>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="panel">
+            <h2>Service-line economics <span class="i">i</span></h2>
+            <div class="subt">Constant currency, USD millions. Status dot on gross-profit Δ %, not on revenue: a revenue beat that does not reach gross profit must not light up.</div>
+            <div id="tb-svc"></div>
+            <div class="foot">Stream = service line (Commerce Cloud) · category (Consumer Products) · entity (ACME Group). Pass-through = CoR Δ ÷ revenue Δ of the stream; payments 63 % at CC (56 % reported, spec DQ-7). n.m. when the signs differ.</div>
+            <span class="src">Prof Net Revenue · Prof NR Share · Prof NR Δ % · GP ÷ NR by dim_line (Profitability GM %) · Bridge Comparison Amount · new: GP Δ, GM Δ pp, pass-through ratio</span>
+          </div>
+          <div class="panel">
+            <h2>Largest variances vs Budget <span class="i">i</span></h2>
+            <div class="subt">Top 8 lines by |Δ|, USD millions, actual rates. Δ = impact on profit; negative is adverse (M-10 signed values). Δ % is n.m. when |budget| &lt; 2.0 or |Δ %| &gt; 50 %.</div>
+            <div id="tb-var"></div>
+            <span class="src">LV Base · LV Comparison · LV Δ · LV Δ % · LV Abs Δ (top 8) · dim_account.block_name · new: vs PY Δ (Compare B Amount), n.m. rule, coverage footer · C-45</span>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="panel">
+            <h2>Monthly trend — net revenue <span class="i">i</span></h2>
+            <div class="subt">Actual · Budget (phased) · Prior year, 15 months to Dec 2025; below: cumulative variance vs Budget. A timing variance dips and recovers; a structural one keeps widening.</div>
+            <div id="ch-trend"></div>
+            <span class="src">Net Revenue · Compare A Amount · PY Amount at dim_month grain (month-grain measure to re-add; the dropped KPI Trend shape) · spec Analysis §7.1</span>
+          </div>
+          <div class="panel">
+            <h2>Full-year outlook vs Budget <span class="i">i</span></h2>
+            <div class="subt">FY Budget → Δ year-to-date → Δ remaining months (latest estimate) → FY latest estimate. Attainment = FY LE ÷ FY Budget.</div>
+            <div id="ch-fy"></div>
+            <div class="foot">The selected year is closed, so the remaining-months step is zero and the outlook equals actual. For YTD Sep 2026 it reads the 9+3 forecast (C-02). The by-driver split of the remaining step and the run-rate table need data the model does not have (left off).</div>
+            <span class="src">FY Budget Amount · FY LE Amount · PL Δ LE vs Budget · PL Δ A (YTD) · M-14 · new: attainment %</span>
+          </div>
+        </div>
+
+        <div class="chips"><span>Drill-through (off the main surface, P3):</span><span class="chip">Volume / rate / mix <small>GMV × take rate · merchants × ARPU proxy</small></span><span class="chip">GM rate vs mix <small>two bars, same inputs as the bridge</small></span><span class="chip">Opex by function <small>PL Base · PL Compare A · PL Δ A · PL % NR</small></span><span class="chip">Adjusting items register <small>ADJ_1..3 rows</small></span><span style="margin-left:auto;color:var(--slate400)">Underlying Δ · Controllable Δ · Nature · Run-rate · Commentary: later (need classification tables)</span></div>
+      </section>
+
+      <!-- ═══════════════════════ PROFITABILITY VIEW ═══════════════════════ -->
+      <section class="view" id="view-prof" aria-label="Profitability">
+        <div class="band" style="padding:10px 20px">
+          <div class="meta"><b>FY Jan – Dec 2025 (12M)</b>&nbsp;-&nbsp;USD $m&nbsp;-&nbsp;<b>Constant currency</b> (FY2025 budget rates; default when comparing to Budget or Prior year)&nbsp;-&nbsp;Compared with <b>Budget</b>&nbsp;-&nbsp;Break down by <b>Region</b>&nbsp;· Channel / sales motion · Category / service line · Segment (Group: Region · Entity)</div>
+          <div class="legend" style="line-height:1.5">No allocated number in a headline column · table sort drives every chart</div>
+        </div>
+
+        <div class="strip" id="prof-strip"></div>
+
+        <div class="grid" style="grid-template-columns:1fr 360px">
+          <div class="panel">
+            <h2>Profitability by Region <span class="i">i</span></h2>
+            <div class="subt">Constant currency, USD millions; rows sorted by net revenue. Status dots on CM Δ vs Budget (pp) and contribution Δ ($), never on revenue. Opex is booked at entity × region (C-31), so Adj. EBITDA by region is measured, not allocated.</div>
+            <div id="tb-prof"></div>
+            <span class="src">Prof Net Revenue · Prof NR Share · KPI Organic Growth per slice · Gross Profit · Contribution Margin · KPI CM % · Adjusted EBITDA · Compare A/B Amount · Bridge FX per slice · new: Δ pp, contribution share, contribution Δ $ · C-46</span>
+          </div>
+          <div class="panel">
+            <h2>Contribution margin — deviation from average <span class="i">i</span></h2>
+            <div class="subt">Dot = region CM % minus company CM % (51.3 %); dot size ∝ net revenue; hollow tick = Budget CM %, grey tick = Prior year. Symmetric axis, minimum ±2 pp.</div>
+            <div id="ch-lolli"></div>
+            <span class="src">KPI CM % per slice and at the visual total · comparator / PY CM % (new) · replaces cm_bars 0–60 % · spec Profitability §5.2</span>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="panel">
+            <h2>Contribution variance vs Budget, by region <span class="i">i</span></h2>
+            <div class="subt">Revenue effect (solid) = (NR − Budget NR) × Budget CM %; margin effect (hatched) = (CM % − Budget CM %) × NR; FX separately. The axis starts at 330.</div>
+            <div id="ch-pwater"></div>
+            <div class="foot" id="pw-foot"></div>
+            <span class="src">Contribution Margin · Net Revenue · KPI CM % per slice vs Compare A · Bridge FX per slice · new dim_prof_step rows · spec Profitability §6.1</span>
+          </div>
+          <div class="panel">
+            <h2>Growth × margin by region <span class="i">i</span></h2>
+            <div class="subt">x = net revenue growth YoY at constant currency, y = CM %, bubble = net revenue; reference lines = company values (+27.5 %, 51.3 %).</div>
+            <div id="ch-bubble"></div>
+            <span class="src">KPI Organic Growth per slice (K-22) · KPI CM % per slice · Prof Net Revenue · spec Profitability §6.2 (PY trail: n/a for FY2025, no FY2023 data)</span>
+          </div>
+        </div>
+
+        <div class="panel" style="padding-bottom:26px">
+          <h2 style="font-size:15px">Drill: mix heatmap — region × service line <span class="i">i</span></h2>
+          <div class="subt" style="margin-bottom:6px">Cells: net revenue (CC, $m); colour = gross margin % of the cell. North America sells proportionally more payments (31 % GM), which explains its lower contribution margin without any efficiency gap.</div>
+          <div id="ch-heat"></div>
+          <span class="src">Net Revenue · Gross Profit at dim_region × dim_line grain (both direct, C-30) · spec Profitability §7.1 · also drill: quarterly CM % trend (buildable) · allocation view: later (needs AllocationKey)</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <b>Illustrative page.</b> Quoted from the specs / control totals (Commerce Cloud, Actual FY2025, USD m): net revenue <code>667.4</code>, Adj. EBITDA <code>82.8</code>, operating profit <code>48.6</code>, net profit <code>38.1</code>, revenue vs budget <code>+9.2 / +1.4 %</code>, constant-currency NR <code>655.7</code> (Δ <code>−2.5</code>), FX <code>+11.7</code>, active merchants <code>124,291</code> (<code>−3.0 %</code> vs budget), GMV <code>+3.4 %</code>, region CM % <code>50.9–51.9</code>, North America <code>53.6 %</code> of reported NR, gap value <code>≈ $3.6 m</code>, Continental Europe <code>+7.2 / +4.9 %</code> and UK &amp; Ireland <code>+3.8 / +5.8 %</code> reported, subscriptions <code>−4.6</code>, payments <code>+11.0</code> revenue / <code>−6.2</code> cost, payments pass-through <code>56 %</code> reported.
+  Every other number (budgets by line and region, monthly series, GM %, opex split, D&amp;A, bubbles, heatmap cells) is a placeholder chosen so that every bridge, table and tile reconciles with the quoted figures. No metric on this page lacks an existing measure or a buildable formula over existing columns; see <code>metric-inventory.md</code> for the source of each.
+  Design tokens: Ledger (<code>docs/design/design-requirements.md</code>), company colour Cloud violet; minus sign U+2212; tabular figures.
+</div>
+
+<script>
+/* ───────────────────────────── data (one place) ───────────────────────────── */
+const D = {
+  period: 'FY Jan – Dec 2025',
+  kpi: {
+    nr:   { v:667.4, bud:658.2, py:513.8, spark:[50.2,49.8,53.1,53.6,54.9,56.0,56.4,57.2,58.3,58.9,59.7,59.3], budSpark:[50.0,50.4,52.3,53.0,54.2,55.1,55.6,56.0,56.9,57.5,58.4,58.8] },
+    ebitda:{ v:82.8, bud:83.1, py:56.0, margin:12.4, rule40:39.9, spark:[5.9,5.7,6.5,6.6,6.8,7.0,7.1,7.2,7.4,7.5,7.6,7.5] },
+    op:   { v:48.6, bud:50.2, py:32.9, margin:7.3, np:38.1, spark:[3.6,3.4,4.2,4.3,4.5,3.6,3.3,3.4,3.8,4.9,5.0,4.6] },
+    gm:   { v:56.0, bud:56.3, py:56.9, sub:81.0, pay:31.0, spark:[56.6,56.5,56.3,56.2,56.1,56.0,55.9,55.8,55.7,55.6,55.7,55.6] },
+    opex: { v:39.0, bud:39.0, py:42.1, amt:260.0, budAmt:256.4, sm:15.2, rd:15.9, ga:7.9, spark:[40.1,40.3,39.4,39.2,39.0,38.8,38.9,38.7,38.6,38.4,38.3,38.5] },
+    gmv:  { v:11315.0, bud:10943.0, py:8730.0, take:2.67, takeBudBp:1, takePyBp:3, spark:[850,840,900,910,930,950,960,975,990,1005,1020,985] },
+    merch:{ v:124291, bud:128135, py:108420, perMerch:91.0, perMerchBud:6.6, spark:[110.2,111.5,113.0,114.4,115.9,117.3,118.6,119.9,121.2,122.3,123.4,124.3] },
+    arr:  { v:262.8, bud:268.1, py:215.6, spark:[220,223,227,231,235,239,243,247,251,255,259,262.8] },
+    mix:  { sub:37.5, pay:45.3, subPy:40.1, payPy:42.7, subAmt:250.3, payAmt:302.1, subG:21.4, payG:37.7, spark:[39.6,39.4,39.0,38.7,38.3,38.0,37.8,37.6,37.4,37.2,37.0,36.9] },
+    fy:   { nr:667.4, nrBud:658.2, ebitda:82.8, ebitdaBud:83.1, spark:[660,659,661,662,663,664,665,666,667,667.2,667.6,667.4] },
+  },
+  thresholds: { amtWatch:1.0, amtRed:3.0, ppWatch:0.3, ppRed:1.0 },
+};
+
+/* ───────────────────────────── helpers ───────────────────────────── */
+const M = '−';
+const f1 = n => (Math.abs(n) < 0.05 ? '0.0' : (n<0?M:'') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}));
+const fs1 = n => (Math.abs(n) < 0.05 ? '0.0' : (n<0?M:'+') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}));
+const f0 = n => (n<0?M:'') + Math.abs(Math.round(n)).toLocaleString('en-US');
+const fs0 = n => (n===0?'0':(n<0?M:'+') + Math.abs(Math.round(n)).toLocaleString('en-US'));
+const money = n => '$' + f1(n) + ' m';
+const pct = (a,b) => (a/b-1)*100;
+function status(adversePct, isPp, lowerBetter){
+  // adversePct: Δ in % (or pp) where negative = below comparator; lowerBetter inverts
+  let d = lowerBetter ? -adversePct : adversePct;
+  const T = D.thresholds, w = isPp?T.ppWatch:T.amtWatch, r = isPp?T.ppRed:T.amtRed;
+  if (Math.abs(d) <= w) return 'grey';
+  if (d > 0) return 'ahead';
+  return Math.abs(d) <= r ? 'amber' : 'red';
+}
+const cls = s => s==='ahead' ? 'ahead' : (s==='red'||s==='amber' ? 'adverse' : 'plan');
+const dotCls = s => s==='ahead' ? 'none' : (s==='grey' ? '' : s);
+function varRow(label, absTxt, pctTxt, st, py){
+  const c = py ? '' : ' ' + cls(st);
+  const isPlan = pctTxt === 'on plan';
+  return `<div class="k${py?' py':''}">${label}</div><div class="a num${isPlan?' plan':c}">${isPlan?'':absTxt}</div><div class="p num${isPlan?' plan':c}">${pctTxt}</div>`;
+}
+function sparkline(arr, w=118, h=40, bud){
+  const mn = Math.min(...arr, ...(bud||[])), mx = Math.max(...arr, ...(bud||[]));
+  const sx = i => (i/(arr.length-1))*(w-6)+3, sy = v => h-4-((v-mn)/((mx-mn)||1))*(h-10);
+  const path = a => a.map((v,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  const last = arr.length-1;
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    ${bud?`<path d="${path(bud)}" fill="none" stroke="#8592A3" stroke-width="1" stroke-dasharray="2 3"/>`:''}
+    <path d="${path(arr)}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="${sx(last).toFixed(1)}" cy="${sy(arr[last]).toFixed(1)}" r="2.6" fill="var(--acc)"/>
+    <text x="${w-2}" y="${h-0}" font-size="8" text-anchor="end" fill="#8592A3">12 months</text></svg>`;
+}
+
+/* ───────────────────────────── KPI cards ───────────────────────────── */
+function kpiCard(id, o){
+  const el = document.getElementById(id);
+  const st = o.status;
+  el.innerHTML = `
+    <div class="ttl">${o.title} <span class="def" title="${o.def}">i</span><span class="dot ${dotCls(st)}"></span></div>
+    <div class="val num">${o.value}</div>
+    ${o.sub?`<div class="sub">${o.sub}</div>`:''}
+    <div class="body"><div class="vars">${o.rows.join('')}</div>${o.spark||''}</div>
+    ${o.swap?`<div class="swap">${o.swap}</div>`:''}
+    <span class="src" title="Source: ${o.src}"><b>${o.src}</b></span>`;
+}
+(function buildKpi(){
+  const K = D.kpi;
+  // Net revenue
+  let d = K.nr.v-K.nr.bud, p = pct(K.nr.v,K.nr.bud), st = status(p,false);
+  kpiCard('k-nr',{ title:'Net revenue', def:'Gross revenue − gross-to-net deductions (spine step 3). Δ vs Budget colours the dot; vs Prior year is text only.', status:st,
+    value:money(K.nr.v), sub:`Organic +27.5 % · Reported +29.9 % vs prior year`,
+    rows:[varRow('vs Budget', fs1(d), fs1(p)+' %', st), varRow('vs Prior year', fs1(K.nr.v-K.nr.py), fs1(pct(K.nr.v,K.nr.py))+' %', st, true)],
+    spark:sparkline(K.nr.spark,96,36,K.nr.budSpark), src:'KPI Value K-01 · KPI Organic Growth · KPI Reported Growth · KPI Δ A / Δ B' });
+  // Adj. EBITDA
+  d = K.ebitda.v-K.ebitda.bud; p = pct(K.ebitda.v,K.ebitda.bud); st = status(p,false);
+  kpiCard('k-ebitda',{ title:'Adjusted EBITDA', def:'Contribution margin + operating expenses (step 9, MPM). Excludes D&A and adjusting items (restructuring, impairment, M&A). No SBC in the data.', status:st,
+    value:money(K.ebitda.v), sub:`Margin ${f1(K.ebitda.margin)} % · Rule of 40: ${f1(K.ebitda.rule40)} (organic growth + margin, no PY comparison)`,
+    rows:[varRow('vs Budget', fs1(d), fs1(p)+' %', st), varRow('vs Prior year', fs1(K.ebitda.v-K.ebitda.py), fs1(pct(K.ebitda.v,K.ebitda.py))+' %', st, true)],
+    spark:sparkline(K.ebitda.spark,96,36), src:'KPI Value K-07 · KPI Adj EBITDA Margin · KPI Rule of 40 (K-12 S)' });
+  // Operating profit
+  d = K.op.v-K.op.bud; p = pct(K.op.v,K.op.bud); st = status(p,false);
+  kpiCard('k-op',{ title:'Operating profit', def:'IFRS 18 required subtotal (step 13). Bridge: Adj. EBITDA 82.8 − D&A 30.1 − adjusting items 4.1 = 48.6.', status:st,
+    value:money(K.op.v), sub:`Margin ${f1(K.op.margin)} % · Net profit ${money(K.op.np)} (margin 5.7 %)`,
+    rows:[varRow('vs Budget', fs1(d), fs1(p)+' %', st), varRow('vs Prior year', fs1(K.op.v-K.op.py), fs1(pct(K.op.v,K.op.py))+' %', st, true)],
+    spark:sparkline(K.op.spark,96,36), src:'KPI Value K-08 · KPI Operating Margin · Net Profit · KPI Net Margin' });
+  // Gross margin %
+  let dp = K.gm.v-K.gm.bud; st = status(dp,true);
+  kpiCard('k-gm',{ title:'Gross margin %', def:'Gross profit ÷ net revenue. Ratio: variances in percentage points only.', status:st,
+    value:`${f1(K.gm.v)} %`, sub:`Subscription ${f1(K.gm.sub)} % · Payments ${f1(K.gm.pay)} %`,
+    rows:[varRow('vs Budget', '', fs1(dp)+' pp', st), varRow('vs Prior year', '', fs1(K.gm.v-K.gm.py)+' pp', st, true)],
+    spark:sparkline(K.gm.spark,76,24), src:'KPI Gross Margin % K-03 · KPI Subscription GM % · Payments GM % (same pattern)' });
+  // Opex % revenue (lower is better)
+  dp = K.opex.v-K.opex.bud; st = status(dp,true,true);
+  kpiCard('k-opex',{ title:'Opex % revenue', def:'−(S&M + R&D + G&A) ÷ net revenue; excludes other operating items, D&A and adjusting items. Lower is better: colour logic inverted.', status:st,
+    value:`${f1(K.opex.v)} %`, sub:`S&amp;M ${f1(K.opex.sm)} · R&amp;D ${f1(K.opex.rd)} · G&amp;A ${f1(K.opex.ga)} % of NR · $ ${fs1(-(K.opex.amt-K.opex.budAmt))} vs bud`,
+    rows:[varRow('vs Budget', '', Math.abs(dp)<0.05?'on plan':fs1(dp)+' pp', st), varRow('vs Prior year', '', fs1(K.opex.v-K.opex.py)+' pp', st, true)],
+    spark:sparkline(K.opex.spark,76,24), src:'new: −(SM+RD+GA) ÷ NR · spec KPI §5 1.3 · lower is better' });
+  // GMV
+  d = K.gmv.v-K.gmv.bud; p = pct(K.gmv.v,K.gmv.bud); st = status(p,false);
+  kpiCard('k-gmv',{ title:'GMV processed', def:'Σ transaction value processed in the period, translated like amounts (local currency at source).', status:st,
+    value:`$${f1(K.gmv.v)} m`, sub:`Take rate ${K.gmv.take.toFixed(2)} % (+${K.gmv.takeBudBp} bp vs bud, +${K.gmv.takePyBp} bp vs PY)`,
+    rows:[varRow('vs Budget', fs1(d), fs1(p)+' %', st), varRow('vs Prior year', fs1(K.gmv.v-K.gmv.py), fs1(pct(K.gmv.v,K.gmv.py))+' %', st, true)],
+    spark:sparkline(K.gmv.spark,84,26), swap:'Products: Units sold · Group: Consumer Products op. margin', src:'KPI GMV K-09 S · KPI Payments Take Rate K-05 S' });
+  // Merchants
+  d = K.merch.v-K.merch.bud; p = pct(K.merch.v,K.merch.bud); st = status(p,false);
+  kpiCard('k-merch',{ title:'Active merchants', def:'Merchants with an active paid plan at the last month-end of the window (K-23); never a sum over months.', status:st,
+    value:f0(K.merch.v), sub:`GMV / merchant $${f1(K.merch.perMerch)} k (+${f1(K.merch.perMerchBud)} % vs bud)`,
+    rows:[varRow('vs Budget', fs0(d), fs1(p)+' %', st), varRow('vs Prior year', fs0(K.merch.v-K.merch.py), fs1(pct(K.merch.v,K.merch.py))+' %', st, true)],
+    spark:sparkline(K.merch.spark,84,26), swap:'Products: NR per unit · Group: Commerce Cloud op. margin', src:'KPI Active Merchants K-10 S · new: KPI GMV ÷ KPI Active Merchants' });
+  // ARR
+  d = K.arr.v-K.arr.bud; p = pct(K.arr.v,K.arr.bud); st = status(p,false);
+  kpiCard('k-arr',{ title:'ARR (run-rate, period end)', def:'Platform-subscriptions net revenue of the last month in the window × 12 (K-23). A run-rate proxy, not contract ARR.', status:st,
+    value:money(K.arr.v), sub:`Net new ARR vs prior year end ${fs1(K.arr.v-K.arr.py)}`,
+    rows:[varRow('vs Budget', fs1(d), fs1(p)+' %', st), varRow('vs Prior year', fs1(K.arr.v-K.arr.py), fs1(pct(K.arr.v,K.arr.py))+' %', st, true)],
+    spark:sparkline(K.arr.spark,84,26), swap:'Products: Gross-to-net % · Group: Services share of NR', src:'KPI ARR K-04 S · new: KPI ARR − KPI ARR as Compare B' });
+  // Revenue mix (neutral)
+  kpiCard('k-mix',{ title:'Revenue mix', def:'Platform subscriptions NR ÷ NR and Payments NR ÷ NR; remainder = apps, partners & ads and professional services. Neutral KPI: no colour.', status:'grey',
+    value:`${f1(K.mix.sub)} % / ${f1(K.mix.pay)} %`, sub:`Subscriptions / Payments · Sub +${f1(K.mix.subG)} % · Pay +${f1(K.mix.payG)} % YoY`,
+    rows:[varRow('vs Prior year', 'Sub '+fs1(K.mix.sub-K.mix.subPy)+' pp', 'Pay '+fs1(K.mix.pay-K.mix.payPy)+' pp', 'grey', true)],
+    spark:sparkline(K.mix.spark,84,26), swap:'Products: A&P % NR · Group: Intercompany eliminated', src:'Prof NR Share by dim_line (SUB, PAY) · gap analysis P1' });
+  // FY outlook
+  const att = K.fy.nr/K.fy.nrBud*100, attE = K.fy.ebitda/K.fy.ebitdaBud*100;
+  d = K.fy.nr-K.fy.nrBud; p = pct(K.fy.nr,K.fy.nrBud); st = status(p,false);
+  kpiCard('k-fy',{ title:'FY outlook vs Budget', def:'Latest estimate for the whole fiscal year = actual closed months + latest forecast for open months (C-02). Attainment = FY LE ÷ FY Budget.', status:st,
+    value:money(K.fy.nr), sub:`Attainment ${f1(att)} % · EBITDA FY ${money(K.fy.ebitda)} (${f1(attE)} %)`,
+    rows:[varRow('Revenue vs FY Bud', fs1(d), fs1(p)+' %', st), varRow('EBITDA vs FY Bud', fs1(K.fy.ebitda-K.fy.ebitdaBud), fs1(pct(K.fy.ebitda,K.fy.ebitdaBud))+' %', status(pct(K.fy.ebitda,K.fy.ebitdaBud),false))],
+    spark:sparkline(K.fy.spark,84,26), swap:'Same card for every company · closed year → outlook = actual', src:'FY LE Amount · FY Budget Amount · PL Δ LE vs Budget M-14' });
+  // headline (spec KPI §3: rank tiles by |Δ$ vs budget|, name top positives and negatives)
+  document.getElementById('kpi-headline').textContent =
+    `Net revenue +$9.2 m (+1.4 %) vs budget on a GMV beat (+3.4 %) · Adj. EBITDA on plan · Operating profit ${M}$1.6 m (${M}3.2 %) on acquired-intangible amortisation · Active merchants ${M}3.0 % and ARR ${M}2.0 % vs budget`;
+})();
+
+/* ───────────────────────────── chart primitives ───────────────────────────── */
+function waterfall(opts){
+  // opts: {steps:[{l, v, type:'total'|'sub'|'step'|'level', note, hatch}], y0, y1, w, h, startAbs}
+  const {steps, y0, y1, w, h} = opts; const padL=40, padR=6, padT=26, padB=40;
+  const iw = w-padL-padR, ih = h-padT-padB, bw = Math.min(64, iw/steps.length*0.66), gap=(iw/steps.length);
+  const sy = v => padT + ih - ((v-y0)/(y1-y0))*ih;
+  let run = 0, out = '';
+  // axis
+  const ticks = 5; for(let i=0;i<=ticks;i++){ const v=y0+(y1-y0)*i/ticks; out+=`<line x1="${padL}" x2="${w-padR}" y1="${sy(v)}" y2="${sy(v)}" stroke="#EDF0F3"/><text x="${padL-6}" y="${sy(v)+3}" font-size="10" text-anchor="end" fill="#8592A3">${f0(v)}</text>`; }
+  steps.forEach((s,i)=>{
+    const x = padL + gap*i + (gap-bw)/2;
+    let top, bot, fill, lbl, lblCol='#101B2B';
+    if (s.type==='total' || s.type==='sub'){ run = s.v; top = sy(run); bot = sy(y0); fill = s.type==='total' ? 'var(--acc)' : '#2B3748'; lbl = f1(run); }
+    else { const from = run; run += s.v; top = sy(Math.max(from,run)); bot = sy(Math.min(from,run)); fill = s.v>=0 ? '#3BA37B' : '#E2804A'; lbl = fs1(s.v); lblCol = s.v>=0?'#06603F':'#C2410C'; if (s.type==='level'){ fill='#8592A3'; lblCol='#101B2B'; lbl=f1(s.v);} }
+    const hh = Math.max(2, bot-top);
+    const pat = s.hatch ? `url(#hatch${s.hatch})` : fill;
+    out += `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${bw}" height="${hh.toFixed(1)}" rx="2" fill="${pat}"${s.hatch?` stroke="${fill}" stroke-width="1"`:''}/>`;
+    if (i < steps.length-1) out += `<line x1="${(x+bw).toFixed(1)}" x2="${(x+gap).toFixed(1)}" y1="${sy(run)}" y2="${sy(run)}" stroke="#CDD4DC" stroke-dasharray="2 2"/>`;
+    out += `<text x="${(x+bw/2).toFixed(1)}" y="${(top-6).toFixed(1)}" font-size="11.5" font-weight="600" text-anchor="middle" fill="${lblCol}">${lbl}</text>`;
+    if (s.note) out += `<text x="${(x+bw/2).toFixed(1)}" y="${(s.type==='level' ? bot+12 : top-18).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="#4F5C6C">${s.note}</text>`;
+    const lines = s.l.split('|');
+    lines.forEach((t,k)=> out += `<text x="${(x+bw/2).toFixed(1)}" y="${h-padB+13+k*11}" font-size="${steps.length>10?9.5:10.5}" text-anchor="middle" fill="#2B3748">${t}</text>`);
+  });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img"><defs>
+    <pattern id="hatchfx" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><rect width="2.5" height="6" fill="#8592A3"/></pattern>
+    <pattern id="hatchg" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><rect width="2.5" height="6" fill="#3BA37B"/></pattern>
+    <pattern id="hatcho" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><rect width="2.5" height="6" fill="#E2804A"/></pattern>
+    </defs>${out}</svg>`;
+}
+
+/* ───────────────────────────── ANALYSIS ───────────────────────────── */
+(function buildAnalysis(){
+  // headline strip
+  const tiles = [
+    { k:'Net revenue — Reported Δ', v:'+9.2', p:'+1.4 %', s:'Actual − Budget, actual rates', st:'grey', src:'PL Δ A row NR' },
+    { k:'Net revenue — Constant-currency Δ', v:M+'2.5', p:M+'0.4 %', s:'Actual at FY2025 budget rates − Budget', st:'grey', src:'_Bridge NR CC Change' },
+    { k:'Adj. EBITDA — Reported Δ', v:M+'0.3', p:M+'0.4 %', s:'on track', st:'grey', src:'PL Δ A row EBITDA' },
+    { k:'Adj. EBITDA — Constant-currency Δ', v:M+'4.9', p:M+'5.9 %', s:'FX adds +4.6 to EBITDA', st:'red', src:'CC branch of _Amt Raw on EBITDA (second FX basis in one visual)' },
+  ];
+  document.getElementById('ana-strip').innerHTML = tiles.map(t=>`<div class="tile"><div class="k">${t.k}<span class="dot ${dotCls(t.st)}" style="width:8px;height:8px"></span></div><div class="v num ${t.st==='red'?'adverse':''}">${t.v}<small>${t.p}</small></div><div class="s">${t.s}</div><span class="src">${t.src}</span></div>`).join('')
+    + `<div class="tile note"><div class="k">Generated headline (same rule as Key figures; FP&A commentary needs a text table → later)</div><div class="h">Reported +1.4 % becomes ${M}0.4 % at constant currency: FX adds $11.7 m to revenue and $4.6 m to EBITDA. Subscriptions ${M}$9.0 m CC on merchants ${M}3.0 %; payments +$5.7 m, 63 % passed through to processing cost.</div><span class="src">text measure over the Δ measures · spec Analysis §4.3 auto-draft</span><div style="margin-top:8px;font-size:11px;color:var(--slate400)">Underlying Δ and Controllable Δ: later — need PassThroughMap / NonControllable tables (spec §4.2, §11)</div></div>`;
+
+  // NR bridge
+  document.getElementById('ch-nrbridge').innerHTML = waterfall({ w:630, h:232, y0:640, y1:672, steps:[
+    { l:'Budget NR', v:658.2, type:'total' },
+    { l:'Platform|subscriptions', v:-9.0, type:'step', note:M+'3.5 %' },
+    { l:'Payments', v:5.7, type:'step', note:'+2.0 %' },
+    { l:'Apps, partners|& ads', v:-3.4, type:'step', note:M+'4.8 %' },
+    { l:'Professional|services', v:4.2, type:'step', note:'+10.0 %' },
+    { l:'Constant-|currency NR', v:655.7, type:'sub' },
+    { l:'FX translation', v:11.7, type:'step', hatch:'g', note:'non-controllable' },
+    { l:'Actual NR', v:667.4, type:'total' },
+  ]});
+
+  // Profit bridge
+  document.getElementById('ch-pbridge').innerHTML = waterfall({ w:630, h:232, y0:40, y1:90, steps:[
+    { l:'Budget|EBITDA', v:83.1, type:'total' },
+    { l:'Rev.|volume', v:-1.4, type:'step' },
+    { l:'GM|rate', v:2.2, type:'step' },
+    { l:'GM|mix', v:-4.2, type:'step' },
+    { l:'VSC', v:0.4, type:'step' },
+    { l:'S&M', v:-0.5, type:'step' },
+    { l:'R&D', v:-1.5, type:'step' },
+    { l:'G&A', v:-0.2, type:'step' },
+    { l:'Other|op.', v:0.3, type:'step' },
+    { l:'FX', v:4.6, type:'step', hatch:'g' },
+    { l:'Actual|EBITDA', v:82.8, type:'sub' },
+    { l:'D&A', v:-30.1, type:'level', note:'vs bud '+M+'1.0' },
+    { l:'Adj.|items', v:-4.1, type:'level', note:'vs bud '+M+'0.3' },
+    { l:'Op.|profit', v:48.6, type:'total' },
+  ]});
+
+  // service-line table (CC)
+  const svc = [
+    { n:'Platform subscriptions', nr:245.9, bud:254.9, cor:46.6, gpBud:207.6, gmBud:81.4, share:37.5, corBud:47.3 },
+    { n:'Payments', nr:296.8, bud:291.1, cor:205.8, gpBud:88.9, gmBud:30.5, share:45.3, corBud:202.2 },
+    { n:'Apps, partners & ads', nr:66.8, bud:70.2, cor:19.9, gpBud:48.9, gmBud:69.7, share:10.2, corBud:21.3 },
+    { n:'Professional services', nr:46.2, bud:42.0, cor:16.2, gpBud:25.2, gmBud:60.0, share:7.0, corBud:16.8 },
+  ];
+  let rows = '', T = {nr:0,bud:0,cor:0,gpBud:0,corBud:0};
+  svc.forEach(s=>{
+    const gp = s.nr-s.cor, gm = gp/s.nr*100, gpD = gp-s.gpBud, gpP = gpD/s.gpBud*100, revD = s.nr-s.bud, revP = revD/s.bud*100, gmD = gm-s.gmBud;
+    const corD = s.cor-s.corBud; const pt = (revD*corD>0) ? f0(corD/revD*100)+' %' : '<span class="nm">n.m.</span>';
+    const st = status(gpP,false);
+    Object.keys(T).forEach(k=>T[k]+=s[k]);
+    rows += `<tr><td class="l"><span class="sd ${dotCls(st)}"></span>${s.n}</td><td class="num">${f1(s.nr)}</td><td class="num ${cls(status(revP,false))}">${fs1(revD)}</td><td class="num ${cls(status(revP,false))}">${fs1(revP)} %</td><td class="num gs">${f1(-s.cor)}</td><td class="num">${f1(gp)}</td><td class="num ${cls(st)}">${fs1(gpD)}</td><td class="num ${cls(st)}">${fs1(gpP)} %</td><td class="num gs">${f1(gm)} %</td><td class="num">${fs1(gmD)} pp</td><td class="num gs">${f1(s.share)} %</td><td class="num">${pt}</td></tr>`;
+  });
+  const gpT = T.nr-T.cor, gmT = gpT/T.nr*100, gmBudT = T.gpBud/T.bud*100;
+  rows += `<tr class="total"><td class="l">Total</td><td class="num">${f1(T.nr)}</td><td class="num">${fs1(T.nr-T.bud)}</td><td class="num">${fs1((T.nr/T.bud-1)*100)} %</td><td class="num gs">${f1(-T.cor)}</td><td class="num">${f1(gpT)}</td><td class="num">${fs1(gpT-T.gpBud)}</td><td class="num">${fs1((gpT/T.gpBud-1)*100)} %</td><td class="num gs">${f1(gmT)} %</td><td class="num">${fs1(gmT-gmBudT)} pp</td><td class="num gs">100.0 %</td><td class="num">${((T.nr-T.bud)*(T.cor-T.corBud)>0)?f0((T.cor-T.corBud)/(T.nr-T.bud)*100)+' %':'<span class="nm">n.m.</span>'}</td></tr>`;
+  document.getElementById('tb-svc').innerHTML = `<table style="font-size:12px"><thead>
+    <tr class="grp"><th></th><th colspan="3">Revenue (CC)</th><th colspan="4" class="gs">Gross profit</th><th colspan="2" class="gs">GM %</th><th colspan="2" class="gs">Mix</th></tr>
+    <tr><th class="l">Stream</th><th>NR</th><th>Δ Bud</th><th>Δ %</th><th class="gs">CoR</th><th>GP</th><th>Δ Bud</th><th>Δ %</th><th class="gs">GM %</th><th>Δ pp</th><th class="gs">Share</th><th>Pass-thr.</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+  // largest variances
+  const lv = [
+    { n:'Payments & transaction fees', b:'Gross revenue', bud:291.1, act:302.1, py:82.7 },
+    { n:'Payment processing & interchange', b:'Cost of revenue', bud:-202.2, act:-208.4, py:-47.9 },
+    { n:'Professional services', b:'Gross revenue', bud:42.0, act:47.0, py:6.3 },
+    { n:'Subscription platform fees', b:'Gross revenue', bud:254.9, act:250.3, py:44.1 },
+    { n:'Apps, partner revenue share & ads', b:'Gross revenue', bud:70.2, act:68.0, py:12.4 },
+    { n:'Engineering & product management', b:'Research & development', bud:-62.4, act:-64.5, py:-9.8 },
+    { n:'Performance marketing & paid acquisition', b:'Sales & marketing', bud:-48.9, act:-50.4, py:-7.1 },
+    { n:'Free-trial & onboarding credits', b:'Gross-to-net deductions', bud:-2.4, act:-3.7, py:-0.9 },
+  ];
+  let vr = '', shown = 0, absShown = 0;
+  lv.forEach(r=>{
+    const d = r.act-r.bud, p = d/Math.abs(r.bud)*100; shown += d; absShown += Math.abs(d);
+    const nm = Math.abs(r.bud) < 2.0 || Math.abs(p) > 50;
+    const wpx = Math.min(44, Math.abs(d)/11*44);
+    const bar = d>=0 ? `<i style="left:50%;width:${wpx}px;background:var(--favbar)"></i>` : `<i style="right:50%;width:${wpx}px;background:var(--unfbar)"></i>`;
+    vr += `<tr><td class="l">${r.n}<span class="blk">${r.b}</span></td><td class="num">${f1(r.bud)}</td><td class="num">${f1(r.act)}</td><td style="text-align:center"><span class="dbar">${bar}</span></td><td class="num ${d>=0?'ahead':'adverse'}" style="font-weight:600">${fs1(d)}</td><td class="num ${nm?'nm':(d>=0?'ahead':'adverse')}">${nm?'n.m.':fs1(p)+' %'}</td><td class="num">${fs1(r.py)}</td></tr>`;
+  });
+  const totalPL = -1.6, other = totalPL - shown, absAll = 38.6;
+  vr += `<tr class="total"><td class="l">Shown lines <span class="blk">coverage Σ|Δ shown| ÷ Σ|Δ all| = ${f0(absShown/absAll*100)} %</span></td><td></td><td></td><td></td><td class="num">${fs1(shown)}</td><td></td><td></td></tr>
+         <tr><td class="l" style="color:var(--slate600)">All other lines</td><td></td><td></td><td></td><td class="num">${fs1(other)}</td><td></td><td></td></tr>
+         <tr class="total"><td class="l">Total P&amp;L Δ (operating profit)</td><td class="num">50.2</td><td class="num">48.6</td><td></td><td class="num adverse">${fs1(totalPL)}</td><td class="num adverse">${M}3.2 %</td><td class="num">+15.7</td></tr>`;
+  document.getElementById('tb-var').innerHTML = `<table><thead><tr><th class="l">Line · block</th><th>Budget</th><th>Actual</th><th style="text-align:center">Unfav. · Fav.</th><th>Δ</th><th>Δ %</th><th>vs PY Δ</th></tr></thead><tbody>${vr}</tbody></table>
+    <div class="foot">Nature · Run-rate FY · Owner · Comment columns: later (need a VarianceNature table). Sort: |Δ| descending (default) or P&amp;L order.</div>`;
+
+  // trend
+  const act = [45.1,46.0,46.4, 50.2,49.8,53.1,53.6,54.9,56.0,56.4,57.2,58.3,58.9,59.7,59.3];
+  const bud = [44.6,45.4,45.9, 50.0,50.4,52.3,53.0,54.2,55.1,55.6,56.0,56.9,57.5,58.4,58.8];
+  const py  = [34.0,34.8,35.2, 37.4,38.4,41.0,41.6,42.3,43.2,43.4,44.1,44.9,45.1,46.0,46.4];
+  const labels = ['Oct','Nov','Dec','Jan 25','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  (function(){
+    const w=630,h=160,pl=36,pr=10,pt=10,pb=22, iw=w-pl-pr, ih=h-pt-pb, mn=30, mx=62;
+    const sx=i=>pl+i/(act.length-1)*iw, sy=v=>pt+ih-(v-mn)/(mx-mn)*ih;
+    const path=a=>a.map((v,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+    let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+    [30,40,50,60].forEach(v=>s+=`<line x1="${pl}" x2="${w-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="#EDF0F3"/><text x="${pl-6}" y="${sy(v)+3}" font-size="10" text-anchor="end" fill="#8592A3">${v}</text>`);
+    s+=`<rect x="${sx(3)-8}" y="${pt}" width="${sx(14)-sx(3)+16}" height="${ih}" fill="#F0EBFB" opacity=".45"/>`;
+    s+=`<path d="${path(py)}" fill="none" stroke="#8592A3" stroke-width="1.4"/>`;
+    s+=`<path d="${path(bud)}" fill="none" stroke="#2B3748" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+    s+=`<path d="${path(act)}" fill="none" stroke="var(--acc)" stroke-width="2"/>`;
+    // marker on months beyond red threshold (|variance| > 3 %): Feb (−1.2%) no; none here → show legend note
+    labels.forEach((l,i)=>{ if(i%2===0||i===3) s+=`<text x="${sx(i)}" y="${h-6}" font-size="9.5" text-anchor="middle" fill="#4F5C6C">${l}</text>`; });
+    s+=`<text x="${pl+8}" y="${pt+10}" font-size="10" text-anchor="start" fill="#4F5C6C"><tspan fill="var(--acc)" font-weight="600">Actual</tspan>  <tspan fill="#2B3748">Budget - - -</tspan>  <tspan fill="#8592A3">Prior year</tspan></text>`;
+    s+=`</svg>`;
+    // cumulative variance step area
+    const cum=[0.2,-0.4,0.4,1.0,1.7,2.6,3.4,4.6,6.0,7.4,8.7,9.2];
+    const w2=630,h2=58,ih2=40,mn2=-1,mx2=10, sy2=v=>8+ih2-(v-mn2)/(mx2-mn2)*ih2, sx2=i=>sx(i+3);
+    let a=`M${sx2(0)},${sy2(0)}`; cum.forEach((v,i)=>{ a+=` L${sx2(i)},${sy2(v)}`; if(i<cum.length-1) a+=` L${sx2(i+1)},${sy2(v)}`; }); a+=` L${sx2(11)},${sy2(0)} Z`;
+    s+=`<svg width="${w2}" height="${h2}" viewBox="0 0 ${w2} ${h2}" role="img"><line x1="${pl}" x2="${w-pr}" y1="${sy2(0)}" y2="${sy2(0)}" stroke="#CDD4DC"/><path d="${a}" fill="#E4F3EC" stroke="#3BA37B" stroke-width="1.4"/><text x="${pl-6}" y="${sy2(0)+3}" font-size="10" text-anchor="end" fill="#8592A3">0</text><text x="${sx2(11)+4}" y="${sy2(9.2)+4}" font-size="11" font-weight="600" fill="#06603F">+9.2 cumulative vs Budget</text><text x="${pl}" y="${h2-2}" font-size="9.5" fill="#4F5C6C">Cumulative YTD variance, FY2025 — widening since Mar: structural (FX), not timing. No month beyond the red threshold (|Δ| &gt; 3 %).</text></svg>`;
+    document.getElementById('ch-trend').innerHTML = s;
+  })();
+
+  // FY outlook bridge
+  document.getElementById('ch-fy').innerHTML = waterfall({ w:630, h:190, y0:640, y1:672, steps:[
+    { l:'FY Budget', v:658.2, type:'total' },
+    { l:'Δ year-to-date|(Jan – Dec, closed)', v:9.2, type:'step' },
+    { l:'Δ remaining months|(latest estimate)', v:0.0, type:'step', note:'none open' },
+    { l:'FY latest estimate|= actual', v:667.4, type:'total', note:'attainment 101.4 %' },
+  ]}) + `<div style="font-size:12px;color:var(--slate600);margin-top:-6px">Adj. EBITDA: FY Budget 83.1 → ${M}0.3 → FY LE 82.8, attainment 99.6 %. Toggle Net revenue | Adj. EBITDA.</div>`;
+})();
+
+/* ───────────────────────────── PROFITABILITY ───────────────────────────── */
+(function buildProf(){
+  const R = [
+    { n:'North America', cur:'USD', nr:357.7, bud:359.2, rep:357.7, g:27.8, gm:55.4, gmBud:56.0, gmPy:56.6, cm:50.9, cmBud:51.4, cmPy:51.8, ebitda:41.0 },
+    { n:'Continental Europe', cur:'EUR', nr:147.2, bud:146.9, rep:154.1, g:26.5, gm:57.0, gmBud:56.8, gmPy:57.5, cm:51.9, cmBud:51.6, cmPy:52.1, ebitda:19.0 },
+    { n:'Asia-Pacific', cur:'AUD', nr:85.1, bud:86.6, rep:86.3, g:31.0, gm:56.1, gmBud:56.5, gmPy:57.0, cm:51.1, cmBud:51.6, cmPy:51.7, ebitda:10.1 },
+    { n:'UK & Ireland', cur:'GBP', nr:65.7, bud:65.5, rep:69.3, g:24.0, gm:56.8, gmBud:56.7, gmPy:57.1, cm:51.9, cmBud:51.8, cmPy:51.8, ebitda:8.1 },
+  ];
+  const totNR = R.reduce((a,r)=>a+r.nr,0), totBud = R.reduce((a,r)=>a+r.bud,0);
+  R.forEach(r=>{ r.gp=r.nr*r.gm/100; r.con=r.nr*r.cm/100; r.conBud=r.bud*r.cmBud/100; r.fx=r.rep-r.nr; r.revEff=(r.nr-r.bud)*r.cmBud/100; r.marEff=(r.cm-r.cmBud)/100*r.nr; });
+  const totCon = R.reduce((a,r)=>a+r.con,0), totConBud = R.reduce((a,r)=>a+r.conBud,0), totGP = R.reduce((a,r)=>a+r.gp,0), totE = R.reduce((a,r)=>a+r.ebitda,0);
+  const cmTot = totCon/totNR*100, cmBudTot = totConBud/totBud*100;
+  const maxCm = Math.max(...R.map(r=>r.cm)), minCm = Math.min(...R.map(r=>r.cm));
+  const big = R[0]; const gap$ = (maxCm-big.cm)/100*big.nr;
+  const driver = R.slice().sort((a,b)=>Math.abs(b.con-b.conBud)-Math.abs(a.con-a.conBud))[0];
+  const nonUsdRep = R.filter(r=>r.cur!=='USD').reduce((a,r)=>a+(r.rep-r.bud),0), nonUsdCC = R.filter(r=>r.cur!=='USD').reduce((a,r)=>a+(r.nr-r.bud),0);
+
+  // headline strip
+  const disp = maxCm-minCm, dispSt = disp>4?'red':disp>2?'amber':'grey';
+  document.getElementById('prof-strip').innerHTML = [
+    `<div class="tile"><div class="k">Concentration</div><div class="v num">${f1(big.nr/totNR*100)} %<small>of NR in ${big.n}</small></div><div class="s">${f1(big.con/totCon*100)} % of contribution (below its revenue share → slightly diluting) · 53.6 % of reported NR</div><span class="src">Prof NR Share · contribution share (new)</span></div>`,
+    `<div class="tile"><div class="k">Margin dispersion<span class="dot ${dotCls(dispSt)}" style="width:8px;height:8px"></span></div><div class="v num">${f1(disp)} pp<small>max − min CM %</small></div><div class="s">≈ $${f1(gap$)} m if ${big.n} reached the best region's CM % · amber &gt; 2 pp, red &gt; 4 pp</div><span class="src">KPI CM % per slice · gap value (new)</span></div>`,
+    `<div class="tile"><div class="k">Profit Δ driver<span class="dot amber" style="width:8px;height:8px"></span></div><div class="v num adverse" style="font-size:20px">${driver.n}<small>${fs1(driver.con-driver.conBud)} contribution</small></div><div class="s">vs Budget (CC): revenue effect ${fs1(driver.revEff)} · margin effect ${fs1(driver.marEff)}</div><span class="src">Contribution Margin vs Compare A per slice · effects (new)</span></div>`,
+    `<div class="tile"><div class="k">FX note</div><div class="v num">+${f1(nonUsdRep)}<small>reported Δ, non-USD regions</small></div><div class="s">${fs1(nonUsdCC)} at constant currency — the green regional “beats” of the old page were FX (spec F-1)</div><span class="src">Bridge FX per slice · _NR CC Base per slice</span></div>`,
+    `<div class="tile note"><div class="k">Reading (generated)</div><div class="h">Profit is made in ${big.n} (${f1(big.nr/totNR*100)} % of NR, ${f1(big.con/totCon*100)} % of contribution) at the lowest margin of the four regions; its ${fs1(big.cm-big.cmBud)} pp CM miss cost $${f1(-big.marEff)} m, the only material profit variance. Europe and the UK are on plan once FX is stripped out.</div><span class="src">text measure over the tiles · spec Profitability §4.2</span></div>`,
+  ].join('');
+
+  // table
+  let tr = '';
+  R.forEach(r=>{
+    const revD = r.nr-r.bud, revP = revD/r.bud*100, cmD = r.cm-r.cmBud, conD = r.con-r.conBud;
+    const stCm = status(cmD,true), stCon = status(conD/r.conBud*100,false);
+    tr += `<tr>
+      <td class="l">${r.n}<span class="blk">${r.cur}</span></td>
+      <td class="num">${f1(r.nr)}</td>
+      <td class="l"><span class="bar" style="width:${(r.nr/totNR*44).toFixed(0)}px"></span><span class="num">${f1(r.nr/totNR*100)} %</span></td>
+      <td class="num">+${f1(r.g)} %</td>
+      <td class="num ${cls(status(revP,false))}" title="reported ${fs1(r.rep-r.bud)} incl. FX ${fs1(r.fx)}">${fs1(revD)}</td>
+      <td class="num ${cls(status(revP,false))}">${fs1(revP)} %</td>
+      <td class="num gs">${f1(r.gp)}</td><td class="num">${f1(r.gm)} %</td><td class="num">${fs1(r.gm-r.gmBud)} pp</td><td class="num">${fs1(r.gm-r.gmPy)} pp</td>
+      <td class="num gs" style="font-weight:600">${f1(r.con)}</td><td class="num" style="font-weight:600">${f1(r.cm)} %</td>
+      <td class="num ${cls(stCm)}"><span class="sd ${dotCls(stCm)}"></span>${fs1(cmD)} pp</td><td class="num">${fs1(r.cm-r.cmPy)} pp</td>
+      <td class="num">${f1(r.con/totCon*100)} %</td>
+      <td class="num ${cls(stCon)}"><span class="sd ${dotCls(stCon)}"></span>${fs1(conD)}</td>
+      <td class="num gs">${f1(r.ebitda)}</td><td class="num">${f1(r.ebitda/r.nr*100)} %</td>
+    </tr>`;
+  });
+  tr += `<tr class="total"><td class="l">Total — reconciles to the statement</td><td class="num">${f1(totNR)}</td><td class="l num">100.0 %</td><td class="num">+27.5 %</td><td class="num">${fs1(totNR-totBud)}</td><td class="num">${fs1((totNR/totBud-1)*100)} %</td><td class="num gs">${f1(totGP)}</td><td class="num">${f1(totGP/totNR*100)} %</td><td class="num">${M}0.3 pp</td><td class="num">${M}0.9 pp</td><td class="num gs">${f1(totCon)}</td><td class="num">${f1(cmTot)} %</td><td class="num">${fs1(cmTot-cmBudTot)} pp</td><td class="num">${M}0.6 pp</td><td class="num">100.0 %</td><td class="num">${fs1(totCon-totConBud)}</td><td class="num gs">${f1(totE)}</td><td class="num">${f1(totE/totNR*100)} %</td></tr>`;
+  document.getElementById('tb-prof').innerHTML = `<table class="tight"><thead>
+    <tr class="grp"><th></th><th colspan="5">A · Scale</th><th colspan="4" class="gs">B · Gross</th><th colspan="6" class="gs">C · Contribution — headline profit level</th><th colspan="2" class="gs">D · Booked by region</th></tr>
+    <tr><th class="l">Region</th><th>NR</th><th class="l">Share</th><th>YoY (CC)</th><th>Δ Bud</th><th>Δ %</th><th class="gs">GP</th><th>GM %</th><th>Δ Bud</th><th>Δ PY</th><th class="gs">Contrib.</th><th>CM %</th><th>Δ Bud</th><th>Δ PY</th><th>Share</th><th>Δ Bud $</th><th class="gs">EBITDA</th><th>%</th></tr></thead><tbody>${tr}</tbody></table>
+    <div class="foot"><span class="badge" title="Collapsed. Only for Channel / Line / Segment breakdowns, where opex is allocated by NR share (C-31). Never in a headline column.">▸ E · allocated — indicative</span> empty in the Region view: nothing is allocated by region. For Channel / Line / Segment it expands to Adj. EBITDA and Operating profit allocated by NR share, grey and badged; a Corporate / unallocated row and allocation keys need an AllocationKey table → later. Group F (Region drivers: active merchants, GMV per merchant, FX portion) is buildable from fact_operational.</div>`;
+
+  // lollipop
+  (function(){
+    const w=326,h=206,pl=140,pr=18,pt=12, rowH=40, maxDev=2.0; const iw=w-pl-pr;
+    const sx=v=>pl+(v+maxDev)/(2*maxDev)*iw;
+    let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+    [-2,-1,0,1,2].forEach(v=>{ s+=`<line x1="${sx(v)}" x2="${sx(v)}" y1="${pt}" y2="${pt+rowH*4}" stroke="${v===0?'#101B2B':'#EDF0F3'}" stroke-width="${v===0?1.2:1}"/><text x="${sx(v)}" y="${pt+rowH*4+13}" font-size="10" text-anchor="middle" fill="#8592A3">${v>0?'+':''}${v} pp</text>`; });
+    R.forEach((r,i)=>{
+      const y=pt+rowH*i+rowH/2, dev=r.cm-cmTot, rad=6+Math.sqrt(r.nr/totNR)*9;
+      s+=`<text x="${pl-10}" y="${y-3}" font-size="12" font-weight="500" text-anchor="end" fill="#101B2B">${r.n}</text><text x="${pl-10}" y="${y+10}" font-size="10" text-anchor="end" fill="#4F5C6C">${f1(r.cm)} % · ${fs1(dev)} / ${fs1(r.cm-r.cmBud)}</text>`;
+      s+=`<line x1="${sx(0)}" x2="${sx(dev)}" y1="${y}" y2="${y}" stroke="#CDD4DC" stroke-width="2"/>`;
+      s+=`<line x1="${sx(r.cmBud-cmTot)}" x2="${sx(r.cmBud-cmTot)}" y1="${y-9}" y2="${y+9}" stroke="#101B2B" stroke-width="1.5"/><rect x="${sx(r.cmBud-cmTot)-3}" y="${y-9}" width="6" height="18" fill="none" stroke="#101B2B" stroke-width="1"/>`;
+      s+=`<line x1="${sx(r.cmPy-cmTot)}" x2="${sx(r.cmPy-cmTot)}" y1="${y-7}" y2="${y+7}" stroke="#8592A3" stroke-width="2"/>`;
+      s+=`<circle cx="${sx(dev)}" cy="${y}" r="${rad.toFixed(1)}" fill="var(--acc)" opacity=".9"/>`;
+    });
+    s+=`<text x="${w-pr}" y="${h-2}" font-size="9.5" text-anchor="end" fill="#4F5C6C">label: CM % · pp vs avg (${f1(cmTot)} %) / vs Budget · ▯ Budget · | PY · size ∝ NR</text></svg>`;
+    document.getElementById('ch-lolli').innerHTML=s;
+  })();
+
+  // waterfall by region
+  const steps=[{ l:'Budget|contribution', v:totConBud, type:'total' }];
+  R.forEach(r=>{ const sh=r.n.split(' ')[0]==='UK'?'UK&I':r.n.split(' ')[0]==='Continental'?'CE':r.n.split(' ')[0]==='Asia-Pacific'?'APAC':'NA'; steps.push({ l:sh+'|revenue', v:+r.revEff.toFixed(1), type:'step' }); steps.push({ l:sh+'|margin', v:+r.marEff.toFixed(1), type:'step', hatch:r.marEff>=0?'g':'o' }); });
+  steps.push({ l:'CC|contrib.', v:+totCon.toFixed(1), type:'sub' });
+  steps.push({ l:'FX', v:5.9, type:'step', hatch:'g' });
+  steps.push({ l:'Actual|contrib.', v:342.0, type:'total' });
+  steps[0].l='Budget|contrib.';
+  document.getElementById('ch-pwater').innerHTML = waterfall({ w:630, h:222, y0:330, y1:345, steps });
+  document.getElementById('pw-foot').textContent = `Check: ${f1(totConBud)} ${fs1(totCon-totConBud)} = ${f1(totCon)} (CC) + 5.9 = 342.0 ✓ - ${driver.n} moved contribution most, and it was margin (${fs1(driver.marEff)}), not revenue (${fs1(driver.revEff)}).`;
+
+  // bubble
+  (function(){
+    const w=630,h=200,pl=44,pr=16,pt=12,pb=30, iw=w-pl-pr, ih=h-pt-pb, x0=22,x1=33,y0=50.5,y1=52.3;
+    const sx=v=>pl+(v-x0)/(x1-x0)*iw, sy=v=>pt+ih-(v-y0)/(y1-y0)*ih;
+    let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+    [50.5,51,51.5,52].forEach(v=>s+=`<line x1="${pl}" x2="${w-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="#EDF0F3"/><text x="${pl-6}" y="${sy(v)+3}" font-size="10" text-anchor="end" fill="#8592A3">${v.toFixed(1)} %</text>`);
+    [22,24,26,28,30,32].forEach(v=>s+=`<text x="${sx(v)}" y="${h-pb+14}" font-size="10" text-anchor="middle" fill="#8592A3">+${v} %</text>`);
+    s+=`<line x1="${sx(27.5)}" x2="${sx(27.5)}" y1="${pt}" y2="${pt+ih}" stroke="#2B3748" stroke-dasharray="3 3"/><line x1="${pl}" x2="${w-pr}" y1="${sy(cmTot)}" y2="${sy(cmTot)}" stroke="#2B3748" stroke-dasharray="3 3"/>`;
+    const q=[['profitable growth',sx(32.5),sy(52.25),'end'],['dilutive growth',sx(32.5),sy(50.6),'end'],['profitable, slower',sx(22.3),sy(52.25),'start'],['problem',sx(22.3),sy(50.6),'start']];
+    q.forEach(([t,x,y,a])=>s+=`<text x="${x}" y="${y}" font-size="10" fill="#8592A3" text-anchor="${a}" font-style="italic">${t}</text>`);
+    R.forEach(r=>{ const rad=8+Math.sqrt(r.nr/totNR)*26; s+=`<circle cx="${sx(r.g)}" cy="${sy(r.cm)}" r="${rad.toFixed(1)}" fill="var(--acc)" opacity=".28" stroke="var(--acc)"/><text x="${sx(r.g)}" y="${sy(r.cm)+4}" font-size="11" font-weight="600" text-anchor="middle" fill="#101B2B">${r.n.replace('Continental ','').replace(' & Ireland','&I')}</text>`; });
+    s+=`<text x="${w-pr}" y="${h-2}" font-size="10" text-anchor="end" fill="#4F5C6C">x: NR growth YoY (CC) · y: CM % · dashed: company +27.5 % / 51.3 %</text></svg>`;
+    document.getElementById('ch-bubble').innerHTML=s;
+  })();
+
+  // heatmap
+  (function(){
+    const lines=['Platform subscriptions','Payments','Apps, partners & ads','Professional services'];
+    const gmL=[81.0,30.7,70.2,64.9];
+    const cells={ 'North America':[118.0,176.5,38.6,24.6], 'Continental Europe':[60.8,59.0,15.1,12.3], 'Asia-Pacific':[38.6,35.3,6.6,4.6], 'UK & Ireland':[28.5,26.0,6.5,4.7] };
+    const w=1290,h=118,pl=140,cw=242,ch=20,pt=18;
+    const col=g=>{ const t=(g-30)/(81-30); const mix=(a,b)=>Math.round(a+(b-a)*t); return `rgb(${mix(240,107)},${mix(235,72)},${mix(251,200)})`; }; /* accT → acc */
+    let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+    lines.forEach((l,j)=>s+=`<text x="${pl+j*cw+cw/2}" y="${pt-6}" font-size="11" font-weight="600" text-anchor="middle" fill="#4F5C6C">${l} · GM ${f1(gmL[j])} %</text>`);
+    s+=`<text x="${pl+4*cw+40}" y="${pt-6}" font-size="11" font-weight="600" text-anchor="middle" fill="#4F5C6C">Total</text>`;
+    Object.keys(cells).forEach((rg,i)=>{ const y=pt+i*(ch+4); const tot=cells[rg].reduce((a,b)=>a+b,0);
+      s+=`<text x="${pl-8}" y="${y+14}" font-size="12" text-anchor="end" fill="#101B2B">${rg}</text>`;
+      cells[rg].forEach((v,j)=>{ const share=v/tot*100; const dark=gmL[j]>62; s+=`<rect x="${pl+j*cw}" y="${y}" width="${cw-4}" height="${ch}" rx="3" fill="${col(gmL[j])}"/><text x="${pl+j*cw+8}" y="${y+14}" font-size="11.5" font-weight="500" fill="${dark?'#fff':'#101B2B'}">${f1(v)}</text><text x="${pl+j*cw+cw-12}" y="${y+14}" font-size="10.5" text-anchor="end" fill="${dark?'#fff':'#4F5C6C'}">${f1(share)} % of region</text>`; });
+      s+=`<text x="${pl+4*cw+40}" y="${y+14}" font-size="12" font-weight="600" text-anchor="middle" fill="#101B2B">${f1(tot)}</text>`;
+    });
+    s+=`</svg>`;
+    document.getElementById('ch-heat').innerHTML=s;
+  })();
+})();
+
+/* ───────────────────────────── view switcher + 810 fold marker ───────────────────────────── */
+(function(){
+  const tabs=[...document.querySelectorAll('.tab[data-view]')];
+  const content=document.getElementById('content');
+  function placeFold(){
+    document.querySelectorAll('.fold').forEach(f=>f.remove());
+    const frame=document.getElementById('frame'); const top=810-frame.getBoundingClientRect().top-window.scrollY+frame.getBoundingClientRect().top; // 810 from the frame's top edge
+    if (frame.offsetHeight > 820){ const f=document.createElement('div'); f.className='fold'; f.style.top=(810-content.offsetTop)+'px'; f.innerHTML='<span>810 px — the one-window fold (ADR-0004). Panels below it go behind a drill tab or scroll inside the view (open decision 3).</span>'; content.appendChild(f); }
+  }
+  function show(id){
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id==='view-'+id));
+    tabs.forEach(t=>{ const on=t.dataset.view===id; t.setAttribute('aria-selected', on?'true':'false'); t.tabIndex=on?0:-1; });
+    try{ localStorage.setItem('pnl-redesign-view', id); }catch(e){}
+    requestAnimationFrame(placeFold);
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.view)));
+  document.querySelector('.tabs').addEventListener('keydown',e=>{ const i=tabs.findIndex(t=>t.getAttribute('aria-selected')==='true'); if(e.key==='ArrowRight') show(tabs[(i+1)%tabs.length].dataset.view); if(e.key==='ArrowLeft') show(tabs[(i+tabs.length-1)%tabs.length].dataset.view); });
+  let start='kpi'; try{ const s=localStorage.getItem('pnl-redesign-view'); if(s&&document.getElementById('view-'+s)) start=s; }catch(e){}
+  const q=new URLSearchParams(location.search).get('view'); if(q&&document.getElementById('view-'+q)) start=q;
+  show(start);
+})();
+</script>
+</body>
+</html>

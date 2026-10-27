@@ -1,0 +1,834 @@
+sel_id,market,period,anchor,comparator,metric,kind,expected,tol,c_status,b_status,source
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,budget.loans,amount,24309.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,budget.principal_eur,amount,9818935.2608,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,budget.new_clients,amount,9905.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,budget.dpd30_pct,ratio,0.042162076,0.000001,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,budget.revenue_eur,amount,1385599.4541,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o1.value_text,text,24.4k €9.6m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o1.row_budget,text,vs Budget: ▲ +0.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o1.row_py,text,vs PY: ▲ +15.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o2.value_text,text,"9,796",0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o2.row_budget,text,vs Budget: ▼ −1.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o2.row_py,text,vs PY: ▲ +5.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o3.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o3.row_py,text,vs PY: ▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o4.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o4.row_py,text,vs PY: ▼ −0.9pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,o4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l1.label,text,Loans,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l1.value_text,text,24.4k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l1.row,text,▲ +0.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l2.label,text,Principal,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l2.value_text,text,€9.6m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l2.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l2.row,text,▼ −2.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l3.label,text,Avg ticket,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l3.value_text,text,€393,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l3.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l3.row,text,▼ −2.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l3.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l4.label,text,Approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l4.value_text,text,53.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l4.row,text,▲ +1.3pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l5.label,text,Take-up rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l5.value_text,text,89.0%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l5.row,text,▲ +0.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l6.label,text,Time to cash,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l6.value_text,text,3.5 h,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l6.row,text,▼ −1.4 h,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,l6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c1.label,text,New clients,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c1.value_text,text,"9,796",0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c1.row,text,▼ −1.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c2.label,text,Returning clients %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c2.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c2.row,text,▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c3.label,text,Repeat share (loans),0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c3.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c3.row,text,▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c4.label,text,New-client approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c4.value_text,text,36.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c4.row,text,▼ −0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c5.label,text,180-day repeat,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c5.value_text,text,43.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c6.label,text,Days between loans,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c6.value_text,text,115 d,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c6.row,text,▲ +5 d,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c6.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p1.label,text,30+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p1.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p1.row,text,▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p2.label,text,90+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p2.value_text,text,2.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p2.row,text,▼ −0.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p3.label,text,30+ by count,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p3.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p3.row,text,▼ −1.0pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p4.label,text,Vintage 6m bad rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p4.value_text,text,2.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p4.row_cmp,text,vs PY vintage,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p4.row,text,▼ −0.5pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p5.label,text,Roll rate 30→60,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p5.value_text,text,77.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p5.row,text,▼ −2.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p6.label,text,Cost of risk,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p6.value_text,text,10.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p6.row,text,▼ −3.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,p6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r1.label,text,Revenue,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r1.value_text,text,€1.3m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r1.row,text,▼ −3.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r2.label,text,Attainment,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r2.value_text,text,96.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r2.row_cmp,text,vs 100%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r2.row,text,▼ −3.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r3.label,text,Interest + fees,0,match,match,contract: layout-spec v4 §5
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r4.label,text,Interchange,0,match,match,contract: layout-spec v4 §5
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r5.label,text,MRR,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r5.value_text,text,€147k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r5.row,text,▲ +18.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r6.label,text,Paying subscribers,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r6.value_text,text,23.4k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r6.row,text,▲ +12.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,r6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c5.row_cmp,text,PY cohort,0,match,match,contract: layout-spec v4 C5
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c5.row,text,▼ −0.9pp,0,match,match,contract: layout-spec v4 C5
+M-2026-09-ALL,ALL,MONTH,2026-09,BUD,c5.chip,status,watch,0,match,match,contract: layout-spec v4 C5 (same status as the previous-cohort chip)
+M-2026-09-PL,PL,MONTH,2026-09,BUD,budget.loans,amount,11537.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,budget.principal_eur,amount,3507159.7847,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,budget.new_clients,amount,4685.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,budget.dpd30_pct,ratio,0.040000000,0.000001,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,budget.revenue_eur,amount,520253.7416,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o1.value_text,text,11.7k €3.3m,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o1.row_budget,text,vs Budget: ▲ +1.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o1.row_py,text,vs PY: ▲ +8.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o2.value_text,text,"4,712",0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o2.row_budget,text,vs Budget: ▲ +0.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o2.row_py,text,vs PY: ▲ +3.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o3.value_text,text,59.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o3.row_py,text,vs PY: ▲ +1.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o4.value_text,text,4.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.8pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o4.row_py,text,vs PY: ▲ +0.1pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l1.label,text,Loans,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l1.value_text,text,11.7k,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l1.row,text,▲ +1.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l2.label,text,Principal,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l2.value_text,text,€3.3m,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l2.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l2.row,text,▼ −6.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l2.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l3.label,text,Avg ticket,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l3.value_text,text,€279,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l3.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l3.row,text,▼ −8.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l3.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l4.label,text,Approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l4.value_text,text,55.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l4.row,text,▲ +2.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l5.label,text,Take-up rate,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l5.value_text,text,89.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l5.row,text,▲ +0.8pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l6.label,text,Time to cash,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l6.value_text,text,3.5 h,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l6.row,text,▼ −1.4 h,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,l6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c1.label,text,New clients,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c1.value_text,text,"4,712",0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c1.row,text,▲ +0.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c2.label,text,Returning clients %,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c2.value_text,text,59.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c2.row,text,▲ +1.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c3.label,text,Repeat share (loans),0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c3.value_text,text,59.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c3.row,text,▲ +1.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c4.label,text,New-client approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c4.value_text,text,38.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c4.row,text,▲ +1.9pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c5.label,text,180-day repeat,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c5.value_text,text,41.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c6.label,text,Days between loans,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c6.value_text,text,121 d,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c6.row,text,▲ +5 d,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c6.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p1.label,text,30+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p1.value_text,text,4.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p1.row,text,▲ +0.8pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p1.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p2.label,text,90+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p2.value_text,text,2.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p2.row,text,▲ +0.3pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p3.label,text,30+ by count,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p3.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p3.row,text,▼ −0.1pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p4.label,text,Vintage 6m bad rate,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p4.value_text,text,3.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p4.row_cmp,text,vs PY vintage,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p4.row,text,▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p5.label,text,Roll rate 30→60,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p5.value_text,text,76.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p5.row,text,▼ −2.8pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p6.label,text,Cost of risk,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p6.value_text,text,10.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p6.row,text,▼ −1.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,p6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r1.label,text,Revenue,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r1.value_text,text,€480k,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r1.row,text,▼ −7.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r1.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r2.label,text,Attainment,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r2.value_text,text,92.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r2.row_cmp,text,vs 100%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r2.row,text,▼ −7.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r2.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r3.label,text,Interest + fees,0,match,match,contract: layout-spec v4 §5
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r4.label,text,Interchange,0,match,match,contract: layout-spec v4 §5
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r5.label,text,MRR,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r5.value_text,text,€78k,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r5.row,text,▲ +8.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r6.label,text,Paying subscribers,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r6.value_text,text,12.7k,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r6.row,text,▲ +6.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,r6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c5.row_cmp,text,PY cohort,0,match,match,contract: layout-spec v4 C5
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c5.row,text,▼ −2.3pp,0,match,match,contract: layout-spec v4 C5
+M-2026-09-PL,PL,MONTH,2026-09,BUD,c5.chip,status,off,0,match,match,contract: layout-spec v4 C5
+M-2026-09-RO,RO,MONTH,2026-09,BUD,budget.loans,amount,6226.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,budget.principal_eur,amount,2885668.6161,0.011,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,budget.new_clients,amount,2547.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,budget.dpd30_pct,ratio,0.045000000,0.000001,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,budget.revenue_eur,amount,407356.7224,0.011,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o1.value_text,text,"5,412 €2.5m",0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o1.row_budget,text,vs Budget: ▼ −13.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o1.row_py,text,vs PY: ▼ −6.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o1.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o2.value_text,text,"2,178",0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o2.row_budget,text,vs Budget: ▼ −14.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o2.row_py,text,vs PY: ▼ −18.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o2.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o3.value_text,text,59.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o3.row_py,text,vs PY: ▲ +5.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o4.value_text,text,4.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o4.row_budget,text,vs Budget: ▼ −0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o4.row_py,text,vs PY: ▼ −3.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-RO,RO,MONTH,2026-09,BUD,o4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,budget.loans,amount,6546.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,budget.principal_eur,amount,3426106.8600,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,budget.new_clients,amount,2673.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,budget.dpd30_pct,ratio,0.042000000,0.000001,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,budget.revenue_eur,amount,457988.9900,0.011,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o1.value_text,text,"7,285 €3.8m",0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o1.row_budget,text,vs Budget: ▲ +11.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o1.row_py,text,vs PY: ▲ +60.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o2.value_text,text,"2,906",0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o2.row_budget,text,vs Budget: ▲ +8.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o2.row_py,text,vs PY: ▲ +40.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o3.value_text,text,60.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o3.row_py,text,vs PY: ▲ +5.8pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o4.value_text,text,4.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o4.row_py,text,vs PY: ◦ 0.0pp,0,match,match,contract: MS-07 band the displayed Δ (was engine-c ▲ on a raw +0.00x pp)
+M-2026-09-PT,PT,MONTH,2026-09,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,budget.loans,amount,239317.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,budget.principal_eur,amount,86422114.3825,0.011,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,budget.new_clients,amount,107471.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,budget.dpd30_pct,ratio,0.038635251,0.000001,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,budget.revenue_eur,amount,11623661.9892,0.011,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o1.value_text,text,243.6k €88.9m,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o1.row_budget,text,vs Budget: ▲ +1.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o1.row_py,text,vs PY: ▲ +51.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o2.value_text,text,108.3k,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o2.row_budget,text,vs Budget: ▲ +0.7%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o2.row_py,text,vs PY: ▲ +24.0%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o3.value_text,text,56.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o3.row_py,text,vs PY: ▲ +9.4pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o4.value_text,text,4.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o4.row_budget,text,vs Budget: ▲ +1.1pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o4.row_py,text,vs PY: ▲ +0.6pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l1.label,text,Loans,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l1.value_text,text,243.6k,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l1.row,text,▲ +1.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l2.label,text,Principal,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l2.value_text,text,€88.9m,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l2.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l2.row,text,▲ +2.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l3.label,text,Avg ticket,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l3.value_text,text,€365,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l3.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l3.row,text,▲ +1.0%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l3.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l4.label,text,Approval rate,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l4.value_text,text,52.1%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l4.row,text,▲ +4.8pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l5.label,text,Take-up rate,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l5.value_text,text,88.3%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l5.row,text,▲ +1.1pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l6.label,text,Time to cash,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l6.value_text,text,4.5 h,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l6.row,text,▼ −0.7 h,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,l6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c1.label,text,New clients,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c1.value_text,text,108.3k,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c1.row,text,▲ +0.7%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c2.label,text,Returning clients %,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c2.value_text,text,56.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c2.row,text,▲ +9.4pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c3.label,text,Repeat share (loans),0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c3.value_text,text,55.6%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c3.row,text,▲ +10.0pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c4.label,text,New-client approval rate,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c4.value_text,text,37.2%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c4.row,text,▲ +1.1pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c5.label,text,180-day repeat,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c5.value_text,text,44.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c6.label,text,Days between loans,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c6.value_text,text,103 d,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c6.row,text,▲ +37 d,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c6.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p1.label,text,30+ DPD %,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p1.value_text,text,4.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p1.row,text,▲ +1.1pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p1.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p2.label,text,90+ DPD %,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p2.value_text,text,2.6%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p2.row,text,▲ +0.3pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p3.label,text,30+ by count,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p3.value_text,text,5.1%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p3.row,text,▲ +0.6pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p3.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p4.label,text,Vintage 6m bad rate,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p4.value_text,text,3.7%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p4.row_cmp,text,vs PY vintage,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p4.row,text,▲ +0.8pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p5.label,text,Roll rate 30→60,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p5.value_text,text,78.6%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p5.row,text,▼ −1.0pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p6.label,text,Cost of risk,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p6.value_text,text,12.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p6.row,text,▲ +0.5pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,p6.chip,status,watch,0,match,match,contract: MS-07 band the displayed Δ (+0.5pp shown = watch; was engine-c off on the raw Δ)
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r1.label,text,Revenue,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r1.value_text,text,€11.9m,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r1.row,text,▲ +2.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r2.label,text,Attainment,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r2.value_text,text,102.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r2.row_cmp,text,vs 100%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r2.row,text,▲ +2.8pp,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r3.label,text,Interest + fees,0,match,match,contract: layout-spec v4 §5
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r4.label,text,Interchange,0,match,match,contract: layout-spec v4 §5
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r5.label,text,MRR,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r5.value_text,text,€131k,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r5.row,text,▲ +17.4%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r6.label,text,Paying subscribers,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r6.value_text,text,22.1k,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r6.row,text,▲ +17.7%,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,r6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c5.row_cmp,text,PY cohort,0,match,match,contract: layout-spec v4 C5
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c5.row,text,▲ +0.8pp,0,match,match,contract: layout-spec v4 C5
+M-FY2025-ALL,ALL,YTD,2025-12,BUD,c5.chip,status,good,0,match,match,contract: layout-spec v4 C5 (same status as the previous-cohort chip)
+M-FY2025-PL,PL,YTD,2025-12,BUD,budget.loans,amount,124111.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,budget.principal_eur,amount,33979039.3465,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,budget.new_clients,amount,53053.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,budget.dpd30_pct,ratio,0.038000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,budget.revenue_eur,amount,4880774.9372,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o1.value_text,text,125.9k €35.5m,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o1.row_budget,text,vs Budget: ▲ +1.4%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o1.row_py,text,vs PY: ▲ +33.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o2.value_text,text,53.5k,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o2.row_budget,text,vs Budget: ▲ +0.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o2.row_py,text,vs PY: ▲ +9.4%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o3.value_text,text,58.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o3.row_py,text,vs PY: ▲ +9.1pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o4.value_text,text,4.0%,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o4.row_budget,text,vs Budget: ▲ +0.2pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o4.row_py,text,vs PY: ▼ −0.6pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PL,PL,YTD,2025-12,BUD,o4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,budget.loans,amount,66725.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,budget.principal_eur,amount,28446442.8160,0.011,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,budget.new_clients,amount,30417.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,budget.dpd30_pct,ratio,0.040000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,budget.revenue_eur,amount,3696337.3020,0.011,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o1.value_text,text,66.8k €27.9m,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o1.row_budget,text,vs Budget: ▲ +0.2%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o1.row_py,text,vs PY: ▲ +44.2%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o2.value_text,text,29.9k,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o2.row_budget,text,vs Budget: ▼ −1.6%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o2.row_py,text,vs PY: ▲ +18.5%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o3.value_text,text,55.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o3.row_py,text,vs PY: ▲ +8.4pp,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o4.value_text,text,6.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o4.row_budget,text,vs Budget: ▲ +2.8pp,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o4.row_py,text,vs PY: ▲ +2.6pp,0,match,match,engine-c 2026-10-27
+M-FY2025-RO,RO,YTD,2025-12,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,budget.loans,amount,48481.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,budget.principal_eur,amount,23996632.2200,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,budget.new_clients,amount,24001.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,budget.dpd30_pct,ratio,0.038000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,budget.revenue_eur,amount,3046549.7500,0.011,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o1.value_text,text,50.8k €25.4m,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o1.row_budget,text,vs Budget: ▲ +4.8%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o1.row_py,text,vs PY: ▲ +154.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o2.value_text,text,24.8k,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o2.row_budget,text,vs Budget: ▲ +3.2%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o2.row_py,text,vs PY: ▲ +89.1%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o3.value_text,text,52.9%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o3.row_py,text,vs PY: ▲ +16.3pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o4.value_text,text,4.2%,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o4.row_budget,text,vs Budget: ▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o4.row_py,text,vs PY: ▲ +0.5pp,0,match,match,engine-c 2026-10-27
+M-FY2025-PT,PT,YTD,2025-12,BUD,o4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,budget.loans,amount,210004.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,budget.principal_eur,amount,82650804.2352,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,budget.new_clients,amount,84052.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,budget.dpd30_pct,ratio,0.042162076,0.000001,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,budget.revenue_eur,amount,12129981.2398,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o1.value_text,text,209.9k €82.1m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o1.row_budget,text,vs Budget: ▼ −0.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o1.row_py,text,vs PY: ▲ +22.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o2.value_text,text,83.6k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o2.row_budget,text,vs Budget: ▼ −0.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o2.row_py,text,vs PY: ▲ +9.8%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o3.value_text,text,62.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o3.row_py,text,vs PY: ▲ +4.8pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o4.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o4.row_py,text,vs PY: ▼ −0.9pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,o4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l1.label,text,Loans,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l1.value_text,text,209.9k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l1.row,text,▼ −0.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l2.label,text,Principal,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l2.value_text,text,€82.1m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l2.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l2.row,text,▼ −0.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l3.label,text,Avg ticket,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l3.value_text,text,€391,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l3.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l3.row,text,▼ −0.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l3.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l4.label,text,Approval rate,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l4.value_text,text,53.4%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l4.row,text,▲ +1.5pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l5.label,text,Take-up rate,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l5.value_text,text,88.9%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l5.row,text,▲ +0.7pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l6.label,text,Time to cash,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l6.value_text,text,3.5 h,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l6.row,text,▼ −1.4 h,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,l6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c1.label,text,New clients,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c1.value_text,text,83.6k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c1.row,text,▼ −0.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c2.label,text,Returning clients %,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c2.value_text,text,62.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c2.row,text,▲ +4.8pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c3.label,text,Repeat share (loans),0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c3.value_text,text,60.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c3.row,text,▲ +4.6pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c4.label,text,New-client approval rate,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c4.value_text,text,36.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c4.row,text,▼ −0.5pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c5.label,text,180-day repeat,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c5.value_text,text,43.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c6.label,text,Days between loans,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c6.value_text,text,106 d,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c6.row,text,▲ +5 d,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c6.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p1.label,text,30+ DPD %,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p1.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p1.row,text,▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p2.label,text,90+ DPD %,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p2.value_text,text,2.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p2.row,text,▼ −0.2pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p3.label,text,30+ by count,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p3.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p3.row,text,▼ −1.0pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p4.label,text,Vintage 6m bad rate,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p4.value_text,text,2.9%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p4.row_cmp,text,vs PY vintage,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p4.row,text,▼ −0.5pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p5.label,text,Roll rate 30→60,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p5.value_text,text,77.6%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p5.row,text,▼ −2.4pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p6.label,text,Cost of risk,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p6.value_text,text,11.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p6.row,text,▼ −1.5pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,p6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r1.label,text,Revenue,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r1.value_text,text,€12.0m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r1.row_cmp,text,BUD,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r1.row,text,▼ −1.3%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r1.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r2.label,text,Attainment,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r2.value_text,text,98.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r2.row_cmp,text,vs 100%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r2.row,text,▼ −1.3pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r3.label,text,Interest + fees,0,match,match,contract: layout-spec v4 §5
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r4.label,text,Interchange,0,match,match,contract: layout-spec v4 §5
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r5.label,text,MRR,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r5.value_text,text,€147k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r5.row,text,▲ +18.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r6.label,text,Paying subscribers,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r6.value_text,text,23.4k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r6.row,text,▲ +12.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,r6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c5.row_cmp,text,PY cohort,0,match,match,contract: layout-spec v4 C5
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c5.row,text,▼ −0.9pp,0,match,match,contract: layout-spec v4 C5
+M-FY2026_YTD_SEP-ALL,ALL,YTD,2026-09,BUD,c5.chip,status,watch,0,match,match,contract: layout-spec v4 C5 (same status as the previous-cohort chip)
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,budget.loans,amount,100325.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,budget.principal_eur,amount,29748591.5933,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,budget.new_clients,amount,39719.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,budget.dpd30_pct,ratio,0.040000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,budget.revenue_eur,amount,4692471.3182,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o1.value_text,text,100.6k €29.1m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o1.row_budget,text,vs Budget: ▲ +0.3%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o1.row_py,text,vs PY: ▲ +12.0%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o2.value_text,text,39.6k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o2.row_budget,text,vs Budget: ▼ −0.4%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o2.row_py,text,vs PY: ▲ +3.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o3.value_text,text,62.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o3.row_py,text,vs PY: ▲ +2.8pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o4.value_text,text,4.8%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.8pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o4.row_py,text,vs PY: ▲ +0.1pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PL,PL,YTD,2026-09,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,budget.loans,amount,57041.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,budget.principal_eur,amount,25543568.3819,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,budget.new_clients,amount,22443.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,budget.dpd30_pct,ratio,0.045000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,budget.revenue_eur,amount,3724995.6516,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o1.value_text,text,51.0k €22.7m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o1.row_budget,text,vs Budget: ▼ −10.5%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o1.row_py,text,vs PY: ▲ +7.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o1.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o2.value_text,text,20.0k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o2.row_budget,text,vs Budget: ▼ −11.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o2.row_py,text,vs PY: ▼ −6.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o2.chip,status,off,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o3.value_text,text,62.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o3.row_py,text,vs PY: ▲ +6.2pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o4.value_text,text,4.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o4.row_budget,text,vs Budget: ▼ −0.4pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o4.row_py,text,vs PY: ▼ −3.2pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-RO,RO,YTD,2026-09,BUD,o4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,budget.loans,amount,52638.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,budget.principal_eur,amount,27358644.2600,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,budget.new_clients,amount,21890.0000,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,budget.dpd30_pct,ratio,0.042000000,0.000001,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,budget.revenue_eur,amount,3712514.2700,0.011,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o1.value_text,text,58.3k €30.3m,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o1.row_budget,text,vs Budget: ▲ +10.7%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o1.row_py,text,vs PY: ▲ +70.4%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o2.value_text,text,24.1k,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o2.row_budget,text,vs Budget: ▲ +10.1%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o2.row_py,text,vs PY: ▲ +44.2%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o3.value_text,text,61.9%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o3.row_py,text,vs PY: ▲ +8.5pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o4.value_text,text,4.9%,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o4.row_budget,text,vs Budget: ▲ +0.7pp,0,match,match,engine-c 2026-10-27
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o4.row_py,text,vs PY: ◦ 0.0pp,0,match,match,contract: MS-07 band the displayed Δ (was engine-c ▲ on a raw +0.00x pp)
+M-FY2026_YTD_SEP-PT,PT,YTD,2026-09,BUD,o4.chip,status,off,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,budget.loans,amount,24309.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,budget.principal_eur,amount,9818935.2608,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,budget.new_clients,amount,9905.0000,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,budget.dpd30_pct,ratio,0.042162076,0.000001,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,budget.revenue_eur,amount,1385599.4541,0.011,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o1.value_text,text,24.4k €9.6m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o1.row_budget,text,vs Budget: ▲ +0.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o1.row_py,text,vs PY: ▲ +15.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o2.value_text,text,"9,796",0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o2.row_budget,text,vs Budget: ▼ −1.1%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o2.row_py,text,vs PY: ▲ +5.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o3.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o3.row_budget,text,vs Budget: n/a,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o3.row_py,text,vs PY: ▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o4.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o4.row_budget,text,vs Budget: ▲ +0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o4.row_py,text,vs PY: ▼ −0.9pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,o4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l1.label,text,Loans,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l1.value_text,text,24.4k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l1.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l1.row,text,▲ +15.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l2.label,text,Principal,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l2.value_text,text,€9.6m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l2.row,text,▲ +19.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l3.label,text,Avg ticket,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l3.value_text,text,€393,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l3.row,text,▲ +3.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l3.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l4.label,text,Approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l4.value_text,text,53.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l4.row,text,▲ +1.3pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l5.label,text,Take-up rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l5.value_text,text,89.0%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l5.row,text,▲ +0.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l6.label,text,Time to cash,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l6.value_text,text,3.5 h,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l6.row,text,▼ −1.4 h,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,l6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c1.label,text,New clients,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c1.value_text,text,"9,796",0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c1.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c1.row,text,▲ +5.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c2.label,text,Returning clients %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c2.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c2.row,text,▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c3.label,text,Repeat share (loans),0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c3.value_text,text,59.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c3.row,text,▲ +3.7pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c4.label,text,New-client approval rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c4.value_text,text,36.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c4.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c4.row,text,▼ −0.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c4.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c5.label,text,180-day repeat,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c5.value_text,text,43.5%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c6.label,text,Days between loans,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c6.value_text,text,115 d,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c6.row,text,▲ +5 d,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c6.chip,status,neutral,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p1.label,text,30+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p1.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p1.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p1.row,text,▼ −0.9pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p2.label,text,90+ DPD %,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p2.value_text,text,2.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p2.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p2.row,text,▼ −0.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p2.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p3.label,text,30+ by count,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p3.value_text,text,4.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p3.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p3.row,text,▼ −1.0pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p3.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p4.label,text,Vintage 6m bad rate,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p4.value_text,text,2.9%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p4.row_cmp,text,vs PY vintage,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p4.row,text,▼ −0.5pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p4.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p5.label,text,Roll rate 30→60,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p5.value_text,text,77.6%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p5.row,text,▼ −2.4pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p6.label,text,Cost of risk,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p6.value_text,text,10.4%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p6.row,text,▼ −3.6pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,p6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r1.label,text,Revenue,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r1.value_text,text,€1.3m,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r1.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r1.row,text,▲ +28.3%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r1.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r2.label,text,Attainment,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r2.value_text,text,96.8%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r2.row_cmp,text,vs 100%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r2.row,text,▼ −3.2pp,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r2.chip,status,watch,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r3.label,text,Interest + fees,0,match,match,contract: layout-spec v4 §5
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r4.label,text,Interchange,0,match,match,contract: layout-spec v4 §5
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r5.label,text,MRR,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r5.value_text,text,€147k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r5.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r5.row,text,▲ +18.7%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r5.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r6.label,text,Paying subscribers,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r6.value_text,text,23.4k,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r6.row_cmp,text,PY,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r6.row,text,▲ +12.2%,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,r6.chip,status,good,0,match,match,engine-c 2026-10-27
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c5.row_cmp,text,PY cohort,0,match,match,contract: layout-spec v4 C5
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c5.row,text,▼ −0.9pp,0,match,match,contract: layout-spec v4 C5
+M-2026-09-ALL-PY,ALL,MONTH,2026-09,PY,c5.chip,status,watch,0,match,match,contract: layout-spec v4 C5 (same status as the previous-cohort chip)

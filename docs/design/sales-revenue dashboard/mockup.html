@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mirelo Sales &amp; revenue - flat mockup</title>
+<title>Mirelo Sales &amp; revenue - flat mockup v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
-/* DRAFT - projection state. Flat mockup of the Mirelo Sales & Revenue draft (ADR-0011, Proposed).
-   Contract: design-tokens.md + layout-spec.md. Overview populated (Sep 2026 - Month - All markets - EUR, x0.6 scale);
-   views 2-5 are structural wireframes with real card titles and placeholder chart shapes. */
+/* DRAFT - projection state. Flat mockup v4 of the Mirelo Sales & Revenue draft (ADR-0011 + ADR-0012 "Visual first, minimum text").
+   Contract: design-tokens.md + layout-spec.md. Values: Sep 2026 - Month - All markets - EUR from data/mirelo_sales_dummy_data
+   (control_totals_eur.csv, fact_target, fact_application, fact_loan, fact_loan_month, fact_subscription_month). Charts in views 2-5 are
+   placeholder shapes. Card face = title - value - delta row(s) - status chip; everything else sits behind the (i) button (bottom-left of
+   every card) or the per-view "How to read" button. Pop-ups: glass, one at a time, Esc / outside / x, focus trapped and returned. */
 :root{
   --ground:#F3F2EF;--panel:#E9E8E4;--panel2:#DEDDD8;--line:#CFCDC6;--marker:#2F2F2D;--ink:#111111;
   --g600:#5C5C58;--g400:#7F7E79;--g300:#BDBBB5;--white:#FFFFFF;
@@ -23,102 +25,102 @@ body{padding:20px 0 40px}
 .caption b{color:var(--ink);font-weight:600}
 button{font-family:inherit;cursor:pointer}
 .num{font-variant-numeric:tabular-nums}
-
-/* ---------- frame ---------- */
 .board{position:relative;width:1440px;height:810px;margin:0 auto;overflow:hidden;background:var(--ground)}
 .abs{position:absolute}
-
-/* ---------- header ---------- */
+/* header */
 .wedge{position:absolute;left:0;top:0;width:1440px;height:64px;pointer-events:none}
 .brand{left:32px;top:20px;width:24px;height:24px;background:var(--ink);color:#fff;font-size:14px;font-weight:800;line-height:24px;text-align:center}
-.title{left:64px;top:14px;height:28px;font-size:22px;line-height:28px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
-.pline{left:64px;top:42px;height:16px;font-size:12px;line-height:16px;color:var(--g600);white-space:nowrap}
+.title{left:64px;top:18px;height:28px;font-size:22px;line-height:28px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
 .seg{display:flex;height:28px;border:1px solid var(--line);background:var(--panel)}
 .seg button{height:26px;border:0;border-right:1px solid var(--line);background:transparent;padding:0 8px;font-size:13px;font-weight:600;line-height:26px;color:var(--ink);white-space:nowrap}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .seg.dd button{width:100%;text-align:left;padding:0 10px}
-.tabs{left:32px;top:64px;height:36px;display:flex;gap:0}
+.tabs{left:32px;top:64px;height:36px;display:flex}
 .tabs button{height:36px;border:0;background:transparent;padding:0 16px;font-size:14px;font-weight:600;color:var(--g600)}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--ink)}
 .tabrule{left:0;top:100px;width:1440px;height:1px;background:var(--line)}
-.tabright{right:32px;top:72px;height:20px;display:flex;gap:16px;font-size:12px;line-height:20px;color:var(--g600)}
-.tabright span{display:inline-flex;align-items:center;gap:4px}
-.icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;border:1.5px solid var(--g600);border-radius:50%;font-size:10px;font-weight:700;line-height:1;color:var(--g600)}
-
-/* ---------- views ---------- */
+.tabright{right:32px;top:72px;height:20px;display:flex;gap:16px;font-size:12px;line-height:20px;color:var(--g600);align-items:center}
+.tabright button{height:20px;border:0;background:transparent;padding:0;font-size:12px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:5px}
+.tabright button:focus-visible,.ib:focus-visible,.pop .x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ii{display:inline-block;width:16px;height:16px;color:currentColor}
+/* views */
 .view{position:absolute;left:0;top:116px;width:1440px;height:694px;display:none}
 .view.on{display:block}
-
-/* ---------- cards ---------- */
+/* cards */
 .card{position:absolute;background:var(--panel)}
-.card::before{content:"";position:absolute;left:0;top:0;width:16px;height:16px;background:var(--marker)}
 .ct{position:absolute;left:16px;top:16px;right:16px;height:16px;font-size:13px;line-height:16px;font-weight:600;white-space:nowrap;display:flex;justify-content:space-between;align-items:center}
-.ct .acts{display:flex;gap:8px;color:var(--g600);font-size:12px;font-weight:600}
-.ct .acts .icon{border-color:var(--g600)}
-.lab{position:absolute;left:16px;top:24px;font-size:12px;line-height:16px;font-weight:500;color:var(--g600)}
-.hero .val{position:absolute;left:16px;top:44px;height:48px;font-size:44px;line-height:48px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
-.hero .val small{font-size:18px;line-height:24px;font-weight:700;margin-left:12px;letter-spacing:0;vertical-align:baseline}
-.hero .sub{position:absolute;left:16px;top:100px;font-size:12px;line-height:16px;color:var(--g600);white-space:nowrap}
-.hero .spark{position:absolute;left:196px;top:44px;width:120px;height:44px}
+.ct .acts{display:flex;gap:10px;color:var(--g600);font-size:12px;font-weight:600}
+.ct .acts button{border:0;background:transparent;padding:0;font:inherit;color:inherit}
+.lab{position:absolute;left:16px;top:16px;font-size:12px;line-height:16px;font-weight:500;color:var(--g600);white-space:nowrap}
+.st{position:absolute;right:16px;top:16px}
+.hero .val{position:absolute;left:16px;top:40px;height:48px;font-size:44px;line-height:48px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.hero .val small{font-size:18px;line-height:24px;font-weight:700;margin-left:12px;letter-spacing:0}
+.kpi .val{position:absolute;left:16px;top:40px;height:32px;font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
 .cr{position:absolute;left:16px;height:16px;display:flex;align-items:center;font-size:12px;line-height:16px}
 .cr .n{width:84px;font-weight:500;color:var(--g600);white-space:nowrap}
 .cr .d{width:64px;text-align:right;font-size:13px;font-weight:700;white-space:nowrap}
-.cr .bar{position:relative;width:80px;height:6px;background:var(--panel2);margin-left:8px}
-.cr .bar i{position:absolute;left:39px;top:-2px;width:1px;height:10px;background:var(--marker)}
+.cr .bar{position:relative;height:6px;background:var(--panel2);margin-left:8px}
+.cr .bar i{position:absolute;top:-2px;width:1px;height:10px;background:var(--marker)}
 .cr .bar b{position:absolute;top:0;height:6px}
+.hero .cr .bar{width:160px}.hero .cr .bar i{left:79px}
+.kpi .cr{top:80px}.kpi .cr .bar{display:none}
 .good{color:var(--good)}.watch{color:var(--watch)}.off{color:var(--off)}.neu{color:var(--g600);font-weight:500}
-.bg-good{background:var(--good)}.bg-watch{background:var(--watch)}.bg-off{background:var(--off)}
-.kpi .val{position:absolute;left:16px;top:44px;height:32px;font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
-.kpi .cr{top:82px}
-.kpi .sub{position:absolute;left:16px;top:100px;font-size:11px;line-height:14px;color:var(--g600);white-space:nowrap}
+.bg-good{background:var(--good)}.bg-watch{background:var(--watch)}.bg-off{background:var(--off)}.bg-neu{background:var(--g400)}
+.ib{position:absolute;left:16px;width:16px;height:16px;padding:0;border:0;background:transparent;color:var(--g600)}
+.ib:hover{color:var(--ink)}
+.hero .ib,.kpi .ib{bottom:8px}.pan .ib{bottom:10px}.tbl .ib{bottom:2px}
 .chart{position:absolute;left:16px;top:44px}
-.legend{position:absolute;left:16px;bottom:10px;display:flex;gap:14px;font-size:11px;line-height:14px;color:var(--g600)}
+.legend{position:absolute;left:40px;bottom:10px;display:flex;gap:14px;font-size:11px;line-height:16px;color:var(--g600)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .sw{display:inline-block;width:12px;height:3px;background:var(--ink)}
-.sw.t{background:var(--teal)}.sw.g{background:var(--g400)}.sw.g3{background:var(--g300)}
-.sw.sq{height:12px}
+.sw.t{background:var(--teal)}.sw.g{background:var(--g400)}.sw.sq{height:12px}
 .sw.dash{background:repeating-linear-gradient(90deg,var(--g400) 0 4px,transparent 4px 7px)}
-.callout{position:absolute;background:var(--accent);border:2px solid var(--white);padding:4px 8px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
-.chip{display:inline-block;height:16px;padding:0 6px;border-radius:2px;font-size:11px;line-height:16px;font-weight:600}
-.chip.good{background:var(--goodT)}.chip.watch{background:var(--watchT)}.chip.off{background:var(--offT)}
-
-/* ---------- tables ---------- */
-table{position:absolute;left:16px;top:40px;right:16px;border-collapse:collapse;width:1344px;font-size:13px;line-height:20px}
-th{height:24px;padding:2px 8px;background:var(--panel2);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--g600);text-align:left;white-space:nowrap}
-td{height:24px;padding:2px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.callout{position:absolute;background:var(--accent);border:2px solid var(--white);padding:2px 8px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.chip{display:inline-block;height:16px;padding:0 6px;border-radius:2px;font-size:11px;line-height:16px;font-weight:600;white-space:nowrap}
+.chip.good{background:var(--goodT)}.chip.watch{background:var(--watchT)}.chip.off{background:var(--offT)}.chip.neu{background:var(--panel2);color:var(--g600)}
+/* tables */
+table{position:absolute;left:16px;top:36px;border-collapse:collapse;width:1344px;font-size:13px;line-height:18px}
+th{height:22px;padding:0 8px;background:var(--panel2);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--g600);text-align:left;white-space:nowrap}
+td{height:22px;padding:0 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tight th,.tight td{height:20px}
 th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr{cursor:pointer}
 tr.sel td{background:var(--accent)}
-tr:hover td{background:var(--accent2)}
+tbody tr:hover td{background:var(--accent2)}
 .wf td{color:var(--g600)}
-.ph-note{font-size:11px;line-height:16px;font-weight:400;color:var(--g400)}
-
-/* ---------- slide-over (shown on demand) ---------- */
+/* glass */
+.glass{background:rgba(255,255,255,.64);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);border-radius:16px}
+@supports not (backdrop-filter:blur(1px)){.glass{background:rgba(255,255,255,.92)}}
+.pop{position:absolute;width:360px;max-height:440px;overflow:auto;padding:14px 20px 16px;display:none;z-index:5;font-size:12px;line-height:18px;color:var(--ink)}
+.pop.on{display:block}
+.pop h3{margin:0 28px 4px 0;font-size:13px;line-height:16px;font-weight:700}
+.pop dl{margin:0}.pop dt{font-weight:600;margin-top:7px}.pop dd{margin:0;color:var(--g600)}
+.pop dd code{font-family:Consolas,monospace;font-size:11px;color:var(--ink)}
+.pop .x{position:absolute;right:10px;top:10px;width:24px;height:24px;border:0;background:transparent;font-size:14px;color:var(--g600)}
+/* slide-over */
 .scrim{position:absolute;left:0;top:100px;width:720px;height:710px;background:rgba(17,17,17,.4);display:none}
-.so{position:absolute;left:720px;top:100px;width:720px;height:710px;background:var(--ground);border-left:1px solid var(--line);display:none}
+.so{position:absolute;left:720px;top:100px;width:720px;height:710px;border-left:1px solid var(--line);border-radius:0;display:none;z-index:4}
 .so.on,.scrim.on{display:block}
-.so .hd{position:absolute;left:0;top:0;width:720px;height:64px;background:var(--white);border-bottom:1px solid var(--line);padding:12px 24px}
+.so .hd{position:absolute;left:0;top:0;width:720px;height:64px;border-bottom:1px solid var(--line);padding:12px 24px}
 .so .hd h2{margin:0;font-size:16px;line-height:20px;font-weight:700}
 .so .hd p{margin:4px 0 0;font-size:12px;line-height:16px;color:var(--g600)}
 .so .x{position:absolute;right:16px;top:16px;width:32px;height:32px;border:1px solid var(--line);background:var(--white);font-size:16px}
 .so .chips{position:absolute;left:24px;top:76px;display:flex;gap:6px}
 .so .chips .chip{background:var(--panel2);color:var(--ink)}
 .so table{left:24px;top:108px;width:672px}
-.so .foot{position:absolute;left:24px;bottom:12px;font-size:11px;color:var(--g600)}
-.so .foot button{height:24px;border:1px solid var(--line);background:var(--white);font-size:11px;font-weight:600;padding:0 8px;margin-right:8px}
+.so .foot{position:absolute;left:24px;bottom:12px;font-size:11px;color:var(--g600);display:flex;gap:8px;align-items:center}
+.so .foot button{height:24px;border:1px solid var(--line);background:var(--white);font-size:11px;font-weight:600;padding:0 8px}
 svg text{font-family:inherit}
 </style>
 </head>
 <body>
-<div class="caption"><b>DRAFT - projection state.</b> Mirelo Sales &amp; revenue - flat mockup, 1440 x 810. Overview populated (Sep 2026 - Month - All markets - EUR, business scale x0.6); Loans issued, Clients, Portfolio quality and Revenue &amp; targets are structural wireframes. Click the tabs; click a table row in the Overview to see the slide-over. Contract: <b>design-tokens.md</b>, <b>layout-spec.md</b>, ADR-0011.</div>
+<div class="caption"><b>DRAFT - projection state.</b> Mirelo Sales &amp; revenue - flat mockup v4.1 (ADR-0012, MS-11, MS-15 applied), 1440 x 810. Sep 2026 - Month - All markets - EUR, values from <b>data/mirelo_sales_dummy_data</b>; charts in views 2-5 are placeholder shapes. Click the tabs; (i) on every card and "How to read" open glass pop-ups; click a Markets row for the slide-over. Contract: <b>design-tokens.md</b>, <b>layout-spec.md</b>.</div>
 
 <div class="board" id="board">
-  <!-- ======================= header ======================= -->
   <svg class="wedge" viewBox="0 0 1440 64" aria-hidden="true"><polygon points="760,0 1440,0 1440,64" fill="#FFD54A"/></svg>
   <div class="abs brand" title="Mirelo">M</div>
   <div class="abs title">Mirelo - Sales &amp; revenue</div>
-  <div class="abs pline" id="pline">Showing Sep 2026 - Month - Actual vs Budget and Prior year - Closed through Sep 2026</div>
-
   <div class="abs seg" style="left:744px;top:20px;width:232px" role="radiogroup" aria-label="Market">
     <button aria-pressed="true" style="width:88px">All markets</button><button style="width:48px">PL</button><button style="width:48px">RO</button><button style="width:48px">PT</button>
   </div>
@@ -129,7 +131,6 @@ svg text{font-family:inherit}
   <div class="abs seg" style="left:1304px;top:20px;width:104px" role="radiogroup" aria-label="Comparator">
     <button aria-pressed="true" style="width:56px">Budget</button><button style="width:46px">PY</button>
   </div>
-
   <div class="abs tabs" role="tablist" id="tabs">
     <button role="tab" aria-selected="true" data-view="v1" style="width:104px">Overview</button>
     <button role="tab" aria-selected="false" data-view="v2" style="width:128px">Loans issued</button>
@@ -137,110 +138,23 @@ svg text{font-family:inherit}
     <button role="tab" aria-selected="false" data-view="v4" style="width:156px">Portfolio quality</button>
     <button role="tab" aria-selected="false" data-view="v5" style="width:164px">Revenue &amp; targets</button>
   </div>
-  <div class="abs tabright"><span><i class="icon">i</i> How to read</span><span>&#x2750; Copy link</span></div>
+  <div class="abs tabright"><button id="howto" aria-haspopup="dialog"><svg class="ii" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="7" width="1.5" height="5" fill="currentColor"/><circle cx="8" cy="4.6" r=".9" fill="currentColor"/></svg><span id="howto-l">How to read</span></button><span>&#x2750; Copy link</span></div>
   <div class="abs tabrule"></div>
 
-  <!-- ======================= VIEW 1 - OVERVIEW ======================= -->
-  <section class="view on" id="v1" role="tabpanel">
-    <!-- hero cards: y 116 -> 0 inside the view -->
-    <div class="card hero" style="left:32px;top:0;width:332px;height:192px" title="Count of disbursed loans and disbursed principal, translated per month x currency at actual rates.">
-      <div class="lab">Loans issued</div>
-      <div class="val num">25.6k<small>&euro;10.2m</small></div>
-      <div class="sub">avg ticket &euro;398 - 97.6 % of target loans</div>
-      <svg class="spark" data-spark="22,21.4,24.6,26.9,20.8,19.6,22.1,22.9,23.3,23.6,23,24.4,25.6|18.9,18.4,21.1,23.1,17.9,16.8,19,19.7,20,20.3,19.8,21,22"></svg>
-      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d watch num">&#9660; &minus;2.4%</span><span class="bar"><i></i><b class="bg-watch" style="right:41px;width:5px"></b></span></div>
-      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +16.4%</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:33px"></b></span></div>
-    </div>
-    <div class="card hero" style="left:380px;top:0;width:332px;height:192px" title="Clients whose first loan was disbursed in the window.">
-      <div class="lab">New clients locked in</div>
-      <div class="val num">10.8k</div>
-      <div class="sub">42.2 % of loans - App 41 % - Partner 22 %</div>
-      <svg class="spark" data-spark="9.2,8.9,10.3,11.2,8.6,8.1,9.3,9.6,9.8,10,9.7,10.3,10.8|8,7.7,8.9,9.7,7.5,7,8,8.3,8.4,8.6,8.4,8.9,9.4"></svg>
-      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d watch num">&#9660; &minus;4.2%</span><span class="bar"><i></i><b class="bg-watch" style="right:41px;width:8px"></b></span></div>
-      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +15.1%</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:30px"></b></span></div>
-    </div>
-    <div class="card hero" style="left:728px;top:0;width:332px;height:192px" title="Borrowers with at least one prior repaid or current loan, share of borrowers in the window.">
-      <div class="lab">Returning clients</div>
-      <div class="val num">52.4%</div>
-      <div class="sub">of borrowers - 57.8 % of loans - 180-day repeat 46 %</div>
-      <svg class="spark" data-spark="49.5,49.8,49.9,50.3,50.6,50.6,51.1,51,51.4,51.7,51.8,52.1,52.4|46.6,46.8,46.9,47.2,47.5,47.6,48,48,48.3,48.6,48.7,49,49.5"></svg>
-      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d neu">n/a</span><span class="bar" style="background:transparent"></span></div>
-      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d good num">&#9650; +2.9pp</span><span class="bar"><i></i><b class="bg-good" style="left:40px;width:23px"></b></span></div>
-    </div>
-    <div class="card hero" style="left:1076px;top:0;width:332px;height:192px" title="Balance 30+ days past due as a share of outstanding principal, last closed month. Down is favourable.">
-      <div class="lab">Bad / overdue loans</div>
-      <div class="val num">4.6%</div>
-      <div class="sub">30+ DPD by balance - 90+ 2.1 % - vintage 6m 3.4 %</div>
-      <svg class="spark" data-spark="4.3,4.4,4.5,4.6,4.7,4.7,4.6,4.6,4.6,4.6,4.6,4.6,4.6|3.8,3.8,3.9,3.9,3.9,4,4,4,4,4,3.9,3.9,3.9"></svg>
-      <div class="cr" style="top:124px"><span class="n">vs Budget</span><span class="d off num">&#9650; +0.6pp</span><span class="bar"><i></i><b class="bg-off" style="right:41px;width:10px"></b></span></div>
-      <div class="cr" style="top:148px"><span class="n">vs Prior year</span><span class="d off num">&#9650; +0.7pp</span><span class="bar"><i></i><b class="bg-off" style="right:41px;width:11px"></b></span></div>
-    </div>
-
-    <!-- why grid: y 324 -> 208 ; y 500 -> 384 -->
-    <div class="card" style="left:32px;top:208px;width:680px;height:160px">
-      <div class="ct"><span>Loans issued by month vs Budget</span><span class="acts"><i class="icon">i</i><span>Open loans issued &#8599;</span></span></div>
-      <svg class="chart" id="c-o5" width="648" height="84"></svg>
-      <div class="legend"><span><i class="sw"></i>Actual</span><span><i class="sw t"></i>Budget</span><span><i class="sw dash"></i>Prior year</span><span><i class="sw sq" style="background:var(--accent);border:1px solid var(--ink);width:10px;height:10px"></i>selected month</span></div>
-    </div>
-    <div class="card" style="left:728px;top:208px;width:680px;height:160px">
-      <div class="ct"><span>New clients by acquisition channel</span><span class="acts"><i class="icon">i</i><span>Open clients &#8599;</span></span></div>
-      <svg class="chart" id="c-o6" width="648" height="92"></svg>
-      <div class="legend"><span><i class="sw sq"></i>Sep 2026</span><span><i class="sw sq" style="background:transparent;border:1px solid var(--g400)"></i>Prior year</span></div>
-    </div>
-    <div class="card" style="left:32px;top:384px;width:680px;height:160px">
-      <div class="ct"><span>Returning clients - cohort repeat curve</span><span class="acts"><i class="icon">i</i><span>Open clients &#8599;</span></span></div>
-      <svg class="chart" id="c-o7" width="648" height="84"></svg>
-      <div class="legend"><span><i class="sw"></i>Cohort Q3 2026</span><span><i class="sw t"></i>Q2 2026</span><span><i class="sw dash"></i>Q3 2025</span></div>
-    </div>
-    <div class="card" style="left:728px;top:384px;width:680px;height:160px">
-      <div class="ct"><span>30+ DPD by market, 13 months</span><span class="acts"><i class="icon">i</i><span>Open portfolio quality &#8599;</span></span></div>
-      <svg class="chart" id="c-o8" width="648" height="84"></svg>
-      <div class="callout" style="left:300px;top:40px">RO credit policy tightened Mar 2026</div>
-      <div class="legend"><span><i class="sw"></i>Poland</span><span><i class="sw t"></i>Romania</span><span><i class="sw dash"></i>Portugal</span></div>
-    </div>
-
-    <!-- table: y 676 -> 560 -->
-    <div class="card" style="left:32px;top:560px;width:1376px;height:118px">
-      <div class="ct"><span>Markets - Sep 2026</span><span class="acts"><span>Show loans &#8599;</span></span></div>
-      <table id="mkt" aria-label="Markets">
-        <thead><tr><th style="width:160px">Market</th><th class="r" style="width:120px">Loans</th><th class="r" style="width:120px">vs Budget</th><th class="r" style="width:140px">Principal &euro;</th><th class="r" style="width:140px">New clients</th><th class="r" style="width:120px">Returning %</th><th class="r" style="width:120px">30+ DPD %</th><th style="width:96px">Status</th><th></th></tr></thead>
-        <tbody>
-          <tr data-m="Poland"><td>Poland</td><td class="r">13.1k</td><td class="r watch">&#9660; &minus;2.3%</td><td class="r">&euro;5.3m</td><td class="r">5.2k</td><td class="r">56.1%</td><td class="r">4.6%</td><td><span class="chip watch">&#9660; Watch</span></td><td></td></tr>
-          <tr data-m="Romania"><td>Romania</td><td class="r">6.0k</td><td class="r off">&#9660; &minus;12.0%</td><td class="r">&euro;2.4m</td><td class="r">2.4k</td><td class="r">50.2%</td><td class="r">4.9%</td><td><span class="chip off">&#9660; Off</span></td><td></td></tr>
-          <tr data-m="Portugal"><td>Portugal</td><td class="r">6.5k</td><td class="r good">&#9650; +11.0%</td><td class="r">&euro;2.5m</td><td class="r">3.2k</td><td class="r">44.8%</td><td class="r">4.2%</td><td><span class="chip good">&#9650; Good</span></td><td></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ======================= VIEW 2 - LOANS ISSUED (wireframe) ======================= -->
+  <section class="view on" id="v1" role="tabpanel"></section>
   <section class="view" id="v2" role="tabpanel"></section>
-  <!-- ======================= VIEW 3 - CLIENTS (wireframe) ======================= -->
   <section class="view" id="v3" role="tabpanel"></section>
-  <!-- ======================= VIEW 4 - PORTFOLIO QUALITY (wireframe) ======================= -->
   <section class="view" id="v4" role="tabpanel"></section>
-  <!-- ======================= VIEW 5 - REVENUE & TARGETS (wireframe) ======================= -->
   <section class="view" id="v5" role="tabpanel"></section>
 
-  <!-- ======================= slide-over ======================= -->
+  <div class="glass pop" id="pop" role="dialog" aria-modal="false" aria-labelledby="pop-h" tabindex="-1"><button class="x" aria-label="Close">&#10005;</button><h3 id="pop-h"></h3><dl id="pop-b"></dl></div>
+
   <div class="scrim" id="scrim"></div>
-  <aside class="so" id="so" aria-label="Loan detail">
-    <div class="hd"><h2 id="so-title">6,012 loans - Romania - Sep 2026</h2><p>Loan grain - Actual only - filters carried from the Overview</p><button class="x" id="so-x" aria-label="Close">&#10005;</button></div>
+  <aside class="so glass" id="so" aria-label="Loan detail" tabindex="-1">
+    <div class="hd"><h2 id="so-title">5,412 loans - Romania - Sep 2026</h2><p>Sep 2026 - Month - Actual - EUR - loan grain</p><button class="x" id="so-x" aria-label="Close">&#10005;</button></div>
     <div class="chips"><span class="chip">Sep 2026 - Month</span><span class="chip" id="so-chip">Romania</span><span class="chip">All products</span><span class="chip">All channels</span></div>
-    <table aria-label="Loans">
-      <thead><tr><th>Loan id</th><th>Client</th><th>Product</th><th>Channel</th><th>Disbursed</th><th class="r">Principal</th><th class="r">Outstanding</th><th class="r">DPD</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr><td>L-26-091204</td><td>C-412 887</td><td>Step 12</td><td>App</td><td>29 Sep 2026</td><td class="r">&euro;640</td><td class="r">&euro;640</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-091188</td><td>C-388 102</td><td>Flex 30</td><td>Marketplace</td><td>29 Sep 2026</td><td class="r">&euro;210</td><td class="r">&euro;210</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-091151</td><td>C-201 554</td><td>Biz Boost</td><td>Agents</td><td>28 Sep 2026</td><td class="r">&euro;1,850</td><td class="r">&euro;1,850</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-090976</td><td>C-455 310</td><td>Flex 90</td><td>Partner</td><td>26 Sep 2026</td><td class="r">&euro;300</td><td class="r">&euro;300</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-090851</td><td>C-109 988</td><td>Step 6</td><td>Web</td><td>24 Sep 2026</td><td class="r">&euro;420</td><td class="r">&euro;350</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-090702</td><td>C-377 420</td><td>Flex 30</td><td>App</td><td>22 Sep 2026</td><td class="r">&euro;180</td><td class="r">&euro;180</td><td class="r">4</td><td>Current</td></tr>
-        <tr><td>L-26-090655</td><td>C-290 017</td><td>Step 12</td><td>App</td><td>21 Sep 2026</td><td class="r">&euro;600</td><td class="r">&euro;550</td><td class="r">0</td><td>Current</td></tr>
-        <tr><td>L-26-090611</td><td>C-122 870</td><td>Flex 90</td><td>Marketplace</td><td>20 Sep 2026</td><td class="r">&euro;250</td><td class="r">&euro;250</td><td class="r">12</td><td>Overdue</td></tr>
-      </tbody>
-    </table>
-    <div class="foot"><button>Export CSV</button><button>Sort: disbursed &#9662;</button>Showing 8 of 6,012 rows - row click opens the client card</div>
+    <table aria-label="Loans"><thead><tr><th>Loan id</th><th>Client</th><th>Product</th><th>Channel</th><th>Disbursed</th><th class="r">Principal</th><th class="r">Outstanding</th><th class="r">DPD</th><th>Status</th></tr></thead><tbody id="so-rows"></tbody></table>
+    <div class="foot"><button>Export CSV</button><button>Sort: disbursed &#9662;</button><span id="so-foot">8 of 5,412</span></div>
   </aside>
 </div>
 
@@ -248,65 +162,148 @@ svg text{font-family:inherit}
 (function(){
   var NS='http://www.w3.org/2000/svg';
   var C={ink:'#111111',teal:'#128C94',g600:'#5C5C58',g400:'#7F7E79',g300:'#BDBBB5',line:'#CFCDC6',panel2:'#DEDDD8',accent:'#FFD54A',white:'#FFFFFF',marker:'#2F2F2D'};
+  var MONTHS=['Sep','Oct','Nov','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+  var ISVG='<svg class="ii" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="7" width="1.5" height="5" fill="currentColor"/><circle cx="8" cy="4.6" r=".9" fill="currentColor"/></svg>';
   function el(p,t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
   function txt(p,x,y,s,o){o=o||{};return el(p,'text',{x:x,y:y,'font-size':o.fs||11,fill:o.fill||C.g600,'text-anchor':o.anchor||'start','font-weight':o.fw||400},s);}
-  var MONTHS=['Sep','Oct','Nov','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+  function ibtn(id){return '<button class="ib" data-info="'+id+'" aria-haspopup="dialog" aria-label="About this card">'+ISVG+'</button>';}
 
-  /* ---- line chart: series [{v:[..],color,dash,dots}] ---- */
+  /* ================= INFO registry: what - why - formula - sub-values - source ================= */
+  var INFO={
+    /* Overview */
+    o1:['Loans issued','Number of loans disbursed in the window and the principal paid out, in EUR.','The volume engine: every other number on this page follows from how many loans go out and how big they are.','Count of fact_loan rows with disbursed_date in the window. Principal = sum of principal_local divided by the ACTUAL_AVG rate of the loan\'s month and currency (= sum of principal_eur).','Budget 24,309 loans (+0.4 %) - principal vs Budget EUR 9.82m (-2.3 %) - average ticket EUR 393 (Budget EUR 404) - Prior year 21,185 loans / EUR 8.04m - FY2026 YTD 209,898 loans / EUR 82.1m','fact_loan - fact_target (LOANS, PRINCIPAL_LOCAL) - param_fx'],
+    o2:['New clients locked in','Clients whose first loan was disbursed in the window.','Shows whether the acquisition doors still bring in people who actually borrow - approvals that are never taken up do not count.','Sum of fact_loan.is_first_loan in the window (= dim_client rows with first_loan_date in the window).','40.1 % of loans - by channel: App 3,620 (37 %) - Partner 2,846 (29 %) - Paid 2,509 (26 %) - Agents 821 (8 %) - Budget 9,905 (-1.1 %) - Prior year 9,281 (+5.5 %)','fact_loan (is_first_loan) - dim_client - fact_target (NEW_CLIENTS) - dim_channel'],
+    o3:['Returning clients','Share of this month\'s borrowers who had borrowed before.','Repeat business is cheaper and lower-risk than acquisition; a rising share means the client base is maturing.','Distinct client_id with is_repeat = TRUE among the window\'s loans divided by distinct client_id among the window\'s loans. Loan-weighted sub-value: sum of is_repeat divided by loans.','14,614 of 24,410 borrowers - loan-weighted 59.9 % - 180-day repeat of the Mar 2026 cohort 43.5 % (90-day 27.6 %) - Prior year 56.2 % (+3.7 pp) - no Budget target','fact_loan (client_id, is_repeat, prior_loans) - dim_client'],
+    o4:['Bad / overdue loans','Balance 30 or more days past due as a share of the outstanding book at the last closed month. Down is favourable.','Tells whether the growth being sold is healthy; the risk appetite in the Budget is the limit.','(bal_dpd_30_59 + bal_dpd_60_89 + bal_dpd_90p) divided by outstanding_local from fact_loan_month at the last closed month, each market translated at that month\'s rate before summing.','EUR 1.50m of EUR 32.47m outstanding - 90+ DPD 2.6 % - 30+ by count 4.6 % - vintage 6-month bad rate (Mar 2026) 2.9 % - Budget appetite 4.2 % (PL 4.0 / RO 4.5 / PT 4.2, outstanding-weighted) - Prior year 5.6 % (-0.9 pp)','fact_loan_month - fact_target (DPD30_RATIO) - param_thresholds - param_fx'],
+    o5:['Loans issued by month vs Budget','Loans disbursed per month over the last 13 months, with the Budget and the same month a year earlier.','Shows seasonality and whether a miss is one month or a trend.','Count of fact_loan per month; Budget = fact_target LOANS per month; Prior year = the month 12 months earlier.','Sep 2026: 24,410 vs 26,373 in Dec 2025 (peak) and 20,966 in Feb 2026 (trough) - Budget met in 7 of 13 months','fact_loan - fact_target - dim_month'],
+    o6:['New clients by acquisition channel','First-loan clients of the month by the channel that brought them, with the prior-year ghost bar.','Which door is working: Paid was cut in May 2026, App and Partner carry the growth.','Sum of is_first_loan per channel_code of the first loan.','App 3,620 (PY 2,890) - Partner 2,846 (PY 1,723) - Paid 2,509 (PY 3,950) - Agents 821 (PY 718)','fact_loan - dim_channel'],
+    o7:['Returning clients - cohort repeat curve','Of the clients whose first loan fell in a cohort month, the share that took a second loan within n days.','Answers how fast clients come back, not only whether.','Clients with first loan in the cohort month; second loan = first fact_loan row with prior_loans >= 1; share with (second - first) <= n days.','Mar 2026 cohort (10,397 clients): 27.6 % at 90 days, 43.5 % at 180 - Mar 2025: 28.2 % / 44.3 % - Jun 2026 (partial): 27.9 % at 90 days','fact_loan - dim_client (cohort_month)'],
+    o8:['30+ DPD by market, 13 months','The 30+ days-past-due ratio per market at each month end.','Romania\'s credit tightening in Mar 2026 shows as the teal line coming down from 7.3 % to 4.1 %.','30+ DPD balance divided by outstanding, per market and month end.','Sep 2026: PL 4.8 % - RO 4.1 % - PT 4.9 % - Sep 2025: PL 4.7 % - RO 7.3 % - PT 4.8 %','fact_loan_month - dim_market'],
+    o9:['Markets - Sep 2026','One row per market with the four priority metrics and the loans variance against the comparator.','The first drill: the row that is off explains most of the total.','Same definitions as the four cards, filtered to the market. Status = loans vs Budget (good >= 0 %, watch -5 to 0 %, off < -5 %).','PL 11,713 loans vs Budget 11,537 - RO 5,412 vs 6,226 - PT 7,285 vs 6,546 - principal vs Budget: PL -6.8 % - RO -13.5 % - PT +11.6 %','fact_loan - fact_target - fact_loan_month - dim_market'],
+    /* Loans issued */
+    l1:['Loans','Loans disbursed in the window.','Tier-1 volume.','Count of fact_loan rows with disbursed_date in the window.','Budget 24,309 - Prior year 21,185 (+15.2 %)','fact_loan - fact_target (LOANS)'],
+    l2:['Principal','Principal disbursed, in EUR.','Volume in money; the FX swing of the PLN shows here, not in the count.','Sum of principal_eur (local divided by the ACTUAL_AVG rate of the month).','Budget EUR 9.82m - Prior year EUR 8.04m (+19.3 %) - Budget translated at the 2026 BUDGET rate (PLN 4.18, RON 5.08)','fact_loan - fact_target (PRINCIPAL_LOCAL) - param_fx'],
+    l3:['Average ticket','Principal per loan.','Mix and product changes move the ticket, not the count.','Principal divided by loans.','Budget EUR 404 (-2.7 %) - Prior year EUR 379 (+3.5 %) - Step 12 share of loans 9.0 %','fact_loan'],
+    l4:['Approval rate','Share of submitted applications that passed credit, cohorted by submission day.','The credit step is the biggest leak of the funnel (new clients 36.9 %).','approved divided by apps_submitted.','Prior year 52.5 % (+1.3 pp) - new clients 36.9 % (PY 37.3 %) - KYC pass 92.9 % - no Budget target','fact_application'],
+    l5:['Take-up rate','Share of approved applications that were disbursed.','A sales problem (pricing, UX), not a credit one.','disbursed divided by approved.','Prior year 88.3 % (+0.6 pp) - 27,429 approved, 24,407 disbursed by submission day','fact_application'],
+    l6:['Time to cash','Median hours from submission to disbursement. Down is favourable.','Instant payout (Oct 2025) took it from 4.9 h to 3.5 h.','Median of fact_loan.hours_to_cash over the window\'s loans.','Prior year 4.9 h (-1.4 h) - approval leg median 2.3 h (PY 3.2 h)','fact_loan (hours_to_cash, hours_to_approve)'],
+    l7:['Loans by month vs Budget','Draft: placeholder shape. Loans per month (columns) with the Budget line and the prior-year ghost.','When a miss happened.','Count of fact_loan per month vs fact_target LOANS.','See the Overview panel for the real series','fact_loan - fact_target'],
+    l8:['Application funnel','Draft: placeholder shape. Started - Submitted - KYC passed - Approved - Disbursed, with the share of the previous stage.','Where applications leak.','fact_application columns in dim_funnel_stage order; lost outcomes are the differences between stages.','Sep 2026: leads 118.6k - started 61.7k - submitted 51.0k - KYC 47.4k - approved 27.4k - disbursed 24.4k','fact_application - dim_funnel_stage'],
+    l9:['Originations bridge Budget to Actual','Draft: placeholder shape. Budget principal to Actual principal in four steps: volume, ticket, product mix, FX.','How much of the gap comes from each cause.','Volume = (loans - Budget loans) x Budget ticket; ticket = loans x (ticket - Budget ticket) at Budget mix; mix = residual at Budget rates; FX = Actual rates minus Budget rates on the Actual local amounts.','Budget EUR 9.82m to Actual EUR 9.59m (-2.3 %)','fact_loan - fact_target - param_fx'],
+    l10:['Loans by product x market','Draft: placeholder shape. Stacked bars per market with the five loan products.','Where the volume sits; Step 12 is not offered in Portugal.','Count of fact_loan per market_code x product_code.','Sep 2026 PL: Flex 30 3,571 - Flex 90 2,750 - Step 6 2,447 - Step 12 1,540 - Biz 1,405; RO: 1,589 / 1,206 / 1,214 / 650 / 753; PT: 2,708 / 2,023 / 2,380 / - / 174','fact_loan - dim_product - dim_market'],
+    l11:['Attainment by channel','Draft: placeholder shape. Loans per channel against the channel\'s share of the Budget.','Which channel carries the plan.','Loans per channel_code divided by the channel target (Budget LOANS allocated by the prior-year channel mix - draft assumption).','Sep 2026 loans: App 15,475 - Partner 4,225 - Paid 3,257 - Agents 1,453','fact_loan - fact_target - dim_channel'],
+    l12:['Stage cycle time vs SLA','Draft: placeholder shape. Median hours per funnel leg against the SLA of dim_funnel_stage.','Which leg is slow.','Only two legs carry timestamps: submitted to approved (hours_to_approve) and approved to disbursed (hours_to_cash - hours_to_approve).','Sep 2026: approve 2.3 h - cash 3.5 h','fact_loan - dim_funnel_stage (sla_hours)'],
+    l13:['Agent and partner leaderboard - Sep 2026','Agents and partners ranked by attainment of their monthly loan quota.','Coaching view: the star, the laggard and the ramp cohort.','Agent loans = fact_loan rows with the agent_code; quota = fact_target AGENT_LOANS for the month; attainment = loans divided by quota. Status: good >= 100 %, watch 90-99 %, off < 90 %.','40 agents with a quota, 55 % at or above target - top: Andrei Stan 185 %, Anna Wojcik 183 % - ramp cohort (8 agents from Jan 2026) tagged','fact_loan - fact_target (AGENT_LOANS) - dim_agent'],
+    /* Clients */
+    c1:['New clients','Clients whose first loan was disbursed in the window.','Acquisition volume.','Sum of fact_loan.is_first_loan.','Budget 9,905 (-1.1 %) - Prior year 9,281 (+5.5 %) - 40.1 % of loans','fact_loan - fact_target (NEW_CLIENTS)'],
+    c2:['Returning clients %','Share of borrowers who had borrowed before (client-weighted).','Retention headline.','Distinct repeat borrowers divided by distinct borrowers.','Prior year 56.2 % (+3.7 pp) - FY2026 YTD 62.1 %','fact_loan - dim_client'],
+    c3:['Repeat share (loans)','Share of loans that went to returning clients (loan-weighted).','Equal to the client-weighted ratio in a single month; higher over long windows because returning clients borrow more often.','Sum of is_repeat divided by loans.','Prior year 56.2 % (+3.7 pp) - FY2026 YTD 60.2 %','fact_loan'],
+    c4:['New-client approval rate','Approval rate of first-time applicants.','The credit step for newcomers; Romania tightened it in Mar 2026.','approved divided by apps_submitted where is_repeat = FALSE.','Prior year 37.3 % (-0.4 pp) - KYC pass for new applicants 88.9 %','fact_application'],
+    c5:['180-day repeat','Share of the Mar 2026 cohort (last cohort with 180 days of history) that took a second loan within 180 days.','Speed of return.','Second loan within 180 days of first_loan_date divided by cohort clients.','Mar 2026 cohort 10,397 clients: 43.5 % (90-day 27.6 %) - Mar 2025 cohort 44.3 % (-0.9 pp)','fact_loan - dim_client (cohort_month)'],
+    c6:['Days between loans','Median days from the previous loan to this one, for repeat loans of the month.','Context: one active loan at a time, the next follows repayment.','Median of (disbursed_date - previous disbursed_date of the same client) over repeat loans in the window.','Prior year 110 d (+5 d, neutral)','fact_loan'],
+    c7:['New clients by channel, 13 months','Draft: placeholder shape. Stacked columns of first-loan clients per month by channel, Budget total as a tick.','The door mix over time.','Sum of is_first_loan per month x channel_code.','Sep 2026 total 9,796 - Dec 2025 peak 11,600 - Aug 2026 trough 7,893','fact_loan - dim_channel - fact_target'],
+    c8:['New-client funnel','Draft: placeholder shape. Leads - first application - first approval - first loan, with the share of the previous stage.','Where first-timers drop.','fact_application with is_repeat = FALSE; stages in dim_funnel_stage order.','New-client approval 36.9 % - KYC pass 88.9 %','fact_application'],
+    c9:['Cohort repeat curves (quarter cohorts)','Draft: placeholder shape. Share with a second loan by days since the first, one line per quarter cohort.','Speed of return by cohort.','Same as the 180-day repeat, by day.','Mar 2026: 27.6 % at 90 d, 43.5 % at 180 d','fact_loan - dim_client'],
+    c10:['Returning % by market x segment - repeat share by product','Draft: placeholder shape. Heat matrix of the returning share by market and consumer / micro-business, and repeat share per product.','Which markets and products create the habit.','Returning % per market_code x segment_code; repeat share per product_code.','Sep 2026 returning %: PL 59.8 - RO 59.8 - PT 60.1','fact_loan - dim_client (segment_code) - dim_product'],
+    c11:['Clients - Sep 2026 cohort','One row per client whose first loan was disbursed in Sep 2026.','The lowest grain of the Clients view; a row opens the client\'s loans.','dim_client rows with cohort_month = 2026-09.','9,796 clients in the cohort - 5 shown','dim_client - fact_loan'],
+    /* Portfolio quality */
+    p1:['30+ DPD %','Balance 30+ days past due as a share of outstanding at Sep 2026. Down is favourable.','Tier-1 credit quality.','See the Overview card.','Budget appetite 4.2 % (+0.4 pp) - Prior year 5.6 % (-0.9 pp)','fact_loan_month - fact_target (DPD30_RATIO)'],
+    p2:['90+ DPD %','Balance 90+ days past due as a share of outstanding. Down is favourable.','The "bad" part of overdue; no interest accrues from 90 DPD.','bal_dpd_90p divided by outstanding at the last closed month.','Prior year 2.8 % (-0.2 pp) - EUR 0.85m of EUR 32.47m','fact_loan_month'],
+    p3:['30+ by count','Share of active loans that are 30+ days past due. Down is favourable.','Count view of the same risk; insensitive to ticket size.','Sum of loans_dpd_30p divided by sum of loans_active.','Prior year 5.5 % (-1.0 pp)','fact_loan_month'],
+    p4:['Vintage 6-month bad rate','Share of the Mar 2026 vintage that reached 90+ DPD within six months on book. Down is favourable.','Ties credit quality to the sales period in which the loans were issued.','Sum of loans_first_90p over rows with months on book <= 6 divided by loans_disbursed of the vintage.','Mar 2025 vintage 3.4 % (-0.5 pp) - Feb 2026 3.3 % - Sep 2025 3.3 %','fact_loan_month (vintage_month)'],
+    p5:['Roll rate 30 to 60','Share of last month\'s 30-59 DPD balance that is 60-89 DPD this month. Down is favourable.','Early warning: are late payers curing or sliding?','bal_dpd_60_89 this month divided by bal_dpd_30_59 last month, same vintage cells (approximation, balances also amortise).','Prior year 80.1 % (-2.4 pp)','fact_loan_month'],
+    p6:['Cost of risk','Provision charge of the month, annualised, over the average outstanding book. Down is favourable.','What the overdue loans cost; high by design for a 1-3 month microloan book.','provision_local x 12 divided by the average of this and last month\'s outstanding (both translated).','Prior year 14.3 % (-3.9 pp) - FY2026 YTD 11.2 % - write-offs in the month EUR 0.29m','fact_loan_month (provision_local, written_off_local)'],
+    p7:['DPD buckets, 13 months','Draft: placeholder shape. Stacked balance in 1-29, 30-59, 60-89 and 90+ DPD per month end.','How overdue the overdue is.','bal_dpd_* columns per month, translated.','Sep 2026: 1-29 EUR 0.51m - 30-59 0.35m - 60-89 0.30m - 90+ 0.85m','fact_loan_month - param_thresholds (DPD_BUCKET)'],
+    p8:['Vintage curves','Draft: placeholder shape. Cumulative 30+ rate by months on book, one line per vintage quarter.','Which sales periods went bad.','loans_first_30p cumulated by months on book divided by loans_disbursed of the vintage.','Vintage 6-month bad rate 2.9 to 3.8 % across 2025-01 to 2026-03','fact_loan_month'],
+    p9:['Bad rate by product x market','Draft: placeholder shape. Heat matrix of the vintage bad rate (Oct 2025 - Mar 2026 vintages) per product and market.','Where the risk sits: Flex 90 in Romania is the worst cell.','loans_first_90p within 6 months on book divided by loans_disbursed, per market x product.','RO Flex 90 4.7 % - RO Step 6 3.9 % - RO Flex 30 3.8 % - PT Flex 90 3.7 % - PL Flex 90 3.7 % - best: PT Biz 1.8 %','fact_loan_month - dim_product - dim_market'],
+    p10:['30+ DPD by market','Draft: placeholder shape. See the Overview panel for the real series.','Romania recovers after the Mar 2026 policy change.','30+ DPD balance divided by outstanding per market and month.','Sep 2026: PL 4.8 % - RO 4.1 % - PT 4.9 %','fact_loan_month - dim_market'],
+    p11:['Roll rates by month','Draft: placeholder shape. 30 to 60 and 60 to 90 roll rates per month.','Are late payers curing?','bal of the next bucket this month divided by the bucket balance last month.','Sep 2026: 30 to 60 77.6 % (PY 80.1 %)','fact_loan_month'],
+    p12:['Segments: size x DPD','Draft: placeholder shape. One bubble per product x market: average ticket (x), 30+ DPD (y), outstanding (size).','Big and bad cells first.','Per market x product at the last closed month.','15 cells; worst: RO Flex 90','fact_loan_month - fact_loan'],
+    p13:['Overdue loans - Sep 2026','One row per loan that is 30+ days past due at the last closed month, worst first.','The lowest grain of the Portfolio view; a row opens the client card.','fact_loan rows with status_code in DPD_30_59, DPD_60_89, DPD_90P, sorted by dpd_days_close.','Outstanding shown in EUR at the Sep 2026 rate - 5 shown','fact_loan - dim_loan_status - dim_client'],
+    /* Revenue */
+    r1:['Revenue','Interest + fees + interchange + subscriptions of the month, in EUR.','The outcome of the loans issued.','Sum of fact_revenue_month.amount_eur.','Budget EUR 1.39m (-3.2 %) - Prior year EUR 1.05m (+28.3 %) - FY2026 YTD EUR 11.98m','fact_revenue_month - fact_target (REVENUE_LOCAL) - param_fx'],
+    r2:['Attainment','Revenue divided by the Budget revenue of the month.','Are we on the number?','Revenue divided by fact_target REVENUE_LOCAL translated at the BUDGET rate. Status: good >= 100 %, watch 95-99.9 %, off < 95 %.','EUR 1.34m of EUR 1.39m - FY2026 YTD 98.1 % (draft estimate) - no pace: Sep is closed','fact_revenue_month - fact_target'],
+    r3:['Interest + fees','Interest income and loan fees of the month.','81 % of revenue; the Budget carries interest and fees together per loan product.','Sum of amount_eur for INTEREST and FEE.','Interest EUR 787k - fees EUR 286k - Budget (loan products) EUR 1.11m (-3.8 %) - Prior year EUR 848k (+26.5 %)','fact_revenue_month - dim_revenue_type - fact_target'],
+    r4:['Interchange','Card interchange of the month.','Small but growing with active accounts.','Sum of amount_eur for INTERCHANGE (product CARD).','Budget EUR 117k (+4.3 %) - Prior year EUR 75k (+63.7 %)','fact_revenue_month - fact_target'],
+    r5:['MRR','Month-end paying subscribers x tier price, in EUR.','Recurring revenue base; the Plus price rise of Jan 2026 lifted it despite churn.','Sum of fact_subscription_month.mrr_eur for PLUS and PRO at the last closed month (period-end, never summed).','Prior year EUR 124k (+18.7 %) - subscription revenue of the month EUR 146k vs Budget EUR 154k (-5.0 %)','fact_subscription_month'],
+    r6:['Paying subscribers','Plus and Pro subscribers at month end.','The base behind MRR.','Sum of subscribers_end for PLUS and PRO at the last closed month.','Plus 15,376 - Pro 8,032 - Prior year 20,869 (+12.1 %) - churn of paying tiers 2.1 % (PY 2.1 %)','fact_subscription_month'],
+    r7:['Revenue by month vs Budget vs PY','Draft: placeholder shape. Monthly revenue with the Budget and prior-year lines.','Trend of the outcome.','Sum of amount_eur per month; Budget translated at the BUDGET rate.','Sep 2026 EUR 1.34m - May 2026 peak EUR 1.40m - Budget beaten in 6 of 13 months','fact_revenue_month - fact_target'],
+    r8:['Revenue by stream, 13 months','Draft: placeholder shape. Stacked columns: interest, fees, interchange, subscriptions.','Mix of the outcome.','Sum of amount_eur per month x revenue_type_code.','Sep 2026: interest 59 % - fees 21 % - interchange 9 % - subscriptions 11 %','fact_revenue_month - dim_revenue_type'],
+    r9:['Attainment by market','Draft: placeholder shape. Revenue vs Budget per market as bullets.','Where the revenue gap is.','Revenue divided by Budget revenue per market.','Sep 2026: PL EUR 480k vs 520k (92.3 %) - RO EUR 350k vs 407k (85.8 %) - PT EUR 511k vs 458k (111.6 %)','fact_revenue_month - fact_target - dim_market'],
+    r10:['MRR and subscribers by tier','Draft: placeholder shape. Stacked subscribers Plus / Pro per month with MRR labels on top (no dual axis).','The recurring base over time.','subscribers_end and mrr_eur per month x tier.','Sep 2026: Plus 15.4k - Pro 8.0k - MRR EUR 147k','fact_subscription_month'],
+    r11:['Subscriber churn %','Draft: placeholder shape. Churned paying subscribers over subscribers at the start of the month.','The Plus price rise of Jan 2026 spiked churn to 4.1 % in Feb-Mar.','subscribers_churned divided by subscribers_start for PLUS and PRO.','Sep 2026 2.1 % (PY 2.1 %)','fact_subscription_month'],
+    r12:['Channel mix, share of loans','Draft: placeholder shape. 100 % stacked columns of loans by channel per month.','Paid bids were cut in May 2026: Paid share falls from 21 % to 13 %.','Loans per channel divided by loans of the month.','Sep 2026: App 63 % - Partner 17 % - Paid 13 % - Agents 6 %','fact_loan - dim_channel'],
+    r13:['Stream x market - Sep 2026','Revenue per stream with the Budget and the prior year.','The matrix behind the Revenue card; interest and fees share one Budget line per loan product.','Sum of amount_eur per revenue_type_code; Budget per product translated at the BUDGET rate.','Total EUR 1.34m vs Budget EUR 1.39m (-3.2 %) and PY EUR 1.05m (+28.3 %)','fact_revenue_month - fact_target - dim_revenue_type']
+  };
+  var HOWTO={
+    v1:['How to read - Overview',[['Showing','Sep 2026 - Month - All markets - EUR - Actual vs Budget and Prior year - closed through Sep 2026.'],['Top band','The four priority metrics. Arrow = direction of the change, colour and chip word = meaning: green good, amber watch, red off. Bars share one scale: 20 % or 5 pp fills half the track.'],['Grid','One "why" panel per metric. Black = Actual, teal = Budget or the comparison, dashed grey = prior year; the yellow dot is the selected month. Click a mark to filter the view; the arrow button opens the metric\'s own view with the same filters.'],['Table','One row per market. Status follows loans vs Budget. Click a row to open the loan-level detail with every filter carried over.'],['(i)','Every card has an (i) button bottom-left with the definition, the formula, the sub-values and the source table.']]],
+    v2:['How to read - Loans issued',[['Showing','Sep 2026 - Month - All markets - EUR.'],['Cards','Loans, principal and ticket compare with the Budget; the funnel rates and time to cash compare with the prior year (no Budget target). Time to cash: down is good.'],['Panels','Funnel bars read top to bottom with the share of the previous stage; the bridge walks from Budget to Actual principal; bullets show loans against the channel target.'],['Table','Agents and partners ranked by quota attainment; status good >= 100 %, watch 90-99 %, off below. Click a row for the agent\'s loans.']]],
+    v3:['How to read - Clients',[['Showing','Sep 2026 - Month - All markets.'],['Cards','New clients compare with the Budget; the returning ratios compare with the prior year in pp; the 180-day repeat compares the Mar 2026 cohort with the Mar 2025 cohort.'],['Panels','Left column = acquisition (which door, where first-timers drop); right column = retention (how fast clients come back, which products create the habit).'],['Table','One row per client of the Sep 2026 cohort. Click a row for the client card and that client\'s loans.']]],
+    v4:['How to read - Portfolio quality',[['Showing','Sep 2026 month end - All markets - EUR at the September rate.'],['Cards','All six are "down is good": a red arrow pointing up means the ratio rose. 30+ DPD compares with the Budget risk appetite; the others with the prior year.'],['Panels','Buckets show how overdue the book is; vintage curves and the heat matrix show which sales periods and cells went bad; roll rates show whether late payers cure.'],['Table','Overdue loans, worst first. Click a row for the loan and its client.']]],
+    v5:['How to read - Revenue & targets',[['Showing','Sep 2026 - Month - All markets - EUR.'],['Cards','Revenue, interest + fees and interchange compare with the Budget (translated at the Budget rate); MRR and subscribers compare with the prior year. Attainment = revenue over Budget revenue.'],['Panels','Trend and mix of revenue, attainment per market, the subscription base and churn, and the channel mix of loans.'],['Table','Stream x market with Budget and prior year. Interest and fees share one Budget line per loan product. Click a row for the loans behind it.']]]
+  };
+
+  /* ================= builders ================= */
+  function V(id){return document.getElementById(id);}
+  function row(name,cls,text,top,px,side){
+    var half=0,bar='';
+    return function(h){half=h;var pos=side==='l'?('right:'+(half+1)+'px'):('left:'+(half+1)+'px');
+      bar=cls==='neu'&&text==='n/a'?'<span class="bar" style="background:transparent"></span>':'<span class="bar"><i></i><b class="bg-'+cls+'" style="'+pos+';width:'+px+'px"></b></span>';
+      return '<div class="cr" style="top:'+top+'px"><span class="n">'+name+'</span><span class="d '+cls+' num">'+text+'</span>'+bar+'</div>';};
+  }
+  function hero(view,x,id,label,chip,val,small,rows){
+    var d=document.createElement('div');d.className='card hero';d.style.cssText='left:'+x+'px;top:0;width:332px;height:192px';
+    d.innerHTML='<div class="lab">'+label+'</div><span class="st chip '+chip[0]+'">'+chip[1]+'</span><div class="val num">'+val+(small?'<small>'+small+'</small>':'')+'</div>'+rows.map(function(r){return r(80);}).join('')+ibtn(id);
+    view.appendChild(d);
+  }
+  function kpi(view,x,id,label,val,r){
+    var d=document.createElement('div');d.className='card kpi';d.style.cssText='left:'+x+'px;top:0;width:216px;height:120px';
+    d.innerHTML='<div class="lab">'+label+'</div><div class="val num">'+val+'</div>'+r(40)+ibtn(id);view.appendChild(d);
+  }
+  function panel(view,x,y,w,h,id,title,open,ph_type,chartH){
+    var d=document.createElement('div');d.className='card pan';d.style.cssText='left:'+x+'px;top:'+(y-116)+'px;width:'+w+'px;height:'+h+'px';
+    d.innerHTML='<div class="ct"><span>'+title+'</span><span class="acts">'+(open?'<button>'+open+' &#8599;</button>':'')+'</span></div>';
+    var s=document.createElementNS(NS,'svg');s.setAttribute('class','chart');s.setAttribute('width',w-32);s.setAttribute('height',chartH||h-70);d.appendChild(s);
+    d.insertAdjacentHTML('beforeend',ibtn(id));view.appendChild(d);if(ph_type)ph(s,ph_type);return {card:d,svg:s};
+  }
+  function table(view,y,h,id,title,cols,rows,tight,act){
+    var d=document.createElement('div');d.className='card tbl';d.style.cssText='left:32px;top:'+(y-116)+'px;width:1376px;height:'+h+'px';
+    d.innerHTML='<div class="ct"><span>'+title+'</span><span class="acts">'+(act?'<button>'+act+' &#8599;</button>':'')+'</span></div><table class="'+(tight?'tight':'')+'" aria-label="'+title+'"><thead><tr>'+cols.map(function(c){return '<th'+(c[1]?' class="r"':'')+(c[2]?' style="width:'+c[2]+'px"':'')+'>'+c[0]+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(v,i){return '<td'+(cols[i][1]?' class="r"':'')+'>'+v+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>'+ibtn(id);
+    view.appendChild(d);return d;
+  }
+  function chipT(c){return '<span class="chip '+c[0]+'">'+c[1]+'</span>';}
+
+  /* ---- charts ---- */
   function lineChart(svg,o){
     var W=+svg.getAttribute('width'),H=+svg.getAttribute('height');
-    var padL=o.padL||34,padR=8,padT=6,padB=16;
-    var pw=W-padL-padR,ph=H-padT-padB;
+    var padL=o.padL||34,padR=8,padT=6,padB=16,pw=W-padL-padR,ph=H-padT-padB;
     var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v);});});
-    var min=o.min!=null?o.min:Math.min.apply(null,all),max=o.max!=null?o.max:Math.max.apply(null,all);
-    if(max===min)max=min+1;
-    var n=o.n||o.series[0].v.length;
-    var X=function(i){return padL+i*(pw/(n-1));},Y=function(v){return padT+(1-(v-min)/(max-min))*ph;};
+    var min=o.min!=null?o.min:Math.min.apply(null,all),max=o.max!=null?o.max:Math.max.apply(null,all);if(max===min)max=min+1;
+    var n=o.n||o.series[0].v.length,X=function(i){return padL+i*(pw/(n-1));},Y=function(v){return padT+(1-(v-min)/(max-min))*ph;};
     el(svg,'line',{x1:padL,x2:W-padR,y1:Y(min),y2:Y(min),stroke:C.line});
-    var ticks=o.ticks||[min,max];
-    ticks.forEach(function(t){txt(svg,padL-6,Y(t)+4,o.fmt?o.fmt(t):t,{anchor:'end'});});
+    (o.ticks||[min,max]).forEach(function(t){txt(svg,padL-6,Y(t)+4,o.fmt?o.fmt(t):t,{anchor:'end'});});
     var sparse=pw/(n-1)<36;
     (o.xl||[]).forEach(function(l,i){if(l&&!(sparse&&i%2))txt(svg,X(i),H-3,l,{anchor:i===0?'start':(i===n-1?'end':'middle')});});
-    o.series.forEach(function(s){
-      var pts=[];s.v.forEach(function(v,i){if(v!=null)pts.push(X(i).toFixed(1)+','+Y(v).toFixed(1));});
-      var a={points:pts.join(' '),fill:'none',stroke:s.color,'stroke-width':s.w||2,'stroke-linejoin':'round'};
-      if(s.dash)a['stroke-dasharray']='4 3';
-      el(svg,'polyline',a);
-      if(s.dots)s.v.forEach(function(v,i){if(v!=null)el(svg,'circle',{cx:X(i),cy:Y(v),r:3,fill:s.color});});
-    });
+    o.series.forEach(function(s){var pts=[];s.v.forEach(function(v,i){if(v!=null)pts.push(X(i).toFixed(1)+','+Y(v).toFixed(1));});
+      var a={points:pts.join(' '),fill:'none',stroke:s.color,'stroke-width':s.w||2,'stroke-linejoin':'round'};if(s.dash)a['stroke-dasharray']='4 3';el(svg,'polyline',a);
+      if(s.dots)s.v.forEach(function(v,i){if(v!=null)el(svg,'circle',{cx:X(i),cy:Y(v),r:3,fill:s.color});});});
     if(o.sel!=null){var s0=o.series[0];el(svg,'circle',{cx:X(o.sel),cy:Y(s0.v[o.sel]),r:4.5,fill:C.accent,stroke:C.ink,'stroke-width':1});}
-    if(o.marker!=null){el(svg,'line',{x1:X(o.marker),x2:X(o.marker),y1:padT,y2:padT+ph,stroke:C.marker,'stroke-dasharray':'2 2'});}
+    if(o.marker!=null)el(svg,'line',{x1:X(o.marker),x2:X(o.marker),y1:padT,y2:padT+ph,stroke:C.marker,'stroke-dasharray':'2 2'});
   }
-  /* ---- horizontal bars with ghost ---- */
   function barsH(svg,o){
-    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height');
-    var labW=o.labW||84,valW=o.valW||110,rowH=H/o.rows.length,max=o.max||Math.max.apply(null,o.rows.map(function(r){return Math.max(r.v,r.py||0);}));
-    var pw=W-labW-valW;
-    o.rows.forEach(function(r,i){
-      var y=i*rowH,bh=Math.min(10,rowH-6),cy=y+rowH/2;
-      txt(svg,0,cy+4,r.l,{fill:C.ink,fs:12,fw:500});
-      el(svg,'rect',{x:labW,y:cy-bh/2,width:pw,height:bh,fill:C.panel2});
+    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height'),labW=o.labW||84,valW=o.valW||110,rowH=H/o.rows.length;
+    var max=o.max||Math.max.apply(null,o.rows.map(function(r){return Math.max(r.v,r.py||0);})),pw=W-labW-valW;
+    o.rows.forEach(function(r,i){var y=i*rowH,bh=Math.min(10,rowH-6),cy=y+rowH/2;
+      txt(svg,0,cy+4,r.l,{fill:C.ink,fs:12,fw:500});el(svg,'rect',{x:labW,y:cy-bh/2,width:pw,height:bh,fill:C.panel2});
       el(svg,'rect',{x:labW,y:cy-bh/2,width:pw*r.v/max,height:bh,fill:r.hl?C.accent:C.ink,stroke:r.hl?C.ink:'none'});
       if(r.py!=null)el(svg,'rect',{x:labW+.5,y:cy-bh/2-2.5,width:pw*r.py/max,height:bh+5,fill:'none',stroke:C.g400});
-      txt(svg,labW+pw+8,cy+4,r.t,{fill:C.ink,fs:12,fw:600});
-    });
+      txt(svg,labW+pw+8,cy+4,r.t,{fill:C.ink,fs:12,fw:600});});
   }
-  /* ---- sparkline ---- */
-  function spark(svg){
-    var d=svg.getAttribute('data-spark').split('|').map(function(s){return s.split(',').map(Number);});
-    svg.setAttribute('viewBox','0 0 120 44');
-    var all=d[0].concat(d[1]),min=Math.min.apply(null,all),max=Math.max.apply(null,all);if(max===min)max=min+1;
-    var X=function(i){return 2+i*(116/12);},Y=function(v){return 4+(1-(v-min)/(max-min))*36;};
-    [1,0].forEach(function(k){var s=d[k];el(svg,'polyline',{points:s.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' '),fill:'none',stroke:k?C.g400:C.ink,'stroke-width':k?1:1.5,'stroke-dasharray':k?'3 2':'none'});});
-    el(svg,'circle',{cx:X(12),cy:Y(d[0][12]),r:3,fill:C.ink});
-  }
-  /* ---- placeholder shapes for wireframes ---- */
   function ph(svg,type){
-    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height'),i,n;
-    var g=C.g300,g2=C.g400;
+    var W=+svg.getAttribute('width'),H=+svg.getAttribute('height'),i,n,g=C.g300,g2=C.g400;
     if(type==='line'){lineChart(svg,{series:[{v:[5,6,7,8,6,5,7,8,8,9,9,10,11],color:g2,dots:true},{v:[6,6,7,8,7,6,7,8,9,9,9,10,11],color:g,dots:true}],xl:MONTHS,ticks:[],padL:8});}
     else if(type==='cols'){n=13;var bw=(W-16)/n*0.6;for(i=0;i<n;i++){var h=20+((i*37)%50);el(svg,'rect',{x:8+i*(W-16)/n,y:H-14-h,width:bw,height:h,fill:g2});}el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
-    else if(type==='stack'){n=13;var bw2=(W-16)/n*0.6;for(i=0;i<n;i++){var base=H-14,hs=[18+((i*13)%14),12+((i*7)%10),8+((i*5)%8),6];var cols=[g2,g,C.panel2,'none'];hs.forEach(function(h,k){el(svg,'rect',{x:8+i*(W-16)/n,y:base-h,width:bw2,height:h,fill:cols[k],stroke:cols[k]==='none'?g2:'none'});base-=h;});}el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
+    else if(type==='stack'){n=13;var bw2=(W-16)/n*0.6;for(i=0;i<n;i++){var base=H-14,hs=[18+((i*13)%14),12+((i*7)%10),8+((i*5)%8),6],cols=[g2,g,C.panel2,'none'];hs.forEach(function(h,k){el(svg,'rect',{x:8+i*(W-16)/n,y:base-h,width:bw2,height:h,fill:cols[k],stroke:cols[k]==='none'?g2:'none'});base-=h;});}el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
     else if(type==='barsH'){var vals=[1,.82,.68,.5,.36],lab=['Stage 1','Stage 2','Stage 3','Stage 4','Stage 5'];barsH(svg,{rows:vals.map(function(v,k){return {l:lab[k],v:v,t:'—'};}),max:1,labW:64,valW:40});svg.querySelectorAll('rect[fill="#111111"]').forEach(function(r){r.setAttribute('fill',g2);});}
     else if(type==='bullets'){var rows=['A','B','C','D','E'],rh=H/rows.length;rows.forEach(function(r,k){var cy=k*rh+rh/2;txt(svg,0,cy+4,'Item '+r,{fill:C.ink,fs:12});el(svg,'rect',{x:70,y:cy-4,width:W-120,height:8,fill:C.panel2});el(svg,'rect',{x:70,y:cy-4,width:(W-120)*(0.55+k*0.09),height:8,fill:g2});el(svg,'rect',{x:70+(W-120)*0.8,y:cy-7,width:2,height:14,fill:g});});}
     else if(type==='bridge'){var steps=[[0,60,'Budget'],[60,48,'volume'],[48,55,'ticket'],[55,58,'mix'],[58,52,'FX'],[0,52,'Actual']],sw=(W-16)/steps.length*0.6;steps.forEach(function(s,k){var x=8+k*(W-16)/steps.length,y0=H-14-Math.max(s[0],s[1]),hh=Math.abs(s[1]-s[0]);if(k===0||k===5){y0=H-14-s[1];hh=s[1];}el(svg,'rect',{x:x,y:y0,width:sw,height:hh,fill:(k===0||k===5)?g2:(s[1]>s[0]?g:C.panel2),stroke:g2});txt(svg,x+sw/2,H-2,s[2],{anchor:'middle'});});el(svg,'line',{x1:0,x2:W,y1:H-14,y2:H-14,stroke:C.line});}
@@ -314,128 +311,153 @@ svg text{font-family:inherit}
     else if(type==='heat'){var rws=5,cls=3,cw=(W-80)/cls,rh2=(H-16)/rws;for(i=0;i<rws;i++){txt(svg,0,16+i*rh2+rh2/2+4,'Row '+(i+1),{fill:C.ink,fs:12});for(var j=0;j<cls;j++){var v=(i*3+j*5)%4;el(svg,'rect',{x:80+j*cw,y:16+i*rh2,width:cw-2,height:rh2-2,fill:[C.panel2,g,g2,C.ink][v]});txt(svg,80+j*cw+cw/2,16+i*rh2+rh2/2+4,'—',{anchor:'middle',fill:v>1?C.white:C.ink});}}for(var j2=0;j2<cls;j2++)txt(svg,80+j2*cw+cw/2,10,'Col '+(j2+1),{anchor:'middle'});}
     else if(type==='curves'){lineChart(svg,{series:[{v:[0,8,19,28,34,38,42,46,48],color:g2},{v:[0,7,17,26,32,36,40,43,45],color:g},{v:[0,6,15,23,29,34,38,41,43],color:g,dash:true}],xl:['0','','60 d','','120 d','','180 d','',''],ticks:[],padL:8,n:9});}
   }
-  function card(view,x,y,w,h,title,type,acts){
-    var d=document.createElement('div');d.className='card';d.style.cssText='left:'+x+'px;top:'+(y-116)+'px;width:'+w+'px;height:'+h+'px';
-    d.innerHTML='<div class="ct"><span>'+title+'</span><span class="acts">'+(type?'<span class="ph-note">wireframe - '+type+'</span>':'')+(acts||'<i class="icon">i</i>')+'</span></div>';
-    if(type){var s=document.createElementNS(NS,'svg');s.setAttribute('class','chart');s.setAttribute('width',w-32);s.setAttribute('height',h-60);d.appendChild(s);ph(s,type);}
-    view.appendChild(d);return d;
-  }
-  function kpi(view,x,title,val,cr,sub){
-    var d=document.createElement('div');d.className='card kpi';d.style.cssText='left:'+x+'px;top:0;width:216px;height:120px';
-    d.innerHTML='<div class="lab">'+title+'</div><div class="val num">'+val+'</div><div class="cr"><span class="n">'+cr[0]+'</span><span class="d '+cr[1]+' num">'+cr[2]+'</span></div>'+(sub?'<div class="sub">'+sub+'</div>':'');
-    view.appendChild(d);
-  }
-  function wfTable(view,title,cols,rows){
-    var d=document.createElement('div');d.className='card';d.style.cssText='left:32px;top:492px;width:1376px;height:186px';
-    var h='<div class="ct"><span>'+title+'</span><span class="acts"><span>Show rows &#8599;</span></span></div><table class="wf"><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
-    for(var i=0;i<rows;i++)h+='<tr>'+cols.map(function(){return '<td>—</td>';}).join('')+'</tr>';
-    d.innerHTML=h+'</tbody></table>';view.appendChild(d);
-  }
+
   var X6=[32,264,496,728,960,1192],X3=[32,496,960],X2=[32,728];
 
-  /* ===== view 1 charts ===== */
-  lineChart(document.getElementById('c-o5'),{series:[
-    {v:[22,21.4,24.6,26.9,20.8,19.6,22.1,22.9,23.3,23.6,23,24.4,25.6],color:C.ink,dots:true},
-    {v:[21.5,21.8,24,26.2,21,20.4,22.6,23.4,23.9,24.1,23.8,25.1,26.2],color:C.teal,dots:true},
-    {v:[18.9,18.4,21.1,23.1,17.9,16.8,19,19.7,20,20.3,19.8,21,22],color:C.g400,w:1.5,dash:true}],
-    xl:MONTHS,min:15,max:28,ticks:[15,20,25],fmt:function(t){return t+'k';},sel:12});
-  barsH(document.getElementById('c-o6'),{rows:[
-    {l:'App',v:4.4,py:3.6,t:'4.4k - 41 %'},{l:'Partner',v:2.4,py:1.5,t:'2.4k - 22 %'},{l:'Web',v:1.9,py:1.8,t:'1.9k - 18 %'},{l:'Agents',v:1.1,py:1.0,t:'1.1k - 10 %'},{l:'Marketplace',v:1.0,py:1.5,t:'1.0k - 9 %'}],max:4.8});
-  lineChart(document.getElementById('c-o7'),{series:[
-    {v:[0,8,19,28,34,null,null,null,null],color:C.ink,dots:true},
-    {v:[0,7,18,27,33,38,42,46,48],color:C.teal,dots:true},
-    {v:[0,6,15,23,29,34,38,41,43],color:C.g400,w:1.5,dash:true}],
-    n:9,xl:['0 d','','60 d','90 d','','','180 d','',''],min:0,max:50,ticks:[0,25,50],fmt:function(t){return t+'%';}});
-  lineChart(document.getElementById('c-o8'),{series:[
-    {v:[4,4,4.1,4.2,4.3,4.4,4.5,4.5,4.6,4.6,4.6,4.6,4.6],color:C.ink,dots:true},
-    {v:[5.8,5.9,6,6.1,6.1,6,5.8,5.6,5.4,5.3,5.1,5,4.9],color:C.teal,dots:true},
-    {v:[3.6,3.6,3.7,3.8,3.9,3.9,4,4,4.1,4.1,4.2,4.2,4.2],color:C.g400,w:1.5,dash:true}],
-    xl:MONTHS,min:3,max:6.5,ticks:[3,4.5,6],fmt:function(t){return t.toFixed(1)+'%';},marker:6});
-  document.querySelectorAll('svg.spark').forEach(spark);
+  /* ================= VIEW 1 - Overview ================= */
+  var v1=V('v1');
+  hero(v1,32,'o1','Loans issued',['good','&#9650; Good'],'24,410','&euro;9.6m',[row('vs Budget','good','&#9650; +0.4%',108,2,'r'),row('vs PY','good','&#9650; +15.2%',132,61,'r')]);
+  hero(v1,380,'o2','New clients locked in',['watch','&#9660; Watch'],'9,796','',[row('vs Budget','watch','&#9660; &minus;1.1%',108,4,'l'),row('vs PY','good','&#9650; +5.5%',132,22,'r')]);
+  hero(v1,728,'o3','Returning clients',['good','&#9650; Good'],'59.9%','',[row('vs Budget','neu','n/a',108,0,'r'),row('vs PY','good','&#9650; +3.7pp',132,59,'r')]);
+  hero(v1,1076,'o4','Bad / overdue loans',['watch','&#9650; Watch'],'4.6%','',[row('vs Budget','watch','&#9650; +0.4pp',108,6,'l'),row('vs PY','good','&#9660; &minus;0.9pp',132,14,'r')]);
+  var p5=panel(v1,32,324,680,152,'o5','Loans issued by month vs Budget','Open loans issued',null,80);
+  lineChart(p5.svg,{series:[{v:[21.2,22.5,23.3,26.4,23.3,21.0,24.9,25.0,23.8,23.4,22.6,21.5,24.4],color:C.ink,dots:true},{v:[20.9,22.5,23.0,26.1,22.5,20.4,25.3,25.1,24.0,23.8,22.9,21.7,24.3],color:C.teal,dots:true},{v:[14.8,16.3,16.9,19.3,17.3,15.3,18.9,19.4,20.1,19.7,19.8,19.7,21.2],color:C.g400,w:1.5,dash:true}],xl:MONTHS,min:14,max:28,ticks:[15,20,25],fmt:function(t){return t+'k';},sel:12});
+  p5.card.insertAdjacentHTML('beforeend','<div class="legend"><span><i class="sw"></i>Actual</span><span><i class="sw t"></i>Budget</span><span><i class="sw dash"></i>Prior year</span><span><i class="sw sq" style="background:var(--accent);border:1px solid var(--ink);width:10px;height:10px"></i>selected month</span></div>');
+  var p6=panel(v1,728,324,680,152,'o6','New clients by acquisition channel','Open clients',null,84);
+  barsH(p6.svg,{rows:[{l:'App',v:3.62,py:2.89,t:'3.6k - 37 %'},{l:'Partner',v:2.85,py:1.72,t:'2.8k - 29 %'},{l:'Paid',v:2.51,py:3.95,t:'2.5k - 26 %'},{l:'Agents',v:0.82,py:0.72,t:'0.8k - 8 %'}],max:4.2});
+  p6.card.insertAdjacentHTML('beforeend','<div class="legend"><span><i class="sw sq"></i>Sep 2026</span><span><i class="sw sq" style="background:transparent;border:1px solid var(--g400)"></i>Prior year</span></div>');
+  var p7=panel(v1,32,500,680,152,'o7','Returning clients - cohort repeat curve','Open clients',null,80);
+  lineChart(p7.svg,{series:[{v:[0,9,18,27.6,33,39,43.5],color:C.ink,dots:true},{v:[0,9,19,28.2,34,40,44.3],color:C.teal,dots:true},{v:[0,9,18,27.9,33,null,null],color:C.g400,w:1.5,dash:true}],n:7,xl:['0 d','30 d','60 d','90 d','120 d','150 d','180 d'],min:0,max:50,ticks:[0,25,50],fmt:function(t){return t+'%';}});
+  p7.card.insertAdjacentHTML('beforeend','<div class="legend"><span><i class="sw"></i>Cohort Mar 2026</span><span><i class="sw t"></i>Mar 2025</span><span><i class="sw dash"></i>Jun 2026 (partial)</span></div>');
+  var p8=panel(v1,728,500,680,152,'o8','30+ DPD by market, 13 months','Open portfolio quality',null,80);
+  lineChart(p8.svg,{series:[{v:[4.7,4.4,4.2,4.0,4.0,4.0,4.2,4.2,4.3,4.5,4.8,4.9,4.8],color:C.ink,dots:true},{v:[7.3,7.2,7.2,6.8,6.7,6.7,6.5,6.1,5.6,5.3,5.0,4.9,4.1],color:C.teal,dots:true},{v:[4.8,4.8,4.4,4.2,4.5,4.7,4.9,5.0,4.8,4.8,4.9,5.0,4.9],color:C.g400,w:1.5,dash:true}],xl:MONTHS,min:3.5,max:7.5,ticks:[4,5.5,7],fmt:function(t){return t.toFixed(1)+'%';},marker:6});
+  p8.card.insertAdjacentHTML('beforeend','<div class="callout" style="left:330px;top:44px">RO policy tightened Mar 2026</div><div class="legend"><span><i class="sw"></i>Poland</span><span><i class="sw t"></i>Romania</span><span><i class="sw dash"></i>Portugal</span></div>');
+  var mkt=table(v1,660,134,'o9','Markets - Sep 2026',[['Market',0,160],['Loans',1,120],['vs Budget',1,120],['Principal &euro;',1,140],['New clients',1,140],['Returning %',1,120],['30+ DPD %',1,120],['Status',0,96],['',0]],[
+    ['Poland','11,713','<span class="good">&#9650; +1.5%</span>','&euro;3.3m','4,712','59.8%','4.8%',chipT(['good','&#9650; Good']),''],
+    ['Romania','5,412','<span class="off">&#9660; &minus;13.1%</span>','&euro;2.5m','2,178','59.8%','4.1%',chipT(['off','&#9660; Off']),''],
+    ['Portugal','7,285','<span class="good">&#9650; +11.3%</span>','&euro;3.8m','2,906','60.1%','4.9%',chipT(['good','&#9650; Good']),'']],true,'Show loans');
+  mkt.id='mkt';
 
-  /* ===== view 2 - Loans issued ===== */
-  var v2=document.getElementById('v2');
-  kpi(v2,X6[0],'Loans','25.6k',['vs Budget','watch','&#9660; &minus;2.4%'],'PY 22.0k');
-  kpi(v2,X6[1],'Principal','&euro;10.2m',['vs Budget','watch','&#9660; &minus;3.1%'],'coverage 1.3&times; of remaining target');
-  kpi(v2,X6[2],'Avg ticket','&euro;398',['vs Budget','neu','&#9650; +1.9%'],'Step 12 share 14 %');
-  kpi(v2,X6[3],'Approval rate','41.3%',['vs Budget','off','&#9660; &minus;2.7pp'],'new clients 31.0 %');
-  kpi(v2,X6[4],'Take-up rate','86.8%',['vs Prior year','watch','&#9660; &minus;0.4pp'],'disbursed &divide; approved');
-  kpi(v2,X6[5],'Time to cash','3.4 h',['vs Prior year','good','&#9660; &minus;1.7 h'],'median submitted &rarr; disbursed');
-  card(v2,X3[0],252,448,162,'Loans by month vs Budget','cols');
-  card(v2,X3[1],252,448,162,'Application funnel','barsH');
-  card(v2,X3[2],252,448,162,'Originations bridge Budget &rarr; Actual','bridge');
-  card(v2,X3[0],430,448,162,'Loans by product &times; market','stack');
-  card(v2,X3[1],430,448,162,'Attainment by channel','bullets');
-  card(v2,X3[2],430,448,162,'Stage cycle time vs SLA','bullets');
-  wfTable(v2,'Agent &amp; partner leaderboard - Sep 2026',['Name','Type','Market','Loans','Target','Attainment %','Principal &euro;','Approval %','Pace','Status'],6);
+  /* ================= VIEW 2 - Loans issued ================= */
+  var v2=V('v2');
+  kpi(v2,X6[0],'l1','Loans','24,410',row('vs Budget','good','&#9650; +0.4%',80,2,'r'));
+  kpi(v2,X6[1],'l2','Principal','&euro;9.6m',row('vs Budget','watch','&#9660; &minus;2.3%',80,5,'l'));
+  kpi(v2,X6[2],'l3','Average ticket','&euro;393',row('vs Budget','neu','&#9660; &minus;2.7%',80,5,'r'));
+  kpi(v2,X6[3],'l4','Approval rate','53.8%',row('vs PY','good','&#9650; +1.3pp',80,10,'r'));
+  kpi(v2,X6[4],'l5','Take-up rate','89.0%',row('vs PY','good','&#9650; +0.6pp',80,5,'r'));
+  kpi(v2,X6[5],'l6','Time to cash','3.5 h',row('vs PY','good','&#9660; &minus;1.4 h',80,11,'r'));
+  panel(v2,X3[0],252,448,162,'l7','Loans by month vs Budget','','cols');
+  panel(v2,X3[1],252,448,162,'l8','Application funnel','','barsH');
+  panel(v2,X3[2],252,448,162,'l9','Originations bridge Budget &rarr; Actual','','bridge');
+  panel(v2,X3[0],430,448,162,'l10','Loans by product &times; market','','stack');
+  panel(v2,X3[1],430,448,162,'l11','Attainment by channel','','bullets');
+  panel(v2,X3[2],430,448,162,'l12','Stage cycle time vs SLA','','bullets');
+  table(v2,608,186,'l13','Agent &amp; partner leaderboard - Sep 2026',[['Name',0,200],['Type',0,90],['Market',0,90],['Team',0,120],['Loans',1,100],['Quota',1,100],['Attainment %',1,120],['Principal &euro;',1,120],['Status',0,110],['',0]],[
+    ['Andrei Stan','Agent','RO','North','63','34','185%','&euro;45.8k',chipT(['good','&#9650; Good']),''],
+    ['Anna Wojcik','Agent','PL','North','73','40','183%','&euro;29.9k',chipT(['good','&#9650; Good']),''],
+    ['Elena Popescu','Agent','RO','South','55','34','162%','&euro;36.0k',chipT(['good','&#9650; Good']),''],
+    ['Cristian Ionescu','Agent','RO','North','51','34','150%','&euro;36.4k',chipT(['good','&#9650; Good']),''],
+    ['Pawel Kaminska','Agent','PL','North','56','40','140%','&euro;22.1k',chipT(['good','&#9650; Good']),'']],false,'Show loans');
 
-  /* ===== view 3 - Clients ===== */
-  var v3=document.getElementById('v3');
-  kpi(v3,X6[0],'New clients','10.8k',['vs Budget','watch','&#9660; &minus;4.2%'],'first loan disbursed in window');
-  kpi(v3,X6[1],'Returning clients %','52.4%',['vs Prior year','good','&#9650; +2.9pp'],'of borrowers');
-  kpi(v3,X6[2],'Repeat share (loans)','57.8%',['vs Prior year','good','&#9650; +3.2pp'],'of loans');
-  kpi(v3,X6[3],'New-client approval rate','31.0%',['vs Prior year','watch','&#9660; &minus;1.1pp'],'first-time applicants');
-  kpi(v3,X6[4],'180-day repeat','46.0%',['vs prev. cohort','good','&#9650; +1.4pp'],'cohort Mar 2026');
-  kpi(v3,X6[5],'Days between loans','71 d',['vs Prior year','neu','&#9660; &minus;4 d'],'median gap');
-  card(v3,X2[0],252,680,162,'New clients by channel, 13 months','stack');
-  card(v3,X2[1],252,680,162,'New-client funnel','barsH');
-  card(v3,X2[0],430,680,162,'Cohort repeat curves (quarter cohorts)','curves');
-  card(v3,X2[1],430,680,162,'Returning % by market &times; segment - repeat share by product','heat');
-  wfTable(v3,'Clients - Sep 2026 cohort',['Client id','Market','Type','First loan','First product','Channel','Loans to date','Principal to date','Last loan','Days since','Status'],6);
+  /* ================= VIEW 3 - Clients ================= */
+  var v3=V('v3');
+  kpi(v3,X6[0],'c1','New clients','9,796',row('vs Budget','watch','&#9660; &minus;1.1%',80,2,'l'));
+  kpi(v3,X6[1],'c2','Returning clients %','59.9%',row('vs PY','good','&#9650; +3.7pp',80,30,'r'));
+  kpi(v3,X6[2],'c3','Repeat share (loans)','59.9%',row('vs PY','good','&#9650; +3.7pp',80,30,'r'));
+  kpi(v3,X6[3],'c4','New-client approval rate','36.9%',row('vs PY','watch','&#9660; &minus;0.4pp',80,3,'l'));
+  kpi(v3,X6[4],'c5','180-day repeat','43.5%',row('vs PY cohort','watch','&#9660; &minus;0.9pp',80,7,'l'));
+  kpi(v3,X6[5],'c6','Days between loans','115 d',row('vs PY','neu','&#9650; +5 d',80,10,'r'));
+  panel(v3,X2[0],252,680,162,'c7','New clients by channel, 13 months','','stack');
+  panel(v3,X2[1],252,680,162,'c8','New-client funnel','','barsH');
+  panel(v3,X2[0],430,680,162,'c9','Cohort repeat curves (quarter cohorts)','','curves');
+  panel(v3,X2[1],430,680,162,'c10','Returning % by market &times; segment - repeat share by product','','heat');
+  table(v3,608,186,'c11','Clients - Sep 2026 cohort',[['Client id',0,120],['Market',0,90],['Type',0,130],['First loan',0,120],['First product',0,120],['Channel',0,110],['Age band',0,110],['City tier',1,90],['Loans to date',1,110],['Status',0,110],['',0]],[
+    ['100384049','PL','Consumer','01 Sep 2026','Flex 30','App','1995-2006','2','1',chipT(['good','Current']),''],
+    ['100384050','PL','Consumer','01 Sep 2026','Flex 30','App','1975-1984','2','1',chipT(['good','Current']),''],
+    ['100384051','PL','Consumer','01 Sep 2026','Flex 30','App','1975-1984','1','1',chipT(['good','Current']),''],
+    ['100384052','PL','Consumer','01 Sep 2026','Flex 30','App','1985-1994','1','1',chipT(['good','Current']),''],
+    ['100384053','PL','Consumer','01 Sep 2026','Flex 30','App','1985-1994','1','1',chipT(['good','Current']),'']],false,'Show clients');
 
-  /* ===== view 4 - Portfolio quality ===== */
-  var v4=document.getElementById('v4');
-  kpi(v4,X6[0],'30+ DPD %','4.6%',['vs Budget','off','&#9650; +0.6pp'],'by balance - Sep 2026');
-  kpi(v4,X6[1],'90+ DPD %','2.1%',['vs Prior year','watch','&#9650; +0.3pp'],'by balance');
-  kpi(v4,X6[2],'30+ by count','5.3%',['vs Prior year','watch','&#9650; +0.5pp'],'of active loans');
-  kpi(v4,X6[3],'Vintage 6m bad rate','3.4%',['vs PY vintage','watch','&#9650; +0.4pp'],'vintage Mar 2026');
-  kpi(v4,X6[4],'Roll rate 30&rarr;60','38.2%',['vs Prior year','off','&#9650; +2.0pp'],'balance rolling one bucket');
-  kpi(v4,X6[5],'Cost of risk','3.9%',['vs Budget','watch','&#9650; +0.3pp'],'annualised');
-  card(v4,X3[0],252,448,162,'DPD buckets, 13 months','stack');
-  card(v4,X3[1],252,448,162,'Vintage curves','curves');
-  card(v4,X3[2],252,448,162,'Bad rate by product &times; market','heat');
-  card(v4,X3[0],430,448,162,'30+ DPD by market','line');
-  card(v4,X3[1],430,448,162,'Roll rates by month','line');
-  card(v4,X3[2],430,448,162,'Segments: size &times; DPD','bubble');
-  wfTable(v4,'Overdue loans - Sep 2026',['Loan id','Client id','Market','Product','Channel','Disbursed','Principal','Outstanding','DPD','Bucket','Max DPD','Status'],6);
+  /* ================= VIEW 4 - Portfolio quality ================= */
+  var v4=V('v4');
+  kpi(v4,X6[0],'p1','30+ DPD %','4.6%',row('vs Budget','watch','&#9650; +0.4pp',80,3,'l'));
+  kpi(v4,X6[1],'p2','90+ DPD %','2.6%',row('vs PY','good','&#9660; &minus;0.2pp',80,2,'r'));
+  kpi(v4,X6[2],'p3','30+ by count','4.6%',row('vs PY','good','&#9660; &minus;1.0pp',80,8,'r'));
+  kpi(v4,X6[3],'p4','Vintage 6-month bad rate','2.9%',row('vs PY vintage','good','&#9660; &minus;0.5pp',80,4,'r'));
+  kpi(v4,X6[4],'p5','Roll rate 30 &rarr; 60','77.6%',row('vs PY','good','&#9660; &minus;2.4pp',80,19,'r'));
+  kpi(v4,X6[5],'p6','Cost of risk','10.4%',row('vs PY','good','&#9660; &minus;3.9pp',80,31,'r'));
+  panel(v4,X3[0],252,448,162,'p7','DPD buckets, 13 months','','stack');
+  panel(v4,X3[1],252,448,162,'p8','Vintage curves','','curves');
+  panel(v4,X3[2],252,448,162,'p9','Bad rate by product &times; market','','heat');
+  panel(v4,X3[0],430,448,162,'p10','30+ DPD by market','','line');
+  panel(v4,X3[1],430,448,162,'p11','Roll rates by month','','line');
+  panel(v4,X3[2],430,448,162,'p12','Segments: size &times; DPD','','bubble');
+  table(v4,608,186,'p13','Overdue loans - Sep 2026',[['Loan id',0,110],['Client id',0,110],['Market',0,80],['Product',0,100],['Channel',0,100],['Disbursed',0,120],['Principal &euro;',1,110],['Outstanding &euro;',1,120],['DPD',1,70],['Max DPD',1,90],['Status',0,110],['',0]],[
+    ['1405770','233197','RO','Flex 90','App','04 Jan 2026','&euro;464','&euro;458','179','179',chipT(['off','90+ DPD']),''],
+    ['1405702','272539','RO','Flex 90','App','04 Jan 2026','&euro;222','&euro;219','179','179',chipT(['off','90+ DPD']),''],
+    ['1451057','255378','PT','Step 6','App','05 Mar 2026','&euro;1,090','&euro;1,090','179','179',chipT(['off','90+ DPD']),''],
+    ['1451068','330236','PL','Flex 30','App','05 Mar 2026','&euro;141','&euro;130','179','179',chipT(['off','90+ DPD']),''],
+    ['1451100','330298','PL','Flex 30','Paid','05 Mar 2026','&euro;106','&euro;97','179','179',chipT(['off','90+ DPD']),'']],false,'Show loans');
 
-  /* ===== view 5 - Revenue & targets ===== */
-  var v5=document.getElementById('v5');
-  kpi(v5,X6[0],'Revenue','&euro;2.98m',['vs Budget','watch','&#9660; &minus;1.8%'],'interest + fees + interchange + subs');
-  kpi(v5,X6[1],'Attainment','98.2%',['vs 100 %','watch','&#9660; &minus;1.8pp'],'pace 101 % - LE FY 98.1 %');
-  kpi(v5,X6[2],'Interest income','&euro;1.79m',['vs Budget','watch','&#9660; &minus;2.4%'],'60 % of revenue');
-  kpi(v5,X6[3],'Fees','&euro;0.63m',['vs Budget','good','&#9650; +0.8%'],'origination + late fees');
-  kpi(v5,X6[4],'MRR','&euro;348k',['vs Budget','good','&#9650; +1.2%'],'+14.0 % YoY');
-  kpi(v5,X6[5],'Paying subscribers','58.6k',['vs Prior year','good','&#9650; +9.8%'],'Plus 44.1k - Pro 14.5k');
-  card(v5,X3[0],252,448,162,'Revenue by month vs Budget vs PY','line');
-  card(v5,X3[1],252,448,162,'Revenue by stream, 13 months','stack');
-  card(v5,X3[2],252,448,162,'Attainment by market','bullets');
-  card(v5,X3[0],430,448,162,'MRR and subscribers by tier','stack');
-  card(v5,X3[1],430,448,162,'Subscriber churn %','line');
-  card(v5,X3[2],430,448,162,'Channel mix, share of loans','stack');
-  wfTable(v5,'Stream &times; market - Sep 2026',['Stream','Market','Actual &euro;','Budget &euro;','&Delta; &euro;','&Delta; %','PY &euro;','&Delta; vs PY %','Status'],6);
+  /* ================= VIEW 5 - Revenue & targets ================= */
+  var v5=V('v5');
+  kpi(v5,X6[0],'r1','Revenue','&euro;1.34m',row('vs Budget','watch','&#9660; &minus;3.2%',80,6,'l'));
+  kpi(v5,X6[1],'r2','Attainment','96.8%',row('vs 100 %','watch','&#9660; &minus;3.2pp',80,26,'l'));
+  kpi(v5,X6[2],'r3','Interest + fees','&euro;1.07m',row('vs Budget','watch','&#9660; &minus;3.8%',80,8,'l'));
+  kpi(v5,X6[3],'r4','Interchange','&euro;122k',row('vs Budget','good','&#9650; +4.3%',80,9,'r'));
+  kpi(v5,X6[4],'r5','MRR','&euro;147k',row('vs PY','good','&#9650; +18.7%',80,37,'r'));
+  kpi(v5,X6[5],'r6','Paying subscribers','23,408',row('vs PY','good','&#9650; +12.1%',80,24,'r'));
+  panel(v5,X3[0],252,448,162,'r7','Revenue by month vs Budget vs PY','','line');
+  panel(v5,X3[1],252,448,162,'r8','Revenue by stream, 13 months','','stack');
+  panel(v5,X3[2],252,448,162,'r9','Attainment by market','','bullets');
+  panel(v5,X3[0],430,448,162,'r10','MRR and subscribers by tier','','stack');
+  panel(v5,X3[1],430,448,162,'r11','Subscriber churn %','','line');
+  panel(v5,X3[2],430,448,162,'r12','Channel mix, share of loans','','stack');
+  table(v5,608,186,'r13','Stream &times; market - Sep 2026',[['Stream',0,180],['Market',0,120],['Actual &euro;',1,130],['Budget &euro;',1,130],['&Delta; vs Budget %',1,130],['PY &euro;',1,130],['&Delta; vs PY %',1,130],['Status',0,110],['',0]],[
+    ['Interest','All markets','&euro;787k','n/a','n/a','&euro;601k','<span class="good">&#9650; +30.9%</span>',chipT(['neu','&#9675; n/a']),''],
+    ['Fees','All markets','&euro;286k','n/a','n/a','&euro;247k','<span class="good">&#9650; +15.8%</span>',chipT(['neu','&#9675; n/a']),''],
+    ['Interchange','All markets','&euro;122k','&euro;117k','<span class="good">&#9650; +4.3%</span>','&euro;75k','<span class="good">&#9650; +63.7%</span>',chipT(['good','&#9650; Good']),''],
+    ['Subscriptions','All markets','&euro;146k','&euro;154k','<span class="off">&#9660; &minus;5.0%</span>','&euro;123k','<span class="good">&#9650; +18.9%</span>',chipT(['off','&#9660; Off']),''],
+    ['<b>Total</b>','All markets','<b>&euro;1.34m</b>','<b>&euro;1.39m</b>','<span class="watch">&#9660; &minus;3.2%</span>','<b>&euro;1.05m</b>','<span class="good">&#9650; +28.3%</span>',chipT(['watch','&#9660; Watch']),'']],false,'Show loans');
 
-  /* ===== tabs ===== */
-  var tabs=document.querySelectorAll('#tabs [role=tab]');
-  tabs.forEach(function(t){t.addEventListener('click',function(){
-    tabs.forEach(function(o){o.setAttribute('aria-selected',o===t?'true':'false');});
-    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.id===t.dataset.view);});
-    closeSo();
-  });});
-  var h=location.hash.replace('#','');if(/^v[1-5]$/.test(h))document.querySelector('#tabs [data-view='+h+']').click();
-  /* ===== segmented controls (visual only) ===== */
+  /* ================= tabs ================= */
+  var curView='v1',tabs=document.querySelectorAll('#tabs [role=tab]');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(o){o.setAttribute('aria-selected',o===t?'true':'false');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.id===t.dataset.view);});curView=t.dataset.view;closeSo();closePop();});});
   document.querySelectorAll('.seg[role=radiogroup]').forEach(function(g){g.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){g.querySelectorAll('button').forEach(function(o){o.setAttribute('aria-pressed',o===b?'true':'false');});});});});
-  /* ===== slide-over ===== */
-  var so=document.getElementById('so'),scrim=document.getElementById('scrim');
-  function closeSo(){so.classList.remove('on');scrim.classList.remove('on');document.querySelectorAll('#mkt tr.sel').forEach(function(r){r.classList.remove('sel');});}
-  document.querySelectorAll('#mkt tbody tr').forEach(function(r){r.addEventListener('click',function(){
-    document.querySelectorAll('#mkt tr.sel').forEach(function(x){x.classList.remove('sel');});r.classList.add('sel');
-    var m=r.dataset.m,loans=r.children[1].textContent;
-    document.getElementById('so-title').textContent=loans+' loans - '+m+' - Sep 2026';document.getElementById('so-chip').textContent=m;
-    so.classList.add('on');scrim.classList.add('on');
-  });});
-  document.getElementById('so-x').addEventListener('click',closeSo);scrim.addEventListener('click',closeSo);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSo();});
+
+  /* ================= glass pop-up (one element, one at a time, focus trapped and returned) ================= */
+  var pop=V('pop'),popH=V('pop-h'),popB=V('pop-b'),opener=null,board=V('board');
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function fill(title,pairs){popH.textContent=title;popB.innerHTML=pairs.map(function(p){return '<dt>'+esc(p[0])+'</dt><dd>'+esc(p[1])+'</dd>';}).join('');}
+  function place(btn){var b=btn.getBoundingClientRect(),o=board.getBoundingClientRect(),bx=b.left-o.left,by=b.top-o.top,bh=b.height;
+    pop.style.maxHeight='440px';pop.classList.add('on');var h=pop.offsetHeight,w=360;
+    var left=Math.min(Math.max(8,bx-4),1440-w-8),below=802-(by+bh+6),above=by-6-104,top;
+    if(h<=below)top=by+bh+6;else if(h<=above)top=by-h-6;else if(below>=above){top=by+bh+6;pop.style.maxHeight=below+'px';}else{pop.style.maxHeight=above+'px';top=by-6-pop.offsetHeight;}
+    pop.style.left=left+'px';pop.style.top=top+'px';}
+  function openPop(btn,title,pairs){if(pop.classList.contains('on')&&opener===btn){closePop();return;}closePop();closeSo();opener=btn;fill(title,pairs);place(btn);btn.setAttribute('aria-expanded','true');pop.focus();}
+  function closePop(){if(!pop.classList.contains('on'))return;pop.classList.remove('on');if(opener){opener.setAttribute('aria-expanded','false');opener.focus();opener=null;}}
+  board.addEventListener('click',function(e){var ib=e.target.closest('.ib');if(ib){e.stopPropagation();var i=INFO[ib.dataset.info];openPop(ib,i[0],[['What it is',i[1]],['Why it matters',i[2]],['Formula',i[3]],['Sub-values',i[4]],['Source',i[5]]]);return;}
+    if(e.target.closest('#howto')){e.stopPropagation();var hw=HOWTO[curView];openPop(V('howto'),hw[0],hw[1]);return;}
+    if(e.target.closest('#pop')){e.stopPropagation();return;}closePop();});
+  pop.querySelector('.x').addEventListener('click',function(e){e.stopPropagation();closePop();});
+  pop.addEventListener('keydown',function(e){if(e.key==='Tab'){var f=pop.querySelectorAll('button');var first=f[0],last=f[f.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===pop)){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();closeSo();}});
+
+  /* ================= slide-over ================= */
+  var so=V('so'),scrim=V('scrim'),soOpener=null;
+  var RO=[['1613731','376664','Flex 30','App','30 Sep 2026','&euro;124','&euro;124','0'],['1613156','393699','Flex 90','App','30 Sep 2026','&euro;248','&euro;248','0'],['1613153','393748','Step 6','Partner','30 Sep 2026','&euro;592','&euro;592','0'],['1613152','359023','Flex 30','App','30 Sep 2026','&euro;172','&euro;172','0'],['1613142','229823','Step 12','App','30 Sep 2026','&euro;658','&euro;658','0'],['1613141','179197','Biz Boost','App','30 Sep 2026','&euro;735','&euro;735','0'],['1613140','393705','Step 6','App','30 Sep 2026','&euro;763','&euro;763','0'],['1613136','135676','Flex 90','App','30 Sep 2026','&euro;305','&euro;305','0']];
+  V('so-rows').innerHTML=RO.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td><td class="r">'+r[5]+'</td><td class="r">'+r[6]+'</td><td class="r">'+r[7]+'</td><td>'+chipT(['good','Current'])+'</td></tr>';}).join('');
+  var MK={Poland:'11,713',Romania:'5,412',Portugal:'7,285'};
+  function closeSo(){if(!so.classList.contains('on'))return;so.classList.remove('on');scrim.classList.remove('on');document.querySelectorAll('#mkt tr.sel').forEach(function(r){r.classList.remove('sel');});if(soOpener){soOpener.focus();soOpener=null;}}
+  document.querySelectorAll('#mkt tbody tr').forEach(function(r){r.setAttribute('tabindex','0');r.addEventListener('click',function(){closePop();document.querySelectorAll('#mkt tr.sel').forEach(function(x){x.classList.remove('sel');});r.classList.add('sel');
+    var m=r.children[0].textContent;V('so-title').textContent=MK[m]+' loans - '+m+' - Sep 2026';V('so-chip').textContent=m;V('so-foot').textContent='8 of '+MK[m];soOpener=r;so.classList.add('on');scrim.classList.add('on');so.focus();});});
+  V('so-x').addEventListener('click',closeSo);scrim.addEventListener('click',closeSo);
+
+  /* deep links for screenshots: #v3, #v2-howto, #v1-o4 */
+  var h=location.hash.replace('#','').split('-');
+  if(/^v[1-5]$/.test(h[0]))document.querySelector('#tabs [data-view='+h[0]+']').click();
+  if(h[1]==='howto')V('howto').click();else if(h[1]){var b=document.querySelector('.ib[data-info="'+h[1]+'"]');if(b)b.click();}
 })();
 </script>
 </body>

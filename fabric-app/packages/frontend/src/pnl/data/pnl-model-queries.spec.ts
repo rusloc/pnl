@@ -8,19 +8,27 @@ import { defaultFilters } from '../model/filters';
 import type { FilterState } from '../model/types';
 import {
   breakdownKeys,
+  budgetAlias,
   buildBridgeQuery,
+  buildBubbleQuery,
+  buildConcentrationQuery,
   buildContextQuery,
-  buildDriversQuery,
-  buildKpiMetaQuery,
-  buildKpiValuesQuery,
+  buildHeatQuery,
   buildProfitabilityQuery,
+  buildProfitBridgeQuery,
   buildStatementQuery,
+  buildVariancesCutQuery,
+  buildVariancesQuery,
+  buildVitalsInfoQuery,
+  buildVitalsMetaQuery,
+  buildVitalsValuesQuery,
   daxString,
   filterVars,
   kpiAliases,
   PnlQueryError,
   selectedBreakdown,
   VISIBLE_ENTITIES_QUERY,
+  vitalsInfoAlias,
 } from './pnl-model-queries';
 import { sampleReference } from './sample-reference';
 
@@ -88,9 +96,9 @@ describe('filterVars', () => {
     expect(vars[0].expression).toBe('TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )');
   });
 
-  it('lets the analysis zones override Compare A (C-40: the bridge comparison is Compare A)', () => {
-    const vars = filterVars({ ...defaults, compareA: 'NONE' }, reference, { compareA: 'PY' });
-    expect(vars.find((v) => v.name === '_cmp_a')?.expression).toBe('TREATAS ( { "PY" }, param_compare_a[choice_code] )');
+  it('sends Compare A as selected, None included: the model picks the bridge comparison itself (C-40, parity rule 1)', () => {
+    const vars = filterVars({ ...defaults, compareA: 'NONE' }, reference);
+    expect(vars.find((v) => v.name === '_cmp_a')?.expression).toBe('TREATAS ( { "NONE" }, param_compare_a[choice_code] )');
   });
 
   it('refuses values outside the allow-list before any query is built', () => {
@@ -147,91 +155,170 @@ describe('buildStatementQuery (Q1)', () => {
   });
 });
 
-describe('KPI queries (Q2)', () => {
-  it('reads the entity’s dim_kpi rows without measures, then values as one scalar CALCULATE per code (no SWITCH fan-out) with the comparison values instead of KPI Δ (ADR-0006 §16)', () => {
-    expect(buildKpiMetaQuery('G')).toBe('EVALUATE\nFILTER ( dim_kpi, dim_kpi[entity_view_code] = "GROUP" )\nORDER BY dim_kpi[slot]');
-    const dax = buildKpiValuesQuery(defaults, reference, ['NR', 'GM_PCT']);
+describe('buildVitalsMetaQuery / buildVitalsValuesQuery / buildVitalsInfoQuery (QV)', () => {
+  it('reads the entity’s Vitals rows of dim_kpi (vitals_slot > 0) in slot order', () => {
+    expect(buildVitalsMetaQuery('S')).toBe('EVALUATE\nFILTER ( dim_kpi, dim_kpi[entity_view_code] = "S" && dim_kpi[vitals_slot] > 0 )\nORDER BY dim_kpi[vitals_slot]');
+    expect(buildVitalsMetaQuery('G')).toContain('= "GROUP"');
+  });
+
+  it('values: KPI Value, the Compare A / B values, and the Budget value for the status unless a Compare is Budget already (PV-01)', () => {
+    const dax = buildVitalsValuesQuery(defaults, reference, ['NR', 'GM_PCT']);
     oneEvaluate(dax);
-    expect(dax).not.toContain('SUMMARIZECOLUMNS');
-    expect(dax).not.toContain('[KPI Δ');
     expect(dax).toContain('"@NR", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) ), DOUBLE )');
     expect(dax).toContain('"@NR_cmp_a", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ), DOUBLE )');
-    expect(dax).toContain('"@GM_PCT_cmp_b", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "GM_PCT" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ) ), DOUBLE )');
-    expect(dax).toContain('"@GM_PCT_s", CALCULATE ( [KPI Secondary], TREATAS ( { "GM_PCT" }, dim_kpi[kpi_code] ) )');
-    expect(dax.endsWith(')\n    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units\n)')).toBe(true);
-    expect(kpiAliases('ARR')).toEqual({ value: '@ARR', cmpA: '@ARR_cmp_a', cmpB: '@ARR_cmp_b', secondary: '@ARR_s' });
+    expect(dax).toContain('"@GM_PCT_cmp_b"');
+    expect(dax).not.toContain('_bud');
+    expect(dax).not.toContain('KPI Secondary');
+    // Compare A = Prior year, Compare B = None: the Budget value comes through CMP_A with Compare A forced to B.
+    const py = buildVitalsValuesQuery({ ...defaults, compareA: 'PY', compareB: 'NONE' }, reference, ['NR']);
+    expect(py).toContain('"@NR_bud", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "NR" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ), REMOVEFILTERS ( param_compare_a ), TREATAS ( { "B" }, param_compare_a[choice_code] ) ), DOUBLE )');
+    expect(py).not.toContain('"@NR_cmp_b"');
+    expect(kpiAliases('ARR')).toEqual({ value: '@ARR', cmpA: '@ARR_cmp_a', cmpB: '@ARR_cmp_b', secondary: '@ARR_s', budget: '@ARR_bud' });
+    expect(budgetAlias(defaults, 'NR')).toBe('@NR_cmp_a');
+    expect(budgetAlias({ compareA: 'PY', compareB: 'BUD' }, 'NR')).toBe('@NR_cmp_b');
+    expect(budgetAlias({ compareA: 'PY', compareB: 'NONE' }, 'NR')).toBe('@NR_bud');
   });
 
-  it('skips the comparison column of a Compare set to None (the model’s KPI Δ is blank there anyway)', () => {
-    const dax = buildKpiValuesQuery({ ...defaults, compareB: 'NONE' }, reference, ['NR']);
-    expect(dax).toContain('"@NR_cmp_a"');
-    expect(dax).not.toContain('"@NR_cmp_b"');
-    expect(dax).not.toContain('CMP_B');
-    expect(buildKpiValuesQuery({ ...defaults, compareA: 'NONE', compareB: 'NONE' }, reference, ['NR']).match(/CALCULATE \(/g)).toHaveLength(2);
+  it('the FY outlook card reads its four FY measures; the revenue-mix card both shares now and as prior year (PV-04)', () => {
+    const dax = buildVitalsValuesQuery(defaults, reference, ['FY_OUTLOOK', 'MIX']);
+    expect(dax).toContain('"@FY_OUTLOOK", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "FY_OUTLOOK" }, dim_kpi[kpi_code] ) ), DOUBLE )');
+    expect(dax).toContain('"@FY_OUTLOOK_bud", CONVERT ( CALCULATE ( [KPI FY Budget NR],');
+    expect(dax).toContain('"@FY_OUTLOOK_e", CONVERT ( CALCULATE ( [KPI FY Outlook EBITDA],');
+    expect(dax).toContain('"@FY_OUTLOOK_e_bud", CONVERT ( CALCULATE ( [KPI FY Budget EBITDA],');
+    expect(dax).not.toContain('"@FY_OUTLOOK_cmp_a"');
+    expect(dax).toContain('"@MIX", CONVERT ( CALCULATE ( [KPI Subscription Share], TREATAS ( { "MIX" }, dim_kpi[kpi_code] ) ), DOUBLE )');
+    expect(dax).toContain('"@MIX_pay", CONVERT ( CALCULATE ( [KPI Payments Share],');
+    expect(dax).toContain('"@MIX_py", CONVERT ( CALCULATE ( [KPI Subscription Share], TREATAS ( { "MIX" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ), REMOVEFILTERS ( param_compare_b ), TREATAS ( { "PY" }, param_compare_b[choice_code] ) ), DOUBLE )');
+    expect(dax).toContain('"@MIX_pay_py"');
+    expect(() => buildVitalsValuesQuery(defaults, reference, [])).toThrow(PnlQueryError);
+    expect(() => buildVitalsValuesQuery(defaults, reference, ['bad code'])).toThrow(PnlQueryError);
   });
 
-  it('refuses a kpi_code that is not the model’s shape and an empty chunk', () => {
-    expect(() => buildKpiValuesQuery(defaults, reference, ['NR"; EVALUATE'])).toThrow(PnlQueryError);
-    expect(() => buildKpiValuesQuery(defaults, reference, ['nr'])).toThrow(/Unknown KPI code/);
-    expect(() => buildKpiValuesQuery(defaults, reference, [])).toThrow(/Empty KPI chunk/);
+  it('info: KPI Info Sub per code in one ROW', () => {
+    const dax = buildVitalsInfoQuery(defaults, reference, ['NR', 'OPEX_PCT']);
+    oneEvaluate(dax);
+    expect(dax).toContain('"@NR_i", CALCULATE ( [KPI Info Sub], TREATAS ( { "NR" }, dim_kpi[kpi_code] ) )');
+    expect(dax).toContain(',"@OPEX_PCT_i", CALCULATE ( [KPI Info Sub]');
+    expect(vitalsInfoAlias('NR')).toBe('@NR_i');
   });
 });
 
-describe('buildBridgeQuery (Q3)', () => {
-  it('reads Bridge Value per step, drops blank steps, appends the base NR as an END row and follows "Compared with"', () => {
-    const dax = buildBridgeQuery({ ...defaults, analysisCompare: 'PY' }, reference);
+describe('buildBridgeQuery (Q3) and buildProfitBridgeQuery (QP)', () => {
+  it('reads Bridge Step Delta / Bridge Is Total per step, drops other entities’ steps, appends the actual NR as the END level and sends Compare A / B as selected (parity rule 1)', () => {
+    const dax = buildBridgeQuery({ ...defaults, compareA: 'PY', compareB: 'NONE' }, reference);
     oneEvaluate(dax);
     expect(dax).toContain('TREATAS ( { "PY" }, param_compare_a[choice_code] )');
-    expect(dax).toContain('dim_bridge_step[step_code]');
-    expect(dax).toContain(',"@value", CONVERT ( [Bridge Value], DOUBLE )');
-    expect(dax).toContain(',NOT ISBLANK ( [@value] )');
+    expect(dax).toContain('TREATAS ( { "NONE" }, param_compare_b[choice_code] )');
+    expect(dax).toContain(',"@delta", CONVERT ( [Bridge Step Delta], DOUBLE )');
+    expect(dax).toContain(',"@is_total", CONVERT ( [Bridge Is Total], DOUBLE )');
+    expect(dax).toContain(',NOT ISBLANK ( [@is_total] )');
     expect(dax).toContain('"step_code", "END"');
+    expect(dax).toContain(',"@is_total", 2');
     expect(dax).toContain('CONVERT ( CALCULATE ( [Prof Net Revenue], _entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units ), DOUBLE )');
     expect(dax.endsWith('EVALUATE\nUNION ( _steps, _end )\nORDER BY [step_sort]')).toBe(true);
   });
+
+  it('profit bridge: Profit Step Delta / Profit Is Total per dim_profit_step plus the comparison levels of D&A, adjusting items and operating profit', () => {
+    const dax = buildProfitBridgeQuery(defaults, reference);
+    oneEvaluate(dax);
+    expect(dax).toContain('dim_profit_step[step_code]');
+    expect(dax).toContain(',"@delta", CONVERT ( [Profit Step Delta], DOUBLE )');
+    expect(dax).toContain(',"@is_total", CONVERT ( [Profit Is Total], DOUBLE )');
+    expect(dax).toContain('"step_code", "CMP_DA"');
+    expect(dax).toContain('CONVERT ( CALCULATE ( [LV Comparison], REMOVEFILTERS ( dim_pl_row ), TREATAS ( { "OP" }, dim_pl_row[line_code] ), _entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units ), DOUBLE )');
+    expect(dax.endsWith('EVALUATE\nUNION ( _steps, _cmp_da, _cmp_adj, _cmp_op )\nORDER BY [step_sort]')).toBe(true);
+  });
 });
 
-describe('buildDriversQuery (Q4)', () => {
-  it('ranks the leaf rows of dim_pl_row by |Δ| vs the bridge comparison, top 8, and follows "Compared with"', () => {
-    const dax = buildDriversQuery(defaults, reference);
+describe('buildVariancesQuery / buildVariancesCutQuery (QL)', () => {
+  it('reads every leaf of dim_pl_row with LV Base / LV Comparison / LV Δ B / LV FX and is_below_cm; no TOPN (ranking is client-side)', () => {
+    const dax = buildVariancesQuery(defaults, reference);
     oneEvaluate(dax);
-    expect(dax).toContain('TOPN (\n    8');
+    expect(dax).not.toContain('TOPN');
+    expect(dax).toContain('    dim_pl_row[row_key]\n    ,dim_pl_row[line_code]\n    ,dim_pl_row[line_label]\n    ,dim_pl_row[account_code]\n    ,dim_pl_row[account_label]\n    ,dim_pl_row[line_sort]\n    ,dim_pl_row[account_sort]');
     expect(dax).toContain(',TREATAS ( { TRUE () }, dim_pl_row[is_leaf] )');
-    expect(dax).toContain('TREATAS ( { "B" }, param_compare_a[choice_code] )');
-    for (const [alias, measure] of [['@base', 'LV Base'], ['@cmp', 'LV Comparison'], ['@d', 'LV Δ'], ['@d_pct', 'LV Δ %'], ['@abs_d', 'LV Abs Δ']]) {
+    for (const [alias, measure] of [['@base', 'LV Base'], ['@cmp', 'LV Comparison'], ['@d_b', 'LV Δ B'], ['@fx', 'LV FX']]) {
       expect(dax).toContain(`,"${alias}", CONVERT ( [${measure}], DOUBLE )`);
     }
-    expect(dax.endsWith(',[@abs_d], DESC\n)\nORDER BY [@abs_d] DESC')).toBe(true);
+    expect(dax).toContain(',"@below_cm", LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], dim_pl_row[account_code] )');
+    expect(dax.endsWith('ORDER BY dim_pl_row[line_sort], dim_pl_row[account_sort]')).toBe(true);
+  });
+
+  it('cut: LV Δ per leaf × member of the allow-listed cut column, members in view only; Entity for the Group view only', () => {
+    const dax = buildVariancesCutQuery({ ...defaults, varCut: 'channel' }, reference);
+    oneEvaluate(dax);
+    expect(dax).toContain('            dim_pl_row[row_key]\n            ,dim_channel[channel_code]\n            ,dim_channel[channel_name]');
+    expect(dax).toContain(',"@in_view", [Slice Member In View]');
+    expect(dax).toContain(',"@d", CONVERT ( [LV Δ], DOUBLE )');
+    expect(dax).toContain(',[@in_view] = 1 && NOT ISBLANK ( dim_channel[channel_code] ) && NOT ISBLANK ( [@d] )');
+    expect(buildVariancesCutQuery({ ...defaults, entity: 'G', varCut: 'entity' }, reference)).toContain('dim_entity[short_name]');
+    expect(() => buildVariancesCutQuery(defaults, reference)).toThrow(PnlQueryError);
+    expect(() => buildVariancesCutQuery({ ...defaults, varCut: 'entity' }, reference)).toThrow(/Group view only/);
   });
 });
 
 describe('buildProfitabilityQuery (Q5)', () => {
-  it('groups by the allow-listed breakdown pair (F-21) and keeps only members in view', () => {
+  it('groups by the allow-listed breakdown pair (F-21), keeps members in view, reads the eight columns and appends the total', () => {
     expect(breakdownKeys('P')).toEqual(['region', 'channel', 'line', 'segment']);
     expect(breakdownKeys('G')).toEqual(['region', 'entity']);
-    expect(selectedBreakdown(defaults)).toBe('channel');
-    const dax = buildProfitabilityQuery(defaults, reference);
+    expect(selectedBreakdown(defaults)).toBe('region');
+    const dax = buildProfitabilityQuery({ ...defaults, breakdown: { ...defaults.breakdown, P: 1 } }, reference);
     oneEvaluate(dax);
-    expect(dax).toContain('            dim_channel[channel_code]\n            ,dim_channel[channel_name]');
+    expect(dax).toContain('                    dim_channel[channel_code]\n                    ,dim_channel[channel_name]');
     expect(dax).toContain(',"@in_view", [Slice Member In View]');
     expect(dax).toContain(',[@in_view] = 1 && NOT ISBLANK ( dim_channel[channel_code] )');
     for (const [alias, measure] of [
       ['@nr', 'Prof Net Revenue'],
-      ['@share', 'Prof NR Share'],
-      ['@nr_d_pct', 'Prof NR Δ %'],
+      ['@nr_d_pct', 'Prof NR Δ % CC'],
       ['@gm', 'KPI Gross Margin %'],
       ['@cm', 'KPI CM %'],
-      ['@ebitda', 'KPI Adj EBITDA Margin'],
-      ['@op', 'KPI Operating Margin'],
+      ['@cm_d_pp', 'Prof CM Δ pp'],
+      ['@contrib', 'Prof Contribution'],
+      ['@ebitda', 'Prof Adj EBITDA'],
     ]) {
-      expect(dax).toContain(`,"${alias}", CONVERT ( [${measure}], DOUBLE )`);
+      expect(dax.split(`,"${alias}", CONVERT ( [${measure}], DOUBLE )`)).toHaveLength(3);
     }
-    expect(dax.endsWith('ORDER BY [@nr] DESC')).toBe(true);
-    const group = buildProfitabilityQuery({ ...defaults, entity: 'G', breakdown: { ...defaults.breakdown, G: 1 } }, reference);
-    expect(group).toContain('dim_entity[entity_code]\n            ,dim_entity[short_name]');
-    const region = buildProfitabilityQuery({ ...defaults, breakdown: { ...defaults.breakdown, P: 0 } }, reference);
-    expect(region).toContain('dim_region[region_code]\n            ,dim_region[region_name]');
+    expect(dax).toContain('"@code", "TOTAL"');
+    expect(dax.endsWith('EVALUATE\nUNION ( _members, _total )\nORDER BY [@nr] DESC')).toBe(true);
+    expect(buildProfitabilityQuery({ ...defaults, entity: 'G', breakdown: { ...defaults.breakdown, G: 1 } }, reference)).toContain('dim_entity[entity_code]\n                    ,dim_entity[short_name]');
     expect(() => buildProfitabilityQuery({ ...defaults, breakdown: { ...defaults.breakdown, P: 7 } }, reference)).toThrow(/Breakdown index/);
+  });
+});
+
+describe('buildConcentrationQuery / buildBubbleQuery / buildHeatQuery', () => {
+  it('concentration: Conc Share on dim_conc_level × dim_region', () => {
+    const dax = buildConcentrationQuery(defaults, reference);
+    oneEvaluate(dax);
+    expect(dax).toContain('    dim_conc_level[level_code]\n    ,dim_conc_level[level_label]\n    ,dim_conc_level[level_sort]\n    ,dim_region[region_code]\n    ,dim_region[region_name]');
+    expect(dax).toContain(',"@share", CONVERT ( [Conc Share], DOUBLE )');
+  });
+
+  it('bubble: growth, CM % and NR per region plus the company references', () => {
+    const dax = buildBubbleQuery(defaults, reference);
+    oneEvaluate(dax);
+    expect(dax).toContain(',"@growth", CONVERT ( [KPI Organic Growth], DOUBLE )');
+    expect(dax).toContain(',"@cm", CONVERT ( [KPI CM %], DOUBLE )');
+    expect(dax).toContain('"@code", "COMPANY"');
+    expect(dax).toContain(',"@growth", CONVERT ( [Prof Company Growth], DOUBLE )');
+    expect(dax).toContain(',"@cm", CONVERT ( [Prof Company CM %], DOUBLE )');
+    expect(dax.endsWith('EVALUATE\nUNION ( _regions, _company )\nORDER BY [@nr] DESC')).toBe(true);
+  });
+
+  it('heat: cells for the company’s own lines (no unassigned), region / line / company totals; the Group view evaluates the cells per line’s company', () => {
+    const dax = buildHeatQuery({ ...defaults, entity: 'S' }, reference);
+    oneEvaluate(dax);
+    expect(dax).toContain('TREATAS ( { "S" }, dim_line[entity_code] )');
+    expect(dax).toContain('TREATAS ( { FALSE () }, dim_line[is_unassigned] )');
+    expect(dax).toContain(',"@nr", CONVERT ( [Prof Net Revenue], DOUBLE )');
+    expect(dax).toContain(',"@gm", CONVERT ( [KPI Gross Margin %], DOUBLE )');
+    expect(dax.endsWith('EVALUATE\nUNION ( _cells_s, _lines_s, _regions, _company )\nORDER BY [@region], [@line_sort]')).toBe(true);
+    const group = buildHeatQuery({ ...defaults, entity: 'G' }, reference);
+    oneEvaluate(group);
+    expect(group).toContain('VAR _entity_p = TREATAS ( { "P" }, param_entity_view[entity_view_code] )');
+    expect(group).toContain('VAR _entity_s = TREATAS ( { "S" }, param_entity_view[entity_view_code] )');
+    expect(group).toContain('UNION ( _cells_p, _lines_p, _cells_s, _lines_s, _regions, _company )');
+    expect(group).toContain(',_entity_p, _fy,');
+    expect(group).toContain(',_entity, _fy,');
   });
 });
 
@@ -241,6 +328,7 @@ describe('buildContextQuery (Q6) and Q0', () => {
     oneEvaluate(dax);
     expect(dax).toContain('"@status", [Data Status]');
     expect(dax).toContain(',"@notices", [Notices]');
+    expect(dax).toContain(',"@refreshed", MAX ( _meta_refresh[refreshed_at] )');
     expect(dax).toContain(',"@prof_note", [Profitability Note]');
     expect(dax).toContain(',"@cm_pct", CONVERT ( [KPI CM %], DOUBLE )');
     expect(VISIBLE_ENTITIES_QUERY).toBe('EVALUATE\nVALUES ( dim_entity[entity_code] )');

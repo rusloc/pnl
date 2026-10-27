@@ -1,0 +1,336 @@
+// ACME Trucks - page "Time util (original)" (time_util_original, re-added 2026-10-23 by bip): its key numbers vs the
+// LIVE baseline (tests/baseline-live.csv, scopes waterfall_saved and kpi_saved, captured from the live model on
+// 2026-10-21). Run in Power BI Desktop > DAX query view against the local Import model after a refresh; every row of
+// every result tab must show _pass = TRUE. Tolerance: relative 1e-9.
+// Context = the page as saved in its PBIR: report filter dim_loader[is_included] = "да"; page filter
+// dim_loader[contractor] = blank (was the drillthrough filter of the original page); slicers week "9 (25.2-3.3)",
+// plan type Month, calculation Weighted, work type Trucks + On spot, office and loader unfiltered; the bar and label
+// visuals' own filters (category code not blank, is_shown = "1", dim_time_category[is_included] = "да").
+// Measures = what the page's visuals bind to, by their current names (old name -> new name in
+// docs/model/trucks-measure-dictionary.md). The page re-uses existing measures only: nothing was re-added.
+// Tabs: 1 bars and labels per category row | 2 KPI cards (RANDBETWEEN rule, same as baseline-live-en.dax)
+
+DEFINE
+    // Deterministic units of the noisy KPI measures (same DAX with _KPI Noise = 1)
+    MEASURE _measures[_test Rock Mass by Truck Plan unit] =
+        SWITCH (
+            TRUE ()
+            ,FIRSTNONBLANK ( param_plan_type[plan_type_code], 1 ) = "Неделя"
+                ,SUM ( fact_rock_mass[rock_mass_truck_plan] )
+            ,SUM ( fact_rock_mass[rock_mass_truck_plan_month] )
+        )
+    MEASURE _measures[_test Rock Mass by Truck Fact unit] =
+        SUM ( fact_rock_mass[rock_mass_truck_fact] )
+    MEASURE _measures[_test Performance per Truck Plan unit] =
+        DIVIDE ( [_test Rock Mass by Truck Plan unit], [_Plan Truck Loading Hours] ) * 1000
+    MEASURE _measures[_test Performance per Truck Fact unit] =
+        DIVIDE ( [_test Rock Mass by Truck Fact unit], [_Fact Truck Loading Hours] ) * 1000
+
+    VAR _tol             = 1e-9
+
+    VAR _r_included      = TREATAS ( { "да" }, dim_loader[is_included] )
+    VAR _p_contractor    = TREATAS ( { BLANK () }, dim_loader[contractor] )
+    VAR _s_week          = TREATAS ( { "9 (25.2-3.3)" }, dim_date[week_label] )
+    VAR _s_plan_type     = TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    VAR _s_calculation   = TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+    VAR _s_work_type     = TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+    VAR _v_category      = FILTER ( ALL ( dim_time_category[category_code] ), NOT ISBLANK ( dim_time_category[category_code] ) )
+    VAR _v_shown         = TREATAS ( { "1" }, dim_time_category[is_shown] )
+    VAR _v_included      = TREATAS ( { "да" }, dim_time_category[is_included] )
+
+EVALUATE
+// ---------------------------------------------------------------- 1 bars and labels per category row
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,dim_time_category[category_code]
+        ,_r_included, _p_contractor, _s_week, _s_plan_type, _s_calculation, _s_work_type, _v_category, _v_shown, _v_included
+        ,"m0", [_WF Plan Subtotal]
+        ,"m1", [_WF Plan Base]
+        ,"m2", [_WF Plan Loss]
+        ,"m3", [_WF Fact Subtotal]
+        ,"m4", [_WF Fact Base]
+        ,"m5", [_WF Fact Loss]
+        ,"m6", [Time Share Plan %]
+        ,"m7", [Time Share Fact %]
+        ,"m8", [Time Share Δ]
+        ,"m9", [_Zero]
+    )
+VAR _actual =
+        UNION (
+             SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Plan Subtotal", "_actual", [m0] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Plan Base", "_actual", [m1] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Plan Loss", "_actual", [m2] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Fact Subtotal", "_actual", [m3] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Fact Base", "_actual", [m4] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_WF Fact Loss", "_actual", [m5] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "Time Share Plan %", "_actual", [m6] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "Time Share Fact %", "_actual", [m7] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "Time Share Δ", "_actual", [m8] )
+            ,SELECTCOLUMNS ( _actual_wide, "_category_sort", dim_time_category[sort_order] + 0, "_actual_code", dim_time_category[category_code], "_measure", "_Zero", "_actual", [m9] )
+        )
+VAR _expected =
+        DATATABLE (
+            "_category_sort", INTEGER,
+            "_expected_code", STRING,
+            "_measure", STRING,
+            "_expected", DOUBLE,
+            {
+                { 1, "КФВ", "_WF Plan Subtotal", 1.0 },
+                { 1, "КФВ", "_WF Plan Base", 0.0 },
+                { 1, "КФВ", "_WF Plan Loss", 0.0 },
+                { 1, "КФВ", "_WF Fact Subtotal", 1.0 },
+                { 1, "КФВ", "_WF Fact Base", 0.0 },
+                { 1, "КФВ", "_WF Fact Loss", 1.0 },
+                { 1, "КФВ", "Time Share Plan %", 1.0 },
+                { 1, "КФВ", "Time Share Fact %", 1.0 },
+                { 1, "КФВ", "Time Share Δ", 0.0 },
+                { 1, "КФВ", "_Zero", 0.0 },
+                { 2, "ТО, ППР", "_WF Plan Subtotal", BLANK () },
+                { 2, "ТО, ППР", "_WF Plan Base", 0.9098689326915471 },
+                { 2, "ТО, ППР", "_WF Plan Loss", 0.09013106730845269 },
+                { 2, "ТО, ППР", "_WF Fact Subtotal", BLANK () },
+                { 2, "ТО, ППР", "_WF Fact Base", 0.9431889061126866 },
+                { 2, "ТО, ППР", "_WF Fact Loss", 0.056811093887313285 },
+                { 2, "ТО, ППР", "Time Share Plan %", 0.09013106730845269 },
+                { 2, "ТО, ППР", "Time Share Fact %", 0.056811093887313285 },
+                { 2, "ТО, ППР", "Time Share Δ", -0.033319973421139404 },
+                { 2, "ТО, ППР", "_Zero", 0.0 },
+                { 3, "КР", "_WF Plan Subtotal", BLANK () },
+                { 3, "КР", "_WF Plan Base", 0.8243147765031935 },
+                { 3, "КР", "_WF Plan Loss", 0.08555415618835366 },
+                { 3, "КР", "_WF Fact Subtotal", BLANK () },
+                { 3, "КР", "_WF Fact Base", 0.8574021040822297 },
+                { 3, "КР", "_WF Fact Loss", 0.08578680203045685 },
+                { 3, "КР", "Time Share Plan %", 0.08555415618835366 },
+                { 3, "КР", "Time Share Fact %", 0.08578680203045685 },
+                { 3, "КР", "Time Share Δ", 0.00023264584210319628 },
+                { 3, "КР", "_Zero", 0.0 },
+                { 4, "Авар. прост.", "_WF Plan Subtotal", BLANK () },
+                { 4, "Авар. прост.", "_WF Plan Base", 0.773260753494359 },
+                { 4, "Авар. прост.", "_WF Plan Loss", 0.05105402300883467 },
+                { 4, "Авар. прост.", "_WF Fact Subtotal", BLANK () },
+                { 4, "Авар. прост.", "_WF Fact Base", 0.7644145090326867 },
+                { 4, "Авар. прост.", "_WF Fact Loss", 0.0929875950495434 },
+                { 4, "Авар. прост.", "Time Share Plan %", 0.05105402300883467 },
+                { 4, "Авар. прост.", "Time Share Fact %", 0.0929875950495434 },
+                { 4, "Авар. прост.", "Time Share Δ", 0.04193357204070873 },
+                { 4, "Авар. прост.", "_Zero", 0.0 },
+                { 5, "Ожид з/ч", "_WF Plan Subtotal", BLANK () },
+                { 5, "Ожид з/ч", "_WF Plan Base", 0.7690954162934888 },
+                { 5, "Ожид з/ч", "_WF Plan Loss", 0.004165337200870196 },
+                { 5, "Ожид з/ч", "_WF Fact Subtotal", BLANK () },
+                { 5, "Ожид з/ч", "_WF Fact Base", 0.7608225509578606 },
+                { 5, "Ожид з/ч", "_WF Fact Loss", 0.0035919580748260947 },
+                { 5, "Ожид з/ч", "Time Share Plan %", 0.004165337200870196 },
+                { 5, "Ожид з/ч", "Time Share Fact %", 0.0035919580748260947 },
+                { 5, "Ожид з/ч", "Time Share Δ", -0.0005733791260441015 },
+                { 5, "Ожид з/ч", "_Zero", 0.0 },
+                { 6, "КТГ", "_WF Plan Subtotal", 0.7690954162934888 },
+                { 6, "КТГ", "_WF Plan Base", 0.0 },
+                { 6, "КТГ", "_WF Plan Loss", 0.0 },
+                { 6, "КТГ", "_WF Fact Subtotal", 0.7608225509578606 },
+                { 6, "КТГ", "_WF Fact Base", 0.0 },
+                { 6, "КТГ", "_WF Fact Loss", 0.0 },
+                { 6, "КТГ", "Time Share Plan %", 0.7690954162934888 },
+                { 6, "КТГ", "Time Share Fact %", 0.7608225509578606 },
+                { 6, "КТГ", "Time Share Δ", -0.00827286533562821 },
+                { 6, "КТГ", "_Zero", 0.0 },
+                { 7, "Пересменок", "_WF Plan Subtotal", BLANK () },
+                { 7, "Пересменок", "_WF Plan Base", 0.725860539341694 },
+                { 7, "Пересменок", "_WF Plan Loss", 0.043234876951795065 },
+                { 7, "Пересменок", "_WF Fact Subtotal", BLANK () },
+                { 7, "Пересменок", "_WF Fact Base", 0.7272469784564553 },
+                { 7, "Пересменок", "_WF Fact Loss", 0.03357557250140507 },
+                { 7, "Пересменок", "Time Share Plan %", 0.043234876951795065 },
+                { 7, "Пересменок", "Time Share Fact %", 0.03357557250140507 },
+                { 7, "Пересменок", "Time Share Δ", -0.009659304450389997 },
+                { 7, "Пересменок", "_Zero", 0.0 },
+                { 8, "Обед", "_WF Plan Subtotal", BLANK () },
+                { 8, "Обед", "_WF Plan Base", 0.6917421899810882 },
+                { 8, "Обед", "_WF Plan Loss", 0.03411834936060599 },
+                { 8, "Обед", "_WF Fact Subtotal", BLANK () },
+                { 8, "Обед", "_WF Fact Base", 0.7054022555605657 },
+                { 8, "Обед", "_WF Fact Loss", 0.021844722895889155 },
+                { 8, "Обед", "Time Share Plan %", 0.03411834936060599 },
+                { 8, "Обед", "Time Share Fact %", 0.021844722895889155 },
+                { 8, "Обед", "Time Share Δ", -0.012273626464716834 },
+                { 8, "Обед", "_Zero", 0.0 },
+                { 9, "Личные нужды", "_WF Plan Subtotal", BLANK () },
+                { 9, "Личные нужды", "_WF Plan Base", 0.674683015300785 },
+                { 9, "Личные нужды", "_WF Plan Loss", 0.017059174680302994 },
+                { 9, "Личные нужды", "_WF Fact Subtotal", BLANK () },
+                { 9, "Личные нужды", "_WF Fact Base", 0.7006954376878507 },
+                { 9, "Личные нужды", "_WF Fact Loss", 0.0047068178727153335 },
+                { 9, "Личные нужды", "Time Share Plan %", 0.017059174680302994 },
+                { 9, "Личные нужды", "Time Share Fact %", 0.0047068178727153335 },
+                { 9, "Личные нужды", "Time Share Δ", -0.012352356807587662 },
+                { 9, "Личные нужды", "_Zero", 0.0 },
+                { 10, "Заправка", "_WF Plan Subtotal", BLANK () },
+                { 10, "Заправка", "_WF Plan Base", 0.6718134381710481 },
+                { 10, "Заправка", "_WF Plan Loss", 0.0028695771297365174 },
+                { 10, "Заправка", "_WF Fact Subtotal", BLANK () },
+                { 10, "Заправка", "_WF Fact Base", 0.6979686300859927 },
+                { 10, "Заправка", "_WF Fact Loss", 0.0027268076018582502 },
+                { 10, "Заправка", "Time Share Plan %", 0.0028695771297365174 },
+                { 10, "Заправка", "Time Share Fact %", 0.0027268076018582502 },
+                { 10, "Заправка", "Time Share Δ", -0.0001427695278782672 },
+                { 10, "Заправка", "_Zero", 0.0 },
+                { 11, "Взрывные работы", "_WF Plan Subtotal", BLANK () },
+                { 11, "Взрывные работы", "_WF Plan Base", 0.6542786580746023 },
+                { 11, "Взрывные работы", "_WF Plan Loss", 0.017534780096445803 },
+                { 11, "Взрывные работы", "_WF Fact Subtotal", BLANK () },
+                { 11, "Взрывные работы", "_WF Fact Base", 0.6856125857309716 },
+                { 11, "Взрывные работы", "_WF Fact Loss", 0.012356044355020874 },
+                { 11, "Взрывные работы", "Time Share Plan %", 0.017534780096445803 },
+                { 11, "Взрывные работы", "Time Share Fact %", 0.012356044355020874 },
+                { 11, "Взрывные работы", "Time Share Δ", -0.005178735741424929 },
+                { 11, "Взрывные работы", "_Zero", 0.0 },
+                { 12, "Перегоны", "_WF Plan Subtotal", BLANK () },
+                { 12, "Перегоны", "_WF Plan Base", 0.6333022103434702 },
+                { 12, "Перегоны", "_WF Plan Loss", 0.02097644773113198 },
+                { 12, "Перегоны", "_WF Fact Subtotal", BLANK () },
+                { 12, "Перегоны", "_WF Fact Base", 0.6677342548642247 },
+                { 12, "Перегоны", "_WF Fact Loss", 0.01787833086674699 },
+                { 12, "Перегоны", "Time Share Plan %", 0.02097644773113198 },
+                { 12, "Перегоны", "Time Share Fact %", 0.01787833086674699 },
+                { 12, "Перегоны", "Time Share Δ", -0.0030981168643849887 },
+                { 12, "Перегоны", "_Zero", 0.0 },
+                { 14, "Ожидание АС", "_WF Plan Subtotal", BLANK () },
+                { 14, "Ожидание АС", "_WF Plan Base", 0.57303763365034 },
+                { 14, "Ожидание АС", "_WF Plan Loss", 0.06026457669313073 },
+                { 14, "Ожидание АС", "_WF Fact Subtotal", BLANK () },
+                { 14, "Ожидание АС", "_WF Fact Base", 0.6008471081377981 },
+                { 14, "Ожидание АС", "_WF Fact Loss", 0.06688714672642683 },
+                { 14, "Ожидание АС", "Time Share Plan %", 0.06026457669313073 },
+                { 14, "Ожидание АС", "Time Share Fact %", 0.06688714672642683 },
+                { 14, "Ожидание АС", "Time Share Δ", 0.006622570033296103 },
+                { 14, "Ожидание АС", "_Zero", 0.0 },
+                { 15, "Консервация/Резерв", "_WF Plan Subtotal", BLANK () },
+                { 15, "Консервация/Резерв", "_WF Plan Base", 0.5595940150861629 },
+                { 15, "Консервация/Резерв", "_WF Plan Loss", 0.01344361856417694 },
+                { 15, "Консервация/Резерв", "_WF Fact Subtotal", BLANK () },
+                { 15, "Консервация/Резерв", "_WF Fact Base", 0.5976110801182989 },
+                { 15, "Консервация/Резерв", "_WF Fact Loss", 0.003236028019498832 },
+                { 15, "Консервация/Резерв", "Time Share Plan %", 0.01344361856417694 },
+                { 15, "Консервация/Резерв", "Time Share Fact %", 0.003236028019498832 },
+                { 15, "Консервация/Резерв", "Time Share Δ", -0.010207590544678109 },
+                { 15, "Консервация/Резерв", "_Zero", 0.0 },
+                { 21, "Прочие простои", "_WF Plan Subtotal", BLANK () },
+                { 21, "Прочие простои", "_WF Plan Base", 0.529032318907671 },
+                { 21, "Прочие простои", "_WF Plan Loss", 0.030561696178492165 },
+                { 21, "Прочие простои", "_WF Fact Subtotal", BLANK () },
+                { 21, "Прочие простои", "_WF Fact Base", 0.541681431205485 },
+                { 21, "Прочие простои", "_WF Fact Loss", 0.05592964891281395 },
+                { 21, "Прочие простои", "Time Share Plan %", 0.030561696178492165 },
+                { 21, "Прочие простои", "Time Share Fact %", 0.05592964891281395 },
+                { 21, "Прочие простои", "Time Share Δ", 0.025367952734321783 },
+                { 21, "Прочие простои", "_Zero", 0.0 },
+                { 22, "Без классификации", "_WF Plan Subtotal", BLANK () },
+                { 22, "Без классификации", "_WF Plan Base", 0.529032318907671 },
+                { 22, "Без классификации", "_WF Plan Loss", BLANK () },
+                { 22, "Без классификации", "_WF Fact Subtotal", BLANK () },
+                { 22, "Без классификации", "_WF Fact Base", 0.5232847080362797 },
+                { 22, "Без классификации", "_WF Fact Loss", 0.018396723169205473 },
+                { 22, "Без классификации", "Time Share Plan %", BLANK () },
+                { 22, "Без классификации", "Time Share Fact %", 0.018396723169205473 },
+                { 22, "Без классификации", "Time Share Δ", 0.018396723169205473 },
+                { 22, "Без классификации", "_Zero", 0.0 },
+                { 24, "КИО", "_WF Plan Subtotal", 0.529032318907671 },
+                { 24, "КИО", "_WF Plan Base", 0.0 },
+                { 24, "КИО", "_WF Plan Loss", 0.0 },
+                { 24, "КИО", "_WF Fact Subtotal", 0.5232847080362797 },
+                { 24, "КИО", "_WF Fact Base", 0.0 },
+                { 24, "КИО", "_WF Fact Loss", 0.0 },
+                { 24, "КИО", "Time Share Plan %", 0.529032318907671 },
+                { 24, "КИО", "Time Share Fact %", 0.5232847080362797 },
+                { 24, "КИО", "Time Share Δ", -0.0057476108713913066 },
+                { 24, "КИО", "_Zero", 0.0 },
+                { 25, "Вспомогательная работа", "_WF Plan Subtotal", BLANK () },
+                { 25, "Вспомогательная работа", "_WF Plan Base", 0.41880311441128704 },
+                { 25, "Вспомогательная работа", "_WF Plan Loss", 0.11022920449638378 },
+                { 25, "Вспомогательная работа", "_WF Fact Subtotal", BLANK () },
+                { 25, "Вспомогательная работа", "_WF Fact Base", 0.4616026724760741 },
+                { 25, "Вспомогательная работа", "_WF Fact Loss", 0.0616820355602055 },
+                { 25, "Вспомогательная работа", "Time Share Plan %", 0.11022920449638378 },
+                { 25, "Вспомогательная работа", "Time Share Fact %", 0.0616820355602055 },
+                { 25, "Вспомогательная работа", "Time Share Δ", -0.048547168936178275 },
+                { 25, "Вспомогательная работа", "_Zero", 0.0 },
+                { 27, "Погрузка самосвалов", "_WF Plan Subtotal", 0.41880311441128704 },
+                { 27, "Погрузка самосвалов", "_WF Plan Base", 0.0 },
+                { 27, "Погрузка самосвалов", "_WF Plan Loss", 0.0 },
+                { 27, "Погрузка самосвалов", "_WF Fact Subtotal", 0.4616026724760741 },
+                { 27, "Погрузка самосвалов", "_WF Fact Base", 0.0 },
+                { 27, "Погрузка самосвалов", "_WF Fact Loss", 0.0 },
+                { 27, "Погрузка самосвалов", "Time Share Plan %", 0.41880311441128704 },
+                { 27, "Погрузка самосвалов", "Time Share Fact %", 0.4616026724760741 },
+                { 27, "Погрузка самосвалов", "Time Share Δ", 0.04279955806478708 },
+                { 27, "Погрузка самосвалов", "_Zero", 0.0 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            VAR _e      = [_expected]
+            VAR _a      = [_actual]
+            VAR _code_ok = [_actual_code] = [_expected_code]
+            VAR _value_ok =
+                IF (
+                    ISBLANK ( _e )
+                    ,ISBLANK ( _a )
+                    ,NOT ISBLANK ( _a ) && ABS ( _a - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+                )
+            RETURN
+                _code_ok && _value_ok
+    )
+ORDER BY [_pass], [_category_sort], [_measure]
+
+EVALUATE
+// ---------------------------------------------------------------- 2 KPI cards (RANDBETWEEN rule)
+VAR _actual_wide =
+    SUMMARIZECOLUMNS (
+        _r_included, _p_contractor, _s_week, _s_plan_type, _s_calculation, _s_work_type
+        ,"k0", [Performance per Truck Plan]
+        ,"u0", [_test Performance per Truck Plan unit]
+        ,"k1", [Performance per Truck Fact]
+        ,"u1", [_test Performance per Truck Fact unit]
+        ,"k2", [Rock Mass by Truck Plan]
+        ,"u2", [_test Rock Mass by Truck Plan unit]
+        ,"k3", [Rock Mass by Truck Fact]
+        ,"u3", [_test Rock Mass by Truck Fact unit]
+    )
+VAR _actual =
+        UNION (
+             SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+        )
+VAR _expected =
+        DATATABLE (
+            "_measure", STRING,
+            "_expected_unit", DOUBLE,
+            {
+                { "Performance per Truck Plan", 884.9378035561388 },
+                { "Performance per Truck Fact", 753.4772201555679 },
+                { "Rock Mass by Truck Plan", 7022.69 },
+                { "Rock Mass by Truck Fact", 7070.292666 }
+            }
+        )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_multiplier", DIVIDE ( [_actual], [_actual_unit] )
+        ,"_pass",
+            VAR _e      = [_expected_unit]
+            VAR _u      = [_actual_unit]
+            VAR _m      = DIVIDE ( [_actual], [_actual_unit] )
+            VAR _unit_ok =
+                NOT ISBLANK ( _u ) && ABS ( _u - _e ) <= _tol * MAX ( 1, ABS ( _e ) )
+            VAR _mult_ok =
+                _m >= [_lo] && _m <= [_hi] && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6
+            RETURN
+                _unit_ok && _mult_ok
+    )
+ORDER BY [_pass], [_measure]

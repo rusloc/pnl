@@ -10,6 +10,7 @@ import type { BandVM, OverviewVM, RowAction } from '@/lib/sales/view-model';
 import { ChartCardView, HeroCardView, KpiCardView, TableCardView } from './cards';
 import type { Box } from './cards';
 import { Header } from './Header';
+import { PopupProvider } from './popup';
 import { SlideOver } from './SlideOver';
 import styles from './sales.module.css';
 
@@ -133,43 +134,46 @@ function Dashboard({ base }: { base: SalesBase }) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.board}>
-        <Header vm={header} sel={sel} panelId={panelId} onChange={update} />
-        <div id={panelId} role="tabpanel" aria-labelledby={`tab-${sel.view}`} className={styles.panel}>
-          {overview ? (
-            <OverviewView
-              vm={overview}
-              onOpen={(view) => update({ view })}
-              onMonth={(anchor) => update({ anchor })}
-              onAction={onAction}
+      {/* one pop-up open at a time; a view change closes it (remount) */}
+      <PopupProvider key={sel.view}>
+        <div className={styles.board}>
+          <Header vm={header} sel={sel} panelId={panelId} onChange={update} />
+          <div id={panelId} role="tabpanel" aria-labelledby={`tab-${sel.view}`} className={styles.panel}>
+            {overview ? (
+              <OverviewView
+                vm={overview}
+                onOpen={(view) => update({ view })}
+                onMonth={(anchor) => update({ anchor })}
+                onAction={onAction}
+              />
+            ) : null}
+            {band ? <BandView vm={band} onMonth={(anchor) => update({ anchor })} onAction={onAction} /> : null}
+          </div>
+          {slide ? (
+            <SlideOver
+              vm={
+                detail && 'error' in detail
+                  ? { kind: 'missing', title: 'Could not load the loan sample', sub: detail.error }
+                  : slide
+              }
+              onClose={onClose}
+              onBack={
+                stack.length > 0
+                  ? () => {
+                      const prev = stack.at(-1) ?? null;
+                      setStack(stack.slice(0, -1));
+                      update({ drill: prev });
+                    }
+                  : null
+              }
+              onClient={(client) => {
+                if (sel.drill) setStack([...stack, sel.drill]);
+                update({ drill: { kind: 'client', client } });
+              }}
             />
           ) : null}
-          {band ? <BandView vm={band} onMonth={(anchor) => update({ anchor })} onAction={onAction} /> : null}
         </div>
-        {slide ? (
-          <SlideOver
-            vm={
-              detail && 'error' in detail
-                ? { kind: 'missing', title: 'Could not load the loan sample', sub: detail.error }
-                : slide
-            }
-            onClose={onClose}
-            onBack={
-              stack.length > 0
-                ? () => {
-                    const prev = stack.at(-1) ?? null;
-                    setStack(stack.slice(0, -1));
-                    update({ drill: prev });
-                  }
-                : null
-            }
-            onClient={(client) => {
-              if (sel.drill) setStack([...stack, sel.drill]);
-              update({ drill: { kind: 'client', client } });
-            }}
-          />
-        ) : null}
-      </div>
+      </PopupProvider>
     </div>
   );
 }

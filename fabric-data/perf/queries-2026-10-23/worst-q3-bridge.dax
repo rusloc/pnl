@@ -1,0 +1,38 @@
+DEFINE
+    VAR _entity = TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 9 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "LTM" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+    VAR _steps =
+        SELECTCOLUMNS (
+            FILTER (
+                SUMMARIZECOLUMNS (
+                    dim_bridge_step[step_code]
+                    ,dim_bridge_step[step_label]
+                    ,dim_bridge_step[step_sort]
+                    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units
+                    ,"@value", CONVERT ( [Bridge Value], DOUBLE )
+                )
+                ,NOT ISBLANK ( [@value] )
+            )
+            ,"step_code", dim_bridge_step[step_code]
+            ,"step_label", dim_bridge_step[step_label]
+            ,"step_sort", dim_bridge_step[step_sort]
+            ,"@value", [@value]
+        )
+    VAR _end =
+        ROW (
+            "step_code", "END"
+            ,"step_label", "Base"
+            ,"step_sort", 999
+            ,"@value", CONVERT ( CALCULATE ( [Prof Net Revenue], _entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units ), DOUBLE )
+        )
+EVALUATE
+UNION ( _steps, _end )
+ORDER BY [step_sort]

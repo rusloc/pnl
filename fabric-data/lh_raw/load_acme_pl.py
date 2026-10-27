@@ -5,6 +5,15 @@ Full overwrite per table (idempotent re-run). Every CSV is parsed strictly again
 header = spec columns (names and order), row count = expected, 0 duplicate keys, no nulls in not-null columns.
 If any table fails a check, nothing is written.
 
+ADR-0008 step (a)+(b), derived in this script and checked before any write (spec section 7, C-10..C-13, C-36):
+- pre-translated amounts appended to fact_pl, fact_pl_allocated (amount_*) and fact_operational (gmv_*):
+  one column per reporting currency at the row version's own rate type (ACT/FC at the month's ACTUAL_AVG, BUD at
+  BUDGET); translated per row, so the sum of any slice equals the month x currency translation the model does
+  today (to within 0.5e-6 per row: rows are kept at 6 dp). Constant currency (C-12) gets no columns: the model
+  iterates the 4 functional currencies x one BUDGET factor per currency and FY (ADR-0008 4.2 / 4.3).
+- fact_pl_elim: one elimination row per intercompany row of fact_pl (account = the block's ELIM_* account,
+  amounts negated). ACME Group = P + S + fact_pl_elim.
+
 Usage (from the repo root, venv in fabric-data/.venv):
     fabric-data/.venv/Scripts/python fabric-data/lh_raw/load_acme_pl.py --dry-run
     fabric-data/.venv/Scripts/python fabric-data/lh_raw/load_acme_pl.py --workspace <ws> --lakehouse <lh>
@@ -17,8 +26,11 @@ Spec: docs/Requirements.md section 8 (D-01 ... D-21), section 10 T-06; data cont
 """
 import argparse
 import csv
+import decimal
 import os
 import sys
+from collections import defaultdict
+from decimal import Decimal
 from pathlib import Path
 
 import pyarrow as pa
@@ -119,6 +131,26 @@ TABLES = {
     "fact_pl_allocated": ("facts", 758364, PL_KEY, PL),
 }
 
+# ADR-0008: derived columns and tables. Same rule as TABLES: types are declared here and nowhere else.
+XA = pa.decimal128(18, 6)  # pre-translated amount: per-row value rounded half-even to 6 dp (max ~2e7, sums exact to 1e-6/row)
+REP_CCYS = ("USD", "EUR", "GBP")  # = param_reporting_currency (checked)
+
+
+def translated(prefix, nullable=False):
+    """One column per reporting currency (<prefix>_usd, _eur, _gbp) at the row version's own rate type."""
+    tail = (N,) if nullable else ()
+    return [(f"{prefix}_{c.lower()}", XA) + tail for c in REP_CCYS]
+
+
+# table -> (local amount column it translates, derived columns appended after the CSV columns)
+DERIVED_COLUMNS = {
+    "fact_pl": ("amount_local", translated("amount")),
+    "fact_pl_allocated": ("amount_local", translated("amount")),
+    "fact_operational": ("gmv_local", translated("gmv", nullable=True)),
+}
+# fact_pl_elim (C-36): same key and columns as fact_pl; rows = fact_pl rows with a counterparty (expected 5,304)
+ELIM_TABLE, ELIM_ROWS = "fact_pl_elim", 5304
+
 
 def arrow_schema(columns):
     return pa.schema([pa.field(c[0], c[1], nullable=len(c) > 2 and c[2]) for c in columns])
@@ -167,6 +199,137 @@ def read_and_check(table):
     return data, problems
 
 
+CTX = decimal.Context(prec=40, rounding=decimal.ROUND_HALF_EVEN)
+Q6 = Decimal("0.000001")
+TOLERANCE = Decimal("0.01")  # pre-translated sums vs translation per month x currency (rounding of 6-dp rows only)
+
+
+def rate_book(loaded):
+    """FX lookups for the derivation, plus spec-vs-data problems: reporting currencies, and one BUDGET rate per
+    currency and FY (C-10; the model's constant-currency path relies on it)."""
+    problems = []
+    reps = loaded["param_reporting_currency"].column("currency_code").to_pylist()
+    if sorted(reps) != sorted(REP_CCYS):
+        problems.append(f"param_reporting_currency {reps} != REP_CCYS {list(REP_CCYS)}")
+    month = loaded["dim_month"]
+    month_fy = dict(zip(month.column("month_key").to_pylist(), month.column("fiscal_year").to_pylist()))
+    fx = loaded["fact_fx_rate"]
+    rate = dict(zip(zip(*(fx.column(c).to_pylist() for c in ("currency_code", "month_key", "rate_type"))),
+                    fx.column("local_per_usd").to_pylist()))
+    budget = defaultdict(set)
+    for (ccy, mk, rt), r in rate.items():
+        if rt == "BUDGET":
+            budget[(ccy, month_fy[mk])].add(r)
+    multi = sorted(k for k, v in budget.items() if len(v) != 1)
+    if multi:
+        problems.append(f"more than one BUDGET rate per currency and FY (C-10): {multi}")
+    return rate, month_fy, problems
+
+
+def factors_for(rate, ccy, mk, version):
+    """One multiplier per reporting currency for one (currency, month, version): C-11 (ACT / FC at ACTUAL_AVG of
+    the month, BUD at BUDGET), cross rate local -> USD -> reporting currency (C-13)."""
+    rt = "BUDGET" if version == "BUD" else "ACTUAL_AVG"
+    return [CTX.divide(rate[(rep, mk, rt)], rate[(ccy, mk, rt)]) for rep in REP_CCYS]
+
+
+def add_translations(table, data, rate, month_fy):
+    """Appends the pre-translated columns (rounded half-even to 6 dp per row). Checks, per version x fiscal year and
+    column: sum of the rows = sum over (currency, month) of the local sum x the same multiplier, within TOLERANCE."""
+    local_col, columns = DERIVED_COLUMNS[table]
+    keys = zip(*(data.column(c).to_pylist() for c in ("currency_code", "month_key", "version_key")))
+    local = data.column(local_col).to_pylist()
+    cache, problems = {}, []
+    out = [[] for _ in columns]
+    row_sums = defaultdict(lambda: [Decimal(0)] * len(columns))  # (version, fy) -> per-column sum of rows
+    local_sums = defaultdict(Decimal)  # (currency, month, version) -> local sum
+    for key, x in zip(keys, local):
+        f = cache.get(key)
+        if f is None:
+            try:
+                f = cache[key] = factors_for(rate, *key)
+            except KeyError as e:
+                return data, [f"no FX rate for {e.args[0]} (row key {key})"], Decimal(0)
+        if x is None:
+            for o in out:
+                o.append(None)
+            continue
+        local_sums[key] += x
+        acc = row_sums[(key[2], month_fy[key[1]])]
+        for i, (o, fi) in enumerate(zip(out, f)):
+            v = CTX.multiply(x, fi).quantize(Q6, context=CTX)
+            o.append(v)
+            acc[i] += v
+    expected = defaultdict(lambda: [Decimal(0)] * len(columns))
+    for key, s in local_sums.items():
+        acc = expected[(key[2], month_fy[key[1]])]
+        for i, fi in enumerate(cache[key]):
+            acc[i] += CTX.multiply(s, fi)
+    worst = max((abs(row_sums[k][i] - expected[k][i]) for k in expected for i in range(len(columns))), default=Decimal(0))
+    if worst > TOLERANCE:
+        problems.append(f"pre-translated sums differ from translation per month x currency by {worst}")
+    for (name, typ, *nullable), values in zip(columns, out):
+        data = data.append_column(pa.field(name, typ, nullable=bool(nullable)), pa.array(values, type=typ))
+    return data, problems, worst
+
+
+def build_elim(loaded):
+    """fact_pl_elim (C-36, D-33): every fact_pl row with a counterparty, account replaced by its block's elimination
+    account (dim_account: is_intercompany, not has_fact_rows, is_direct: ELIM_GR / ELIM_VSC), every amount negated.
+    Checks: expected rows, unique key, and per version x month x region the eliminations net to 0 in local currency
+    (both intercompany sides match, so contribution margin is unchanged and the C-37 difference is 0)."""
+    acc = loaded["dim_account"]
+    cols = {c: acc.column(c).to_pylist() for c in ("account_code", "block_code", "is_intercompany", "has_fact_rows",
+                                                    "is_direct")}
+    block_of = dict(zip(cols["account_code"], cols["block_code"]))
+    elim_of = defaultdict(list)
+    for code, blk, ic, has_rows, direct in zip(*cols.values()):
+        if ic and not has_rows and direct:
+            elim_of[blk].append(code)
+    pl = loaded["fact_pl"]
+    ic_rows = pl.filter(pc.is_valid(pl.column("counterparty_entity_code")))
+    problems, mapped = [], []
+    for code in ic_rows.column("account_code").to_pylist():
+        target = elim_of.get(block_of[code], [])
+        if len(target) != 1:
+            return None, [f"block {block_of[code]} of {code} has {len(target)} elimination accounts, expected 1"]
+        mapped.append(target[0])
+    elim = ic_rows.set_column(ic_rows.schema.get_field_index("account_code"),
+                              pl.schema.field("account_code"), pa.array(mapped, type=S))
+    for name in ["amount_local"] + [c[0] for c in DERIVED_COLUMNS["fact_pl"][1]]:
+        i = elim.schema.get_field_index(name)
+        elim = elim.set_column(i, elim.schema.field(name), pc.negate_checked(elim.column(name)))
+    if elim.num_rows != ELIM_ROWS:
+        problems.append(f"rows {elim.num_rows} != expected {ELIM_ROWS}")
+    counts = elim.group_by(PL_KEY, use_threads=False).aggregate([([], "count_all")])
+    if counts.num_rows != elim.num_rows:
+        problems.append(f"{elim.num_rows - counts.num_rows} duplicate key(s) on {PL_KEY}")
+    net = elim.group_by(["version_key", "month_key", "region_code"], use_threads=False).aggregate(
+        [("amount_local", "sum")])
+    off = sum(1 for v in net.column("amount_local_sum").to_pylist() if v != 0)
+    if off:
+        problems.append(f"{off} version x month x region group(s) where eliminations do not net to 0 (C-37)")
+    return elim, problems
+
+
+def derive(loaded):
+    """ADR-0008 (a) + (b) in place on `loaded`. Returns [(table, rows, note, problems)] for the report lines."""
+    rate, month_fy, problems = rate_book(loaded)
+    if problems:
+        return [("fact_fx_rate", 0, "", problems)]
+    report = []
+    for table in DERIVED_COLUMNS:
+        data, probs, worst = add_translations(table, loaded[table], rate, month_fy)
+        loaded[table] = data
+        report.append((table, data.num_rows, f"+{len(DERIVED_COLUMNS[table][1])} cols, max sum diff {worst:.6f}",
+                       probs))
+    elim, probs = build_elim(loaded)
+    if elim is not None:
+        loaded[ELIM_TABLE] = elim
+    report.append((ELIM_TABLE, 0 if elim is None else elim.num_rows, "derived from fact_pl", probs))
+    return report
+
+
 def storage_options():
     from azure.identity import AzureCliCredential
 
@@ -193,8 +356,15 @@ def main():
     if failed:
         print(f"{failed} table(s) failed the checks. Nothing written.")
         return 1
+    for table, rows, note, problems in derive(loaded):
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'OK':4}  derive {table:26} rows {rows:>9,}  {note}"
+              + (f"  -> {'; '.join(problems)}" if problems else ""))
+    if failed:
+        print(f"{failed} derived table(s) failed the checks. Nothing written.")
+        return 1
     if args.dry_run:
-        print(f"Dry run: all {len(TABLES)} tables pass the checks. Nothing written.")
+        print(f"Dry run: all {len(loaded)} tables pass the checks. Nothing written.")
         return 0
 
     from deltalake import DeltaTable, write_deltalake
@@ -209,7 +379,7 @@ def main():
         ok = rows == data.num_rows
         failed += not ok
         print(f"{'OK' if ok else 'FAIL':4}  write  {SCHEMA}.{table:26} rows {rows:>9,}  version {dt.version()}")
-    print(f"{len(TABLES) - failed} of {len(TABLES)} tables written and read back.")
+    print(f"{len(loaded) - failed} of {len(loaded)} tables written and read back.")
     return 1 if failed else 0
 
 

@@ -45,7 +45,7 @@ describe('Overview (default window: Month · Sep 2026 · All markets · vs Budge
       ['Bad / overdue loans', '4.6%', null],
     ]);
     expect(vm.heroes[2]?.rows[0].text).toBe('n/a'); // returning % has no Budget
-    expect(vm.heroes.every((h) => h.spark.actual.length === 13 && h.spark.actual.every((v) => v !== null))).toBe(true);
+    expect(vm.heroes.every((h) => !('spark' in h))).toBe(true); // design-requirements §1: no in-card sparklines
     expect(vm.charts.map((c) => c.id)).toEqual(['o5', 'o6', 'o7', 'o8']);
     expect(vm.table.rows.map((r) => r.cells[0]?.text)).toEqual(['Poland', 'Romania', 'Portugal']);
   });
@@ -61,6 +61,40 @@ describe('Overview (default window: Month · Sep 2026 · All markets · vs Budge
       'Showing Jul–Sep 2026 - QTD - Romania - Actual vs Prior year and Budget - Closed through Sep 2026',
     );
     expect(engine.header(sel({ tv: 'R', anchor: monthIndex('2024-06') })).periodLine).toContain('(data from Jan 2024)');
+  });
+});
+
+describe('ADR-0012: card face = title · value · delta rows · status chip; the rest behind ⓘ / How to read', () => {
+  const views: ViewId[] = ['overview', 'loans', 'clients', 'portfolio', 'revenue'];
+  it.each(views)('%s: every card and panel carries a complete ⓘ, no sub-line or footnote on the face', (view) => {
+    const s = sel({ view });
+    const vm = view === 'overview' ? engine.overview(s) : engine.band(s, ix);
+    const cards = 'heroes' in vm ? [...vm.heroes, ...vm.charts, vm.table] : [...vm.kpis, ...vm.charts, vm.table];
+    for (const c of cards) {
+      expect(c, c.id).not.toHaveProperty('sub');
+      expect(c, c.id).not.toHaveProperty('note');
+      for (const k of ['what', 'why', 'formula', 'source'] as const)
+        expect(c.info[k].length, `${c.id}.${k}`).toBeGreaterThan(8);
+    }
+    const band = 'heroes' in vm ? vm.heroes : vm.kpis;
+    expect(band.some((c) => c.info.values.length > 0)).toBe(true); // the former sub-lines live in the pop-up
+  });
+
+  it('one How to read per view, opening with the Showing sentence', () => {
+    for (const view of views) {
+      const h = engine.header(sel({ view, tv: 'R', anchor: monthIndex('2024-06') })).howToRead;
+      expect(h.title).toMatch(/^How to read - /);
+      expect(h.lines[0]?.value).toContain('(data from Jan 2024)'); // the clipped-window note moved here
+    }
+    expect(new Set(views.map((view) => engine.header(sel({ view })).howToRead.title)).size).toBe(5);
+  });
+
+  it('hero chips follow the header comparator and fall back when it has no value', () => {
+    const vm = engine.overview(sel());
+    expect(vm.heroes[0]?.status?.text).toMatch(/^[▲▼◦] (Good|Watch|Off)$/);
+    expect(vm.heroes[2]?.status).toEqual(
+      vm.heroes[2] ? { text: expect.any(String), status: vm.heroes[2].rows[1].status } : null,
+    ); // returning % has no Budget → PY
   });
 });
 

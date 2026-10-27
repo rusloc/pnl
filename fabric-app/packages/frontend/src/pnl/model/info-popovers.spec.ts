@@ -1,59 +1,65 @@
-// Info pop-up copy (L-15): the shared text with its placeholders filled, never invented.
+// ⓘ and How-to-read copy (ADR-0012; parity rules 6, 13, 18, 19): panel copy is
+// Track B's dim_pl_info, the How to read opens with the selection sentence,
+// and no UI copy uses " · " (the " - " separator rule).
 import { describe, expect, it } from 'vitest';
 
-import { boldRuns, fillInfo, INFO_HEADINGS, INFO_TEXT, infoFor, type InfoKey } from './info-popovers';
+import { sampleReference } from '../data/sample-reference';
+import { defaultFilters } from './filters';
+import { cardInfo, howToRead, lineWord, PANEL_INFO, panelInfo } from './info-popovers';
 
-const KEYS: InfoKey[] = ['bridge', 'variances', 'profitability', 'cm'];
+const reference = sampleReference();
+const filter = defaultFilters(reference);
 
-describe('info pop-up text', () => {
-  it('has the four parts for each of the four visuals, with the shared headings', () => {
-    for (const key of KEYS) {
-      const t = INFO_TEXT[key];
-      expect(t.whatItShows.length).toBeGreaterThan(20);
-      expect(t.howToRead.length).toBeGreaterThanOrEqual(3);
-      expect(t.example.startsWith('"')).toBe(true);
-      expect(t.watchOut.length).toBeGreaterThan(20);
+describe('panel and card copy', () => {
+  it('has a title, what it shows, a formula ("; " between terms) and a source for each of the seven panels (shared block)', () => {
+    for (const key of ['NRBRIDGE', 'PBRIDGE', 'VAR', 'PROFTABLE', 'CONC', 'BUBBLE', 'HEAT'] as const) {
+      const t = PANEL_INFO[key];
+      expect(t.title.length).toBeGreaterThan(3);
+      expect(t.what.length).toBeGreaterThan(40);
+      expect(t.formula).toBeTruthy();
+      expect(t.source).toBeTruthy();
+      expect(t.values).toEqual([]);
+      expect(`${t.title} ${t.what} ${t.formula}`).not.toContain(' · ');
     }
-    expect(Object.values(INFO_HEADINGS)).toEqual(['What it shows', 'How to read it', 'For example', 'Watch out']);
+    expect(PANEL_INFO.VAR.formula).toMatch(/Δ % = Δ ÷ \|comparison\|, n\.m\. when \|comparison\| < 2\.0 or \|Δ %\| > 50 %; FX =/);
+    // The comparison and the company's slot word are filled from the selection.
+    expect(panelInfo('VAR', { comparison: 'Latest est.', entity: 'P' }).title).toBe('Largest variances vs Latest est.');
+    expect(panelInfo('NRBRIDGE', { comparison: 'Prior year', entity: 'P' })).toMatchObject({ what: expect.stringMatching(/^Prior year to actual/), formula: expect.stringMatching(/^volume = Σ slices/) });
+    expect(panelInfo('NRBRIDGE', { comparison: 'Budget', entity: 'G' }).formula).toMatch(/^company step/);
+    expect(panelInfo('HEAT', { comparison: 'Budget', entity: 'P' }).title).toBe('Mix - region × category');
+    expect(panelInfo('PBRIDGE', { comparison: 'Budget', entity: 'S' }).what).toMatch(/mix by service line/);
+    expect([lineWord('P'), lineWord('S'), lineWord('G')]).toEqual(['category', 'service line', 'service line']);
   });
 
-  it('fills {comparison} and {breakdown} from the current state everywhere, leaving no placeholder behind', () => {
-    const filled = infoFor('profitability', { comparison: 'Budget', breakdown: 'channel' });
-    expect(filled.title).toBe('Profitability by channel');
-    expect(filled.whatItShows).toBe(
-      'How much revenue each channel brings in, how it grew against Budget, and how much of that revenue is left as profit at each stage of the P&L.'
-    );
-    expect(filled.howToRead[1]).toBe('**vs Budget**: revenue growth of the row; green is better than Budget, orange is worse.');
-    expect(filled.watchOut).toMatch(/^Costs that are not booked to a channel/);
-    const all = [filled.title, filled.whatItShows, ...filled.howToRead, filled.example, filled.watchOut].join('\n');
-    expect(all).not.toMatch(/\{(comparison|breakdown)\}/);
+  it('card copy per code (and company where the block lists both), falling back to the model’s label and definition', () => {
+    expect(cardInfo('NR', 'S', 'Net revenue', 'def')).toMatchObject({ title: 'Net revenue', formula: 'NR = GR + GTN; Δ = actual − comparison, % of |comparison|', source: expect.stringMatching(/^KPI Value K-01/) });
+    expect(cardInfo('GM_PCT', 'S', 'x', 'y').source).toMatch(/KPI Subscription GM %/);
+    expect(cardInfo('GM_PCT', 'P', 'x', 'y').source).toMatch(/GM % by category/);
+    expect(cardInfo('EBITDA', 'S', 'x', 'y').source).toMatch(/Rule of 40/);
+    expect(cardInfo('EBITDA', 'P', 'x', 'y').source).not.toMatch(/Rule of 40/);
+    expect(cardInfo('OPEX_PCT', 'P', 'Opex % of NR', 'y').title).toBe('Opex % revenue');
+    expect(cardInfo('IC_ELIM', 'G', 'Intercompany eliminated', 'Fees billed by Commerce Cloud')).toEqual({ title: 'Intercompany eliminated', what: 'Fees billed by Commerce Cloud', formula: null, values: [], source: 'KPI Value (IC_ELIM)' });
+  });
+});
 
-    const bridge = infoFor('bridge', { comparison: 'Prior year' });
-    expect(bridge.whatItShows).toBe('How net revenue got from Prior year to the current figure, split into the reasons for the change.');
-    expect(bridge.howToRead[0]).toBe('The first bar is net revenue in Prior year; the last bar is net revenue now.');
-    expect(bridge.title).toBe('Net revenue bridge');
-
-    const cm = infoFor('cm', { comparison: 'Budget', breakdown: 'region' });
-    expect(cm.title).toBe('Contribution margin by region');
-    expect(cm.whatItShows).toMatch(/^For each region, /);
+describe('howToRead', () => {
+  it('one guide per view, opening with the selection sentence and closing with the Budget-only legend', () => {
+    const kpi = howToRead('kpi', filter, reference);
+    expect(kpi.title).toBe('How to read - Vitals');
+    expect(kpi.lines[0]).toEqual({ label: 'Showing', value: 'Jan – Sep 2026 - year to date - USD m - vs Budget and Prior year' });
+    expect(kpi.lines.map((l) => l.label)).toEqual(['Showing', 'Results', 'Drivers & health', 'Card face', 'Legend']);
+    expect(kpi.lines.at(-1)?.value).toMatch(/^Status vs Budget only/);
+    expect(howToRead('ana', filter, reference).lines.map((l) => l.label)).toEqual(['Showing', 'Page 1', 'Page 2', 'Paging', 'Colours', 'Legend']);
+    expect(howToRead('prof', filter, reference).lines.map((l) => l.label)).toEqual(['Showing', 'Page 1', 'Page 2', 'Basis', 'Paging', 'Legend']);
+    expect(howToRead('prof', filter, reference).lines[2].value).toMatch(/region × category\.$/);
+    expect(howToRead('prof', { ...filter, entity: 'S' }, reference).lines[2].value).toMatch(/region × service line\.$/);
   });
 
-  it('keeps a placeholder visible rather than inventing a value when the state has none', () => {
-    expect(fillInfo('each {breakdown} vs {comparison}', { comparison: 'Budget' })).toBe('each {breakdown} vs Budget');
-  });
-
-  it('the examples are the illustrative sentences of the shared document, quoted', () => {
-    expect(INFO_TEXT.bridge.example).toBe('"Revenue is 65 m above budget: 128 m from selling more units, partly offset by price / mix and a weaker euro."');
-    expect(INFO_TEXT.variances.example).toBe('"Working media is 18 m below budget: a favourable variance, because a lower cost raises profit."');
-  });
-
-  it('splits **bold** runs for rendering', () => {
-    expect(boldRuns('**FX** = the effect of **rates**.')).toEqual([
-      { text: 'FX', bold: true },
-      { text: ' = the effect of ', bold: false },
-      { text: 'rates', bold: true },
-      { text: '.', bold: false },
-    ]);
-    expect(boldRuns('plain')).toEqual([{ text: 'plain', bold: false }]);
+  it('names the comparisons from the selection; with none selected, the C-40 fallback (Prior year)', () => {
+    expect(howToRead('ana', { ...filter, compareA: 'LE', compareB: 'NONE', units: 'k', currency: 'EUR' }, reference).lines[0].value).toBe('Jan – Sep 2026 - year to date - EUR k - vs Latest estimate');
+    expect(howToRead('prof', { ...filter, compareA: 'NONE', compareB: 'NONE' }, reference).lines[0].value).toMatch(/vs Prior year$/);
+    for (const view of ['kpi', 'ana', 'prof'] as const) {
+      for (const line of howToRead(view, filter, reference).lines) expect(line.value).not.toContain(' · ');
+    }
   });
 });

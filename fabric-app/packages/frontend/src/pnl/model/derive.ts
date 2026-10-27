@@ -45,3 +45,27 @@ export function kpiDelta(value: number | null, compare: number | null, percentKp
   if (compare === 0) return null;
   return (value - compare) / Math.abs(compare);
 }
+
+// ---------------------------------------------------------------------------
+// Largest variances (C-45, redesign v4): the `LV *` rules on the level columns
+// `LV Base` / `LV Comparison` (already in the pinned units).
+
+/** `LV Δ`: blank when both sides are blank; otherwise base − comparison (a blank side counts as 0). */
+export function lvDelta(base: number | null, comparison: number | null): number | null {
+  if (base === null && comparison === null) return null;
+  return (base ?? 0) - (comparison ?? 0);
+}
+
+/**
+ * `LV Δ % Text`: blank when both sides are blank; "n.m." when |comparison| < 2.0 display
+ * units or |Δ %| > 50 %; otherwise the signed percentage. `comparison` is in display units
+ * (millions or thousands, as the model scales it), so the 2.0 test is in those units.
+ * Returns the percentage as a number (null = blank, NaN = n.m.) so callers format it.
+ */
+export function lvDeltaPct(base: number | null, comparison: number | null): number | null {
+  if (base === null && comparison === null) return null;
+  const c = comparison ?? 0;
+  if (Math.abs(c) < 2) return Number.NaN;
+  const pct = ((base ?? 0) - c) / Math.abs(c);
+  return Math.abs(pct) > 0.5 ? Number.NaN : pct;
+}

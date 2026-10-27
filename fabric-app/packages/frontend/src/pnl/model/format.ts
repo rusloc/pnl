@@ -88,3 +88,16 @@ export function parseSampleNumber(text: string): number | null {
   const n = parseFloat(t.replace(/−/g, '-').replace(/[^0-9.-]/g, ''));
   return Number.isNaN(n) ? null : n;
 }
+
+/**
+ * Money on the redesigned views (Track B `Vitals Card SVG` / Track C `money`):
+ * "$667.4 m", "−$9.2 m", "+$9.2 m" when `plus`; "n/a" for a blank; a value that
+ * rounds to zero carries no sign.
+ */
+export function fmtMoney(value: number | null, units: Units, currency: Currency, plus = false): string {
+  if (value === null || Number.isNaN(value)) return 'n/a';
+  const r = units === 'm' ? roundTo(value, 1) : roundTo(value * 1000, 0);
+  const body = group(Math.abs(r).toFixed(units === 'm' ? 1 : 0));
+  const sign = r < 0 ? MINUS : r > 0 && plus ? '+' : '';
+  return `${sign}${CURRENCY_SYMBOL[currency]}${body} ${units}`;
+}

@@ -40,8 +40,9 @@ describe('sample statement rows', () => {
   it('flags the figures as sample and keeps the company-specific KPI slots (K-04, K-05)', () => {
     const f = sampleFigures({ ...defaultFilters(sampleReference()), entity: 'S' });
     expect(f.sample).toBe(true);
-    expect(f.financial.map((t) => t.label)).toContain('ARR, period end');
-    expect(f.operational.map((t) => t.label)).toContain('Rule of 40');
-    expect(f.profitability.options).toEqual(['Region', 'Sales motion', 'Service line', 'Segment']);
+    // The redesigned zones have no mockup figures: empty, never invented (LSN-002); the sample bridge stays.
+    expect(f.vitals).toEqual({ results: [], drivers: [] });
+    expect(f.profitability.rows).toEqual([]);
+    expect(f.bridge.steps.length).toBeGreaterThan(2);
   });
 });

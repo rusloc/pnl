@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nordmark executive dashboard</title>
+<meta name="description" content="Nordmark Retail executive dashboard prototype v2: three Tier-1 numbers, nine explanation tiles, attribute filter bar, frosted-glass pop-ups with plain-English metric explanations and drill paths. DRAFT for USER approval; illustrative Week 43 data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== tokens: flat minimal, one accent (cobalt #2048C6, 7.2:1 on white) ===== */
+:root{
+  --bg:#FFFFFF; --ink:#111827; --muted:#5F6878; --line:#E5E7EB; --line2:#F1F3F5; --soft:#F6F7F9;
+  --acc:#2048C6; --accT:#EAEFFB;
+  --good:#136C3A; --goodT:#E1F0E5; --watch:#9A5B00; --watchT:#FBEFD6; --off:#C0272D; --offT:#FAE3E3;
+  --col:#D1D5DB; --tgt:#9CA3AF;
+  --mix2:#374151; --mix3:#B6BCC6;
+  --glass:rgba(255,255,255,.62); --glass-b:rgba(255,255,255,.78); --glass-hi:rgba(255,255,255,.9);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{font-family:"Inter","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"cv11" 1}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+h1{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+h2{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:var(--soft);padding:0 4px;border-radius:4px}
+.page{max-width:1440px;margin:0 auto;padding:16px 32px 40px}
+.draft{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--watch);background:var(--watchT);padding:3px 8px;border-radius:999px;margin-bottom:10px}
+
+/* ===== header ===== */
+.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.top .brand small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.top .meta{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--muted);padding-left:20px;border-left:1px solid var(--line)}
+.top .meta b{color:var(--ink);font-weight:600}
+.top .acts{margin-left:auto;display:flex;gap:8px}
+.btn{height:34px;padding:0 14px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px;background:var(--bg);white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.acc{color:var(--acc);border-color:var(--acc)}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;font-size:13px;color:var(--muted)}
+.cnt{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-weight:600;font-size:12px}
+.cnt.good{background:var(--goodT);color:var(--good)} .cnt.watch{background:var(--watchT);color:var(--watch)} .cnt.off{background:var(--offT);color:var(--off)}
+.status .sen{padding-left:12px;border-left:1px solid var(--line)}
+.status .sen b{color:var(--off);font-weight:600}
+
+/* ===== filter bar ===== */
+.filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 0 6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.filters .lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 0 14px}
+.filters .lbl:first-of-type{margin-left:0}
+.chip{height:28px;padding:0 12px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;font-weight:500;color:var(--muted);background:var(--bg);display:inline-flex;align-items:center;gap:6px;transition:border-color .12s,background .12s,color .12s;position:relative}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed="true"]{color:var(--acc);border-color:rgba(32,72,198,.45);background:rgba(32,72,198,.10);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);box-shadow:inset 0 1px 0 var(--glass-hi)}
+.chip.all[aria-pressed="true"]{color:var(--ink);border-color:var(--ink);background:var(--soft)}
+.filters .count{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* ===== grids and cards ===== */
+section{margin-top:16px}
+section>h2{margin-bottom:8px;display:flex;align-items:baseline;gap:10px}
+section>h2 span{font-weight:400;letter-spacing:0;text-transform:none;font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.empty{grid-column:1/-1;padding:18px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:13px;text-align:center}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:12px 16px 10px;background:var(--bg);display:flex;flex-direction:column;gap:5px;min-height:138px}
+.card.t1{min-height:156px}
+.card.t1 .val{font-size:40px;line-height:44px}
+.ch{display:flex;align-items:center;gap:8px}
+.ch h3{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch h3 span{font-weight:400;color:var(--muted)}
+.st{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:default}
+.st.good{background:var(--goodT);color:var(--good)} .st.watch{background:var(--watchT);color:var(--watch)} .st.off{background:var(--offT);color:var(--off)}
+.cv{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex:1}
+.val{font-size:30px;font-weight:600;line-height:36px;letter-spacing:-.02em;white-space:nowrap}
+.val small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px;letter-spacing:0}
+.delta{font-size:12.5px;font-weight:600;line-height:18px;white-space:nowrap;margin-top:2px}
+.good .delta{color:var(--good)} .watch .delta{color:var(--watch)} .off .delta{color:var(--off)}
+svg.spark{width:120px;height:40px;flex:none;display:block;overflow:visible}
+svg.spark rect{fill:var(--col)} svg.spark rect.cur{fill:var(--ink)}
+.good svg.spark rect.cur{fill:var(--good)} .watch svg.spark rect.cur{fill:var(--watch)} .off svg.spark rect.cur{fill:var(--off)}
+svg.spark path{fill:none;stroke:var(--tgt);stroke-width:1;stroke-dasharray:2 2}
+svg.spark text{font-size:9px;fill:var(--muted);font-family:inherit}
+svg.spark text.cur{fill:var(--ink);font-weight:600}
+.mixbar{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px;width:120px;flex:none;margin-bottom:12px}
+.mixbar i{display:block;height:100%} .mixbar .a{background:var(--acc)} .mixbar .b{background:var(--mix2)} .mixbar .c{background:var(--mix3)}
+.cf{display:flex;align-items:center;gap:8px;margin-top:2px}
+.note{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acts2{margin-left:auto;display:flex;gap:4px;flex:none}
+.ib{width:28px;height:28px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--muted);background:var(--bg)}
+.ib:hover{border-color:var(--acc);color:var(--acc)}
+.ib.i{font-family:Georgia,serif;font-style:italic}
+
+/* ===== frosted glass (pop-ups, drawer, tooltip) ===== */
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glass-b);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--glass-hi),0 12px 40px rgba(17,24,39,.16)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:rgba(255,255,255,.92)}
+  .chip[aria-pressed="true"]{background:#E6ECFA}
+}
+.scrim{position:fixed;inset:0;background:rgba(17,24,39,.22);z-index:40}
+.pop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(580px,calc(100vw - 32px));max-height:min(86vh,820px);overflow:auto;padding:22px 24px 20px;z-index:50}
+.pop-h{display:flex;align-items:flex-start;gap:12px}
+.pop-h .eyebrow{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pop-h h2{font-size:18px;font-weight:600;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin-top:2px}
+.pop-h .word{margin-left:auto;font-size:14px;font-weight:600;white-space:nowrap;padding-top:14px}
+.pop-h .word.good{color:var(--good)} .pop-h .word.watch{color:var(--watch)} .pop-h .word.off{color:var(--off)}
+.x{width:32px;height:32px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);flex:none;background:rgba(255,255,255,.5)}
+.x:hover{color:var(--ink);border-color:var(--ink)}
+.pop-v{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:14px}
+.pop-v .big{font-size:48px;font-weight:600;line-height:52px;letter-spacing:-.03em;white-space:nowrap}
+.pop-v .big small{font-size:16px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.pop-v .delta{font-size:13.5px;margin-top:4px}
+.pop-v svg.spark{width:240px;height:72px}
+.pop-v .mixbar{width:240px;height:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(17,24,39,.08)}
+.stats div{font-size:12px;color:var(--muted)}
+.stats div b{display:block;font-size:15px;font-weight:600;color:var(--ink);margin-top:2px}
+.body{margin-top:14px;display:grid;grid-template-columns:118px 1fr;gap:8px 14px;font-size:13px;line-height:1.5}
+.body dt{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.body dd b{font-weight:600}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.tag{font-size:11px;font-weight:500;color:var(--muted);border:1px solid rgba(17,24,39,.14);border-radius:999px;padding:2px 9px;background:rgba(255,255,255,.4)}
+.tag b{color:var(--ink);font-weight:600}
+.pop-f{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(17,24,39,.08);font-size:12.5px;color:var(--muted)}
+.pop-f b{color:var(--ink);font-weight:500}
+.pill{margin-top:12px;width:100%;height:40px;border-radius:999px;border:1px solid rgba(32,72,198,.45);background:rgba(32,72,198,.10);color:var(--acc);font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.pill:hover{background:rgba(32,72,198,.16)}
+.pill .n{width:22px;height:22px;border-radius:999px;background:var(--acc);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.steps{counter-reset:s;margin:14px 0 0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.steps li{position:relative;padding-left:38px;font-size:13px;line-height:1.5}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:999px;background:var(--acc);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.steps li b{display:block;font-weight:600}
+.steps li.last::before{background:var(--mix2)}
+.pop ul.plain{margin:12px 0 0 18px;font-size:13px;line-height:1.55}
+.pop ul.plain li{margin-bottom:6px}
+.drawer{position:fixed;top:12px;right:12px;bottom:12px;width:min(460px,calc(100vw - 24px));padding:22px 22px 18px;overflow:auto;z-index:50}
+.drawer h2{font-size:18px;font-weight:600;text-transform:none;letter-spacing:-.01em;color:var(--ink)}
+.drawer .dom{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.drawer .bk{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-top:1px solid rgba(17,24,39,.08);font-size:12.5px}
+.drawer .bk div{flex:1;min-width:0}
+.drawer .bk b{font-weight:600;display:block}
+.drawer .bk span{color:var(--muted)}
+.drawer .bk .o{flex:none;font-size:11px;font-weight:600;color:var(--muted);border:1px solid rgba(17,24,39,.14);border-radius:999px;padding:1px 8px;white-space:nowrap;margin-top:1px}
+.tip{position:fixed;z-index:60;max-width:280px;padding:10px 12px;font-size:12.5px;line-height:1.45;color:var(--ink);border-radius:12px;pointer-events:none}
+.tip b{font-weight:600}
+
+/* ===== notes for the owner ===== */
+details.notes{margin-top:28px;border:1px solid var(--line);border-radius:var(--r);padding:0 20px}
+details.notes summary{cursor:pointer;padding:14px 0;font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;gap:10px}
+details.notes summary::-webkit-details-marker{display:none}
+details.notes summary::before{content:"+";width:22px;height:22px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-weight:500;color:var(--muted)}
+details.notes[open] summary::before{content:"−"}
+details.notes summary span{font-weight:400;color:var(--muted);font-size:13px}
+.nb{padding:4px 0 20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:13px;line-height:1.55}
+.nb h4{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.nb h4:first-child{margin-top:8px}
+.nb ul,.nb ol{margin-left:18px}
+.nb li{margin-bottom:5px}
+.nb li em{display:block;font-style:normal;color:var(--muted)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+table.t td{padding:5px 8px 5px 0;border-bottom:1px solid var(--line2);vertical-align:top}
+footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap}
+footer b{color:var(--ink);font-weight:500}
+
+@media (max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}.nb{grid-template-columns:1fr}.top .acts{margin-left:0}}
+@media (max-width:720px){.grid{grid-template-columns:1fr}.page{padding:16px}.top .meta{border-left:0;padding-left:0}.stats{grid-template-columns:1fr 1fr}.body{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="draft">Draft v2 · projection state · design prototype for USER approval · nothing built</div>
+
+<header class="top">
+  <div class="brand"><h1>Nordmark Retail</h1><small>Executive dashboard · consumer-goods reseller</small></div>
+  <div class="meta"><span><b>Week 43</b> · 19–25 Oct 2026</span><span>Compare <b>Budget</b></span><span>All regions &amp; formats</span><span>Refreshed Mon 26 Oct 05:12</span></div>
+  <div class="acts">
+    <button class="btn" id="btn-how" aria-haspopup="dialog">How to read</button>
+    <button class="btn acc" id="btn-more" aria-haspopup="dialog">More KPIs <span style="opacity:.7">20</span></button>
+  </div>
+</header>
+
+<div class="status">
+  <span class="cnt good">▲ 7 on track</span><span class="cnt watch">● 3 watch</span><span class="cnt off">▼ 2 off track</span>
+  <span class="sen"><b>Off track:</b> Availability 94.1%, Markdown 9.8% of sales.</span>
+</div>
+
+<nav class="filters" id="filters" aria-label="Quick filter by attribute"></nav>
+
+<section aria-labelledby="h-t1"><h2 id="h-t1">The three numbers <span>sell more · keep more · turn stock faster</span></h2><div class="grid" id="g-t1"></div></section>
+<section aria-labelledby="h-t2"><h2 id="h-t2">What explains them <span>worst first</span></h2><div class="grid" id="g-t2"></div></section>
+
+<details class="notes" id="notes">
+  <summary>Notes for the owner <span>· status rules · data contract · number corrections vs v1 · open questions · build risks</span></summary>
+  <div class="nb">
+    <div>
+      <h4>Status rules (status is always vs target, independent of the comparator)</h4>
+      <table class="t" id="rules"><thead><tr><th>Metric</th><th>Rule</th></tr></thead><tbody></tbody></table>
+      <h4>Where the margins meet</h4>
+      <p>Front margin = Net sales − COGS at landed cost (POS lines). Back margin = contract rate × qualifying purchases, accrued weekly from the supplier-income fact and provisional until the monthly true-up. Total margin € = front + back; Total margin % divides it by Net sales. Markdown already reduces the sell price, so it never enters the margin sum twice: it is shown as markdown % of gross sales and as a step in the margin bridge. EBITDA = Total margin − shrink − store OpEx − central OpEx − fulfilment.</p>
+      <h4>Data contract (five facts, three keys)</h4>
+      <ul>
+        <li><b>Facts:</b> Sales (day × store/channel × SKU), Inventory snapshot (day × location × SKU, semi-additive), Purchases / receipts (PO line × receipt), Supplier income (contract × period), GL / OpEx (account × cost centre × period × scenario). Traffic &amp; web optional.</li>
+        <li><b>LY week key</b> on the retail calendar: every LY comparison joins week 43 to LY week 43, never to the same dates; the 53-week year is restated per policy.</li>
+        <li><b>LFL flag</b> on the store, recalculated monthly (open ≥ 13 months, not refitted); LFL filters both current and LY sales to the same store set.</li>
+        <li><b>Last snapshot</b> for stock (MAX snapshot date in the window); <b>provisional flag</b> on back margin and EBITDA flash until close.</li>
+        <li>Executive model stays day × store × category (≤ 500 MB); SKU grain only behind a click; receipt, PO and GL lines in the domain models.</li>
+      </ul>
+      <h4>Number corrections vs v1 (so the worked examples add up)</h4>
+      <ul>
+        <li>Stock incl. on-order €168m → <b>€490m</b> (11.4 weeks × €43.0m forecast weekly COGS; €168m could not give 11.4 weeks at €42.9m weekly COGS).</li>
+        <li>GMROI inputs €411m ÷ €152m → <b>€1,016m ÷ €376m</b> (R12M total margin at 36.3% of ~€2.8bn sales); the ratio 2.7× is unchanged.</li>
+        <li>Back margin €3.9m (6.3%) → <b>€3.8m (6.2%)</b> so front 30.1% + back 6.2% = 36.3%.</li>
+        <li>Channel shares 68.4 / 19.8 / 11.8 → <b>68.4 / 19.9 / 11.7</b> (the € amounts €42.0m / €12.2m / €7.2m were kept).</li>
+        <li>Weeks-of-cover rule tightened to On track ±1 wk · Watch ±1–2 · Off beyond ±2, so +1.9 wks reads Watch as in v1.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Open questions for the USER (each with a default)</h4>
+      <ol>
+        <li><b>Retail calendar</b> · 4-5-4 or calendar months, week start, 53-week handling? <em>Default: 4-5-4, weeks Mon–Sun, FY from the Monday nearest 1 Feb; LY always by week key.</em></li>
+        <li><b>Countries and currency</b> · one or several, which reporting currency? <em>Default: NL + BE, EUR only, no FX layer.</em></li>
+        <li><b>Private label</b> · split on the landing page or only on drill pages? <em>Default: drill pages only; bench KPI "Private-label share %".</em></li>
+        <li><b>Back-margin method</b> · weekly contract-rate accrual with monthly true-up, or finance-posted amounts only? <em>Default: accrual, shown provisional until true-up.</em></li>
+        <li><b>THE number</b> · Net sales, Total margin % or Weeks of cover as the page's headline? <em>Default: Net sales first; a profit-first page swaps Total margin € into the lead.</em></li>
+        <li><b>Availability definition</b> · all ranged SKUs or top sellers, weighted? <em>Default: top-500 by LY sales, sales-weighted.</em></li>
+        <li><b>Channels and formats in scope</b> · marketplace? three formats? <em>Default: Store (hyper, super, convenience), Online, Wholesale; marketplace on the bench.</em></li>
+        <li><b>Landed cost</b> · standard cost with PPV, or actual incl. freight and duty? <em>Default: standard landed cost on the POS line; PPV on the Supplier page.</em></li>
+      </ol>
+      <h4>Build risks (tri-track, top three)</h4>
+      <ul>
+        <li><b>Retail calendar</b> · every LY figure, LFL and "same week" claim depends on the LY week key and the 53-week policy.</li>
+        <li><b>Grain and size</b> · 3 years × 142 stores × 68k SKUs × days is far beyond an executive model; landing page on a day × store × category aggregation, SKU grain only behind a click.</li>
+        <li><b>Card visual limits (Track B)</b> · column sparklines, chip tints and the pop-ups become SVG measures, fx shapes and tooltip pages; each adds a query, so the N-01 budget must be measured on the first build.</li>
+      </ul>
+      <h4>Not in this frame</h4>
+      <p>Five drill pages (Sales, Margin, Inventory, Supplier, Channel &amp; customer), the board-export page and the mobile layout follow the same tokens; drill-page heroes repeat the clicked tile at the top. Top category movers (Δ vs LY) moved from the landing page to step 2 of the Net sales drill.</p>
+    </div>
+  </div>
+</details>
+
+<footer><span><b>Illustrative data</b> · EUR, NL + BE</span><span>LY = same retail week</span><span>Status vs target, Δ vs the comparator</span><span>PROV. = provisional until close (true-up 10 Nov)</span><span style="margin-left:auto">Spec: <code>docs/specs/2026-10-24-executive-dashboard-consumer-goods-reseller-spec.md</code></span></footer>
+
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="pop glass" id="pop" role="dialog" aria-modal="true" aria-labelledby="pop-title" hidden></div>
+<aside class="drawer glass" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden></aside>
+<div class="tip glass" id="tip" role="tooltip" hidden></div>
+
+<script>
+/* ===================== data ===================== */
+const ATTRS=[
+ ['group','Group',[['B1','B1 base-crucial'],['B2','B2 margin & cost'],['B3','B3 stock & supply'],['B4','B4 channel & customer']]],
+ ['lever','Lever',[['sales','Sales'],['margin','Margin'],['stock','Stock'],['supply','Supply'],['cash','Cash']]],
+ ['horizon','Horizon',[['week','Week'],['month','Month'],['quarter','Quarter']]],
+ ['owner','Owner',[['commercial','Commercial'],['supply','Supply chain'],['finance','Finance'],['digital','Digital']]],
+ ['statement','Statement',[['pl','P&L'],['bs','Balance sheet'],['ops','Operational']]],
+];
+const LABEL={};ATTRS.forEach(a=>{LABEL[a[0]]={};a[2].forEach(v=>LABEL[a[0]][v[0]]=v[1])});
+const PAGE={Sales:'Sales page',Margin:'Margin page',Inventory:'Inventory page',Supplier:'Supplier page',Channel:'Channel & customer page'};
+
+const M=[
+ {id:'ns',tier:1,title:'Net sales',sub:'week 43, all channels',value:'€61.4',unit:'m',status:'watch',delta:'−€1.5m (−2.4%) vs budget',note:'Three store closures weigh',
+  pts:[57.8,58.4,59.1,60.3,58.9,59.6,61.2,60.4,59.8,60.9,61.7,60.2,61.4],tgt:62.9,
+  tags:{group:'B1',lever:'sales',horizon:'week',owner:'commercial',statement:'pl'},
+  rule:'Watch when −3% to 0% vs budget; Off track below −3%.',
+  what:'The money customers actually paid us this week, after returns, discounts and VAT.',
+  why:'It is the top line every other number divides by or adds up to; if it slips, the margin and stock numbers follow.',
+  formula:'Gross sales at ticket price − markdowns and discounts − returns, excluding VAT.',
+  example:'€68.4m at ticket − €6.7m markdowns and discounts − €0.3m returns = <b>€61.4m</b>. Budget was €62.9m, so −€1.5m (−2.4%).',
+  stats:[['vs LY week','+3.8%'],['Period 10 to date','€241.7m'],['Year to date','€2,318m']],
+  foot:['Target budget €62.9m','Updated Mon 05:12'],
+  drill:{page:'Sales',steps:[['Weekly net sales vs budget and LY','13–26 retail weeks; the same frame as the card, with the comparator carried.'],['Store ranking','142 rows: net sales, Δ vs budget, LFL %, basket value, traffic; click a store.'],['Store × category × week','A matrix for the chosen store; click a cell.'],['SKU-store-day rows','Units, net sales, markdown, on-hand; "open receipt lines" hands the key to the POS domain model.']]}},
+ {id:'tm',tier:1,title:'Total margin',sub:'front + back · prov.',value:'36.3',unit:'%',status:'good',delta:'+0.1 pp vs budget 36.2%',note:'Provisional until 10 Nov true-up',
+  pts:[35.9,36.0,36.2,36.1,35.8,36.0,36.4,36.2,36.1,36.3,36.5,36.0,36.3],tgt:36.2,
+  tags:{group:'B1',lever:'margin',horizon:'month',owner:'finance',statement:'pl'},
+  rule:'Watch when −1.0 pp to 0 vs budget; Off track below −1.0 pp. Provisional until the monthly true-up.',
+  what:'The share of each euro of sales we keep after paying suppliers for the goods, counting the money suppliers pay back to us.',
+  why:'Front margin alone hides half of a reseller’s profit; this is the margin the business really keeps.',
+  formula:'(Front margin + back margin) ÷ Net sales. Front = sales − cost of goods; back = supplier rebates, promo funding and listing fees.',
+  example:'Front €18.5m + back €3.8m = €22.3m; ÷ €61.4m = <b>36.3%</b>. Budget 36.2%, so +0.1 pp.',
+  stats:[['Front margin','30.1%'],['Back margin','6.2%'],['vs LY week','−0.2 pp']],
+  foot:['Target budget 36.2%','Provisional · true-up 10 Nov'],
+  drill:{page:'Margin',steps:[['Margin bridge','LY margin % → price → mix → landed cost → markdown → back margin → this week.'],['Category × subcategory matrix','Net sales, front %, back %, total %, markdown %, shrink %, Δ pp vs plan.'],['SKU × promotion list','Sell price, landed cost, markdown €, promo funding, margin €.'],['Contract accrual lines','Rate, qualifying purchases, accrued, invoiced, provisional flag.']]}},
+ {id:'wc',tier:1,title:'Weeks of cover',sub:'forward',value:'11.4',unit:'wks',status:'watch',delta:'+1.9 wks vs target 9.5',note:'Toys intake landed early',
+  pts:[9.2,9.4,9.6,9.9,10.1,10.3,10.6,10.4,10.8,11.0,11.2,11.1,11.4],tgt:9.5,
+  tags:{group:'B1',lever:'stock',horizon:'week',owner:'supply',statement:'bs'},
+  rule:'On track within ±1 wk of target 9.5; Watch 1–2 wks away; Off track beyond ±2 wks.',
+  what:'How many weeks our stock would last at the sales we expect, if nothing more arrived.',
+  why:'Too little and shelves go empty; too much and the stock ends in markdown. It decides this week’s buying actions.',
+  formula:'(Stock on hand + stock on order, at cost) ÷ forecast cost of goods sold per week.',
+  example:'€490m stock incl. on-order ÷ €43.0m forecast weekly cost of goods = <b>11.4 weeks</b>. Target 9.5, so +1.9 → Watch.',
+  stats:[['On hand at cost','€402m'],['On order','€88m'],['vs last week','+0.3 wks']],
+  foot:['Target 9.5 wks (by category)','Updated Mon 05:12'],
+  drill:{page:'Inventory',steps:[['Stock at cost by category vs target cover','Bars with target markers, over and under coloured.'],['SKU exception list','Three tabs: out-of-stock top sellers, overstock (cover > 26 wks), delisted with stock.'],['SKU-store-day snapshot','On hand, on order, in transit, first-receipt date, last sale.'],['Open PO lines','Due date, supplier, OTIF status; the PO domain model from here.']]}},
+ {id:'md',tier:2,title:'Markdown',sub:'% of gross sales',value:'9.8',unit:'%',status:'off',delta:'+1.3 pp vs budget 8.5%',note:'Apparel clearance four weeks early',
+  pts:[7.9,8.1,8.4,8.2,8.6,8.9,8.7,9.1,9.4,9.0,9.3,9.6,9.8],tgt:8.5,
+  tags:{group:'B2',lever:'margin',horizon:'week',owner:'commercial',statement:'pl'},
+  rule:'Lower is better. Watch when 0 to +1.0 pp vs budget; Off track above +1.0 pp.',
+  what:'The part of the ticket price we gave away through price cuts and promotions.',
+  why:'Every point of markdown is margin lost; rising markdown is the first sign of too much or the wrong stock.',
+  formula:'Markdown value (permanent + promotional) ÷ gross sales at ticket price.',
+  example:'€6.7m markdown ÷ €68.4m gross sales = <b>9.8%</b>. Budget 8.5%, so +1.3 pp; lower is better → Off track.',
+  stats:[['Markdown value','€6.7m'],['vs LY week','+1.9 pp'],['Budget','8.5%']],
+  foot:['Target budget 8.5%','Updated Mon 05:12'],
+  drill:{page:'Margin',steps:[['Markdown by promo type','TPR, multibuy, clearance, loyalty: value and % of sales.'],['Category × subcategory matrix','Markdown % next to front, back and total margin.'],['SKU × promotion list','Markdown €, funding source (supplier / own), start and end.'],['Receipt lines','POS domain model, via the SKU-store-day key.']]}},
+ {id:'av',tier:2,title:'Availability',sub:'top-500 SKUs, weighted',value:'94.1',unit:'%',status:'off',delta:'−2.9 pp vs target 97%',note:'DC Tilburg WMS outage',
+  pts:[96.8,96.5,96.9,96.2,95.9,96.1,95.4,95.0,95.2,94.8,94.6,94.3,94.1],tgt:97,
+  tags:{group:'B3',lever:'supply',horizon:'week',owner:'supply',statement:'ops'},
+  rule:'On track at 97% or above; Watch 95–97%; Off track below 95%.',
+  what:'How often our best-selling products were actually on the shelf when a customer could buy them.',
+  why:'A gap on the shelf is a sale that never happens; it is the "too little stock" failure mode.',
+  formula:'SKU-store-days in stock ÷ SKU-store-days ranged, for the top-500 sellers, weighted by sales.',
+  example:'500 SKUs × 142 stores × 7 days = 497,000 ranged; 467,700 in stock → <b>94.1%</b>. Target 97%, so −2.9 pp → Off track.',
+  stats:[['Lost sales est.','€0.9m'],['vs last week','−0.2 pp'],['Fresh top-50','91%']],
+  foot:['Target ≥ 97%','Updated Mon 05:12'],
+  drill:{page:'Inventory',steps:[['Availability by store cluster','Heatmap: cluster × week.'],['Out-of-stock top sellers','SKU list with lost-sales estimate.'],['SKU-store-day snapshot','On hand, on order, in transit, last sale.'],['Open PO lines','Due date, supplier, OTIF status.']]}},
+ {id:'eb',tier:2,title:'EBITDA flash',sub:'period 10 to date · prov.',value:'€15.3',unit:'m',status:'watch',delta:'−€0.8m (−5.0%) vs budget',note:'Payroll over on Sunday trading',
+  pts:[3.6,3.7,3.8,3.9,3.6,3.8,4.0,3.8,3.7,3.9,4.0,3.7,3.7],tgt:3.9,
+  tags:{group:'B2',lever:'margin',horizon:'month',owner:'finance',statement:'pl'},
+  rule:'Watch when −5% to 0 vs budget; Off track below −5%. Provisional until month-end close.',
+  what:'Profit before interest, tax and depreciation for the period so far: what is left after all operating costs.',
+  why:'It is the bottom line the board sees; every margin and cost move lands here.',
+  formula:'Total margin − shrink − store costs − central costs − fulfilment costs; ÷ Net sales for the margin %.',
+  example:'€87.7m margin − €2.2m shrink − €52.4m store − €11.6m central − €6.2m fulfilment = <b>€15.3m</b> (6.3% of €241.7m). Budget €16.1m, so −€0.8m (−5.0%).',
+  stats:[['EBITDA margin','6.3%'],['Budget margin','6.6%'],['Payroll vs plan','+0.3 pp']],
+  foot:['Target budget €16.1m','Provisional · weekly flash'],
+  drill:{page:'Margin',steps:[['EBITDA bridge','Total margin → shrink → store OpEx → central OpEx → fulfilment → EBITDA.'],['Store operating cost % by format and region','Payroll, rent, utilities vs budget.'],['Cost centre × account','GL detail for the period.'],['GL journal lines','Finance system, via the cost-centre key.']]}},
+ {id:'lf',tier:2,title:'Like-for-like growth',sub:'vs LY week',value:'+3.4',unit:'%',status:'good',delta:'+0.4 pp vs budget LFL 3.0%',note:'Online LFL +12%',
+  pts:[2.1,2.4,2.8,3.1,2.6,2.9,3.5,3.0,2.7,3.2,3.6,3.1,3.4],tgt:3,
+  tags:{group:'B4',lever:'sales',horizon:'week',owner:'commercial',statement:'pl'},
+  rule:'Watch when −2 pp to 0 vs budget LFL; Off track below −2 pp.',
+  what:'Sales growth in the stores that were open a year ago too, so new openings and closures do not distort it.',
+  why:'It tells you whether the existing business is growing, not just the estate.',
+  formula:'Sales of stores open ≥ 13 months this week ÷ the same stores’ sales in the same retail week last year − 1.',
+  example:'131 LFL stores: €39.0m ÷ €37.7m − 1 = <b>+3.4%</b>. Budget LFL 3.0%, so +0.4 pp.',
+  stats:[['LFL stores','131 of 142'],['Non-LFL effect','−1.2 pp'],['Online LFL','+12.1%']],
+  foot:['Target budget LFL 3.0%','Updated Mon 05:12'],
+  drill:{page:'Sales',steps:[['LFL vs non-LFL bridge','LY → LFL growth → new stores → closures → online → wholesale → actual.'],['LFL growth by format and region','Hyper, super, convenience × NL, BE.'],['Store ranking, LFL set','131 rows: LFL %, Δ vs budget, basket, traffic.'],['Store × category × week','Matrix for the chosen store.']]}},
+ {id:'fg',tier:2,title:'Front gross margin',sub:'% of net sales',value:'30.1',unit:'%',status:'good',delta:'+0.1 pp vs budget 30.0%',note:'Mix offsets Apparel clearance',
+  pts:[29.6,29.8,30.2,30.0,29.7,30.1,30.3,29.9,30.0,30.2,30.4,29.8,30.1],tgt:30,
+  tags:{group:'B2',lever:'margin',horizon:'week',owner:'finance',statement:'pl'},
+  rule:'Watch when −1.0 pp to 0 vs budget; Off track below −1.0 pp.',
+  what:'The share of sales left after paying what the goods cost us, landed in our warehouse.',
+  why:'It is the price-minus-cost half of profit; pricing, buying cost and category mix show up here first.',
+  formula:'(Net sales − cost of goods at landed cost) ÷ Net sales.',
+  example:'€61.4m − €42.9m cost of goods = €18.5m; ÷ €61.4m = <b>30.1%</b>. Budget 30.0%, so +0.1 pp.',
+  stats:[['Cost of goods','€42.9m'],['Front margin','€18.5m'],['vs LY week','−0.3 pp']],
+  foot:['Target budget 30.0%','Updated Mon 05:12'],
+  drill:{page:'Margin',steps:[['Margin % by category vs plan','Dumbbell: plan vs actual per category.'],['Category × subcategory matrix','Front %, back %, total %, markdown %, shrink %.'],['SKU × promotion list','Sell price, landed cost, margin €.'],['Receipt lines for COGS','POS domain model.']]}},
+ {id:'st',tier:2,title:'Sell-through',sub:'A/W season to date',value:'63.1',unit:'%',status:'good',delta:'+1.1 pp vs target 62%',note:'Season week 12 of 20',
+  pts:[41,44,47,50,52,55,57,58,59,60,61,62,63.1],tgt:62,
+  tags:{group:'B3',lever:'stock',horizon:'quarter',owner:'commercial',statement:'ops'},
+  rule:'Watch when −5 pp to 0 vs the season target; Off track below −5 pp.',
+  what:'The share of the season’s stock we have sold so far.',
+  why:'It says whether the season is clearing on time or heading for clearance markdown.',
+  formula:'Units sold season to date ÷ (opening stock units + units received).',
+  example:'8.4m units sold ÷ (4.2m opening + 9.1m received = 13.3m) = <b>63.1%</b>. Target 62% at week 12 of 20, so +1.1 pp.',
+  stats:[['Apparel','58%'],['Home & kitchen','69%'],['vs LY season','+2.4 pp']],
+  foot:['Target 62% by season week 12','Updated weekly'],
+  drill:{page:'Inventory',steps:[['Sell-through by season × category','Curve vs target curve per category.'],['Aged stock buckets','0–30 / 31–90 / 91–180 / 180+ days at cost.'],['SKU exception list, overstock tab','Cover > 26 wks, € at cost.'],['SKU-store-day snapshot','On hand, on order, in transit, last sale.']]}},
+ {id:'gm',tier:2,title:'GMROI',sub:'rolling 12 months',value:'2.7',unit:'×',status:'good',delta:'+0.2× vs target 2.5×',note:'Electronics 1.9× below target',
+  pts:[2.5,2.5,2.6,2.6,2.6,2.7,2.7,2.7,2.6,2.7,2.7,2.7,2.7],tgt:2.5,
+  tags:{group:'B3',lever:'cash',horizon:'quarter',owner:'finance',statement:'bs'},
+  rule:'On track at 2.5× or above; Watch 2.0–2.5×; Off track below 2.0×.',
+  what:'How many euros of margin each euro tied up in stock earned over the last 12 months.',
+  why:'Stock costs money to hold; this says whether it is earning its keep.',
+  formula:'Total margin for the last 12 months ÷ average stock at cost over the same 12 months.',
+  example:'€1,016m margin ÷ €376m average stock = <b>2.7×</b>. Target 2.5×, so +0.2×.',
+  stats:[['R12M total margin','€1,016m'],['Average stock at cost','€376m'],['H&B · Electronics','4.1× · 1.9×']],
+  foot:['Target ≥ 2.5× (by category)','Updated weekly'],
+  drill:{page:'Inventory',steps:[['GMROI by category','Ranked bar vs category target.'],['Stock at cost by category vs cover','Where the stock sits.'],['SKU exception list','Overstock and delisted with stock.'],['SKU-store-day snapshot','On hand, on order, last sale.']]}},
+ {id:'ot',tier:2,title:'Supplier OTIF',sub:'inbound, PO lines',value:'95.4',unit:'%',status:'good',delta:'+0.4 pp vs target 95%',note:'Two Electronics suppliers below 85%',
+  pts:[94.0,94.6,95.1,94.8,95.3,95.0,94.7,95.2,95.6,95.1,95.4,95.0,95.4],tgt:95,
+  tags:{group:'B3',lever:'supply',horizon:'week',owner:'supply',statement:'ops'},
+  rule:'On track at 95% or above; Watch 92–95%; Off track below 92%.',
+  what:'The share of purchase-order lines suppliers delivered on the agreed day and in the agreed quantity.',
+  why:'Late or short deliveries become empty shelves two weeks later.',
+  formula:'PO lines received on time and in full ÷ PO lines due.',
+  example:'4,591 lines on time and in full ÷ 4,812 lines due = <b>95.4%</b>. Target 95%, so +0.4 pp.',
+  stats:[['PO lines due','4,812'],['vs last week','+0.4 pp'],['Suppliers below 85%','2']],
+  foot:['Target ≥ 95%','Updated Mon 05:12'],
+  drill:{page:'Supplier',steps:[['OTIF trend and by supplier','Ranked bar, volume-weighted.'],['Supplier scorecard','Spend, OTIF, lead time, PPV, back margin %.'],['Contract','Terms, rebate scheme, accrual vs earned.'],['PO line × receipt','Ordered, received, due and received dates.']]}},
+ {id:'mx',tier:2,kind:'mix',title:'Channel mix',sub:'% of net sales vs plan',value:'68.4',unit:'% store',status:'good',delta:'online +1.9 pp vs plan',note:'Online ahead of plan',
+  mix:[68.4,19.9,11.7],
+  tags:{group:'B4',lever:'sales',horizon:'month',owner:'digital',statement:'pl'},
+  rule:'On track within ±2 pp of the plan mix per channel; Watch 2–3 pp away; Off track beyond 3 pp.',
+  what:'What share of sales came through stores, online and wholesale.',
+  why:'A shift between channels changes margin and cost to serve even when total sales look fine.',
+  formula:'Each channel’s net sales ÷ total net sales, compared with the planned mix.',
+  example:'Store €42.0m, online €12.2m, wholesale €7.2m of €61.4m → <b>68.4% / 19.9% / 11.7%</b>. Plan 70 / 18 / 12, so online +1.9 pp.',
+  stats:[['Store','68.4% · −1.6 pp'],['Online','19.9% · +1.9 pp'],['Wholesale','11.7% · −0.3 pp']],
+  foot:['Target plan mix 70 / 18 / 12','Updated Mon 05:12'],
+  drill:{page:'Channel',steps:[['Channel mix trend','100% stacked area, 13–26 weeks.'],['Channel P&L matrix','Net sales, margin, cost to serve, contribution per channel.'],['Store format / online site','Hyper, super, convenience; web, app, marketplace.'],['Order lines','E-commerce and wholesale domain models.']]}},
+];
+const BENCH=[
+ ['Sales',[['Sales pace vs budget %','Net sales to date ÷ (budget × elapsed trading-day share)','CM · daily'],['Units & average selling price','Σ units; Net sales ÷ units','CM · daily'],['Online conversion % & AOV','Orders ÷ sessions; Net sales ÷ orders','EC · daily'],['Store traffic & basket','Footfall; items ÷ transactions; Net sales ÷ transactions','RO · daily']]],
+ ['Margin',[['Promo share % & uplift','Promo sales ÷ Net sales; promo units ÷ baseline − 1','CM · weekly'],['Shrink %','(Book stock − counted stock) at cost ÷ Net sales','RO · monthly'],['Category margin mix','Margin % by category vs plan; contribution to total margin','CM · weekly']]],
+ ['Inventory',[['Aged / excess stock %','Stock at cost older than 90 days or > 26 wks cover ÷ total','SC · weekly'],['Inventory turns','R12M COGS ÷ average inventory at cost','SC · monthly']]],
+ ['Supplier',[['Top-10 supplier concentration %','Top-10 suppliers’ COGS ÷ total COGS','CM · monthly'],['Purchase price variance %','(Actual landed − standard) ÷ standard × units','CF · weekly']]],
+ ['Cost',[['Store operating cost % of sales','Store OpEx ÷ Net sales','RO · monthly'],['Cost to serve online per order','Fulfilment + delivery + returns ÷ orders','EC · weekly']]],
+ ['Cash',[['Cash conversion cycle (days)','DIO + DSO (wholesale) − DPO','CF · monthly'],['Cash balance & headroom','Period-end balances vs covenant / policy','CF · weekly']]],
+ ['Customer',[['Returns rate % (online)','Returned units ÷ sold units, lagged 30 days','EC · weekly'],['Active loyalty customers & repeat rate','Members with ≥ 1 purchase R12M; ≥ 2 purchases ÷ active','MK · monthly'],['NPS / review score','Survey or review-platform export, latest wave','MK · monthly']]],
+ ['People & risk',[['Store payroll hours vs plan & sales per labour hour','Hours worked ÷ planned; Net sales ÷ hours','RO · weekly'],['Data-quality score','% sources refreshed on schedule and reconciled','BI · daily']]],
+];
+const WORD={good:'▲ On track',watch:'● Watch',off:'▼ Off track'};
+
+/* ===================== helpers ===================== */
+const $=s=>document.querySelector(s);
+const byId={};M.forEach(m=>byId[m.id]=m);
+function spark(m,W,H,labels){
+  if(m.kind==='mix'){return `<div class="mixbar" aria-hidden="true"><i class="a" style="width:${m.mix[0]}%"></i><i class="b" style="width:${m.mix[1]}%"></i><i class="c" style="width:${m.mix[2]}%"></i></div>`}
+  const p=m.pts,t=m.tgt,n=p.length,g=2,bw=(W-g*(n-1))/n,lab=labels?12:0,base=H-lab;
+  let lo=Math.min(...p,t),hi=Math.max(...p,t);const r=(hi-lo)||1;lo-=r*0.6;hi+=r*0.15;
+  const y=v=>base-(v-lo)/(hi-lo)*base;let h='';
+  p.forEach((v,i)=>{const x=i*(bw+g);h+=`<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(base-y(v)).toFixed(1)}" rx="1"${i===n-1?' class="cur"':''}/>`;
+    if(labels&&(i%3===0||i===n-1))h+=`<text x="${(x+bw/2).toFixed(1)}" y="${H}" text-anchor="middle"${i===n-1?' class="cur"':''}>W${31+i}</text>`});
+  h+=`<path d="M0 ${y(t).toFixed(1)} H${W}"/>`;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true">${h}</svg>`;
+}
+function tagsHtml(m){return `<div class="tags">${ATTRS.map(a=>`<span class="tag">${a[1]} <b>${LABEL[a[0]][m.tags[a[0]]]}</b></span>`).join('')}</div>`}
+
+/* ===================== cards ===================== */
+function card(m){
+  return `<article class="card ${m.status}${m.tier===1?' t1':''}" data-id="${m.id}" aria-labelledby="c-${m.id}">
+    <div class="ch"><h3 id="c-${m.id}">${m.title} <span>· ${m.sub}</span></h3><span class="st ${m.status}" tabindex="0" data-tip="<b>${m.title}</b> · ${m.rule}">${WORD[m.status]}</span></div>
+    <div class="cv"><div><div class="val">${m.value}<small>${m.unit}</small></div><div class="delta">${m.delta}</div></div>${spark(m,120,40,false)}</div>
+    <div class="cf"><span class="note">${m.note}</span><div class="acts2"><button class="ib i" data-act="explain" data-id="${m.id}" aria-label="Explain ${m.title}" aria-haspopup="dialog">i</button><button class="ib" data-act="drill" data-id="${m.id}" aria-label="Drill path for ${m.title}" aria-haspopup="dialog">↗</button></div></div>
+  </article>`;
+}
+$('#g-t1').innerHTML=M.filter(m=>m.tier===1).map(card).join('')+'<div class="empty" hidden>No Tier-1 number carries this combination.</div>';
+$('#g-t2').innerHTML=M.filter(m=>m.tier===2).map(card).join('')+'<div class="empty" hidden>No explanation tile carries this combination.</div>';
+$('#rules tbody').innerHTML=M.map(m=>`<tr><td><b>${m.title}</b></td><td>${m.rule}</td></tr>`).join('');
+
+/* ===================== filter bar ===================== */
+const sel={};ATTRS.forEach(a=>sel[a[0]]=new Set());
+(function(){
+  let h=`<button class="chip all" id="chip-all" aria-pressed="true">All</button>`;
+  ATTRS.forEach(a=>{h+=`<span class="lbl">${a[1]}</span>`+a[2].map(v=>`<button class="chip" data-attr="${a[0]}" data-val="${v[0]}" aria-pressed="false">${v[1]}</button>`).join('')});
+  h+=`<span class="count" id="count" aria-live="polite"></span>`;
+  $('#filters').innerHTML=h;
+})();
+function applyFilter(){
+  let shown=0;const total=M.length;
+  document.querySelectorAll('.card').forEach(el=>{
+    const m=byId[el.dataset.id];
+    const ok=ATTRS.every(a=>sel[a[0]].size===0||sel[a[0]].has(m.tags[a[0]]));
+    el.hidden=!ok;if(ok)shown++;
+  });
+  ['#g-t1','#g-t2'].forEach(g=>{const grid=$(g);grid.querySelector('.empty').hidden=!!grid.querySelector('.card:not([hidden])')});
+  const any=ATTRS.some(a=>sel[a[0]].size>0);
+  $('#chip-all').setAttribute('aria-pressed',String(!any));
+  $('#count').textContent=`${shown} of ${total} metrics`;
+}
+$('#filters').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  if(b.id==='chip-all'){ATTRS.forEach(a=>sel[a[0]].clear());document.querySelectorAll('.chip[data-attr]').forEach(c=>c.setAttribute('aria-pressed','false'))}
+  else{const s=sel[b.dataset.attr],v=b.dataset.val;if(s.has(v))s.delete(v);else s.add(v);b.setAttribute('aria-pressed',String(s.has(v)))}
+  applyFilter();
+});
+applyFilter();
+
+/* ===================== pop-ups (one at a time) ===================== */
+let opener=null,openEl=null;
+const pop=$('#pop'),drawer=$('#drawer'),scrim=$('#scrim'),tip=$('#tip');
+function openLayer(el,html,from){
+  closeAll(false);
+  opener=from||document.activeElement;openEl=el;
+  el.innerHTML=html;el.hidden=false;scrim.hidden=false;
+  document.body.style.overflow='hidden';
+  const x=el.querySelector('.x');(x||el).focus();
+}
+function closeAll(restore=true){
+  if(!openEl)return;
+  openEl.hidden=true;scrim.hidden=true;openEl=null;document.body.style.overflow='';
+  if(restore&&opener&&opener.focus)opener.focus();
+}
+function head(eyebrow,title,word,status){
+  return `<div class="pop-h"><div><div class="eyebrow">${eyebrow}</div><h2 id="pop-title">${title}</h2></div>${word?`<span class="word ${status}">${word}</span>`:''}<button class="x" aria-label="Close">×</button></div>`;
+}
+function explainHtml(m){
+  return head(`${m.tier===1?'Tier 1':'Explains Tier 1'} · ${m.sub}`,m.title,WORD[m.status].slice(2),m.status)+
+  `<div class="pop-v"><div><div class="big">${m.value}<small>${m.unit}</small></div><div class="delta ${m.status}" style="color:var(--${m.status})">${m.delta}</div></div>${spark(m,240,72,true)}</div>
+   <div class="stats">${m.stats.map(s=>`<div>${s[0]}<b>${s[1]}</b></div>`).join('')}</div>
+   <dl class="body"><dt>What it is</dt><dd>${m.what}</dd><dt>Why it matters</dt><dd>${m.why}</dd><dt>Formula</dt><dd>${m.formula}</dd><dt>Worked example</dt><dd>${m.example}</dd><dt>Status rule</dt><dd>${m.rule}</dd></dl>
+   ${tagsHtml(m)}
+   <div class="pop-f"><span>${m.foot[0]}</span><span><b>${m.foot[1]}</b></span></div>
+   <button class="pill" data-act="drill" data-id="${m.id}"><span class="n">↗</span>Drill path · ${PAGE[m.drill.page]}</button>`;
+}
+function drillHtml(m){
+  return head(`Drill path · ${PAGE[m.drill.page]}`,m.title,WORD[m.status].slice(2),m.status)+
+  `<ol class="steps">${m.drill.steps.map((s,i)=>`<li${i===m.drill.steps.length-1?' class="last"':''}><b>${s[0]}</b>${s[1]}</li>`).join('')}</ol>
+   <div class="pop-f"><span>Carried on every click: period · region / format · comparator · the metric</span></div>
+   <button class="pill" data-act="explain" data-id="${m.id}"><span class="n" style="font-family:Georgia,serif;font-style:italic">i</span>Back to the explanation</button>`;
+}
+function howHtml(){
+  return head('Nordmark · Week 43','How to read this page','','')+
+  `<ul class="plain">
+    <li><b>Three numbers</b> carry the page: Net sales (sell more), Total margin % (keep more), Weeks of cover (turn stock faster). The nine tiles below explain them, worst first.</li>
+    <li><b>Status</b> is vs the metric’s target: ▲ On track · ● Watch · ▼ Off track; hover a chip for the rule. The <b>Δ line</b> is vs the comparator in the header (Budget).</li>
+    <li><b>Sparkline</b> = the last 13 retail weeks; the current week is in the status colour, the dotted line is the target.</li>
+    <li><b>ⓘ</b> opens the plain-English explanation and a worked example; <b>↗</b> opens the drill path to the drill page and its lowest grain.</li>
+    <li><b>Filter chips</b> narrow the grid: inside one attribute a choice is OR, across attributes AND; <b>All</b> resets.</li>
+    <li><b>More KPIs</b> lists the 20 bench metrics that ship inactive and switch on per client. <b>prov.</b> in a title = provisional until close.</li>
+  </ul>
+  <div class="pop-f"><span>Illustrative data · EUR · LY = same retail week</span><span><b>Refreshed Mon 26 Oct 05:12</b></span></div>`;
+}
+function drawerHtml(){
+  return `<div class="pop-h"><div><div class="eyebrow">KPI bench · inactive, switched on per client</div><h2 id="drawer-title">More KPIs · 20</h2></div><button class="x" aria-label="Close">×</button></div>
+  <p style="font-size:12.5px;color:var(--muted);margin-top:8px">Same tile anatomy and status rules when activated; each would take its attributes from the KPI table. Top category movers (Δ vs LY) live on step 2 of the Net sales drill.</p>
+  ${BENCH.map(d=>`<div class="dom">${d[0]}</div>`+d[1].map(k=>`<div class="bk"><div><b>${k[0]}</b><span>${k[1]}</span></div><span class="o">${k[2]}</span></div>`).join('')).join('')}`;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');
+  if(b){const m=byId[b.dataset.id];const from=openEl?opener:b;
+    openLayer(pop,b.dataset.act==='explain'?explainHtml(m):drillHtml(m),from);return}
+  if(e.target.closest('.x')){closeAll();return}
+  if(e.target===scrim){closeAll();return}
+});
+$('#btn-how').addEventListener('click',e=>openLayer(pop,howHtml(),e.currentTarget));
+$('#btn-more').addEventListener('click',e=>openLayer(drawer,drawerHtml(),e.currentTarget));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&openEl){closeAll();return}
+  if(e.key==='Tab'&&openEl){ /* keep focus inside the open layer */
+    const f=[...openEl.querySelectorAll('button,[tabindex="0"],a[href]')].filter(x=>!x.hidden);if(!f.length)return;
+    const first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){last.focus();e.preventDefault()}
+    else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault()}
+  }
+});
+
+/* ===================== tooltip (status chips) ===================== */
+function showTip(el){
+  tip.innerHTML=el.dataset.tip;tip.hidden=false;
+  const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=r.right-w,y=r.bottom+8;
+  if(x<8)x=8;if(y+h>window.innerHeight-8)y=r.top-h-8;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+function hideTip(){tip.hidden=true}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(t)showTip(t)});
+document.addEventListener('mouseout',e=>{if(e.target.closest('[data-tip]'))hideTip()});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t)showTip(t)});
+document.addEventListener('focusout',e=>{if(e.target.closest('[data-tip]'))hideTip()});
+</script>
+</body>
+</html>

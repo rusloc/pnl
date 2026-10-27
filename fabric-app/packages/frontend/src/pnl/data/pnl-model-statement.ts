@@ -119,7 +119,26 @@ export function mapStatementRows(table: QueryTable): StatementRow[] {
   });
 
   mapped.sort((a, b) => a.lineSort - b.lineSort || a.accountSort - b.accountSort);
+  // Parity rule 11: the top level is numbered and in capitals like Track B's dim_pl_row[line_display].
+  let lineRank = 0;
+  for (const m of mapped) {
+    if (m.statementRow.kind === 'leaf') continue;
+    lineRank += 1;
+    m.statementRow.label = lineDisplay(lineRank, m.statementRow.label);
+  }
   return mapped.map((m) => m.statementRow);
+}
+
+/**
+ * Track B's `dim_pl_row[line_display]` ("01. GROSS REVENUE" … "29. NET MARGIN %"):
+ * the line's rank in display order over every line, ratio rows included, then its
+ * name in capitals. Derived here from the Q1 line rows (every dim_report_line row
+ * comes back, in line_sort order) because the column is not in the published model
+ * yet; it reproduces the model's formula `FORMAT ( COUNTROWS ( FILTER ( dim_report_line,
+ * sort_order <= _sort ) ), "00" ) & ". " & UPPER ( line_name )`.
+ */
+export function lineDisplay(rank: number, label: string): string {
+  return `${String(rank).padStart(2, '0')}. ${label.toUpperCase()}`;
 }
 
 /** Builds Q1 for the filter, runs it on the connector, maps the rows. */

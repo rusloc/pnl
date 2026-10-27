@@ -1,0 +1,4 @@
+{
+  "query": "EVALUATE\nFILTER ( dim_kpi, dim_kpi[entity_view_code] = \"S\" && dim_kpi[vitals_slot] > 0 )\nORDER BY dim_kpi[vitals_slot]",
+  "resultSetRowCountLimit": 50
+}

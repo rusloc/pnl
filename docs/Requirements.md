@@ -38,8 +38,8 @@ The dashed zone appears only when a notice applies; every other zone stays fixed
 | L-01 | Header | Report title, data status (last closed month, last refresh time). Entity switch: picker opened from the brand mark at the top of the filter rail (Consumer Products, Commerce Cloud, ACME Group), mark tinted in the selected company's colour, accessible name "Switch company" (ADR-0007) | Entity switch is single select. Switching keeps period, version, currency and region selections. The context line (L-04) names the current company. |
 | L-02 | Page tabs | Report · Line definitions · Filters & rules | Definitions and rules pages are static reference content generated from the account hierarchy (section 8). |
 | L-03 | Filter band | Three groups: Period & version, Slice, Presentation (section 6) | Wraps to one column below \~900 px. Disabled filters stay visible with a reason. |
-| L-04 | Context line | Entity · time window with actual months · base vs comparisons · currency, units, FX basis · active slice filters | Always visible; plain text so it appears in exports and screenshots. |
-| L-05 | Notices | Cut-off, forecast months included, prior year missing, allocation active, intercompany eliminated | Shown only when the condition applies (section 7). |
+| L-04 | Context line | _(replaced, ADR-0007 §3a + ADR-0004: the title row carries a status line (company - Management reporting - closed through - refreshed); the full selection (period sentence, versions, currency, units, FX basis, slices) is listed in the applied-filters pop-up opened from the funnel next to the title)_ | Status line always visible; pop-up on demand. |
+| L-05 | Notices | Cut-off, forecast months included, prior year missing, allocation active, intercompany eliminated | Shown only when the condition applies (section 7), as labelled rows of the applied-filters pop-up (no notice strip; ADR-0007 §3a, `docs/design/period-picker-v2.md` Part 2). |
 | L-06 | KPI strip | Row 1: 8 financial tiles. Row 2: 4 operational tiles (section 5) | 4 tiles per row on desktop, 2 on tablet, 1 on phone. Each tile: label, value, delta vs Compare A, delta vs Compare B, one-line definition. |
 | L-07 | Income statement | Matrix: rows = unified line structure (section 3), columns = the Variance layout (section 4). Expand all / Collapse all buttons above the line column (M-20; ADR-0007) | Main zone; full width. Line column frozen on horizontal scroll. |
 | L-08 | Analysis panels | Left: net revenue bridge (waterfall). Right: largest variances (top 8 leaf lines) | Side by side on desktop, stacked on narrow screens. |
@@ -126,6 +126,8 @@ The statement has one column layout, Variance, for every entity including ACME G
 
 ## 5. KPI strip
 
+> **Vitals (formerly Key figures), 2026-10-27:** the KPI view is named **Vitals** in every track (P&L views redesign v4, `docs/design/P&L views redesign/`). The K-xx IDs below are unchanged; Vitals shows 10 cards (3 results, 2 secondary incl. the new Opex % NR, 5 company-swapped drivers) and the remaining K-xx stay in the model.
+
 Twelve fixed tile slots: eight financial, four operational. Slots 1–3 and 6–8 are identical for every view; slots 4–5 and 9–12 swap content by entity.
 
 | ID | Slot | ACME Consumer Products | ACME Commerce Cloud | ACME Group | Better when |
@@ -166,8 +168,8 @@ Twelve fixed tile slots: eight financial, four operational. Slots 1–3 and 6–
 - K-21 Δ colour follows the "Better when" column. Neutral KPIs are never coloured.
 - K-22 KPIs follow every filter, including slice filters.
 - K-23 Period-end KPIs (ARR, active merchants) read the last month of the window, not a sum.
-- K-24 Every tile (all 12) shows a sparkline: the KPI's monthly value for the 13 months ending at the selected month, base version, same filters. Open Actual months blank; the selected month marked; period-end KPIs plot month-end values, ratio KPIs the monthly ratio, growth KPIs monthly growth vs prior year (ADR-0007).
-- K-25 Tiles with a Compare A / Compare B value show a thin target bar: base value as the bar, Compare A and B as labelled ticks. Growth KPIs show the sparkline only. Tile values load first; trends fill in after (ADR-0007).
+- K-24 _(removed: KPI card v2 replaced the sparklines, ADR-0007 §3a; the `KPI Trend` measures were dropped 2026-10-23)_
+- K-25 _(removed: KPI card v2 replaced the target bars, ADR-0007 §3a)_
 
 ## 6. Filters
 
@@ -195,7 +197,7 @@ Twenty-one controls in fixed slots. Slice filters keep the same slot for both en
 | F-18 | _(removed, ADR-0007: Variance layout only)_ | | | | | | | |
 | F-19 | _(removed, ADR-0007: By function only)_ | | | | | | | |
 | F-20 | Expand / Collapse | Above the statement's line column | Expand all, Collapse all | Collapsed | Buttons | ✓ | ✓ | ✓ |
-| F-21 | Breakdown | Profitability panel | Region, Channel, Category / service line, Segment; Group: Region, Entity | Channel; Group: Entity | Single | ✓ | ✓ | ✓ |
+| F-21 | Breakdown | Profitability panel | Region, Channel, Category / service line, Segment; Group: Region, Entity | Region for every company (ADR-0007 §3a) | Single | ✓ | ✓ | ✓ |
 
 **Interaction rules**
 
@@ -327,7 +329,7 @@ Targets marked "proposed" are starting values for you to confirm with users.
 
 | ID | Area | Requirement |
 | --- | --- | --- |
-| N-01 | Performance | Any filter change re-renders all zones in under 2 s at the 95th percentile (proposed). Expanding or collapsing a row responds in under 0.3 s. |
+| N-01 | Performance | Any filter change re-renders all zones in under 2 s at the 95th percentile (proposed). Expanding or collapsing a row responds in under 0.3 s. **Showcase target (ADR-0008):** each view renders in ≤ 5 s after a filter change; 5–10 s is the accepted worst case. |
 | N-02 | Refresh | Actuals load after each monthly close; budget and forecast load when a version is approved. The header shows the last refresh time and the last closed month. |
 | N-03 | Close control | The last closed month comes from dim\_month.is\_closed, set by finance, never from the latest data date. |
 | N-04 | Security | Row-level security by entity and region. Entity managers see their entity only; the Group view and eliminations need group access. |

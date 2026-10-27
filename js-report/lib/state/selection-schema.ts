@@ -5,6 +5,8 @@ import type { EntityView, MonthNumber, Selection } from '../engine/types.ts';
 // F-37 shareable link (ADR-0002 §2.4): the URL query string is the whole state. Every key is validated at the
 // boundary; an invalid value is replaced by its default (F-02 … F-21) and the URL is rewritten, and unknown keys are
 // dropped, so nothing unvalidated reaches the engine. Defaults are omitted, so the bare URL is the spec default.
+// Retired keys `lay`, `lens` and `d` (layout, cost lens, detail; ADR-0007 items 1–3) are unknown keys now: old links
+// still open, and the rewrite drops them.
 
 const entity = z.enum(['P', 'S', 'GROUP']);
 const flag = z.enum(['0', '1']).transform((v) => v === '1');
@@ -21,9 +23,6 @@ const ENUMS = {
   u: z.enum(['M', 'K']),
   cs: z.enum(['NEG', 'POS']),
   vf: z.enum(['BOTH', 'ABS', 'PCT']),
-  lay: z.enum(['VAR', 'TREND_M', 'TREND_Q', 'ENTITY']),
-  lens: z.enum(['FN', 'NAT']),
-  d: z.enum(['SUM', 'STD', 'FULL']),
   bd: z.enum(['REGION', 'CHANNEL', 'LINE', 'SEGMENT', 'ENTITY']),
   v: z.enum(['statement', 'kpi', 'analysis', 'profitability']),
 } as const;
@@ -50,9 +49,6 @@ const KEYS = {
   showFyOutlook: 'fo',
   showTags: 'tg',
   hideEmpty: 'he',
-  layout: 'lay',
-  costLens: 'lens',
-  detail: 'd',
   breakdown: 'bd',
   view: 'v',
 } as const satisfies Record<keyof Selection, string>;
@@ -116,11 +112,8 @@ export function createSelectionCodec(m: Manifest): SelectionCodec {
       showPctNr: true, // F-17: all on
       showFyOutlook: true,
       showTags: true,
-      hideEmpty: true,
-      layout: e === 'GROUP' ? 'ENTITY' : 'VAR', // F-18
-      costLens: 'FN', // F-19
-      detail: 'STD', // F-20
-      breakdown: e === 'GROUP' ? 'ENTITY' : 'CHANNEL', // F-21
+      hideEmpty: true, // M-22
+      breakdown: 'REGION', // F-21: Region for every company (ADR-0007 §3a, parity rule 4)
       view: 'statement',
     };
   }
@@ -145,8 +138,6 @@ export function createSelectionCodec(m: Manifest): SelectionCodec {
     const fy = pick(z.coerce.number().int(), q.get(KEYS.fy), d.fy);
     const month = pick(z.coerce.number().int(), q.get(KEYS.month), d.month);
     const breakdown = pick(ENUMS.bd, q.get(KEYS.breakdown), d.breakdown);
-    const layout = pick(ENUMS.lay, q.get(KEYS.layout), d.layout);
-    const groupOnly = (v: string) => v === 'ENTITY';
     return {
       entity: e,
       fy: years.includes(fy) ? fy : d.fy,
@@ -168,12 +159,9 @@ export function createSelectionCodec(m: Manifest): SelectionCodec {
       showFyOutlook: pick(flag, q.get(KEYS.showFyOutlook), d.showFyOutlook),
       showTags: pick(flag, q.get(KEYS.showTags), d.showTags),
       hideEmpty: pick(flag, q.get(KEYS.hideEmpty), d.hideEmpty),
-      // Entity columns and the Entity breakdown exist only in the Group view (F-18, F-21)
-      layout: groupOnly(layout) && e !== 'GROUP' ? d.layout : layout,
-      costLens: pick(ENUMS.lens, q.get(KEYS.costLens), d.costLens),
-      detail: pick(ENUMS.d, q.get(KEYS.detail), d.detail),
+      // The Entity breakdown exists only in the Group view, which offers Region and Entity only (F-21)
       breakdown:
-        (groupOnly(breakdown) && e !== 'GROUP') || (e === 'GROUP' && !['REGION', 'ENTITY'].includes(breakdown))
+        (breakdown === 'ENTITY' && e !== 'GROUP') || (e === 'GROUP' && !['REGION', 'ENTITY'].includes(breakdown))
           ? d.breakdown
           : breakdown,
       view: pick(ENUMS.v, q.get(KEYS.view), d.view),
@@ -181,8 +169,7 @@ export function createSelectionCodec(m: Manifest): SelectionCodec {
   }
 
   function serialize(sel: Selection): string {
-    // Entity-dependent defaults (layout, breakdown) are judged against the selected entity; the entity itself
-    // against the global default.
+    // Defaults are judged against the selected entity; the entity itself against the global default.
     const d = { ...defaults(sel.entity), entity: defaults('P').entity };
     const out = new URLSearchParams();
     for (const [field, key] of Object.entries(KEYS) as [keyof Selection, string][]) {
@@ -198,20 +185,17 @@ export function createSelectionCodec(m: Manifest): SelectionCodec {
 }
 
 /**
- * What the app can show today (ADR-0002 build steps 0–3). Anything else falls back to the default, so a link made
+ * What the app can show today (ADR-0002 build steps 0–3, 6–8). Anything else falls back to the default, so a link made
  * for a later build still opens on real numbers instead of an unbuilt view. Remove each line as its step lands.
  */
-export function restrictToBuilt(sel: Selection, defaults: Selection): Selection {
+export function restrictToBuilt(sel: Selection): Selection {
   return {
     ...sel,
-    entity: sel.entity === 'GROUP' ? 'P' : sel.entity, // step 4: Group view, eliminations, entity columns
-    layout: 'VAR', // step 4: Trend and Entity columns
-    detail: defaults.detail, // step 4: detail levels
+    entity: sel.entity === 'GROUP' ? 'P' : sel.entity, // step 4: Group view, eliminations
     region: [], // step 5: slice filters and allocation
     channel: [],
     line: [],
     segment: [],
-    costLens: 'FN', // step 8: by-nature lens
-    view: 'statement', // steps 6–8: key figures, analysis, profitability
+    // steps 6–8 landed 2026-10-27 (P&L views redesign v4): Vitals (`v=kpi`), Analysis, Profitability
   };
 }

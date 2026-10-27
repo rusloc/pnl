@@ -1,4 +1,4 @@
-import { CHANNEL_SHORT, INFO, MARKET_NAMES, SEGMENT_NAMES } from './copy.ts';
+import { CHANNEL_SHORT, MARKET_NAMES, SEGMENT_NAMES, info } from './copy.ts';
 import type { DetailIndex } from './detail.ts';
 import { cohortClients } from './detail.ts';
 import { fmtCount, fmtDays, fmtEur0, fmtInt, fmtPct } from './format.ts';
@@ -8,7 +8,7 @@ import type { Ctx } from './overview.ts';
 import { quarterLabel, quarterMonths, trend } from './overview.ts';
 import type { SalesSelection } from './types.ts';
 import type { BandVM, ChartCard, TableCard } from './view-model.ts';
-import { dateLabel, monthLabel, shift, windowLabel, windowOf } from './windows.ts';
+import { dateLabel, monthKey, monthLabel, shift, windowLabel, windowOf } from './windows.ts';
 
 // View 3 — Clients (layout-spec §3): acquisition and return.
 
@@ -34,66 +34,82 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
   const r180 = m.repeat180(sel.anchor - 6, mk);
   const gap = m.median(sel.tv, sel.anchor, mk, 'median_days_between');
 
+  const ret = m.returning(sel.tv, sel.anchor, mk);
+  const stat = cube.windowStat(sel.tv, monthKey(sel.anchor), mk);
+  const r180py = m.repeat180(sel.anchor - 18, mk);
+  const gapPy = m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_days_between');
   const kpis = [
     kpi(
       'c1',
       'New clients',
       fmtCount(A.first),
-      `${fmtPct(A.loans ? A.first / A.loans : null)} of loans`,
+      [
+        { label: 'Share of loans', value: fmtPct(A.loans ? A.first / A.loans : null) },
+        { label: 'Budget', value: fmtCount(cube.budget(w, mk, 'NEW_CLIENTS')) },
+        { label: 'Prior year', value: fmtCount(P?.first ?? null) },
+      ],
       'countUp',
       { actual: A.first, budget: cube.budget(w, mk, 'NEW_CLIENTS'), py: P?.first ?? null },
       sel.cmp,
-      INFO.c1 ?? '',
     ),
     kpi(
       'c2',
       'Returning clients %',
-      fmtPct(m.returning(sel.tv, sel.anchor, mk)),
-      'of borrowers',
+      fmtPct(ret),
+      [
+        { label: 'Borrowers', value: fmtCount(stat?.borrowers ?? null) },
+        { label: 'Returning borrowers', value: fmtCount(stat?.returning ?? null) },
+      ],
       'ratioUp',
-      { actual: m.returning(sel.tv, sel.anchor, mk), py: m.refReturning(sel.tv, sel.anchor - 12, mk) },
+      { actual: ret, py: m.refReturning(sel.tv, sel.anchor - 12, mk) },
       sel.cmp,
-      INFO.c2 ?? '',
     ),
     kpi(
       'c3',
       'Repeat share (loans)',
       fmtPct(m.repeatShare(A)),
-      'of loans',
+      [
+        { label: 'Repeat loans', value: fmtCount(A.repeat) },
+        { label: 'Loans', value: fmtCount(A.loans) },
+      ],
       'ratioUp',
       { actual: m.repeatShare(A), py: m.repeatShare(P) },
       sel.cmp,
-      INFO.c3 ?? '',
     ),
     kpi(
       'c4',
       'New-client approval rate',
       fmtPct(m.approval(FN)),
-      'first-time applicants',
+      [
+        { label: 'First-time submitted', value: fmtCount(FN.submitted) },
+        { label: 'First-time approved', value: fmtCount(FN.approved) },
+      ],
       'ratioUp',
       { actual: m.approval(FN), py: m.approval(FNP) },
       sel.cmp,
-      INFO.c4 ?? '',
     ),
     kpi(
       'c5',
       '180-day repeat',
       fmtPct(r180),
-      `cohort ${monthLabel(sel.anchor - 6)}`,
+      [
+        { label: 'Cohort', value: monthLabel(sel.anchor - 6) },
+        { label: '90-day repeat', value: fmtPct(m.cohortCurve([sel.anchor - 6], mk)[cube.cohortDays.indexOf(90)] ?? null) },
+        { label: `${monthLabel(sel.anchor - 18)} cohort (PY)`, value: fmtPct(r180py) },
+      ],
       'ratioUp',
-      { actual: r180, py: null, ref: { label: 'vs prev. cohort', value: m.repeat180(sel.anchor - 7, mk) } },
+      // vs the same cohort month a year earlier (layout-spec v4 C5, MS-05)
+      { actual: r180, py: null, ref: { label: 'vs PY cohort', value: r180py } },
       sel.cmp,
-      INFO.c5 ?? '',
     ),
     kpi(
       'c6',
       'Days between loans',
       fmtDays(gap),
-      'median gap',
+      [{ label: 'Prior year', value: fmtDays(gapPy) }],
       'neutralDays',
-      { actual: gap, py: m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_days_between') },
+      { actual: gap, py: gapPy },
       sel.cmp,
-      INFO.c6 ?? '',
     ),
   ];
 
@@ -107,7 +123,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
   const c7: ChartCard = {
     id: 'c7',
     title: 'New clients by channel, 13 months',
-    info: INFO.c7 ?? '',
+    info: info('c7'),
     open: null,
     legend: [
       ...channels.map((c, k) => ({
@@ -148,7 +164,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
   const c8: ChartCard = {
     id: 'c8',
     title: 'New-client funnel',
-    info: INFO.c8 ?? '',
+    info: info('c8'),
     open: null,
     legend: [
       { label: 'First-time applicants', role: 'actual' },
@@ -171,7 +187,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
   const c9: ChartCard = {
     id: 'c9',
     title: 'Cohort repeat curves (quarter cohorts)',
-    info: INFO.c9 ?? '',
+    info: info('c9'),
     open: null,
     legend: cohorts.map((c, k) => ({ label: quarterLabel(c[0] ?? sel.anchor), role: CATEGORY_ROLES[k] ?? 'c4' })),
     chart: {
@@ -200,7 +216,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
   const c10: ChartCard = {
     id: 'c10',
     title: 'Returning % by market × segment - repeat share by product',
-    info: INFO.c10 ?? '',
+    info: info('c10'),
     open: null,
     legend: [
       { label: 'Repeat share of loans', role: 'actual' },
@@ -237,7 +253,10 @@ function clientsTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): Ta
   return {
     id: 'c11',
     title: `Clients - ${windowLabel(w)} cohort - ${MARKET_NAMES[sel.market]}`,
-    info: INFO.c11 ?? '',
+    info: info('c11', [
+      { label: 'Rows', value: ix ? `top ${list.length} by principal to date (draft sample)` : 'loading' },
+      { label: 'Loan states', value: `snapshot at ${monthLabel(cube.closed)}` },
+    ]),
     columns: [
       { key: 'id', label: 'Client id', width: 130, align: 'left' },
       { key: 'market', label: 'Market', width: 80, align: 'left' },
@@ -283,11 +302,7 @@ function clientsTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): Ta
         },
       ],
     })),
-    note: ix
-      ? list.length
-        ? `Top ${list.length} by principal to date (draft sample) - states at ${monthLabel(cube.closed)}`
-        : 'No first loans in this window'
-      : 'Loading the client sample…',
+    empty: ix ? (list.length ? null : 'No first loans in this window') : 'Loading the client sample…',
     action: null,
     needsDetail: true,
   };

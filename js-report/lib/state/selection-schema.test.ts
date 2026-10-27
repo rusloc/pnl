@@ -61,10 +61,26 @@ describe('selection codec', () => {
     expect(codec.parse(q('r=NA,EU,UK,AP')).region).toEqual([]);
   });
 
-  it('Group view: entity-specific slices off (F-32), Entity columns and Entity breakdown by default (F-18, F-21)', () => {
-    const sel = codec.parse(q('e=GROUP&ch=GRO'));
-    expect(sel).toMatchObject({ entity: 'GROUP', channel: [], layout: 'ENTITY', breakdown: 'ENTITY' });
-    expect(codec.parse(q('lay=ENTITY&bd=ENTITY'))).toMatchObject({ layout: 'VAR', breakdown: 'CHANNEL' });
+  it('Group view: entity-specific slices off (F-32); Entity breakdown only there (F-21)', () => {
+    expect(codec.parse(q('e=GROUP&ch=GRO'))).toMatchObject({ entity: 'GROUP', channel: [], breakdown: 'REGION' });
+    expect(codec.parse(q('e=GROUP&bd=ENTITY')).breakdown).toBe('ENTITY');
+    expect(codec.parse(q('e=GROUP&bd=CHANNEL')).breakdown).toBe('REGION');
+    expect(codec.parse(q('bd=ENTITY')).breakdown).toBe('REGION');
+    expect(codec.parse(q('bd=CHANNEL')).breakdown).toBe('CHANNEL');
+  });
+
+  it('Profitability breakdown defaults to Region for every company (F-21, parity rule 4)', () => {
+    for (const e of ['P', 'S', 'GROUP'] as const) expect(codec.defaults(e).breakdown).toBe('REGION');
+    expect(codec.serialize({ ...codec.defaults('S'), breakdown: 'REGION' })).toBe('e=S');
+  });
+
+  it('retired keys lay / lens / d (layout, cost lens, detail): old links still open and the rewrite drops them', () => {
+    const sel = codec.parse(q('lay=TREND_M&lens=NAT&d=FULL&cur=EUR'));
+    expect(sel).toEqual({ ...codec.defaults('P'), currency: 'EUR' });
+    expect(codec.serialize(sel)).toBe('cur=EUR');
+    const keys = Object.keys(codec.parse(q('e=GROUP&lay=ENTITY&lens=FN&d=SUM')));
+    for (const gone of ['layout', 'costLens', 'detail']) expect(keys).not.toContain(gone);
+    expect(codec.parse(q('lay=bogus&lens=&d=1'))).toEqual(codec.defaults('P'));
   });
 
   it('reads the entity before the manifest is loaded', () => {
@@ -73,17 +89,14 @@ describe('selection codec', () => {
   });
 });
 
-describe('restrictToBuilt (build step 3)', () => {
-  it('falls back to what is built: single entity, Variance, by function, no slices, statement', () => {
-    const sel = codec.parse(q('e=GROUP&lay=TREND_M&lens=NAT&d=FULL&r=EU&v=analysis&cur=EUR'));
-    expect(restrictToBuilt(sel, codec.defaults('P'))).toMatchObject({
-      entity: 'P',
-      layout: 'VAR',
-      costLens: 'FN',
-      detail: 'STD',
-      region: [],
-      view: 'statement',
+describe('restrictToBuilt (build steps 3, 6–8)', () => {
+  it('falls back to what is built: single entity, no slices; the three redesigned views are kept', () => {
+    const sel = codec.parse(q('e=GROUP&lay=TREND_M&lens=NAT&d=FULL&r=EU&v=analysis&cur=EUR&he=0'));
+    expect(restrictToBuilt(sel)).toEqual({
+      ...codec.defaults('P'),
       currency: 'EUR', // built settings are kept
+      hideEmpty: false,
+      view: 'analysis',
     });
   });
 });

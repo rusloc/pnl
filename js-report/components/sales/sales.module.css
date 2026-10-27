@@ -85,19 +85,6 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
-.pline {
-  left: 64px;
-  top: 42px;
-  width: 680px;
-  height: 16px;
-  margin: 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--g600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .seg {
   display: flex;
   height: 28px;
@@ -191,19 +178,6 @@
 .linkBtn:hover {
   color: var(--ink);
 }
-.icon {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  font-style: normal;
-}
 
 /* ---------- view region ---------- */
 .panel {
@@ -218,15 +192,6 @@
 .card {
   position: absolute;
   background: var(--panel);
-}
-.card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  background: var(--marker);
 }
 .ct {
   position: absolute;
@@ -259,7 +224,7 @@
 .lab {
   position: absolute;
   left: 16px;
-  top: 24px;
+  top: 16px;
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
@@ -268,20 +233,10 @@
 }
 
 /* hero (Overview, 332 × 192): the whole card is a button that opens the metric's view */
-.hero {
-  border: 0;
-  padding: 0;
-  text-align: left;
-  color: var(--ink);
-  cursor: pointer;
-}
-.hero:hover {
-  background: #e4e3df;
-}
 .heroVal {
   position: absolute;
   left: 16px;
-  top: 44px;
+  top: 40px;
   height: 48px;
   font-size: 44px;
   line-height: 48px;
@@ -295,22 +250,6 @@
   line-height: 24px;
   font-weight: 700;
   letter-spacing: 0;
-}
-.sub {
-  position: absolute;
-  left: 16px;
-  top: 100px;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--g600);
-  white-space: nowrap;
-}
-.spark {
-  position: absolute;
-  left: 196px;
-  top: 44px;
-  width: 120px;
-  height: 44px;
 }
 .cr {
   position: absolute;
@@ -336,14 +275,14 @@
 }
 .diff {
   position: relative;
-  width: 80px;
+  width: 144px;
   height: 6px;
   margin-left: 8px;
   background: var(--panel2);
 }
 .diff i {
   position: absolute;
-  left: 39px;
+  left: 71px;
   top: -2px;
   width: 1px;
   height: 10px;
@@ -384,7 +323,7 @@
 .kpiVal {
   position: absolute;
   left: 16px;
-  top: 44px;
+  top: 40px;
   height: 32px;
   font-size: 28px;
   line-height: 32px;
@@ -402,18 +341,6 @@
 }
 .kpi .crDelta {
   width: auto;
-}
-.kpiSub {
-  position: absolute;
-  left: 16px;
-  right: 8px;
-  top: 100px;
-  font-size: 11px;
-  line-height: 14px;
-  color: var(--g600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .alt {
   visibility: hidden;
@@ -437,7 +364,7 @@
 }
 .legend {
   position: absolute;
-  left: 16px;
+  left: 44px; /* right of the corner ⓘ */
   bottom: 8px;
   display: flex;
   gap: 14px;
@@ -477,7 +404,7 @@
   left: 16px;
   right: 16px;
   top: 44px;
-  bottom: 16px;
+  bottom: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -609,56 +536,8 @@
   height: 12px;
   background: var(--teal);
 }
-.note {
-  position: absolute;
-  right: 16px;
-  top: 16px;
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--g600);
-  font-weight: 400;
-}
 
 /* ---------- pop-overs ---------- */
-.infoWrap {
-  position: relative;
-  display: inline-flex;
-}
-.infoBtn {
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--g600);
-  cursor: pointer;
-}
-.infoBtn:hover {
-  color: var(--ink);
-}
-.pop {
-  position: absolute;
-  right: 0;
-  top: 24px;
-  z-index: 20;
-  width: 300px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
-  color: var(--ink);
-  white-space: normal;
-  text-align: left;
-}
-.popUp {
-  top: auto;
-  bottom: 24px;
-}
 .openBtn {
   border: 0;
   padding: 0 2px;
@@ -828,4 +707,44 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* ---------- card face extras (ADR-0012: title · value · delta rows · status chip; ⓘ bottom-left) ---------- */
+.hero {
+  color: var(--ink);
+}
+.hero:hover {
+  background: #e4e3df;
+}
+.heroOpen {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.hero > span,
+.hero > div {
+  pointer-events: none; /* clicks fall through to the stretched open button */
+}
+.heroChip {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+.kpiChip {
+  position: absolute;
+  right: 12px;
+  top: 48px;
+}
+.infoCorner {
+  position: absolute;
+  left: 8px;
+  bottom: 2px;
+  z-index: 2; /* above the hero's stretched button */
+}
+.empty {
+  color: var(--g600);
+  font-style: italic;
 }

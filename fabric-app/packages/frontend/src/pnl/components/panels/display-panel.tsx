@@ -3,6 +3,7 @@
 import { useId } from 'react';
 
 import type { FilterPatch } from '../../model/filters';
+import { CURRENCY_SYMBOL } from '../../model/format';
 import { SAMPLE_INERT_REASON, SAMPLE_STATEMENT_ONLY_NOTE, sampleGate } from '../../model/sample-mode';
 import type { CostSign, Currency, FxBasis, Units, VarianceFormat } from '../../model/types';
 import { Caption, PanelGroup, type PanelProps } from '../filter-flyout';
@@ -18,10 +19,14 @@ const FX: readonly { value: FxBasis; label: string }[] = [
   { value: 'actual', label: 'Actual rates' },
   { value: 'constant', label: 'Constant currency' },
 ];
-const UNITS: readonly { value: Units; label: string }[] = [
-  { value: 'm', label: '$m' },
-  { value: 'k', label: '$k' },
-];
+/** Units buttons carry the selected currency's symbol: $m / $k, €m / €k, £m / £k (parity rule 14). */
+function unitOptions(currency: Currency): readonly { value: Units; label: string }[] {
+  const symbol = CURRENCY_SYMBOL[currency];
+  return [
+    { value: 'm', label: `${symbol}m` },
+    { value: 'k', label: `${symbol}k` },
+  ];
+}
 const COST_SIGN: readonly { value: CostSign; label: string }[] = [
   { value: 'neg', label: '−' },
   { value: 'pos', label: '+' },
@@ -56,7 +61,7 @@ export function DisplayPanel({ filter, dispatch, sample }: PanelProps) {
       </PanelGroup>
       <div className="grid grid-cols-2 gap-[10px]">
         <PanelGroup label="Units">
-          <Segmented label="Units" value={filter.units} options={UNITS} onChange={(units) => set({ units })} />
+          <Segmented label="Units" value={filter.units} options={unitOptions(filter.currency)} onChange={(units) => set({ units })} />
         </PanelGroup>
         <PanelGroup label="Costs shown">
           <Segmented label="Costs shown" value={filter.costSign} options={COST_SIGN} onChange={(costSign) => set({ costSign })} />

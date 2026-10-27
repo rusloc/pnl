@@ -7,7 +7,7 @@ export function LiveChip({ detail }: { detail?: string }) {
       className="inline-flex items-center gap-[6px] rounded-[12px] border border-acc bg-acc-t px-[8px] py-[1px] font-ledger text-[11px] font-medium text-ink-900"
     >
       <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-acc" />
-      Live · semantic model{detail ? ` · ${detail}` : ''}
+      Live - semantic model{detail ? ` - ${detail}` : ''}
     </span>
   );
 }

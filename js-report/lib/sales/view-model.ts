@@ -1,3 +1,4 @@
+import type { HowToReadVM, InfoVM } from './copy.ts';
 import type { Unit } from './format.ts';
 import type { CmpRow, Status } from './status.ts';
 import type { Drill, MarketCode, ViewId } from './types.ts';
@@ -89,31 +90,36 @@ export type Chart =
 export interface ChartCard {
   id: string;
   title: string;
-  info: string;
+  info: InfoVM;
   open: ViewId | null; // "Open <view> ↗" on Overview why panels
   legend: LegendItem[];
   chart: Chart;
 }
 
+/** Status chip: glyph + word (design-tokens §2.3), never colour alone. */
+export interface Chip {
+  text: string;
+  status: Status;
+}
+
 export interface HeroCard {
   id: string;
   label: string;
-  info: string;
+  info: InfoVM;
   value: string;
   second: string | null;
-  sub: string;
   rows: [CmpRow, CmpRow];
-  spark: { actual: (number | null)[]; py: (number | null)[] };
+  status: Chip | null; // status chip of the header comparator row (top-right)
   open: ViewId;
 }
 
 export interface KpiCard {
   id: string;
   label: string;
-  info: string;
+  info: InfoVM;
   value: string;
-  sub: string;
   row: CmpRow;
+  status: Chip | null;
   alt: CmpRow | null; // the other comparator, shown on hover / focus (layout-spec §6)
 }
 
@@ -138,10 +144,10 @@ export interface TableRow {
 export interface TableCard {
   id: string;
   title: string;
-  info: string;
+  info: InfoVM;
   columns: { key: string; label: string; width: number; align: 'left' | 'right' }[];
   rows: TableRow[];
-  note: string | null; // footer / empty-state copy
+  empty: string | null; // shown in place of rows when there are none (or while the sample loads)
   action: { label: string; drill: Drill } | null; // "Show loans ↗"
   needsDetail: boolean; // rows come from the lazy detail sample
 }
@@ -162,6 +168,7 @@ export interface BandVM {
 export interface HeaderVM {
   title: string;
   periodLine: string;
+  howToRead: HowToReadVM;
   months: { value: string; label: string }[]; // closed months, newest first
 }
 

@@ -74,6 +74,7 @@ export function FilterRail({ wide, onToggleWide, openPanel, onTogglePanel, summa
             onClick={() => onTogglePanel(key)}
             aria-expanded={open}
             aria-label={`${label}: ${summaries[key]}`}
+            title={`${label}: ${summaries[key]}`}
             className={cn(
               'box-border flex min-h-[48px] w-full cursor-pointer items-center gap-[12px] rounded-[8px] border-0 px-[10px] text-left font-[inherit]',
               open ? 'bg-ink-700 text-surface' : 'bg-transparent text-rail-text'

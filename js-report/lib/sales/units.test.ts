@@ -111,3 +111,14 @@ describe('status rules (design-tokens §6)', () => {
     expect(attainmentStatus(null, t)).toBe('neutral');
   });
 });
+
+describe('status bands the displayed Δ (MS-07)', () => {
+  it('a Δ that shows as 0.0 % / 0.0 pp is on plan, not a miss', () => {
+    const r = cmpRow('countUp', 'vs Budget', 99.96, 100);
+    expect(r.text).toBe('◦ 0.0%');
+    expect(r.status).toBe('good');
+    expect(cmpRow('riskDown', 'vs Budget', 0.04004, 0.04).status).toBe('good');
+    expect(cmpRow('countUp', 'vs Budget', 94.96, 100).status).toBe('watch'); // −5.04 % shows −5.0 %: still watch
+    expect(cmpRow('countUp', 'vs Budget', 94.94, 100).status).toBe('off'); // −5.06 % shows −5.1 %: off
+  });
+});

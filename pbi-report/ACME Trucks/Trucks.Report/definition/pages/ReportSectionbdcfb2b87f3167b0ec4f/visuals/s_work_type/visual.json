@@ -180,7 +180,7 @@
                 "Version": 2,
                 "From": [
                   {
-                    "Name": "w",
+                    "Name": "d",
                     "Entity": "dim_loader_work_type",
                     "Type": 0
                   }
@@ -194,7 +194,7 @@
                             "Column": {
                               "Expression": {
                                 "SourceRef": {
-                                  "Source": "w"
+                                  "Source": "d"
                                 }
                               },
                               "Property": "work_type_name"
@@ -205,14 +205,14 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Trucks'"
+                                "Value": "'On spot'"
                               }
                             }
                           ],
                           [
                             {
                               "Literal": {
-                                "Value": "'On spot'"
+                                "Value": "'Trucks'"
                               }
                             }
                           ]

@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>P&amp;L views redesign</title>
+<meta name="description" content="Assessment page v3: KPI, Analysis and Profitability views of the ACME Unified P&L on the Ledger design; one 1440×810 window, two sub-pages per analytic view, explanations in pop-ups. Draft 2026-10-27, illustrative values.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* Ledger tokens — docs/design/design-requirements.md */
+:root{
+  --ink900:#101B2B; --ink700:#2B3748; --slate600:#4F5C6C; --slate400:#8592A3;
+  --line300:#CDD4DC; --line200:#DEE3E9; --line100:#EDF0F3; --ground:#F2F4F7; --subtle:#F6F8FA; --surface:#FFFFFF;
+  --railtext:#C9D3E0; --raildiv:#3A475A; --grprule:#E3E8ED; --subrule:#D5DCE3;
+  --acc:#6B48C8; --accT:#F0EBFB;
+  --fav:#06603F; --favbar:#3BA37B; --favtint:#E4F3EC; --unf:#C2410C; --unfbar:#E2804A; --unftint:#FCEDE5;
+  --amber:#8A5A00; --amberbar:#D9A441; --ambertint:#FBF4E4;
+  --font:'IBM Plex Sans','Segoe UI',system-ui,sans-serif; --cond:'IBM Plex Sans Condensed','IBM Plex Sans','Arial Narrow',sans-serif;
+}
+:root:not([data-theme="light"]){} /* single light theme (Ledger) */
+*{box-sizing:border-box}
+html,body{margin:0;background:#D9DEE5;color:var(--ink900);font-family:var(--font);font-size:14px;line-height:1.4}
+body{padding:24px 0 32px}
+.num{font-variant-numeric:tabular-nums}
+.frame{position:relative;width:1440px;height:810px;margin:0 auto;background:var(--ground);display:flex;overflow:hidden;box-shadow:0 14px 36px rgba(16,27,43,.2)}
+.rail{flex:none;width:64px;background:var(--ink900);color:var(--railtext);display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px}
+.rail .mark{width:36px;height:36px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+.rail .mark small{position:absolute;right:3px;bottom:1px;font-size:9px;font-weight:600}
+.rail .div{width:24px;height:1px;background:var(--raildiv);margin-bottom:8px}
+.rail .it{width:44px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.rail .it svg{width:20px;height:20px}
+.rail .it.open{background:var(--ink700);color:#fff}
+.rail .spacer{flex:1}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.hdr{background:var(--surface);border-bottom:1px solid var(--line200);padding:14px 24px 0;flex:none}
+.hdr .row1{display:flex;align-items:center;gap:12px}
+.hdr h1{font-size:22px;font-weight:600;margin:0}
+.hdr .funnel{width:32px;height:32px;border-radius:8px;border:1px solid var(--line300);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--slate600)}
+.hdr .status{margin-left:auto;font-size:12.5px;color:var(--slate600)}
+.hdr .status b{font-weight:600;color:var(--ink900)}
+.tabs{display:flex;align-items:center;gap:4px;margin-top:6px}
+.tab{min-height:46px;padding:0 14px;border:0;background:none;font:inherit;font-size:15px;font-weight:500;color:var(--slate600);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:3px solid transparent}
+.tab svg{width:18px;height:18px}
+.tab[aria-selected="true"]{color:var(--ink900);font-weight:600;border-bottom-color:var(--acc)}
+.tab.dim{opacity:.5;cursor:default}
+.pager{display:flex;align-items:center;gap:4px;margin-left:10px;font-size:13px;color:var(--slate600)}
+.pager[hidden]{display:none}
+.pager button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line300);background:#fff;font:inherit;font-size:18px;line-height:1;color:var(--ink900);cursor:pointer}
+.pager button:disabled{color:var(--line300);cursor:default}
+.pager span{min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.tabs .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.pill{font-size:11px;font-weight:500;padding:2px 9px;border-radius:12px;background:var(--accT);color:var(--acc)}
+.btn{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line300);background:#fff;font:inherit;font-size:13px;font-weight:500;color:var(--ink900);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.content{flex:1;min-height:0;padding:12px 24px 14px;position:relative}
+.view{display:none;height:100%;flex-direction:column;gap:10px;min-height:0}
+.view.on{display:flex}
+.page{display:none;height:100%;min-height:0;gap:10px}
+.page.on{display:grid}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate600);flex:none;line-height:1}
+.grid{display:grid;gap:10px;min-height:0}
+/* cards */
+.card{position:relative;background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;min-width:0;min-height:0}
+.card.subtle{background:var(--subtle)}
+.ttl{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--slate600)}
+.val{font-weight:600;line-height:1.05;margin-top:auto}
+.card .vars{margin-bottom:auto}
+.hero .val{font-size:46px} .sec .val{font-size:28px} .drv .val{font-size:30px}
+.vars{display:grid;grid-template-columns:auto auto auto;column-gap:14px;row-gap:3px;font-size:13px;align-items:baseline;white-space:nowrap;margin-top:12px;justify-content:start}
+.hero .vars{font-size:14px;margin-top:14px}
+.vars .k{color:var(--slate600)} .vars .a,.vars .p{text-align:right;font-weight:600}
+.vars .py .a,.vars .py .p{color:var(--ink900);font-weight:500}
+.ahead{color:var(--fav)} .adverse{color:var(--unf)} .plan{color:var(--slate600);font-weight:500!important}
+.i{width:20px;height:20px;border-radius:50%;border:1px solid var(--line300);background:#fff;font:inherit;font-size:11px;font-weight:600;color:var(--slate600);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
+.i:hover,.i:focus-visible{border-color:var(--acc);color:var(--acc);outline:none}
+.chip{margin-left:auto;font-size:11px;font-weight:500;padding:2px 8px 2px 6px;border-radius:12px;display:inline-flex;align-items:center;gap:5px;background:var(--line100);color:var(--ink900);white-space:nowrap}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--slate400)}
+.chip.amber{background:var(--ambertint);color:var(--amber)} .chip.amber::before{background:var(--amberbar)}
+.chip.red{background:var(--unftint);color:var(--unf)} .chip.red::before{background:var(--unf)}
+.chip.ahead{background:var(--favtint);color:var(--fav)} .chip.ahead::before{background:var(--favbar)}
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line200);border-radius:12px;padding:10px 16px 8px;position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.panel h2{font-size:15px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;flex:none;min-height:30px}
+.panel h2 .i{margin-left:auto}
+.panel .ch{flex:1;min-height:0;position:relative}
+.panel .ch svg{display:block}
+.panel .ch.scroll{overflow:auto}
+/* segmented controls (toolbar, 30 px) */
+.seg{display:inline-flex;border:1px solid var(--line300);border-radius:8px;overflow:hidden;background:#fff;height:28px}
+.seg button{border:0;background:none;font:inherit;font-size:12px;font-weight:500;color:var(--ink900);padding:0 10px;cursor:pointer;border-left:1px solid var(--line300)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--accT);color:var(--acc);font-weight:600}
+.seg button:disabled{color:var(--line300);cursor:default}
+.seg .lbl{font-size:11px;color:var(--slate600);padding:0 8px;display:inline-flex;align-items:center;background:var(--subtle)}
+.ctl{display:flex;gap:8px;align-items:center;margin-left:auto}
+.legend{display:flex;gap:12px;font-size:11.5px;color:var(--slate600);flex:none;align-items:center;min-height:18px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+/* tables */
+table{border-collapse:collapse;width:100%;font-family:var(--cond);font-size:13.5px}
+th{font-size:11.5px;font-weight:600;color:var(--slate600);text-align:right;padding:5px 6px;border-bottom:1px solid var(--line300);white-space:nowrap}
+th.l,td.l{text-align:left}
+td{padding:7px 6px;text-align:right;border-bottom:1px solid var(--line100);white-space:nowrap}
+tr.total td{font-weight:600;background:var(--subtle);border-top:1px solid var(--subrule)}
+tr.blk td{font-weight:600;background:var(--subtle);border-top:1px solid var(--subrule);cursor:pointer}
+tr.blk td.l::before{content:"▾";display:inline-block;width:14px;color:var(--slate400);font-size:11px}
+tr.blk.closed td.l::before{content:"▸"}
+tr.leaf td.l{padding-left:22px}
+tr.leaf.x td.l{cursor:pointer}
+tr.leaf.x td.l::before{content:"▸";display:inline-block;width:12px;margin-left:-12px;color:var(--slate400);font-size:10px}
+tr.leaf.x.open td.l::before{content:"▾"}
+#tb-var table{font-size:12.5px} #tb-var td{padding:3px 6px} #tb-var th{padding:4px 6px}
+tr.mem td{color:var(--slate600);padding-top:2px;padding-bottom:2px;background:#FAFBFC}
+tr.mem td.l{padding-left:40px}
+tr.al td{color:var(--slate600);font-style:italic}
+.tag{font-size:10px;font-weight:500;padding:0 5px;border-radius:4px;border:1px dashed var(--slate400);color:var(--slate600);font-style:normal;margin-left:6px;font-family:var(--font)}
+.blkn{font-size:11px;color:var(--slate600);margin-left:6px;font-weight:400}
+.dbar{position:relative;display:inline-block;width:124px;height:9px;vertical-align:middle;background:var(--line100);border-radius:2px}
+.dbar::before{content:"";position:absolute;left:50%;top:-2px;width:1px;height:13px;background:rgba(16,27,43,.45);z-index:1}
+.dbar i{position:absolute;top:0;height:9px}
+.sd{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--slate400);margin-right:6px;vertical-align:1px}
+.sd.amber{background:var(--amberbar)} .sd.red{background:var(--unf)} .sd.none{visibility:hidden}
+.nm{color:var(--slate400)}
+svg text{font-family:var(--font)}
+/* pop-ups: frosted glass */
+.scrim{position:absolute;inset:0;z-index:20;display:none}
+.scrim.on{display:block}
+.pop{position:absolute;z-index:21;width:420px;max-height:640px;overflow:auto;padding:16px 18px 14px;border-radius:16px;border:1px solid rgba(222,227,233,.95);background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 14px 36px rgba(16,27,43,.2);font-size:13px;line-height:1.45}
+.pop.wide{width:780px}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pop{background:#fff}}
+.pop h3{font-size:15px;font-weight:600;margin:0 28px 6px 0}
+.pop p{margin:0 0 6px}
+.pop .f{font-family:var(--cond);background:rgba(246,248,250,.9);border:1px solid var(--line200);border-radius:8px;padding:5px 8px;margin:6px 0;white-space:pre-wrap}
+.pop .src{display:block;margin-top:8px;font-family:var(--cond);font-size:11px;color:var(--slate400)}
+.pop .x{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:8px;border:0;background:rgba(242,244,247,.9);color:var(--slate600);font-size:16px;cursor:pointer}
+.pop .x:focus-visible{outline:2px solid var(--acc)}
+.pop .lg{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0}
+.pop .lg span{display:inline-flex;align-items:center;gap:6px}
+.pop .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+.pop ul{margin:4px 0 6px;padding-left:18px}
+.pop li{margin:2px 0}
+.pop .ex{font-style:italic;color:var(--slate600)}
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <nav class="rail" aria-label="Filters">
+    <div class="mark" title="Switch company">A<small>▾</small></div>
+    <div class="div"></div>
+    <div class="it open" title="Period"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v4M13 2.5v4" stroke-linecap="round"/></svg></div>
+    <div class="it" title="Versions"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 17h15M5 15V9.5M10 15V4.5M15 15V7.5"/></svg></div>
+    <div class="it" title="Slice"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z"/></svg></div>
+    <div class="it" title="Display"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h8.5M15.5 6H17M3 14h2.5M9.5 14H17"/><circle cx="13.5" cy="6" r="2"/><circle cx="7.5" cy="14" r="2"/></svg></div>
+    <div class="spacer"></div>
+    <div class="it" title="Expand">»</div>
+  </nav>
+  <div class="main">
+    <header class="hdr">
+      <div class="row1">
+        <h1>Profit &amp; loss</h1>
+        <div class="funnel" title="Applied filters"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z"/></svg></div>
+        <div class="status"><b>Commerce Cloud</b> - Management reporting - <b>FY Jan – Dec 2025</b> - USD $m - Closed through Dec 2025 - Refreshed 26 Oct 2026 09:12</div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab dim" role="tab" aria-selected="false" tabindex="-1" title="Unchanged by this redesign"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h14M3 8h14M3 12h10M3 16h7"/></svg>P&amp;L statement</button>
+        <button class="tab" role="tab" aria-selected="true" data-view="kpi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></svg>Key figures</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="ana"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 17h15M4 14V9M8 14V5M12 14v-3M16 14V7"/></svg>Analysis</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="prof"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 3v7h7"/></svg>Profitability</button>
+        <div class="pager" id="pager" hidden><button id="pg-prev" aria-label="Previous page">‹</button><span id="pg-cnt">1 / 2</span><button id="pg-next" aria-label="Next page">›</button></div>
+        <div class="right"><span class="pill">vs Budget, Prior year · constant currency on Profitability</span><button class="btn" id="howto" data-info="howto"><span class="i" aria-hidden="true" style="width:16px;height:16px;font-size:9px">i</span>How to read</button></div>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- KPI -->
+      <section class="view on" id="view-kpi" aria-label="Key figures">
+        <div class="eyebrow">Results</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr 292px;flex:1.15">
+          <div class="card hero" id="k-nr"></div><div class="card hero" id="k-ebitda"></div><div class="card hero" id="k-op"></div>
+          <div class="grid" style="grid-template-rows:1fr 1fr"><div class="card sec" id="k-gm"></div><div class="card sec" id="k-opex"></div></div>
+        </div>
+        <div class="eyebrow">Drivers &amp; health</div>
+        <div class="grid" style="grid-template-columns:repeat(5,1fr);flex:1">
+          <div class="card drv subtle" id="k-gmv"></div><div class="card drv subtle" id="k-merch"></div><div class="card drv subtle" id="k-arr"></div><div class="card drv subtle" id="k-mix"></div><div class="card drv subtle" id="k-fy"></div>
+        </div>
+      </section>
+
+      <!-- ANALYSIS -->
+      <section class="view" id="view-ana" aria-label="Analysis">
+        <div class="page on" data-page="1" style="grid-template-columns:1fr 1fr">
+          <div class="panel"><h2>Net revenue bridge <button class="i" data-info="nrbridge">i</button></h2><div class="ch" id="ch-nrbridge" data-chart="nrbridge"></div></div>
+          <div class="panel"><h2>Profit bridge: Budget Adj. EBITDA → Actual → Operating profit <button class="i" data-info="pbridge">i</button></h2><div class="ch" id="ch-pbridge" data-chart="pbridge"></div></div>
+        </div>
+        <div class="page" data-page="2" style="grid-template-columns:1fr">
+          <div class="panel">
+            <h2>Largest variances vs Budget
+              <div class="ctl" id="var-ctl">
+                <div class="seg" id="seg-top"><span class="lbl">Top</span><button data-top="8" aria-pressed="true">8</button><button data-top="12" aria-pressed="false">12</button><button data-top="all" aria-pressed="false">All</button></div>
+                <div class="seg" id="seg-mode"><button data-mode="block" aria-pressed="true">By block</button><button data-mode="flat" aria-pressed="false">By |Δ|</button></div>
+                <div class="seg" id="seg-cut"><span class="lbl">Cut</span><button data-cut="none" aria-pressed="true">Total</button><button data-cut="REGION" aria-pressed="false">Region</button><button data-cut="CHANNEL" aria-pressed="false">Sales motion</button><button data-cut="LINE" aria-pressed="false">Service line</button><button data-cut="SEGMENT" aria-pressed="false">Segment</button><button data-cut="ENTITY" aria-pressed="false" disabled title="Group view only">Entity</button></div>
+              </div>
+              <button class="i" data-info="var">i</button></h2>
+            <div class="legend" id="var-legend"></div>
+            <div class="ch scroll" id="tb-var"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFITABILITY -->
+      <section class="view" id="view-prof" aria-label="Profitability">
+        <div class="page on" data-page="1" style="grid-template-columns:1fr 470px">
+          <div class="panel"><h2>Profitability by Region <button class="i" data-info="proftable">i</button></h2><div class="ch" id="tb-prof"></div></div>
+          <div class="panel"><h2>Concentration — share by profit level <button class="i" data-info="conc">i</button></h2><div class="ch" id="ch-conc" data-chart="conc"></div></div>
+        </div>
+        <div class="page" data-page="2" style="grid-template-rows:1fr 212px">
+          <div class="panel">
+            <h2>Growth × margin
+              <div class="ctl"><div class="seg" id="seg-level"><button data-level="region" aria-pressed="true">Region</button><button data-level="channel" aria-pressed="false">Region × sales motion</button><button data-level="line" aria-pressed="false">Region × service line</button></div><div class="seg"><button id="btn-trail" aria-pressed="true">Trails</button></div></div>
+              <button class="i" data-info="bubble">i</button></h2>
+            <div class="ch" id="ch-bubble" data-chart="bubble"></div>
+          </div>
+          <div class="panel"><h2>Mix — region × service line <button class="i" data-info="heat">i</button></h2><div class="ch" id="ch-heat" data-chart="heat"></div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="pop-title" hidden></div>
+</div>
+
+<script>
+/* ───────── data ───────── */
+const M = '−';
+const D = {
+  kpi: {
+    nr:   { v:667.4, bud:658.2, py:513.8, organic:27.5, reported:29.9 },
+    ebitda:{ v:82.8, bud:83.1, py:56.0, margin:12.4, rule40:39.9 },
+    op:   { v:48.6, bud:50.2, py:32.9, margin:7.3, np:38.1, npMargin:5.7, da:30.1, adj:4.1 },
+    gm:   { v:56.0, bud:56.3, py:56.9, sub:81.0, pay:31.0 },
+    opex: { v:39.0, bud:39.0, py:42.1, amt:260.0, budAmt:256.4, sm:15.2, rd:15.9, ga:7.9 },
+    gmv:  { v:11315.0, bud:10943.0, py:8730.0, take:2.67, takeBudBp:1, takePyBp:3 },
+    merch:{ v:124291, bud:128135, py:108420, perMerch:91.0, perMerchBud:6.6 },
+    arr:  { v:262.8, bud:268.1, py:215.6 },
+    mix:  { sub:37.5, pay:45.3, subPy:40.1, payPy:42.7, subAmt:250.3, payAmt:302.1, subG:21.4, payG:37.7 },
+    fy:   { nr:667.4, nrBud:658.2, ebitda:82.8, ebitdaBud:83.1 },
+  },
+  thresholds: { amtWatch:1.0, amtRed:3.0, ppWatch:0.3, ppRed:1.0 },
+  /* P&L leaves of Commerce Cloud to operating profit: budget → actual, reported (actual rates), signed (M-01) */
+  blocks: [['GR','Gross revenue'],['GTN','Gross-to-net deductions'],['COR','Cost of revenue'],['VSC','Variable selling & cost-to-serve'],['SM','Sales & marketing'],['RD','Research & development'],['GA','General & administrative'],['OOI','Other operating income / (expense)'],['DA','Depreciation & amortisation'],['ADJ','Adjusting items']],
+  leaves: [
+    { c:'GR_S1', n:'Subscription platform fees', b:'GR', bud:260.9, act:256.3, line:'SUB' },
+    { c:'GR_S2', n:'Payments & transaction fees', b:'GR', bud:297.5, act:308.5, line:'PAY' },
+    { c:'GR_S3', n:'Apps, partner revenue share & ads', b:'GR', bud:71.8, act:69.6, line:'APP' },
+    { c:'GR_S4', n:'Professional services', b:'GR', bud:43.0, act:49.0, line:'PS' },
+    { c:'GTN_S1', n:'Contractual discounts & promotional credits', b:'GTN', bud:-9.6, act:-9.4 },
+    { c:'GTN_S2', n:'Free-trial & onboarding credits', b:'GTN', bud:-2.4, act:-3.7, line:'SUB' },
+    { c:'GTN_S3', n:'Refunds, SLA credits & billing adjustments', b:'GTN', bud:-3.0, act:-2.9 },
+    { c:'COR_S1', n:'Cloud hosting & infrastructure', b:'COR', bud:-58.0, act:-58.9 },
+    { c:'COR_S2', n:'Payment processing & interchange', b:'COR', bud:-202.2, act:-208.4, line:'PAY' },
+    { c:'COR_S3', n:'Third-party software, data & partner payouts', b:'COR', bud:-12.1, act:-11.8 },
+    { c:'COR_S4', n:'Customer support & merchant onboarding', b:'COR', bud:-9.2, act:-8.9 },
+    { c:'COR_S5', n:'Professional services delivery', b:'COR', bud:-6.1, act:-5.7, line:'PS' },
+    { c:'VSC_S1', n:'Sales commissions', b:'VSC', bud:-14.2, act:-14.0 },
+    { c:'VSC_S2', n:'Partner & agency referral fees', b:'VSC', bud:-8.9, act:-8.6 },
+    { c:'VSC_S3', n:'Transaction & merchant credit losses', b:'VSC', bud:-8.5, act:-9.1, line:'PAY' },
+    { c:'SM_S1', n:'Performance marketing & paid acquisition', b:'SM', bud:-48.9, act:-50.4 },
+    { c:'SM_S2', n:'Brand, content & events', b:'SM', bud:-14.6, act:-14.4 },
+    { c:'SM_S3', n:'Sales & account management staff', b:'SM', bud:-29.8, act:-29.9 },
+    { c:'SM_S4', n:'Partner programme & ecosystem', b:'SM', bud:-6.9, act:-6.7 },
+    { c:'RD_S1', n:'Engineering & product management', b:'RD', bud:-62.4, act:-64.5 },
+    { c:'RD_S2', n:'Data, AI & security platform', b:'RD', bud:-47.1, act:-47.4 },
+    { c:'RD_S3', n:'Capitalised development costs (credit)', b:'RD', bud:5.5, act:5.8 },
+    { c:'GA_1', n:'Finance, legal & HR', b:'GA', bud:-21.0, act:-21.3 },
+    { c:'GA_2', n:'IT & corporate systems', b:'GA', bud:-13.4, act:-13.5 },
+    { c:'GA_3', n:'Facilities & insurance', b:'GA', bud:-9.6, act:-9.5 },
+    { c:'GA_4', n:'Corporate centre allocation', b:'GA', bud:-8.2, act:-8.2 },
+    { c:'OOI_1', n:'Operating FX gains / (losses)', b:'OOI', bud:0.2, act:0.6 },
+    { c:'OOI_2', n:'Gain / (loss) on disposal of assets', b:'OOI', bud:0.0, act:-0.1 },
+    { c:'OOI_3', n:'Other operating income', b:'OOI', bud:0.3, act:0.3 },
+    { c:'DA_S1', n:'Amortisation: capitalised software', b:'DA', bud:-9.8, act:-9.9 },
+    { c:'DA_S2', n:'Depreciation: servers, equipment & right-of-use assets', b:'DA', bud:-12.0, act:-12.0 },
+    { c:'DA_S3', n:'Amortisation: acquired intangibles', b:'DA', bud:-7.3, act:-8.2 },
+    { c:'ADJ_1', n:'Restructuring & reorganisation', b:'ADJ', bud:-1.2, act:-1.2 },
+    { c:'ADJ_2', n:'Impairment of goodwill & intangibles', b:'ADJ', bud:0.0, act:0.0 },
+    { c:'ADJ_3', n:'M&A, integration & other one-offs', b:'ADJ', bud:-2.6, act:-2.9 },
+  ],
+  pyGrowth: { GR:1.30, GTN:1.25, COR:1.33, VSC:1.28, SM:1.18, RD:1.22, GA:1.12, OOI:1.0, DA:1.35, ADJ:0.6 },   /* actual ÷ prior year, per block (illustrative) */
+  fxK: { GR:0.0171, GTN:0.0171, COR:0.0177, VSC:0.0126, SM:0.005, RD:0.005, GA:0.005, OOI:0, DA:0, ADJ:0 },  /* FX portion = actual × k (translation effect, illustrative) */
+  cuts: {
+    REGION:  { name:'Region', booked:true,  m:[['NA','North America',.536],['CE','Continental Europe',.231],['AP','Asia-Pacific',.129],['UK','UK & Ireland',.104]] },
+    CHANNEL: { name:'Sales motion', booked:false, m:[['SELF','Self-serve',.38],['SALES','Sales-led',.47],['PART','Partner & agency-led',.15]] },
+    LINE:    { name:'Service line', booked:false, m:[['SUB','Platform subscriptions',.375],['PAY','Payments',.453],['APP','Apps, partners & ads',.102],['PS','Professional services',.07]] },
+    SEGMENT: { name:'Customer segment', booked:false, m:[['SMB','Small business',.41],['MID','Mid-market',.35],['ENT','Enterprise',.24]] },
+  },
+  memCols: ['#6B48C8','#2453A6','#3BA37B','#E2804A'],
+  R: [
+    { n:'North America', k:'NA', cur:'USD', col:'#6B48C8', nr:357.7, bud:359.2, rep:357.7, g:27.8, gPy:24.0, gm:55.4, gmBud:56.0, cm:50.9, cmBud:51.4, cmPy:51.8, ebitda:41.0 },
+    { n:'Continental Europe', k:'CE', cur:'EUR', col:'#2453A6', nr:147.2, bud:146.9, rep:154.1, g:26.5, gPy:22.5, gm:57.0, gmBud:56.8, cm:51.9, cmBud:51.6, cmPy:52.1, ebitda:19.0 },
+    { n:'Asia-Pacific', k:'APAC', cur:'AUD', col:'#3BA37B', nr:85.1, bud:86.6, rep:86.3, g:31.0, gPy:27.0, gm:56.1, gmBud:56.5, cm:51.1, cmBud:51.6, cmPy:51.7, ebitda:10.1 },
+    { n:'UK & Ireland', k:'UK&I', cur:'GBP', col:'#E2804A', nr:65.7, bud:65.5, rep:69.3, g:24.0, gPy:20.0, gm:56.8, gmBud:56.7, cm:51.9, cmBud:51.8, cmPy:51.8, ebitda:8.1 },
+  ],
+  company: { g:27.5, cm:51.3, gPy:23.6, cmPy:51.9 },
+  heat: { lines:['Platform subscriptions','Payments','Apps, partners & ads','Professional services'], short:['Subs','Pay','Apps','PS'], gm:[81.0,30.7,70.2,64.9], cm:[72.0,29.0,61.0,52.0], g:[21.0,38.0,22.0,12.0],
+          cells:{ NA:[118.0,176.5,38.6,24.6], CE:[60.8,59.0,15.1,12.3], APAC:[38.6,35.3,6.6,4.6], 'UK&I':[28.5,26.0,6.5,4.7] } },
+  motions: { names:['Self-serve','Sales-led','Partner & agency-led'], short:['Self','Sales','Partner'], w:[.38,.47,.15], cm:[56.0,49.0,48.0], g:[30.0,26.0,24.0] },
+};
+/* ───────── helpers ───────── */
+const f1 = n => (Math.abs(n) < 0.05 ? '0.0' : (n<0?M:'') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}));
+const fs1 = n => (Math.abs(n) < 0.05 ? '0.0' : (n<0?M:'+') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}));
+const f0 = n => (n<0?M:'') + Math.abs(Math.round(n)).toLocaleString('en-US');
+const fs0 = n => (n===0?'0':(n<0?M:'+') + Math.abs(Math.round(n)).toLocaleString('en-US'));
+const money = n => '$' + f1(n) + ' m';
+const pct = (a,b) => (a/b-1)*100;
+const hash = (a,b) => { let x=Math.sin(a*12.9898+b*78.233)*43758.5453; return x-Math.floor(x); }; /* deterministic jitter */
+function status(adv, isPp, lowerBetter){ let d = lowerBetter ? -adv : adv; const T=D.thresholds, w=isPp?T.ppWatch:T.amtWatch, r=isPp?T.ppRed:T.amtRed; if (Math.abs(d)<=w) return 'grey'; if (d>0) return 'ahead'; return Math.abs(d)<=r?'amber':'red'; }
+const cls = s => s==='ahead'?'ahead':(s==='red'||s==='amber'?'adverse':'plan');
+const dotCls = s => s==='ahead'?'none':(s==='grey'?'':s);
+const chipTxt = { grey:'on track', amber:'watch', red:'off track', ahead:'ahead' };
+const chip = s => s ? `<span class="chip ${s==='grey'?'':s}">${chipTxt[s]}</span>` : '';
+function varRow(label, absTxt, pctTxt, st, py){ const c = py?'':' '+cls(st); const plan = pctTxt==='on plan'; return `<div class="k${py?' py':''}">${label}</div><div class="a num${plan?' plan':c}">${plan?'':absTxt}</div><div class="p num${plan?' plan':c}">${pctTxt}</div>`; }
+
+/* ───────── pop-up texts (explanation · formula · source code) ───────── */
+const INFO = {
+  nr:{ t:'Net revenue', w:'Gross revenue less gross-to-net deductions (spine step 3). The chip follows the Budget variance only; prior year is text.', f:'NR = GR + GTN\nΔ vs Budget = NR − Budget NR, % of Budget', a:`Organic growth +${f1(D.kpi.nr.organic)} % · reported +${f1(D.kpi.nr.reported)} % vs prior year (constant currency vs actual rates)`, s:'KPI Value K-01 · KPI Organic Growth · KPI Reported Growth · KPI Δ A / Δ B' },
+  ebitda:{ t:'Adjusted EBITDA', w:'Contribution margin plus operating expenses (step 9, management performance measure). Excludes D&A and adjusting items (restructuring, impairment, M&A). No SBC exists in the data.', f:'Adj. EBITDA = CM + OPEX', a:`Margin ${f1(D.kpi.ebitda.margin)} % · Rule of 40 = organic growth + margin = ${f1(D.kpi.ebitda.rule40)} (no prior-year comparison: FY2024 has no prior year)`, s:'KPI Value K-07 · KPI Adj EBITDA Margin · KPI Rule of 40 (K-12 S)' },
+  op:{ t:'Operating profit', w:'IFRS 18 required subtotal (step 13).', f:`OP = Adj. EBITDA − D&A − adjusting items\n${f1(D.kpi.ebitda.v)} − ${f1(D.kpi.op.da)} − ${f1(D.kpi.op.adj)} = ${f1(D.kpi.op.v)}`, a:`Margin ${f1(D.kpi.op.margin)} % · Net profit ${money(D.kpi.op.np)} (margin ${f1(D.kpi.op.npMargin)} %)`, s:'KPI Value K-08 · KPI Operating Margin · Net Profit · KPI Net Margin' },
+  gm:{ t:'Gross margin %', w:'Gross profit as a share of net revenue. Ratio: variances in percentage points only.', f:'GM % = GP ÷ NR', a:`Platform subscriptions ${f1(D.kpi.gm.sub)} % · Payments ${f1(D.kpi.gm.pay)} %`, s:'KPI Gross Margin % K-03 · KPI Subscription GM % · Payments GM % (same pattern on PAY)' },
+  opex:{ t:'Opex % revenue', w:'Sales & marketing, R&D and G&A as a share of net revenue. Lower is better, so the colour logic is inverted. Excludes other operating items, D&A and adjusting items.', f:'Opex % = −(SM + RD + GA) ÷ NR', a:`S&M ${f1(D.kpi.opex.sm)} % · R&D ${f1(D.kpi.opex.rd)} % · G&A ${f1(D.kpi.opex.ga)} % · opex ${money(D.kpi.opex.amt)}, ${fs1(-(D.kpi.opex.amt-D.kpi.opex.budAmt))} vs budget`, s:'new: blocks SM + RD + GA ÷ NR (PL % NR rows) · spec KPI §5 1.3' },
+  gmv:{ t:'GMV processed', w:'Transaction value processed in the period, translated like amounts. Card content swaps by company: Consumer Products shows Units sold, ACME Group the Consumer Products operating margin.', f:'GMV = Σ gmv_local → reporting currency', a:`Take rate ${D.kpi.gmv.take.toFixed(2)} % (+${D.kpi.gmv.takeBudBp} bp vs budget, +${D.kpi.gmv.takePyBp} bp vs prior year)`, s:'KPI GMV K-09 S · KPI Payments Take Rate K-05 S' },
+  merch:{ t:'Active merchants', w:'Merchants with an active paid plan at the last month-end of the window; never a sum over months. Swaps: Products → Net revenue per unit; Group → Commerce Cloud operating margin.', f:'merchants = active_merchants_end at window end', a:`GMV per merchant $${f1(D.kpi.merch.perMerch)} k (+${f1(D.kpi.merch.perMerchBud)} % vs budget)`, s:'KPI Active Merchants K-10 S · new: KPI GMV ÷ KPI Active Merchants' },
+  arr:{ t:'ARR (run-rate, period end)', w:'Platform-subscription net revenue of the last month in the window × 12. A run-rate proxy, not contract ARR. Swaps: Products → Gross-to-net %; Group → Services share of net revenue.', f:'ARR = SUB NR (last month) × 12', a:`Net new ARR vs prior year end ${fs1(D.kpi.arr.v-D.kpi.arr.py)}`, s:'KPI ARR K-04 S · new: KPI ARR − KPI ARR as Compare B' },
+  mix:{ t:'Revenue mix', w:'Platform subscriptions and Payments as shares of net revenue; the rest is apps, partners & ads and professional services. Neutral KPI: no colour. Swaps: Products → A&P % NR; Group → Intercompany eliminated.', f:'share = NR of service line ÷ NR', a:`Subscriptions ${money(D.kpi.mix.subAmt)} (+${f1(D.kpi.mix.subG)} % YoY) · Payments ${money(D.kpi.mix.payAmt)} (+${f1(D.kpi.mix.payG)} % YoY)`, s:'Prof NR Share by dim_line (SUB, PAY) · gap analysis P1' },
+  fy:{ t:'FY outlook vs Budget', w:'Latest estimate for the whole fiscal year: actual closed months plus the latest forecast for open months (C-02). The selected year is closed, so the outlook equals actual. Same card for every company.', f:'attainment = FY LE ÷ FY Budget', a:`Revenue attainment ${f1(D.kpi.fy.nr/D.kpi.fy.nrBud*100)} % · EBITDA FY ${money(D.kpi.fy.ebitda)} (${f1(D.kpi.fy.ebitda/D.kpi.fy.ebitdaBud*100)} %)`, s:'FY LE Amount · FY Budget Amount · PL Δ LE vs Budget M-14' },
+  nrbridge:{ t:'Net revenue bridge', w:'Budget to Actual, USD millions. Driver steps at constant currency, then a constant-currency subtotal, then FX (hatched: not controllable). The axis starts at 640; read the numbers. Reported +1.4 % reads −0.4 % at constant currency; FX adds +11.7.', f:'658.2 − 9.0 + 5.7 − 3.4 + 4.2 = 655.7 (CC) + 11.7 = 667.4\nstep % = Δ ÷ that service line\'s Budget NR', s:'Bridge Value · Bridge Comparison NR · _NR CC Base · Bridge FX · C-40 · new step "Constant-currency NR"' },
+  pbridge:{ t:'Profit bridge', w:'Budget Adj. EBITDA to Actual: revenue volume at budget GM %, GM rate and mix by service line, variable selling & cost-to-serve, opex blocks, then FX (+4.6; at constant currency EBITDA is −4.9 vs Budget). D&A and adjusting items are actual levels (their Δ vs budget is the small label) so the bridge reconciles to Operating profit. No SBC step: not in the data. End toggle EBITDA | Operating profit | Net profit.', f:'Σ steps = −0.3 = 82.8 − 83.1\n82.8 − 30.1 − 4.1 = 48.6', s:'PL Δ A rows SM RD GA OOI DA ADJ · GP by dim_line · _Bridge NR CC Change · CC branch of _Amt Raw · new dim_profit_step · spec Analysis §5.2' },
+  var:{ t:'Largest variances vs Budget', w:'Leaf lines of the P&L down to operating profit, USD millions, actual rates. <b>Sign convention:</b> Δ = Actual − Budget on signed values, so a positive Δ always helps profit (revenue up, or cost down) and a negative Δ always hurts it; bars share one scale across every row. Δ % = Δ ÷ |Budget|, n.m. when |Budget| &lt; 2.0 or |Δ %| &gt; 50 %. vs PY = the same Δ against prior year. FX = the translation portion of the Δ (reported minus constant currency), so Δ − FX is the business change.<br><br><b>Granularity:</b> <i>Top</i> 8 / 12 / All (All starts with blocks collapsed; an opened block scrolls inside the panel). <i>By block</i> groups the shown lines under their P&L block with the block\'s full subtotal (click a block row to collapse it); <i>By |Δ|</i> is one flat ranking. <i>Cut</i> splits every bar into slice members (Region · Sales motion · Service line · Segment; Entity in the Group view only) and ▸ on a line lists the members. Revenue, gross-to-net, cost of revenue and variable selling are booked at slice grain and by region; opex and below are booked by region only and <i>allocated by NR share</i> to the other slices (rows marked alloc.). Footer: shown lines and coverage, all other lines, total P&L Δ at operating profit.', f:'Δ = Actual − Budget (signed) · Δ % = Δ ÷ |Budget| · FX = (Actual − Actual cc) − (Budget − Budget cc)', s:'LV Base · LV Comparison · LV Δ · LV Δ % · LV Abs Δ (TopN) · Compare B Amount (PY) · dim_account.block_code · _Amt Row block subtotals · _Amt Entity slice filters on fact_pl / fact_pl_allocated (C-30, C-31) · new: LV FX (gap analysis P4), TopN parameter, block grouping · C-45' },
+  proftable:{ t:'Profitability by Region', w:'Constant currency (FY2025 budget rates), USD millions, rows by net revenue. Δ vs Budget % on net revenue at constant currency; GM % and CM % of the region\'s revenue; CM Δ = contribution margin % minus Budget (pp), the only column with a status dot (never on revenue). Adj. EBITDA is <b>booked</b> by region: opex is recorded at entity × region (C-31), so nothing here is allocated. Allocated columns exist only for Channel / Line / Segment breakdowns and stay collapsed and badged there.', f:'GM % = GP ÷ NR · CM % = contribution ÷ NR · CM Δ = CM % − Budget CM %', s:'Prof Net Revenue · Prof NR Δ % (CC) · Gross Profit · Contribution Margin · KPI CM % · Adjusted EBITDA · Compare A Amount · new: CM Δ pp · C-46' },
+  conc:{ t:'Concentration — share by profit level', w:'Three 100 % bars: each region\'s share of net revenue, of contribution and of Adj. EBITDA (booked). Read down a colour: a region whose share shrinks from revenue to contribution is diluting the margin; one whose share grows is accretive. The small figures are the share at each level. North America: 54.6 % of revenue, 54.2 % of contribution, 52.4 % of EBITDA.', f:'share = region value ÷ company value, per level', s:'Prof NR Share · contribution share and EBITDA share (same pattern on Contribution Margin / Adjusted EBITDA)' },
+  bubble:{ t:'Growth × margin', w:'x = net revenue growth year on year at constant currency, y = contribution margin %, bubble = net revenue; dashed lines = company values, giving four quadrants (labels inside the plot). Each bubble shows CM % and growth. <b>Trails</b> run from the prior-year position (hollow dot) to the current one. <b>Levels:</b> Region, then Region × sales motion and Region × service line split each region into its members, coloured by parent region (legend); the axes re-fit per level. Hover a bubble for its figures.<br><br>Data note: a prior-year growth needs two earlier years; for the quoted FY2025 view the model has no FY2023, so trails are available from FY2026 windows on (the trail shown here is illustrative). Sub-region bubbles use revenue, cost of revenue and variable selling at slice grain (C-30); CM % by sales motion / service line is therefore measured, not allocated.', f:'growth = NRcc ÷ PY NRcc − 1 · CM % = contribution ÷ NR, per slice', s:'KPI Organic Growth per slice (K-22) · KPI CM % per slice · Prof Net Revenue · dim_region × dim_channel / dim_line · PY: Compare B Amount' },
+  heat:{ t:'Mix — region × service line', w:'Cells: net revenue at constant currency, $m, and share of the region; colour = gross margin % of the service line. North America sells proportionally more payments (31 % GM), which explains its lower contribution margin without any efficiency gap. Rows and columns reconcile to the table.', f:'cell = NR(region, line)', s:'Net Revenue · Gross Profit at dim_region × dim_line grain (both direct, C-30)' },
+};
+const HOWTO = {
+  kpi:{ t:'How to read — Key figures', body:`<div class="cols"><div><p><b>Three heroes</b> (Net revenue, Adj. EBITDA, Operating profit), two ratio cards and five driver cards. Each shows value, Δ vs Budget ($ and %, pp for ratios) and Δ vs Prior year; <b>on plan</b> replaces a zero variance. Period, currency and data date are in the header line.</p><p><b>Colour only on a breach, vs Budget only:</b></p><div class="lg"><span><i class="sd"></i>on track ±1 % / ±0.3 pp</span><span><i class="sd amber"></i>watch 1–3 % / 0.3–1 pp</span><span><i class="sd red"></i>off track &gt; 3 % / &gt; 1 pp</span><span class="ahead">ahead = green</span></div><p>Thresholds are one parameter table (spec KPI §6); "lower is better" inverts on Opex %. The driver row swaps content by company like today's slots 4–5 and 9–12 (L-10). The ⓘ on each card holds its definition, formula, sub-metrics and source measure.</p><p><b>Generated headline</b> (spec KPI §3, ranking the cards' Δ vs Budget) — kept out of the page at USER review; example: <span class="ex">"Net revenue +$9.2 m (+1.4 %) vs budget on a GMV beat (+3.4 %) · Adj. EBITDA on plan · Operating profit −$1.6 m (−3.2 %) on acquired-intangible amortisation · Active merchants −3.0 % and ARR −2.0 % vs budget."</span></p></div><div><p><b>Illustrative values.</b> Commerce Cloud · Actual FY2025 · USD m. Quoted from the specs and control totals: NR 667.4, Adj. EBITDA 82.8, OP 48.6, NP 38.1, revenue +9.2 / +1.4 % vs budget, merchants 124,291 (−3.0 %), GMV +3.4 %. Every other number is a placeholder chosen so that all cards, bridges and tables reconcile.</p><p>No sparklines, no bars, no banner (USER reviews v2, v3).</p><p class="src">Sources: KPI Value K-01..K-12 · KPI Δ A / Δ B · KPI * items · FY LE / FY Budget Amount · new: Opex % NR, GMV per merchant, net new ARR, revenue mix, attainment, thresholds table · docs/design/P&L views redesign/metric-inventory.md</p></div></div>` },
+  ana:{ t:'How to read — Analysis', body:`<div class="cols"><div><p><b>Page 1</b> — the net revenue bridge (Budget → drivers at constant currency → CC subtotal → FX → Actual) and the profit bridge (Budget Adj. EBITDA → Actual → Operating profit). <b>Page 2</b> — the largest variances: every P&L line down to operating profit, with Top-N, block grouping, slice cut, FX column and prior-year Δ. Page with ‹ › or the arrow keys.</p><p>Comparator = Compare A, else Compare B, else Prior year (parity rule 1); here Budget. Constant currency = FY2025 budget rates (C-12). "Prior forecast" has no equivalent in the model.</p><p>Bridge colours: increase green, decrease orange, totals violet, subtotals dark, FX hatched. Bridge axes do not start at zero. Variance bars: right/green helps profit, left/orange hurts it, one shared scale.</p></div><div><p><b>Left off (USER review v3):</b> headline strip, service-line economics table, monthly trend, full-year outlook. <b>Needs data:</b> Underlying / Controllable Δ, FP&A commentary, variance nature / run-rate / owner.</p><p><b>Illustrative values</b> — Commerce Cloud FY2025, USD m; quoted: FX +11.7, CC NR 655.7 (Δ −2.5), subscriptions −4.6, payments +11.0 revenue / −6.2 cost. Other figures are placeholders that reconcile across the panels (leaf lines sum to NR 667.4 / 658.2 and OP 48.6 / 50.2).</p><p class="src">Sources: Bridge Value · Bridge Comparison NR · _NR CC Base · Bridge FX · PL Δ A · LV * · Compare B Amount · dim_account · fact_pl / fact_pl_allocated · metric-inventory.md §2</p></div></div>` },
+  prof:{ t:'How to read — Profitability', body:`<div class="cols"><div><p><b>Page 1</b> — the profitability table (8 columns, constant currency, status dot on CM Δ only) and the concentration bars (share of revenue, contribution and Adj. EBITDA by region). <b>Page 2</b> — growth × margin (levels Region → × sales motion → × service line, prior-year trails) and the mix heatmap. Page with ‹ › or the arrow keys.</p><p>Constant currency by default when comparing to Budget or Prior year; breakdown = Region (Channel / sales motion, Category / service line, Segment; Group: Region, Entity). Table sort drives the charts.</p><p><b>No allocated number in a headline column.</b> By Region, opex is booked (C-31), so Adj. EBITDA is measured. Allocated columns (other breakdowns) stay collapsed and badged.</p></div><div><p>Status dot on CM Δ vs Budget (pp): grey ±0.3, amber to 1.0, red beyond; green when ahead.</p><p><b>Left off (USER review v3):</b> margin-dispersion, profit-driver and FX tiles, CM deviation lollipop, contribution waterfall, quarterly CM % trend, allocation view. <b>Needs data:</b> Corporate / unallocated row, driver-based allocation keys, CAC / churn / ARPU columns, prior-year trails for the first data year.</p><p><b>Illustrative values</b> — Commerce Cloud FY2025, USD m; quoted: region CM % 50.9–51.9, North America 53.6 % of reported NR, Continental Europe +7.2 / +4.9 % and UK &amp; Ireland +3.8 / +5.8 % reported. Other figures are placeholders that reconcile across the panels.</p><p class="src">Sources: Prof Net Revenue · Prof NR Share · Prof NR Δ % · KPI Organic Growth per slice · Gross Profit · Contribution Margin · KPI CM % · Adjusted EBITDA · dim_region × dim_channel / dim_line · metric-inventory.md §3</p></div></div>` },
+};
+
+/* ───────── KPI cards ───────── */
+function kpiCard(id, o){
+  document.getElementById(id).innerHTML = `
+    <div class="ttl">${o.title} <button class="i" data-info="${o.info}" aria-label="About ${o.title}">i</button>${chip(o.status)}</div>
+    <div class="val num">${o.value}</div>
+    <div class="vars" style="margin-top:12px">${o.rows.join('')}</div>`;
+}
+(function buildKpi(){
+  const K = D.kpi; let d,p,st,dp;
+  d=K.nr.v-K.nr.bud; p=pct(K.nr.v,K.nr.bud); st=status(p,false);
+  kpiCard('k-nr',{ title:'Net revenue', info:'nr', status:st, value:money(K.nr.v), rows:[varRow('vs Budget',fs1(d),fs1(p)+' %',st), varRow('vs Prior year',fs1(K.nr.v-K.nr.py),fs1(pct(K.nr.v,K.nr.py))+' %',st,true)] });
+  d=K.ebitda.v-K.ebitda.bud; p=pct(K.ebitda.v,K.ebitda.bud); st=status(p,false);
+  kpiCard('k-ebitda',{ title:'Adjusted EBITDA', info:'ebitda', status:st, value:money(K.ebitda.v), rows:[varRow('vs Budget',fs1(d),fs1(p)+' %',st), varRow('vs Prior year',fs1(K.ebitda.v-K.ebitda.py),fs1(pct(K.ebitda.v,K.ebitda.py))+' %',st,true)] });
+  d=K.op.v-K.op.bud; p=pct(K.op.v,K.op.bud); st=status(p,false);
+  kpiCard('k-op',{ title:'Operating profit', info:'op', status:st, value:money(K.op.v), rows:[varRow('vs Budget',fs1(d),fs1(p)+' %',st), varRow('vs Prior year',fs1(K.op.v-K.op.py),fs1(pct(K.op.v,K.op.py))+' %',st,true)] });
+  dp=K.gm.v-K.gm.bud; st=status(dp,true);
+  kpiCard('k-gm',{ title:'Gross margin %', info:'gm', status:st, value:`${f1(K.gm.v)} %`, rows:[varRow('vs Budget','',fs1(dp)+' pp',st), varRow('vs Prior year','',fs1(K.gm.v-K.gm.py)+' pp',st,true)] });
+  dp=K.opex.v-K.opex.bud; st=status(dp,true,true);
+  kpiCard('k-opex',{ title:'Opex % revenue', info:'opex', status:st, value:`${f1(K.opex.v)} %`, rows:[varRow('vs Budget','',Math.abs(dp)<0.05?'on plan':fs1(dp)+' pp',st), varRow('vs Prior year','',fs1(K.opex.v-K.opex.py)+' pp',st,true)] });
+  d=K.gmv.v-K.gmv.bud; p=pct(K.gmv.v,K.gmv.bud); st=status(p,false);
+  kpiCard('k-gmv',{ title:'GMV processed', info:'gmv', status:st, value:`$${f1(K.gmv.v)} m`, rows:[varRow('vs Budget',fs1(d),fs1(p)+' %',st), varRow('vs Prior year',fs1(K.gmv.v-K.gmv.py),fs1(pct(K.gmv.v,K.gmv.py))+' %',st,true)] });
+  d=K.merch.v-K.merch.bud; p=pct(K.merch.v,K.merch.bud); st=status(p,false);
+  kpiCard('k-merch',{ title:'Active merchants', info:'merch', status:st, value:f0(K.merch.v), rows:[varRow('vs Budget',fs0(d),fs1(p)+' %',st), varRow('vs Prior year',fs0(K.merch.v-K.merch.py),fs1(pct(K.merch.v,K.merch.py))+' %',st,true)] });
+  d=K.arr.v-K.arr.bud; p=pct(K.arr.v,K.arr.bud); st=status(p,false);
+  kpiCard('k-arr',{ title:'ARR (run-rate)', info:'arr', status:st, value:money(K.arr.v), rows:[varRow('vs Budget',fs1(d),fs1(p)+' %',st), varRow('vs Prior year',fs1(K.arr.v-K.arr.py),fs1(pct(K.arr.v,K.arr.py))+' %',st,true)] });
+  kpiCard('k-mix',{ title:'Revenue mix', info:'mix', status:null, value:`${f1(K.mix.sub)} % / ${f1(K.mix.pay)} %`, rows:[`<div class="k">Sub / Pay</div><div class="a num" style="font-weight:500">vs PY</div><div class="p num" style="font-weight:500">${fs1(K.mix.sub-K.mix.subPy)} pp / ${fs1(K.mix.pay-K.mix.payPy)} pp</div>`] });
+  d=K.fy.nr-K.fy.nrBud; p=pct(K.fy.nr,K.fy.nrBud); st=status(p,false);
+  kpiCard('k-fy',{ title:'FY outlook', info:'fy', status:st, value:money(K.fy.nr), rows:[varRow('vs FY Budget',fs1(d),fs1(p)+' %',st), varRow('EBITDA vs FY Bud',fs1(K.fy.ebitda-K.fy.ebitdaBud),fs1(pct(K.fy.ebitda,K.fy.ebitdaBud))+' %',status(pct(K.fy.ebitda,K.fy.ebitdaBud),false))] });
+})();
+
+/* ───────── chart primitives (w, h from the container) ───────── */
+function waterfall(opts){
+  const {steps, y0, y1, w, h} = opts; const padL=44, padR=8, padT=30, padB=42;
+  const iw=w-padL-padR, ih=h-padT-padB, gap=iw/steps.length, bw=Math.min(84, gap*0.66);
+  const sy=v=>padT+ih-((v-y0)/(y1-y0))*ih; let run=0, out='';
+  for(let i=0;i<=5;i++){ const v=y0+(y1-y0)*i/5; out+=`<line x1="${padL}" x2="${w-padR}" y1="${sy(v)}" y2="${sy(v)}" stroke="#EDF0F3"/><text x="${padL-6}" y="${sy(v)+3}" font-size="10" text-anchor="end" fill="#8592A3">${f0(v)}</text>`; }
+  steps.forEach((s,i)=>{
+    const x=padL+gap*i+(gap-bw)/2; let top,bot,fill,lbl,lblCol='#101B2B';
+    if (s.type==='total'||s.type==='sub'){ run=s.v; top=sy(run); bot=sy(y0); fill=s.type==='total'?'var(--acc)':'#2B3748'; lbl=f1(run); }
+    else { const from=run; run+=s.v; top=sy(Math.max(from,run)); bot=sy(Math.min(from,run)); fill=s.v>=0?'#3BA37B':'#E2804A'; lbl=fs1(s.v); lblCol=s.v>=0?'#06603F':'#C2410C'; if(s.type==='level'){ fill='#8592A3'; lblCol='#101B2B'; lbl=f1(s.v);} }
+    const hh=Math.max(2,bot-top), pat=s.hatch?`url(#h${s.hatch})`:fill;
+    out+=`<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${bw}" height="${hh.toFixed(1)}" rx="2" fill="${pat}"${s.hatch?` stroke="${fill}"`:''}/>`;
+    if(i<steps.length-1) out+=`<line x1="${(x+bw).toFixed(1)}" x2="${(x+gap).toFixed(1)}" y1="${sy(run)}" y2="${sy(run)}" stroke="#CDD4DC" stroke-dasharray="2 2"/>`;
+    out+=`<text x="${(x+bw/2).toFixed(1)}" y="${(top-6).toFixed(1)}" font-size="12.5" font-weight="600" text-anchor="middle" fill="${lblCol}">${lbl}</text>`;
+    if(s.note) out+=`<text x="${(x+bw/2).toFixed(1)}" y="${(s.type==='level'?bot+12:top-19).toFixed(1)}" font-size="10" text-anchor="middle" fill="#4F5C6C">${s.note}</text>`;
+    s.l.split('|').forEach((t,k)=> out+=`<text x="${(x+bw/2).toFixed(1)}" y="${h-padB+14+k*12}" font-size="${steps.length>10?10.5:11.5}" text-anchor="middle" fill="#2B3748">${t}</text>`);
+  });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img"><defs>
+    <pattern id="hg" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><rect width="2.5" height="6" fill="#3BA37B"/></pattern>
+    <pattern id="ho" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><rect width="2.5" height="6" fill="#E2804A"/></pattern></defs>${out}</svg>`;
+}
+const CH = {};
+CH.nrbridge = (w,h) => waterfall({ w,h, y0:640, y1:672, steps:[
+  { l:'Budget NR', v:658.2, type:'total' }, { l:'Platform|subscriptions', v:-9.0, type:'step', note:M+'3.5 %' }, { l:'Payments', v:5.7, type:'step', note:'+2.0 %' },
+  { l:'Apps, partners|& ads', v:-3.4, type:'step', note:M+'4.8 %' }, { l:'Professional|services', v:4.2, type:'step', note:'+10.0 %' },
+  { l:'Constant-|currency NR', v:655.7, type:'sub' }, { l:'FX translation', v:11.7, type:'step', hatch:'g' }, { l:'Actual NR', v:667.4, type:'total' } ]});
+CH.pbridge = (w,h) => waterfall({ w,h, y0:40, y1:90, steps:[
+  { l:'Budget|EBITDA', v:83.1, type:'total' }, { l:'Rev.|volume', v:-1.4, type:'step' }, { l:'GM|rate', v:2.2, type:'step' }, { l:'GM|mix', v:-4.2, type:'step' }, { l:'VSC', v:0.4, type:'step' },
+  { l:'S&M', v:-0.5, type:'step' }, { l:'R&D', v:-1.5, type:'step' }, { l:'G&A', v:-0.2, type:'step' }, { l:'Other|op.', v:0.3, type:'step' }, { l:'FX', v:4.6, type:'step', hatch:'g' },
+  { l:'Actual|EBITDA', v:82.8, type:'sub' }, { l:'D&A', v:-30.1, type:'level', note:'vs bud '+M+'1.0' }, { l:'Adj.|items', v:-4.1, type:'level', note:'vs bud '+M+'0.3' }, { l:'Op.|profit', v:48.6, type:'total' } ]});
+CH.heat = (w,h) => {
+  const H=D.heat, pl=150, ch=Math.min(34,(h-30)/4-6), cw=(w-pl-70)/4, pt=20, keys=Object.keys(H.cells), names={NA:'North America',CE:'Continental Europe',APAC:'Asia-Pacific','UK&I':'UK & Ireland'};
+  const col=g=>{ const t=(g-30)/(81-30), mix=(a,b)=>Math.round(a+(b-a)*t); return `rgb(${mix(240,107)},${mix(235,72)},${mix(251,200)})`; };
+  let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  H.lines.forEach((l,j)=>s+=`<text x="${pl+j*cw+cw/2}" y="${pt-6}" font-size="11.5" font-weight="600" text-anchor="middle" fill="#4F5C6C">${l} · GM ${f1(H.gm[j])} %</text>`);
+  s+=`<text x="${pl+4*cw+34}" y="${pt-6}" font-size="11.5" font-weight="600" text-anchor="middle" fill="#4F5C6C">Total</text>`;
+  keys.forEach((rg,i)=>{ const y=pt+i*(ch+6), tot=H.cells[rg].reduce((a,b)=>a+b,0); s+=`<text x="${pl-10}" y="${y+ch/2+4}" font-size="12.5" text-anchor="end" fill="#101B2B">${names[rg]}</text>`;
+    H.cells[rg].forEach((v,j)=>{ const dark=H.gm[j]>62; s+=`<rect x="${pl+j*cw}" y="${y}" width="${cw-6}" height="${ch}" rx="4" fill="${col(H.gm[j])}"/><text x="${pl+j*cw+10}" y="${y+ch/2+4}" font-size="12.5" font-weight="600" fill="${dark?'#fff':'#101B2B'}">${f1(v)}</text><text x="${pl+j*cw+cw-14}" y="${y+ch/2+4}" font-size="11" text-anchor="end" fill="${dark?'#fff':'#4F5C6C'}">${f1(v/tot*100)} %</text>`; });
+    s+=`<text x="${pl+4*cw+34}" y="${y+ch/2+4}" font-size="12.5" font-weight="600" text-anchor="middle" fill="#101B2B">${f1(tot)}</text>`; });
+  return s+'</svg>';
+};
+/* concentration: 100 % stacked bars at three profit levels */
+CH.conc = (w,h) => {
+  const R=D.R, levels=[['Net revenue',r=>r.nr],['Contribution',r=>r.nr*r.cm/100],['Adj. EBITDA',r=>r.ebitda]];
+  const pl=110, pr=16, pt=16, legH=96, barH=Math.min(64,(h-pt-legH-30)/3-18), gapY=(h-pt-legH)/3, iw=w-pl-pr;
+  let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img">`;
+  const shares=levels.map(([n,f])=>{ const tot=R.reduce((a,r)=>a+f(r),0); return R.map(r=>f(r)/tot*100); });
+  levels.forEach(([n],li)=>{ const y=pt+li*gapY+(gapY-barH)/2; let x=pl;
+    s+=`<text x="${pl-10}" y="${y+barH/2+4}" font-size="12.5" font-weight="500" text-anchor="end" fill="#101B2B">${n}</text>`;
+    R.forEach((r,ri)=>{ const wd=shares[li][ri]/100*iw; s+=`<rect x="${x.toFixed(1)}" y="${y}" width="${Math.max(0,wd-2).toFixed(1)}" height="${barH}" rx="3" fill="${r.col}" opacity="${li===0?1:li===1?.82:.64}"/>`;
+      if(wd>36) s+=`<text x="${(x+wd/2).toFixed(1)}" y="${y+barH/2+4}" font-size="11.5" font-weight="600" text-anchor="middle" fill="#fff">${f1(shares[li][ri])} %</text>`; x+=wd; }); });
+  /* legend with the drift: contribution share − NR share, EBITDA share − NR share */
+  const ly=h-legH+10, colW=(w-16-(pl-100))/2; R.forEach((r,ri)=>{ const x=pl-100+(ri%2)*colW, y=ly+Math.floor(ri/2)*40; const d1=shares[1][ri]-shares[0][ri], d2=shares[2][ri]-shares[0][ri], c=d=>d<-0.2?'#C2410C':d>0.2?'#06603F':'#4F5C6C';
+    s+=`<circle cx="${x+5}" cy="${y}" r="5" fill="${r.col}"/><text x="${x+16}" y="${y+4}" font-size="11.5" font-weight="500" fill="#101B2B">${r.n}</text><text x="${x+16}" y="${y+19}" font-size="10.5" fill="#4F5C6C">contribution <tspan fill="${c(d1)}" font-weight="600">${fs1(d1)} pp</tspan> · EBITDA <tspan fill="${c(d2)}" font-weight="600">${fs1(d2)} pp</tspan></text>`; });
+  s+=`<text x="${pl-100}" y="${h-2}" font-size="10" fill="#8592A3">share drift vs revenue share, pp</text></svg>`; return s;
+};
+/* growth × margin with levels and trails */
+const BUB = { level:'region', trails:true };
+function bubbleData(level){
+  const R=D.R; if(level==='region') return R.map(r=>({ n:r.n, lbl:r.k, col:r.col, nr:r.nr, g:r.g, cm:r.cm, gPy:r.gPy, cmPy:r.cmPy, parent:r.n }));
+  const out=[]; R.forEach((r,ri)=>{
+    if(level==='line'){ const H=D.heat, cells=H.cells[r.k]; cells.forEach((v,j)=>{ const jit=(hash(ri+1,j+1)-0.5); out.push({ n:`${r.n} · ${H.lines[j]}`, lbl:`${r.k} ${H.short[j]}`, col:r.col, nr:v, g:H.g[j]+jit*8+(r.g-D.company.g)*0.6, cm:H.cm[j]+jit*3+(r.cm-D.company.cm)*0.8, parent:r.n }); }); }
+    else { const Mo=D.motions; Mo.names.forEach((n,j)=>{ const jit=(hash(ri+3,j+7)-0.5); const wj=Mo.w[j]*(1+jit*0.3); out.push({ n:`${r.n} · ${n}`, lbl:`${r.k} ${Mo.short[j]}`, col:r.col, nr:r.nr*wj, g:Mo.g[j]+jit*6+(r.g-D.company.g)*0.6, cm:Mo.cm[j]+jit*2.5+(r.cm-D.company.cm)*0.8, parent:r.n }); }); }
+  });
+  out.forEach((b,i)=>{ b.gPy=b.g-3.5-hash(i,1)*2; b.cmPy=b.cm+0.6+hash(i,2)*0.8; }); return out;
+}
+CH.bubble = (w,h) => {
+  const B=bubbleData(BUB.level), C=D.company, pl=52, pr=20, pt=16, pb=36, iw=w-pl-pr, ih=h-pt-pb;
+  const xs=B.flatMap(b=>BUB.trails?[b.g,b.gPy]:[b.g]).concat([C.g]), ys=B.flatMap(b=>BUB.trails?[b.cm,b.cmPy]:[b.cm]).concat([C.cm]);
+  const padX=Math.max(2,(Math.max(...xs)-Math.min(...xs))*0.18), padY=Math.max(0.6,(Math.max(...ys)-Math.min(...ys))*0.18);
+  const x0=Math.min(...xs)-padX, x1=Math.max(...xs)+padX, y0=Math.min(...ys)-padY, y1=Math.max(...ys)+padY;
+  const sx=v=>pl+(v-x0)/(x1-x0)*iw, sy=v=>pt+ih-(v-y0)/(y1-y0)*ih, totNR=B.reduce((a,b)=>a+b.nr,0);
+  let s=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img"><defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8592A3"/></marker></defs>`;
+  const stepY=(y1-y0)>12?5:(y1-y0)>4?1:0.5, stepX=(x1-x0)>30?10:(x1-x0)>12?5:2;
+  for(let v=Math.ceil(y0/stepY)*stepY; v<=y1; v+=stepY) s+=`<line x1="${pl}" x2="${w-pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="#EDF0F3"/><text x="${pl-6}" y="${sy(v)+3}" font-size="10" text-anchor="end" fill="#8592A3">${f1(v)} %</text>`;
+  for(let v=Math.ceil(x0/stepX)*stepX; v<=x1; v+=stepX) s+=`<text x="${sx(v)}" y="${h-pb+16}" font-size="10" text-anchor="middle" fill="#8592A3">+${f0(v)} %</text>`;
+  s+=`<line x1="${sx(C.g)}" x2="${sx(C.g)}" y1="${pt}" y2="${pt+ih}" stroke="#2B3748" stroke-dasharray="4 3"/><line x1="${pl}" x2="${w-pr}" y1="${sy(C.cm)}" y2="${sy(C.cm)}" stroke="#2B3748" stroke-dasharray="4 3"/>`;
+  s+=`<text x="${sx(C.g)+5}" y="${pt+11}" font-size="10.5" font-weight="600" fill="#2B3748">company growth +${f1(C.g)} %</text><text x="${w-pr-4}" y="${sy(C.cm)-5}" font-size="10.5" font-weight="600" text-anchor="end" fill="#2B3748">company CM ${f1(C.cm)} %</text>`;
+  [['profitable growth',w-pr-6,pt+ih*0.08+22,'end'],['dilutive growth',w-pr-6,pt+ih-10,'end'],['profitable, slower',pl+8,pt+ih*0.08+22,'start'],['problem',pl+8,pt+ih-10,'start']].forEach(([t,x,y,a])=>s+=`<text x="${x}" y="${y}" font-size="12" fill="#8592A3" text-anchor="${a}" font-style="italic">${t}</text>`);
+  const rmax=Math.min(iw,ih)*(BUB.level==='region'?0.17:0.09);
+  B.forEach(b=>{ const r=6+Math.sqrt(b.nr/totNR)*rmax, x=sx(b.g), y=sy(b.cm);
+    if(BUB.trails){ s+=`<line x1="${sx(b.gPy)}" x2="${x}" y1="${sy(b.cmPy)}" y2="${y}" stroke="#8592A3" stroke-width="1.2" marker-end="url(#arr)"/><circle cx="${sx(b.gPy)}" cy="${sy(b.cmPy)}" r="3.5" fill="#fff" stroke="#8592A3" stroke-width="1.2"/>`; }
+    s+=`<circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${b.col}" opacity=".3" stroke="${b.col}"><title>${b.n}: NR $${f1(b.nr)} m · CM ${f1(b.cm)} % · growth +${f1(b.g)} %${BUB.trails?` · PY CM ${f1(b.cmPy)} %, growth +${f1(b.gPy)} %`:''}</title></circle>`;
+    if(BUB.level==='region') s+=`<text x="${x}" y="${y-2}" font-size="12" font-weight="600" text-anchor="middle" fill="#101B2B">${b.lbl}</text><text x="${x}" y="${y+10}" font-size="9.5" text-anchor="middle" fill="#2B3748">${f1(b.cm)} % · +${f1(b.g)} %</text>`;
+    else s+=`<text x="${x}" y="${y+3.5}" font-size="9.5" font-weight="600" text-anchor="middle" fill="#101B2B">${b.lbl}</text>`; });
+  if(BUB.level!=='region'){ let lx=pl+150; s+=`<rect x="${lx-6}" y="${pt-2}" width="${D.R.length*126}" height="18" rx="4" fill="#fff" opacity=".85"/>`; D.R.forEach(r=>{ s+=`<circle cx="${lx+5}" cy="${pt+7}" r="4.5" fill="${r.col}"/><text x="${lx+14}" y="${pt+11}" font-size="10.5" fill="#101B2B">${r.n}</text>`; lx+=126; }); }
+  s+=`<text x="${w-pr}" y="${h-4}" font-size="10" text-anchor="end" fill="#4F5C6C">x: NR growth YoY (CC) · y: CM % · size: NR${BUB.trails?' · ○→● prior year → actual':''}</text></svg>`; return s;
+};
+function fit(el){ const c=el.getBoundingClientRect(); const w=Math.floor(c.width), h=Math.floor(c.height); if(w<50||h<50) return; el.innerHTML=CH[el.dataset.chart](w,h); }
+function renderCharts(){ document.querySelectorAll('.view.on .page.on [data-chart], #view-kpi.on [data-chart]').forEach(fit); }
+
+/* ───────── largest variances: expanded table ───────── */
+const VAR = { top:8, mode:'block', cut:'none', closed:new Set(), open:new Set() };
+function leafCalc(l){ const d=l.act-l.bud, p=d/Math.abs(l.bud||1)*100, nm=Math.abs(l.bud)<2||Math.abs(p)>50, py=l.act-l.act/D.pyGrowth[l.b], fx=l.act*D.fxK[l.b]; return { d,p,nm,py,fx }; }
+function memberSplit(l, cutKey, d){ const cut=D.cuts[cutKey]; const direct=['GR','GTN','COR','VSC'].includes(l.b), booked=cut.booked||direct;
+  let ws=cut.m.map(m=>m[2]); if(cutKey==='LINE'&&l.line) ws=cut.m.map(m=>m[0]===l.line?1:0);
+  else if(booked){ const li=D.leaves.indexOf(l); ws=ws.map((w,i)=>w*(0.55+hash(li+1,i+1)*0.9)); const t=ws.reduce((a,b)=>a+b,0); ws=ws.map(w=>w/t); }
+  return { alloc:!booked, parts:cut.m.map((m,i)=>({ code:m[0], name:m[1], v:d*ws[i] })) }; }
+function bar(d, scale, parts){ const half=62, px=v=>Math.abs(v)/scale*half;
+  if(!parts) return `<span class="dbar"><i style="${d>=0?'left:50%':'right:50%'};width:${px(d).toFixed(1)}px;background:${d>=0?'var(--favbar)':'var(--unfbar)'};border-radius:2px"></i></span>`;
+  let pos=0, neg=0, s='<span class="dbar">'; parts.forEach((p,i)=>{ const wd=px(p.v); if(p.v>=0){ s+=`<i style="left:calc(50% + ${pos.toFixed(1)}px);width:${wd.toFixed(1)}px;background:${D.memCols[i]}" title="${p.name} ${fs1(p.v)}"></i>`; pos+=wd; } else { neg+=wd; s+=`<i style="right:calc(50% + ${(neg-wd).toFixed(1)}px);width:${wd.toFixed(1)}px;background:${D.memCols[i]};opacity:.55" title="${p.name} ${fs1(p.v)}"></i>`; } }); return s+'</span>'; }
+function renderVar(){
+  const L=D.leaves.map(l=>Object.assign({}, l, leafCalc(l))), scale=Math.max(...L.map(l=>Math.abs(l.d))), absAll=L.reduce((a,l)=>a+Math.abs(l.d),0);
+  const ranked=L.slice().sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)), N=VAR.top==='all'?L.length:VAR.top, shownSet=new Set(ranked.slice(0,N).map(l=>l.c));
+  const shown=L.filter(l=>shownSet.has(l.c)), cut=VAR.cut!=='none'?D.cuts[VAR.cut]:null;
+  let rows='';
+  const leafRow=l=>{ const sp=cut?memberSplit(l,VAR.cut,l.d):null, open=VAR.open.has(l.c);
+    let r=`<tr class="leaf${cut?' x':''}${open?' open':''}${sp&&sp.alloc?' al':''}" data-leaf="${l.c}"><td class="l">${l.n}${VAR.mode==='flat'?`<span class="blkn">${D.blocks.find(b=>b[0]===l.b)[1]}</span>`:''}${sp&&sp.alloc?'<span class="tag">alloc.</span>':''}</td><td class="num">${f1(l.bud)}</td><td class="num">${f1(l.act)}</td><td style="text-align:center">${bar(l.d,scale,sp?sp.parts:null)}</td><td class="num ${l.d>=0?'ahead':'adverse'}" style="font-weight:600">${fs1(l.d)}</td><td class="num ${l.nm?'nm':(l.d>=0?'ahead':'adverse')}">${l.nm?'n.m.':fs1(l.p)+' %'}</td><td class="num">${fs1(l.py)}</td><td class="num" style="color:var(--slate600)">${Math.abs(l.fx)<0.05?'<span class="nm">–</span>':fs1(l.fx)}</td></tr>`;
+    if(sp&&open) sp.parts.forEach((p,i)=>{ r+=`<tr class="mem"><td class="l"><i class="sd" style="background:${D.memCols[i]}"></i>${p.name}</td><td></td><td></td><td style="text-align:center">${bar(p.v,scale,null)}</td><td class="num ${p.v>=0?'ahead':'adverse'}">${fs1(p.v)}</td><td></td><td></td><td></td></tr>`; });
+    return r; };
+  if(VAR.mode==='block'){
+    D.blocks.forEach(([code,name])=>{ const inBlock=shown.filter(l=>l.b===code).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)); if(!inBlock.length) return;
+      const all=L.filter(l=>l.b===code), bd=all.reduce((a,l)=>a+l.d,0), bbud=all.reduce((a,l)=>a+l.bud,0), bact=all.reduce((a,l)=>a+l.act,0), bpy=all.reduce((a,l)=>a+l.py,0), bfx=all.reduce((a,l)=>a+l.fx,0), bp=bd/Math.abs(bbud||1)*100, bnm=Math.abs(bbud)<2||Math.abs(bp)>50;
+      const closed=VAR.top==='all'?!VAR.open.has('B:'+code):VAR.closed.has(code);
+      rows+=`<tr class="blk${closed?' closed':''}" data-block="${code}"><td class="l">${name}<span class="blkn">${inBlock.length} of ${all.length} lines</span></td><td class="num">${f1(bbud)}</td><td class="num">${f1(bact)}</td><td style="text-align:center">${bar(bd,scale,null)}</td><td class="num ${bd>=0?'ahead':'adverse'}">${fs1(bd)}</td><td class="num ${bnm?'nm':(bd>=0?'ahead':'adverse')}">${bnm?'n.m.':fs1(bp)+' %'}</td><td class="num">${fs1(bpy)}</td><td class="num" style="color:var(--slate600)">${Math.abs(bfx)<0.05?'<span class="nm">–</span>':fs1(bfx)}</td></tr>`;
+      if(!closed) inBlock.forEach(l=>rows+=leafRow(l)); });
+  } else ranked.slice(0,N).forEach(l=>rows+=leafRow(l));
+  const sd=shown.reduce((a,l)=>a+l.d,0), sabs=shown.reduce((a,l)=>a+Math.abs(l.d),0), tot=L.reduce((a,l)=>a+l.d,0), tbud=L.reduce((a,l)=>a+l.bud,0), tact=L.reduce((a,l)=>a+l.act,0), tpy=L.reduce((a,l)=>a+l.py,0), tfx=L.reduce((a,l)=>a+l.fx,0);
+  rows+=`<tr class="total"><td class="l">Shown lines <span class="blkn">${shown.length} of ${L.length} · coverage ${f0(sabs/absAll*100)} %</span></td><td></td><td></td><td style="text-align:center">${bar(sd,scale,null)}</td><td class="num ${sd>=0?'ahead':'adverse'}">${fs1(sd)}</td><td></td><td></td><td></td></tr>
+    <tr><td class="l" style="color:var(--slate600)">All other lines</td><td></td><td></td><td style="text-align:center">${bar(tot-sd,scale,null)}</td><td class="num">${fs1(tot-sd)}</td><td></td><td></td><td></td></tr>
+    <tr class="total"><td class="l">Total P&amp;L Δ (operating profit)</td><td class="num">${f1(tbud)}</td><td class="num">${f1(tact)}</td><td style="text-align:center">${bar(tot,scale,null)}</td><td class="num ${tot>=0?'ahead':'adverse'}">${fs1(tot)}</td><td class="num ${tot>=0?'ahead':'adverse'}">${fs1(tot/Math.abs(tbud)*100)} %</td><td class="num">${fs1(tpy)}</td><td class="num" style="color:var(--slate600)">${fs1(tfx)}</td></tr>`;
+  document.getElementById('tb-var').innerHTML=`<table><thead><tr><th class="l">Line${VAR.mode==='block'?' · block':''}</th><th>Budget</th><th>Actual</th><th style="text-align:center">Δ · unfavourable | favourable${cut?' · by '+cut.name.toLowerCase():''}</th><th>Δ</th><th>Δ %</th><th>vs PY Δ</th><th>of which FX</th></tr></thead><tbody>${rows}</tbody></table>`;
+  document.getElementById('var-legend').innerHTML = cut ? cut.m.map((m,i)=>`<span><i style="background:${D.memCols[i]}"></i>${m[1]}</span>`).join('') + '<span style="margin-left:auto;color:var(--slate400)">opex and below: allocated by NR share unless cut by Region</span>' : '';
+}
+(function wireVar(){
+  const on=(id,attr,fn)=>document.getElementById(id).addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||b.disabled) return; [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false')); fn(b.dataset[attr]); renderVar(); });
+  on('seg-top','top',v=>{ VAR.top=v==='all'?'all':+v; VAR.open.clear(); });
+  on('seg-mode','mode',v=>VAR.mode=v);
+  on('seg-cut','cut',v=>{ VAR.cut=v; VAR.open.forEach(k=>{ if(!k.startsWith('B:')) VAR.open.delete(k); }); });
+  document.getElementById('tb-var').addEventListener('click',e=>{ const tr=e.target.closest('tr'); if(!tr) return;
+    if(tr.dataset.block){ const k=tr.dataset.block; if(VAR.top==='all'){ VAR.open.has('B:'+k)?VAR.open.delete('B:'+k):VAR.open.add('B:'+k); } else { VAR.closed.has(k)?VAR.closed.delete(k):VAR.closed.add(k); } renderVar(); }
+    else if(tr.dataset.leaf&&VAR.cut!=='none'){ const k=tr.dataset.leaf; VAR.open.has(k)?VAR.open.delete(k):VAR.open.add(k); renderVar(); } });
+  renderVar();
+})();
+
+/* ───────── profitability table (8 columns) ───────── */
+(function buildProf(){
+  const R=D.R, totNR=R.reduce((a,r)=>a+r.nr,0), totBud=R.reduce((a,r)=>a+r.bud,0);
+  R.forEach(r=>{ r.gp=r.nr*r.gm/100; r.con=r.nr*r.cm/100; r.conBud=r.bud*r.cmBud/100; });
+  const totCon=R.reduce((a,r)=>a+r.con,0), totConBud=R.reduce((a,r)=>a+r.conBud,0), totGP=R.reduce((a,r)=>a+r.gp,0), totE=R.reduce((a,r)=>a+r.ebitda,0), cmTot=totCon/totNR*100, cmBudTot=totConBud/totBud*100;
+  let tr='';
+  R.forEach(r=>{ const revP=(r.nr/r.bud-1)*100, cmD=r.cm-r.cmBud, st=status(cmD,true), sr=status(revP,false);
+    tr+=`<tr><td class="l"><i class="sd" style="background:${r.col}"></i>${r.n}<span class="blkn">${r.cur}</span></td><td class="num">${f1(r.nr)}</td><td class="num ${cls(sr)}">${fs1(revP)} %</td><td class="num">${f1(r.gm)} %</td><td class="num" style="font-weight:600">${f1(r.cm)} %</td><td class="num ${cls(st)}"><span class="sd ${dotCls(st)}"></span>${fs1(cmD)} pp</td><td class="num">${f1(r.con)}</td><td class="num">${f1(r.ebitda)}</td></tr>`; });
+  tr+=`<tr class="total"><td class="l">Commerce Cloud</td><td class="num">${f1(totNR)}</td><td class="num">${fs1((totNR/totBud-1)*100)} %</td><td class="num">${f1(totGP/totNR*100)} %</td><td class="num">${f1(cmTot)} %</td><td class="num">${fs1(cmTot-cmBudTot)} pp</td><td class="num">${f1(totCon)}</td><td class="num">${f1(totE)}</td></tr>`;
+  document.getElementById('tb-prof').innerHTML=`<table style="font-size:14px"><thead><tr><th class="l">Region</th><th>Net revenue</th><th>Δ vs Budget % (CC)</th><th>GM %</th><th>CM %</th><th>CM Δ pp</th><th>Contribution $</th><th>Adj. EBITDA $</th></tr></thead><tbody>${tr}</tbody></table>`;
+  document.querySelectorAll('#tb-prof td').forEach(td=>{ td.style.padding='13px 8px'; });
+})();
+
+/* ───────── views, pager, level switcher, pop-ups ───────── */
+(function(){
+  const tabs=[...document.querySelectorAll('.tab[data-view]')], pager=document.getElementById('pager'), cnt=document.getElementById('pg-cnt'), prev=document.getElementById('pg-prev'), next=document.getElementById('pg-next');
+  const state={ view:'kpi', page:{ ana:1, prof:1 } };
+  const pagesOf=v=>document.querySelectorAll(`#view-${v} .page`).length;
+  function showPage(v,n){ const pages=document.querySelectorAll(`#view-${v} .page`); if(!pages.length) return; n=Math.max(1,Math.min(pages.length,n)); state.page[v]=n; pages.forEach(p=>p.classList.toggle('on',+p.dataset.page===n)); cnt.textContent=`${n} / ${pages.length}`; prev.disabled=n===1; next.disabled=n===pages.length; renderCharts(); }
+  function show(v){ state.view=v; document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='view-'+v)); tabs.forEach(t=>{ const on=t.dataset.view===v; t.setAttribute('aria-selected',on?'true':'false'); t.tabIndex=on?0:-1; });
+    const n=pagesOf(v); pager.hidden=n<2; if(n>1) showPage(v,state.page[v]||1); else renderCharts(); closePop(); try{ localStorage.setItem('pnl-redesign-view',v); }catch(e){} }
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.view)));
+  prev.addEventListener('click',()=>showPage(state.view,state.page[state.view]-1)); next.addEventListener('click',()=>showPage(state.view,state.page[state.view]+1));
+  // level switcher + trails
+  document.getElementById('seg-level').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false')); BUB.level=b.dataset.level; renderCharts(); });
+  document.getElementById('btn-trail').addEventListener('click',e=>{ BUB.trails=!BUB.trails; e.currentTarget.setAttribute('aria-pressed',BUB.trails?'true':'false'); renderCharts(); });
+  // pop-ups
+  const pop=document.getElementById('pop'), scrim=document.getElementById('scrim'), frame=document.getElementById('frame'); let opener=null;
+  function closePop(){ if(pop.hidden) return; pop.hidden=true; scrim.classList.remove('on'); pop.classList.remove('wide'); if(opener){ opener.focus(); opener=null; } }
+  function openPop(btn,id){ if(!pop.hidden && opener===btn){ closePop(); return; } closePop(); opener=btn; const wide=id==='howto';
+    if(wide){ const h=HOWTO[state.view]; pop.innerHTML=`<button class="x" aria-label="Close">×</button><h3 id="pop-title">${h.t}</h3>${h.body}`; pop.classList.add('wide'); }
+    else { const o=INFO[id]; pop.innerHTML=`<button class="x" aria-label="Close">×</button><h3 id="pop-title">${o.t}</h3><p>${o.w}</p>${o.f?`<div class="f">${o.f}</div>`:''}${o.a?`<p>${o.a}</p>`:''}<span class="src">${o.s}</span>`; }
+    pop.hidden=false; scrim.classList.add('on');
+    const fr=frame.getBoundingClientRect(), br=btn.getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight; let left, top;
+    if(wide){ left=(fr.width-pw)/2; top=Math.max(12,(fr.height-ph)/2); }
+    else { left=br.left-fr.left+br.width/2-pw/2; top=br.bottom-fr.top+8; if(top+ph>fr.height-12) top=Math.max(12,br.top-fr.top-ph-8); }
+    pop.style.left=Math.max(12,Math.min(fr.width-pw-12,left))+'px'; pop.style.top=top+'px';
+    pop.querySelector('.x').addEventListener('click',closePop); pop.querySelector('.x').focus(); }
+  document.addEventListener('click',e=>{ const b=e.target.closest('[data-info]'); if(b){ openPop(b,b.dataset.info); return; } if(!pop.hidden && !e.target.closest('#pop')) closePop(); });
+  pop.addEventListener('keydown',e=>{ if(e.key==='Tab'){ const f=[...pop.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])')]; if(f.length){ const first=f[0], last=f[f.length-1]; if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); } else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); } } } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closePop(); return; } if(!pop.hidden) return; if(e.target.matches('input,textarea')) return;
+    if(e.key==='ArrowRight'&&!pager.hidden) showPage(state.view,state.page[state.view]+1); if(e.key==='ArrowLeft'&&!pager.hidden) showPage(state.view,state.page[state.view]-1); });
+  window.addEventListener('resize',renderCharts);
+  let start='kpi'; try{ const s=localStorage.getItem('pnl-redesign-view'); if(s&&document.getElementById('view-'+s)) start=s; }catch(e){}
+  const q=new URLSearchParams(location.search).get('view'); if(q&&document.getElementById('view-'+q)) start=q;
+  show(start); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(renderCharts);
+})();
+</script>
+</body>
+</html>

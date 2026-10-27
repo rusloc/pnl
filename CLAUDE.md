@@ -240,6 +240,7 @@ fabric-data/
 **Key rules:**
 - The repo CSVs are the source; the script's `TABLES` spec is the only place column types are declared
 - Schema `acme_pl`; table names = CSV file names; every load is an idempotent full overwrite
+- Derived on load (ADR-0008): 3 pre-translated columns per fact (`amount_usd/eur/gbp`, `gmv_*`) appended after the CSV columns, and one derived table `fact_pl_elim`. The lakehouse is a staging area: the data lives in the semantic model, which is refreshed only after a load or a model change
 - Workspace / lakehouse come from `--workspace` / `--lakehouse` or `FABRIC_WORKSPACE` / `FABRIC_LAKEHOUSE` — no IDs in code
 - `--dry-run` first; every write to `lh_raw` waits for the USER's yes; verify with `sql/verify-acme-pl.sql` after each load
 - The SQL endpoint can lag ~15 min behind a write — retry before calling a verification failed
@@ -295,15 +296,17 @@ fabric-app/
 
 **Structure:**
 ```
-pbi-report/
-  ACME Unified PnL.pbip
-  ACME Unified PnL.SemanticModel/   → TMDL (Import from lh_raw SQL endpoint via PQ params SqlEndpoint / Database; measures in `_measures`)
-  ACME Unified PnL.Report/          → PBIR: one page `pnl_one_pager`, view + side-bar bookmarks, theme + SVG icons
-  tests/control-totals.dax          → DAX query view tests (T-01..T-17, T-06 vs control_totals_usd)
-docs/model/                         → semantic-model.md, measure-dictionary.md
+pbi-report/                           → one folder per report: .pbip + .Report + .SemanticModel + tests/ + __backup__/ (ignored)
+  ACME Unified PnL/
+    ACME Unified PnL.pbip
+    ACME Unified PnL.SemanticModel/   → TMDL (Import from lh_raw SQL endpoint via PQ params SqlEndpoint / Database; measures in `_measures`)
+    ACME Unified PnL.Report/          → PBIR: one page `pnl_one_pager`, view + side-bar bookmarks, theme + SVG icons
+    tests/control-totals.dax          → DAX query view tests (T-01..T-17, T-06 vs control_totals_usd)
+  ACME Trucks/                        → second showcase report (outside the P&L spec): Trucks.pbip, data/ (Parquet), tests/, Design guide/ · docs/ADD/features/trucks-report-redesign.md
+docs/model/                           → semantic-model.md, measure-dictionary.md (+ trucks-measure-dictionary.md)
 docs/ADD/features/pbi-report-layout.md → design brief, view map, first-open checklist
 ```
-- Verify after every PBIR edit: `powerbi-report-author validate "pbi-report/ACME Unified PnL.pbip"`; a measure change is done only when every `_pass` in `tests/control-totals.dax` is TRUE.
+- Verify after every PBIR edit: `powerbi-report-author validate "pbi-report/ACME Unified PnL/ACME Unified PnL.pbip"`; a measure change is done only when every `_pass` in `pbi-report/ACME Unified PnL/tests/control-totals.dax` is TRUE.
 
 **Key rules:**
 - PBIP is the source of truth — every model/report change lands as a diff-reviewable PBIP commit; no binary `.pbix` in the repo

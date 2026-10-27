@@ -1,7 +1,8 @@
-import { INFO, MARKET_NAMES } from './copy.ts';
+import { MARKET_NAMES, info } from './copy.ts';
+import type { InfoValue } from './copy.ts';
 import type { Cube } from './cube.ts';
 import { fmtCount, fmtDeltaPct, fmtEur, fmtEur0, fmtEurDelta, fmtHours, fmtPct, fmtPp } from './format.ts';
-import { kpiRows } from './kpis.ts';
+import { chipOf, kpiRows } from './kpis.ts';
 import type { Bundle } from './kpis.ts';
 import { MARKETS } from './manifest.ts';
 import type { Ctx } from './overview.ts';
@@ -19,14 +20,13 @@ export function kpi(
   id: string,
   label: string,
   value: string,
-  sub: string,
+  values: InfoValue[],
   kind: DeltaKind,
   b: Bundle,
   cmp: Comparator,
-  info: string,
 ): KpiCard {
   const { row, alt } = kpiRows(kind, b, cmp);
-  return { id, label, info, value, sub, row, alt };
+  return { id, label, info: info(id, values), value, row, alt, status: chipOf(row) };
 }
 
 export const CATEGORY_ROLES: readonly SeriesRole[] = ['c1', 'c2', 'c3', 'c4', 'c5'];
@@ -97,66 +97,83 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const step12 = m.loans(w, mk, { product: 'STEP12' }).loans;
   const cash = m.median(sel.tv, sel.anchor, mk, 'median_hours_to_cash');
 
+  const cashPy = m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_hours_to_cash');
   const kpis: KpiCard[] = [
     kpi(
       'l1',
       'Loans',
       fmtCount(A.loans),
-      sel.cmp === 'BUD' ? `PY ${fmtCount(P?.loans ?? null)}` : `Budget ${fmtCount(budLoans)}`,
+      [
+        { label: 'Budget', value: fmtCount(budLoans) },
+        { label: 'Prior year', value: fmtCount(P?.loans ?? null) },
+      ],
       'countUp',
       { actual: A.loans, budget: budLoans, py: P?.loans ?? null },
       sel.cmp,
-      INFO.l1 ?? '',
     ),
     kpi(
       'l2',
       'Principal',
       fmtEur(A.principal),
-      `at Budget FX ${budPrincipal ? fmtDeltaPct(A.principalBudFx / budPrincipal - 1) : 'n/a'} vs Budget`,
+      [
+        { label: 'Budget', value: fmtEur(budPrincipal) },
+        { label: 'At Budget FX', value: fmtEur(A.principalBudFx) },
+        {
+          label: 'Δ vs Budget at Budget FX',
+          value: budPrincipal ? fmtDeltaPct(A.principalBudFx / budPrincipal - 1) : 'n/a',
+        },
+        { label: 'Prior year', value: fmtEur(P?.principal ?? null) },
+      ],
       'countUp',
       { actual: A.principal, budget: budPrincipal, py: P?.principal ?? null },
       sel.cmp,
-      INFO.l2 ?? '',
     ),
     kpi(
       'l3',
       'Avg ticket',
       fmtEur0(m.avgTicket(A)),
-      `Step 12 share ${fmtPct(A.loans ? step12 / A.loans : null)}`,
+      [
+        { label: 'Step 12 share of loans', value: fmtPct(A.loans ? step12 / A.loans : null) },
+        { label: 'Budget ticket', value: fmtEur0(budPrincipal && budLoans ? budPrincipal / budLoans : null) },
+        { label: 'Prior year', value: fmtEur0(m.avgTicket(P)) },
+      ],
       'neutralPct',
       { actual: m.avgTicket(A), budget: budPrincipal && budLoans ? budPrincipal / budLoans : null, py: m.avgTicket(P) },
       sel.cmp,
-      INFO.l3 ?? '',
     ),
     kpi(
       'l4',
       'Approval rate',
       fmtPct(m.approval(F)),
-      `new clients ${fmtPct(m.approval(m.funnel(w, mk, false)))}`,
+      [
+        { label: 'New clients', value: fmtPct(m.approval(m.funnel(w, mk, false))) },
+        { label: 'Submitted', value: fmtCount(F.submitted) },
+        { label: 'Approved', value: fmtCount(F.approved) },
+      ],
       'ratioUp',
       { actual: m.approval(F), py: m.approval(FP) },
       sel.cmp,
-      INFO.l4 ?? '',
     ),
     kpi(
       'l5',
       'Take-up rate',
       fmtPct(m.takeUp(F)),
-      'disbursed ÷ approved',
+      [
+        { label: 'Approved', value: fmtCount(F.approved) },
+        { label: 'Disbursed', value: fmtCount(F.disbursed) },
+      ],
       'ratioUp',
       { actual: m.takeUp(F), py: m.takeUp(FP) },
       sel.cmp,
-      INFO.l5 ?? '',
     ),
     kpi(
       'l6',
       'Time to cash',
       fmtHours(cash),
-      'median submitted → disbursed',
+      [{ label: 'Prior year', value: fmtHours(cashPy) }],
       'hoursDown',
-      { actual: cash, py: m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_hours_to_cash') },
+      { actual: cash, py: cashPy },
       sel.cmp,
-      INFO.l6 ?? '',
     ),
   ];
 
@@ -165,7 +182,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l7: ChartCard = {
     id: 'l7',
     title: 'Loans by month vs Budget',
-    info: INFO.l7 ?? '',
+    info: info('l7'),
     open: null,
     legend: [
       { label: 'Actual', role: 'actual' },
@@ -203,7 +220,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l8: ChartCard = {
     id: 'l8',
     title: 'Application funnel',
-    info: INFO.l8 ?? '',
+    info: info('l8'),
     open: null,
     legend: [
       { label: 'Applications', role: 'actual' },
@@ -233,7 +250,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l9: ChartCard = {
     id: 'l9',
     title: 'Originations bridge Budget → Actual',
-    info: INFO.l9 ?? '',
+    info: info('l9'),
     open: null,
     legend: [
       { label: 'Budget / Actual', role: 'actual' },
@@ -271,7 +288,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l10: ChartCard = {
     id: 'l10',
     title: 'Loans by product × market',
-    info: INFO.l10 ?? '',
+    info: info('l10'),
     open: null,
     legend: products.map((p, k) => ({ label: p.product_name, role: CATEGORY_ROLES[k] ?? 'c5' })),
     chart: {
@@ -289,12 +306,12 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l11: ChartCard = {
     id: 'l11',
     title: 'Attainment by channel',
-    info: INFO.l11 ?? '',
+    info: info('l11'),
     open: null,
     legend: [],
     chart: {
       kind: 'placeholder',
-      text: 'Placeholder - the dataset has no channel targets (fact_target: market × product and agent quotas only)',
+      text: 'Not available - no channel targets', // the reason is in the ⓘ (ADR-0012, MS-13)
     },
   };
 
@@ -306,7 +323,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const l12: ChartCard = {
     id: 'l12',
     title: 'Stage cycle time vs SLA',
-    info: INFO.l12 ?? '',
+    info: info('l12'),
     open: null,
     legend: [
       { label: 'Median hours', role: 'actual' },
@@ -350,7 +367,7 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
   return {
     id: 'l13',
     title: `Agent & partner leaderboard - ${windowLabel(w)}`,
-    info: INFO.l13 ?? '',
+    info: info('l13'),
     columns: [
       { key: 'name', label: 'Name', width: 220, align: 'left' },
       { key: 'type', label: 'Type', width: 90, align: 'left' },
@@ -389,7 +406,7 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
         ],
       };
     }),
-    note: rows.length === 0 ? 'No agent or partner loans in this window' : null,
+    empty: rows.length === 0 ? 'No agent or partner loans in this window' : null,
     action: null,
     needsDetail: false,
   };

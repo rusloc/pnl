@@ -1,113 +1,95 @@
-// Profitability (L-09, C-46, design brief §6.4): table by breakdown and the
-// contribution-margin bars with the company average marker.
+// Profitability (L-09, C-46; redesign v4 build-brief §3), constant currency on
+// every panel (PV-02). Page 1: the eight-column table by the breakdown (F-21;
+// CM Δ pp carries the only status dot) and the concentration bars. Page 2:
+// growth × margin by region (left) and the region × service line mix heatmap
+// (right), both full height.
 import { cn } from '@/lib/utils';
 
-import { windowLabel } from '../model/filters';
-import { SAMPLE_WINDOW_LONG } from '../model/sample-mode';
-import type { Figures, FilterState, Tone } from '../model/types';
-import { InfoPopover } from '../components/info-popover';
-import { ZoneChip, ZoneState } from '../components/zone-state';
-import { COMPANY_THEME } from '../theme/company';
+import { BubbleChart } from '../components/charts/bubble-chart';
+import { ConcentrationBars } from '../components/charts/concentration-bars';
+import { Heatmap } from '../components/charts/heatmap';
+import type { Page } from '../components/pager';
+import { Panel } from '../components/panel';
+import { profitabilitySubtitle } from '../data/pnl-model-figures';
+import type { Figures, FilterState, StatusKind } from '../model/types';
 
-const TEXT: Record<Tone, string> = { fav: 'text-fav', unf: 'text-unf', neutral: 'text-ink-900' };
-const COLS = 'grid-cols-[minmax(190px,1.4fr)_90px_minmax(130px,1fr)_84px_84px_96px_96px_96px]';
+const DOT: Record<StatusKind, string> = {
+  neutral: 'invisible',
+  ontrack: 'bg-slate-400',
+  ahead: 'bg-fav-bar',
+  watch: 'bg-[#D9A441]',
+  off: 'bg-unf',
+};
 
-export function ProfitabilityView({ figures, filter }: { figures: Figures; filter: FilterState }) {
+const COLS = 'grid-cols-[minmax(150px,1.3fr)_88px_90px_70px_70px_92px_92px_100px]';
+
+export function ProfitabilityView({ figures, filter, page }: { figures: Figures; filter: FilterState; page: Page }) {
   const p = figures.profitability;
-  const zone = figures.zones.profitability;
-  // The heading names the breakdown the numbers show: the live mapper derives `by` from the filter;
-  // the sample path keeps its own (LSN-002, F-21).
-  const by = p.by;
-  // L-15: `{comparison}` is the one the table's "vs …" column uses (C-40), `{breakdown}` the heading's.
-  const info = { comparison: p.compareLabel, breakdown: by };
-  const cmBars = p.rows.filter((r) => r.cm !== '');
-  const cmPos = Math.min(100, (p.cmAveragePct / 60) * 100);
-  const unitsWord = filter.units === 'm' ? 'millions' : 'thousands';
+  // Built from the selection (parity rule 13), so it reads right while the zone loads.
+  const subtitle = profitabilitySubtitle(filter);
+  if (page === 2) {
+    return (
+      <div id="view-prof" className="grid min-h-[420px] flex-auto gap-[12px] [grid-template-columns:1fr_1fr]" data-page="2">
+        <Panel id="bubble" title="Growth × margin by region" subtitle={subtitle} info={figures.bubble.info} zone={figures.zones.bubble} what="growth × margin chart" empty={figures.bubble.points.length === 0} className="min-h-0">
+          <BubbleChart bubble={figures.bubble} />
+        </Panel>
+        <Panel
+          id="heat"
+          title={`Mix - region × ${filter.entity === 'P' ? 'category' : 'service line'}`}
+          subtitle={subtitle}
+          info={figures.heat.info}
+          zone={figures.zones.heat}
+          what="mix heatmap"
+          empty={figures.heat.rows.length === 0}
+          className="min-h-0"
+        >
+          <Heatmap heat={figures.heat} entity={filter.entity} />
+        </Panel>
+      </div>
+    );
+  }
+  const cell = 'px-[6px] py-[5px] text-right';
   return (
-    <div id="view-prof" className="flex min-h-[420px] flex-auto flex-wrap gap-[16px]">
-      <section
-        aria-labelledby="h-prof"
-        className="box-border flex min-w-0 flex-[1.7_1_640px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
-      >
-        <h2 id="h-prof" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Profitability by {by} <InfoPopover info="profitability" context={info} /> <ZoneChip status={zone} />
-        </h2>
-        {/* LSN-002: while sample, the subtitle names the window the numbers actually show. */}
-        <span className="text-[13px] text-slate-600">
-          {figures.sample ? SAMPLE_WINDOW_LONG : windowLabel(filter, true)}, {filter.currency} {unitsWord}
-        </span>
-        <ZoneState status={zone} what="profitability table" />
-        {p.rows.length > 0 && (
-          <div className="mt-[12px] overflow-x-auto">
-            <div className="min-w-[760px] tabular-nums">
-              <div className={cn('grid border-b border-line-300 text-[12px] font-semibold text-slate-600', COLS)}>
-                <div className="py-[6px] pr-[8px]">{p.column}</div>
-                <div className="px-[8px] py-[6px] text-right">Net revenue</div>
-                <div className="px-[8px] py-[6px]">Share</div>
-                <div className="px-[8px] py-[6px] text-right">vs {p.compareLabel}</div>
-                <div className="border-l border-group-rule px-[8px] py-[6px] text-right">Gross</div>
-                <div className="px-[8px] py-[6px] text-right">Contribution</div>
-                <div className="px-[8px] py-[6px] text-right">Adj. EBITDA</div>
-                <div className="px-[8px] py-[6px] text-right">Operating</div>
-              </div>
-              <div className={cn('grid text-[11px] text-slate-600', COLS)}>
-                <div />
-                <div />
-                <div />
-                <div />
-                <div className="col-span-4 border-l border-group-rule px-[8px] py-[2px] text-center">margin, % of net revenue</div>
-              </div>
-              {p.rows.map((r) => (
-                <div key={r.name} className={cn('grid min-h-[48px] items-center border-t border-line-100 text-[14px]', COLS)}>
-                  <div className="py-[6px] pr-[8px] font-medium">{r.name}</div>
-                  <div className="px-[8px] py-[6px] text-right">{r.nrText}</div>
-                  <div className="flex items-center gap-[8px] px-[8px] py-[6px]">
-                    <div aria-hidden="true" className="h-[8px] flex-auto overflow-hidden rounded-[4px] bg-line-100">
-                      <div className="h-full bg-acc" style={{ width: `${r.sharePct}%` }} />
-                    </div>
-                    <span className="w-[48px] text-right text-ink-700">{r.shareText}</span>
-                  </div>
-                  <div className={cn('px-[8px] py-[6px] text-right font-semibold', TEXT[r.tone])}>{r.deltaPctText}</div>
-                  <div className="border-l border-group-rule px-[8px] py-[6px] text-right">{r.gm}</div>
-                  <div className="px-[8px] py-[6px] text-right">{r.cm}</div>
-                  <div className="px-[8px] py-[6px] text-right">{r.ebitda}</div>
-                  <div className="px-[8px] py-[6px] text-right">{r.op}</div>
-                </div>
-              ))}
+    <div id="view-prof" className="grid min-h-[420px] flex-auto gap-[12px] [grid-template-columns:minmax(0,1fr)_minmax(380px,470px)]" data-page="1">
+      <Panel id="prof-table" title={`Profitability by ${p.column || 'Region'}`} subtitle={subtitle} info={p.info} zone={figures.zones.profitability} what="profitability table" empty={p.rows.length === 0} className="min-h-0">
+        <div className="min-h-0 flex-auto overflow-auto font-ledger-condensed text-[13px] tabular-nums" data-testid="prof-table-grid">
+          <div className={cn('grid border-b border-line-300 text-[11.5px] font-semibold text-slate-600', COLS)}>
+            <div className="py-[5px] pr-[6px]">{p.column}</div>
+            <div className={cell}>Net revenue</div>
+            <div className={cell}>Δ vs {p.compareLabel} %</div>
+            <div className={cell}>GM %</div>
+            <div className={cell}>CM %</div>
+            <div className={cell}>CM Δ pp</div>
+            <div className={cell}>Contribution</div>
+            <div className={cn(cell, 'flex flex-col items-end')}>
+              <span>Adj. EBITDA</span>
+              {p.allocated && (
+                <span className="rounded-[4px] border border-dashed border-slate-400 px-[4px] font-ledger text-[10px] font-normal" data-testid="allocated-badge">
+                  allocated - indicative
+                </span>
+              )}
             </div>
           </div>
-        )}
-        {p.note && <span className="mt-[10px] text-[12px] text-slate-600">{p.note}</span>}
-      </section>
-
-      <section
-        aria-labelledby="h-cm"
-        className="box-border flex min-w-0 flex-[1_1_340px] flex-col gap-[4px] rounded-[12px] border border-line-200 bg-surface px-[20px] py-[16px]"
-      >
-        <h2 id="h-cm" className="m-0 flex items-center gap-[10px] text-[17px] font-semibold">
-          Contribution margin by {by} <InfoPopover info="cm" context={info} align="end" />
-        </h2>
-        <span className="text-[13px] text-slate-600">
-          Dashed line: {COMPANY_THEME[filter.entity].short} average {p.cmAverageText || 'n/a'}. Scale 0–60%.
-        </span>
-        <div className="mt-[16px] flex flex-col gap-[14px]">
-          {cmBars.map((r) => {
-            const value = parseFloat(r.cm.replace('%', '')) || 0;
-            return (
-              <div key={r.name} className="flex flex-col gap-[4px]">
-                <div className="flex justify-between gap-[8px] text-[13px]">
-                  <span>{r.name}</span>
-                  <span className="font-semibold tabular-nums">{r.cm}</span>
-                </div>
-                <div aria-hidden="true" className="relative h-[14px] rounded-[3px] bg-line-100">
-                  <div className="absolute bottom-0 left-0 top-0 rounded-[3px] bg-acc" style={{ width: `${Math.max(0, Math.min(100, (value / 60) * 100))}%` }} />
-                  <div className="absolute -bottom-[3px] -top-[3px] border-l-2 border-dashed border-ink-900" style={{ left: `${cmPos}%` }} />
-                </div>
+          {p.rows.map((r) => (
+            <div key={r.key} className={cn('grid items-center border-b border-line-100', COLS, r.total && 'border-t border-subtotal-rule bg-subtle font-semibold')} data-testid={r.total ? 'prof-total' : 'prof-row'}>
+              <div className="py-[5px] pr-[6px] font-medium">{r.name}</div>
+              <div className={cell}>{r.nrText}</div>
+              <div className={cell}>{r.nrDeltaText}</div>
+              <div className={cell}>{r.gm}</div>
+              <div className={cell}>{r.cm}</div>
+              <div className={cn(cell, 'flex items-center justify-end gap-[6px]')}>
+                <span aria-hidden="true" className={cn('inline-block h-[8px] w-[8px] rounded-full', DOT[r.cmStatus])} data-testid="cm-dot" data-status={r.cmStatus} />
+                {r.cmDeltaText}
               </div>
-            );
-          })}
+              <div className={cell}>{r.contributionText}</div>
+              <div className={cell}>{r.ebitdaText}</div>
+            </div>
+          ))}
         </div>
-      </section>
+      </Panel>
+      <Panel id="concentration" title="Concentration - share by profit level" info={figures.concentration.info} zone={figures.zones.concentration} what="concentration bars" empty={figures.concentration.levels.length === 0} className="min-h-0">
+        <ConcentrationBars concentration={figures.concentration} />
+      </Panel>
     </div>
   );
 }

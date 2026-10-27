@@ -18,17 +18,19 @@
   "scripts": {
     "dev": "rayfin dev",
     "dev:frontend": "npm run -w @rayfin-app/frontend dev",
-    "build": "npm run -w @rayfin-app/data build && npm run -w @rayfin-app/frontend build && npm run check:bundle",
-    "build:fabric": "npm run -w @rayfin-app/data build && npm run -w @rayfin-app/frontend build:fabric && npm run check:bundle",
+    "build": "npm run -w @rayfin-app/shared build && node scripts/validate-functions.mjs && node scripts/guard-chat-function.mjs && npm run -w @rayfin-app/functions build && npm run -w @rayfin-app/data build && npm run -w @rayfin-app/frontend build && npm run check:bundle",
+    "build:fabric": "npm run -w @rayfin-app/shared build && node scripts/validate-functions.mjs && node scripts/guard-chat-function.mjs && npm run -w @rayfin-app/functions build && npm run -w @rayfin-app/data build && npm run -w @rayfin-app/frontend build:fabric && npm run check:bundle",
     "check:bundle": "node scripts/check-bundle.mjs packages/frontend/dist",
     "lint": "npm run -w @rayfin-app/frontend lint",
     "preview": "npm run -w @rayfin-app/frontend preview",
-    "test": "npm run -w @rayfin-app/frontend test",
+    "test": "npm run -w @rayfin-app/frontend test && npm run -w @rayfin-app/functions test",
     "test:watch": "npm run -w @rayfin-app/frontend test:watch",
-    "typecheck": "tsc -b",
+    "typecheck": "npm run -w @rayfin-app/shared build && node scripts/validate-functions.mjs && node scripts/guard-chat-function.mjs && npm run -w @rayfin-app/functions build && tsc -b",
     "pack:add": "node scripts/scaffold.mjs",
     "test:template": "node scripts/run-template-tests.mjs",
-    "rayfin:up": "rayfin up"
+    "rayfin:up": "rayfin up",
+    "functions:build": "npm run -w @rayfin-app/functions build",
+    "validate:functions": "npm run -w @rayfin-app/shared build && node scripts/validate-functions.mjs && node scripts/guard-chat-function.mjs"
   },
   "devDependencies": {
     "@microsoft/rayfin-cli": "^1.36.0-alpha",
@@ -41,6 +43,7 @@
     "typecheck": "tsc -b"
   },
   "rayfinPacks": [
-    "connectors"
+    "connectors",
+    "functions"
   ]
 }

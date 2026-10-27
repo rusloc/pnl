@@ -1,0 +1,158 @@
+/// D-02 below-contribution-margin lines spread to slices by NR share (C-31).
+table fact_pl_allocated
+	isHidden
+	lineageTag: 66c068f6-2971-5c26-9aeb-c3c0768ad480
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 964a1934-8c9f-508c-90bb-05a65a27ad77
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 2a61114b-6080-5a93-85d9-22281d9ee0b2
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column version_key
+		dataType: string
+		isHidden
+		lineageTag: 12439952-c192-524f-a0dc-fbbc7069eb9c
+		summarizeBy: none
+		sourceColumn: version_key
+
+		annotation SummarizationSetBy = User
+
+	column region_code
+		dataType: string
+		isHidden
+		lineageTag: adce4a20-47b5-5ee7-b21c-6fa8667f9e75
+		summarizeBy: none
+		sourceColumn: region_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 8444e617-d9b9-51d9-86bf-550f3b1cf0fc
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 77954b88-e2fe-5f86-8296-0a0fe9a4c5e5
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: 08c4332b-d92e-58f8-977a-2ee050cbd6a0
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column account_code
+		dataType: string
+		isHidden
+		lineageTag: b2d0ee1a-9905-5e20-b21a-bd62bf74fbaf
+		summarizeBy: none
+		sourceColumn: account_code
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_entity_code
+		dataType: string
+		isHidden
+		lineageTag: 6b0d6934-5afd-59f9-8528-2340bf404734
+		summarizeBy: none
+		sourceColumn: counterparty_entity_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 1b5977b3-230a-5a68-9b82-fbe386811d27
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column cost_centre_code
+		dataType: string
+		isHidden
+		lineageTag: 3ab21528-88a4-54e3-88a9-0c8d5d1a2bc8
+		summarizeBy: none
+		sourceColumn: cost_centre_code
+
+		annotation SummarizationSetBy = User
+
+	column amount_local
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 991e90f0-b157-58b4-a3a0-fc07da9dc65a
+		summarizeBy: none
+		sourceColumn: amount_local
+
+		annotation SummarizationSetBy = User
+
+	column amount_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 7bb0ab8d-34f0-48e5-be6f-36c7dc9f1e28
+		summarizeBy: none
+		sourceColumn: amount_usd
+
+		annotation SummarizationSetBy = User
+
+	column amount_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 543b5d58-69b1-4aea-8eac-9bb37d5106fc
+		summarizeBy: none
+		sourceColumn: amount_eur
+
+		annotation SummarizationSetBy = User
+
+	column amount_gbp
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 0195d51e-4275-4a09-b0de-0b1b618dbc8f
+		summarizeBy: none
+		sourceColumn: amount_gbp
+
+		annotation SummarizationSetBy = User
+
+	partition fact_pl_allocated = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    Data = Source{[Schema = "acme_pl", Item = "fact_pl_allocated"]}[Data],
+				    // ADR-0008: read only the declared columns; pre-translated amounts as Decimal Number (double), never Fixed Decimal
+				    Selected = Table.SelectColumns(Data, {"entity_code", "month_key", "version_key", "region_code", "channel_code", "line_code", "segment_code", "account_code", "counterparty_entity_code", "currency_code", "cost_centre_code", "amount_local", "amount_usd", "amount_eur", "amount_gbp"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"amount_local", Currency.Type}, {"amount_usd", type number}, {"amount_eur", type number}, {"amount_gbp", type number}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

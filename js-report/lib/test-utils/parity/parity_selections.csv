@@ -1,0 +1,602 @@
+sel_id,entity,fy,month,time_view,compare_a,compare_b,currency,fx_basis,units,metric,kind,expected,tol,c_status,b_status,source
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,ct.NR,amount,667360690.8433,0.01,match,match:T-06,control_totals_usd
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,ct.EBITDA,amount,82827372.2090,0.01,match,match:T-06,control_totals_usd
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,ct.OP,amount,48580071.4695,0.01,match,match:T-06,control_totals_usd
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,ct.NP,amount,38144183.9088,0.01,match,match:T-06,control_totals_usd
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.value_text,text,$667.4 m,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.value_text,text,$82.8 m,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.op.value_text,text,$48.6 m,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.op.status,status,off,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.op.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.value_text,text,55.9%,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.value_text,text,38.9%,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gmv.value_text,text,"$12,470.9 m",0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gmv.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gmv.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.merchants.value_text,text,"124,291",0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.merchants.status,status,off,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.merchants.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.arr.value_text,text,$279.2 m,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.arr.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.arr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.mix.value_text,text,37.1% / 49.9%,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.mix.status,status,neutral,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.mix.rows,text,Sub / Pay vs PY,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.value_text,text,$667.4 m,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.value,amount,667360690.8433,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.value,amount,82827372.2090,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.op.value,amount,48580071.4695,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.value,ratio,0.558516421,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.value,ratio,0.389467893,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.d_bud_pct,ratio,0.013885387,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.d_bud_pp,ratio,-0.000313636,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.organic,ratio,0.278333002,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.value,amount,667360690.8433,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.attainment,ratio,1.013885387,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.mix.sub_share,ratio,0.370519900,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.mix.pay_share,ratio,0.499309507,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.gmv.value,amount,12470944535.3555,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.merchants.value,count,124291,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.arr.value,amount,279201235.6196,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,vitals.merchants.gmv_per_merchant_text,text,$100.3 k,0,match,match,contract: HTML v4 INFO.merch
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.START.value,amount,658221037.2736,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.START.label,text,Budget NR,0,match,accepted:PV-11,contract: build-brief §2
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_SUB.value,amount,-4647223.1596,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_SUB.label,text,Platform subscriptions,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_PAY.value,amount,4822029.0084,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_PAY.label,text,Payments,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_APP.value,amount,-876949.8922,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_APP.label,text,"Apps, partners & ads",0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_PS.value,amount,-1890902.4697,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.SVC_PS.label,text,Professional services,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.CC_SUB.value,amount,655627990.7605,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.CC_SUB.label,text,Constant-currency NR,0,match,match,contract: build-brief §2
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.FX.value,amount,11732700.0828,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.FX.label,text,FX,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.END.value,amount,667360690.8433,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.END.label,text,Actual NR,0,match,match,contract: build-brief §2
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.BUD.value,amount,82872108.2449,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.VOL.value,amount,-1453808.9691,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GM_RATE.value,amount,-25843.1097,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GM_MIX.value,amount,-1364064.8176,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.VSC.value,amount,211393.0562,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.SM.value,amount,453003.7032,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.RD.value,amount,478005.5392,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GA.value,amount,247244.5898,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.OOI.value,amount,-81009.0746,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.FX.value,amount,1490343.0467,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.ACT.value,amount,82827372.2090,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.DA.value,amount,-31069557.5935,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.ADJ.value,amount,-3177743.1460,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.OP.value,amount,48580071.4695,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.total_delta,amount,-1569730.0423,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.coverage_top8,ratio,0.879622674,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.leaf_count,count,32,0,match,gap:PV-12,contract: empty lines hidden (Track B parity round 2026-10-27; PV-12)
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.top8_codes,text,GR_S2 COR_S2 GR_S4 RD_S1 ADJ_3 COR_S5 SM_S1 GR_S1,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.nm_codes,text,ADJ_3 OOI_1 OOI_3,0,match,gap:PV-23,contract: n.m. only on lines with data (Track B parity round 2026-10-27)
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.py_column,text,vs PY,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,var.total_fx,amount,850229.3593,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.basis,text,CC,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.nr,amount,357700784.6400,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.nr_delta_pct,ratio,-0.004384135,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.gm_pct,ratio,0.554867807,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_pct,ratio,0.508838263,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_delta_pp,ratio,-0.002557449,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.ebitda,amount,41976612.4300,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.nr,amount,146319455.9247,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.nr_delta_pct,ratio,-0.002057957,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.gm_pct,ratio,0.565123241,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_pct,ratio,0.519623638,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_delta_pp,ratio,0.000784115,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.ebitda,amount,19667876.7204,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.nr,amount,66586164.8861,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.nr_delta_pct,ratio,0.004133394,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.gm_pct,ratio,0.561533812,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_pct,ratio,0.516114293,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_delta_pp,ratio,-0.002569953,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.ebitda,amount,8682563.0506,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.nr,amount,85021585.3097,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.nr_delta_pct,ratio,-0.011513367,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.gm_pct,ratio,0.560290389,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_pct,ratio,0.514701042,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_delta_pp,ratio,-0.003854535,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.ebitda,amount,11009976.9613,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.nr,amount,655627990.7605,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.nr_delta_pct,ratio,-0.003939477,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.gm_pct,ratio,0.558536762,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_pct,ratio,0.512744527,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_delta_pp,ratio,-0.001979204,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.ebitda,amount,81337029.1624,0.05,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.NA.NR,ratio,0.545584981,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.EU.NR,ratio,0.223174511,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.AP.NR,ratio,0.129679615,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.UK.NR,ratio,0.101560894,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.NA.CM,ratio,0.541428527,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.EU.CM,ratio,0.226168677,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.AP.CM,ratio,0.130174442,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.UK.CM,ratio,0.102228354,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.NA.EBITDA,ratio,0.516082439,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.EU.EBITDA,ratio,0.241807169,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.AP.EBITDA,ratio,0.135362418,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,conc.UK.EBITDA,ratio,0.106747974,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.NA.growth,ratio,0.268908310,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.EU.growth,ratio,0.297224151,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.AP.growth,ratio,0.289909841,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.UK.growth,ratio,0.273797495,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.company.growth,ratio,0.278333002,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,bubble.company.cm_pct,ratio,0.512744527,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,heat.SUB.colour_gm,ratio,0.809964875,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,heat.PAY.colour_gm,ratio,0.393736960,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,heat.APP.colour_gm,ratio,0.700055833,0.000001,match,match,engine-c 2026-10-27
+S-FY25,S,2025,12,FY,B,PY,USD,ACT,M,heat.PS.colour_gm,ratio,0.178110296,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,ct.NR,amount,595967635.7345,0.01,match,match:T-06,control_totals_usd
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,ct.EBITDA,amount,77783157.7535,0.01,match,match:T-06,control_totals_usd
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,ct.OP,amount,46509620.4731,0.01,match,match:T-06,control_totals_usd
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,ct.NP,amount,36494875.3205,0.01,match,match:T-06,control_totals_usd
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.value_text,text,$596.0 m,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.value_text,text,$77.8 m,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.status,status,off,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.value_text,text,$46.5 m,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.status,status,off,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.value_text,text,55.8%,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.value_text,text,38.0%,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gmv.value_text,text,"$11,285.0 m",0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gmv.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gmv.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.merchants.value_text,text,"138,726",0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.merchants.status,status,off,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.merchants.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.arr.value_text,text,$320.0 m,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.arr.status,status,off,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.arr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.mix.value_text,text,37.5% / 50.3%,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.mix.status,status,neutral,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.mix.rows,text,Sub / Pay vs PY,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.value_text,text,$861.0 m,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.value,amount,595967635.7345,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.value,amount,77783157.7535,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.value,amount,46509620.4731,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.value,ratio,0.557848760,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.value,ratio,0.379999247,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.d_bud_pct,ratio,-0.010280891,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.d_bud_pp,ratio,-0.000292130,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.organic,ratio,0.273892831,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.value,amount,860955932.1889,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.attainment,ratio,0.987644418,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.mix.sub_share,ratio,0.374799485,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.mix.pay_share,ratio,0.502748323,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.gmv.value,amount,11284983967.4023,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.merchants.value,count,138726,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.arr.value,amount,320001855.6507,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,vitals.merchants.gmv_per_merchant_text,text,$81.3 k,0,match,match,contract: HTML v4 INFO.merch
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.START.value,amount,602158360.3305,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.START.label,text,Budget NR,0,match,accepted:PV-11,contract: build-brief §2
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_SUB.value,amount,-7963090.8940,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_SUB.label,text,Platform subscriptions,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_PAY.value,amount,518475.0833,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_PAY.label,text,Payments,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_APP.value,amount,-976129.7846,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_APP.label,text,"Apps, partners & ads",0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_PS.value,amount,-2087717.2943,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.SVC_PS.label,text,Professional services,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.CC_SUB.value,amount,591649897.4409,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.CC_SUB.label,text,Constant-currency NR,0,match,match,contract: build-brief §2
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.FX.value,amount,4317738.2936,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.FX.label,text,FX,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.END.value,amount,595967635.7345,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.END.label,text,Actual NR,0,match,match,contract: build-brief §2
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.BUD.value,amount,82581155.9518,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.VOL.value,amount,-5911807.8683,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GM_RATE.value,amount,-1404974.3491,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GM_MIX.value,amount,-1409979.0133,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.VSC.value,amount,-882082.3772,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.SM.value,amount,1542586.9856,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.RD.value,amount,1756280.3650,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GA.value,amount,857908.5457,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.OOI.value,amount,58388.4684,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.FX.value,amount,595681.0447,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.ACT.value,amount,77783157.7535,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.DA.value,amount,-29856609.3102,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.ADJ.value,amount,-1416927.9701,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.OP.value,amount,46509620.4731,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.total_delta,amount,-5878487.0518,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.coverage_top8,ratio,0.779597584,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.leaf_count,count,32,0,match,gap:PV-12,contract: empty lines hidden (Track B parity round 2026-10-27; PV-12)
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.top8_codes,text,GR_S1 COR_S2 GR_S2 GR_S4 VSC_S3 COR_S5 ADJ_1 RD_S1,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.nm_codes,text,ADJ_1 OOI_1 OOI_3,0,match,gap:PV-23,contract: n.m. only on lines with data (Track B parity round 2026-10-27)
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.py_column,text,vs PY,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,var.total_fx,amount,370931.8134,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.basis,text,CC,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.nr,amount,314353645.6300,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.nr_delta_pct,ratio,-0.016588190,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.gm_pct,ratio,0.554939346,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_pct,ratio,0.506196269,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_delta_pp,ratio,-0.007221439,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.ebitda,amount,39230137.9000,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.nr,amount,137549723.7701,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.nr_delta_pct,ratio,-0.024736179,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.gm_pct,ratio,0.561560086,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_pct,ratio,0.513592791,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_delta_pp,ratio,-0.006441324,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.ebitda,amount,18939369.7816,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.nr,amount,61475385.4133,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.nr_delta_pct,ratio,-0.009558210,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.gm_pct,ratio,0.561965707,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_pct,ratio,0.513875970,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_delta_pp,ratio,-0.006202518,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.ebitda,amount,8466280.7200,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.nr,amount,78271142.6275,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.nr_delta_pct,ratio,-0.014156136,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.gm_pct,ratio,0.559546128,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_pct,ratio,0.511394051,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_delta_pp,ratio,-0.008205323,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.ebitda,amount,10551688.3072,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.nr,amount,591649897.4409,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.nr_delta_pct,ratio,-0.017451328,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.gm_pct,ratio,0.557818088,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_pct,ratio,0.509401439,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_delta_pp,ratio,-0.007067605,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.ebitda,amount,77187476.7088,0.05,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.NR,ratio,0.531316995,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.NR,ratio,0.232484996,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.NR,ratio,0.132293005,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.NR,ratio,0.103905005,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.CM,ratio,0.527973932,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.CM,ratio,0.234397881,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.CM,ratio,0.132810492,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.CM,ratio,0.104817696,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.EBITDA,ratio,0.508244855,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.EBITDA,ratio,0.245368427,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.EBITDA,ratio,0.136702076,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.EBITDA,ratio,0.109684642,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.NA.growth,ratio,0.268400828,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.EU.growth,ratio,0.268403107,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.AP.growth,ratio,0.315114177,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.UK.growth,ratio,0.263678165,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.company.growth,ratio,0.273892831,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,bubble.company.cm_pct,ratio,0.509401439,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,heat.SUB.colour_gm,ratio,0.812169460,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,heat.PAY.colour_gm,ratio,0.385900426,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,heat.APP.colour_gm,ratio,0.700021536,0.000001,match,match,engine-c 2026-10-27
+S-YTD26,S,2026,9,YTD,B,PY,USD,ACT,M,heat.PS.colour_gm,ratio,0.177442471,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,ct.NR,amount,4575428492.3836,0.01,match,match:T-06,control_totals_usd
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,ct.EBITDA,amount,896884746.7315,0.01,match,match:T-06,control_totals_usd
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,ct.OP,amount,690335320.6931,0.01,match,match:T-06,control_totals_usd
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,ct.NP,amount,495801736.0291,0.01,match,match:T-06,control_totals_usd
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.value_text,text,"$4,575.4 m",0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.value_text,text,$896.9 m,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.op.value_text,text,$690.3 m,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.op.status,status,off,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.op.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.value_text,text,48.9%,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.value_text,text,19.7%,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.units.value_text,text,"569,256,242",0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.units.status,status,watch,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.units.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nrPerUnit.value_text,text,$8.04,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nrPerUnit.status,status,ahead,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nrPerUnit.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gtn.value_text,text,21.3%,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gtn.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gtn.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ap.value_text,text,8.4%,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ap.status,status,neutral,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ap.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.value_text,text,"$4,575.4 m",0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.value,amount,4575428492.3836,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.ebitda.value,amount,896884746.7315,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.op.value,amount,690335320.6931,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.gm.value,ratio,0.489478500,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.value,ratio,0.196797646,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.d_bud_pct,ratio,0.006279338,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.opex.d_bud_pp,ratio,-0.000005816,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.nr.organic,ratio,0.063417027,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.value,amount,4575428492.3836,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,vitals.fy.attainment,ratio,1.006279338,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.START.value,amount,4546877113.5154,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.START.label,text,Budget NR,0,match,accepted:PV-11,contract: build-brief §2
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.VOL.value,amount,-88696926.1478,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.VOL.label,text,Volume,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.PRICE.value,amount,21679871.9112,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.PRICE.label,text,Price / mix,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.CC_SUB.value,amount,4479860059.2789,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.CC_SUB.label,text,Constant-currency NR,0,match,match,contract: build-brief §2
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.FX.value,amount,95568433.1047,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.FX.label,text,FX,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.END.value,amount,4575428492.3836,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,nr_bridge.END.label,text,Actual NR,0,match,match,contract: build-brief §2
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.BUD.value,amount,901010076.7490,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.VOL.value,amount,-32874671.1002,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GM_RATE.value,amount,-8497849.0422,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GM_MIX.value,amount,4065652.7552,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.VSC.value,amount,1888647.3369,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.SM.value,amount,7833301.5639,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.RD.value,amount,1707940.9788,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.GA.value,amount,3645454.2485,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.OOI.value,amount,-291375.2475,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.FX.value,amount,18397568.4889,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.ACT.value,amount,896884746.7315,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.DA.value,amount,-164715425.7597,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.ADJ.value,amount,-41834000.2787,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,profit_bridge.OP.value,amount,690335320.6931,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.total_delta,amount,-31263195.9079,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.coverage_top8,ratio,0.830876011,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.leaf_count,count,37,0,match,gap:PV-12,contract: empty lines hidden (Track B parity round 2026-10-27; PV-12)
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.top8_codes,text,GR_P1 ADJ_2 ADJ_1 COR_P1 COR_P5 COR_P2 VSC_P1 VSC_P3,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.nm_codes,text,ADJ_1 ADJ_2 OOI_1 OOI_2,0,match,gap:PV-23,contract: n.m. only on lines with data (Track B parity round 2026-10-27)
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.py_column,text,vs PY,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,var.total_fx,amount,13993772.2841,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.basis,text,CC,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.nr,amount,2031163595.7000,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.nr_delta_pct,ratio,-0.015303034,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.gm_pct,ratio,0.489571212,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_pct,ratio,0.390853122,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_delta_pp,ratio,-0.002110539,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.ebitda,amount,398165389.6700,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.nr,amount,1206916716.9785,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.nr_delta_pct,ratio,-0.014222573,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.gm_pct,ratio,0.489546913,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_pct,ratio,0.391011569,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_delta_pp,ratio,-0.001952092,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.ebitda,amount,236841916.0108,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.nr,amount,542647872.6456,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.nr_delta_pct,ratio,-0.013477333,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.gm_pct,ratio,0.489291521,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_pct,ratio,0.390767238,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_delta_pp,ratio,-0.002196422,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.ebitda,amount,106253334.9747,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.nr,amount,699131873.9548,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.nr_delta_pct,ratio,-0.014969295,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.gm_pct,ratio,0.489710407,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_pct,ratio,0.391178295,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_delta_pp,ratio,-0.001785366,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.ebitda,amount,137226537.5871,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.nr,amount,4479860059.2789,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.nr_delta_pct,ratio,-0.014739139,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.gm_pct,ratio,0.489552509,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_pct,ratio,0.390936153,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_delta_pp,ratio,-0.002027508,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.ebitda,amount,878487178.2425,0.05,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.NA.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.EU.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.AP.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.UK.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,prof.TOTAL.cm_status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.NA.NR,ratio,0.453398894,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.EU.NR,ratio,0.269409468,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.AP.NR,ratio,0.156061097,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.UK.NR,ratio,0.121130541,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.NA.CM,ratio,0.453302596,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.EU.CM,ratio,0.269461441,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.AP.CM,ratio,0.156157759,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.UK.CM,ratio,0.121078203,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.NA.EBITDA,ratio,0.453239842,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.EU.EBITDA,ratio,0.269602018,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.AP.EBITDA,ratio,0.156207787,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,conc.UK.EBITDA,ratio,0.120950354,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.NA.growth,ratio,0.060528996,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.EU.growth,ratio,0.069267666,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.AP.growth,ratio,0.062953963,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.UK.growth,ratio,0.061914166,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.company.growth,ratio,0.063417027,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,bubble.company.cm_pct,ratio,0.390936153,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,heat.HOME.colour_gm,ratio,0.511755285,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,heat.PERS.colour_gm,ratio,0.591301937,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,heat.KITC.colour_gm,ratio,0.471270089,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,heat.ELEC.colour_gm,ratio,0.356515583,0.000001,match,match,engine-c 2026-10-27
+P-FY25,P,2025,12,FY,B,PY,USD,ACT,M,heat.TOYS.colour_gm,ratio,0.436742122,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,ct.NR,amount,3398521942.6604,0.01,match,match:T-06,control_totals_usd
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,ct.EBITDA,amount,682594931.6447,0.01,match,match:T-06,control_totals_usd
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,ct.OP,amount,550227316.2603,0.01,match,match:T-06,control_totals_usd
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,ct.NP,amount,396244971.8623,0.01,match,match:T-06,control_totals_usd
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.value_text,text,"$3,398.5 m",0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.value_text,text,$682.6 m,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.value_text,text,$550.2 m,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.status,status,off,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.value_text,text,49.4%,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.value_text,text,19.3%,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.status,status,ahead,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.units.value_text,text,"419,838,143",0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.units.status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.units.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nrPerUnit.value_text,text,$8.09,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nrPerUnit.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nrPerUnit.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gtn.value_text,text,21.3%,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gtn.status,status,ontrack,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gtn.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ap.value_text,text,8.0%,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ap.status,status,neutral,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ap.rows,text,vs Budget | vs Prior year,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.value_text,text,"$4,908.1 m",0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.value,amount,3398521942.6604,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.ebitda.value,amount,682594931.6447,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.op.value,amount,550227316.2603,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.gm.value,ratio,0.494100114,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.value,ratio,0.192609749,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.d_bud_pct,ratio,-0.019128599,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.opex.d_bud_pp,ratio,-0.004202485,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.nr.organic,ratio,0.060786958,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.value,amount,4908087890.1284,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,vitals.fy.attainment,ratio,0.975921168,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.START.value,amount,3464798688.4490,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.START.label,text,Budget NR,0,match,accepted:PV-11,contract: build-brief §2
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.VOL.value,amount,-64973368.0835,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.VOL.label,text,Volume,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.PRICE.value,amount,-30818087.7968,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.PRICE.label,text,Price / mix,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.CC_SUB.value,amount,3369007232.5687,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.CC_SUB.label,text,Constant-currency NR,0,match,match,contract: build-brief §2
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.FX.value,amount,29514710.0917,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.FX.label,text,FX,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.END.value,amount,3398521942.6604,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,nr_bridge.END.label,text,Actual NR,0,match,match,contract: build-brief §2
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.BUD.value,amount,701037782.2520,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.VOL.value,amount,-47725267.9739,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GM_RATE.value,amount,-16667392.0267,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GM_MIX.value,amount,2788656.0344,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.VSC.value,amount,4394997.5096,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.SM.value,amount,25519508.1667,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.RD.value,amount,2372765.1016,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.GA.value,amount,5119141.6800,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.OOI.value,amount,-168954.5368,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.FX.value,amount,5923695.4378,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.ACT.value,amount,682594931.6447,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.DA.value,amount,-122346789.9421,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.ADJ.value,amount,-10020825.4423,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,profit_bridge.OP.value,amount,550227316.2603,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.total_delta,amount,-21554494.5227,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.coverage_top8,ratio,0.812518971,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.leaf_count,count,37,0,match,gap:PV-12,contract: empty lines hidden (Track B parity round 2026-10-27; PV-12)
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.top8_codes,text,GR_P1 SM_P1 COR_P2 COR_P1 COR_P5 GTN_P1 GTN_P2 ADJ_3,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.nm_codes,text,ADJ_1 ADJ_3 OOI_1 OOI_2,0,match,gap:PV-23,contract: n.m. only on lines with data (Track B parity round 2026-10-27)
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.py_column,text,vs PY,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,var.total_fx,amount,4783197.8907,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.basis,text,CC,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.nr,amount,1488560152.5500,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.nr_delta_pct,ratio,-0.027350710,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.gm_pct,ratio,0.494284172,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_pct,ratio,0.391735232,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_delta_pp,ratio,-0.005408463,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.ebitda,amount,299444296.3100,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.nr,amount,944079349.1954,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.nr_delta_pct,ratio,-0.027748644,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.gm_pct,ratio,0.494005957,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_pct,ratio,0.391233367,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_delta_pp,ratio,-0.005910329,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.ebitda,amount,189355330.0920,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.nr,amount,418100712.6533,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.nr_delta_pct,ratio,-0.027395595,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.gm_pct,ratio,0.494043568,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_pct,ratio,0.391283181,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_delta_pp,ratio,-0.005860514,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.ebitda,amount,83870644.7200,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.nr,amount,518267018.1699,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.nr_delta_pct,ratio,-0.028514866,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.gm_pct,ratio,0.493794210,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_pct,ratio,0.391190960,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_delta_pp,ratio,-0.005952736,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.ebitda,amount,104000965.0850,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.nr,amount,3369007232.5687,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.nr_delta_pct,ratio,-0.027647048,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.gm_pct,ratio,0.494100977,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_pct,ratio,0.391454769,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_delta_pp,ratio,-0.005688926,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.ebitda,amount,676671236.2069,0.05,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.NA.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.EU.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.AP.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.UK.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,prof.TOTAL.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.NR,ratio,0.441839405,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.NR,ratio,0.280224791,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.NR,ratio,0.153833751,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.NR,ratio,0.124102053,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.CM,ratio,0.442155967,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.CM,ratio,0.280066300,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.CM,ratio,0.153730079,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.CM,ratio,0.124047654,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.NA.EBITDA,ratio,0.442525528,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.EU.EBITDA,ratio,0.279833573,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.AP.EBITDA,ratio,0.153694970,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,conc.UK.EBITDA,ratio,0.123945929,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.NA.growth,ratio,0.061237623,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.EU.growth,ratio,0.060189179,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.AP.growth,ratio,0.060427677,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.UK.growth,ratio,0.060979236,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.company.growth,ratio,0.060786958,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,bubble.company.cm_pct,ratio,0.391454769,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,heat.HOME.colour_gm,ratio,0.515639473,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,heat.PERS.colour_gm,ratio,0.595674633,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,heat.KITC.colour_gm,ratio,0.475484410,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,heat.ELEC.colour_gm,ratio,0.347143819,0.000001,match,match,engine-c 2026-10-27
+P-YTD26,P,2026,9,YTD,B,PY,USD,ACT,M,heat.TOYS.colour_gm,ratio,0.415279200,0.000001,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.nr.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.nr.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.ebitda.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.ebitda.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.op.status,status,off,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.op.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.gm.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.gm.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.opex.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.opex.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.gmv.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.gmv.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.merchants.status,status,off,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.merchants.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.arr.status,status,ontrack,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.arr.rows,text,vs Prior year | vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.mix.status,status,neutral,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.mix.rows,text,Sub / Pay vs PY,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.fy.status,status,ahead,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,nr_bridge.START.value,amount,513706576.9559,0.05,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,profit_bridge.BUD.value,amount,56056238.2032,0.05,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,var.total_delta,amount,14160920.1464,0.05,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,prof.NA.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,prof.EU.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,prof.AP.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,prof.UK.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25-cmpPY,S,2025,12,FY,PY,B,USD,ACT,M,prof.TOTAL.cm_status,status,watch,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.nr.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.ebitda.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.op.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.gm.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.opex.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.gmv.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.merchants.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.arr.rows,text,vs Budget,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.mix.rows,text,Sub / Pay vs PY,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,vitals.fy.rows,text,vs FY Budget | EBITDA vs FY Bud,0,match,match,engine-c 2026-10-27
+S-FY25-noB,S,2025,12,FY,B,NONE,USD,ACT,M,var.py_column,text,none,0,match,accepted:PV-05,contract: parity rule 17

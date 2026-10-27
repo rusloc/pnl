@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-recorded",
+  "object": "chat.completion",
+  "created": 1761220000,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Commerce Cloud closed Q3 2026 with net revenue of 412.3 m, 2.1 % above budget; gross margin was 61.4 %, 0.8 pp below budget. See the Key figures view."
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1200,
+    "completion_tokens": 40,
+    "total_tokens": 1240
+  }
+}

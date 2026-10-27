@@ -1,0 +1,31 @@
+DEFINE
+    VAR _entity = TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 9 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "LTM" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+EVALUATE
+TOPN (
+    8
+    ,SUMMARIZECOLUMNS (
+        dim_pl_row[row_key]
+        ,dim_pl_row[line_code]
+        ,dim_pl_row[line_label]
+        ,dim_pl_row[account_code]
+        ,dim_pl_row[account_label]
+        ,TREATAS ( { TRUE () }, dim_pl_row[is_leaf] )
+        ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units
+        ,"@base", CONVERT ( [LV Base], DOUBLE )
+        ,"@cmp", CONVERT ( [LV Comparison], DOUBLE )
+        ,"@d", CONVERT ( [LV Δ], DOUBLE )
+        ,"@d_pct", CONVERT ( [LV Δ %], DOUBLE )
+        ,"@abs_d", CONVERT ( [LV Abs Δ], DOUBLE )
+    )
+    ,[@abs_d], DESC
+)
+ORDER BY [@abs_d] DESC

@@ -4,9 +4,12 @@
 - [Desktop open rule](feedback_desktop_open.md) — no PBIP edits while Desktop has it open; prove plans with DEFINE MEASURE
 - [ACME Trucks report](project_trucks_report.md) — 2nd showcase report: Time util redesign + RU→EN rename plan, waits for ginee export; real-name risk Q-01
 - [Track B Copilot](project_track_b_copilot.md) — no anonymous Copilot chat; param-table window breaks naive Copilot DAX; prep limits (2026-10-23)
+- [P&L redesign v4](project_pl_redesign_v4.md) — Vitals / Analysis 2p / Profitability 2p built 2026-10-27, 241 measures, tests 257 TRUE, timings
 - [Mirelo Sales report](project_mirelo_report.md) — ADR-0011 Track B PBIP draft: model shape, generator in scratch, 2,560 tests TRUE, placeholders
 
 ## Open threads
+- 2026-10-27 Parity check B vs C fixed in both PBIPs (Mirelo MS-01..14, P&L PV-01..22 bip items); T-P 601 + 257 rows TRUE, Vitals 2.5 s cold; open: USER first open, ginee republish
+- 2026-10-27 P&L redesign v4 built (validator 0/0, tests 17 sets TRUE, views <= 3 s query time). Open: USER first open + click-test pager / variances / How to read; ginee republish for fin; scratch Desktop PIDs 26980 / 11888 to close
 - 2026-10-27 Mirelo Sales PBIP built (validator 0/0, tests 2,560 TRUE, all views render-checked in scratch). Open: USER first open + Refresh + tab/drill click-test; USER closes Desktop PIDs 19876 / 4732 / 2088 (mine, untitled + scratch copies); open questions Q1-Q6 in the hand-back; ADR-0011 still Proposed
 - 2026-10-23 ADR-0008 model step + parity fixes applied (validator 0/0, tests 12 sets TRUE, views 2.3-4.3 s local). Open: ginee service rollout (steps 6-8), USER records bm_pl_expand (still hand-written root.children form), M-22 rounding-hide not doable natively, Track A could add fx_basis_name TREATAS for pruning (fin)
 - 2026-10-23 Trucks: original page re-added as "Time util (original)" (validator 0/0, tests 409/536/194 TRUE, render-checked). Open: divider line vs long caption, "Произв-сть" display name, USER first open

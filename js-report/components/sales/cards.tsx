@@ -1,21 +1,9 @@
+import type { CSSProperties } from 'react';
 import type { CmpRow, Status } from '@/lib/sales/status';
 import type { ViewId } from '@/lib/sales/types';
 import type { ChartCard, HeroCard, KpiCard, LegendItem, RowAction, TableCard } from '@/lib/sales/view-model';
-import {
-  Bars,
-  Bubble,
-  Bullets,
-  C,
-  ColumnChart,
-  FILL,
-  Funnel,
-  Heat,
-  LineChart,
-  Sparkline,
-  StackedBars,
-  Waterfall,
-} from './charts';
-import { InfoButton } from './controls';
+import { Bars, Bubble, Bullets, C, ColumnChart, FILL, Funnel, Heat, LineChart, StackedBars, Waterfall } from './charts';
+import { InfoButton } from './popup';
 import styles from './sales.module.css';
 
 // Card family renderers (design-tokens §5, layout-spec §0.2). Positions are board px minus the 116 px content top.
@@ -27,6 +15,30 @@ export interface Box {
   h: number;
 }
 const place = (b: Box) => ({ left: b.x, top: b.y - 116, width: b.w, height: b.h });
+
+// Pop-up placement (design-tokens §5a: 360 px wide, max 420 high), in card coordinates: the side with more room, and
+// flipped to the card's right edge when 360 px would leave the frame (x 1408).
+const FRAME_R = 1408;
+const BOARD_H = 810;
+const TABS_BOTTOM = 104;
+const POP_W = 360;
+const xSide = (b: Box): CSSProperties => (b.x + 8 + POP_W > FRAME_R ? { right: 8 } : { left: 8 });
+/** ⓘ at the bottom-left of a card or panel. */
+function belowOrAbove(b: Box): CSSProperties {
+  const down = BOARD_H - (b.y + b.h) - 8;
+  const up = b.y + b.h - 32 - TABS_BOTTOM;
+  return down >= up
+    ? { ...xSide(b), top: b.h + 4, maxHeight: Math.min(420, down) }
+    : { ...xSide(b), bottom: 32, maxHeight: Math.min(420, up) };
+}
+/** ⓘ in a table's title row: tables sit at the bottom of the frame, so the pop-up opens above the card. */
+const aboveCard = (b: Box): CSSProperties => ({
+  right: 8,
+  bottom: b.h + 4,
+  maxHeight: Math.min(420, b.y - TABS_BOTTOM - 4),
+});
+
+const HALF_BAR = 72; // hero diverging bar 144 × 6 (16 px card padding kept on the right)
 
 const TONE: Record<Status, string | undefined> = {
   good: styles.good,
@@ -54,7 +66,11 @@ function Comparator({ row, top, bar, className }: { row: CmpRow; top: number; ba
               <i />
               <b
                 className={BAR_BG[row.status]}
-                style={b.side === 'right' ? { left: 40, width: b.size * 40 } : { right: 40, width: b.size * 40 }}
+                style={
+                  b.side === 'right'
+                    ? { left: HALF_BAR, width: b.size * HALF_BAR }
+                    : { right: HALF_BAR, width: b.size * HALF_BAR }
+                }
               />
             </>
           ) : null}
@@ -64,46 +80,58 @@ function Comparator({ row, top, bar, className }: { row: CmpRow; top: number; ba
   );
 }
 
+function StatusChip({ chip, className }: { chip: { text: string; status: Status } | null; className?: string }) {
+  return chip ? (
+    <span className={`${styles.chip} ${styles[chip.status] ?? ''} ${TONE[chip.status] ?? ''} ${className ?? ''}`}>
+      {chip.text}
+    </span>
+  ) : null;
+}
+
 export function HeroCardView({ card, box, onOpen }: { card: HeroCard; box: Box; onOpen: (v: ViewId) => void }) {
   return (
-    <button
-      type="button"
-      className={`${styles.card} ${styles.hero}`}
-      style={place(box)}
-      title={card.info}
-      aria-label={`${card.label}: ${card.value}${card.second ? `, ${card.second}` : ''}. ${card.rows.map((r) => `${r.label} ${r.text}`).join(', ')}. Open the view.`}
-      onClick={() => onOpen(card.open)}
-    >
+    <section className={`${styles.card} ${styles.hero}`} style={place(box)} aria-label={card.label}>
+      {/* stretched button: the whole card opens the metric's view; the ⓘ sits above it */}
+      <button
+        type="button"
+        className={styles.heroOpen}
+        aria-label={`${card.label}: ${card.value}${card.second ? `, ${card.second}` : ''}. ${card.rows.map((r) => `${r.label} ${r.text}`).join(', ')}. Open the view.`}
+        onClick={() => onOpen(card.open)}
+      />
       <span className={styles.lab}>{card.label}</span>
+      <StatusChip chip={card.status} className={styles.heroChip} />
       <span className={styles.heroVal}>
         {card.value}
         {card.second ? <small>{card.second}</small> : null}
       </span>
-      <span className={styles.sub}>{card.sub}</span>
-      <span className={styles.spark}>
-        <Sparkline actual={card.spark.actual} py={card.spark.py} />
-      </span>
       <Comparator row={card.rows[0]} top={124} bar />
       <Comparator row={card.rows[1]} top={148} bar />
-    </button>
+      <InfoButton
+        id={card.id}
+        title={card.label}
+        info={card.info}
+        className={styles.infoCorner}
+        popupStyle={belowOrAbove(box)}
+      />
+    </section>
   );
 }
 
 export function KpiCardView({ card, box }: { card: KpiCard; box: Box }) {
   return (
-    <section
-      className={`${styles.card} ${styles.kpi}`}
-      style={place(box)}
-      aria-label={card.label}
-      tabIndex={card.alt ? 0 : undefined}
-    >
-      <span className={styles.lab} title={card.info}>
-        {card.label}
-      </span>
+    <section className={`${styles.card} ${styles.kpi}`} style={place(box)} aria-label={card.label}>
+      <span className={styles.lab}>{card.label}</span>
       <span className={styles.kpiVal}>{card.value}</span>
+      <StatusChip chip={card.status} className={styles.kpiChip} />
       <Comparator row={card.row} top={80} bar={false} className={card.alt ? styles.main : undefined} />
       {card.alt ? <Comparator row={card.alt} top={80} bar={false} className={styles.alt} /> : null}
-      <span className={styles.kpiSub}>{card.sub}</span>
+      <InfoButton
+        id={card.id}
+        title={card.label}
+        info={card.info}
+        className={styles.infoCorner}
+        popupStyle={belowOrAbove(box)}
+      />
     </section>
   );
 }
@@ -156,7 +184,7 @@ export function ChartCardView({
   onMonth: (m: number) => void;
 }) {
   const width = box.w - 32;
-  const height = box.h - 40 - (card.legend.length ? 30 : 12);
+  const height = box.h - 40 - 30; // bottom strip: ⓘ + legend
   const ch = card.chart;
   const size = { width, height };
   return (
@@ -164,7 +192,6 @@ export function ChartCardView({
       <div className={styles.ct}>
         <h3 id={`${card.id}-t`}>{card.title}</h3>
         <span className={styles.acts}>
-          <InfoButton text={card.info} label={card.title} up={box.y >= 430} />
           {card.open ? (
             <button type="button" className={styles.openBtn} onClick={() => card.open && onOpen(card.open)}>
               Open {VIEW_NAMES[card.open]} ↗
@@ -187,6 +214,13 @@ export function ChartCardView({
           {ch.kind === 'bubble' ? <Bubble chart={ch} {...size} /> : null}
         </div>
       )}
+      <InfoButton
+        id={card.id}
+        title={card.title}
+        info={card.info}
+        className={styles.infoCorner}
+        popupStyle={belowOrAbove(box)}
+      />
       <Legend items={card.legend} />
     </section>
   );
@@ -208,12 +242,7 @@ export function TableCardView({
       <div className={styles.ct}>
         <h3 id={`${card.id}-t`}>{card.title}</h3>
         <span className={styles.acts}>
-          {card.note && !tight ? (
-            <span className={styles.note} style={{ position: 'static' }}>
-              {card.note}
-            </span>
-          ) : null}
-          <InfoButton text={card.info} label={card.title} up />
+          <InfoButton id={card.id} title={card.title} info={card.info} popupStyle={aboveCard(box)} />
           {card.action ? (
             <button
               type="button"
@@ -244,6 +273,13 @@ export function TableCardView({
             </tr>
           </thead>
           <tbody>
+            {card.empty ? (
+              <tr>
+                <td colSpan={card.columns.length + 1} className={styles.empty}>
+                  {card.empty}
+                </td>
+              </tr>
+            ) : null}
             {card.rows.map((r) => (
               <tr
                 key={r.key}

@@ -1,8 +1,8 @@
 import { bins } from './clients.ts';
-import { CHANNEL_SHORT, INFO, MARKET_NAMES } from './copy.ts';
+import { CHANNEL_SHORT, MARKET_NAMES, info } from './copy.ts';
 import type { DetailIndex } from './detail.ts';
 import { STATUS_SHORT, overdueLoans } from './detail.ts';
-import { fmtEur0, fmtInt, fmtPct } from './format.ts';
+import { fmtCount, fmtEur, fmtEur0, fmtInt, fmtPct } from './format.ts';
 import { kpi } from './loans.ts';
 import { MARKETS } from './manifest.ts';
 import type { Ctx } from './overview.ts';
@@ -29,66 +29,72 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const SP = m.snap(a - 12, mk);
   const cor = m.costOfRisk(w, mk);
 
+  const eur = (v: number | undefined) => fmtEur(v ?? null);
   const kpis = [
     kpi(
       'p1',
       '30+ DPD %',
       fmtPct(m.dpd30(S)),
-      `by balance - ${monthLabel(a)}`,
+      [
+        { label: 'Month-end', value: monthLabel(a) },
+        { label: '30+ DPD balance', value: eur(S ? S.b30_59 + S.b60_89 + S.b90p : undefined) },
+        { label: 'Outstanding', value: eur(S?.outstanding) },
+        { label: 'Planned (Budget)', value: fmtPct(cube.budgetDpd30(a, mk)) },
+      ],
       'riskDown',
       { actual: m.dpd30(S), budget: cube.budgetDpd30(a, mk), py: m.dpd30(SP) },
       sel.cmp,
-      INFO.p1 ?? '',
     ),
     kpi(
       'p2',
       '90+ DPD %',
       fmtPct(m.dpd90(S)),
-      'by balance',
+      [{ label: '90+ DPD balance', value: eur(S?.b90p) }],
       'riskDown',
       { actual: m.dpd90(S), py: m.dpd90(SP) },
       sel.cmp,
-      INFO.p2 ?? '',
     ),
     kpi(
       'p3',
       '30+ by count',
       fmtPct(m.dpd30Count(S)),
-      'of active loans',
+      [
+        { label: 'Loans 30+ DPD', value: fmtCount(S?.dpd30Count ?? null) },
+        { label: 'Active loans', value: fmtCount(S?.active ?? null) },
+      ],
       'riskDown',
       { actual: m.dpd30Count(S), py: m.dpd30Count(SP) },
       sel.cmp,
-      INFO.p3 ?? '',
     ),
     kpi(
       'p4',
       'Vintage 6m bad rate',
       fmtPct(m.vintageBad6(a - 6, mk)),
-      `vintage ${monthLabel(a - 6)}`,
+      [
+        { label: 'Vintage', value: monthLabel(a - 6) },
+        { label: 'Same vintage a year earlier', value: fmtPct(m.vintageBad6(a - 18, mk)) },
+      ],
       'riskDown',
       { actual: m.vintageBad6(a - 6, mk), py: null, ref: { label: 'vs PY vintage', value: m.vintageBad6(a - 18, mk) } },
       sel.cmp,
-      INFO.p4 ?? '',
     ),
     kpi(
       'p5',
       'Roll rate 30→60',
       fmtPct(m.roll3060(a, mk)),
-      'balance rolling one bucket',
+      [{ label: '1–29 → 30+', value: fmtPct(m.roll129(a, mk)) }],
       'riskDown',
       { actual: m.roll3060(a, mk), py: m.roll3060(a - 12, mk) },
       sel.cmp,
-      INFO.p5 ?? '',
     ),
     kpi(
       'p6',
       'Cost of risk',
       fmtPct(cor),
-      'annualised',
+      [{ label: 'Basis', value: 'annualised over the window' }],
       'riskDown',
       { actual: cor, py: cube.available(shift(w, -12)) ? m.costOfRisk(shift(w, -12), mk) : null },
       sel.cmp,
-      INFO.p6 ?? '',
     ),
   ];
 
@@ -98,7 +104,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p7: ChartCard = {
     id: 'p7',
     title: 'DPD buckets, 13 months',
-    info: INFO.p7 ?? '',
+    info: info('p7'),
     open: null,
     legend: BUCKETS.map(([label, , role]) => ({ label, role })),
     chart: {
@@ -125,7 +131,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p8: ChartCard = {
     id: 'p8',
     title: 'Vintage curves',
-    info: INFO.p8 ?? '',
+    info: info('p8'),
     open: null,
     legend: vintages.map((v, k) => ({ label: quarterLabel(v[0] ?? a), role: roles[k] ?? 'c4' })),
     chart: {
@@ -153,7 +159,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p9: ChartCard = {
     id: 'p9',
     title: 'Bad rate by product × market',
-    info: INFO.p9 ?? '',
+    info: info('p9'),
     open: null,
     legend: [],
     chart: {
@@ -174,7 +180,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p10: ChartCard = {
     id: 'p10',
     title: '30+ DPD by market',
-    info: INFO.p10 ?? '',
+    info: info('p10'),
     open: null,
     legend: MARKETS.map((c, k) => ({ label: MARKET_NAMES[c], role: k === 0 ? 'c1' : k === 1 ? 'c2' : 'py' })),
     chart: {
@@ -198,7 +204,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p11: ChartCard = {
     id: 'p11',
     title: 'Roll rates by month',
-    info: INFO.p11 ?? '',
+    info: info('p11'),
     open: null,
     legend: [
       { label: '30 → 60', role: 'c1' },
@@ -252,7 +258,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const p12: ChartCard = {
     id: 'p12',
     title: 'Segments: size × DPD',
-    info: INFO.p12 ?? '',
+    info: info('p12'),
     open: null,
     legend: [
       ...shownMarkets.map((c) => ({
@@ -274,7 +280,10 @@ function overdueTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): Ta
   return {
     id: 'p13',
     title: `Overdue loans - ${monthLabel(cube.closed)} - ${MARKET_NAMES[sel.market]}`,
-    info: INFO.p13 ?? '',
+    info: info('p13', [
+      { label: 'Rows', value: ix ? `worst ${list.length} by DPD (draft sample)` : 'loading' },
+      { label: 'Loan states', value: `${monthLabel(cube.closed)} snapshot for every selected month` },
+    ]),
     columns: [
       { key: 'loan', label: 'Loan id', width: 120, align: 'left' },
       { key: 'client', label: 'Client id', width: 120, align: 'left' },
@@ -307,9 +316,7 @@ function overdueTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): Ta
         { text: STATUS_SHORT[r.status] ?? r.status, status: r.dpd_close >= 90 ? 'off' : 'watch', chip: true },
       ],
     })),
-    note: ix
-      ? `Loan states are the ${monthLabel(cube.closed)} snapshot for every selected month - worst ${list.length} by DPD (draft sample)`
-      : 'Loading the loan sample…',
+    empty: ix ? (list.length ? null : 'No overdue loans') : 'Loading the loan sample…',
     action: null,
     needsDetail: true,
   };

@@ -1,4 +1,4 @@
-<!-- next-id: CAND-003 -->
+<!-- next-id: CAND-006 -->
 
 # Candidates
 
@@ -17,3 +17,27 @@
 **Tags:** sync, hand-off, track-c, spec-drift
 **Promote-to:** defect-patterns.md on second sighting
 **Expires:** 2027-01-21
+
+### CAND-003 · A view's FX basis differs by track (forced CC vs selected basis) · first seen 2026-10-27
+**Where:** Profitability: js-report/lib/engine/profitability.ts (always trCC) vs pbi-report ACME `_measures` Prof * / Conc Share / Heat Cell (selected basis; only `Prof NR Δ % CC` forced); PV-02
+**Why interesting:** totals differ by the FX effect (S FY2025 NR 655.6 vs 667.4) and each track's own reconciliations still pass
+**Watch for:** per-view basis overrides in briefs ("CC by default", "Display flyout still rules"); TREATAS ( param_fx_basis ) on only some columns of one visual
+**Tags:** fx, constant-currency, parity, profitability
+**Promote-to:** defect-patterns.md on second sighting
+**Expires:** 2027-01-25
+
+### CAND-004 · One track ships a placeholder for a metric the other derives from the same data · first seen 2026-10-27
+**Where:** Mirelo C6 Days between loans: B `Card C6 SVG` placeholder ("needs previous-loan dates"); C derives the previous disbursed date per client from fact_loan (scripts/build-sales-data.ts `gap`); MS-03
+**Why interesting:** "the data doesn't have it" goes unchallenged until the other track proves it buildable
+**Watch for:** README "Built vs placeholder" rows; placeholder cards in one track only
+**Tags:** placeholder, data-gap, parity, mirelo
+**Promote-to:** defect-patterns.md on second sighting
+**Expires:** 2027-01-25
+
+### CAND-005 · Cross-track DAX fixture rows generated once, not re-synced after the contract CSV changes · first seen 2026-10-27
+**Where:** pbi-report/ACME Unified PnL/tests/control-totals.dax T-P block still expects the pre-decision var.leaf_count (35/38) and var.nm_codes after nerd updated parity_selections.csv (PV-23)
+**Why interesting:** the B run reports TRUE against stale expectations, so a closed-looking gap stays open
+**Watch for:** T-P rows whose expected differs from the CSV; compare row counts and changed metric ids after every CSV edit
+**Tags:** fixture, parity, dax, stale, sync
+**Promote-to:** defect-patterns.md (relates to CAND-001) on second sighting
+**Expires:** 2027-01-25

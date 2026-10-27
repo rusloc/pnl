@@ -133,3 +133,22 @@ export function InfoCircleIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** Four-point sparkle, the AI assistant's mark (ADR-0009); current colour. */
+export function SparkleIcon(p: IconProps) {
+  return (
+    <Svg size={16} viewBox="0 0 16 16" {...p}>
+      <path d="M8 1.5l1.6 4.4L14 7.5l-4.4 1.6L8 13.5 6.4 9.1 2 7.5l4.4-1.6z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M12.8 11.2l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" />
+    </Svg>
+  );
+}
+
+/** Send arrow for the chat input; current colour. */
+export function SendIcon(p: IconProps) {
+  return (
+    <Svg size={16} viewBox="0 0 16 16" {...p}>
+      <path d="M2.5 8h10M8.5 3.5L13 8l-4.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}

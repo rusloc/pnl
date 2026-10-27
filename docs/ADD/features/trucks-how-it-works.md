@@ -1,6 +1,7 @@
 # ACME Trucks — how the "Time utilization" page works
 
-> Report `pbi-report/ACME Trucks/Trucks.pbip` (2026-10-23, bip). One visible page, "Time utilization", plus a hidden tooltip page.
+> Report `pbi-report/ACME Trucks/Trucks.pbip` (2026-10-23, bip). Two visible pages: "Time utilization" (the redesign, opens
+> first) and "Time util (original)" (the original design, §7), plus a hidden tooltip page.
 > Measure details and DAX: [trucks-measure-dictionary.md](../../model/trucks-measure-dictionary.md). Build record and design
 > decisions: [trucks-report-redesign.md](trucks-report-redesign.md) §0.
 
@@ -117,3 +118,36 @@ and connected without a sign-in prompt. Steps: open `backup/Trucks.pbix` → Vie
 to S4 in turn (the old Week slicer lists weeks under a hierarchy; Plan type MONTH; Calculation Linear / Weighted; Office K3) and
 press Refresh visuals after each → Export → put the JSON in `pbi-report/ACME Trucks/tests/` for bip to add to this table. Do the
 same on `Trucks.pbip` for the visual display times.
+
+## 7. Original page
+
+"Time util (original)" (page `time_util_original`, second tab) is the original "Time util" design, re-added on 2026-10-23 at
+USER request so both versions sit in one report. Source: the original page in
+`pbi-report/ACME Trucks/__backup__/Trucks.Report.2026-10-21-2043.bak`. The redesign page is unchanged and stays first (it opens on
+load); the tooltip page stays hidden. There is no page navigator: switch with the page tabs.
+
+- **Kept as it was:** layout, all 31 objects (27 visuals and 4 groups), their formatting, slicer selections (week
+  "9 (25.2-3.3)", Month, Weighted, Trucks + On spot), visual filters, sync groups and visible texts.
+- **Field references** point at the English model (rename map in [trucks-report-redesign.md](trucks-report-redesign.md) §0.2):
+  `Calendar` → `dim_date` (`Date` → `date`, `_dateSpanBiz` → `week_label`, `_dateBiz` → `business_date_label`),
+  `Справочник ЭКС` → `dim_loader`, `СПИСОК_ЭКС` → `dim_loader_work_type`, `Справочник простоев` → `dim_time_category`,
+  `PLAN_SWITCHER` / `METRIC_SWITCH` → `param_plan_type` / `param_calculation`, `Таблица мер` → `_measures`. The page uses
+  14 measures that still exist under their new names (dictionary, "Was" column). No measure was re-added. The saved Plan type
+  selection follows the caption change `MONTH` → `Month`.
+- **Page filter:** `dim_loader[contractor]` = blank, page level only, so the redesign's numbers do not change. The original
+  page was a drillthrough target on that field. The binding was removed and the filter kept as a plain page filter: nothing in
+  the report drills to it, and the validator asks a drillthrough page for a Back button.
+- **Theme:** the report theme is the redesign's `acme-trucks-theme.json`. The original page ran on the base theme (its custom
+  theme only changed data colours, which the page does not use). So the page pins the original values where the new theme differs: page
+  background white, slicer header and item text 12 pt, value-axis labels 9 pt grey `#605E5C`, blank chart title 14 pt and
+  axis-title spacing, card and label-table text `#252423`, Loader slicer border black. A render of the page under the original
+  theme and one under the new theme with these values match pixel for pixel, apart from the chart plot area (2 px lower) and
+  the noisy KPI cards.
+- **Serialization fixes (no visible effect):** `nativeQueryRef` added to the 21 projections, and 7 repeated filter IDs inside
+  the page renamed so that each ID is unique.
+- **What looks different from the live original:** the category captions come from the model, so the page shows "Capital
+  repairs", "Awaiting trucks", "Conservation / reserve" (live: "Conservation", "Awaiting", "Reserved"). The longer
+  "Conservation / reserve" widens the bar charts' label area, so the thin dark divider line now crosses the right edge of the
+  category labels. The KPI cards change on every refresh (`_KPI Noise`).
+- **Test:** `tests/time-util-original.dax` checks the page's bar, label and KPI measures in its saved context against the live
+  baseline `tests/baseline-live.csv` (scopes `waterfall_saved`, `kpi_saved`): 194/194 TRUE.

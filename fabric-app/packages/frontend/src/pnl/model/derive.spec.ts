@@ -1,6 +1,6 @@
 // The variance rules the app derives client-side (ADR-0006 §16), checked against the
 // DAX of `_PL Δ A/B/LE`, `PL Δ A/B %`, `PL % NR` and `KPI Δ A/B` in
-// pbi-report/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl,
+// pbi-report/ACME Unified PnL/ACME Unified PnL.SemanticModel/definition/tables/_measures.tmdl,
 // including DAX blank arithmetic (BLANK − x = −x; DIVIDE by 0 or BLANK = BLANK).
 import { describe, expect, it } from 'vitest';
 

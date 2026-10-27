@@ -32,7 +32,7 @@ function liveLike(status: (zone: ZoneKey) => ZoneStatus): PnlDataSource {
     loadFigures: async (filter, reference) => {
       const f = await loadSampleFigures(filter, reference);
       const zones = Object.fromEntries((Object.keys(f.zones) as ZoneKey[]).map((z) => [z, status(z)])) as Figures['zones'];
-      return { ...f, sample: false, zones, notices: ['Notice from the model'], dataStatus: 'Closed through Sep 2026  ·  Refreshed 21 Oct 2026 18:00' };
+      return { ...f, sample: false, zones, notices: ['Notice from the model'], dataStatus: 'Closed through Sep 2026  ·  Refreshed 21 Oct 2026 18:00', refreshedAt: '2026-10-21T18:00:00' };
     },
   };
 }
@@ -71,26 +71,28 @@ function expectDescribedByReason(group: HTMLElement) {
 }
 
 describe('sample mode', () => {
-  it('shows one notice-strip line naming the filters the sample figures ignore', async () => {
+  it('shows one notice row in the applied-filters pop-up naming the filters the sample figures ignore', async () => {
     await renderApp();
-    const strip = screen.getByRole('note');
-    expect(strip).toHaveTextContent(SAMPLE_FIGURES_NOTICE);
-    expect(strip.textContent?.split('Sample figures (').length).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: /^Show the applied filters/ }));
+    const dialog = screen.getByRole('dialog', { name: 'Applied filters' });
+    const rows = within(dialog).getAllByTestId('notice-row');
+    expect(rows.filter((r) => r.textContent?.includes(SAMPLE_FIGURES_NOTICE))).toHaveLength(1);
+    expect(dialog.textContent?.split('Sample figures (').length).toBe(2);
   });
 
   it('switches off fiscal year, month and time view with the reason (period re-titles the window)', async () => {
     await renderApp();
     const dialog = openPanel('Period');
-    expectOff(within(dialog).getByRole('button', { name: 'FY2025' }));
-    expectOff(within(dialog).getByRole('button', { name: 'Jan' }));
-    expectOff(within(dialog).getByRole('button', { name: 'Month' }));
-    expectDescribedByReason(within(dialog).getByRole('group', { name: 'Fiscal year' }));
-    expectDescribedByReason(within(dialog).getByRole('group', { name: 'Month' }));
-    expectDescribedByReason(within(dialog).getByRole('group', { name: 'Time view' }));
-    fireEvent.click(within(dialog).getByRole('button', { name: 'FY2025' }));
+    expectOff(within(dialog).getByRole('radio', { name: '2025' }));
+    expectOff(within(dialog).getByRole('radio', { name: 'Jan' }));
+    expectOff(within(dialog).getByRole('radio', { name: 'One month' }));
+    expectDescribedByReason(within(dialog).getByRole('radiogroup', { name: 'Year' }));
+    expectDescribedByReason(within(dialog).getByRole('radiogroup', { name: 'Up to' }));
+    expectDescribedByReason(within(dialog).getByRole('radiogroup', { name: 'Show' }));
+    fireEvent.click(within(dialog).getByRole('radio', { name: '2025' }));
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: YTD · Sep 2026');
-    expect(screen.getByText('YTD Sep 2026 · Actual')).toBeVisible();
+    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: Showing Jan – Sep 2026 - year to date');
+    expect(screen.getByText('YTD Sep 2026 - Actual')).toBeVisible();
   });
 
   it('switches off base version and Compare A / B, so a column can never read "Latest est." over Budget figures (F-06, F-07)', async () => {
@@ -152,36 +154,38 @@ describe('sample mode', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: '$k' }));
     fireEvent.click(within(dialog).getByRole('switch', { name: 'Full-year outlook columns' }));
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(screen.getByText('Line · USD k')).toBeVisible();
+    expect(screen.getByText('Line - USD k')).toBeVisible();
     expect(screen.queryByText('Full year 2026')).toBeNull();
   });
 
-  it('switches off "Compared with" so the Analysis headings stay vs Budget, like the bars (C-45)', async () => {
+  it('has no Analysis toolbar (parity rule 1); the sample bridge shows and the redesigned panels say they have no sample figures', async () => {
     await renderApp('ana');
-    const prior = screen.getByRole('button', { name: 'Prior year' });
-    expectOff(prior);
-    fireEvent.click(prior);
+    expect(screen.queryByRole('group', { name: 'Compared with' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Prior year' })).toBeNull();
+    expect(screen.getByRole('heading', { name: /^Net revenue bridge/ })).toBeVisible();
+    expect(screen.getAllByTestId('bridge-step').length).toBeGreaterThan(2);
+    expect(screen.getByTestId('sample-empty')).toHaveTextContent(/No sample figures for the profit bridge/);
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
     expect(screen.getByRole('heading', { name: /^Largest variances vs Budget/ })).toBeVisible();
-    expect(screen.getByText(/^Budget to Actual, USD millions/)).toBeVisible();
+    expect(screen.getByTestId('sample-empty')).toHaveTextContent(/No sample figures for the largest variances/);
+    // The cut is a query input: off while sample (LSN-002).
+    expectOff(screen.getByRole('button', { name: 'Region' }));
   });
 
-  it('switches off "Break down by" and names the breakdown the sample shows (F-21)', async () => {
+  it('Profitability is Region only (PV-19): no breakdown control; the sample has no profitability figures, the table says so', async () => {
     await renderApp('prof');
-    const region = screen.getByRole('button', { name: 'Region' });
-    expectOff(region);
-    fireEvent.click(region);
-    expect(screen.getByRole('heading', { name: /^Profitability by channel/ })).toBeVisible();
-    expect(screen.getByRole('heading', { name: /^Contribution margin by channel/ })).toBeVisible();
+    expect(screen.queryByRole('group', { name: 'Break down by' })).toBeNull();
+    expect(screen.getByRole('heading', { name: /^Profitability by Region/ })).toBeVisible();
+    expect(screen.getAllByTestId('sample-empty')[0]).toHaveTextContent(/No sample figures for the profitability table/);
     switchCompany('Commerce Cloud');
-    expect(await screen.findByRole('heading', { name: /^Profitability by sales motion/ })).toBeVisible();
-    expectOff(screen.getByRole('button', { name: 'Region' }));
+    expect(await screen.findByRole('heading', { name: /^Profitability by Region/ })).toBeVisible();
   });
 
   it('gives every view the same sample caveat', async () => {
     for (const view of ['pnl', 'kpi', 'ana', 'prof'] as const) {
       const { unmount } = render(<PnlApp source={sampleSource} initialView={view} />);
       const chips = await screen.findAllByRole('status');
-      expect(chips[0]).toHaveTextContent(`Sample data · ${SAMPLE_FIGURES_DETAIL}`);
+      expect(chips[0]).toHaveTextContent(`Sample data - ${SAMPLE_FIGURES_DETAIL}`);
       unmount();
     }
   });
@@ -192,30 +196,36 @@ describe('sample mode', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expand all' }));
     expect(screen.getByRole('button', { name: 'Collapse all' })).toBeEnabled();
     switchCompany('Commerce Cloud');
-    expect(screen.getByText(/^Commerce Cloud · /)).toBeVisible();
-    fireEvent.click(screen.getByRole('tab', { name: 'Key figures' }));
-    const kpi = screen.getByRole('region', { name: 'Key figures' });
+    expect(screen.getByTestId('status-line')).toHaveTextContent(/^Commerce Cloud - /);
+    fireEvent.click(screen.getByRole('tab', { name: 'Vitals' }));
+    const kpi = screen.getByRole('region', { name: 'Vitals' });
     expect(kpi).toBeVisible();
-    // Sample tiles carry comparison rows read back from the mockup's Δ text (kpi-card-v2); nothing is invented (LSN-002).
-    expect(within(kpi).getAllByTestId('compare-row').length).toBeGreaterThan(0);
-    expect(within(kpi).getAllByText('vs Budget').length).toBeGreaterThan(0);
+    // The mockup has no Vitals cards: the view says so rather than inventing numbers (LSN-002).
+    expect(within(kpi).getByTestId('sample-empty')).toHaveTextContent(/No sample figures for the vitals/);
   });
 });
 
 // ADR-0006 phase 2: live zones — no gates, the model's notices and status, a chip per zone,
 // and a loading / error panel where a zone has no numbers to show.
 describe('live mode', () => {
-  it('drops the notice and every gate, shows the model’s notices and data status, and flags each zone live', async () => {
+  it('drops the notice and every gate, shows the model’s notices and refresh time, and flags each zone live', async () => {
     await renderApp('pnl', liveSource);
     expect(screen.queryByText(SAMPLE_FIGURES_NOTICE)).toBeNull();
-    expect(screen.getByRole('note')).toHaveTextContent('Notice from the model');
-    expect(screen.getByText(/Refreshed 21 Oct 2026 18:00/)).toBeVisible();
-    expect(screen.getByRole('status')).toHaveTextContent(`Live · semantic model · ${LIVE_ZONE_DETAIL}`);
+    fireEvent.click(screen.getByRole('button', { name: 'Show the applied filters (1 notice)' }));
+    const popup = screen.getByRole('dialog', { name: 'Applied filters' });
+    expect(within(popup).getAllByTestId('notice-row')).toHaveLength(1);
+    expect(within(popup).getByTestId('notice-row')).toHaveTextContent('Notice from the model');
+    expect(within(popup).queryByText(SAMPLE_FIGURES_NOTICE)).toBeNull();
+    fireEvent.click(within(popup).getByRole('button', { name: 'Close' }));
+    expect(screen.getByTestId('status-line')).toHaveTextContent(
+      'Consumer Products - Management reporting - Closed through Sep 2026 - Refreshed 21 Oct 2026 18:00'
+    );
+    expect(screen.getByRole('status')).toHaveTextContent(`Live - semantic model - ${LIVE_ZONE_DETAIL}`);
     let dialog = openPanel('Period');
-    expect(within(dialog).getByRole('button', { name: 'FY2025' })).toBeEnabled();
-    expect(within(dialog).getByRole('button', { name: 'Jun' })).toBeEnabled();
-    expect(within(dialog).getByRole('button', { name: 'LTM' })).toBeEnabled();
-    expect(within(dialog).getByRole('group', { name: 'Fiscal year' })).not.toHaveAttribute('aria-describedby');
+    expect(within(dialog).getByRole('radio', { name: '2025' })).toBeEnabled();
+    expect(within(dialog).getByRole('radio', { name: 'Jun' })).toBeEnabled();
+    expect(within(dialog).getByRole('radio', { name: 'Last 12 months' })).toBeEnabled();
+    expect(within(dialog).getByRole('radiogroup', { name: 'Year' })).not.toHaveAttribute('aria-describedby');
     dialog = openPanel('Versions');
     expect(within(dialog).getByRole('radio', { name: /^Latest estimate/ })).toBeEnabled();
     expect(within(within(dialog).getByRole('group', { name: 'Compare B' })).getByRole('button', { name: 'None' })).toBeEnabled();
@@ -228,10 +238,13 @@ describe('live mode', () => {
     expect(within(dialog).queryByText(SAMPLE_STATEMENT_ONLY_NOTE)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Analysis' }));
-    expect(screen.getByRole('button', { name: 'Prior year' })).toBeEnabled();
-    fireEvent.click(screen.getByRole('tab', { name: 'Profitability' }));
-    expect(screen.getByRole('button', { name: 'Region' })).toBeEnabled();
+    // Live, the analysis headings follow Compare A (C-40, parity rule 1).
+    expect(screen.getByRole('heading', { name: /^Profit bridge: Budget Adj\. EBITDA/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    expect(screen.getByRole('heading', { name: /^Largest variances vs Budget/ })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Price tier' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Profitability' }));
+    expect(screen.queryByRole('group', { name: 'Break down by' })).toBeNull();
   });
 
   it('re-titles the live statement from the filters and re-queries on a filter change', async () => {
@@ -245,30 +258,55 @@ describe('live mode', () => {
     };
     await renderApp('pnl', source);
     const dialog = openPanel('Period');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Jun' }));
-    fireEvent.click(within(dialog).getByRole('button', { name: 'QTD' }));
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Jun' }));
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Quarter to date' }));
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     await waitFor(() => expect(calls.at(-1)).toMatchObject({ month: 6, timeView: 'qtd' }));
-    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: QTD · Jun 2026');
-    expect(await screen.findByText('Q2 2026 · Actual')).toBeVisible();
+    expect(screen.getByRole('button', { name: /^Period:/ })).toHaveAttribute('aria-label', 'Period: Showing Apr – Jun 2026 - quarter to date');
+    expect(await screen.findByText('QTD Jun 2026 - Actual')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: /^Versions:/ }));
     fireEvent.click(within(within(screen.getByRole('dialog')).getByRole('group', { name: 'Compare A' })).getByRole('button', { name: 'Latest est.' }));
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     await waitFor(() => expect(calls.at(-1)?.compareA).toBe('LE'));
     expect(screen.getByText('vs Latest estimate')).toBeVisible();
+    // Parity rules 1, 13: the analysis headings, the Vitals caption, the Profitability subtitle and the
+    // How to read all follow the new Compare A; the statement footnote names the bar comparison.
+    expect(screen.getByTestId('statement-footnote')).toHaveTextContent('bars in Δ % vs Latest estimate on a ±15% scale');
+    fireEvent.click(screen.getByRole('tab', { name: 'Analysis' }));
+    expect(screen.getByRole('heading', { name: /^Profit bridge: Latest est\. Adj\. EBITDA/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    expect(screen.getByRole('heading', { name: /^Largest variances vs Latest est\./ })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'How to read' }));
+    expect(screen.getByRole('dialog', { name: 'How to read - Analysis' })).toHaveTextContent('Apr – Jun 2026 - quarter to date - USD m - vs Latest estimate and Prior year');
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Vitals' }));
+    expect(screen.getByText('Changes vs Latest estimate and Prior year, same months')).toBeVisible();
+    fireEvent.click(screen.getByRole('tab', { name: 'Profitability' }));
+    expect(screen.getByTestId('prof-table-subtitle')).toHaveTextContent('Constant currency (FY2026 budget rates) - USD m - vs Latest est. - opex booked by region, allocated for other breakdowns');
+  });
+
+  it('units buttons carry the selected currency’s symbol (parity rule 14)', async () => {
+    await renderApp('pnl', liveSource);
+    const dialog = openPanel('Display');
+    expect(within(dialog).getByRole('button', { name: '$m' })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'EUR' }));
+    expect(within(dialog).getByRole('button', { name: '€m' })).toBeVisible();
+    expect(within(dialog).getByRole('button', { name: '€k' })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'GBP' }));
+    expect(within(dialog).getByRole('button', { name: '£k' })).toBeVisible();
   });
 
   it('shows a loading panel while a zone is in flight and an error panel with the reason when the model could not answer', async () => {
     const mixed = liveLike((zone) =>
-      zone === 'kpi' ? { kind: 'loading' } : zone === 'bridge' ? { kind: 'error', reason: 'Row limit of 20 exceeded', requestId: 'req-9' } : { kind: 'live', requestId: 'req-1' }
+      zone === 'vitals' ? { kind: 'loading' } : zone === 'bridge' ? { kind: 'error', reason: 'Row limit of 20 exceeded', requestId: 'req-9' } : { kind: 'live', requestId: 'req-1' }
     );
     await renderApp('kpi', mixed);
-    expect(screen.getByRole('status')).toHaveTextContent(zoneLoadingText('key figures'));
+    expect(screen.getByRole('status')).toHaveTextContent(zoneLoadingText('vitals'));
     fireEvent.click(screen.getByRole('tab', { name: 'Analysis' }));
     expect(screen.getByRole('alert')).toHaveTextContent(zoneErrorText('net revenue bridge', 'Row limit of 20 exceeded'));
     expect(screen.getByRole('alert')).toHaveTextContent('request req-9');
-    // The variances card next to it is live and keeps its chip.
-    expect(screen.getByRole('status')).toHaveTextContent('Live · semantic model');
+    // The profit bridge next to it is live and keeps its chip.
+    expect(screen.getByRole('status')).toHaveTextContent('Live - semantic model');
   });
 
   it('disables the Group option of the picker when the model shows the user one company only (Q0, N-04)', async () => {
@@ -291,6 +329,6 @@ describe('live mode', () => {
       loadFigures: liveSource.loadFigures,
     };
     await renderApp('pnl', none);
-    expect(screen.getByRole('note')).toHaveTextContent(/no P&L access/);
+    expect(screen.getByRole('alert')).toHaveTextContent(/no P&L access/);
   });
 });

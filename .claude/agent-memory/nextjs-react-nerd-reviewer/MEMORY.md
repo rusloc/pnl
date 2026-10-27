@@ -1,6 +1,8 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-10-27 · Parity B vs C fixes done (0 Track C expected-fail); harness js-report/lib/test-utils/parity/; ⓘ copy export `npm run export:info-copy`
+- 2026-10-27 · CAND-010: band the displayed Δ, not the raw one; CAND-009: "; " between formulas, " - " in prose
 - 2026-10-27 · Mirelo /sales draft built (ADR-0011 (c)); README js-report/app/sales/README.md, .sync note 2026-10-26-mirelo-sales-track-c-draft.md
 - 2026-10-27 · PG-004: stopped `next start` keeps the port on Windows (stale server = fake test failures); kill by port
 - 2026-10-27 · CAND-004: modal content swap drops focus to body; refocus close button on content change
@@ -15,7 +17,7 @@
 ## Topic files
 - platform-gotchas.md — 4 entries · stalest 2026-10-22 · PG-NNN
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 6 awaiting second hit
+- candidates.md        — 10 awaiting second hit
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
@@ -28,10 +30,17 @@
 - 2026-10-23: chat (ADR-0009 §4) in js-report/lib/chat; contract .sync/2026-10-23-track-c-chat-contract.md + machine copy .sync/track-c/chat-tools.json (`npm run export:chat-tools`, stale file fails a test). Backend = small CPU model (archi note): keep schemas terse, codes checked in code not as enums, results ≤ 1,600 chars.
 - Chat tool args = patch over current Selection, strict reject (not codec fallback), then codec round trip; unbuilt = restrictToBuilt() diff.
 
+## P&L redesign facts (verify before citing)
+- Engine: slices.ts rebuilds C-31 allocation at runtime (line × NR(slice) ÷ NR(region) per entity×version×month×region) from pl-*.parquet; no allocated file shipped. ops.parquet now loaded by dataset.ts.
+- view-context.ts = plans (Compare A/B, bridge cmp = A else B else PY, Budget, PY) + tr / trAct / trCC; Profitability always CC; status chips vs Budget only (thresholds.ts).
+- Glass pop-ups shared: components/glass.tsx (PopupProvider scope prop); /sales wraps it in components/sales/popup.tsx.
+
 ## Mirelo /sales facts (verify before citing)
 - Engine lib/sales (framework-free), build scripts/build-sales-data.ts reads data/mirelo_sales_dummy_data/parquet → public/data/sales (197 kB first paint, 915 kB total). `npm run build:sales-data` before `npm test`.
 - Distinct-client returning % and MEDIANX are per-window precomputed in the build (window-stats.parquet: tv × anchor × market × segment); everything else is additive monthly cubes translated per month × market in cube.ts.
 - Detail sample is exact for its caps (top-N per month × market / agent × month / overdue per market / cohort clients + full client histories); tested against raw fact_loan.
+- 2026-10-27 ADR-0012 applied: card face title · value · Δ rows · status chip; sub-lines → ⓘ values (copy.ts info(id, values)); How to read per view.
+- 2026-10-27 USER review: no period banner (text → period tooltip + How-to-read), no card corner markers, no in-card sparklines (design-requirements §1 "Visual first, minimum text" applies to Mirelo too, overriding design-tokens card anatomy).
 - Control totals (control_totals_eur.csv) reconcile for ALL/PL/RO/PT × Sep 2026, FY2024, FY2025, FY2026 YTD + every closed month.
 
 ## Open questions

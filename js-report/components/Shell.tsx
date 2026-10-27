@@ -4,16 +4,24 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createDatasetLoader, type Dataset } from '@/lib/data/dataset';
 import { createEngine } from '@/lib/engine';
+import { companyName } from '@/lib/engine/header';
+import { hideEmptyLines } from '@/lib/engine/hide-empty';
 import { windowLabel } from '@/lib/engine/notices';
-import type { EntityCode, Selection } from '@/lib/engine/types';
+import type { EntityCode, EntityView, Selection } from '@/lib/engine/types';
 import { createSelectionCodec, parseEntity, restrictToBuilt } from '@/lib/state/selection-schema';
-import { FilterRail, type PanelKey } from './FilterRail';
+import { joinQuery, parseViewState, serializeViewState, type ViewState } from '@/lib/state/view-state';
+import { CompanyPicker } from './CompanyPicker';
+import { collapsedRows, expandedRows, openRows, type Expansion } from './expansion';
+import { FilterRail, isPanelKey, type Overlay } from './FilterRail';
+import { PopupProvider } from './glass';
 import { Flyout } from './Flyout';
 import { Header } from './Header';
-import { InfoIcon } from './Icons';
 import styles from './ledger.module.css';
 import { StatementTable } from './StatementTable';
 import { themeVars } from './theme';
+import { AnalysisBridges, Variances } from './views/AnalysisView';
+import { ProfitabilityCharts, ProfitabilityTable } from './views/ProfitabilityView';
+import { VitalsView } from './views/VitalsView';
 
 // Client root (ADR-0002 §2.5): loads public/data, owns Selection ↔ URL (F-37) and passes engine results down.
 // Orchestration only: every number comes from lib/engine.
@@ -71,18 +79,16 @@ export function Shell() {
   );
 }
 
-const DEFAULT_OPEN = ['GR', 'GTN', 'COR', 'VSC', 'OPEX']; // design guide §6.1, Standard detail (M-20)
-
 function Ledger({ dataset, search }: { dataset: Dataset; search: string }) {
   const m = dataset.manifest;
   const codec = useMemo(() => createSelectionCodec(m), [m]);
   const engine = useMemo(() => createEngine(dataset), [dataset]);
   const defaults = useMemo(() => codec.defaults('P'), [codec]);
-  const sel = useMemo(
-    () => restrictToBuilt(codec.parse(new URLSearchParams(search)), defaults),
-    [codec, search, defaults],
-  );
-  const canonical = codec.serialize(sel);
+  const sel = useMemo(() => restrictToBuilt(codec.parse(new URLSearchParams(search))), [codec, search]);
+  // Sub-page and variances controls (p, lvn, lvm, lvc): validated like the Selection keys, appended after them.
+  const vs = useMemo(() => parseViewState(new URLSearchParams(search)), [search]);
+  const paged = sel.view === 'analysis' || sel.view === 'profitability';
+  const canonical = joinQuery(codec.serialize(sel), serializeViewState(paged ? vs : { ...vs, page: 1 }));
 
   // Invalid or unbuilt input never stays in the URL: rewrite it to the state actually shown (ADR-0002 §2.4).
   useEffect(() => {
@@ -90,109 +96,192 @@ function Ledger({ dataset, search }: { dataset: Dataset; search: string }) {
       window.history.replaceState(null, '', canonical ? `?${canonical}` : window.location.pathname);
   }, [canonical, search]);
 
-  const update = useCallback(
-    (patch: Partial<Selection>) => {
-      const next = codec.serialize({ ...sel, ...patch });
-      window.history.replaceState(null, '', next ? `?${next}` : window.location.pathname);
+  const go = useCallback(
+    (next: Selection, view: ViewState) => {
+      const q = joinQuery(codec.serialize(next), serializeViewState(view));
+      window.history.replaceState(null, '', q ? `?${q}` : window.location.pathname);
     },
-    [codec, sel],
+    [codec],
   );
+  // A view switch opens its first sub-page (ADR-0004 pager).
+  const update = useCallback(
+    (patch: Partial<Selection>) =>
+      go({ ...sel, ...patch }, patch.view && patch.view !== sel.view ? { ...vs, page: 1 } : vs),
+    [go, sel, vs],
+  );
+  const updateView = useCallback((patch: Partial<ViewState>) => go(sel, { ...vs, ...patch }), [go, sel, vs]);
+
+  // ← → page Analysis and Profitability (build-brief §0), unless the key belongs to a field, a pop-up or a control.
+  useEffect(() => {
+    if (!paged) return;
+    const ctrl = new AbortController();
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const t = e.target;
+        if (
+          t instanceof Element &&
+          t.closest('input, select, textarea, [role="dialog"], [role="radiogroup"], [role="tablist"]')
+        )
+          return;
+        updateView({ page: e.key === 'ArrowLeft' ? 1 : 2 });
+      },
+      { signal: ctrl.signal },
+    );
+    return () => ctrl.abort();
+  }, [paged, updateView]);
 
   const [wide, setWide] = useState(false);
-  const [panel, setPanel] = useState<PanelKey | null>(null);
-  const closePanel = useCallback(() => setPanel(null), []);
+  // One pop-over at a time: a filter flyout, the company picker or the applied-filters pop-up
+  const [overlay, setOverlay] = useState<Overlay | null>(null);
+  const closeOverlay = useCallback(() => setOverlay(null), []);
+  const toggleOverlay = (key: Overlay) => setOverlay((o) => (o === key ? null : key));
 
-  // M-21: expansion persists across filter changes and resets when the entity or cost lens changes.
-  const expansionKey = `${sel.entity}|${sel.costLens}`;
-  const [expansion, setExpansion] = useState({ key: expansionKey, open: new Set(DEFAULT_OPEN) });
-  const open = expansion.key === expansionKey ? expansion.open : new Set(DEFAULT_OPEN);
+  const statement = useMemo(() => engine.statement(sel), [engine, sel]);
+  const howToRead = useMemo(() => (sel.view === 'statement' ? null : engine.howToRead(sel)), [engine, sel]);
+
+  // M-20 / M-21 (parity rule 5): the statement opens collapsed; expansion persists across every filter change and
+  // resets to collapsed only when the company changes. Presets read the full spine, so rows that Hide empty lines
+  // drops do not change them.
+  const [expansion, setExpansion] = useState<Expansion>({ entity: sel.entity, open: null });
+  const collapsed = useMemo(() => collapsedRows(statement.rows), [statement]);
+  const open = openRows(expansion, sel.entity, collapsed);
+  const setOpen = (next: ReadonlySet<string>) => setExpansion({ entity: sel.entity, open: next });
   const toggle = (code: string) => {
     const next = new Set(open);
     if (!next.delete(code)) next.add(code);
-    setExpansion({ key: expansionKey, open: next });
+    setOpen(next);
   };
 
-  const statement = useMemo(() => engine.statement(sel), [engine, sel]);
   const notices = useMemo(() => engine.notices(sel), [engine, sel]);
-  const status = engine.dataStatus();
-  const closedMonth = m.tables.dim_month.find((d) => d.month_key === status.lastClosedMonth);
+  const period = useMemo(() => engine.period(sel), [engine, sel]);
+  const header = useMemo(() => engine.header(sel), [engine, sel]); // viewer's time zone: client-only render
   const units = m.tables.param_units.find((u) => u.units_code === sel.units) ?? { divisor: 1_000_000, decimals: 1 };
   const costMultiplier =
     m.tables.param_cost_sign.find((c) => c.cost_sign_code === sel.costSign)?.display_multiplier_for_costs ?? 1;
   const window_ = windowLabel(m, sel);
-  const anchor = m.tables.dim_month.find((d) => d.fiscal_year === sel.fy && d.month_number === sel.month);
-  const anchorLabel = `${anchor?.month_name ?? sel.month} ${sel.fy}`;
   // F-37: absolute link from the runtime hook; Ledger mounts only in the browser (after the data load), so the
   // window fallback never runs on the server.
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? `${window.location.origin}${window.location.pathname}`;
   const shareUrl = `${base}${canonical ? `?${canonical}` : ''}`;
-  const compares = [sel.compareA, sel.compareB]
-    .filter((c) => c !== 'NONE')
-    .map((c) => ({ B: 'Budget', LE: 'Latest est.', PY: 'Prior year' })[c]);
+  const rows = hideEmptyLines(statement.rows, sel, units); // M-22, rounded in the selected units
 
-  const companies = [
-    ...m.tables.dim_entity.map((e) => ({ code: e.entity_code, name: e.short_name })),
-    { code: 'GROUP' as const, name: m.tables.dim_entity[0]?.consolidation_group ?? 'ACME Group' },
-  ];
+  const companies = (['P', 'S', 'GROUP'] as const satisfies readonly EntityView[]).map((code) => ({
+    code,
+    name: companyName(m, code),
+  }));
 
   return (
     <div className={styles.app} style={themeVars(sel.entity)}>
       <FilterRail
         wide={wide}
         onToggleWide={() => setWide((w) => !w)}
-        openPanel={panel}
-        onTogglePanel={(key) => setPanel((p) => (p === key ? null : key))}
+        openPanel={overlay}
+        onTogglePanel={toggleOverlay}
         summaries={{
-          period:
-            sel.timeView === 'FY'
-              ? `Full year · FY${sel.fy}`
-              : `${sel.timeView === 'MTD' ? 'Month' : sel.timeView} · ${anchorLabel}`,
-          versions: `${{ A: 'Actual', LE: 'Latest estimate', B: 'Budget' }[sel.base]}${compares.length ? ` vs ${compares.join(', ')}` : ''}`,
+          period: period.summary, // period picker v2: the rail tooltip uses the summary sentence
+          versions: header.rail.versions,
           slice: 'All slices',
-          display: `${sel.currency} ${sel.units === 'M' ? 'm' : 'k'} · ${sel.fxBasis === 'CC' ? 'constant currency' : 'actual rates'}`,
+          display: header.rail.display,
         }}
       />
-      {panel && (
+      {overlay === 'company' && (
+        <CompanyPicker
+          entity={sel.entity}
+          companies={companies}
+          wide={wide}
+          onSelect={(entity) => update({ entity })}
+          onClose={closeOverlay}
+        />
+      )}
+      {overlay !== null && isPanelKey(overlay) && (
         <Flyout
-          panel={panel}
+          panel={overlay}
           wide={wide}
           sel={sel}
           defaults={defaults}
           manifest={m}
+          period={period}
           onChange={update}
-          onClose={closePanel}
+          onClose={closeOverlay}
         />
       )}
       <main className={styles.main}>
-        <Header
-          sel={sel}
-          companies={companies}
-          dataStatus={closedMonth ? `Actuals closed through ${closedMonth.month_name} ${closedMonth.fiscal_year}` : ''}
-          context={engine.context(sel)}
-          shareUrl={shareUrl}
-          onChange={update}
-        />
-        <div className={styles.content}>
-          {notices.length > 0 && (
-            <ul className={styles.notices} aria-label="Notices">
-              {notices.map((n) => (
-                <li key={n.code}>
-                  <InfoIcon />
-                  {n.text}
-                </li>
-              ))}
-            </ul>
-          )}
-          <StatementTable
-            rows={statement.rows}
+        {/* one glass pop-up at a time across header and content; a view or page change closes it */}
+        <PopupProvider scope={`${sel.view}-${vs.page}`}>
+          <Header
             sel={sel}
-            windowLabel={window_}
-            format={{ units, unitsLabel: `${sel.currency} ${sel.units === 'M' ? 'm' : 'k'}`, costMultiplier }}
-            open={open}
-            onToggle={toggle}
+            status={header.status}
+            filters={header.filters}
+            notices={notices}
+            filtersOpen={overlay === 'filters'}
+            onToggleFilters={() => toggleOverlay('filters')}
+            onCloseFilters={closeOverlay}
+            shareUrl={shareUrl}
+            onChange={update}
+            pager={paged ? { page: vs.page, onPage: (page) => updateView({ page }) } : null}
+            howToRead={howToRead}
           />
-        </div>
+          <div className={styles.content}>
+            {sel.view === 'statement' ? (
+              <StatementTable
+                rows={rows}
+                sel={sel}
+                windowLabel={window_}
+                format={{ units, unitsLabel: `${sel.currency} ${sel.units === 'M' ? 'm' : 'k'}`, costMultiplier }}
+                open={open}
+                onToggle={toggle}
+                onExpandAll={() => setOpen(expandedRows(statement.rows))}
+                onCollapseAll={() => setOpen(collapsed)}
+              />
+            ) : (
+              <RedesignedView engine={engine} sel={sel} vs={vs} onViewState={updateView} />
+            )}
+          </div>
+        </PopupProvider>
       </main>
     </div>
+  );
+}
+
+/** Vitals · Analysis · Profitability (P&L views redesign v4): engine view models in, components out. */
+function RedesignedView({
+  engine,
+  sel,
+  vs,
+  onViewState,
+}: {
+  engine: ReturnType<typeof createEngine>;
+  sel: Selection;
+  vs: ViewState;
+  onViewState: (patch: Partial<ViewState>) => void;
+}) {
+  const vm = useMemo(() => {
+    if (sel.view === 'kpi') return { kind: 'vitals', vm: engine.vitals(sel) } as const;
+    if (sel.view === 'analysis')
+      return vs.page === 1
+        ? ({ kind: 'bridges', vm: engine.analysis(sel) } as const)
+        : ({ kind: 'variances', vm: engine.variances(sel, vs.top, vs.mode, vs.cut) } as const);
+    if (sel.view === 'profitability')
+      return { kind: vs.page === 1 ? 'profTable' : 'profCharts', vm: engine.profitability(sel) } as const;
+    return null;
+  }, [engine, sel, vs]);
+  if (!vm) return null;
+  return (
+    <section
+      id={`view-${sel.view}`}
+      role="tabpanel"
+      aria-label={`${sel.view === 'kpi' ? 'Vitals' : sel.view === 'analysis' ? 'Analysis' : 'Profitability'}${sel.view === 'kpi' ? '' : `, page ${vs.page} of 2`}`}
+      style={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', minHeight: 0 }}
+    >
+      {vm.kind === 'vitals' ? <VitalsView vm={vm.vm} /> : null}
+      {vm.kind === 'bridges' ? <AnalysisBridges vm={vm.vm} /> : null}
+      {vm.kind === 'variances' ? (
+        <Variances vm={vm.vm} top={vs.top} mode={vs.mode} cut={vs.cut} onChange={(patch) => onViewState(patch)} />
+      ) : null}
+      {vm.kind === 'profTable' ? <ProfitabilityTable vm={vm.vm} /> : null}
+      {vm.kind === 'profCharts' ? <ProfitabilityCharts vm={vm.vm} /> : null}
+    </section>
   );
 }

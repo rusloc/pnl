@@ -7,7 +7,7 @@ import { Fragment, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 import { fmtAmount, fmtPct, fmtPp, pctToneOf, toneOf } from '../model/format';
-import { VERSION_LABEL, VERSION_SHORT, windowLabel } from '../model/filters';
+import { statementFootnote, VERSION_LABEL, VERSION_SHORT, windowTitle } from '../model/filters';
 import { expandableCodes, visibleRows } from '../model/statement-rows';
 import type { Figures, FilterState, RowKind, StatementRow, Tone } from '../model/types';
 import { ChevronIcon } from '../components/ui/icons';
@@ -61,7 +61,8 @@ function buildColumns(filter: FilterState): { columns: Column[]; groups: ColumnG
 
   const base: Omit<Column, 'groupStart'>[] = [{ kind: 'base', width: 84, title: VERSION_SHORT[filter.baseVersion] }];
   if (filter.showPctNr) base.push({ kind: 'pctNr', width: 60, title: '% NR' });
-  push(`${windowLabel(filter)} · ${VERSION_LABEL[filter.baseVersion]}`, base);
+  // Track B's `PL Hdr Base`: "<window> - <version>" (parity rule 12).
+  push(`${windowTitle(filter)} - ${VERSION_LABEL[filter.baseVersion]}`, base);
 
   if (filter.compareA !== 'NONE') {
     const a: Omit<Column, 'groupStart'>[] = [{ kind: 'cmpA', width: 84, title: VERSION_SHORT[filter.compareA] }];
@@ -187,7 +188,7 @@ export function StatementView({ figures, filter, openCodes, onToggleRow, onExpan
             </div>
             <div className="grid border-b border-line-300 text-[12px] font-semibold text-slate-600" style={{ gridTemplateColumns: template }}>
               <div className="sticky left-0 z-[1] bg-surface py-[8px] pl-[20px] pr-[8px]">
-                Line · {filter.currency} {filter.units}
+                Line - {filter.currency} {filter.units}
               </div>
               {columns.map((c) => (
                 <div
@@ -283,10 +284,7 @@ export function StatementView({ figures, filter, openCodes, onToggleRow, onExpan
         </div>
       </div>
       <p className="m-0 flex flex-none flex-wrap items-center justify-between gap-[8px] border-t border-line-100 px-[16px] py-[8px] text-[12px] text-slate-600">
-        <span>
-          Actual at monthly average rates, budget at budget rates · costs negative · Δ positive when favourable · bar = Δ %
-          vs Budget on a ±15% scale · IFRS 18 required subtotal · MPM management-defined measure · IC intercompany
-        </span>
+        <span data-testid="statement-footnote">{statementFootnote(filter)}</span>
         <ZoneChip status={zone} />
       </p>
     </section>

@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Dataset } from '../data/dataset.ts';
 import { loadPublicDataset } from '../test-utils/public-data.ts';
@@ -113,14 +115,77 @@ describe('spine (spec §3, D-32)', () => {
 });
 
 describe('engine guards for unbuilt features', () => {
-  it('refuses slice filters, other layouts and the nature lens instead of ignoring them', () => {
-    const engine = createEngine(ds);
-    expect(() => engine.statement(selection({ channel: ['GRO'] }))).toThrow(/slice filters/);
-    expect(() => engine.statement(selection({ layout: 'TREND_M' }))).toThrow(/layout/);
-    expect(() => engine.statement(selection({ costLens: 'NAT' }))).toThrow(/By nature/);
+  it('refuses slice filters instead of ignoring them', () => {
+    expect(() => createEngine(ds).statement(selection({ channel: ['GRO'] }))).toThrow(/slice filters/);
   });
 
   it('reports the last closed month from dim_month (N-03)', () => {
     expect(createEngine(ds).dataStatus().lastClosedMonth).toBe('2026-09');
+  });
+});
+
+// Parity rule 11: Track B's dim_pl_row[line_display] = number among all dim_report_line rows in sort order + name in
+// capitals (pbi-report/ACME Unified PnL/ACME Unified PnL.SemanticModel/definition/tables/dim_pl_row.tmdl).
+const TRACK_B_LINES = [
+  '01. GROSS REVENUE',
+  '02. GROSS-TO-NET DEDUCTIONS',
+  '03. NET REVENUE',
+  '04. COST OF REVENUE',
+  '05. GROSS PROFIT',
+  '06. GROSS MARGIN %',
+  '07. VARIABLE SELLING & COST-TO-SERVE',
+  '08. CONTRIBUTION MARGIN',
+  '09. CONTRIBUTION MARGIN %',
+  '10. OPERATING EXPENSES',
+  '11. SALES & MARKETING',
+  '12. RESEARCH & DEVELOPMENT',
+  '13. GENERAL & ADMINISTRATIVE',
+  '14. OTHER OPERATING INCOME / (EXPENSE)',
+  '15. ADJUSTED EBITDA',
+  '16. ADJUSTED EBITDA MARGIN %',
+  '17. DEPRECIATION & AMORTISATION',
+  '18. UNDERLYING OPERATING PROFIT',
+  '19. ADJUSTING ITEMS (NON-UNDERLYING)',
+  '20. OPERATING PROFIT',
+  '21. OPERATING MARGIN %',
+  '22. INVESTING INCOME',
+  '23. PROFIT BEFORE FINANCING AND INCOME TAXES',
+  '24. FINANCING EXPENSES',
+  '25. PROFIT BEFORE TAX',
+  '26. INCOME TAX EXPENSE',
+  '27. EFFECTIVE TAX RATE %',
+  '28. NET PROFIT FOR THE PERIOD',
+  '29. NET MARGIN %',
+];
+const BOOKMARK = fileURLToPath(
+  new URL(
+    '../../../pbi-report/ACME Unified PnL/ACME Unified PnL.Report/definition/bookmarks/bm_pl_expand.bookmark.json',
+    import.meta.url,
+  ),
+);
+
+describe('numbered statement rows (parity rule 11)', () => {
+  const spine = () => buildSpine(ds.manifest, 'P');
+
+  it('every report line reads as Track B: 01. GROSS REVENUE … 29. NET MARGIN %, for both companies', () => {
+    for (const e of ['P', 'S'] as const)
+      expect(
+        buildSpine(ds.manifest, e)
+          .filter((r) => r.kind !== 'leaf')
+          .map((r) => r.display),
+      ).toEqual(TRACK_B_LINES);
+  });
+
+  it('accounts keep their names; the plain line name stays in label', () => {
+    const rows = spine();
+    expect(rows.filter((r) => r.kind === 'leaf').every((r) => r.display === r.label)).toBe(true);
+    expect(rows.find((r) => r.code === 'GR')?.label).toBe('Gross revenue');
+  });
+
+  // Cross-check against the labels Track B's report itself stores (absent outside this repo, e.g. in the vosk.dev copy)
+  it.skipIf(!existsSync(BOOKMARK))('the block labels in Track B’s Expand all bookmark are ours', () => {
+    const stored = [...readFileSync(BOOKMARK, 'utf8').matchAll(/'(\d\d\. [^']+)'/g)].map((x) => x[1]);
+    expect(stored.length).toBeGreaterThan(0);
+    for (const label of stored) expect(TRACK_B_LINES).toContain(label);
   });
 });

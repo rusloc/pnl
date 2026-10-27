@@ -1,0 +1,106 @@
+DEFINE
+    VAR _entity = TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2025 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 12 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "FY" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+    VAR _lines =
+        SELECTCOLUMNS (
+            SUMMARIZECOLUMNS (
+                dim_pl_row[row_key]
+                ,dim_pl_row[line_code]
+                ,dim_pl_row[line_label]
+                ,dim_pl_row[row_type]
+                ,dim_pl_row[is_key]
+                ,dim_pl_row[tag]
+                ,dim_pl_row[line_sort]
+                ,TREATAS ( { FALSE () }, dim_pl_row[is_leaf] )
+                ,_entity
+                ,_fy
+                ,_month
+                ,_tv
+                ,_base
+                ,_cmp_a
+                ,_cmp_b
+                ,_ccy
+                ,_fx
+                ,_units
+                ,"@base", CONVERT ( [PL Base], DOUBLE )
+                ,"@cmp_a", CONVERT ( [PL Compare A], DOUBLE )
+                ,"@cmp_b", CONVERT ( [PL Compare B], DOUBLE )
+                ,"@fy_bud", CONVERT ( [PL FY Budget], DOUBLE )
+                ,"@fy_le", CONVERT ( [PL FY LE], DOUBLE )
+            )
+            ,"row_key", dim_pl_row[row_key]
+            ,"line_code", dim_pl_row[line_code]
+            ,"line_label", dim_pl_row[line_label]
+            ,"row_type", dim_pl_row[row_type]
+            ,"is_key", dim_pl_row[is_key]
+            ,"tag", dim_pl_row[tag]
+            ,"account_code", ""
+            ,"account_label", ""
+            ,"is_leaf", FALSE ()
+            ,"line_sort", dim_pl_row[line_sort]
+            ,"account_sort", 0
+            ,"@base", [@base]
+            ,"@cmp_a", [@cmp_a]
+            ,"@cmp_b", [@cmp_b]
+            ,"@fy_bud", [@fy_bud]
+            ,"@fy_le", [@fy_le]
+        )
+    VAR _leaves =
+        SELECTCOLUMNS (
+            SUMMARIZECOLUMNS (
+                dim_pl_row[row_key]
+                ,dim_pl_row[line_code]
+                ,dim_pl_row[line_label]
+                ,dim_pl_row[row_type]
+                ,dim_pl_row[is_key]
+                ,dim_pl_row[tag]
+                ,dim_pl_row[account_code]
+                ,dim_pl_row[account_label]
+                ,dim_pl_row[is_leaf]
+                ,dim_pl_row[line_sort]
+                ,dim_pl_row[account_sort]
+                ,TREATAS ( { TRUE () }, dim_pl_row[is_leaf] )
+                ,_entity
+                ,_fy
+                ,_month
+                ,_tv
+                ,_base
+                ,_cmp_a
+                ,_cmp_b
+                ,_ccy
+                ,_fx
+                ,_units
+                ,"@base", CONVERT ( [PL Base], DOUBLE )
+                ,"@cmp_a", CONVERT ( [PL Compare A], DOUBLE )
+                ,"@cmp_b", CONVERT ( [PL Compare B], DOUBLE )
+                ,"@fy_bud", CONVERT ( [PL FY Budget], DOUBLE )
+                ,"@fy_le", CONVERT ( [PL FY LE], DOUBLE )
+            )
+            ,"row_key", dim_pl_row[row_key]
+            ,"line_code", dim_pl_row[line_code]
+            ,"line_label", dim_pl_row[line_label]
+            ,"row_type", dim_pl_row[row_type]
+            ,"is_key", dim_pl_row[is_key]
+            ,"tag", dim_pl_row[tag]
+            ,"account_code", dim_pl_row[account_code]
+            ,"account_label", dim_pl_row[account_label]
+            ,"is_leaf", dim_pl_row[is_leaf]
+            ,"line_sort", dim_pl_row[line_sort]
+            ,"account_sort", dim_pl_row[account_sort]
+            ,"@base", [@base]
+            ,"@cmp_a", [@cmp_a]
+            ,"@cmp_b", [@cmp_b]
+            ,"@fy_bud", [@fy_bud]
+            ,"@fy_le", [@fy_le]
+        )
+EVALUATE
+UNION ( _lines, _leaves )
+ORDER BY [line_sort], [account_sort]

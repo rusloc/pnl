@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import type { KeyboardEvent, RefObject } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import styles from './sales.module.css';
 
 // Keyboard-complete controls (WAI-ARIA radio group and tabs patterns: roving tabindex, arrows / Home / End).
@@ -37,8 +37,10 @@ export function Segmented<T extends string>({
   value,
   onChange,
   x,
+  title,
 }: {
   label: string;
+  title?: string; // tooltip (the period picker carries the "Showing …" sentence and any clipped-window note)
   options: readonly { value: T; label: string; width: number }[];
   value: T;
   onChange: (v: T) => void;
@@ -52,6 +54,7 @@ export function Segmented<T extends string>({
       style={{ left: x, top: 20, width }}
       role="radiogroup"
       aria-label={label}
+      title={title}
     >
       {options.map((o, i) => (
         <button
@@ -124,80 +127,6 @@ export function Tabs<T extends string>({
         </button>
       ))}
     </div>
-  );
-}
-
-/** Closes on Escape and on a pointer press outside `ref`, while `open`. */
-function useDismiss(open: boolean, ref: RefObject<HTMLElement | null>, close: () => void) {
-  useEffect(() => {
-    if (!open) return;
-    const ctrl = new AbortController();
-    document.addEventListener('keydown', (e) => e.key === 'Escape' && close(), { signal: ctrl.signal });
-    document.addEventListener(
-      'pointerdown',
-      (e) => e.target instanceof Node && !ref.current?.contains(e.target) && close(),
-      { signal: ctrl.signal },
-    );
-    return () => ctrl.abort();
-  }, [open, ref, close]);
-}
-
-/** ⓘ button with a pop-up of the card's definition (design-tokens §5 title row). */
-export function InfoButton({ text, label, up = false }: { text: string; label: string; up?: boolean }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-  const id = useId();
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(open, ref, close);
-  return (
-    <span className={styles.infoWrap} ref={ref}>
-      <button
-        type="button"
-        className={styles.infoBtn}
-        aria-label={`About ${label}`}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <i className={styles.icon} aria-hidden="true">
-          i
-        </i>
-      </button>
-      {open ? (
-        <span id={id} role="note" className={`${styles.pop} ${up ? styles.popUp : ''}`}>
-          {text}
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
-export function HowToRead({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-  const id = useId();
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(open, ref, close);
-  return (
-    <span className={styles.infoWrap} ref={ref}>
-      <button
-        type="button"
-        className={styles.linkBtn}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <i className={styles.icon} aria-hidden="true">
-          i
-        </i>
-        How to read
-      </button>
-      {open ? (
-        <span id={id} role="note" className={styles.pop}>
-          {text}
-        </span>
-      ) : null}
-    </span>
   );
 }
 

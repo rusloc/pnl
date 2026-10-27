@@ -1,4 +1,4 @@
-<!-- next-id: CAND-007 -->
+<!-- next-id: CAND-011 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -25,3 +25,20 @@ Seen: /sales verify run (2026-10-27)
 ### CAND-006 · layout-spec table heights cannot fit the row count at 24 px rows · 2026-10-27 · expires 2027-01-25
 Overview table 118 px = title + header + 3 rows only at 20/21 px rows; band tables 186 px fit 6 rows only at 21 px. Spec says 24 px. Used 21 px rows + in-card scroll. Watch the same arithmetic in Track B.
 Seen: js-report/components/sales/sales.module.css (2026-10-27)
+
+### CAND-007 · Context consumer outside its provider fails silently (default no-op setter) · 2026-10-27 · expires 2027-01-25
+The P&L "How to read" button sat in the header, outside a PopupProvider that only wrapped the content area; the context default `setOpenId: () => undefined` made the click do nothing, with no error. Caught only by the headless click check. Fix: provider wraps header + content; reset per view/page with a `scope` prop (derived state) instead of a `key` remount. Consider throwing from the default context value in dev.
+Seen: js-report/components/Shell.tsx + components/glass.tsx (2026-10-27)
+
+### CAND-008 · eslint react-hooks/immutability flags a `let` reassigned inside `.map` in a component body · 2026-10-27 · expires 2027-01-25
+"Cannot reassign variable after render completes" for a running total in a waterfall. Fix: move the accumulation into a pure module-level helper (`runningLevels(steps)`).
+Seen: js-report/components/views/charts.tsx Waterfall (2026-10-27)
+
+### CAND-009 · Global separator swap turns formula separators into minus signs · 2026-10-27 · expires 2027-01-25
+A blanket sed " · " → " - " (parity rule 6) also hit ⓘ formula strings: "NR = GR + GTN - Δ = actual − comparison" reads as subtraction. Prose separator is " - "; between formulas use "; ". Caught only by reading the exported markdown (scripts/export-info-copy.ts), not by tests.
+Seen: js-report/lib/engine/{vitals,analysis,profitability}.ts formula fields (2026-10-27, uncommitted)
+
+### CAND-010 · Status banded on the raw Δ while the face shows the rounded Δ · 2026-10-27 · expires 2027-01-25
+"◦ 0.0%" shown with a red/amber chip: band computed from the exact Δ, text from the rounded one. Band the displayed value (lib/sales/status.ts displayed()). Parity rows seeded from engine output had captured the bug: seed from the contract, not from the track's own result.
+Seen: js-report/lib/sales/status.ts, lib/test-utils/parity/parity_selections_mirelo.csv (3 rows) (2026-10-27, uncommitted)
+

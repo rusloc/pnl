@@ -1,0 +1,29 @@
+DEFINE
+    VAR _entity = TREATAS ( { "GROUP" }, param_entity_view[entity_view_code] )
+    VAR _fy     = TREATAS ( { 2026 }, param_fiscal_year[fiscal_year] )
+    VAR _month  = TREATAS ( { 9 }, param_period[month_number] )
+    VAR _tv     = TREATAS ( { "LTM" }, param_time_view[time_view_code] )
+    VAR _base   = TREATAS ( { "A" }, param_base_version[choice_code] )
+    VAR _cmp_a  = TREATAS ( { "B" }, param_compare_a[choice_code] )
+    VAR _cmp_b  = TREATAS ( { "PY" }, param_compare_b[choice_code] )
+    VAR _ccy    = TREATAS ( { "USD" }, param_reporting_currency[currency_code] )
+    VAR _fx     = TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )
+    VAR _units  = TREATAS ( { "M" }, param_units[units_code] )
+EVALUATE
+CALCULATETABLE (
+    ROW (
+        "@SVC_SHARE", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "SVC_SHARE" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@SVC_SHARE_cmp_a", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "SVC_SHARE" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@SVC_SHARE_cmp_b", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "SVC_SHARE" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@SVC_SHARE_s", CALCULATE ( [KPI Secondary], TREATAS ( { "SVC_SHARE" }, dim_kpi[kpi_code] ) )
+        ,"@IC_ELIM", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "IC_ELIM" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@IC_ELIM_cmp_a", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "IC_ELIM" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@IC_ELIM_cmp_b", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "IC_ELIM" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@IC_ELIM_s", CALCULATE ( [KPI Secondary], TREATAS ( { "IC_ELIM" }, dim_kpi[kpi_code] ) )
+        ,"@CM_PCT", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "CM_PCT" }, dim_kpi[kpi_code] ) ), DOUBLE )
+        ,"@CM_PCT_cmp_a", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "CM_PCT" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_A" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@CM_PCT_cmp_b", CONVERT ( CALCULATE ( [KPI Value], TREATAS ( { "CM_PCT" }, dim_kpi[kpi_code] ), REMOVEFILTERS ( param_eval ), TREATAS ( { "CMP_B" }, param_eval[eval_code] ) ), DOUBLE )
+        ,"@CM_PCT_s", CALCULATE ( [KPI Secondary], TREATAS ( { "CM_PCT" }, dim_kpi[kpi_code] ) )
+    )
+    ,_entity, _fy, _month, _tv, _base, _cmp_a, _cmp_b, _ccy, _fx, _units
+)

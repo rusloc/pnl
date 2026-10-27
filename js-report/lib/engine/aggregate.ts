@@ -11,11 +11,10 @@ export interface Translation {
 }
 
 /**
- * The one scan (ADR-0002 §2.3): Σ per account over the plan's version × month rows, each row translated at its own
- * month × currency rate before summing (D-30), in reporting-currency units. GROUP = both entities without the rows
- * that carry a counterparty, i.e. intercompany removed (C-36, D-33). No slice filters yet: C-31 lands in step 5.
+ * Translation factors of a plan, indexed [(version × month) × region]: local cents → reporting units, 0 = the row is
+ * not in the plan. Each month × currency at its own rate (D-30, C-11 … C-13). Shared by every scan.
  */
-export function aggregateAccounts(ds: Dataset, entity: EntityView, plan: ColumnPlan, tr: Translation): Float64Array {
+export function planFactors(ds: Dataset, plan: ColumnPlan, tr: Translation): Float64Array {
   const { dict, tables } = ds.manifest;
   const nMonths = tables.dim_month.length;
   const nRegions = dict.region.length;
@@ -31,8 +30,6 @@ export function aggregateAccounts(ds: Dataset, entity: EntityView, plan: ColumnP
     if (!cc) throw new Error(`aggregate: no FY${tr.fy} month for constant currency`);
     return cc.month_index;
   };
-
-  // factor[(version × month) × region]: local cents → reporting units; 0 = row not in the plan
   const factor = new Float64Array(dict.version.length * nMonths * nRegions);
   for (const p of plan.parts) {
     const v = dict.version.indexOf(p.version);
@@ -44,6 +41,19 @@ export function aggregateAccounts(ds: Dataset, entity: EntityView, plan: ColumnP
           translationFactor(tr.fx, ccy, tr.currency, t, isBudget, tr.basis, ccMonth(t)) / 100;
       });
   }
+  return factor;
+}
+
+/**
+ * The one scan (ADR-0002 §2.3): Σ per account over the plan's version × month rows, each row translated at its own
+ * month × currency rate before summing (D-30), in reporting-currency units. GROUP = both entities without the rows
+ * that carry a counterparty, i.e. intercompany removed (C-36, D-33). Slice cuts: slices.ts (C-30, C-31).
+ */
+export function aggregateAccounts(ds: Dataset, entity: EntityView, plan: ColumnPlan, tr: Translation): Float64Array {
+  const { dict, tables } = ds.manifest;
+  const nMonths = tables.dim_month.length;
+  const nRegions = dict.region.length;
+  const factor = planFactors(ds, plan, tr);
 
   const out = new Float64Array(dict.account.length);
   const entities: EntityCode[] = entity === 'GROUP' ? ['P', 'S'] : [entity];

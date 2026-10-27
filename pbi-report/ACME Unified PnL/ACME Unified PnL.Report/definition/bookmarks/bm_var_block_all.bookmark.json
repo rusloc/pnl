@@ -1,0 +1,428 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Variances: block all",
+  "name": "bm_var_block_all",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "an_var_b12",
+      "an_var_b8",
+      "an_var_ball",
+      "an_var_cov12",
+      "an_var_cov8",
+      "an_var_covall",
+      "an_var_m12",
+      "an_var_m8",
+      "an_var_mall",
+      "an_var_t12",
+      "an_var_t8",
+      "an_var_tall",
+      "an_var_tb_block_12_0",
+      "an_var_tb_block_12_1",
+      "an_var_tb_block_12_2",
+      "an_var_tb_block_12_3",
+      "an_var_tb_block_12_4",
+      "an_var_tb_block_12_5",
+      "an_var_tb_block_8_0",
+      "an_var_tb_block_8_1",
+      "an_var_tb_block_8_2",
+      "an_var_tb_block_8_3",
+      "an_var_tb_block_8_4",
+      "an_var_tb_block_8_5",
+      "an_var_tb_block_all_0",
+      "an_var_tb_block_all_1",
+      "an_var_tb_block_all_2",
+      "an_var_tb_block_all_3",
+      "an_var_tb_block_all_4",
+      "an_var_tb_block_all_5",
+      "an_var_tb_flat_12_0",
+      "an_var_tb_flat_12_1",
+      "an_var_tb_flat_12_2",
+      "an_var_tb_flat_12_3",
+      "an_var_tb_flat_12_4",
+      "an_var_tb_flat_12_5",
+      "an_var_tb_flat_8_0",
+      "an_var_tb_flat_8_1",
+      "an_var_tb_flat_8_2",
+      "an_var_tb_flat_8_3",
+      "an_var_tb_flat_8_4",
+      "an_var_tb_flat_8_5",
+      "an_var_tb_flat_all_0",
+      "an_var_tb_flat_all_1",
+      "an_var_tb_flat_all_2",
+      "an_var_tb_flat_all_3",
+      "an_var_tb_flat_all_4",
+      "an_var_tb_flat_all_5"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {
+          "an_var_b12": {
+            "singleVisual": {
+              "visualType": "barChart",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_b8": {
+            "singleVisual": {
+              "visualType": "barChart",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_ball": {
+            "singleVisual": {
+              "visualType": "barChart"
+            }
+          },
+          "an_var_cov12": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_cov8": {
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_covall": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "an_var_m12": {
+            "singleVisual": {
+              "visualType": "pivotTable",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_m8": {
+            "singleVisual": {
+              "visualType": "pivotTable",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_mall": {
+            "singleVisual": {
+              "visualType": "pivotTable"
+            }
+          },
+          "an_var_t12": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_t8": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tall": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_0": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_1": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_2": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_3": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_4": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_12_5": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_0": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_1": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_2": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_3": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_4": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_8_5": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_block_all_0": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "an_var_tb_block_all_1": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "an_var_tb_block_all_2": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "an_var_tb_block_all_3": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "an_var_tb_block_all_4": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "an_var_tb_block_all_5": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "an_var_tb_flat_12_0": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_12_1": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_12_2": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_12_3": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_12_4": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_12_5": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_0": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_1": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_2": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_3": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_4": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_8_5": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_0": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_1": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_2": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_3": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_4": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "an_var_tb_flat_all_5": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          }
+        },
+        "visualContainerGroups": {}
+      }
+    }
+  }
+}

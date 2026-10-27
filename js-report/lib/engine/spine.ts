@@ -19,6 +19,18 @@ const KIND = {
 } as const;
 
 /**
+ * Statement text of a report line (parity rule 11), as Track B's `dim_pl_row[line_display]`: its number among all
+ * dim_report_line rows in sort order (ratio rows included), two digits, then the name in capitals: "01. GROSS REVENUE".
+ */
+export function lineDisplay(
+  lines: readonly { line_name: string; sort_order: number }[],
+  line: { line_name: string; sort_order: number },
+): string {
+  const n = lines.filter((l) => l.sort_order <= line.sort_order).length;
+  return `${String(n).padStart(2, '0')}. ${line.line_name.toUpperCase()}`;
+}
+
+/**
  * Spine rows for an entity view (M-02, N-11). Leaves are the accounts of each block that the entity books. Labels
  * come from dim_report_line / dim_account; the entity alias (L-11) is a secondary label.
  */
@@ -44,6 +56,7 @@ export function buildSpine(m: Manifest, entity: EntityView): SpineRow[] {
       code: l.line_code,
       kind: KIND[l.row_type],
       label: l.line_name,
+      display: lineDisplay(lines, l),
       alias: (entity === 'P' ? l.alias_products : entity === 'S' ? l.alias_services : null) ?? null,
       parent: l.parent_line_code,
       level,
@@ -58,6 +71,7 @@ export function buildSpine(m: Manifest, entity: EntityView): SpineRow[] {
           code: a.account_code,
           kind: 'leaf',
           label: a.account_name,
+          display: a.account_name, // accounts keep their names (parity rule 11)
           alias: null,
           parent: l.line_code,
           level: level === 0 ? 1 : 2,

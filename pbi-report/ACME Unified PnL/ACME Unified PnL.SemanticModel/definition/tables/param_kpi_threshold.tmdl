@@ -1,0 +1,48 @@
+/// Spec KPI §6 status thresholds (a parameter, not data): on track within on_track, watch up to watch, off beyond; PCT = relative Δ (amounts, counts), PP = percentage points (ratios).
+table param_kpi_threshold
+	lineageTag: 146ec322-7171-5280-89d6-6e20ce20f6f3
+	isHidden
+
+	column delta_kind
+		dataType: string
+		lineageTag: dae847d4-fd9b-52d7-997d-1af2aa453a52
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [delta_kind]
+
+		annotation SummarizationSetBy = User
+
+	column on_track
+		dataType: double
+		formatString: 0.00
+		lineageTag: 2aac3066-6f7e-551f-a5ff-48d9fd6422d1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [on_track]
+
+		annotation SummarizationSetBy = User
+
+	column watch
+		dataType: double
+		formatString: 0.00
+		lineageTag: f53d9bcb-a54a-5193-aabc-11c148034dfc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [watch]
+
+		annotation SummarizationSetBy = User
+
+	partition param_kpi_threshold = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "delta_kind", STRING
+				    ,"on_track", DOUBLE
+				    ,"watch", DOUBLE
+				    ,{
+				        { "PCT", 0.01, 0.03 }
+				        ,{ "PP", 0.3, 1.0 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

@@ -4,34 +4,32 @@
 // "sample data" chip while this source is active. Used only when no backend can
 // be reached (rayfin dev, tests); deployed, every zone is read from the semantic
 // model (ADR-0006).
-import { barOnScale } from '../model/compare-bar';
 import { parseSampleNumber, toneOf } from '../model/format';
+import { PANEL_INFO } from '../model/info-popovers';
 import type {
   Bridge,
+  Bubble,
+  Concentration,
   Driver,
   EntityCode,
   Figures,
   FilterState,
-  KpiCompare,
-  KpiTile,
+  Heat,
   Profitability,
   ReferenceData,
   StatementRow,
   Tone,
+  VitalsZone,
   ZoneKey,
   ZoneStatus,
 } from '../model/types';
 import { SAMPLE_DATA } from './sample-data';
-import type { SampleRow, SampleTile } from './sample-types';
+import type { SampleRow } from './sample-types';
 
 interface SampleMeta {
   sliceNote: string;
   notices: string[];
   bridgeSub: string;
-  profBy: string;
-  profCol: string;
-  profOpts: string[];
-  profNote: string;
 }
 
 const FULL_YEAR_NOTICE =
@@ -42,11 +40,6 @@ export const SAMPLE_META: Record<EntityCode, SampleMeta> = {
     sliceNote: 'All slices',
     notices: [FULL_YEAR_NOTICE],
     bridgeSub: 'Volume and price / mix at constant currency; FX is the translation effect.',
-    profBy: 'channel',
-    profCol: 'Channel',
-    profOpts: ['Region', 'Channel', 'Category', 'Price tier'],
-    profNote:
-      'Gross and contribution margins use costs booked to each channel. Lines below contribution margin are allocated by net revenue share, so EBITDA and operating margins by channel are indicative.',
   },
   S: {
     sliceNote: 'All slices',
@@ -55,11 +48,6 @@ export const SAMPLE_META: Record<EntityCode, SampleMeta> = {
       'Revenue includes $21.8m billed to Consumer Products for its D2C webstore and payments; it is eliminated in the Group view.',
     ],
     bridgeSub: 'Change by service line at constant currency; FX is the translation effect.',
-    profBy: 'sales motion',
-    profCol: 'Sales motion',
-    profOpts: ['Region', 'Sales motion', 'Service line', 'Segment'],
-    profNote:
-      'Gross and contribution margins use costs booked to each sales motion. Lines below contribution margin are allocated by net revenue share, so EBITDA and operating margins by sales motion are indicative.',
   },
   G: {
     sliceNote: 'All regions, consolidated',
@@ -68,11 +56,6 @@ export const SAMPLE_META: Record<EntityCode, SampleMeta> = {
       FULL_YEAR_NOTICE,
     ],
     bridgeSub: 'Change by company at constant currency; FX is the translation effect.',
-    profBy: 'company',
-    profCol: 'Company',
-    profOpts: ['Region', 'Company'],
-    profNote:
-      'Company margins are each company’s own results before eliminations. Shares are of consolidated net revenue.',
   },
 };
 
@@ -106,31 +89,6 @@ export function sampleToneCodes(r: SampleRow): string {
   return r[7];
 }
 
-/** The mockup's "vs …" lines are the comparison rows; its other lines (margin, reported growth, drivers) are sub-lines. */
-function isCompareLine(name: string): boolean {
-  return name.startsWith('vs ');
-}
-
-/** A comparison row from the mockup's pre-formatted Δ text: the bar reads the printed number back, never invents one (LSN-002). */
-function toCompare([name, text, code]: SampleTile['s'][number]): KpiCompare {
-  const n = parseSampleNumber(text);
-  const pp = text.endsWith('pp');
-  const t = tone(code);
-  return { name, text, tone: t, bar: n === null ? null : barOnScale(pp ? n : n / 100, pp, t === 'unf' ? -1 : 1) };
-}
-
-function toTile(t: SampleTile): KpiTile {
-  return {
-    // The mockup has no kpi_code: the label keys the tile.
-    code: t.l,
-    label: t.l,
-    hint: t.h,
-    value: t.v,
-    sublines: t.s.filter(([name]) => !isCompareLine(name)).map(([name, text]) => `${name} ${text}`),
-    compares: t.s.filter(([name]) => isCompareLine(name)).map(toCompare),
-  };
-}
-
 function toBridge(entity: EntityCode): Bridge {
   const d = SAMPLE_DATA[entity].bridge;
   return {
@@ -142,7 +100,9 @@ function toBridge(entity: EntityCode): Bridge {
       kind: kind === 't' ? 'total' : kind === 'f' ? 'fav' : 'unf',
       bottomPct,
       heightPct,
+      sub: null,
     })),
+    info: PANEL_INFO.NRBRIDGE,
   };
 }
 
@@ -157,54 +117,84 @@ function toDrivers(entity: EntityCode): Driver[] {
   }));
 }
 
-function toProfitability(entity: EntityCode): Profitability {
-  const d = SAMPLE_DATA[entity];
-  const m = SAMPLE_META[entity];
-  const cmTile = d.kpis.find((k) => k.l === 'Contribution margin');
-  const cmAverageText = cmTile?.v ?? '';
-  return {
-    by: m.profBy,
-    column: m.profCol,
-    options: m.profOpts,
-    compareLabel: 'Budget',
-    note: m.profNote,
-    rows: d.prof.map(([name, nrText, shareText, sharePct, deltaPctText, code, gm, cm, ebitda, op]) => ({
-      name, nrText, shareText, sharePct: Math.max(0, Math.min(100, sharePct)), deltaPctText,
-      tone: tone(code), gm, cm, ebitda, op,
-    })),
-    cmAverageText,
-    cmAveragePct: parseSampleNumber(cmAverageText) ?? 0,
-  };
+/** The mockup's profitability table is the pre-redesign one; the redesigned zones have no sample figures (honest: empty, flagged). */
+export function emptyProfitability(): Profitability {
+  return { by: '', column: '', options: [], compareLabel: '', subtitle: '', allocated: false, rows: [], info: PANEL_INFO.PROFTABLE };
 }
 
-/** A profitability zone with nothing in it (a live zone still loading or failed). */
-export function emptyProfitability(): Profitability {
-  return { by: '', column: '', options: [], compareLabel: '', note: '', rows: [], cmAverageText: '', cmAveragePct: 0 };
+export function emptyBridge(key: 'NRBRIDGE' | 'PBRIDGE'): Bridge {
+  return { subtitle: '', steps: [], axisText: '', info: PANEL_INFO[key] };
+}
+
+export function emptyVitals(): VitalsZone {
+  return { results: [], drivers: [] };
+}
+
+export function emptyConcentration(): Concentration {
+  return { levels: [], legend: [], info: PANEL_INFO.CONC };
+}
+
+export function emptyBubble(): Bubble {
+  return { points: [], ref: null, quadrants: ['profitable, slower', 'profitable growth', 'problem', 'dilutive growth'], info: PANEL_INFO.BUBBLE };
+}
+
+export function emptyHeat(): Heat {
+  return { rows: [], cols: [], grand: '', info: PANEL_INFO.HEAT };
+}
+
+/** A snapshot with nothing in it, each zone carrying the status given (loading, sample, …). */
+export function emptyFigures(zones: Record<ZoneKey, ZoneStatus>): Figures {
+  return {
+    sample: false,
+    zones,
+    notices: [],
+    dataStatus: null,
+    refreshedAt: null,
+    statement: [],
+    vitals: emptyVitals(),
+    vitalsInfo: {},
+    bridge: emptyBridge('NRBRIDGE'),
+    profit: emptyBridge('PBRIDGE'),
+    variances: { leaves: [] },
+    variancesCut: null,
+    drivers: [],
+    profitability: emptyProfitability(),
+    concentration: emptyConcentration(),
+    bubble: emptyBubble(),
+    heat: emptyHeat(),
+  };
 }
 
 const SAMPLE_ZONES: Record<ZoneKey, ZoneStatus> = {
   statement: { kind: 'sample' },
-  kpi: { kind: 'sample' },
+  vitals: { kind: 'sample' },
+  vitalsInfo: { kind: 'sample' },
   bridge: { kind: 'sample' },
-  drivers: { kind: 'sample' },
+  profit: { kind: 'sample' },
+  variances: { kind: 'sample' },
+  variancesCut: { kind: 'sample' },
   profitability: { kind: 'sample' },
+  concentration: { kind: 'sample' },
+  bubble: { kind: 'sample' },
+  heat: { kind: 'sample' },
   context: { kind: 'sample' },
 };
 
+/**
+ * The mockup covers the statement, the net revenue bridge and the top 8 variances
+ * (AI assistant); the redesigned zones (Vitals cards, profit bridge, variances
+ * table, profitability) stay empty and say so (LSN-002).
+ */
 export function sampleFigures(filter: FilterState): Figures {
   const entity = filter.entity;
   const d = SAMPLE_DATA[entity];
   return {
+    ...emptyFigures(SAMPLE_ZONES),
     sample: true,
-    zones: SAMPLE_ZONES,
     notices: SAMPLE_META[entity].notices,
-    dataStatus: null,
     statement: d.rows.map(toStatementRow),
-    financial: d.kpis.map(toTile),
-    operational: d.ops.map(toTile),
     bridge: toBridge(entity),
     drivers: toDrivers(entity),
-    profitability: toProfitability(entity),
   };
 }
 

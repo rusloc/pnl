@@ -3,7 +3,7 @@
 - **From:** rusloc/pnl (Track C, nerd)
 - **To:** vosk.dev repo agent
 - **Date:** 2026-10-26
-- **Status:** draft (ADR-0011 is Proposed; the USER has not accepted it yet)
+- **Status:** draft (ADR-0011 is Proposed). Two flavours: JS app (this route) + Power BI report (USER 2026-10-27). ADR-0012 card face and pop-ups applied 2026-10-27 (visual only; embed contract unchanged)
 
 Source of truth: `js-report/app/sales/README.md`, `docs/ADR/0011-mirelo-sales-revenue-report.md`, and `docs/design/sales-revenue dashboard/` (`design-tokens.md`, `layout-spec.md`, `mockup.html`). This note is the shared copy for embedding.
 
@@ -37,6 +37,8 @@ None new. The route uses the app's existing names: `NEXT_PUBLIC_SITE_URL` (metad
 - **CSP:** unchanged (`next.config.ts`). No inline `style` beyond React style props, no external origins, and no console errors in the headless check.
 
 ## 5. Status
+
+- 2026-10-27 USER review, visual only (embed contract unchanged): the period line under the title is gone (its text now sits in the period picker tooltip and the How-to-read pop-up), and the card corner markers and hero sparklines are removed.
 
 - Overview is complete to the px spec. Views 2–5 have their 6 KPI cards and data-backed charts; L11 *Attainment by channel* is a labelled placeholder (no channel targets in the data). Mark-click cross-filtering is not built; clicking a month on a trend chart sets the month.
 - Control totals (`checks/control_totals_eur.csv`) reconcile for ALL / PL / RO / PT × Sep 2026, FY2024, FY2025 and FY2026 YTD Sep, and for every closed month.

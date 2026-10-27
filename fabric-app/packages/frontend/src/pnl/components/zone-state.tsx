@@ -1,7 +1,7 @@
 // Per-zone status (ADR-0006 phase 2): the chip a live zone carries, and the
 // panel a zone shows while its model query is in flight or after it failed —
 // never numbers that do not match the filters (LSN-002).
-import { LIVE_ZONE_DETAIL, SAMPLE_FIGURES_DETAIL, zoneErrorText, zoneLoadingText } from '../model/sample-mode';
+import { LIVE_ZONE_DETAIL, SAMPLE_FIGURES_DETAIL, sampleEmptyText, zoneErrorText, zoneLoadingText } from '../model/sample-mode';
 import type { ZoneStatus } from '../model/types';
 import { LiveChip } from './live-chip';
 import { SampleChip } from './sample-chip';
@@ -14,8 +14,15 @@ export function ZoneChip({ status }: { status: ZoneStatus }) {
   return null;
 }
 
-/** Loading / error panel that replaces a zone's content; `what` names the zone in the copy. */
-export function ZoneState({ status, what }: { status: ZoneStatus; what: string }) {
+/** Loading / error panel that replaces a zone's content; `what` names the zone in the copy; `empty` = a sample zone with no figures. */
+export function ZoneState({ status, what, empty = false }: { status: ZoneStatus; what: string; empty?: boolean }) {
+  if (status.kind === 'sample' && empty) {
+    return (
+      <p role="note" className="m-0 px-[16px] py-[24px] text-[13px] text-slate-600" data-testid="sample-empty">
+        {sampleEmptyText(what)}
+      </p>
+    );
+  }
   if (status.kind === 'loading') {
     return (
       <p role="status" aria-busy="true" className="m-0 flex items-center gap-[8px] px-[16px] py-[24px] text-[13px] text-slate-600">

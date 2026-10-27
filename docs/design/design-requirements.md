@@ -13,6 +13,7 @@ Date: 2026-10-21 · Applies to: Track A (Rayfin app, `fabric-app/`) and Track B 
 - **One neutral frame, one identity colour per company, two fixed meaning colours.** Switching company swaps only the identity colour (`acc` / `accT`); layout never changes (L-10). Identity colour never means good or bad.
 - **Variance meaning never relies on colour alone** (N-07): favourable/unfavourable always pair a colour with a sign and an arrow (▲ / ▼).
 - Numbers: tabular figures, right-aligned, minus sign `−` (U+2212) for negatives, `+` on deltas (L-12, N-06).
+- **Visual first, minimum text (USER directive 2026-10-27, all designs and all tracks):** every design artefact and report view is visual. No long bars or strips of text explaining numbers, no prose intros, no footnote paragraphs on the page. Card face = title · value · delta · status only. Explanations, formulas, sources and caveats live in pop-ups reached from an ⓘ button per card/panel and one "How to read" button per view. No tiny sparkline / mini-line charts inside cards (noise); real charts keep their space. Pop-ups and overlaying windows use the matte / frosted-glass style (translucent white, backdrop blur, 1 px light border, 16 px radius, solid fallback). Filters, slicers and switchers collapse into one side bar with a menu pop-up where the view has more than a handful of controls.
 
 ## 2. Colour tokens
 

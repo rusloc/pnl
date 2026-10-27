@@ -1,134 +1,75 @@
-// Info pop-up (L-15, ADR-0007 §2.6): an (i) button in a visual's title row that
-// opens a small card with the shared explanation (model/info-popovers.ts).
-// Closes on Escape, ✕ and a click outside; focus moves to the close button on
-// open and returns to the (i) button on close (N-08). Styled with the flyout
-// tokens (design guide §5.2).
-import { useEffect, useId, useRef, useState } from 'react';
+// ⓘ pop-up (ADR-0012 §2.3, parity rule 18): an (i) button in a card's or
+// panel's title row that opens a glass pop-up (`glass-dialog.tsx`) with the
+// name, what it shows, the formula, the sub-metrics and the source measures
+// (`model/info-popovers.ts`, Track B's `dim_pl_info` / `KPI Info Sub`).
+import { useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { boldRuns, INFO_HEADINGS, infoFor, type InfoContext, type InfoKey } from '../model/info-popovers';
-import { CloseIcon, InfoCircleIcon } from './ui/icons';
+import type { InfoCopy } from '../model/types';
+import { GlassDialog } from './glass-dialog';
+import { InfoCircleIcon } from './ui/icons';
+
+/** The sub-metrics line of a card's ⓘ, read from the model in its own zone (`KPI Info Sub`). */
+export type InfoDetail = { kind: 'text'; text: string } | { kind: 'loading' } | { kind: 'error'; reason: string } | null;
 
 interface InfoPopoverProps {
-  info: InfoKey;
-  context: InfoContext;
+  info: InfoCopy;
+  detail?: InfoDetail;
   /** Which edge of the button the card aligns to; 'end' for cards at the right of the screen. */
   align?: 'start' | 'end';
 }
 
-function Rich({ text }: { text: string }) {
-  return (
-    <>
-      {boldRuns(text).map((r, i) => (r.bold ? <strong key={i}>{r.text}</strong> : <span key={i}>{r.text}</span>))}
-    </>
-  );
-}
-
-export function InfoPopover({ info, context, align = 'start' }: InfoPopoverProps) {
+export function InfoPopover({ info, detail = null, align = 'start' }: InfoPopoverProps) {
   const [open, setOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLSpanElement>(null);
-  const titleId = useId();
-  const text = infoFor(info, context);
-
-  useEffect(() => {
-    if (!open) return;
-    const button = buttonRef.current;
-    closeRef.current?.focus();
-    const ctrl = new AbortController();
-    window.addEventListener(
-      'keydown',
-      (e) => {
-        if (e.key === 'Escape') {
-          e.stopPropagation();
-          setOpen(false);
-        }
-      },
-      { signal: ctrl.signal, capture: true }
-    );
-    document.addEventListener(
-      'mousedown',
-      (e) => {
-        if (rootRef.current && e.target instanceof Node && !rootRef.current.contains(e.target)) setOpen(false);
-      },
-      { signal: ctrl.signal }
-    );
-    return () => {
-      ctrl.abort();
-      button?.focus();
-    };
-  }, [open]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <span ref={rootRef} className="relative inline-flex font-ledger text-[14px] font-normal normal-case tracking-normal">
       <button
         ref={buttonRef}
         type="button"
-        aria-label={`About ${text.title}`}
+        aria-label={`About ${info.title}`}
         aria-haspopup="dialog"
         aria-expanded={open}
-        title={`About ${text.title}`}
+        title={`About ${info.title}`}
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          'flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0',
-          open ? 'text-acc' : 'text-slate-400 hover:text-slate-600'
+          'flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border bg-surface p-0',
+          open ? 'border-acc text-acc' : 'border-line-300 text-slate-600 hover:border-acc hover:text-acc'
         )}
       >
-        <InfoCircleIcon />
+        <InfoCircleIcon size={14} />
       </button>
-      {open && (
-        <div
-          role="dialog"
-          aria-labelledby={titleId}
-          className={cn(
-            'absolute top-full z-30 mt-[6px] box-border flex w-[380px] max-w-[calc(100vw-120px)] flex-col rounded-[12px] border border-line-200 bg-surface text-left text-ink-900 shadow-flyout',
-            align === 'end' ? 'right-0' : 'left-0'
-          )}
-        >
-          <div className="flex flex-none items-center justify-between gap-[8px] border-b border-line-100 px-[16px] pb-[10px] pt-[12px]">
-            <span id={titleId} className="text-[16px] font-semibold">
-              {text.title}
-            </span>
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="flex h-[40px] w-[40px] flex-none cursor-pointer items-center justify-center rounded-[8px] border-0 bg-ground"
-            >
-              <CloseIcon />
-            </button>
-          </div>
-          <div className="flex flex-col gap-[12px] px-[16px] pb-[14px] pt-[12px] text-[13px] leading-[1.45]">
-            <section>
-              <h3 className="m-0 mb-[4px] text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-600">{INFO_HEADINGS.whatItShows}</h3>
-              <p className="m-0">
-                <Rich text={text.whatItShows} />
-              </p>
-            </section>
-            <section>
-              <h3 className="m-0 mb-[4px] text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-600">{INFO_HEADINGS.howToRead}</h3>
-              <ul className="m-0 flex list-disc flex-col gap-[4px] pl-[18px]">
-                {text.howToRead.map((line, i) => (
-                  <li key={i}>
-                    <Rich text={line} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-            <section>
-              <h3 className="m-0 mb-[4px] text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-600">{INFO_HEADINGS.example}</h3>
-              <p className="m-0 italic text-ink-700">{text.example}</p>
-            </section>
-            <section className="rounded-[8px] border border-notice-border bg-notice-tint px-[12px] py-[8px] text-notice-text">
-              <h3 className="m-0 mb-[4px] text-[12px] font-semibold uppercase tracking-[0.06em] text-notice-icon">{INFO_HEADINGS.watchOut}</h3>
-              <p className="m-0">{text.watchOut}</p>
-            </section>
-          </div>
-        </div>
-      )}
+      <GlassDialog open={open} onClose={() => setOpen(false)} rootRef={rootRef} openerRef={buttonRef} title={info.title} align={align} width={420} testId="info-popover">
+        <p className="m-0">{info.what}</p>
+        {info.formula && (
+          <p className="m-0 mt-[8px] whitespace-pre-wrap rounded-[8px] border border-line-200 bg-subtle/90 px-[8px] py-[5px] font-ledger-condensed text-[12.5px]" data-testid="info-formula">
+            {info.formula}
+          </p>
+        )}
+        {info.values.length > 0 && (
+          <dl className="m-0 mt-[8px] grid grid-cols-[auto_1fr] gap-x-[12px] gap-y-[3px] tabular-nums" data-testid="info-values">
+            {info.values.map((v) => (
+              <div key={v.label} className="contents">
+                <dt className="text-slate-600">{v.label}</dt>
+                <dd className="m-0 font-medium">{v.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {detail && (
+          <p className="m-0 mt-[8px]" data-testid="info-detail">
+            {detail.kind === 'text' ? detail.text : detail.kind === 'loading' ? 'Sub-metrics: reading from the semantic model…' : `Sub-metrics could not be read: ${detail.reason}`}
+          </p>
+        )}
+        {info.source && (
+          <span className="mt-[10px] block font-ledger-condensed text-[11px] text-slate-400" data-testid="info-source">
+            {info.source}
+          </span>
+        )}
+      </GlassDialog>
     </span>
   );
 }

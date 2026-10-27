@@ -1,13 +1,16 @@
-import { CHANNEL_SHORT, INFO, MARKET_NAMES, STORY_EVENTS } from './copy.ts';
+import { CHANNEL_SHORT, MARKET_NAMES, STORY_EVENTS, info } from './copy.ts';
+import type { InfoValue } from './copy.ts';
 import type { Cube } from './cube.ts';
-import { fmtCount, fmtEur, fmtEur0, fmtPct } from './format.ts';
-import { heroRows } from './kpis.ts';
+import { fmtCount, fmtDeltaPct, fmtEur, fmtEur0, fmtInt, fmtPct } from './format.ts';
+import { heroChip, heroRows } from './kpis.ts';
+import type { Bundle } from './kpis.ts';
 import { MARKETS } from './manifest.ts';
 import type { Metrics } from './metrics.ts';
 import { STATUS_WORD, cmpRow } from './status.ts';
-import type { SalesSelection } from './types.ts';
+import type { DeltaKind } from './status.ts';
+import type { SalesSelection, ViewId } from './types.ts';
 import type { ChartCard, HeroCard, OverviewVM, TableCard } from './view-model.ts';
-import { axisLabel, monthIndex, shift, trailing13, windowLabel, windowOf } from './windows.ts';
+import { axisLabel, monthIndex, monthKey, monthLabel, shift, trailing13, windowLabel, windowOf } from './windows.ts';
 
 // View 1 — Overview (layout-spec §1): four Tier-1 hero cards, the 2 × 2 "why" grid and the market table.
 
@@ -52,86 +55,129 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   const P = m.refLoans(py, mk);
   const budLoans = cube.budget(w, mk, 'LOANS');
   const budNew = cube.budget(w, mk, 'NEW_CLIENTS');
+  const budPrincipal = cube.budget(w, mk, 'PRINCIPAL_LOCAL');
+  const Y = m.loans(windowOf('Y', sel.anchor), mk);
+
+  const hero = (
+    id: string,
+    label: string,
+    value: string,
+    second: string | null,
+    values: InfoValue[],
+    kind: DeltaKind,
+    bundle: Bundle,
+    open: ViewId,
+  ): HeroCard => {
+    const rows = heroRows(kind, bundle);
+    return { id, label, info: info(id, values), value, second, rows, status: heroChip(rows, sel.cmp), open };
+  };
 
   // O1 Loans issued
   const loansTrend = trend(ctx, sel.anchor, (i) => m.loans(monthWindow(i), mk).loans);
-  const o1: HeroCard = {
-    id: 'o1',
-    label: 'Loans issued',
-    info: INFO.o1 ?? '',
-    value: fmtCount(A.loans),
-    second: fmtEur(A.principal),
-    sub: [`avg ticket ${fmtEur0(m.avgTicket(A))}`, budLoans ? `${fmtPct(A.loans / budLoans)} of target loans` : null]
-      .filter(Boolean)
-      .join(' - '),
-    rows: heroRows('countUp', { actual: A.loans, budget: budLoans, py: P?.loans ?? null }),
-    spark: { actual: loansTrend.actual, py: loansTrend.py },
-    open: 'loans',
-  };
+  const o1 = hero(
+    'o1',
+    'Loans issued',
+    fmtCount(A.loans),
+    fmtEur(A.principal),
+    [
+      { label: 'Budget loans', value: fmtCount(budLoans) },
+      {
+        label: 'Budget principal',
+        value: `${fmtEur(budPrincipal)} (actual ${fmtDeltaPct(budPrincipal ? A.principal / budPrincipal - 1 : null)})`,
+      },
+      {
+        label: 'Avg ticket',
+        value: `${fmtEur0(m.avgTicket(A))} (Budget ${fmtEur0(budPrincipal && budLoans ? budPrincipal / budLoans : null)})`,
+      },
+      { label: 'Prior year', value: `${fmtCount(P?.loans ?? null)} - ${fmtEur(P?.principal ?? null)}` },
+      { label: `${monthLabel(sel.anchor).slice(-4)} YTD`, value: `${fmtCount(Y.loans)} - ${fmtEur(Y.principal)}` },
+    ],
+    'countUp',
+    { actual: A.loans, budget: budLoans, py: P?.loans ?? null },
+    'loans',
+  );
 
   // O2 New clients locked in
   const byChannel = cube.loansBy(w, mk, (r) => r.channel, { repeat: false });
-  const top = [...byChannel.entries()].sort((a, b) => b[1].loans - a[1].loans).slice(0, 2);
-  const newTrend = trend(ctx, sel.anchor, (i) => m.loans(monthWindow(i), mk).first);
-  const o2: HeroCard = {
-    id: 'o2',
-    label: 'New clients locked in',
-    info: INFO.o2 ?? '',
-    value: fmtCount(A.first),
-    second: null,
-    sub: [
-      `${fmtPct(A.loans ? A.first / A.loans : null)} of loans`,
-      ...top.map(([c, s]) => `${CHANNEL_SHORT[c] ?? c} ${fmtPct(A.first ? s.loans / A.first : null, 0)}`),
-    ].join(' - '),
-    rows: heroRows('countUp', { actual: A.first, budget: budNew, py: P?.first ?? null }),
-    spark: { actual: newTrend.actual, py: newTrend.py },
-    open: 'clients',
-  };
+  const byShare = [...byChannel.entries()].sort((x, y) => y[1].loans - x[1].loans);
+  const o2 = hero(
+    'o2',
+    'New clients locked in',
+    fmtCount(A.first),
+    null,
+    [
+      { label: 'Share of loans', value: fmtPct(A.loans ? A.first / A.loans : null) },
+      ...byShare.map(([c, v]) => ({
+        label: CHANNEL_SHORT[c] ?? c,
+        value: `${fmtCount(v.loans)} (${fmtPct(A.first ? v.loans / A.first : null, 0)})`,
+      })),
+      { label: 'Budget', value: fmtCount(budNew) },
+      { label: 'Prior year', value: fmtCount(P?.first ?? null) },
+    ],
+    'countUp',
+    { actual: A.first, budget: budNew, py: P?.first ?? null },
+    'clients',
+  );
 
   // O3 Returning clients (client-weighted)
   const ret = m.returning(sel.tv, sel.anchor, mk);
-  const retTrend = trend(ctx, sel.anchor, (i) => m.returning('M', i, mk));
   const r180 = m.repeat180(sel.anchor - 6, mk);
-  const o3: HeroCard = {
-    id: 'o3',
-    label: 'Returning clients',
-    info: INFO.o3 ?? '',
-    value: fmtPct(ret),
-    second: null,
-    sub: ['of borrowers', `${fmtPct(m.repeatShare(A))} of loans`, `180-day repeat ${fmtPct(r180, 0)}`].join(' - '),
-    rows: heroRows('ratioUp', { actual: ret, py: m.refReturning(sel.tv, sel.anchor - 12, mk) }),
-    spark: { actual: retTrend.actual, py: retTrend.py },
-    open: 'clients',
-  };
+  const stat = cube.windowStat(sel.tv, monthKey(sel.anchor), mk);
+  const o3 = hero(
+    'o3',
+    'Returning clients',
+    fmtPct(ret),
+    null,
+    [
+      {
+        label: 'Returning borrowers',
+        value: `${fmtInt(stat?.returning ?? null)} of ${fmtInt(stat?.borrowers ?? null)}`,
+      },
+      { label: 'Loan-weighted', value: fmtPct(m.repeatShare(A)) },
+      { label: `180-day repeat (cohort ${monthLabel(sel.anchor - 6)})`, value: fmtPct(r180) },
+      {
+        label: '90-day repeat',
+        value: fmtPct(m.cohortCurve([sel.anchor - 6], mk)[cube.cohortDays.indexOf(90)] ?? null),
+      },
+      { label: 'Prior year', value: fmtPct(m.refReturning(sel.tv, sel.anchor - 12, mk)) },
+      { label: 'Budget', value: 'none for this ratio' },
+    ],
+    'ratioUp',
+    { actual: ret, py: m.refReturning(sel.tv, sel.anchor - 12, mk) },
+    'clients',
+  );
 
   // O4 Bad / overdue loans (30+ DPD by balance at the anchor month)
   const snap = m.snap(sel.anchor, mk);
-  const dpdTrend = trend(ctx, sel.anchor, (i) => m.dpd30At(i, mk));
-  const o4: HeroCard = {
-    id: 'o4',
-    label: 'Bad / overdue loans',
-    info: INFO.o4 ?? '',
-    value: fmtPct(m.dpd30(snap)),
-    second: null,
-    sub: [
-      '30+ DPD by balance',
-      `90+ ${fmtPct(m.dpd90(snap))}`,
-      `vintage 6m ${fmtPct(m.vintageBad6(sel.anchor - 6, mk))}`,
-    ].join(' - '),
-    rows: heroRows('riskDown', {
-      actual: m.dpd30(snap),
-      budget: cube.budgetDpd30(sel.anchor, mk),
-      py: m.dpd30At(sel.anchor - 12, mk),
-    }),
-    spark: { actual: dpdTrend.actual, py: dpdTrend.py },
-    open: 'portfolio',
-  };
+  const o4 = hero(
+    'o4',
+    'Bad / overdue loans',
+    fmtPct(m.dpd30(snap)),
+    null,
+    [
+      {
+        label: '30+ DPD balance',
+        value: `${fmtEur(snap ? snap.b30_59 + snap.b60_89 + snap.b90p : null)} of ${fmtEur(snap?.outstanding ?? null)}`,
+      },
+      { label: '90+ DPD by balance', value: fmtPct(m.dpd90(snap)) },
+      { label: '30+ by count', value: fmtPct(m.dpd30Count(snap)) },
+      {
+        label: `Vintage 6m bad rate (${monthLabel(sel.anchor - 6)})`,
+        value: fmtPct(m.vintageBad6(sel.anchor - 6, mk)),
+      },
+      { label: 'Budget 30+ appetite', value: fmtPct(cube.budgetDpd30(sel.anchor, mk)) },
+      { label: 'Prior year', value: fmtPct(m.dpd30At(sel.anchor - 12, mk)) },
+    ],
+    'riskDown',
+    { actual: m.dpd30(snap), budget: cube.budgetDpd30(sel.anchor, mk), py: m.dpd30At(sel.anchor - 12, mk) },
+    'portfolio',
+  );
 
   // O5 Loans issued by month vs Budget
   const o5: ChartCard = {
     id: 'o5',
     title: 'Loans issued by month vs Budget',
-    info: INFO.o5 ?? '',
+    info: info('o5'),
     open: 'loans',
     legend: [
       { label: 'Actual', role: 'actual' },
@@ -166,7 +212,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   const o6: ChartCard = {
     id: 'o6',
     title: 'New clients by acquisition channel',
-    info: INFO.o6 ?? '',
+    info: info('o6'),
     open: 'clients',
     legend: [
       { label: windowLabel(w), role: 'actual' },
@@ -194,7 +240,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   const o7: ChartCard = {
     id: 'o7',
     title: 'Returning clients - cohort repeat curve',
-    info: INFO.o7 ?? '',
+    info: info('o7'),
     open: 'clients',
     legend: cohorts.map((c, k) => ({
       label: `${k === 0 ? 'Cohort ' : ''}${quarterLabel(c[0] ?? sel.anchor)}`,
@@ -221,7 +267,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   const o8: ChartCard = {
     id: 'o8',
     title: '30+ DPD by market, 13 months',
-    info: INFO.o8 ?? '',
+    info: info('o8'),
     open: 'portfolio',
     legend: MARKETS.map((c, k) => ({ label: MARKET_NAMES[c], role: k === 0 ? 'c1' : k === 1 ? 'c2' : 'py' })),
     chart: {
@@ -250,7 +296,7 @@ function marketTable(ctx: Ctx, sel: SalesSelection): TableCard {
   return {
     id: 'o9',
     title: `Markets - ${windowLabel(w)}`,
-    info: INFO.o9 ?? '',
+    info: info('o9'),
     columns: [
       { key: 'market', label: 'Market', width: 160, align: 'left' },
       { key: 'loans', label: 'Loans', width: 120, align: 'right' },
@@ -286,7 +332,7 @@ function marketTable(ctx: Ctx, sel: SalesSelection): TableCard {
         ],
       };
     }),
-    note: null,
+    empty: null,
     action: { label: 'Show loans', drill: { kind: 'loans', market: sel.market } },
     needsDetail: false,
   };

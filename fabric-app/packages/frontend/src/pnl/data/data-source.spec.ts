@@ -10,7 +10,7 @@ import type { AppClient } from '@/lib/rayfin-client';
 import { defaultFilters } from '../model/filters';
 import type { Figures, ZoneKey } from '../model/types';
 import { assembleFigures, createAppDataSource, loadVisibleEntities, modelZoneLoaders, zoneQueryKey, ZONES, type ZoneLoaders } from './data-source';
-import type { KpiMeta } from './pnl-model-figures';
+import type { VitalsMeta } from './pnl-model-figures';
 import type { ModelQueryRunner } from './pnl-model-client';
 import { sampleReference } from './sample-reference';
 import { sampleFigures } from './sample-source';
@@ -42,7 +42,7 @@ function fakeLoaders(overrides: Partial<Record<ZoneKey, () => Promise<unknown>>>
     if (!o) throw new Error(`${zone} unavailable`);
     return (await o()) as never;
   };
-  return { calls, statement: make('statement'), kpi: make('kpi'), bridge: make('bridge'), drivers: make('drivers'), profitability: make('profitability'), context: make('context') };
+  return { calls, ...(Object.fromEntries(ZONES.map((z) => [z, make(z)])) as unknown as ZoneLoaders) };
 }
 
 describe('createAppDataSource().loadFigures', () => {
@@ -64,13 +64,13 @@ describe('createAppDataSource().loadFigures', () => {
     expect(final.zones.context).toEqual({ kind: 'live', requestId: 'req-c' });
     expect(final.notices).toEqual(['Group notice']);
     expect(final.dataStatus).toBe('Closed through Sep 2026  ·  Refreshed 21 Oct 2026 18:00');
-    expect(final.zones.kpi).toEqual({ kind: 'error', reason: 'kpi unavailable', requestId: undefined });
-    expect(final.financial).toEqual([]);
+    expect(final.zones.vitals).toEqual({ kind: 'error', reason: 'vitals unavailable', requestId: undefined });
+    expect(final.vitals.results).toEqual([]);
     expect(final.zones.bridge.kind).toBe('error');
     expect(final.bridge.steps).toEqual([]);
-    // The profitability zone failed on its own; the context note is not enough to show a table.
     expect(final.zones.profitability.kind).toBe('error');
     expect(final.profitability.rows).toEqual([]);
+    expect(final.zones.heat.kind).toBe('error');
   });
 
   it('caches raw results per query key: the same filter again, or a display-only change, re-queries nothing', async () => {
@@ -81,7 +81,7 @@ describe('createAppDataSource().loadFigures', () => {
     await source.loadFigures({ ...filter, units: 'k', costSign: 'pos', showPctNr: false, showFyOutlook: false }, reference);
     expect(loaders.calls.statement).toBe(1);
     // A failed zone is not cached: it is retried on the next load.
-    expect(loaders.calls.kpi).toBe(3);
+    expect(loaders.calls.vitals).toBe(3);
     // A query-relevant change loads again.
     await source.loadFigures({ ...filter, month: 6 }, reference);
     expect(loaders.calls.statement).toBe(2);
@@ -111,35 +111,19 @@ describe('zoneQueryKey', () => {
   it('depends on the filters a zone’s query reads and nothing else', () => {
     const base = zoneQueryKey('statement', filter);
     expect(zoneQueryKey('statement', { ...filter, units: 'k', costSign: 'pos', hideEmpty: false })).toBe(base);
-    expect(zoneQueryKey('statement', { ...filter, analysisCompare: 'PY' })).toBe(base);
-    expect(zoneQueryKey('bridge', { ...filter, analysisCompare: 'PY' })).not.toBe(zoneQueryKey('bridge', filter));
-    expect(zoneQueryKey('profitability', { ...filter, breakdown: { ...filter.breakdown, P: 0 } })).not.toBe(zoneQueryKey('profitability', filter));
+    // Parity rule 1: the analysis zones read Compare A / B like every other zone; no toggle of their own.
+    expect(zoneQueryKey('bridge', { ...filter, compareA: 'PY' })).not.toBe(zoneQueryKey('bridge', filter));
+    expect(zoneQueryKey('variances', { ...filter, compareB: 'NONE' })).not.toBe(zoneQueryKey('variances', filter));
+    expect(zoneQueryKey('profitability', { ...filter, breakdown: { ...filter.breakdown, P: 1 } })).not.toBe(zoneQueryKey('profitability', filter));
     expect(zoneQueryKey('statement', { ...filter, fxBasis: 'constant' })).not.toBe(base);
+    // The cut is a query input of its own zone only; every Profitability zone is at constant currency whatever the flyout says (PV-02).
+    expect(zoneQueryKey('variancesCut', { ...filter, varCut: 'region' })).not.toBe(zoneQueryKey('variancesCut', filter));
+    expect(zoneQueryKey('variances', { ...filter, varCut: 'region' })).toBe(zoneQueryKey('variances', filter));
+    for (const zone of ['profitability', 'concentration', 'bubble', 'heat'] as const) {
+      expect(zoneQueryKey(zone, { ...filter, fxBasis: 'constant' })).toBe(zoneQueryKey(zone, filter));
+    }
     // Another entity's slices do not matter for this entity (F-30).
     expect(zoneQueryKey('statement', { ...filter, slices: { ...filter.slices, S: { channel: ['SELF'], line: null, segment: null } } })).toBe(base);
-  });
-});
-
-describe('modelZoneLoaders.kpi', () => {
-  it('reads dim_kpi once, then the values in chunks of three codes', async () => {
-    const metaTable = {
-      columns: ['dim_kpi[slot]', 'dim_kpi[kpi_code]', 'dim_kpi[kpi_label]', 'dim_kpi[kpi_group]', 'dim_kpi[better_when]', 'dim_kpi[value_type]', 'dim_kpi[definition]'].map((name) => ({ name, dataType: 'String' })),
-      rows: ['NR', 'ORG_GROWTH', 'GM_PCT', 'GTN_PCT', 'AP_PCT'].map((code, i) => [i + 1, code, code, 'Financial', 'Higher', 'PCT', '']),
-    };
-    let n = 0;
-    const executeQuery = vi.fn<(input: ExecuteQueryInput) => Promise<SemanticModelQueryResult>>(async ({ query }) => ({
-      status: 'success',
-      table: query.includes('FILTER ( dim_kpi') ? metaTable : { columns: [], rows: [[]] },
-      requestId: `req-${(n += 1)}`,
-    }));
-    const result = await modelZoneLoaders.kpi({ executeQuery }, filter, reference);
-    expect(result.zone).toBe('kpi');
-    expect(executeQuery).toHaveBeenCalledTimes(3);
-    expect(executeQuery.mock.calls[1][0].query).toContain('"@NR"');
-    expect(executeQuery.mock.calls[1][0].query).toContain('"@GM_PCT_s"');
-    expect(executeQuery.mock.calls[2][0].query).toContain('"@AP_PCT"');
-    expect(executeQuery.mock.calls[1][0].resultSetRowCountLimit).toBe(5);
-    expect(result.requestId.split(' ')).toHaveLength(3);
   });
 });
 
@@ -149,7 +133,7 @@ describe('assembleFigures', () => {
     const figures = assembleFigures(settled, filter, reference);
     expect(figures.zones.statement).toMatchObject({ kind: 'error', requestId: 'req-x' });
     expect((figures.zones.statement as { reason: string }).reason).toMatch(/missing column/);
-    expect(figures.zones.kpi).toEqual({ kind: 'loading' });
+    expect(figures.zones.vitals).toEqual({ kind: 'loading' });
   });
 });
 
@@ -170,42 +154,78 @@ describe('loadReference with the model’s visible entities (Q0)', () => {
   });
 });
 
-// kpi-card-v2: a tile's comparison rows come from the KPI zone's own Q2b values; once the zone has
-// settled nothing else is read for the tiles (no trend query).
-describe('createAppDataSource().loadFigures — KPI tiles', () => {
-  const META: KpiMeta[] = [
-    { slot: 1, code: 'NR', label: 'Net revenue', group: 'Financial', betterWhen: 'Higher', valueType: 'AMT', definition: 'Gross revenue + GTN' },
-    { slot: 2, code: 'ORG_GROWTH', label: 'Organic growth', group: 'Financial', betterWhen: 'Higher', valueType: 'PCT', definition: '' },
-    { slot: 9, code: 'UNITS', label: 'Units sold', group: 'Operational', betterWhen: 'Higher', valueType: 'CNT', definition: '' },
+// The AI assistant's `get_kpis` reads the Vitals zone on demand through the same cache (ADR-0009 §2).
+describe('createAppDataSource().loadZone — Vitals for the AI assistant', () => {
+  const META: VitalsMeta[] = [
+    { slot: 1, tier: 'hero', code: 'NR', label: 'Net revenue', betterWhen: 'Higher', valueType: 'AMT', definition: 'Gross revenue + GTN' },
+    { slot: 6, tier: 'driver', code: 'UNITS', label: 'Units sold', betterWhen: 'Higher', valueType: 'CNT', definition: '' },
   ];
   const valuesTable = {
-    columns: ['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@NR_s]', '[@ORG_GROWTH]', '[@ORG_GROWTH_cmp_a]', '[@ORG_GROWTH_cmp_b]', '[@ORG_GROWTH_s]', '[@UNITS]', '[@UNITS_cmp_a]', '[@UNITS_cmp_b]', '[@UNITS_s]'].map((name) => ({ name, dataType: 'Double' })),
-    rows: [[3398.5, 3464.8, 3250.1, '', 0.06, 0.09, 0, 'Reported +8.2%', 419.8, 427.1, 404.1, '']],
+    columns: ['[@NR]', '[@NR_cmp_a]', '[@NR_cmp_b]', '[@UNITS]', '[@UNITS_cmp_a]', '[@UNITS_cmp_b]'].map((name) => ({ name, dataType: 'Double' })),
+    rows: [[3398.5, 3464.8, 3250.1, 419.8, 427.1, 404.1]],
   };
-  const kpiResult = async () => ({ zone: 'kpi', meta: META, values: [valuesTable], requestId: 'req-k' });
+  const vitalsResult = async () => ({ zone: 'vitals', meta: META, values: [valuesTable], requestId: 'req-k' });
 
-  it('maps the comparison rows from the Q2b values and sends no further query for the tiles', async () => {
+  it('maps the cards from the QV2 values and sends no further query', async () => {
     const executeQuery = vi.fn<(input: ExecuteQueryInput) => Promise<SemanticModelQueryResult>>();
     const client = { connectors: { pnlModel: { executeQuery } } } as unknown as AppClient;
-    const source = createAppDataSource({ getClient: async () => client, loaders: fakeLoaders({ kpi: kpiResult }) });
-    const snapshots: Figures[] = [];
-    const final = await source.loadFigures(filter, reference, (f) => snapshots.push(f));
+    const source = createAppDataSource({ getClient: async () => client, loaders: fakeLoaders({ vitals: vitalsResult }) });
+    const result = await source.loadZone('vitals', filter, reference);
+    const final = assembleFigures({ vitals: { status: 'ok', result } }, filter, reference);
     expect(executeQuery).not.toHaveBeenCalled();
-    expect(snapshots.length).toBe(1 + ZONES.length);
-    expect(final.zones.kpi).toEqual({ kind: 'live', requestId: 'req-k' });
-    expect(final.financial[0]).toMatchObject({
+    expect(final.zones.vitals).toEqual({ kind: 'live', requestId: 'req-k' });
+    expect(final.vitals.results[0]).toMatchObject({
       code: 'NR',
-      hint: 'Gross revenue + GTN',
-      sublines: [],
-      compares: [
-        { name: 'vs Budget', text: '−1.9%', tone: 'unf', bar: { capped: false } },
-        { name: 'vs Prior year', text: '+4.6%', tone: 'fav', bar: { capped: false } },
+      value: '$3,398.5 m',
+      status: { kind: 'watch' },
+      rows: [
+        { name: 'vs Budget', abs: '−66.3', rel: '−1.9%', tone: 'watch' },
+        { name: 'vs Prior year', abs: '+148.4', rel: '+4.6%', tone: 'neutral' },
       ],
     });
-    expect(final.financial[0].compares[0].bar?.fraction).toBeLessThan(0);
-    expect(final.financial[0].compares[1].bar?.fraction).toBeGreaterThan(0);
-    // Growth KPIs: value and sub-line only.
-    expect(final.financial[1]).toMatchObject({ code: 'ORG_GROWTH', value: '+6.0%', sublines: ['Reported +8.2%'], compares: [] });
-    expect(final.operational[0].compares.map((c) => c.text)).toEqual(['−1.7%', '+3.9%']);
+    expect(final.vitals.drivers[0].rows.map((r) => r.rel)).toEqual(['−1.7%', '+3.9%']);
+  });
+});
+
+describe('modelZoneLoaders — redesign v4 zones', () => {
+  const metaTable = {
+    columns: ['dim_kpi[vitals_slot]', 'dim_kpi[vitals_tier]', 'dim_kpi[kpi_code]', 'dim_kpi[kpi_label]', 'dim_kpi[better_when]', 'dim_kpi[value_type]', 'dim_kpi[definition]'].map((name) => ({ name, dataType: 'String' })),
+    rows: ['NR', 'EBITDA', 'OP', 'GM_PCT'].map((code, i) => [i + 1, i < 3 ? 'Hero' : 'Secondary', code, code, 'Higher', 'AMT', '']),
+  };
+  const runner = () => {
+    let n = 0;
+    const executeQuery = vi.fn<(input: ExecuteQueryInput) => Promise<SemanticModelQueryResult>>(async ({ query }) => ({
+      status: 'success',
+      table: query.includes('FILTER ( dim_kpi') ? metaTable : { columns: [], rows: [[]] },
+      requestId: `req-${(n += 1)}`,
+    }));
+    return executeQuery;
+  };
+
+  it('vitals: reads the Vitals rows once, then the values in chunks of three codes; vitalsInfo the same with KPI Info Sub', async () => {
+    const executeQuery = runner();
+    const result = await modelZoneLoaders.vitals({ executeQuery }, filter, reference);
+    expect(result.zone).toBe('vitals');
+    expect(executeQuery).toHaveBeenCalledTimes(3);
+    expect(executeQuery.mock.calls[0][0].query).toContain('dim_kpi[vitals_slot] > 0');
+    expect(executeQuery.mock.calls[1][0].query).toContain('"@NR"');
+    expect(executeQuery.mock.calls[2][0].query).toContain('"@GM_PCT"');
+    const info = await modelZoneLoaders.vitalsInfo({ executeQuery: runner() }, filter, reference);
+    expect(info.zone).toBe('vitalsInfo');
+    expect(info.zone === 'vitalsInfo' && info.codes).toEqual(['NR', 'EBITDA', 'OP', 'GM_PCT']);
+  });
+
+  it('variancesCut: no query without a cut; one query with the cut; the Profitability zones are sent at constant currency', async () => {
+    const executeQuery = runner();
+    const none = await modelZoneLoaders.variancesCut({ executeQuery }, filter, reference);
+    expect(none).toEqual({ zone: 'variancesCut', table: null, requestId: '' });
+    expect(executeQuery).not.toHaveBeenCalled();
+    await modelZoneLoaders.variancesCut({ executeQuery }, { ...filter, varCut: 'region' }, reference);
+    expect(executeQuery.mock.calls[0][0].query).toContain('dim_region[region_code]');
+    expect(executeQuery.mock.calls[0][0].resultSetRowCountLimit).toBe(600);
+    await modelZoneLoaders.profitability({ executeQuery }, { ...filter, fxBasis: 'actual' }, reference);
+    expect(executeQuery.mock.calls[1][0].query).toContain('TREATAS ( { "CC" }, param_fx_basis[fx_basis_code] )');
+    await modelZoneLoaders.statement({ executeQuery }, { ...filter, fxBasis: 'actual' }, reference);
+    expect(executeQuery.mock.calls[2][0].query).toContain('TREATAS ( { "ACT" }, param_fx_basis[fx_basis_code] )');
   });
 });
