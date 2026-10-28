@@ -1,0 +1,158 @@
+/// Sales actuals, week x selling site x category (E-30 .. E-34, E-41). is_lfl / is_lfl_as_ly per row (E-31).
+table fact_sales_week
+	lineageTag: 382cf5d3-ced7-5d77-b792-eef1d0501134
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: 798d9eba-6e21-5add-b700-6e691bfdf6a4
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 123315f2-c17a-5343-8f2f-9899e6424022
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 2fc43d8e-987e-5b83-9acf-11f5f331ec29
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column gross_sales
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 87431d1b-a959-5bfe-a440-a57024e99a2a
+		summarizeBy: none
+		sourceColumn: gross_sales
+
+		annotation SummarizationSetBy = User
+
+	column markdown_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 739811a0-a56a-5890-8b88-30171c42f3e5
+		summarizeBy: none
+		sourceColumn: markdown_value
+
+		annotation SummarizationSetBy = User
+
+	column returns
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 756cca93-3302-5ea7-89a5-f0df738e607b
+		summarizeBy: none
+		sourceColumn: returns
+
+		annotation SummarizationSetBy = User
+
+	column net_sales
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c43dd222-1dc2-5b7f-b9f2-5b63ebcef42f
+		summarizeBy: none
+		sourceColumn: net_sales
+
+		annotation SummarizationSetBy = User
+
+	column units
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5d299ce1-3b23-5187-a510-a79721e088f6
+		summarizeBy: none
+		sourceColumn: units
+
+		annotation SummarizationSetBy = User
+
+	column cogs_landed
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 8c9cb122-d397-5580-81ee-eb36651aa1a4
+		summarizeBy: none
+		sourceColumn: cogs_landed
+
+		annotation SummarizationSetBy = User
+
+	column back_margin_alloc
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 5d93e96f-7548-5839-a8ff-a886bbedb928
+		summarizeBy: none
+		sourceColumn: back_margin_alloc
+
+		annotation SummarizationSetBy = User
+
+	column transactions
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9e4b8044-6971-50f6-b6e6-4230d7ae94d3
+		summarizeBy: none
+		sourceColumn: transactions
+
+		annotation SummarizationSetBy = User
+
+	column is_lfl
+		dataType: boolean
+		isHidden
+		lineageTag: 558009c6-b922-5b45-81bd-2f41f9086b42
+		summarizeBy: none
+		sourceColumn: is_lfl
+
+		annotation SummarizationSetBy = User
+
+	column is_lfl_as_ly
+		dataType: boolean
+		isHidden
+		lineageTag: 0fed9c48-ae45-573b-9fac-87d92ee3b887
+		summarizeBy: none
+		sourceColumn: is_lfl_as_ly
+
+		annotation SummarizationSetBy = User
+
+	partition fact_sales_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_sales_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"gross_sales", type number},
+				            {"markdown_value", type number},
+				            {"returns", type number},
+				            {"net_sales", type number},
+				            {"units", Int64.Type},
+				            {"cogs_landed", type number},
+				            {"back_margin_alloc", type number},
+				            {"transactions", Int64.Type},
+				            {"is_lfl", type logical},
+				            {"is_lfl_as_ly", type logical}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

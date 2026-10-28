@@ -1,0 +1,50 @@
+/// Comparator switcher (E-14): Budget, Last year, Last week (no Forecast, ADR-0013 OQ 6). Disconnected.
+table param_comparator
+	lineageTag: 66cb8812-6b87-5c7e-886f-1491516419cf
+
+	column comparator_code
+		dataType: string
+		isHidden
+		lineageTag: 83111370-012f-5044-ab9c-f872dd023878
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_code]
+
+		annotation SummarizationSetBy = User
+
+	column comparator_name
+		dataType: string
+		lineageTag: 962a0a9c-67ac-5960-9091-b352701b897b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 864e3f9c-3b88-550e-82ca-f5b01e6c7336
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_comparator = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "comparator_code", STRING
+				    ,"comparator_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "BUD", "Budget", 1 }
+				        ,{ "LY", "Last year", 2 }
+				        ,{ "LW", "Last week", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

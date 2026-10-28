@@ -1,0 +1,229 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Open Notes",
+  "name": "bm_notes",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_filters",
+      "grp_filters_scrim",
+      "menu_panel",
+      "menu_reset",
+      "grp_filters_close",
+      "menu_param_period",
+      "menu_param_comparator",
+      "menu_param_region",
+      "menu_param_attr_group",
+      "menu_param_attr_lever",
+      "menu_param_attr_horizon",
+      "menu_param_attr_owner",
+      "menu_param_attr_statement",
+      "grp_how",
+      "grp_how_scrim",
+      "how_panel",
+      "grp_how_close",
+      "grp_more",
+      "grp_more_scrim",
+      "more_panel",
+      "grp_more_close",
+      "more_table",
+      "grp_notes",
+      "grp_notes_scrim",
+      "notes_panel",
+      "grp_notes_close"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "exec_landing",
+    "sections": {
+      "exec_landing": {
+        "visualContainers": {
+          "grp_filters_scrim": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_panel": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_reset": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_period": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_comparator": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_region": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_group": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_lever": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_horizon": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_owner": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_statement": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_how_scrim": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "how_panel": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_how_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_more_scrim": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "more_panel": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_more_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "more_table": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_notes_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "notes_panel": {
+            "singleVisual": {
+              "visualType": "image"
+            }
+          },
+          "grp_notes_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_filters": {
+            "isHidden": true
+          },
+          "grp_how": {
+            "isHidden": true
+          },
+          "grp_more": {
+            "isHidden": true
+          },
+          "grp_notes": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

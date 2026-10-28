@@ -1,0 +1,61 @@
+/// Forward weekly COGS forecast, week x selling site x category (weeks of cover).
+table fact_forecast_week
+	lineageTag: 6b03e24b-19bd-5efe-a6af-27d35bf26710
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: 0b054b17-b249-5655-8fd1-22bfe01307a1
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 79ef85e9-8258-5858-ba1c-e770640a09ec
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 71d3df23-9d2a-5fc7-9bf5-ab24705f4063
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column forecast_cogs
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 90e3c684-4e9a-542c-aa67-871f04b2bd49
+		summarizeBy: none
+		sourceColumn: forecast_cogs
+
+		annotation SummarizationSetBy = User
+
+	partition fact_forecast_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_forecast_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"forecast_cogs", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,6 @@
+/// Folder that holds the Parquet files of data/nordmark_retail_dummy_data/parquet + manifest.json (absolute path; change it on another machine, E-80).
+expression DataFolder = "C:\__PBI\PNL\data\nordmark_retail_dummy_data\parquet" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 7bec2ec9-43b6-5a34-b2b9-231ab2fc4051
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text

@@ -1,0 +1,109 @@
+/// Category (9) with cover, GMROI and sell-through targets.
+table dim_category
+	lineageTag: 16c25601-f9f2-5edd-bb39-645f44f21b93
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 4db7a1a6-42e8-5a69-9df0-12722658ebc2
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column category_name
+		dataType: string
+		lineageTag: b68751cd-0e89-5952-9ea7-a3c9d8377a06
+		summarizeBy: none
+		sourceColumn: category_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column division
+		dataType: string
+		lineageTag: e8c6764d-f640-5892-a942-4ea32c0e5ec1
+		summarizeBy: none
+		sourceColumn: division
+
+		annotation SummarizationSetBy = User
+
+	column is_seasonal
+		dataType: boolean
+		lineageTag: 8304dc2b-7ed6-5e5d-9bcb-421b47e0a646
+		summarizeBy: none
+		sourceColumn: is_seasonal
+
+		annotation SummarizationSetBy = User
+
+	column cover_target_wks
+		dataType: double
+		formatString: #,0.00
+		lineageTag: e860e72c-53cc-5480-b98c-3bf8a5360f34
+		summarizeBy: none
+		sourceColumn: cover_target_wks
+
+		annotation SummarizationSetBy = User
+
+	column gmroi_target
+		dataType: double
+		formatString: #,0.00
+		lineageTag: f53649f7-81c6-5e4f-98c0-d93a93f3c231
+		summarizeBy: none
+		sourceColumn: gmroi_target
+
+		annotation SummarizationSetBy = User
+
+	column sellthrough_target
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 09d62e72-6106-595e-b0ec-feff9c57536a
+		summarizeBy: none
+		sourceColumn: sellthrough_target
+
+		annotation SummarizationSetBy = User
+
+	column top500_skus
+		dataType: int64
+		formatString: 0
+		lineageTag: c643e9b7-3475-5e4e-84f8-0acb4c5fa0f8
+		summarizeBy: none
+		sourceColumn: top500_skus
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 95c62374-e9d0-5e38-91bf-c94be006f2b0
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_category = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_category.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"category_code", type text},
+				            {"category_name", type text},
+				            {"division", type text},
+				            {"is_seasonal", type logical},
+				            {"cover_target_wks", type number},
+				            {"gmroi_target", type number},
+				            {"sellthrough_target", type number},
+				            {"top500_skus", Int64.Type},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

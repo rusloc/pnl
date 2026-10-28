@@ -1,0 +1,105 @@
+/// Week-end stock snapshot, week x location x category. Never sum over weeks.
+table fact_inventory_week
+	lineageTag: a990406c-18b2-5468-8cff-66b793f36044
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: 222643c9-3349-5118-8189-9a19ac927c4c
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: e275b56b-6894-59fb-8afe-c77d5e70d38a
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 8920b332-1547-5a39-97db-4a4c989ddc96
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column on_hand_units
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 78385500-b98d-5f94-8b92-89411ec0db35
+		summarizeBy: none
+		sourceColumn: on_hand_units
+
+		annotation SummarizationSetBy = User
+
+	column on_hand_cost
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 2941ca7c-923c-5302-86b5-f3feefeb453f
+		summarizeBy: none
+		sourceColumn: on_hand_cost
+
+		annotation SummarizationSetBy = User
+
+	column on_order_cost
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a470f017-7bcc-5d50-8f43-84db9d839c8a
+		summarizeBy: none
+		sourceColumn: on_order_cost
+
+		annotation SummarizationSetBy = User
+
+	column in_transit_cost
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: e2f6b582-9be0-549f-a168-e8f3b2b2d183
+		summarizeBy: none
+		sourceColumn: in_transit_cost
+
+		annotation SummarizationSetBy = User
+
+	column aged_90_cost
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 2e44455f-5594-5623-86a5-d9384bf7c751
+		summarizeBy: none
+		sourceColumn: aged_90_cost
+
+		annotation SummarizationSetBy = User
+
+	partition fact_inventory_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_inventory_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"on_hand_units", Int64.Type},
+				            {"on_hand_cost", type number},
+				            {"on_order_cost", type number},
+				            {"in_transit_cost", type number},
+				            {"aged_90_cost", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

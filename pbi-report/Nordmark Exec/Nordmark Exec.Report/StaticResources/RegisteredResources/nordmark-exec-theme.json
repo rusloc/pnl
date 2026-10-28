@@ -1,0 +1,95 @@
+{
+  "name": "nordmark-exec-theme.json",
+  "dataColors": [
+    "#2048C6",
+    "#374151",
+    "#B6BCC6",
+    "#136C3A",
+    "#9A5B00",
+    "#C0272D",
+    "#5F6878",
+    "#D1D5DB"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#111827",
+  "tableAccent": "#E5E7EB",
+  "good": "#136C3A",
+  "bad": "#C0272D",
+  "neutral": "#9A5B00",
+  "foregroundNeutralSecondary": "#5F6878",
+  "foregroundNeutralTertiary": "#5F6878",
+  "backgroundLight": "#F6F7F9",
+  "backgroundNeutral": "#F1F3F5",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#111827"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 24,
+      "color": "#111827"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 10,
+      "color": "#111827"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 8,
+      "color": "#5F6878"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "background": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

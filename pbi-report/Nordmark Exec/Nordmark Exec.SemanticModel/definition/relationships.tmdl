@@ -1,0 +1,99 @@
+relationship 7e058c74-46c0-533e-bf5a-1550f76592da
+	fromColumn: fact_sales_week.week_key
+	toColumn: dim_week.week_key
+
+relationship 728c3dec-ec11-5de9-bb9d-977e761d5ff3
+	fromColumn: fact_sales_week.store_code
+	toColumn: dim_store.store_code
+
+relationship 3581a4e8-d66f-5441-955c-a2bf89f60919
+	fromColumn: fact_sales_week.category_code
+	toColumn: dim_category.category_code
+
+relationship f2e8a8b5-d843-560d-9c4e-85ae714e055c
+	fromColumn: fact_budget_week.week_key
+	toColumn: dim_week.week_key
+
+relationship ec2ce9ef-6730-5d01-8772-590f40f0bdb9
+	fromColumn: fact_budget_week.store_code
+	toColumn: dim_store.store_code
+
+relationship ad5a88cd-5f5d-5c65-8f25-f9cf32fa7120
+	fromColumn: fact_budget_week.category_code
+	toColumn: dim_category.category_code
+
+relationship bd8e50e2-7dcb-5443-ab7e-7063eeb6bc94
+	fromColumn: fact_supplier_income_week.week_key
+	toColumn: dim_week.week_key
+
+relationship 3c30fa27-0f83-5992-b35e-65b3089f597c
+	fromColumn: fact_supplier_income_week.supplier_code
+	toColumn: dim_supplier.supplier_code
+
+relationship 77a3307a-0464-5c10-8076-9fa43fb64dfc
+	fromColumn: fact_inventory_week.week_key
+	toColumn: dim_week.week_key
+
+relationship dffc3b4a-6d8e-5610-8a5b-6a8cda740972
+	fromColumn: fact_inventory_week.store_code
+	toColumn: dim_store.store_code
+
+relationship e8eea4fe-2f04-584c-a3e3-625d8008119b
+	fromColumn: fact_inventory_week.category_code
+	toColumn: dim_category.category_code
+
+relationship 97be96ab-b8dc-504c-884a-f2c3196fa330
+	fromColumn: fact_forecast_week.week_key
+	toColumn: dim_week.week_key
+
+relationship e5a64b7d-1b3e-59fe-ac1c-ddaf15898d42
+	fromColumn: fact_forecast_week.store_code
+	toColumn: dim_store.store_code
+
+relationship 63b85276-7992-568f-b61c-5da7db7905aa
+	fromColumn: fact_forecast_week.category_code
+	toColumn: dim_category.category_code
+
+relationship 1ead6a43-4a50-5602-a6ed-39269e1e4879
+	fromColumn: fact_availability_week.week_key
+	toColumn: dim_week.week_key
+
+relationship 9c4089a8-c2c3-5b30-88b9-f5be0961e7c7
+	fromColumn: fact_availability_week.store_code
+	toColumn: dim_store.store_code
+
+relationship e5ed39af-c582-54da-b029-759865338a36
+	fromColumn: fact_availability_week.category_code
+	toColumn: dim_category.category_code
+
+relationship acf3ed15-4a75-5598-8ed0-98e991e9fdf7
+	fromColumn: fact_receipts_week.week_key
+	toColumn: dim_week.week_key
+
+relationship 66ad290c-9183-59fa-a93e-c3ef3479ef43
+	fromColumn: fact_receipts_week.store_code
+	toColumn: dim_store.store_code
+
+relationship ea07e4bb-729b-5996-9624-ea18ca628dff
+	fromColumn: fact_receipts_week.category_code
+	toColumn: dim_category.category_code
+
+relationship ebd96aa6-426f-51c6-a9ba-a88189fb2a01
+	fromColumn: fact_po_week.week_key
+	toColumn: dim_week.week_key
+
+relationship d301fe8f-51f1-5ce2-93a2-a44d714cdfaf
+	fromColumn: fact_po_week.supplier_code
+	toColumn: dim_supplier.supplier_code
+
+relationship b9c543e3-8e0f-5b66-9ee4-53670f8e6667
+	fromColumn: fact_opex_week.week_key
+	toColumn: dim_week.week_key
+
+relationship 3c2f0d99-01aa-5175-a883-72cd6f900bf8
+	fromColumn: fact_opex_week.store_code
+	toColumn: dim_store.store_code
+
+relationship 9e5ce2ff-2aaa-50b2-a24c-5fac2b1cf6f7
+	fromColumn: fact_opex_week.cost_type_code
+	toColumn: dim_cost_type.cost_type_code

@@ -1,0 +1,61 @@
+/// Receipt units into selling locations, week x site x category (sell-through).
+table fact_receipts_week
+	lineageTag: 307ac0c1-d406-561e-acdc-74edc738ccfd
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: 9a2b9459-f290-5ce3-8eab-ab7e03069888
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 6d6d9269-5abc-5dc8-b6a5-387436ab91ab
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 4fc796a2-6847-53bd-b19c-de6855d49059
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column receipt_units
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9cab95ab-046e-5ff3-87d1-0bc371b9a00c
+		summarizeBy: none
+		sourceColumn: receipt_units
+
+		annotation SummarizationSetBy = User
+
+	partition fact_receipts_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_receipts_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"receipt_units", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

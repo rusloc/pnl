@@ -1,0 +1,83 @@
+/// Supplier income accruals, week x supplier (source of back_margin_alloc, ET-07).
+table fact_supplier_income_week
+	lineageTag: cd265296-4108-5717-b71b-18907fd8d94e
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: b8d0a79f-43ad-5c87-8e8b-196a56d53b33
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column supplier_code
+		dataType: string
+		isHidden
+		lineageTag: d7af7f11-07f4-5959-a090-bdadb83facad
+		summarizeBy: none
+		sourceColumn: supplier_code
+
+		annotation SummarizationSetBy = User
+
+	column rebate_accrual
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 11260fd9-068b-5c63-8178-ad2c19a2add1
+		summarizeBy: none
+		sourceColumn: rebate_accrual
+
+		annotation SummarizationSetBy = User
+
+	column promo_funding
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: dfae1a37-2aa4-5b4c-80b5-fa0d35fc6804
+		summarizeBy: none
+		sourceColumn: promo_funding
+
+		annotation SummarizationSetBy = User
+
+	column listing_fees
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 2fa3f517-83f9-539c-b793-3a2db293cf33
+		summarizeBy: none
+		sourceColumn: listing_fees
+
+		annotation SummarizationSetBy = User
+
+	column is_provisional
+		dataType: boolean
+		isHidden
+		lineageTag: f2bcbace-86fa-599a-be97-1a5c56c303a6
+		summarizeBy: none
+		sourceColumn: is_provisional
+
+		annotation SummarizationSetBy = User
+
+	partition fact_supplier_income_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_supplier_income_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"supplier_code", type text},
+				            {"rebate_accrual", type number},
+				            {"promo_funding", type number},
+				            {"listing_fees", type number},
+				            {"is_provisional", type logical}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

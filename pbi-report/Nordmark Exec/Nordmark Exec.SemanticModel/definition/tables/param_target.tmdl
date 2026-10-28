@@ -1,0 +1,52 @@
+/// KPI x category (or ALL) targets. Joins nothing.
+table param_target
+	lineageTag: 2d9eb999-c384-55df-a9fe-4903a0541943
+	isHidden
+
+	column kpi_code
+		dataType: string
+		isHidden
+		lineageTag: fe5befaa-ed15-59ad-9a49-6eee3da13c3e
+		summarizeBy: none
+		sourceColumn: kpi_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 1e9915f9-7896-5797-9445-91e92fb5ef3a
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column target_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 417afe64-7f85-5e45-aa12-1c6c9722b09c
+		summarizeBy: none
+		sourceColumn: target_value
+
+		annotation SummarizationSetBy = User
+
+	partition param_target = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_target.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"kpi_code", type text},
+				            {"category_code", type text},
+				            {"target_value", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,62 @@
+/// PO lines due / OTIF, week x supplier. No site key.
+table fact_po_week
+	lineageTag: 6de16d5c-c82c-5baa-8aa1-7c024cfe44bc
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: 5a18b5f3-87db-50fa-b10a-1b36899c2318
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column supplier_code
+		dataType: string
+		isHidden
+		lineageTag: a44440da-2c59-5015-aacf-d7268a49e902
+		summarizeBy: none
+		sourceColumn: supplier_code
+
+		annotation SummarizationSetBy = User
+
+	column po_lines_due
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1d4e3458-b6c8-557d-8cb5-3ee9ef95837b
+		summarizeBy: none
+		sourceColumn: po_lines_due
+
+		annotation SummarizationSetBy = User
+
+	column po_lines_otif
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7505cb3c-821b-5aab-ba94-9704da8f22aa
+		summarizeBy: none
+		sourceColumn: po_lines_otif
+
+		annotation SummarizationSetBy = User
+
+	partition fact_po_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_po_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"supplier_code", type text},
+				            {"po_lines_due", Int64.Type},
+				            {"po_lines_otif", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
