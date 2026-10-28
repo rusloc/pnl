@@ -580,7 +580,7 @@ export function buildVariancesQuery(filter: FilterState, reference: ReferenceDat
     `    ,${num('@cmp', '[LV Comparison]')}`,
     `    ,${num('@d_b', '[LV Δ B]')}`,
     `    ,${num('@fx', '[LV FX]')}`,
-    '    ,"@below_cm", LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], dim_pl_row[account_code] )',
+    '    ,"@below_cm", LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], SELECTEDVALUE ( dim_pl_row[account_code] ) )',
     ')',
     'ORDER BY dim_pl_row[line_sort], dim_pl_row[account_sort]',
   ].join('\n');

@@ -241,6 +241,32 @@ Constant currency is a slow path today. The statement query (Q1) for ACME Group,
 
 **Model:** local full refresh 23.7–23.9 s with `fact_pl_elim` (ginee's 14–16 s was without it). Track A: its queries filter the code columns, so the currency SWITCH is pruned there but the FX-basis branch is not; adding a `TREATAS` on `param_fx_basis[fx_basis_name]` to its filter block would give it the same pruning (fin's call). Service timings: ginee's round (§4.1 rollout steps 6–8).
 
+#### Service, after (a)+(b) (ginee, 2026-10-28)
+
+**What changed on the service.** `ACME Unified PnL` in RAW was updated in place from the PBIP TMDL (ADR-0008 (a)+(b) plus the redesign v4 measures and tables: 44 tables, 253 measures), then fully refreshed once. The binding to the existing cloud connection was kept. Rollback copy: `pbi-report/ACME Unified PnL/__backup__/service-2026-10-28/` (gitignored).
+
+**Refresh.** Full refresh 42.9 s, against the 28 s baseline. All 44 objects completed, with 1,251,696 imported rows (+5,304 from `fact_pl_elim`). This is inside §4.1's 35–45 s estimate.
+
+**Tests on the service** (`tests/control-totals.dax`, run through `executeQueries`):
+- All `_pass` values are TRUE: T-06 24/24 and 552/552, T-05/T-10 54/54, T-07 empty, L-07, L-09/F-21 15/15, K-20 43/43, the ADR-0008 FX and elimination blocks (48/48), and T-R1…T-R5.
+- T-01/T-02, T-03 and T-17 pass by value.
+- The T-P parity block passes 601/601. As written (one UNION of 145 rows per selection), it exceeds the capacity's 10,240 MB per-query memory limit on the service, so it was run in chunks of 10 rows with the same filters and the same `_pass` rule.
+
+**Query timings.** The frozen 2026-10-23 set (`fabric-data/perf/queries-2026-10-23/`, Track A's pre-redesign builders) was re-run with the same method as §5.1: sequential, 2 runs, cache not cleared. The CLI and API overhead was 1.9–2.0 s this time, against 1.5 s on 2026-10-23.
+
+| View (calls) | Default, before → after | Worst case (Group LTM), before → after |
+|---|---|---|
+| P&L statement (Q1 + Q6) | ≈ 6.8 → ≈ 6.7 s | ≈ 7.4 → ≈ 6.6 s |
+| Key figures (Q2a + 4 × Q2b) | ≈ 9.6 → ≈ 11.9 s (chunk 4 at 9.6–9.7 s) | ≈ 9.5–12.3 → ≈ 8.5 s |
+| Analysis (Q3 + Q4) | ≈ 6.1 → ≈ 7.4 s | ≈ 6.3 → ≈ 6.8 s |
+| Profitability (Q5 + Q6) | ≈ 4.0 → ≈ 4.0 s | ≈ 4.3 → ≈ 4.7 s |
+| Constant currency: Group FY2025 statement (Q1) | 19.7 → 6.7–7.2 s | |
+
+**Reading.**
+- Constant currency is the clear gain: the statement call is 3× faster.
+- The other views are flat on the service (±1 s, against an overhead that rose by 0.5 s), unlike the −30…−55 % measured locally. Track A's queries filter `param_fx_basis[fx_basis_code]` / `param_reporting_currency[currency_code]`, so the branch pruning that produced the local gain does not apply to them (see **Model** above).
+- These are the old builders. The redesign's own queries (fin's 16 probes) have not been timed yet, so their numbers decide whether Track A meets N-01.
+
 ## 6. Consequences
 
 - Loader, lakehouse tables and the model change together; the `TABLES` spec in `load_acme_pl.py` remains the only place column types are declared.

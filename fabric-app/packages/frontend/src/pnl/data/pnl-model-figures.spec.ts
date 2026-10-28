@@ -254,13 +254,15 @@ const LEAVES = table(
     ['SM|SM_P1', 'SM', 'Sales & marketing', 'SM_P1', 'Advertising: working media', 110, 400, -221.9509, -240.2039, -15.3, -0.4, true],
     ['COR|COR_P2', 'COR', 'Cost of revenue', 'COR_P2', 'Sourced finished goods', 40, 170, -452.3033, -466.8099, -28.4, null, false],
     ['TAX|TAX_P1', 'TAX', 'Income tax expense', 'TAX_P1', 'Income tax', 260, 900, -125.1, -130.2, -13.9, -0.2, true],
+    ['OOI|OOI_P9', 'OOI', 'Other operating income', 'OOI_P9', 'Not in this entity', 200, 10, null, null, null, null, false],
   ]
 );
 
 describe('largest variances zone (C-45)', () => {
   it('maps the leaves with their level columns and derives the AI assistant\'s top 8 (Gross product sales −69.5 (−1.6%), working media +18.3 (+7.6%))', () => {
     const zone = mapVarianceLeaves(LEAVES);
-    expect(zone.leaves).toHaveLength(4);
+    expect(zone.leaves).toHaveLength(4); // the all-blank OOI_P9 leaf is dropped
+    expect(zone.leaves.map((l) => l.rowKey)).not.toContain('OOI|OOI_P9');
     expect(zone.leaves[1]).toMatchObject({ rowKey: 'SM|SM_P1', code: 'SM_P1', block: 'SM', blockName: 'Sales & marketing', base: -221.9509, comparison: -240.2039, deltaB: -15.3, fx: -0.4, belowCm: true });
     expect(zone.leaves[2].fx).toBeNull();
     const drivers = driversFromVariances(zone, filter);

@@ -1,6 +1,6 @@
 # Semantic model — ACME Unified P&L (Track B)
 
-> Draft, 2026-10-21 (bip); ADR-0008 physical speed-ups 2026-10-23. Source: `pbi-report/ACME Unified PnL/ACME Unified PnL.SemanticModel/` (TMDL). Spec: `docs/Requirements.md` §7–§8; data rules: `data/acme_pl_dummy_data/README.md`; data layer: ADR-0003. Measures: `docs/model/measure-dictionary.md`.
+> Draft, 2026-10-21 (bip); ADR-0008 physical speed-ups 2026-10-23. Service copy in RAW (dev, Track A's source) republished from this TMDL on 2026-10-28 (ginee): 44 tables, 253 measures, full refresh 42.9 s, all DAX tests green on the service (ADR-0008 §5.2). Source: `pbi-report/ACME Unified PnL/ACME Unified PnL.SemanticModel/` (TMDL). Spec: `docs/Requirements.md` §7–§8; data rules: `data/acme_pl_dummy_data/README.md`; data layer: ADR-0003. Measures: `docs/model/measure-dictionary.md`.
 
 ## Storage mode and source
 

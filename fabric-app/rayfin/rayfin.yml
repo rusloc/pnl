@@ -29,7 +29,8 @@ services:
   storage:
     enabled: false
   functions:
-    enabled: true
+    # chat deferred 2026-10-28 (USER): chatTurn is not deployed; code kept (ADR-0009).
+    enabled: false
     path: "packages/functions"
     buildCommand: "npm run build"
     auth:

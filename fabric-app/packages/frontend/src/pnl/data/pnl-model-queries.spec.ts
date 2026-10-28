@@ -240,7 +240,7 @@ describe('buildVariancesQuery / buildVariancesCutQuery (QL)', () => {
     for (const [alias, measure] of [['@base', 'LV Base'], ['@cmp', 'LV Comparison'], ['@d_b', 'LV Δ B'], ['@fx', 'LV FX']]) {
       expect(dax).toContain(`,"${alias}", CONVERT ( [${measure}], DOUBLE )`);
     }
-    expect(dax).toContain(',"@below_cm", LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], dim_pl_row[account_code] )');
+    expect(dax).toContain(',"@below_cm", LOOKUPVALUE ( dim_account[is_below_cm], dim_account[account_code], SELECTEDVALUE ( dim_pl_row[account_code] ) )');
     expect(dax.endsWith('ORDER BY dim_pl_row[line_sort], dim_pl_row[account_sort]')).toBe(true);
   });
 

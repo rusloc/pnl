@@ -11,6 +11,12 @@
     "moduleResolution": "NodeNext",
     "tsBuildInfoFile": ".temp/rayfin.tsbuildinfo"
   },
-  "include": ["**/*"],
-  "exclude": [".temp/**/*", "functions/**/*"]
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    ".temp/**/*",
+    "functions/**/*",
+    "probes/**/*"
+  ]
 }

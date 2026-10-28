@@ -1,6 +1,6 @@
 # Track A — P&L views redesign v4 (Vitals · Analysis · Profitability)
 
-> Status: built 2026-10-27 (fin), gate green, **not deployed**; the live panels wait for the semantic-model republish with bip's 2026-10-27 measures (see "Republish dependency"). Sources: `docs/design/P&L views redesign/build-brief.md` (v4), ADR-0012 (visual first), ADR-0006 §8.3 (query catalogue), `docs/design/parity-rules.md` 18–21, `docs/ADD/features/parity-check-2026-10-27.md` (PV-01 … PV-05 applied). Track B is the model Track A reads; Track C is the behaviour / copy reference.
+> Status: **deployed 2026-10-28** (fin, `npx rayfin up` to RAW after ginee's republish; USER click-test pending), gate green (263 + 20 tests); the AI chat is **deferred** (USER 2026-10-28: `services.functions.enabled: false`, `RAYFIN_PUBLIC_PNL_CHAT=off`, code kept, ADR-0009). Built 2026-10-27; the 16 probes and their timings are under "Republish dependency". Sources: `docs/design/P&L views redesign/build-brief.md` (v4), ADR-0012 (visual first), ADR-0006 §8.3 (query catalogue), `docs/design/parity-rules.md` 18–21, `docs/ADD/features/parity-check-2026-10-27.md` (PV-01 … PV-05 applied). Track B is the model Track A reads; Track C is the behaviour / copy reference.
 
 ## What and where
 
@@ -32,6 +32,24 @@ Sample mode (no backend, `rayfin dev` / tests): the mockup covers the statement,
 ## Republish dependency (ginee + USER)
 
 The deployed model must carry bip's 2026-10-27 changes before these zones answer: `dim_kpi[vitals_slot]` / `vitals_tier` / `in_key_figures` with the rows `OPEX_PCT`, `MIX`, `FY_OUTLOOK`; `param_kpi_threshold`; `dim_bridge_step` rows `CC_SUB` / `END`; `dim_profit_step`; `dim_conc_level`; `dim_pl_info`; measures `Bridge Step Delta`, `Bridge Is Total`, `Profit Step Delta`, `Profit Is Total`, `LV Δ B`, `LV FX`, `Prof NR Δ % CC`, `Prof CM Δ pp`, `Prof Contribution`, `Prof Adj EBITDA`, `Conc Share`, `Prof Company Growth`, `Prof Company CM %`, `KPI Info Sub`, `KPI Opex % NR`, `KPI Subscription Share`, `KPI Payments Share`, `KPI FY Outlook NR`, `KPI FY Budget NR`, `KPI FY Outlook EBITDA`, `KPI FY Budget EBITDA`. Until then those zones show the model's error (the statement and the context keep working). Smoke after the republish: `npx rayfin connector invoke pnlModel executeQuery --file rayfin/probes/redesign/<name>.query.json` for the 16 probes (`rayfin/probes/make-redesign-probes.ts` regenerates them from the app's builders), then `npx rayfin up` (USER).
+
+**Done 2026-10-28.** Readiness diff (INFO.VIEW vs TMDL): 253 / 253 measures, 260 / 260 columns, 0 missing (the 44 extra service columns are the engine's `RowNumber-*`). All 16 probes answer (`connector invoke` wall clock, `q0-ok` baseline 3.9 s = CLI + API overhead; ADR-0006 §8.3 has the per-row cells):
+
+| Probe | Rows × cols | Wall s |
+|---|---|---|
+| qv1-vitals-meta-s | 10 × 14 | 3.6 |
+| qv2-vitals-values-s-{cmp-py, fy, heroes, drivers, ratios} | 1 × 3 / 4 / 9 / 10 / 9 | 4.6 / 4.9 / 6.3 / 7.9 / 8.2 |
+| qv3-vitals-info-s | 1 × 3 | 24.8 (slowest; own zone) |
+| q3-bridge-s | 9 × 5 | 8.7 |
+| qp-profit-bridge-s | 17 × 5 | 14.0 |
+| ql-variances-s | 73 × 12 | 6.3 |
+| ql2-variances-cut-region-s | 292 × 5 | 4.5 |
+| q5-profitability-s | 5 × 10 | 10.0 |
+| qc-concentration-s | 12 × 6 | 5.6 |
+| qb-bubble-s | 5 × 5 | 6.3 |
+| qh-heat-s / qh-heat-group | 25 × 7 / 50 × 7 | 6.6 / 8.1 |
+
+Two fixes from the first live run: (1) QL's `@below_cm` lookup used a bare `dim_pl_row[account_code]` inside `SUMMARIZECOLUMNS` ("a single value … cannot be determined"); it now mirrors the model's `LV Alloc Tag` with `SELECTEDVALUE`. (2) Because `@below_cm` is never blank, QL returns every leaf of `dim_pl_row` (73, not ≈ 44); `mapVarianceLeaves` drops the leaves with no amount at all so the block counts and "All" match the model's table. Deploy note: `rayfin up` compiles every `.ts` under `rayfin/` (`rayfin/tsconfig.json` includes `**/*`), so `rayfin/probes/make-redesign-probes.ts` broke the connector-apply step once; `probes/**/*` is now excluded there. The workspace still carries the earlier `UserDataFunction` `acme_connector` and `GraphQLApi` `acme_gql` items (not deleted).
 
 ## Deviations and open points
 

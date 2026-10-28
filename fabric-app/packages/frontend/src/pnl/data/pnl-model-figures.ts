@@ -455,7 +455,9 @@ export function mapVarianceLeaves(table: QueryTable): VariancesZone {
       belowCm: cellBoolean(read(row, VARIANCE_COLUMNS.belowCm)),
     })
   );
-  return { leaves };
+  // `@below_cm` is never blank, so SUMMARIZECOLUMNS keeps every leaf of dim_pl_row;
+  // drop the ones with no amount at all (another entity's lines), as the model's own table does.
+  return { leaves: leaves.filter((l) => l.base !== null || l.comparison !== null || l.deltaB !== null || l.fx !== null) };
 }
 
 /** The top 8 leaves by |Δ| as the AI assistant's largest-variances rows (ADR-0009). */
