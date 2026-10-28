@@ -1,0 +1,58 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "How to read overview: open",
+  "name": "bm_info_overview_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_info_overview",
+      "info_overview_panel",
+      "info_overview_title",
+      "info_overview_showing",
+      "info_overview_text",
+      "info_overview_close"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "info_overview_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "info_overview_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "info_overview_showing": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "info_overview_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "info_overview_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_info_overview": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

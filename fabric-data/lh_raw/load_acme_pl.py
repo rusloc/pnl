@@ -17,6 +17,10 @@ ADR-0008 step (a)+(b), derived in this script and checked before any write (spec
 Usage (from the repo root, venv in fabric-data/.venv):
     fabric-data/.venv/Scripts/python fabric-data/lh_raw/load_acme_pl.py --dry-run
     fabric-data/.venv/Scripts/python fabric-data/lh_raw/load_acme_pl.py --workspace <ws> --lakehouse <lh>
+    fabric-data/.venv/Scripts/python fabric-data/lh_raw/load_acme_pl.py --parquet-out <dir> [--tables t1,t2,...]
+
+--parquet-out writes the same checked, typed tables as local Parquet files (<dir>/<table>.parquet) instead of the
+lakehouse; --tables limits which tables are written (all tables are still checked and derived).
 
 <ws> / <lh>: workspace and lakehouse IDs (CLAUDE.md > Workspaces), or names in OneLake form
 ("RAW", "lh_raw.Lakehouse"). Defaults come from the env vars FABRIC_WORKSPACE and FABRIC_LAKEHOUSE.
@@ -342,8 +346,10 @@ def main():
     ap.add_argument("--workspace", default=os.environ.get("FABRIC_WORKSPACE"), help="workspace id or name (env FABRIC_WORKSPACE)")
     ap.add_argument("--lakehouse", default=os.environ.get("FABRIC_LAKEHOUSE"), help="lakehouse id or <name>.Lakehouse (env FABRIC_LAKEHOUSE)")
     ap.add_argument("--dry-run", action="store_true", help="parse and check every table, write nothing")
+    ap.add_argument("--parquet-out", help="write local Parquet files to this folder instead of the lakehouse")
+    ap.add_argument("--tables", help="with --parquet-out: comma-separated tables to write (default: all)")
     args = ap.parse_args()
-    if not args.dry_run and not (args.workspace and args.lakehouse):
+    if not args.dry_run and not args.parquet_out and not (args.workspace and args.lakehouse):
         ap.error("--workspace and --lakehouse (or FABRIC_WORKSPACE / FABRIC_LAKEHOUSE) are required unless --dry-run")
 
     loaded, failed = {}, 0
@@ -366,6 +372,25 @@ def main():
     if args.dry_run:
         print(f"Dry run: all {len(loaded)} tables pass the checks. Nothing written.")
         return 0
+    if args.parquet_out:
+        import pyarrow.parquet as pq
+
+        names = args.tables.split(",") if args.tables else list(loaded)
+        unknown = [t for t in names if t not in loaded]
+        if unknown:
+            print(f"Unknown table(s) {unknown}. Nothing written.")
+            return 1
+        out = Path(args.parquet_out)
+        out.mkdir(parents=True, exist_ok=True)
+        for table in names:
+            path = out / f"{table}.parquet"
+            pq.write_table(loaded[table], path, compression="snappy")
+            rows = pq.read_metadata(path).num_rows
+            ok = rows == loaded[table].num_rows
+            failed += not ok
+            print(f"{'OK' if ok else 'FAIL':4}  parquet {table:26} rows {rows:>9,}  {path.stat().st_size:>10,} bytes")
+        print(f"{len(names) - failed} of {len(names)} tables written to Parquet and read back.")
+        return 1 if failed else 0
 
     from deltalake import DeltaTable, write_deltalake
 

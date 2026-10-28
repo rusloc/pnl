@@ -1,0 +1,57 @@
+/// Variances cut (Analysis page 2): the legend of the stacked variance bars. Total = no split.
+table param_var_cut
+	lineageTag: 0538abb8-0ef2-592c-b7bc-4e8788761cc4
+
+	column Cut
+		dataType: string
+		lineageTag: 4c225a69-b8cb-5542-b1c6-e7c7e01b1a2e
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Cut Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Cut Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Cut Fields'
+		dataType: string
+		isHidden
+		lineageTag: 45948a8f-bca9-5d29-a783-c0c36773d6f3
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Cut Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Cut Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: db691ff9-c330-567f-a293-92213946a637
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition param_var_cut = calculated
+		mode: import
+		source =
+				{
+				    ( "Total", NAMEOF ( 'var_cut_total'[Cut total] ), 0 ),
+				    ( "Region", NAMEOF ( 'dim_region'[region_name] ), 1 ),
+				    ( "Sales motion", NAMEOF ( 'dim_channel'[channel_name] ), 2 ),
+				    ( "Service line", NAMEOF ( 'dim_line'[line_name] ), 3 ),
+				    ( "Segment", NAMEOF ( 'dim_segment'[segment_name] ), 4 ),
+				    ( "Entity", NAMEOF ( 'dim_entity'[short_name] ), 5 )
+				}
+
+	annotation PBI_Id = 5afea89df19559e8b9d9ceb41e9c9712
+
+	annotation PBI_ResultType = Table

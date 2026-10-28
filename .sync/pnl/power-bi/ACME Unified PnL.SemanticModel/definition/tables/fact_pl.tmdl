@@ -1,0 +1,158 @@
+/// D-01 P&L fact: signed local amounts at entity x month x version x slice x account x counterparty. Direct lines are read from here; below-CM lines from fact_pl_allocated.
+table fact_pl
+	isHidden
+	lineageTag: bd743188-195a-54fe-a1f5-457acd29576e
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: e5aac25e-5726-5def-ae6b-62f97454ad34
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 008ce67a-d2a9-5ace-a138-4390ad340502
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column version_key
+		dataType: string
+		isHidden
+		lineageTag: e3f3199d-4e4b-5028-aaf5-b67a50fd5c86
+		summarizeBy: none
+		sourceColumn: version_key
+
+		annotation SummarizationSetBy = User
+
+	column region_code
+		dataType: string
+		isHidden
+		lineageTag: 08f45134-310b-527b-9a14-5c4aaeb71b2f
+		summarizeBy: none
+		sourceColumn: region_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 0b90f22f-1127-58e8-8e95-1e7534f94ab2
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: ac5f98e5-cff1-584b-8070-21b759aceab1
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: 808c8a0a-6921-5e7b-8c2e-7f802ae149c1
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column account_code
+		dataType: string
+		isHidden
+		lineageTag: 5d01d5f0-d289-5ddb-b6b9-3383703f426d
+		summarizeBy: none
+		sourceColumn: account_code
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_entity_code
+		dataType: string
+		isHidden
+		lineageTag: ac00f778-2169-597c-b93f-dd77ef77f9ff
+		summarizeBy: none
+		sourceColumn: counterparty_entity_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 8e5564db-b599-5619-8574-7ef8948e8cdb
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column cost_centre_code
+		dataType: string
+		isHidden
+		lineageTag: b8479fa4-3a62-5a79-bdc7-29908ce18e2a
+		summarizeBy: none
+		sourceColumn: cost_centre_code
+
+		annotation SummarizationSetBy = User
+
+	column amount_local
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 37dde1d8-3638-553b-82df-510f8076c8cc
+		summarizeBy: none
+		sourceColumn: amount_local
+
+		annotation SummarizationSetBy = User
+
+	column amount_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: cbd99d35-22b9-4ed0-9d3b-9f4fb0144d6f
+		summarizeBy: none
+		sourceColumn: amount_usd
+
+		annotation SummarizationSetBy = User
+
+	column amount_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 0e0709ef-18db-4293-998f-1f0283e8debf
+		summarizeBy: none
+		sourceColumn: amount_eur
+
+		annotation SummarizationSetBy = User
+
+	column amount_gbp
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a282ee59-d09b-4aae-b173-30bfacdcf092
+		summarizeBy: none
+		sourceColumn: amount_gbp
+
+		annotation SummarizationSetBy = User
+
+	partition fact_pl = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\fact_pl.parquet")),
+				    // ADR-0008: read only the declared columns; pre-translated amounts as Decimal Number (double), never Fixed Decimal
+				    Selected = Table.SelectColumns(Data, {"entity_code", "month_key", "version_key", "region_code", "channel_code", "line_code", "segment_code", "account_code", "counterparty_entity_code", "currency_code", "cost_centre_code", "amount_local", "amount_usd", "amount_eur", "amount_gbp"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"amount_local", Currency.Type}, {"amount_usd", type number}, {"amount_eur", type number}, {"amount_gbp", type number}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

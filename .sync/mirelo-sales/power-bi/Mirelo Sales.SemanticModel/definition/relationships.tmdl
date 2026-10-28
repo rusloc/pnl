@@ -1,0 +1,111 @@
+relationship 4fa45824-4592-57cc-b869-073ff600bd0b
+	fromColumn: fact_loan.month_key
+	toColumn: dim_month.month_key
+
+relationship 4d4ac59b-019b-5c47-94ed-5304cc218897
+	fromColumn: fact_loan.disbursed_date
+	toColumn: dim_date.date
+
+relationship 528e7169-8199-55b3-8871-5d3f2a3b1f25
+	fromColumn: fact_loan.market_code
+	toColumn: dim_market.market_code
+
+relationship 6ffe7d18-3239-5526-bc29-ec172fd7e6ec
+	fromColumn: fact_loan.product_code
+	toColumn: dim_product.product_code
+
+relationship 4fb0a105-0777-5f08-942a-1038700588a6
+	fromColumn: fact_loan.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship fab5b537-349a-59b0-b4e1-99bfdee22df7
+	fromColumn: fact_loan.agent_code
+	toColumn: dim_agent.agent_code
+
+relationship 7171aa8e-e888-5804-a20f-c2fd06af3eeb
+	fromColumn: fact_loan.client_id
+	toColumn: dim_client.client_id
+
+relationship 947f997c-3030-57d3-ac59-1fabaa1d03a3
+	fromColumn: fact_loan.status_code
+	toColumn: dim_loan_status.status_code
+
+relationship 02729af6-adbc-5835-a9e0-384ba840752e
+	fromColumn: fact_application.month_key
+	toColumn: dim_month.month_key
+
+relationship bc0bdec3-7cdc-55a3-a188-642c2f52b05d
+	fromColumn: fact_application.date
+	toColumn: dim_date.date
+
+relationship e38c0bcd-8f0c-54d3-abc2-08484420f122
+	fromColumn: fact_application.market_code
+	toColumn: dim_market.market_code
+
+relationship d4d6ad3d-b48f-56d5-a7d3-66307e290238
+	fromColumn: fact_application.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 66d864b6-a7e8-5eb8-b8e8-d55e7cce2953
+	fromColumn: fact_application.product_code
+	toColumn: dim_product.product_code
+
+relationship 4178ca23-09a3-52c2-9a48-4842cf7392d8
+	fromColumn: fact_loan_month.month_key
+	toColumn: dim_month.month_key
+
+relationship 52eed50c-f8c4-5e0b-b426-1b35fe7c3d5b
+	fromColumn: fact_loan_month.market_code
+	toColumn: dim_market.market_code
+
+relationship fe2b9631-0183-5ce3-b59f-4ad6ec74027b
+	fromColumn: fact_loan_month.product_code
+	toColumn: dim_product.product_code
+
+relationship 3eb6948e-deab-5ccc-9c2c-44183f5a62b5
+	fromColumn: fact_loan_month.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 603f309c-8b4b-5ab1-bd99-81890884269c
+	fromColumn: fact_subscription_month.month_key
+	toColumn: dim_month.month_key
+
+relationship 38ab4aea-2b42-537e-9873-3c8b05f7772e
+	fromColumn: fact_subscription_month.market_code
+	toColumn: dim_market.market_code
+
+relationship 08411780-7324-5081-8478-8c42abcfd5f5
+	fromColumn: fact_subscription_month.product_code
+	toColumn: dim_product.product_code
+
+relationship 208d2436-5927-5695-9347-d088e0bd5666
+	fromColumn: fact_revenue_month.month_key
+	toColumn: dim_month.month_key
+
+relationship 0e308984-941f-5af2-8525-77a9a51bb01f
+	fromColumn: fact_revenue_month.market_code
+	toColumn: dim_market.market_code
+
+relationship 14ef9ae2-153c-5480-8f8f-e45f1f04b386
+	fromColumn: fact_revenue_month.product_code
+	toColumn: dim_product.product_code
+
+relationship e877c755-7035-5b17-b5d7-ea5e799f77d5
+	fromColumn: fact_revenue_month.revenue_type_code
+	toColumn: dim_revenue_type.revenue_type_code
+
+relationship d5f0c2e1-5a16-56a8-a38b-c4b5b6378aec
+	fromColumn: fact_target.month_key
+	toColumn: dim_month.month_key
+
+relationship 5e20d34d-e81a-5a95-9116-5073c170d9ac
+	fromColumn: fact_target.market_code
+	toColumn: dim_market.market_code
+
+relationship 336a64c5-0fd0-5ac7-9126-313268b621c2
+	fromColumn: fact_target.product_code
+	toColumn: dim_product.product_code
+
+relationship 62da61fa-97a6-52dd-be83-db918dbb5587
+	fromColumn: fact_target.agent_code
+	toColumn: dim_agent.agent_code

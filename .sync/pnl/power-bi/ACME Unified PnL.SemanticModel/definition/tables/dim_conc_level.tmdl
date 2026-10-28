@@ -1,0 +1,50 @@
+/// Profit levels of the concentration bars (Profitability page 1).
+table dim_conc_level
+	lineageTag: 9d5efd98-d7e8-5b35-b50c-e47712725abe
+
+	column level_code
+		dataType: string
+		isHidden
+		lineageTag: 3391c49a-2428-550e-a529-a39b7f47a17b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [level_code]
+
+		annotation SummarizationSetBy = User
+
+	column level_label
+		dataType: string
+		lineageTag: 19677116-7232-54e9-969f-2301a6b78b1a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [level_label]
+		sortByColumn: level_sort
+
+		annotation SummarizationSetBy = User
+
+	column level_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 40043629-cf1e-5a5b-b570-37d72236ffc2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [level_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_conc_level = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "level_code", STRING
+				    ,"level_label", STRING
+				    ,"level_sort", INTEGER
+				    ,{
+				        { "NR", "Net revenue", 1 }
+				        ,{ "CM", "Contribution", 2 }
+				        ,{ "EBITDA", "Adj. EBITDA", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

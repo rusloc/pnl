@@ -1,0 +1,59 @@
+/// Acquisition / sales channel: App organic, Paid, Partner, Agent.
+table dim_channel
+	lineageTag: 5edad2d9-ee53-52f2-885e-6e7deee7ad72
+
+	column channel_code
+		dataType: string
+		lineageTag: 6fe837b9-ef41-51bf-be27-5a53151c6075
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_name
+		dataType: string
+		lineageTag: a6ad5f6d-735e-57be-b25e-235f870836bc
+		summarizeBy: none
+		sourceColumn: channel_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_assisted
+		dataType: boolean
+		lineageTag: 35410e39-7833-58a9-8a86-558489c75121
+		summarizeBy: none
+		sourceColumn: is_assisted
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7899d7a4-1a49-5c8a-86ad-b341bb5e8581
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_channel = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_channel.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"channel_code", type text},
+				            {"channel_name", type text},
+				            {"is_assisted", type logical},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

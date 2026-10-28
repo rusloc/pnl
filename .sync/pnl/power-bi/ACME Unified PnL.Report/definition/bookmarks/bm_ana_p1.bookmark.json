@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Ana page 1",
+  "name": "bm_ana_p1",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_ana_p1",
+      "grp_ana_p2"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {},
+        "visualContainerGroups": {
+          "grp_ana_p1": {
+            "isHidden": false
+          },
+          "grp_ana_p2": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

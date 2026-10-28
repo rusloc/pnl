@@ -1,0 +1,52 @@
+/// D-21 / F-04 time view.
+table param_time_view
+	lineageTag: cd134013-bcbd-559c-b129-16561369079b
+
+	column time_view_code
+		dataType: string
+		isHidden
+		lineageTag: 115401a7-1b31-5c80-95d7-07240183decb
+		summarizeBy: none
+		sourceColumn: time_view_code
+
+		annotation SummarizationSetBy = User
+
+	column time_view_name
+		dataType: string
+		lineageTag: acad1f3c-2453-5faa-9f82-0e8fe9831173
+		summarizeBy: none
+		sourceColumn: time_view_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0cfd8846-b66e-5009-a76a-fdb54deb7c59
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 6ba35804-8f22-5ef9-a335-cfb1da7dcd79
+		summarizeBy: none
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = User
+
+	partition param_time_view = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\param_time_view.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

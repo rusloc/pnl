@@ -1,0 +1,217 @@
+/* P&L statement card — design guide §6.1. */
+.card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--line-200);
+  border-radius: 12px;
+  background: var(--surface);
+}
+/* M-20: Expand all / Collapse all above the line column */
+.rowTools {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-100);
+}
+.rowTool {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-300);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-700);
+  font-size: 13px;
+  cursor: pointer;
+}
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-table);
+  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+}
+.table th,
+.table td {
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* header rows */
+.groupHead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 8px 8px 6px;
+  border-bottom: 2px solid var(--ink-900);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+.groupHead th.groupGap {
+  border-left: 12px solid var(--surface);
+}
+.groupHead th.corner {
+  border-bottom: 0;
+}
+.colHead th {
+  position: sticky;
+  top: 34px;
+  z-index: 3;
+  padding: 8px;
+  border-bottom: 1px solid var(--line-300);
+  background: var(--surface);
+  color: var(--slate-600);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+.colHead th.lineHead {
+  padding-left: 20px;
+  text-align: left;
+}
+.colHead th.baseHead {
+  color: var(--ink-900);
+}
+.colHead th.barHead {
+  text-align: center;
+}
+.table th.sticky,
+.table td.sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+.colHead th.sticky,
+.groupHead th.sticky {
+  z-index: 4;
+}
+.groupStart {
+  border-left: 1px solid var(--group-rule);
+}
+
+/* body rows (§6.1 row kinds) */
+.row td {
+  height: 28px;
+  border-top: 1px solid var(--line-100);
+  background: var(--surface);
+  font-size: 14px;
+  text-align: right;
+}
+.row td.lineCell {
+  text-align: left;
+}
+.section td {
+  border-top-color: var(--group-rule);
+  font-weight: 500;
+}
+.subtotal td {
+  border-top-color: var(--subtotal-rule);
+  background: var(--subtle);
+  font-weight: 600;
+}
+.memo td {
+  border-top-color: var(--subtotal-rule);
+  background: var(--subtle);
+  font-weight: 500;
+  font-style: italic;
+}
+.key td {
+  border-top-color: var(--key-rule);
+  background: var(--acc-t);
+  font-weight: 700;
+}
+.ratio td {
+  color: var(--slate-600);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.lineInner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.noToggle {
+  padding-left: 18px;
+}
+.alias {
+  color: var(--slate-600);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+}
+.tag {
+  padding: 0 6px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+}
+.muted {
+  color: var(--slate-600);
+}
+.fav {
+  color: var(--fav);
+}
+.unf {
+  color: var(--unf);
+}
+
+/* ±15 % bar */
+.barCell {
+  position: relative;
+}
+.barAxis {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 50%;
+  width: 1px;
+  background: var(--line-300);
+}
+.bar {
+  position: absolute;
+  top: 30%;
+  bottom: 30%;
+  border-radius: 2px;
+}
+.barFav {
+  background: var(--fav-bar);
+}
+.barUnf {
+  background: var(--unf-bar);
+}
+
+.footnote {
+  flex: none;
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid var(--line-100);
+  color: var(--slate-600);
+  font-size: 12px;
+}

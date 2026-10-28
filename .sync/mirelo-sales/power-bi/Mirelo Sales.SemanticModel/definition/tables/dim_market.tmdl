@@ -1,0 +1,72 @@
+/// Market: PL (PLN), RO (RON), PT (EUR).
+table dim_market
+	lineageTag: e1f9fbc7-0d75-5c28-8be8-5dfb01141ec8
+
+	column market_code
+		dataType: string
+		lineageTag: 2b865791-8a90-5d8f-83b3-695aecfc8b5b
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column market_name
+		dataType: string
+		lineageTag: ec8e0a86-1584-5337-8aa7-508d2e518c18
+		summarizeBy: none
+		sourceColumn: market_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		lineageTag: b6c10e25-e3a6-5a7a-9432-8559db2063f7
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column launch_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: b88650f1-f0fc-52e3-b0d5-821a8d3a8d72
+		summarizeBy: none
+		sourceColumn: launch_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 226cec55-6f90-5eb7-a3ee-5978fa7ec9b5
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_market = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_market.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"market_code", type text},
+				            {"market_name", type text},
+				            {"currency_code", type text},
+				            {"launch_date", type date},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

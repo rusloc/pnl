@@ -1,0 +1,95 @@
+{
+  "name": "mirelo-flat-theme.json",
+  "dataColors": [
+    "#111111",
+    "#128C94",
+    "#7F7E79",
+    "#BDBBB5",
+    "#FFD54A",
+    "#5C5C58",
+    "#9ED9DD",
+    "#2F2F2D"
+  ],
+  "background": "#E9E8E4",
+  "foreground": "#111111",
+  "tableAccent": "#CFCDC6",
+  "good": "#176B3D",
+  "bad": "#B3261E",
+  "neutral": "#8A5A00",
+  "foregroundNeutralSecondary": "#5C5C58",
+  "foregroundNeutralTertiary": "#7F7E79",
+  "backgroundLight": "#F3F2EF",
+  "backgroundNeutral": "#DEDDD8",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#111111"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Bold",
+      "fontSize": 21,
+      "color": "#111111"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 10,
+      "color": "#111111"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 8,
+      "color": "#5C5C58"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "background": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F3F2EF"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F3F2EF"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

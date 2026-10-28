@@ -1,0 +1,38 @@
+/// F-03 period = anchor month of the window (disconnected).
+table param_period
+	lineageTag: e98f27e1-cf57-5b90-956e-1141eba1e9f2
+
+	column month_number
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9193b68d-875c-5715-b4f4-b9ed8792aa40
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_number]
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: d1f378a7-f42a-5290-b0bc-715471a1741d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_name]
+		sortByColumn: month_number
+
+		annotation SummarizationSetBy = User
+
+	partition param_period = calculated
+		mode: import
+		source =
+				DISTINCT (
+				    SELECTCOLUMNS (
+				        dim_month
+				        ,"month_number", dim_month[month_number]
+				        ,"month_name", dim_month[month_name]
+				    )
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,58 @@
+/// F-07 version choice (from param_version_choice, disconnected).
+table param_compare_b
+	lineageTag: 22e5e7ed-2bd9-5ac0-97a1-aadc0742e98e
+
+	column choice_code
+		dataType: string
+		isHidden
+		lineageTag: adb942c3-b3f7-58a9-9a7b-646e60b89662
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [choice_code]
+
+		annotation SummarizationSetBy = User
+
+	column choice_name
+		dataType: string
+		lineageTag: 62d29af9-e071-5442-ad54-f20bdd7fe2ba
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [choice_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8fc826e4-9c14-52f8-9c55-a94d04c1af3d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 81f1fac8-80ab-56c9-b1f6-5bee299c8522
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_default]
+
+		annotation SummarizationSetBy = User
+
+	partition param_compare_b = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    FILTER ( param_version_choice, param_version_choice[allowed_as_compare] = TRUE () )
+				    ,"choice_code", param_version_choice[choice_code]
+				    ,"choice_name", param_version_choice[choice_name]
+				    ,"sort_order", param_version_choice[sort_order]
+				    ,"is_default", param_version_choice[default_for] = "Compare B"
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "How to read revenue: open",
+  "name": "bm_info_revenue_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_info_revenue",
+      "info_revenue_panel",
+      "info_revenue_title",
+      "info_revenue_showing",
+      "info_revenue_text",
+      "info_revenue_close"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "info_revenue_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "info_revenue_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "info_revenue_showing": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "info_revenue_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "info_revenue_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_info_revenue": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

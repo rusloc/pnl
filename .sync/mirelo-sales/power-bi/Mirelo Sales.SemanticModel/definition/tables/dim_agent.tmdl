@@ -1,0 +1,98 @@
+/// Field agents (A001-A040) and partners (P001-P012); joins fact_loan and the agent rows of fact_target.
+table dim_agent
+	lineageTag: 94c19a05-12fe-5be7-8328-0f76dffd2250
+
+	column agent_code
+		dataType: string
+		lineageTag: 2097e805-538e-58c5-a410-10bc4231d8a5
+		summarizeBy: none
+		sourceColumn: agent_code
+
+		annotation SummarizationSetBy = User
+
+	column agent_name
+		dataType: string
+		lineageTag: 6bb27427-7178-5e31-850e-95798b4bba45
+		summarizeBy: none
+		sourceColumn: agent_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column agent_type
+		dataType: string
+		lineageTag: 6b505976-3c24-5008-9e3e-562d27327ee0
+		summarizeBy: none
+		sourceColumn: agent_type
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		lineageTag: cc3b6a7c-9e41-5ead-baa2-f0793a96d5d1
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column team
+		dataType: string
+		lineageTag: fb17cd61-173d-53af-99e9-23f13424d71d
+		summarizeBy: none
+		sourceColumn: team
+
+		annotation SummarizationSetBy = User
+
+	column start_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: cf9c88f0-3cd5-57b1-847e-21212839fbe9
+		summarizeBy: none
+		sourceColumn: start_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column is_ramp_cohort
+		dataType: boolean
+		lineageTag: 7f12eafa-08e4-5607-ac10-cc9018882f85
+		summarizeBy: none
+		sourceColumn: is_ramp_cohort
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e764c214-59d9-5c44-b3c9-6305fd390728
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_agent = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_agent.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"agent_code", type text},
+				            {"agent_name", type text},
+				            {"agent_type", type text},
+				            {"market_code", type text},
+				            {"team", type text},
+				            {"start_date", type date},
+				            {"is_ramp_cohort", type logical},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,71 @@
+/// D-21 / F-05..F-07 version choices (source of the three version slicer tables).
+table param_version_choice
+	isHidden
+	lineageTag: 6f0088d3-5b42-5b2f-b73f-52865470644b
+
+	column choice_code
+		dataType: string
+		isHidden
+		lineageTag: 0590bec9-2310-5adb-bd4b-7c19f4d219b9
+		summarizeBy: none
+		sourceColumn: choice_code
+
+		annotation SummarizationSetBy = User
+
+	column choice_name
+		dataType: string
+		isHidden
+		lineageTag: 1f5e738e-1376-50b4-bea4-ee350f4d9e13
+		summarizeBy: none
+		sourceColumn: choice_name
+
+		annotation SummarizationSetBy = User
+
+	column allowed_as_base
+		dataType: boolean
+		isHidden
+		lineageTag: 4583476d-3402-5828-bf92-ea9be4ba9148
+		summarizeBy: none
+		sourceColumn: allowed_as_base
+
+		annotation SummarizationSetBy = User
+
+	column allowed_as_compare
+		dataType: boolean
+		isHidden
+		lineageTag: 5b19e109-d40c-5f56-94af-c47987b40089
+		summarizeBy: none
+		sourceColumn: allowed_as_compare
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 234a5b6c-65b3-5bd9-941a-6d2fbf701dea
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column default_for
+		dataType: string
+		isHidden
+		lineageTag: 08218474-3eab-5b9a-b7e9-d09df09ae6d4
+		summarizeBy: none
+		sourceColumn: default_for
+
+		annotation SummarizationSetBy = User
+
+	partition param_version_choice = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\param_version_choice.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,50 @@
+/// Cost centres referenced by the facts (drill-through, deferred).
+table dim_cost_centre
+	isHidden
+	lineageTag: 3403fe8f-0991-5db9-951c-9ffd88da33ec
+
+	column cost_centre_code
+		dataType: string
+		isHidden
+		lineageTag: 5a272113-b8d7-5dfb-8e68-d896e5c969da
+		summarizeBy: none
+		sourceColumn: cost_centre_code
+
+		annotation SummarizationSetBy = User
+
+	column cost_centre_name
+		dataType: string
+		lineageTag: b1baeb51-5da6-5805-9b1a-1b6beb0d6b6f
+		summarizeBy: none
+		sourceColumn: cost_centre_name
+
+		annotation SummarizationSetBy = User
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: fce4b2f8-1cdb-5ab9-81c6-e77e2358cdbc
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column function
+		dataType: string
+		lineageTag: 9980f974-4b67-58de-93e4-801568b19848
+		summarizeBy: none
+		sourceColumn: function
+
+		annotation SummarizationSetBy = User
+
+	partition dim_cost_centre = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\dim_cost_centre.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

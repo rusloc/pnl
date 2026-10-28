@@ -1,0 +1,45 @@
+/// D-12 account to nature weights (by-nature lens, deferred).
+table bridge_account_nature
+	isHidden
+	lineageTag: 817f94b1-5fcc-5112-9c03-0d1fd0be89db
+
+	column account_code
+		dataType: string
+		isHidden
+		lineageTag: 0fd3765e-1357-5153-bc08-6618a4ba8785
+		summarizeBy: none
+		sourceColumn: account_code
+
+		annotation SummarizationSetBy = User
+
+	column nature_code
+		dataType: string
+		isHidden
+		lineageTag: 987f25bf-92f5-52ec-b32e-f849d3968a4b
+		summarizeBy: none
+		sourceColumn: nature_code
+
+		annotation SummarizationSetBy = User
+
+	column weight
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 16d53059-7a06-55b3-bcce-0fed39d14134
+		summarizeBy: none
+		sourceColumn: weight
+
+		annotation SummarizationSetBy = User
+
+	partition bridge_account_nature = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\bridge_account_nature.parquet")),
+				    Typed = Table.TransformColumnTypes(Data, {{"weight", Currency.Type}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

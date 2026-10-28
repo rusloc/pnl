@@ -1,0 +1,134 @@
+/// Calendar month, 2024-01 to 2026-12. month_index 1 = Jan 2024 drives every period window. is_closed marks closed months (through the last closed month); has_actuals runs one month further (open month).
+table dim_month
+	lineageTag: afe5b268-38e6-5165-922f-5ce09d088bc4
+
+	column month_key
+		dataType: string
+		lineageTag: d09e6f5e-8ed2-586f-ba4e-31f55fb6bae7
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column month_start
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: f0309826-1676-5945-979c-6b928d8e42ed
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 137469b5-3c07-55a0-b75f-066187de3198
+		summarizeBy: none
+		sourceColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 70a07016-d7f5-559a-a84e-6dc9d7e1ba4d
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a5a3bfb-0dcf-559b-ae27-aafad6d31e16
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: 03ff1050-32e8-50be-a0e5-7b883fa868a2
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	column days_in_month
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bdd5ec9b-814a-50c1-8d37-413e56292031
+		summarizeBy: none
+		sourceColumn: days_in_month
+
+		annotation SummarizationSetBy = User
+
+	column is_closed
+		dataType: boolean
+		lineageTag: a00ceeb4-e4e3-58c8-bc97-27b23bcf178a
+		summarizeBy: none
+		sourceColumn: is_closed
+
+		annotation SummarizationSetBy = User
+
+	column has_actuals
+		dataType: boolean
+		lineageTag: 91baad9e-34a2-520d-aa29-a47f84a52a1c
+		summarizeBy: none
+		sourceColumn: has_actuals
+
+		annotation SummarizationSetBy = User
+
+	/// Month as text, e.g. Sep 2026 (header and titles).
+	column month_label
+		dataType: string
+		lineageTag: 84fb09ed-7dcd-532b-a233-c50b7e230039
+		summarizeBy: none
+		sourceColumn: month_label
+		sortByColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	/// Axis label, e.g. Sep 26 (unique per month, so it can sort by month_index).
+	column month_short
+		dataType: string
+		lineageTag: 1482759f-e1e6-5d23-8fa4-dfd10efed358
+		summarizeBy: none
+		sourceColumn: month_short
+		sortByColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	partition dim_month = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"month_start", type date},
+				            {"month_index", Int64.Type},
+				            {"year", Int64.Type},
+				            {"quarter", Int64.Type},
+				            {"month_name", type text},
+				            {"days_in_month", Int64.Type},
+				            {"is_closed", type logical},
+				            {"has_actuals", type logical}
+				        }
+				    ),
+				    label = Table.AddColumn(typed, "month_label", each Date.ToText([month_start], [Format = "MMM yyyy", Culture = "en-US"]), type text),
+				    short = Table.AddColumn(label, "month_short", each Date.ToText([month_start], [Format = "MMM yy", Culture = "en-US"]), type text)
+				in
+				    short
+
+	annotation PBI_ResultType = Table

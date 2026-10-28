@@ -1,0 +1,61 @@
+/// Steps of the profit bridge (Analysis page 1): comparison Adj. EBITDA, volume, GM rate, GM mix, variable selling, opex blocks, FX, actual Adj. EBITDA, D&A, adjusting items, operating profit.
+table dim_profit_step
+	lineageTag: 3d0faee3-eb20-527a-bd44-4e469b667277
+
+	column step_code
+		dataType: string
+		isHidden
+		lineageTag: 3f2ddf18-2386-5cc3-a7e9-c360594b48a3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_code]
+
+		annotation SummarizationSetBy = User
+
+	column step_label
+		dataType: string
+		lineageTag: e1d50a03-077c-50d6-b489-3673cb523732
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_label]
+		sortByColumn: step_sort
+
+		annotation SummarizationSetBy = User
+
+	column step_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 89f0761e-6f32-5f3b-88bb-35ce0c88deaa
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_profit_step = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "step_code", STRING
+				    ,"step_label", STRING
+				    ,"step_sort", INTEGER
+				    ,{
+				        { "BUD", "Comparison Adj. EBITDA", 10 }
+				        ,{ "VOL", "Revenue volume", 20 }
+				        ,{ "GM_RATE", "GM rate", 30 }
+				        ,{ "GM_MIX", "GM mix", 40 }
+				        ,{ "VSC", "Variable selling", 50 }
+				        ,{ "SM", "S&M", 60 }
+				        ,{ "RD", "R&D", 70 }
+				        ,{ "GA", "G&A", 80 }
+				        ,{ "OOI", "Other operating", 90 }
+				        ,{ "FX", "FX", 100 }
+				        ,{ "ACT", "Adj. EBITDA", 110 }
+				        ,{ "DA", "D&A", 120 }
+				        ,{ "ADJ", "Adjusting items", 130 }
+				        ,{ "OP", "Operating profit", 140 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

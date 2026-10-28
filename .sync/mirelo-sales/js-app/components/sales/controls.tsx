@@ -1,0 +1,158 @@
+import { useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import styles from './sales.module.css';
+
+// Keyboard-complete controls (WAI-ARIA radio group and tabs patterns: roving tabindex, arrows / Home / End).
+
+function roving<T>(
+  e: KeyboardEvent,
+  values: readonly T[],
+  current: T,
+  pick: (v: T) => void,
+  focus: (i: number) => void,
+) {
+  const i = values.indexOf(current);
+  const n = values.length;
+  const next =
+    e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      ? (i + 1) % n
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+        ? (i - 1 + n) % n
+        : e.key === 'Home'
+          ? 0
+          : e.key === 'End'
+            ? n - 1
+            : -1;
+  if (next < 0) return;
+  e.preventDefault();
+  const v = values[next];
+  if (v === undefined) return;
+  pick(v);
+  focus(next);
+}
+
+export function Segmented<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  x,
+  title,
+}: {
+  label: string;
+  title?: string; // tooltip (the period picker carries the "Showing …" sentence and any clipped-window note)
+  options: readonly { value: T; label: string; width: number }[];
+  value: T;
+  onChange: (v: T) => void;
+  x: number;
+}) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const width = options.reduce((s, o) => s + o.width, 0) + 2;
+  return (
+    <div
+      className={`${styles.abs} ${styles.seg}`}
+      style={{ left: x, top: 20, width }}
+      role="radiogroup"
+      aria-label={label}
+      title={title}
+    >
+      {options.map((o, i) => (
+        <button
+          key={o.value}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="button"
+          role="radio"
+          aria-checked={o.value === value}
+          tabIndex={o.value === value ? 0 : -1}
+          style={{ width: o.width }}
+          onClick={() => onChange(o.value)}
+          onKeyDown={(e) =>
+            roving(
+              e,
+              options.map((p) => p.value),
+              value,
+              onChange,
+              (k) => refs.current[k]?.focus(),
+            )
+          }
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Tabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+  panelId,
+}: {
+  tabs: readonly { value: T; label: string; width: number }[];
+  value: T;
+  onChange: (v: T) => void;
+  panelId: string;
+}) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  return (
+    <div className={`${styles.abs} ${styles.tabs}`} role="tablist" aria-label="Views">
+      {tabs.map((t, i) => (
+        <button
+          key={t.value}
+          id={`tab-${t.value}`}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="button"
+          role="tab"
+          aria-selected={t.value === value}
+          aria-controls={panelId}
+          tabIndex={t.value === value ? 0 : -1}
+          style={{ width: t.width }}
+          onClick={() => onChange(t.value)}
+          onKeyDown={(e) =>
+            roving(
+              e,
+              tabs.map((p) => p.value),
+              value,
+              onChange,
+              (k) => refs.current[k]?.focus(),
+            )
+          }
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Copies the current URL (the whole state, F-37 analogue). Clipboard can be blocked in a sandboxed iframe. */
+export function CopyLink() {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  useEffect(() => {
+    if (state === 'idle') return;
+    const t = setTimeout(() => setState('idle'), 2000);
+    return () => clearTimeout(t);
+  }, [state]);
+  return (
+    <button
+      type="button"
+      className={styles.linkBtn}
+      onClick={() =>
+        navigator.clipboard.writeText(window.location.href).then(
+          () => setState('copied'),
+          () => setState('failed'),
+        )
+      }
+    >
+      <span aria-hidden="true">⧉</span>
+      <span aria-live="polite">
+        {state === 'copied' ? 'Copied' : state === 'failed' ? 'Copy blocked' : 'Copy link'}
+      </span>
+    </button>
+  );
+}

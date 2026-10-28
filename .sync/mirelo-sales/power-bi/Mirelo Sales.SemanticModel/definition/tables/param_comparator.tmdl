@@ -1,0 +1,49 @@
+/// Comparator picker: Budget or PY (disconnected).
+table param_comparator
+	lineageTag: 9461f1ce-8410-5ede-9dc5-91e95db3f870
+
+	column comparator_code
+		dataType: string
+		isHidden
+		lineageTag: 17774e63-bb3a-563c-8423-df3a16970b18
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_code]
+
+		annotation SummarizationSetBy = User
+
+	column comparator_name
+		dataType: string
+		lineageTag: fe5fe1b1-f8cf-5a65-a291-43b46aca0716
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ebd7c0c3-bbfd-5010-a726-7c2723b1031a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_comparator = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "comparator_code", STRING
+				    ,"comparator_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "BUD", "Budget", 1 }
+				        ,{ "PY", "PY", 2 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

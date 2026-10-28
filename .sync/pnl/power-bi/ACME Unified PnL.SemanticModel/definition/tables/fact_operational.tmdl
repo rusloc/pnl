@@ -1,0 +1,151 @@
+/// D-03 units sold (Products), GMV and month-end active merchants (Services).
+table fact_operational
+	isHidden
+	lineageTag: 3445822a-7c93-5582-9c87-bf700e35fdab
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: 79e6c9cd-de35-5b3d-b768-eea62712087a
+		summarizeBy: none
+		sourceColumn: entity_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: cadfc085-9203-5859-acf2-de7b41ab5a0c
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column version_key
+		dataType: string
+		isHidden
+		lineageTag: 85c97ba0-2343-5f6f-be04-9162efbbaf02
+		summarizeBy: none
+		sourceColumn: version_key
+
+		annotation SummarizationSetBy = User
+
+	column region_code
+		dataType: string
+		isHidden
+		lineageTag: 63da1977-11e0-5a1d-99ef-c18bf0eda8ef
+		summarizeBy: none
+		sourceColumn: region_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: a29383b3-3e95-50ed-89eb-35448026f508
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 8c823f43-7bb8-5e49-b062-2bc016217604
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: 5f5a67ab-00a1-5882-94fe-2a583fd50432
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 97505739-f963-5a80-b94d-419e5fd46830
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column units_sold
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3055bf26-4698-5be0-bea7-b9aa9d19de17
+		summarizeBy: none
+		sourceColumn: units_sold
+
+		annotation SummarizationSetBy = User
+
+	column gmv_local
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: c400fcab-fece-5d1f-8f2f-9219d8bb95ee
+		summarizeBy: none
+		sourceColumn: gmv_local
+
+		annotation SummarizationSetBy = User
+
+	column active_merchants_end
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6b1c9311-0d9c-59cf-b274-831b46424b24
+		summarizeBy: none
+		sourceColumn: active_merchants_end
+
+		annotation SummarizationSetBy = User
+
+	column gmv_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 73674d88-89fb-47b0-95cc-09022f53ed33
+		summarizeBy: none
+		sourceColumn: gmv_usd
+
+		annotation SummarizationSetBy = User
+
+	column gmv_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 333ea197-9c13-4eb5-b811-d9e3886f2679
+		summarizeBy: none
+		sourceColumn: gmv_eur
+
+		annotation SummarizationSetBy = User
+
+	column gmv_gbp
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: f310b672-bb10-4dc6-b11f-206609a0acf7
+		summarizeBy: none
+		sourceColumn: gmv_gbp
+
+		annotation SummarizationSetBy = User
+
+	partition fact_operational = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\fact_operational.parquet")),
+				    // ADR-0008: read only the declared columns; pre-translated amounts as Decimal Number (double), never Fixed Decimal
+				    Selected = Table.SelectColumns(Data, {"entity_code", "month_key", "version_key", "region_code", "channel_code", "line_code", "segment_code", "currency_code", "units_sold", "gmv_local", "active_merchants_end", "gmv_usd", "gmv_eur", "gmv_gbp"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"gmv_local", Currency.Type}, {"gmv_usd", type number}, {"gmv_eur", type number}, {"gmv_gbp", type number}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

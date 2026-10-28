@@ -1,0 +1,156 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "How to read prof: open",
+  "name": "bm_howto_prof_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_howto_prof",
+      "howto_prof_panel",
+      "howto_prof_title",
+      "howto_prof_showing",
+      "howto_prof_text",
+      "howto_prof_close",
+      "grp_howto_kpi",
+      "howto_kpi_panel",
+      "howto_kpi_title",
+      "howto_kpi_showing",
+      "howto_kpi_text",
+      "howto_kpi_close",
+      "grp_howto_ana",
+      "howto_ana_panel",
+      "howto_ana_title",
+      "howto_ana_showing",
+      "howto_ana_text",
+      "howto_ana_close"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {
+          "howto_prof_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_prof_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_prof_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_prof_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_kpi_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_kpi_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_kpi_text": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_kpi_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_ana_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_ana_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_ana_text": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_ana_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_kpi_showing": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_ana_showing": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "howto_prof_showing": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_howto_prof": {
+            "isHidden": false
+          },
+          "grp_howto_kpi": {
+            "isHidden": true
+          },
+          "grp_howto_ana": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

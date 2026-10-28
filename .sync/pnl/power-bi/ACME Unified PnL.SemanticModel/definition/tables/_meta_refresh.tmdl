@@ -1,0 +1,22 @@
+/// Refresh timestamp (calculated at refresh) for the header data status (N-02).
+table _meta_refresh
+	isHidden
+	lineageTag: 4e50b5a9-414f-5dd3-b5fb-2b7868a63ddd
+
+	column refreshed_at
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: 7c1bccea-4658-57f0-bfd8-8b56118afc10
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [refreshed_at]
+
+		annotation SummarizationSetBy = User
+
+	partition _meta_refresh = calculated
+		mode: import
+		source = ROW ( "refreshed_at", NOW () )
+
+	annotation PBI_ResultType = Table
+

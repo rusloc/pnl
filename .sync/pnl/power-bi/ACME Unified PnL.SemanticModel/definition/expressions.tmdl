@@ -1,0 +1,7 @@
+/// Folder that holds the Parquet files of this pack (the data/ folder next to the .pbip): full local path, no trailing backslash. Set it before the first refresh.
+expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: c73dbb47-a214-5887-b9a3-b2428f6e54a4
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+

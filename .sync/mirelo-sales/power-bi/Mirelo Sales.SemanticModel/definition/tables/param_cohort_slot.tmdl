@@ -1,0 +1,53 @@
+/// Legend of the cohort and vintage curves: quarter slots relative to the anchor quarter (fixed colours per slot).
+table param_cohort_slot
+	lineageTag: e2757efb-399b-55e0-a2a7-451c37aa0696
+
+	column slot_code
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 53a8a961-d825-5e91-bcd1-b79c459e9cab
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [slot_code]
+
+		annotation SummarizationSetBy = User
+
+	column slot_name
+		dataType: string
+		lineageTag: c6ea6921-1f52-5890-b236-b3ac05f6b48c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [slot_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7d57bcde-6585-5661-8834-22484443979b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_cohort_slot = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "slot_code", INTEGER
+				    ,"slot_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { 0, "Anchor quarter", 1 }
+				        ,{ 1, "Previous quarter", 2 }
+				        ,{ 2, "2 quarters back", 3 }
+				        ,{ 3, "3 quarters back", 4 }
+				        ,{ 4, "Year-ago quarter", 5 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,62 @@
+/// Market picker: All, PL, RO, PT (disconnected; All = all markets, no market filter). market_name feeds the sentences.
+table param_market
+	lineageTag: 194040e8-c242-55c1-ba6a-b657ed7c68d6
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 95df709f-0cba-5fbb-a564-d401670aa160
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [market_code]
+
+		annotation SummarizationSetBy = User
+
+	column market_label
+		dataType: string
+		lineageTag: 0d63d15e-cb4c-5711-802a-13bbf744ef9e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [market_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column market_name
+		dataType: string
+		isHidden
+		lineageTag: 2170e39d-c8c4-5ff0-b816-af96546a3644
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [market_name]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d0919fd6-988a-5a74-9500-4dc8b58a92bd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_market = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "market_code", STRING
+				    ,"market_label", STRING
+				    ,"market_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "ALL", "All", "All markets", 0 }
+				        ,{ "PL", "PL", "Poland", 1 }
+				        ,{ "RO", "RO", "Romania", 2 }
+				        ,{ "PT", "PT", "Portugal", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

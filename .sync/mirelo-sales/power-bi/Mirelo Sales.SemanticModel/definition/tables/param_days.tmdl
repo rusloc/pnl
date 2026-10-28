@@ -1,0 +1,23 @@
+/// X axis of the cohort repeat curves: days since the first loan, 0-180 in steps of 5.
+table param_days
+	lineageTag: 7c933b97-3de5-5db4-996a-10b097c769d8
+
+	column days_since_first
+		dataType: int64
+		formatString: 0
+		lineageTag: 186c9c6b-a21b-5155-8d07-ce2637350b26
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [days_since_first]
+
+		annotation SummarizationSetBy = User
+
+	partition param_days = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    GENERATESERIES ( 0, 180, 5 )
+				    ,"days_since_first", [Value]
+				)
+
+	annotation PBI_ResultType = Table

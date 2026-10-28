@@ -1,0 +1,52 @@
+/// Steps of the originations bridge Budget -> Actual (waterfall categories; the visual adds the Actual total).
+table dim_bridge_step
+	lineageTag: c35ab307-c223-54aa-b38e-7e649df96473
+
+	column step_code
+		dataType: string
+		isHidden
+		lineageTag: 2daa48a9-6c5b-554a-b911-a31363e81b7b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_code]
+
+		annotation SummarizationSetBy = User
+
+	column step_name
+		dataType: string
+		lineageTag: 4b624cf5-e46d-5ce9-b686-11772f55800f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9d39323c-fc18-5224-9e05-09083ec2da3d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_bridge_step = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "step_code", STRING
+				    ,"step_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "BUDGET", "Budget", 1 }
+				        ,{ "VOLUME", "Volume", 2 }
+				        ,{ "TICKET", "Ticket", 3 }
+				        ,{ "MIX", "Mix", 4 }
+				        ,{ "FX", "FX", 5 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

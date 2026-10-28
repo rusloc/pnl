@@ -1,0 +1,146 @@
+/// ADR-0012 info buttons: one row per card / panel / table (code, title, what, why, formula, source; text verbatim from Track C js-report/lib/sales/copy.ts, parity check 2026-10-27). Disconnected; each info visual is filtered to its row.
+table dim_card
+	lineageTag: bcec3e8e-7fea-5a71-a53c-ece78032ac25
+
+	column card_code
+		dataType: string
+		isHidden
+		lineageTag: 763604bd-6c23-5b32-b99a-8a836b546403
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_code]
+
+		annotation SummarizationSetBy = User
+
+	column card_label
+		dataType: string
+		lineageTag: 39ccc8f4-829f-539f-ba91-c9530074b717
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column what
+		dataType: string
+		lineageTag: f3aa8dfe-a5d3-5147-822b-1829f80de256
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [what]
+
+		annotation SummarizationSetBy = User
+
+	column why
+		dataType: string
+		lineageTag: a675b82e-e1a9-5f69-a5e5-674cd6fd6302
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [why]
+
+		annotation SummarizationSetBy = User
+
+	column formula
+		dataType: string
+		lineageTag: 602cd4c7-0578-574c-b8a6-49031f469542
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [formula]
+
+		annotation SummarizationSetBy = User
+
+	column source
+		dataType: string
+		lineageTag: e396a026-fd53-5560-a03f-65a61c84e7b7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [source]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ed182549-7e14-5e91-9648-410e140f2eab
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_card = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "card_code", STRING
+				    ,"card_label", STRING
+				    ,"what", STRING
+				    ,"why", STRING
+				    ,"formula", STRING
+				    ,"source", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "O1", "Loans issued", "Loans disbursed in the window and their principal.", "Volume is the first Tier-1 number: did we lend what we planned?", "Count of loans with a disbursed date in the window; principal = Σ local principal ÷ actual rate of the month × currency.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS - param_fx (ACTUAL_AVG / BUDGET)", 1 }
+				        ,{ "O2", "New clients locked in", "Clients whose first loan was disbursed in the window.", "New clients feed next year’s repeat book; stalling acquisition shows here first.", "Σ first loans in the window (not first approval, not first account).", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) NEW_CLIENTS", 2 }
+				        ,{ "O3", "Returning clients", "Share of borrowers in the window who had borrowed before.", "Returning clients are cheaper to serve and lower risk.", "Distinct borrowers with an earlier loan ÷ distinct borrowers (client-weighted). No Budget exists for this ratio.", "fact_loan (pre-aggregated: loans-month) (window-stats)", 3 }
+				        ,{ "O4", "Bad / overdue loans", "Balance 30+ days past due at the last month of the window.", "The health check on the growth; down is favourable.", "(30–59 + 60–89 + 90+ DPD balance) ÷ outstanding at month-end, each market at its own rate.", "fact_loan_month (portfolio-month) - fact_target (BUD) DPD30_RATIO", 4 }
+				        ,{ "O5", "Loans issued by month vs Budget", "Loans per month for the 13 months to the selected month.", "Shows whether a gap to Budget is one month or a trend.", "Monthly count of disbursed loans: Actual, Budget and the same month a year earlier. Click a month to select it.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS", 5 }
+				        ,{ "O6", "New clients by acquisition channel", "New clients in the window by acquisition channel.", "Shows which channel carries acquisition and how it moved against last year.", "Σ first loans by channel; the outline is the same window a year earlier.", "fact_loan (pre-aggregated: loans-month) - dim_channel", 6 }
+				        ,{ "O7", "Cohort repeat curve", "Share of a first-loan cohort with a second loan within N days.", "Early repeat is the leading signal for returning clients.", "Clients with a second loan ≤ N days after the first ÷ cohort clients; a month counts at day N once all its clients are N days old.", "fact_loan (pre-aggregated: loans-month) (cohort-curve) - dim_client", 7 }
+				        ,{ "O8", "30+ DPD by market", "30+ DPD by balance per market, month-end, 13 months.", "Separates a market problem from a portfolio-wide one.", "Per market: 30+ DPD balance ÷ outstanding at each month-end.", "fact_loan_month (portfolio-month)", 8 }
+				        ,{ "O9", "Markets", "Loans, principal, new clients, returning % and 30+ DPD per market.", "The first drill: which market drives the gap.", "Card definitions per market; Δ follows the header comparator. Click filters the page; double-click or Show loans lists the loans.", "fact_loan (pre-aggregated: loans-month) - fact_loan_month (portfolio-month) - fact_target (BUD)", 9 }
+				        ,{ "L1", "Loans", "Loans disbursed in the window.", "The volume half of originations.", "Count of loans with a disbursed date in the window.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS", 10 }
+				        ,{ "L2", "Principal", "Disbursed principal in EUR.", "The money half of originations; FX can move it with no change in lending.", "Σ local principal ÷ actual rate of the month × currency. Constant currency re-translates actuals at the Budget rate.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) PRINCIPAL_LOCAL - param_fx (ACTUAL_AVG / BUDGET)", 11 }
+				        ,{ "L3", "Avg ticket", "Average principal per loan.", "Context for volume: bigger tickets can hide fewer loans.", "Principal ÷ loans. No favourable side.", "fact_loan (pre-aggregated: loans-month)", 12 }
+				        ,{ "L4", "Approval rate", "Approved share of submitted applications.", "Credit policy and applicant quality both show here.", "Approved ÷ submitted, cohorted by submission day. No Budget exists for this ratio.", "fact_application (funnel-month)", 13 }
+				        ,{ "L5", "Take-up rate", "Disbursed share of approved applications.", "Approved offers not taken up are lost revenue.", "Disbursed ÷ approved.", "fact_application (funnel-month)", 14 }
+				        ,{ "L6", "Time to cash", "Median hours from submission to cash.", "Speed wins repeat clients; down is favourable.", "Median (MEDIANX) of hours to cash over the window’s loans.", "fact_loan (pre-aggregated: loans-month) (window-stats)", 15 }
+				        ,{ "L7", "Loans by month vs Budget", "Loans per month: Actual columns, Budget line, Prior year outline.", "Month-by-month view of the volume gap.", "Monthly count of disbursed loans; Budget LOANS.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD)", 16 }
+				        ,{ "L8", "Application funnel", "Applications by funnel stage in the window.", "Shows at which step applicants are lost.", "Each stage counts applications that reached it; % = stage ÷ previous stage; Δ in pp vs the same window a year earlier.", "fact_application (funnel-month)", 17 }
+				        ,{ "L9", "Originations bridge", "Principal bridge from Budget to Actual.", "Splits the gap into lending (volume, mix, ticket) and FX.", "Volume = Δ loans × Budget ticket; mix = product × market share shift at Budget tickets; ticket = actual loans × ticket change; FX = actual at actual rates − actual at Budget rates.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) - param_fx (ACTUAL_AVG / BUDGET)", 18 }
+				        ,{ "L10", "Loans by product x market", "Loans in the window per market, split by product.", "Product mix drives ticket size and risk.", "Count of loans by market × product.", "fact_loan (pre-aggregated: loans-month) - dim_product", 19 }
+				        ,{ "L11", "Attainment by channel", "Loans against a channel target.", "Would show which channel misses its plan.", "Not available: the dataset has no channel targets (fact_target holds market × product and agent rows only).", "fact_target (BUD)", 20 }
+				        ,{ "L12", "Stage cycle time vs SLA", "Median hours of the two timed legs against the stage SLA.", "Shows which leg slows cash out.", "Submitted → approved and approved → cash medians; SLA = KYC + credit stage SLA hours.", "fact_loan (pre-aggregated: loans-month) (window-stats) - dim_funnel_stage", 21 }
+				        ,{ "L13", "Agent and partner leaderboard", "Agents and partners against their loan quota.", "Assisted channels depend on a few people; laggards show early.", "Agent loans ÷ AGENT_LOANS quota in the window, sorted by attainment. Click a row for that agent’s loans.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) AGENT_LOANS - dim_agent", 22 }
+				        ,{ "C1", "New clients", "Clients whose first loan was disbursed in the window.", "Acquisition volume against plan.", "Σ first loans in the window.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD) NEW_CLIENTS", 23 }
+				        ,{ "C2", "Returning clients %", "Borrowers with an earlier loan, share of all borrowers.", "Loyalty at client level.", "Distinct returning borrowers ÷ distinct borrowers. No Budget exists for this ratio.", "fact_loan (pre-aggregated: loans-month) (window-stats)", 24 }
+				        ,{ "C3", "Repeat share (loans)", "Repeat loans, share of all loans.", "Loyalty at loan level.", "Repeat loans ÷ loans.", "fact_loan (pre-aggregated: loans-month)", 25 }
+				        ,{ "C4", "New-client approval rate", "Approval rate of first-time applicants.", "The gate for new clients; credit policy changes show here first.", "Approved ÷ submitted for new applicants.", "fact_application (funnel-month)", 26 }
+				        ,{ "C5", "180-day repeat", "Share of a cohort with a second loan within 180 days.", "The leading indicator of the returning share.", "Cohort = first loans 6 months before the selected month; second loan ≤ 180 days after the first ÷ cohort clients. Compared with the same cohort month a year earlier.", "fact_loan (pre-aggregated: loans-month) (cohort-curve)", 27 }
+				        ,{ "C6", "Days between loans", "Median days between a repeat loan and the client’s previous loan.", "How quickly clients come back. No favourable side.", "Median gap in days over the window’s repeat loans.", "fact_loan (pre-aggregated: loans-month) (window-stats)", 28 }
+				        ,{ "C7", "New clients by channel vs Budget", "New clients per month by channel, Budget total as a line.", "Shows which channel moved acquisition.", "Σ first loans by month × channel; Budget NEW_CLIENTS.", "fact_loan (pre-aggregated: loans-month) - fact_target (BUD)", 29 }
+				        ,{ "C8", "New-client funnel", "First-time applicants by stage in the window.", "Where new clients are lost.", "Leads → submitted → approved → disbursed for new applicants; % of the previous stage.", "fact_application (funnel-month)", 30 }
+				        ,{ "C9", "Cohort repeat curves", "Second-loan share by days since first loan, last four quarter cohorts.", "Compares how fast recent cohorts come back.", "Clients with a second loan ≤ N days ÷ cohort clients, right-censored at the last close.", "fact_loan (pre-aggregated: loans-month) (cohort-curve)", 31 }
+				        ,{ "C10", "Returning % by market x segment", "Returning % per market × client segment; repeat share per product.", "Shows where loyalty is strong or weak.", "Matrix: client-weighted returning %; bars: repeat loans ÷ loans per product, tick = company average.", "fact_loan (pre-aggregated: loans-month) (window-stats) - dim_client", 32 }
+				        ,{ "C11", "New clients table", "Clients whose first loan falls in the window.", "Puts names on the cohort behind the numbers.", "Top clients by principal since 2024 (draft sample); loan states are the last-close snapshot. Click a row for the client card.", "fact_loan (pre-aggregated: loans-month) - dim_client", 33 }
+				        ,{ "P1", "30+ DPD %", "Balance 30+ days past due at the last month of the window.", "The headline risk ratio against the planned risk appetite.", "30+ DPD balance ÷ outstanding at month-end.", "fact_loan_month (portfolio-month) - fact_target (BUD) DPD30_RATIO", 34 }
+				        ,{ "P2", "90+ DPD %", "Balance 90+ days past due.", "The part most likely to be written off.", "90+ DPD balance ÷ outstanding.", "fact_loan_month (portfolio-month)", 35 }
+				        ,{ "P3", "30+ by count", "Loans 30+ days past due, share of active loans.", "A count view of the same risk.", "Loans 30+ DPD ÷ active loans.", "fact_loan_month (portfolio-month)", 36 }
+				        ,{ "P4", "Vintage 6m bad rate", "Loans that reached 90+ DPD within 6 months on book.", "Judges underwriting quality early, before write-off.", "First-90+ loans with months on book ≤ 6 ÷ loans disbursed; vintage = 6 months before the selected month.", "fact_loan_month (portfolio-month)", 37 }
+				        ,{ "P5", "Roll rate 30→60", "Overdue balance rolling one bucket per month.", "High roll rates mean collections are not catching up.", "60–89 balance this month ÷ 30–59 balance last month (balances also amortise).", "fact_loan_month (portfolio-month)", 38 }
+				        ,{ "P6", "Cost of risk", "Provision charge as an annual rate of the average book.", "What the risk costs in money.", "Σ provision ÷ months × 12 ÷ average month-end outstanding.", "fact_loan_month (portfolio-month)", 39 }
+				        ,{ "P7", "DPD buckets", "Overdue balance per bucket at month-end, 13 months.", "Shows whether arrears build up or clear.", "Month-end balance in 1–29, 30–59, 60–89 and 90+ DPD, in EUR.", "fact_loan_month (portfolio-month)", 40 }
+				        ,{ "P8", "Vintage curves", "Cumulative share of loans that reached 30+ DPD by months on book.", "Compares recent vintages at the same age.", "First-30+ loans up to month N ÷ loans disbursed, per vintage quarter.", "fact_loan_month (portfolio-month)", 41 }
+				        ,{ "P9", "30+ DPD by product x market", "30+ DPD by balance per product × market.", "Locates the risk.", "30+ DPD balance ÷ outstanding at the last month of the window.", "fact_loan_month (portfolio-month)", 42 }
+				        ,{ "P10", "30+ DPD by market", "30+ DPD by balance per market, 13 months.", "Tracks a market’s risk story over the year.", "Per market: 30+ DPD balance ÷ outstanding at each month-end.", "fact_loan_month (portfolio-month)", 43 }
+				        ,{ "P11", "Roll rate 30 to 60", "Balance rolling one bucket per month.", "Early warning for rising arrears.", "30→60: 60–89 now ÷ 30–59 last month; 1–29→30+: 30–59 now ÷ 1–29 last month.", "fact_loan_month (portfolio-month)", 44 }
+				        ,{ "P12", "Segments", "One bubble per product × market.", "Shows whether the risky segments are also the big ones.", "x = average ticket, y = 30+ DPD by balance, size = outstanding; worst bubble in yellow.", "fact_loan_month (portfolio-month) - fact_loan (pre-aggregated: loans-month)", 45 }
+				        ,{ "P13", "Overdue loans", "Loans 30+ days past due at the last close, worst first.", "The collection list behind the ratios.", "Loan-level snapshot at the last closed month (draft sample: top 100 per market by DPD). Click a row for the client card.", "fact_loan (detail sample)", 46 }
+				        ,{ "R1", "Revenue", "Revenue from interest, fees, interchange and subscriptions.", "What the loans and accounts earned.", "Σ local revenue ÷ actual rate of the month × currency.", "fact_revenue_month - fact_target (BUD) REVENUE_LOCAL - param_fx (ACTUAL_AVG / BUDGET)", 47 }
+				        ,{ "R2", "Attainment", "Revenue against Budget.", "Are we on the number?", "Revenue ÷ Budget revenue; ≥ 100 % good, 95–99.9 % watch, below off (param_thresholds).", "fact_revenue_month - fact_target (BUD) REVENUE_LOCAL - param_thresholds", 48 }
+				        ,{ "R3", "Interest + fees", "Interest income plus origination and late fees: the revenue the loans earn.", "The lending streams together; the Budget carries them together per loan product.", "Σ INTEREST + FEE revenue; Budget = REVENUE_LOCAL of the loan products at the BUDGET rate.", "fact_revenue_month - fact_target (BUD) REVENUE_LOCAL (loan products)", 49 }
+				        ,{ "R4", "Interchange", "Interchange earned on the debit card.", "The card stream grows with account activity, outside lending.", "Σ INTERCHANGE revenue; Budget = REVENUE_LOCAL of CARD at the BUDGET rate.", "fact_revenue_month - fact_target (BUD) REVENUE_LOCAL (CARD)", 50 }
+				        ,{ "R5", "MRR", "Monthly recurring revenue of paying tiers at month-end.", "The recurring part of revenue.", "Plus and Pro subscribers at month-end × monthly price, in EUR.", "fact_subscription_month", 51 }
+				        ,{ "R6", "Paying subscribers", "Paying subscribers at month-end.", "The base that MRR rests on.", "Plus + Pro subscribers at the last month of the window.", "fact_subscription_month", 52 }
+				        ,{ "R7", "Revenue by month vs Budget vs PY", "Revenue per month: Actual, Budget, Prior year.", "Month-by-month view of the revenue gap.", "Monthly revenue in EUR; Budget REVENUE_LOCAL at Budget rates.", "fact_revenue_month - fact_target (BUD)", 53 }
+				        ,{ "R8", "Revenue by stream", "Revenue per month by stream.", "Shows which stream moves the total.", "Monthly revenue in EUR by revenue type.", "fact_revenue_month", 54 }
+				        ,{ "R9", "Revenue attainment by market", "Revenue against Budget per market.", "Locates the miss.", "Revenue ÷ Budget revenue in the window; tick = Budget.", "fact_revenue_month - fact_target (BUD)", 55 }
+				        ,{ "R10", "Paying subscribers by tier", "Paying subscribers per month by tier; MRR above the columns.", "Tier mix and MRR side by side, no dual axis.", "Month-end subscribers by tier; label = MRR in EUR.", "fact_subscription_month", 56 }
+				        ,{ "R11", "Subscriber churn %", "Share of paying subscribers lost in the month.", "Churn spikes after price changes.", "Churned ÷ subscribers at the start of the month (Plus + Pro).", "fact_subscription_month", 57 }
+				        ,{ "R12", "Channel mix", "Share of loans per month by channel.", "Channel mix moves acquisition cost and risk.", "Loans by channel ÷ loans, per month.", "fact_loan (pre-aggregated: loans-month)", 58 }
+				        ,{ "R13", "Stream x market", "Revenue per stream × market.", "The detail behind the revenue cards.", "Budget exists for interchange (card), subscriptions (Plus + Pro) and the total; interest and fees share the loan-product Budget, so their rows show n/a. Click a row for that market’s loans.", "fact_revenue_month - fact_target (BUD)", 59 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

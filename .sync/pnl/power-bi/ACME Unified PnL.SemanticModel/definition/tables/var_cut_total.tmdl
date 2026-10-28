@@ -1,0 +1,24 @@
+/// One-row stand-in for the 'Total' cut of the variances field parameter (no slice split).
+table var_cut_total
+	lineageTag: 6851640d-c80e-55ae-a72a-2a36417f4135
+
+	column 'Cut total'
+		dataType: string
+		lineageTag: ab739e51-3bdf-5fe4-8f8d-41e2b1557470
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Cut total]
+
+		annotation SummarizationSetBy = User
+
+	partition var_cut_total = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "Cut total", STRING
+				    ,{
+				        { "Total" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

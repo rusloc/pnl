@@ -1,0 +1,180 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.3.0/schema.json",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "CY26SU10",
+      "reportVersionAtImport": {
+        "visual": "2.11.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "acme-finance-theme.json",
+      "reportVersionAtImport": {
+        "visual": "2.11.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
+    }
+  },
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "resourcePackages": [
+    {
+      "name": "SharedResources",
+      "type": "SharedResources",
+      "items": [
+        {
+          "name": "CY26SU10",
+          "path": "BaseThemes/CY26SU10.json",
+          "type": "BaseTheme"
+        }
+      ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "acme-finance-theme.json",
+          "path": "acme-finance-theme.json",
+          "type": "CustomTheme"
+        },
+        {
+          "name": "ic-close.svg",
+          "path": "ic-close.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-info.svg",
+          "path": "ic-info.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-collapse.svg",
+          "path": "ic-rail-collapse.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-display-on.svg",
+          "path": "ic-rail-display-on.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-display.svg",
+          "path": "ic-rail-display.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-expand.svg",
+          "path": "ic-rail-expand.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-period-on.svg",
+          "path": "ic-rail-period-on.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-period.svg",
+          "path": "ic-rail-period.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-slice-on.svg",
+          "path": "ic-rail-slice-on.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-slice.svg",
+          "path": "ic-rail-slice.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-versions-on.svg",
+          "path": "ic-rail-versions-on.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-rail-versions.svg",
+          "path": "ic-rail-versions.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-ana-ink.svg",
+          "path": "ic-tab-ana-ink.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-ana-slate.svg",
+          "path": "ic-tab-ana-slate.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-kpi-ink.svg",
+          "path": "ic-tab-kpi-ink.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-kpi-slate.svg",
+          "path": "ic-tab-kpi-slate.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-pnl-ink.svg",
+          "path": "ic-tab-pnl-ink.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-pnl-slate.svg",
+          "path": "ic-tab-pnl-slate.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-prof-ink.svg",
+          "path": "ic-tab-prof-ink.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-tab-prof-slate.svg",
+          "path": "ic-tab-prof-slate.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-filter-slate.svg",
+          "path": "ic-filter-slate.svg",
+          "type": "Image"
+        },
+        {
+          "name": "ic-filter-ink.svg",
+          "path": "ic-filter-ink.svg",
+          "type": "Image"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "useStylableVisualContainerHeader": true,
+    "exportDataMode": "AllowSummarized",
+    "defaultDrillFilterOtherVisuals": true,
+    "allowChangeFilterTypes": true,
+    "useEnhancedTooltips": true,
+    "useDefaultAggregateDisplayName": true
+  }
+}

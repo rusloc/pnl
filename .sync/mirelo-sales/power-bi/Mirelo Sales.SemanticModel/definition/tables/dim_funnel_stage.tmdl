@@ -1,0 +1,88 @@
+/// Funnel stages in order (joins no fact; the Funnel measures switch on stage_code). sla_hours feeds the cycle-time chart.
+table dim_funnel_stage
+	lineageTag: a967406b-9757-5921-aed1-5b2cb8bfb605
+
+	column stage_code
+		dataType: string
+		lineageTag: cb319c82-995c-5ceb-a539-f71ffefce523
+		summarizeBy: none
+		sourceColumn: stage_code
+
+		annotation SummarizationSetBy = User
+
+	column stage_name
+		dataType: string
+		lineageTag: eb904f92-8032-56e1-9201-b78b60205412
+		summarizeBy: none
+		sourceColumn: stage_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e9d9a97e-0b01-57e9-bd6c-f7a3462640ca
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_terminal
+		dataType: boolean
+		lineageTag: afb5cf0e-59a8-5740-80a2-51419cc3f36d
+		summarizeBy: none
+		sourceColumn: is_terminal
+
+		annotation SummarizationSetBy = User
+
+	column outcome
+		dataType: string
+		lineageTag: 13a84d04-cbc7-564d-ae94-1066731aa016
+		summarizeBy: none
+		sourceColumn: outcome
+
+		annotation SummarizationSetBy = User
+
+	column fact_column
+		dataType: string
+		isHidden
+		lineageTag: 56005e58-b1c0-5338-90f5-a6c77971f476
+		summarizeBy: none
+		sourceColumn: fact_column
+
+		annotation SummarizationSetBy = User
+
+	column sla_hours
+		dataType: int64
+		formatString: 0
+		lineageTag: b5dd2b3e-a330-53ab-b610-8d0d5a823214
+		summarizeBy: none
+		sourceColumn: sla_hours
+
+		annotation SummarizationSetBy = User
+
+	partition dim_funnel_stage = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_funnel_stage.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"stage_code", type text},
+				            {"stage_name", type text},
+				            {"sort_order", Int64.Type},
+				            {"is_terminal", type logical},
+				            {"outcome", type text},
+				            {"fact_column", type text},
+				            {"sla_hours", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

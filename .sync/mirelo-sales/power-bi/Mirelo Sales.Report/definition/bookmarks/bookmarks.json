@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "bmg_views",
+      "displayName": "Views",
+      "children": [
+        "bm_view_overview",
+        "bm_view_loans",
+        "bm_view_clients",
+        "bm_view_portfolio",
+        "bm_view_revenue"
+      ]
+    },
+    {
+      "name": "bmg_info",
+      "displayName": "How to read",
+      "children": [
+        "bm_info_overview_open",
+        "bm_info_overview_close",
+        "bm_info_loans_open",
+        "bm_info_loans_close",
+        "bm_info_clients_open",
+        "bm_info_clients_close",
+        "bm_info_portfolio_open",
+        "bm_info_portfolio_close",
+        "bm_info_revenue_open",
+        "bm_info_revenue_close"
+      ]
+    }
+  ]
+}

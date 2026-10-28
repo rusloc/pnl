@@ -1,0 +1,137 @@
+/// Product: five microloans, three account tiers (FREE, PLUS, PRO) and the debit card.
+table dim_product
+	lineageTag: 9da2228a-a2ae-5a64-84b8-d3bccca412a0
+
+	column product_code
+		dataType: string
+		lineageTag: efc4667d-c1f8-583d-84a4-e2b7291a235c
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = User
+
+	column product_name
+		dataType: string
+		lineageTag: b679c728-ea7f-58b6-8fde-f816fb1cf5c2
+		summarizeBy: none
+		sourceColumn: product_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column product_line
+		dataType: string
+		lineageTag: d496d9b3-e6ea-53ad-b286-932d06dea330
+		summarizeBy: none
+		sourceColumn: product_line
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		lineageTag: a3f5ed65-723e-531c-a7df-b229e7abd39e
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column repayment_type
+		dataType: string
+		lineageTag: 9795d7f0-5c74-5a49-964e-f31d969d91a0
+		summarizeBy: none
+		sourceColumn: repayment_type
+
+		annotation SummarizationSetBy = User
+
+	column term_months
+		dataType: int64
+		formatString: 0
+		lineageTag: 929b23a7-d724-599b-b260-0d88e39313c1
+		summarizeBy: none
+		sourceColumn: term_months
+
+		annotation SummarizationSetBy = User
+
+	column tenor_days
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f0d70512-c7ca-5a50-8f27-f443295232c7
+		summarizeBy: none
+		sourceColumn: tenor_days
+
+		annotation SummarizationSetBy = User
+
+	column pl_launch_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 7b08434f-f255-58a7-ae0b-7f019b9f86ad
+		summarizeBy: none
+		sourceColumn: pl_launch_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column ro_launch_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 3c05bd92-4206-5089-837d-740be55745f2
+		summarizeBy: none
+		sourceColumn: ro_launch_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column pt_launch_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 7a0c634e-ddc8-53c8-ba87-ace96b94e2ef
+		summarizeBy: none
+		sourceColumn: pt_launch_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d50eac97-4ff3-53d1-b5ca-9414270a3e3b
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_product.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"product_code", type text},
+				            {"product_name", type text},
+				            {"product_line", type text},
+				            {"segment_code", type text},
+				            {"repayment_type", type text},
+				            {"term_months", Int64.Type},
+				            {"tenor_days", Int64.Type},
+				            {"pl_launch_date", type date},
+				            {"ro_launch_date", type date},
+				            {"pt_launch_date", type date},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,62 @@
+/// FX rates, local per 1 EUR: ACTUAL_AVG (Jan 2024 - Oct 2026) and BUDGET (one rate per year). Applied on load; kept for reference.
+table param_fx
+	lineageTag: e4a23fb2-732b-5a56-a877-dd39e7ea6db0
+	isHidden
+
+	column currency_code
+		dataType: string
+		isHidden
+		lineageTag: 351f360b-f345-5e91-8db2-5be5e920fcb9
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: e9e688d6-17ac-5ad5-ad22-1dfeeb6be2a2
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column rate_type
+		dataType: string
+		isHidden
+		lineageTag: 48432615-fe87-5fc3-b4f5-84397bb1d890
+		summarizeBy: none
+		sourceColumn: rate_type
+
+		annotation SummarizationSetBy = User
+
+	column local_per_eur
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: bb989c49-9086-5591-865a-c2d7e486410e
+		summarizeBy: none
+		sourceColumn: local_per_eur
+
+		annotation SummarizationSetBy = User
+
+	partition param_fx = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_fx.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"currency_code", type text},
+				            {"month_key", type text},
+				            {"rate_type", type text},
+				            {"local_per_eur", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

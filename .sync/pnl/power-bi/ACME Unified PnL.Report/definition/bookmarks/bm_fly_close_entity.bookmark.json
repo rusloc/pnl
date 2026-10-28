@@ -1,0 +1,85 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Flyout: close company picker",
+  "name": "bm_fly_close_entity",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_fly_period",
+      "grp_fly_versions",
+      "grp_fly_slice",
+      "grp_fly_display",
+      "grp_fly_entity",
+      "pl_matrix"
+    ],
+    "suppressActiveSection": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "pnl_one_pager",
+    "sections": {
+      "pnl_one_pager": {
+        "visualContainers": {
+          "pl_matrix": {
+            "singleVisual": {
+              "visualType": "pivotTable",
+              "expansionStates": [
+                {
+                  "roles": [
+                    "Rows"
+                  ],
+                  "levels": [
+                    {
+                      "queryRefs": [
+                        "dim_pl_row.line_display"
+                      ],
+                      "isCollapsed": true,
+                      "identityKeys": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Entity": "dim_pl_row"
+                              }
+                            },
+                            "Property": "line_display"
+                          }
+                        }
+                      ],
+                      "isPinned": true
+                    },
+                    {
+                      "queryRefs": [
+                        "dim_pl_row.account_label"
+                      ],
+                      "isCollapsed": true,
+                      "isPinned": true
+                    }
+                  ],
+                  "root": {}
+                }
+              ]
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_fly_period": {
+            "isHidden": true
+          },
+          "grp_fly_versions": {
+            "isHidden": true
+          },
+          "grp_fly_slice": {
+            "isHidden": true
+          },
+          "grp_fly_display": {
+            "isHidden": true
+          },
+          "grp_fly_entity": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+/// DPD buckets, write-off point and absolute KPI status bands (attainment bands feed the Attainment status).
+table param_thresholds
+	lineageTag: 93f24614-3539-511b-bede-5c51d39c69a5
+	isHidden
+
+	column threshold_set
+		dataType: string
+		isHidden
+		lineageTag: 4a7cf973-bdaf-5a6d-a572-bed61ab7c68c
+		summarizeBy: none
+		sourceColumn: threshold_set
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: c0f4640f-b3a7-51fd-b6f5-1f942e528e6d
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column band_code
+		dataType: string
+		isHidden
+		lineageTag: 78d616f3-c23c-55ff-963a-417aa3f09a86
+		summarizeBy: none
+		sourceColumn: band_code
+
+		annotation SummarizationSetBy = User
+
+	column min_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: dff0da5b-390c-5d12-b752-b9312845385f
+		summarizeBy: none
+		sourceColumn: min_value
+
+		annotation SummarizationSetBy = User
+
+	column max_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c834c0c2-b898-5c8d-9745-22066e6244c4
+		summarizeBy: none
+		sourceColumn: max_value
+
+		annotation SummarizationSetBy = User
+
+	column label
+		dataType: string
+		isHidden
+		lineageTag: f7622cc8-7e71-52eb-abf3-fad26c08f275
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9f6d0c8e-f796-5faa-a33b-2d67da38926d
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition param_thresholds = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_thresholds.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"threshold_set", type text},
+				            {"metric_code", type text},
+				            {"band_code", type text},
+				            {"min_value", type number},
+				            {"max_value", type number},
+				            {"label", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

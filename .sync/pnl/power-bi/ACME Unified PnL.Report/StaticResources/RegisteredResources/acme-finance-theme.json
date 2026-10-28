@@ -1,0 +1,71 @@
+{
+  "name": "acme-finance-theme.json",
+  "dataColors": [
+    "#2453A6",
+    "#6B48C8",
+    "#3B4A5E",
+    "#3BA37B",
+    "#E2804A",
+    "#8592A3",
+    "#2B3748",
+    "#CDD4DC"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#101B2B",
+  "tableAccent": "#CDD4DC",
+  "good": "#06603F",
+  "bad": "#C2410C",
+  "neutral": "#8A5A00",
+  "foregroundNeutralSecondary": "#4F5C6C",
+  "foregroundNeutralTertiary": "#8592A3",
+  "backgroundLight": "#F6F8FA",
+  "backgroundNeutral": "#DEE3E9",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#101B2B"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 26,
+      "color": "#101B2B"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 13,
+      "color": "#101B2B"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#101B2B"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F2F4F7"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F2F4F7"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

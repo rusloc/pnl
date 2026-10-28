@@ -1,0 +1,28 @@
+/* Standalone Mirelo resets. The colour and type tokens live on .page in components/sales/sales.module.css
+   (design-tokens §2–§5); this file only sets what sits outside the board. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: #f3f2ef; /* --ground, so the area outside the 1440 × 810 board matches it */
+  color: #111111; /* --ink */
+  font-family: var(--font-inter), Inter, 'Segoe UI', system-ui, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid #111111; /* same ring as .page :focus-visible */
+  outline-offset: 1px;
+}

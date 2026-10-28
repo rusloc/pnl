@@ -1,0 +1,50 @@
+/// Revenue stream: interest, fees, interchange, subscriptions.
+table dim_revenue_type
+	lineageTag: f0def71f-6d29-5305-a084-f974c3cd6ee5
+
+	column revenue_type_code
+		dataType: string
+		lineageTag: dc4c7de1-e03d-592b-84ad-8f42526f13d0
+		summarizeBy: none
+		sourceColumn: revenue_type_code
+
+		annotation SummarizationSetBy = User
+
+	column revenue_type_name
+		dataType: string
+		lineageTag: 412da70d-ea16-5f76-9a4f-abd099aa4fa7
+		summarizeBy: none
+		sourceColumn: revenue_type_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3aa41de7-32e0-5264-ba7a-d2b414f9bbe9
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_revenue_type = m
+		mode: import
+		source =
+				let
+				    // Draft source (ADR-0011 (a)): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole. Derived columns are added below, after the typed step.
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_revenue_type.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"revenue_type_code", type text},
+				            {"revenue_type_name", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

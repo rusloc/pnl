@@ -1,0 +1,58 @@
+/// F-05 version choice (from param_version_choice, disconnected).
+table param_base_version
+	lineageTag: 7f1bb3d2-f31d-53a0-98cc-9ff74f51104a
+
+	column choice_code
+		dataType: string
+		isHidden
+		lineageTag: c1a1ffeb-23ea-542c-8783-f132bae69637
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [choice_code]
+
+		annotation SummarizationSetBy = User
+
+	column choice_name
+		dataType: string
+		lineageTag: be68d28d-82e4-5593-9e37-82b0feca1b63
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [choice_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2a71485b-2c52-51c6-9e3a-6861c5a204c8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: e5d39815-e4be-5ad5-b41e-29d930a90251
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_default]
+
+		annotation SummarizationSetBy = User
+
+	partition param_base_version = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    FILTER ( param_version_choice, param_version_choice[allowed_as_base] = TRUE () )
+				    ,"choice_code", param_version_choice[choice_code]
+				    ,"choice_name", param_version_choice[choice_name]
+				    ,"sort_order", param_version_choice[sort_order]
+				    ,"is_default", param_version_choice[default_for] = "Base"
+				)
+
+	annotation PBI_ResultType = Table
+

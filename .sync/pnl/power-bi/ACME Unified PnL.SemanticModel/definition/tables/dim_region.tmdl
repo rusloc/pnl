@@ -1,0 +1,52 @@
+/// D-17 regions and functional currency.
+table dim_region
+	lineageTag: 5e753339-093e-5ec0-a5c9-ac07a5c15e2e
+
+	column region_code
+		dataType: string
+		isHidden
+		lineageTag: 80e9ac8e-3467-54cc-afc4-dcf432f73fb9
+		summarizeBy: none
+		sourceColumn: region_code
+
+		annotation SummarizationSetBy = User
+
+	column region_name
+		dataType: string
+		lineageTag: a161f392-b1d6-5fff-be1c-891e470a47c0
+		summarizeBy: none
+		sourceColumn: region_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column functional_currency
+		dataType: string
+		isHidden
+		lineageTag: bb1ff2e2-0758-555b-aaf5-6e49c6f0f7b6
+		summarizeBy: none
+		sourceColumn: functional_currency
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9f4cac65-f2a9-5630-a112-09ca2a443288
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_region = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\dim_region.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

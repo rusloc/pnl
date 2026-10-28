@@ -1,0 +1,52 @@
+/// D-21 / F-13 FX basis.
+table param_fx_basis
+	lineageTag: 2aa8ad3a-b9a0-5c18-82b6-59a37777974f
+
+	column fx_basis_code
+		dataType: string
+		isHidden
+		lineageTag: d8b48729-ff9a-51c3-9642-e55fbdeb312d
+		summarizeBy: none
+		sourceColumn: fx_basis_code
+
+		annotation SummarizationSetBy = User
+
+	column fx_basis_name
+		dataType: string
+		lineageTag: fc8d26a1-191e-5979-a16d-c4fd0d62939c
+		summarizeBy: none
+		sourceColumn: fx_basis_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 510379e0-66ea-5390-b70d-82fb40ff7851
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 1f732c7a-83c4-5387-bd9f-3893cb6ff1ad
+		summarizeBy: none
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = User
+
+	partition param_fx_basis = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\param_fx_basis.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

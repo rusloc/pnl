@@ -1,0 +1,134 @@
+/// D-11 the 19-step spine: row order, row type, formulas, tags. Not joined to facts.
+table dim_report_line
+	isHidden
+	lineageTag: ab599d3c-dff8-5db5-9c7b-77ac31b4e665
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 1fdb33d8-1114-5932-8a74-002a7725b603
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column line_name
+		dataType: string
+		isHidden
+		lineageTag: eaaba9f7-9524-5caa-ba06-63d967c1a5a5
+		summarizeBy: none
+		sourceColumn: line_name
+
+		annotation SummarizationSetBy = User
+
+	column row_type
+		dataType: string
+		isHidden
+		lineageTag: e7a499dd-848a-51a2-9798-d98c847caeee
+		summarizeBy: none
+		sourceColumn: row_type
+
+		annotation SummarizationSetBy = User
+
+	column formula
+		dataType: string
+		isHidden
+		lineageTag: f3bf102e-d3bc-50f1-a443-a92b36d276a8
+		summarizeBy: none
+		sourceColumn: formula
+
+		annotation SummarizationSetBy = User
+
+	column block_code
+		dataType: string
+		isHidden
+		lineageTag: 24454946-ada9-5031-904a-c7419fd1026b
+		summarizeBy: none
+		sourceColumn: block_code
+
+		annotation SummarizationSetBy = User
+
+	column spine_step
+		dataType: string
+		isHidden
+		lineageTag: 035a17a2-9f89-50eb-83d2-289e6a2abc48
+		summarizeBy: none
+		sourceColumn: spine_step
+
+		annotation SummarizationSetBy = User
+
+	column tag
+		dataType: string
+		isHidden
+		lineageTag: f9216061-7347-5176-b831-95258919b2c3
+		summarizeBy: none
+		sourceColumn: tag
+
+		annotation SummarizationSetBy = User
+
+	column parent_line_code
+		dataType: string
+		isHidden
+		lineageTag: f20b6642-05b7-5085-9488-01f71329426b
+		summarizeBy: none
+		sourceColumn: parent_line_code
+
+		annotation SummarizationSetBy = User
+
+	column is_key
+		dataType: boolean
+		isHidden
+		lineageTag: 42beccd9-bb06-5bfe-b31d-5974ef64a463
+		summarizeBy: none
+		sourceColumn: is_key
+
+		annotation SummarizationSetBy = User
+
+	column alias_products
+		dataType: string
+		isHidden
+		lineageTag: 3783bd22-df1a-52af-859f-bd94881c9ef3
+		summarizeBy: none
+		sourceColumn: alias_products
+
+		annotation SummarizationSetBy = User
+
+	column alias_services
+		dataType: string
+		isHidden
+		lineageTag: 9da6c1b8-d116-5122-aac3-b7fc4c9031d1
+		summarizeBy: none
+		sourceColumn: alias_services
+
+		annotation SummarizationSetBy = User
+
+	column ifrs18_category
+		dataType: string
+		isHidden
+		lineageTag: 8cdbfc8e-710a-55be-8db3-842400bc14bc
+		summarizeBy: none
+		sourceColumn: ifrs18_category
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 200b695c-dc51-5f11-bae4-29303df9770a
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_report_line = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\dim_report_line.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

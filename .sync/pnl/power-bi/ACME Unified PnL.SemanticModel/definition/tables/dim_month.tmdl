@@ -1,0 +1,89 @@
+/// D-15 months; is_closed is the close control (N-03).
+table dim_month
+	lineageTag: 63a7d469-af75-55a9-a461-4c85152429c8
+
+	column month_key
+		dataType: string
+		lineageTag: a5c3969e-b723-5f1d-8bd0-f651b0df3858
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column month_start_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 06874f90-b451-5365-bf90-92f08204222e
+		summarizeBy: none
+		sourceColumn: month_start_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cfc932df-7c84-57a9-ade9-f1e0d109c05f
+		summarizeBy: none
+		sourceColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	column fiscal_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 251b8345-5ef1-57aa-9f7f-c0a108ba0b98
+		summarizeBy: none
+		sourceColumn: fiscal_year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: string
+		lineageTag: 302f7916-6987-577a-be19-f1efa9c2202e
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_number
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d1b3b0ab-ac23-5827-b5de-0c3981843f00
+		summarizeBy: none
+		sourceColumn: month_number
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: c6a60db3-7170-523f-922b-5895beeec223
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month_number
+
+		annotation SummarizationSetBy = User
+
+	column is_closed
+		dataType: boolean
+		lineageTag: bd6c07df-7ed2-5c75-aa13-6df276761d00
+		summarizeBy: none
+		sourceColumn: is_closed
+
+		annotation SummarizationSetBy = User
+
+	partition dim_month = m
+		mode: import
+		source =
+				let
+				    // .sync pack: one local Parquet file per table in DataFolder (written by load_acme_pl.py --parquet-out, same types as lh_raw). A file source does not fold: the file is read whole.
+				    Data = Parquet.Document(File.Contents(DataFolder & "\dim_month.parquet"))
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
+

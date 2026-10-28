@@ -1,0 +1,38 @@
+/// Folder that holds the Parquet files of this pack (mirelo-sales/data/parquet): full local path, no trailing backslash. Set it before the first refresh.
+expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 3c02a267-effe-53bf-bf8a-b1e4ae5106f1
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+/// ACTUAL_AVG rates (local per 1 EUR) by currency x month, used on load to translate amounts (not loaded).
+expression fx_actual =
+		let
+		    src = Parquet.Document(File.Contents(DataFolder & "\param_fx.parquet")),
+		    rows = Table.SelectRows(src, each [rate_type] = "ACTUAL_AVG"),
+		    typed = Table.TransformColumnTypes(
+		        Table.SelectColumns(rows, {"currency_code", "month_key", "local_per_eur"}),
+		        {{"currency_code", type text}, {"month_key", type text}, {"local_per_eur", type number}}
+		    )
+		in
+		    typed
+	lineageTag: 7a2b3752-885f-5be7-ab9d-4733cc562de2
+	queryGroup: Helpers
+
+	annotation PBI_ResultType = Table
+
+/// BUDGET rates (local per 1 EUR) by currency x month, used on load to translate amounts (not loaded).
+expression fx_budget =
+		let
+		    src = Parquet.Document(File.Contents(DataFolder & "\param_fx.parquet")),
+		    rows = Table.SelectRows(src, each [rate_type] = "BUDGET"),
+		    typed = Table.TransformColumnTypes(
+		        Table.SelectColumns(rows, {"currency_code", "month_key", "local_per_eur"}),
+		        {{"currency_code", type text}, {"month_key", type text}, {"local_per_eur", type number}}
+		    )
+		in
+		    typed
+	lineageTag: 89a3dd9b-8c66-581e-83af-8d0578512f7c
+	queryGroup: Helpers
+
+	annotation PBI_ResultType = Table

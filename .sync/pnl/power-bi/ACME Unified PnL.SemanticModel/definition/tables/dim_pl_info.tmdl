@@ -1,0 +1,72 @@
+/// ADR-0012 info pop-ups of the redesigned panels (title, what it shows, formula, source; Track C copy with {cmp} / {line} placeholders, parity check 2026-10-27). Disconnected; each info button is filtered to its row.
+table dim_pl_info
+	lineageTag: 993635bb-987f-5f9c-8ea1-1a8697499f67
+	isHidden
+
+	column info_code
+		dataType: string
+		isHidden
+		lineageTag: 60d56b78-813d-5275-9365-6c0488590677
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_code]
+
+		annotation SummarizationSetBy = User
+
+	column title
+		dataType: string
+		lineageTag: 1db8a7e7-9f47-58bc-b439-b2249c80288c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [title]
+
+		annotation SummarizationSetBy = User
+
+	column what
+		dataType: string
+		lineageTag: 3c7adf8d-aad4-5945-a7cd-91d64386631b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [what]
+
+		annotation SummarizationSetBy = User
+
+	column formula
+		dataType: string
+		lineageTag: df0446cf-70a8-5614-8077-3b6319d3ed62
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [formula]
+
+		annotation SummarizationSetBy = User
+
+	column source
+		dataType: string
+		lineageTag: fd8e8d5a-2017-56ff-a3dc-ad309f828ab5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [source]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_pl_info = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "info_code", STRING
+				    ,"title", STRING
+				    ,"what", STRING
+				    ,"formula", STRING
+				    ,"source", STRING
+				    ,{
+				        { "NRBRIDGE", "Net revenue bridge", "{cmp} to actual: driver steps at constant currency, a constant-currency subtotal, then FX (translation, not controllable). The axis does not start at zero; read the labels.", "steps per {line} or volume / price-mix at constant currency; CC subtotal = comparison + Σ steps; FX = (NR − NRcc) actual − (NR − NRcc) comparison", "Bridge Value per dim_bridge_step - Bridge Volume - Bridge Price Mix - Bridge FX (C-40)" }
+				        ,{ "PBRIDGE", "Profit bridge", "{cmp} Adj. EBITDA to actual: revenue volume at the comparison's gross margin, GM rate and mix by {line}, variable selling, the opex blocks (all at constant currency), then FX. D&A and adjusting items are actual levels (their Δ is the small label) so the bridge reconciles to operating profit. No share-based compensation step: not in the data.", "volume = ΔNRcc × comparison GM %; GM rate = Σ NRcc × ΔGM % per {line}; mix = remainder; Σ steps = Adj. EBITDA Δ; Adj. EBITDA + D&A + adjusting items = OP", "Profit Step Delta per dim_profit_step - Bridge Comparison Amount - Adjusted EBITDA - Operating Profit" }
+				        ,{ "VAR", "Largest variances vs {cmp}", "Leaf lines of the P&L down to operating profit. Δ = actual − comparison on signed values, so a positive Δ always helps profit and a negative one hurts it; bars share one scale. Top 8 / 12 / All; By block groups the shown lines under their P&L block with the block’s full subtotal; By |Δ| is one flat ranking. A cut splits every bar into slice members; opex and below are booked by region only and allocated by NR share to the other slices (marked alloc.).", "Δ = actual − comparison; Δ % = Δ ÷ |comparison|, n.m. when |comparison| < 2.0 in the units or |Δ %| > 50 %; FX = (actual − actual cc) − (comparison − comparison cc)", "LV Δ - LV Δ B (Compare B) - LV FX - LV Δ % Text - LV Coverage (C-45)" }
+				        ,{ "PROFTABLE", "Profitability by Region", "Constant currency, rows by net revenue. Δ vs {cmp} % on net revenue; GM % and CM % of the region’s revenue; CM Δ = contribution margin % minus {cmp} in pp, the only column with a status dot. Adj. EBITDA is booked by region (C-31): nothing here is allocated.", "GM % = GP ÷ NR; CM % = contribution ÷ NR; CM Δ = CM % − comparison CM %", "Prof Net Revenue - Prof NR Δ % CC - Prof GM % - Prof CM % - Prof CM Δ pp - Prof Contribution - Prof Adj EBITDA (C-46)" }
+				        ,{ "CONC", "Concentration - share by profit level", "Three 100 % bars: each region’s share of net revenue, of contribution and of Adj. EBITDA (booked by region). A region whose share shrinks from revenue to contribution dilutes the margin; one whose share grows is accretive.", "share = region value ÷ company value, per level; drift = EBITDA share − NR share (pp)", "Prof NR Share - contribution and EBITDA shares (same pattern on Contribution Margin / Adjusted EBITDA)" }
+				        ,{ "BUBBLE", "Growth × margin by region", "x = net revenue growth year on year at constant currency, y = contribution margin %, bubble = net revenue; dashed lines = company values, giving four quadrants. The thin line runs from the prior-year position (hollow dot) to the current one; it needs two earlier years, so it is blank where the prior year has no prior year (C-04).", "growth = NRcc ÷ PY NRcc − 1; CM % = contribution ÷ NR, per region", "KPI Organic Growth per slice (K-22) - KPI CM % per slice - Prof Net Revenue - PY: Compare B Amount" }
+				        ,{ "HEAT", "Mix - region × {line}", "Cells: net revenue at constant currency and its share of the region; colour = gross margin % of the column (dark = high). Row and column totals reconcile to the table.", "cell = NR(region, line); share = cell ÷ region NR; colour = GP ÷ NR of the line", "Net Revenue - Gross Profit at dim_region × dim_line grain (both direct, C-30)" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

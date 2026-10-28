@@ -1,0 +1,58 @@
+/// Month picker (closed months only, newest first). Disconnected: the selected month anchors every period window.
+table param_anchor_month
+	lineageTag: b3683d95-79e1-5a1b-b644-c34deb8a9a73
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 0d9625e5-1b1f-55a5-808b-615cedfc3f1c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_key]
+
+		annotation SummarizationSetBy = User
+
+	column month_label
+		dataType: string
+		lineageTag: 4e5e8d97-91b1-5367-90b5-c33af0dc34c9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_label]
+		sortByColumn: sort_desc
+
+		annotation SummarizationSetBy = User
+
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: aa38458e-c3c5-51b2-beb8-b72f9428806d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_index]
+
+		annotation SummarizationSetBy = User
+
+	column sort_desc
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5f0392e8-81c0-5058-ae54-71c54fa8f62e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_desc]
+
+		annotation SummarizationSetBy = User
+
+	partition param_anchor_month = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    FILTER ( dim_month, dim_month[is_closed] = TRUE () )
+				    ,"month_key", dim_month[month_key]
+				    ,"month_label", dim_month[month_label]
+				    ,"month_index", dim_month[month_index]
+				    ,"sort_desc", 0 - dim_month[month_index]
+				)
+
+	annotation PBI_ResultType = Table
