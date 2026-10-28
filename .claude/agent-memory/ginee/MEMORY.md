@@ -9,19 +9,22 @@
 - [2026-10-21] First load done and verified: 28/28 row counts OK, control total diff 0.00 (source: observed)
 - [2026-10-21] SQL endpoint sync took ~15 min after the write; collation case-sensitive (upper-case INFORMATION_SCHEMA) (source: observed)
 
+- [2026-10-28] Nordmark exec dataset at data/nordmark_retail_dummy_data/ (Parquet only, 15.4 MB, story-first); see data.md
 - [2026-10-26] Mirelo dataset built locally at data/mirelo_sales_dummy_data/ (ADR-0011 draft data home = Parquet folder): 634 k loans, 302 k clients, verify 47/47 green; see data.md (source: observed)
 - [2026-10-21] ACME Trucks: local Import PBIP model rebuilt from the live "Time unitilaztion" model, data snapshot in Parquet; KPI measures use RANDBETWEEN (source: observed)
 
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
+- Nordmark dataset (2026-10-28): built + verify green; 16 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (E-23 edge, E-15 dot scope, E-41 mix window, GMROI example, ST bars, scoped EBITDA)
+- .sync packs (2026-10-28): pnl/power-bi (Parquet via DataFolder) + mirelo-sales/power-bi + data written, draft; pending USER Desktop first-open + bip DAX test run; re-copy if pbi-report changes after fcfa19c
 - Mirelo: USER to decide on committing 96 MB of fact_loan CSVs (split in 3) vs gitignoring CSVs / Git LFS; later lh_raw schema mirelo_sales (ADR-0011 (a), not in the draft)
 - ACME Trucks: USER Desktop refresh + baseline-live.dax; Q-01 sensitive values (data, DAX literals); propose CLAUDE.md row for workspace Showcase (personal tenant)
 - USER to delete 5 unrelated CSVs in lh_raw/Files root (fab rm commands handed over); decide on Files/acme_pl_dummy_data copies
 - Verify on MS Learn: Direct Lake decimal mapping
-- ACME Unified PnL in RAW: refreshed OK (28 s) via connection acme-lh_raw-sql-dev; T-06 green; T-05 GROUP fails → bip; CLAUDE.md row proposed, not written. Ask USER if acme_gql is the app's
+- ACME Unified PnL in RAW = PBIP as of fcfa19c (republished 2026-10-28, refresh 42.9 s, all tests green incl. T-P 601/601 chunked). CLAUDE.md Workspaces row still says baseline 28 s / ~1.25 M: update proposed, not written. Ask USER if acme_gql is the app's
 - Per-table docs in docs/model/ not written
-- ADR-0008: lh_raw write + verify green; PBIP PQ/columns applied 2026-10-23 (local refresh 14-25 s, +131 MB in memory, hash-encoded doubles). Next: bip fact_pl_elim + measures, local tests, then my service backup/updateDefinition/refresh, re-time via fabric-data/perf
+- ADR-0008 done on the service; open: Track A redesign probes not timed (fin), old builders show no service gain except CC (code-column filters, no pruning)
 
 ## Handoffs to bip
 - [2026-10-23] fact_pl_elim table (partition M + 15 cols, 5 rels: entity, month, version, region, account) + ADR-0008 §4.2 rewrites (_Amt Raw, _Elim Amount, _Bridge Elim Change, KPI IC Eliminated, Bridge Volume); new cols on the 3 facts are in the PBIP
@@ -30,6 +33,9 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-28 (delegated, evening): Nordmark Retail dummy dataset (ADR-0013 phase 1): generator + verify (76 green, byte-identical rerun) + README contract; no Fabric calls, no git
+- 2026-10-28 (delegated, later): RAW model republish: preflight verify green, backup service-2026-10-28, updateDefinition 50 parts, refresh 42.9 s, service tests all green (T-P chunked, 10 GB query memory cap), frozen perf re-timed; ADR-0008 §5.2 + semantic-model.md header written; no git
+- 2026-10-28 (delegated): .sync Power BI packs for vosk.dev; loader --parquet-out/--tables; no Fabric calls, no pbi-report edits, no git
 - 2026-10-26 (delegated): Mirelo synthetic dataset generator + verify + README; pandas 3.1 blocked by App Control -> 2.3.3; fact_loan CSV split by year; no Fabric calls, no git
 - 2026-10-23 (delegated, evening): ADR-0008 PQ + 3 double cols per fact applied in the PBIP (backups 2058), validator 0/0, TMDL parse OK, local refresh 13.1 -> 14.1-24.9 s, memory 148.6 -> 279.8 MB; encodingHint Value no effect; fact_pl_elim handed to bip
 - 2026-10-23 (delegated, later): verify-acme-pl.sql 1-5 green after ~24 min endpoint sync; ADR-0008 §5 load note; fabric-data/perf/ runner + frozen queries; PQ/refresh plan prepared only

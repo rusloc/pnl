@@ -27,6 +27,9 @@ TODO: lock North Star
 - **2026-10-26 — Executive-page status language:** card background washed white → pale status colour (50 % alpha), one pulsating overall-status dot computed over all cards regardless of filters, filtered-out cards concealed in place (no reflow). Reference: exec dashboard prototype v4.
 - **2026-10-26 — Shared ⓘ copy file per report** (`docs/ADD/features/<report>-info-popovers.md`) so Track B and Track C pop-ups carry the same text.
 
+- **2026-10-27 — Growth × margin trails in A / B:** needs a per-region PY growth / CM % measure in the model (bip backlog); until then only the HTML design and Track C draw trails.
+- **2026-10-27 — Timing hygiene for DAX measurements:** list live runners on the instance, kill leftovers, repeat ×3 before reporting a view time (CAND-024; candidate step for bip's performance routine).
+
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
 - **2026-10-21** — This repo delivers assets only; vosk.dev embedding lives in a separate repo. (ADR-0001)
@@ -70,6 +73,9 @@ TODO: lock North Star
 - **2026-10-26** — P&L three-view redesign assessed as HTML only (no track touched): Operating profit as third hero; sub-page pager instead of scroll on Analysis / Profitability; CC default on Profitability; pass-through ratio without a table. Exec dashboard: cobalt kept, number corrections accepted, five attributes per metric.
 - **2026-10-27** — **ADR-0012 accepted: visual first, minimum text** — card face = title · value · delta · status; explanations only behind ⓘ per card + one "How to read" per view, matte-glass pop-ups; no in-card sparklines; no banners / footers / intros; filters in a side-bar glass menu when > 5 controls; cards concealed in place on filter; card size by importance; no non-actionable decoration (Mirelo corner markers removed).
 - **2026-10-27** — P&L redesign v3 scope: Analysis = bridges + expanded Largest variances (headline strip, service-line table, trend, FY outlook left off); Profitability = 8-column table + concentration bars + growth × margin with levels + mix heatmap (dispersion tiles, lollipop, waterfall, quarterly CM %, allocation view left off). Exec dashboard v4: sized cards, status wash, overall-status dot (literal rule → orange on 7 / 3 / 2; USER to confirm).
+- **2026-10-27** — **Two-flavour delivery** for the new showcases (Mirelo Sales & Revenue, Nordmark exec dashboard): custom JS app + Power BI report; no Rayfin flavour (ADR-0011 (d) confirmed; to be stated in ADR-0013).
+- **2026-10-27** — P&L redesign v4 = build target in all three tracks: Key figures → **"Vitals"**; Profitability page 2 vertical split, growth × margin **Region only** (no level switcher, no buttons, no trails in A / B); Profitability always constant currency. Exec dashboard v5: on-track plain white, red border off-track, no bars on Channel mix, plain ⓘ, binoculars drill icon, bars half height bottom-aligned.
+- **2026-10-27** — Parity decisions B vs C (hunter round, defaults): Vitals status chips vs Budget only; heatmap colour = column GM %; Revenue mix = Sub % / Pay %; variances second column follows Compare B (dropped on None); leaf lines with no data in either version hidden, n.m. only on lines with data, footer counts lines shown; " - " separators, "; " inside formulas; "vs PY" label; counts exact with separators; shared ⓘ / How-to-read copy source = Track C `view-copy.ts` / `copy.ts` exported to `docs/ADD/features/info-popovers.md` + `sales-info-popovers.md`; the parity harness lives in `js-report/lib/test-utils/parity/`.
 
 ## Features
 ### Planned
@@ -81,9 +87,9 @@ TODO: lock North Star
 - Track C — finalize steps 4–9 in the vosk.dev repo from the `.sync/` hand-off (incl. the ADR-0007 note)
 - ACME Trucks — clean report-page tooltips on the waterfall bars; `_KPI Noise` decision; pre-publish (`DataFolder`, embed locale)
 - P&L round 1 from the spec gap analysis (2026-10-24): P1 sub-lines → P3 Price / Mix → P4 FX column → P2 memo block (ADR) → D-1 ARR snapshot
-- Mirelo Sales & Revenue — ADR-0012 follow-ups in both drafts (sub-lines → ⓘ per card); `mirelo_sales` schema in `lh_raw` + Power Query switch (ADR-0011 a); parity file across B + C; `docs/Requirements-sales.md`; Track B publish target
-- P&L Key figures / Analysis / Profitability rebuild in all three tracks from the approved redesign v3 (same layout, metric list, design; ADR-0012)
-- Nordmark reseller executive dashboard — after USER approval of prototype v4 (flat + glass, 2026-10-27): requirements note + ADR-0013, data generator, Track B landing page first, then A / C
+- Mirelo Sales & Revenue — `mirelo_sales` schema in `lh_raw` + Power Query switch (ADR-0011 a); `docs/Requirements-sales.md`; Track B publish target; per-region PY measure for bubble trails
+- P&L redesign — Track A service verification: model republish to RAW (ginee, USER yes) → 16 probes → `rayfin up` → PV re-audit → Track A parity rows in the harness
+- Nordmark reseller executive dashboard — after USER approval of prototype v5 (2026-10-27): requirements note + ADR-0013 (two flavours: JS app + PBI), data generator, Track B landing page first, then the JS app
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -101,3 +107,4 @@ TODO: lock North Star
 - **2026-10-23** — Period picker v2 + page top in A, B, C; parity rules applied (A, C; B partly); ADR-0008 loader + `lh_raw` load (USER ran it) + model step locally (tests all TRUE; views 2.3–4.3 s); Track A AI chat built behind a switch (272 tests, not deployed); Track C chat tool layer + contract (213 tests); Trucks tooltip fix, how-it-works doc, original page back; parity audit (hunter) → fixes in all tracks
 - **2026-10-26** — Specs saved (P&L KPI / Analysis / Profitability page specs); P&L three-view redesign assessment HTML (v1 → v2) + metric inventory; exec dashboard prototype v2 → v3 (flat + glass, side-bar filters, fold met); Mirelo dataset (634k loans, control totals 2,396, verify 47 / 47) + design contract (tokens, layout spec, mockup v2) + Power BI PBIP (241 measures, 5 views, validator 0 / 0, 2,560 tests TRUE) + Track C `/sales` route (88 tests, 301 / 301, < 1 MB shipped), both reconciled to `control_totals_eur.csv`
 - **2026-10-27** — P&L redesign v3 (2-page Analysis / Profitability, expanded variances, levels on growth × margin); exec dashboard v4 (sized cards, status wash, overall dot, conceal in place); Mirelo clean-ups per ADR-0012 in PBIP (240 measures, 181 visuals), Track C and contract v3; ADR-0011 accepted, ADR-0012 written
+- **2026-10-27** — P&L redesign v4 (Vitals, Region-only growth × margin, build brief) **built in all three tracks**: Track B (253 measures, 5 new tables, pagers, tooltip-page ⓘ; 257 + 601 parity rows TRUE; Vitals 2.5 s cold; validator 0 / 0), Track C (engine modules, URL keys `p / lvn / lvm / lvc`, 362 tests, `.sync` note), Track A (13 zones, 9 query builders, glass dialogs; 263 + 20 tests, dry-run clean; service verification pending); B-vs-C parity harness (601 P&L + 833 Mirelo rows) green, 42 findings closed, profit-bridge GM-rate bug in B fixed; Mirelo ADR-0012 follow-ups in both tracks (B 338 measures / 3,452 TRUE; C 95 sales tests); exec dashboard v5; Mirelo mockup v4.1; shared ⓘ copy exported to Markdown

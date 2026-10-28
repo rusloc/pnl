@@ -1,6 +1,8 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-10-28 · Nordmark exec JS flavour built in js-exec/ (ADR-0013 (h)): 86 tests, ET-01 = all 9,328 control rows both ways, 452 kB data, 32/32 headless; CAND-012/013
+- 2026-10-28 · Standalone packs (USER option a): .sync/pnl/js-app (P&L, chat out) + .sync/mirelo-sales/js-app (/sales kept, / → 307); js-report stays source of truth; CAND-011
 - 2026-10-27 · Parity B vs C fixes done (0 Track C expected-fail); harness js-report/lib/test-utils/parity/; ⓘ copy export `npm run export:info-copy`
 - 2026-10-27 · CAND-010: band the displayed Δ, not the raw one; CAND-009: "; " between formulas, " - " in prose
 - 2026-10-27 · Mirelo /sales draft built (ADR-0011 (c)); README js-report/app/sales/README.md, .sync note 2026-10-26-mirelo-sales-track-c-draft.md
@@ -17,7 +19,7 @@
 ## Topic files
 - platform-gotchas.md — 4 entries · stalest 2026-10-22 · PG-NNN
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 10 awaiting second hit
+- candidates.md        — 13 awaiting second hit
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
@@ -42,6 +44,12 @@
 - 2026-10-27 ADR-0012 applied: card face title · value · Δ rows · status chip; sub-lines → ⓘ values (copy.ts info(id, values)); How to read per view.
 - 2026-10-27 USER review: no period banner (text → period tooltip + How-to-read), no card corner markers, no in-card sparklines (design-requirements §1 "Visual first, minimum text" applies to Mirelo too, overriding design-tokens card anatomy).
 - Control totals (control_totals_eur.csv) reconcile for ALL/PL/RO/PT × Sep 2026, FY2024, FY2025, FY2026 YTD + every closed month.
+
+## Nordmark exec facts (verify before citing)
+- js-exec/: engine in lib/engine (brief + CLAUDE.md, not ADR-0013's lib/exec); cube week × site group (NL, BE, ONLINE, WHOLESALE, DC, CENTRAL) × category; metrics.ts mirrors data/nordmark_retail_dummy_data/checks/verify.py metrics().
+- Status: badness rounded to 10 dp; ≤ watch_from good, ≤ off_from watch (edge = Watch: data README beats the E-23 sentence); dot over rated cards, N/A excluded.
+- Copy source = lib/engine/copy.ts + view.ts (examples / stats from data); export to docs/ADD/features/exec-info-popovers.md not done (sync point 1 open).
+- Headless checks: Python Playwright (`py -3.12`) works on this box; scripts stay in the session scratchpad.
 
 ## Open questions
 - 2026-10-27: Mirelo: Budget for interest vs fees (set per product only); leaderboard Approval % / Pace (no agent funnel); loan states are a Sep 2026 snapshot for every anchor — deferred to USER.

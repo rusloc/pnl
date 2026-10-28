@@ -1,5 +1,5 @@
 # Quirks (version-bound)
-<!-- next-id: QRK-009 -->
+<!-- next-id: QRK-010 -->
 
 ### QRK-001 · `connector inspect --name` does not interpolate `${VAR}` in `connectors[].config` · 2026-10-21
 **What:** With `workspaceId: ${LH_RAW_WORKSPACE_ID}` in `rayfin.yml`, `npx rayfin connector inspect --name lhraw --entity acme_pl.dim_entity` fails `Fabric API error: 400 Bad Request`. Same command with literal IDs returns rows. `connector list --json` and `up --dry-run` DO resolve the placeholders.
@@ -8,8 +8,8 @@
 **Scope (refined 2026-10-21):** `inspect --name` only. `connector invoke pnlModel executeQuery --file …` with `workspaceId: ${PNL_MODEL_WORKSPACE_ID}` / `itemId: ${PNL_MODEL_ITEM_ID}` in `rayfin.yml` and the values in `rayfin/.env` succeeded three times (ROW, INFO.VIEW.MEASURES, Q1) — ADR-0006 §3.20 answered: `invoke` interpolates, `inspect` does not. No Power BI consent prompt appeared for an identity that had already run `rayfin login`.
 **Where:** `fabric-app/rayfin/rayfin.yml`, `fabric-app/rayfin/probes/*.query.json`
 **Versions:** rayfin-core 1.36.2 · rayfin-cli 1.36.2
-**Hits:** 2 · **Confidence:** high · **Tags:** cli, connector, inspect, invoke, env-interpolation
-**Last-verified:** 2026-10-21 · **Last-refined:** 2026-10-21 · **Related:** DEC-001, DEC-003, QRK-002
+**Hits:** 3 · **Confidence:** high · **Tags:** cli, connector, inspect, invoke, env-interpolation
+**Last-verified:** 2026-10-28 (8 more `invoke --name pnlModel` runs with `${VAR}` ids, all resolved) · **Last-refined:** 2026-10-21 · **Related:** DEC-001, DEC-003, QRK-002
 **Status:** active — skill-patch candidate (connectors.md: "inspect --name needs literal ids; invoke --name does not")
 
 ### QRK-002 · cli 1.36.2 `connector add` / `blankapp` scaffold differ from the skill · 2026-10-21
@@ -37,7 +37,7 @@
 **Where:** `fabric-app/packages/frontend/src/lib/rayfin-client.ts`, `fabric-app/rayfin/probes/q2-kpi-smoke.query.json` (the shape that never finishes)
 **Versions:** rayfin-lib 1.36.2 · rayfin-cli 1.36.2 · rayfin-connector-fabric-semanticmodel 1.36.2
 **Hits:** 2 · **Confidence:** high · **Tags:** timeout, api-client, connector-invoke, semantic-model, n-01
-**Last-verified:** 2026-10-22 (16:05: the full old-shape default Q1 timed out again at 30 s; captured as its `_lines` / `_leaves` halves instead — the split-under-25-s workaround holds) · **Related:** DEC-003, LSN-005, LSN-006, QRK-001
+**Last-verified:** 2026-10-28 (QV3 `KPI Info Sub` × 10 codes = 24.8 s wall through invoke, 5 s short of the cap; the app's 120 s config covers it) · 2026-10-22 (16:05: the full old-shape default Q1 timed out again at 30 s; captured as its `_lines` / `_leaves` halves instead — the split-under-25-s workaround holds) · **Related:** DEC-003, LSN-005, LSN-006, QRK-001
 **Status:** active — skill-patch candidate (connectors.md: "long DAX needs `timeout` on the client config; `connector invoke` has none")
 
 ### QRK-005 · Rayfin functions = a Node UDF host behind one JSON POST with a 250 s client clamp; the Fabric UDF docs describe the same host as Python 3.11 / 240 s / 100 s public / 4 MB in / 30 MB out · 2026-10-23
@@ -75,3 +75,12 @@
 **Hits:** 1 · **Confidence:** medium (source-level fact; the acceptance question is open) · **Tags:** functions, azure-openai, foundry, entra, audience, ai-chat
 **Last-verified:** 2026-10-23 · **Related:** QRK-005, LSN-003, DEC-006
 **Status:** active - resolve on the first deployed `chatTurn` invoke: record which endpoint host accepted the token
+
+### QRK-009 · `rayfin up` compiles every `.ts` under `rayfin/` (`rayfin/tsconfig.json` includes `**/*`) in the connector-apply step; `--dry-run` does not · 2026-10-28
+**What:** The connector step of `up` runs `tsc` on `rayfin/tsconfig.json` (`include: ["**/*"]`, `exclude: [".temp/**/*", "functions/**/*"]`, `module` / `moduleResolution: NodeNext`, `rootDir: "."`). Any helper script parked under `rayfin/` (here `rayfin/probes/make-redesign-probes.ts`, which imports the frontend builders without `.js` extensions) fails that compile with TS2835; the static deploy still ships and the connector configs stay at their last applied state ("Run 'rayfin up connector apply' after the workload is ready"). `up --dry-run` neither builds nor compiles, so the gate does not catch it. Fix: exclude the folder in `rayfin/tsconfig.json` (`"probes/**/*"` added); adding `.js` extensions would instead pull frontend sources under `rootDir`. Then `npx rayfin up connector apply` (lhraw applied; `pnlModel` "skipped — Cat-B, no dialect" is normal: semantic-model connectors have no DAB config).
+**Why / Evidence:** `npx rayfin up` 2026-10-28: "Connector apply step failed: TypeScript compilation failed: rayfin/probes/make-redesign-probes.ts(10,32): error TS2835 …"; `rayfin-cli/dist/services/connector-generator.js` globs `rayfin/.temp/compiled/connectors/<name>/*.js` after the compile. The probes generator had only ever run through `tsx`.
+**Where:** `fabric-app/rayfin/tsconfig.json` (exclude), `fabric-app/rayfin/probes/make-redesign-probes.ts`
+**Versions:** rayfin-cli 1.36.2
+**Hits:** 1 · **Confidence:** high · **Tags:** cli, up, connector-apply, tsconfig, probes, deploy-gate
+**Last-verified:** 2026-10-28 · **Related:** QRK-006, LSN-008
+**Status:** active — skill-patch candidate (deploy.md: "keep non-connector TypeScript out of `rayfin/` or exclude it in `rayfin/tsconfig.json`; dry-run does not compile")

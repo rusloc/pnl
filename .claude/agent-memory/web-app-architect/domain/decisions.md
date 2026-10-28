@@ -1,4 +1,4 @@
-<!-- next-id: DEC-005 -->
+<!-- next-id: DEC-006 -->
 
 # Decisions (durable)
 
@@ -49,3 +49,15 @@
 **Last-verified:** 2026-10-23
 **Related:** DEC-003
 **Status:** active
+
+### DEC-005 · New showcases ship as standalone JS apps (one top-level folder per report), not routes in `js-report/` · 2026-10-28
+**Decision:** from Nordmark on, each new showcase's JS flavour is its own Next.js app at the repo root (proposed `js-exec/`, alt `nordmark-app/`), with its own package.json / lockfile / lint / vitest, copied helpers (`parquet-columns.ts`, csv, parity runner) instead of cross-app imports; the `.sync/` pack is the folder itself (`npm ci && npm run build`). Two flavours only (JS + PBI), local Parquet from a deterministic generator, no `lh_raw` at runtime; pulse dot = literal v5 rule (7/3/2 → orange).
+**Why:** USER 2026-10-28 ("standalone apps per report for the .sync hand-offs"), relayed by the main agent while ADR-0013 was being drafted. Reverses the ADR-0011 (c) reasoning (Mirelo = route `/sales` to reuse tooling) for *new* reports; Mirelo's route is untouched. Price accepted: duplicated tooling + a second CI job; benefit: self-contained pack, no shared bundle, no design-system leakage, no LCP coupling.
+**Reversal cost:** low — folders map 1:1 onto `js-report/app/<x>/`, `components/<x>/`, `lib/<x>/`; engine is framework-free.
+**Applied at:** `docs/ADR/0013-nordmark-executive-dashboard.md` §2 (a)(b)(h)(i), §5; `docs/Requirements-exec.md` E-02, E-80…E-83, E-86
+**Hits:** 1
+**Tags:** showcase, js-flavour, standalone-app, sync-handoff, portability, parquet, nordmark, two-flavours
+**Confidence:** high
+**Last-verified:** 2026-10-28
+**Related:** DEC-001, DEC-003
+**Status:** active (ADR-0013 Proposed; the four USER points inside it are decided)

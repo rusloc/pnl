@@ -6,8 +6,11 @@
 - [Track B Copilot](project_track_b_copilot.md) — no anonymous Copilot chat; param-table window breaks naive Copilot DAX; prep limits (2026-10-23)
 - [P&L redesign v4](project_pl_redesign_v4.md) — Vitals / Analysis 2p / Profitability 2p built 2026-10-27, 241 measures, tests 257 TRUE, timings
 - [Mirelo Sales report](project_mirelo_report.md) — ADR-0011 Track B PBIP draft: model shape, generator in scratch, 2,560 tests TRUE, placeholders
+- [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour built 2026-10-28: window-in-context model, SVG cards, copy from js-exec copy.ts, tooltip-table trick
 
 ## Open threads
+- 2026-10-28 Nordmark Exec built (validator 0/0, tests 23 blocks / 13,273 rows, slowest visual ~0.7 s). Open: USER first open + hover check of the 3 tooltip pages; selected-chip style; parity-rules.md rows (main agent); USER closes my scratch Desktop PIDs 28300 (UI hung) and 13356
+- 2026-10-28 .sync packs pnl/power-bi + mirelo-sales verified (refresh, tests all green, validator 0/0), READMEs flipped to ready. Open: stale 'Not opened in Desktop yet' caveats + Mirelo '272 measures' (model has 338) in pack READMEs -> ginee/main agent
 - 2026-10-27 Parity check B vs C fixed in both PBIPs (Mirelo MS-01..14, P&L PV-01..22 bip items); T-P 601 + 257 rows TRUE, Vitals 2.5 s cold; open: USER first open, ginee republish
 - 2026-10-27 P&L redesign v4 built (validator 0/0, tests 17 sets TRUE, views <= 3 s query time). Open: USER first open + click-test pager / variances / How to read; ginee republish for fin; scratch Desktop PIDs 26980 / 11888 to close
 - 2026-10-27 Mirelo Sales PBIP built (validator 0/0, tests 2,560 TRUE, all views render-checked in scratch). Open: USER first open + Refresh + tab/drill click-test; USER closes Desktop PIDs 19876 / 4732 / 2088 (mine, untitled + scratch copies); open questions Q1-Q6 in the hand-back; ADR-0011 still Proposed

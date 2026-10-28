@@ -1,4 +1,4 @@
-<!-- next-id: CAND-011 -->
+<!-- next-id: CAND-014 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -41,4 +41,16 @@ Seen: js-report/lib/engine/{vitals,analysis,profitability}.ts formula fields (20
 ### CAND-010 · Status banded on the raw Δ while the face shows the rounded Δ · 2026-10-27 · expires 2027-01-25
 "◦ 0.0%" shown with a red/amber chip: band computed from the exact Δ, text from the rounded one. Band the displayed value (lib/sales/status.ts displayed()). Parity rows seeded from engine output had captured the bug: seed from the contract, not from the track's own result.
 Seen: js-report/lib/sales/status.ts, lib/test-utils/parity/parity_selections_mirelo.csv (3 rows) (2026-10-27, uncommitted)
+
+### CAND-011 · Splitting a sub-route out of a shared Next app: root globals leak and must be re-declared · 2026-10-28 · expires 2027-01-26
+/sales lived under the P&L root layout, so it silently depended on P&L globals (`* { box-sizing }`, `button, input { font: inherit; color: inherit }`). A standalone root that drops them shifts button text/size. Fix: copy only the resets the route actually relied on (not tokens / min-width / focus colour), keep vendored files at their original relative paths so sources copy unchanged, and gate the split with a headless pixel diff against the source server at the same URLs (0 px diff on 9 URLs).
+Seen: .sync/mirelo-sales/js-app/app/globals.css vs js-report/app/globals.css (2026-10-28)
+
+### CAND-012 · Split JSX text inside an inline-flex + gap container spaces out · 2026-10-28 · expires 2027-01-26
+`<span className="cnt">▲ {n} on track</span>` renders three text nodes; in an inline-flex container with `gap` each one is a flex item, so the pill is wider than the HTML prototype's. Fix: one template-string child. Caught only by the screenshot comparison with prototype.html.
+Seen: js-exec/components/ExecApp.tsx status pills (2026-10-28)
+
+### CAND-013 · Bash tool chokes on quote-heavy heredocs / node -e bodies · 2026-10-28 · expires 2027-01-26
+Quoted heredocs holding TS test files or a Playwright script, and `node -e` bodies with backticks, fail with "unexpected EOF while looking for matching quote" in the harness. Write files with the Write tool (or Edit), use Bash only to run them.
+Seen: js-exec test files, scratchpad checks.py, this memory update (2026-10-28)
 

@@ -26,3 +26,14 @@
 - [2026-10-26] Simulation starts 2023-01-01 (burn-in) so the Jan 2024 book is seasoned; 2023 loans only appear as fact_loan_month vintages 2023-xx (no dim_month row) and in dim_client.loans_before_2024 / prior_loans (source: observed)
 - [2026-10-26] fact_loan CSV split by disbursement year (single file 96 MB, at GitHub's 100 MB hard limit); Parquet single file 19.6 MB. EUR columns 6 dp (ADR-0008 rule) (source: observed)
 - [2026-10-26] Headline FY2026 YTD Sep: 209,898 loans, EUR 82.10 m, 83,633 new clients, returning 62.1 % clients / 60.2 % loans, 30+ DPD 4.63 % at Sep, revenue EUR 11.98 m (APR band 18-45 % caps revenue at about half the concept's) (source: observed)
+
+## 2026-10-28 .sync Power BI packs (vosk.dev hand-off)
+- [2026-10-28] load_acme_pl.py has `--parquet-out <dir> [--tables a,b]`: same checks + ADR-0008 derive, writes local snappy Parquet (decimal types kept), lakehouse path unchanged (source: observed)
+- [2026-10-28] .sync/pnl/power-bi/data = the 23 tables the P&L model imports (6 unused params left out), 31.8 MB; model cols/types checked vs Parquet schema 23/23 (source: observed)
+- [2026-10-28] Mirelo generator is byte-deterministic: regen from the .sync copy matched all parquet + manifest + params + control totals; verify 47/47 (source: observed)
+
+## 2026-10-28 Nordmark Retail exec dataset (local only, data/nordmark_retail_dummy_data/, ADR-0013 phase 1)
+- [2026-10-28] Story-first generator (seed 20261028): ALL weekly story table with v5 W43 anchors pinned, integer-cent alloc with residual to largest cell; generate.py self-asserts 83 v5 display strings; verify.py 76 checks incl. ET-20 rerun, all green (source: observed)
+- [2026-10-28] 18 tables, 0.88 M rows, 15.4 MB Parquet only (no CSV, per build brief); dim_store 149 rows (145 stores incl. 3 closed, ONLINE, WHOLESALE, 2 DCs) with scope_code = region-switcher key (source: observed)
+- [2026-10-28] FY2025 weekly totals derived from channel growths (2-pass, noise drawn once) else wholesale absorbs store/LFL mismatch; budget bottom-up per channel with P10 pin on non-LFL/online/wholesale only (else budget LFL dips) (source: observed)
+- [2026-10-28] GMROI front-margin definition gives EUR 862m / 319m = 2.7x, not v5 EUR 1,016m / 376m (impossible with YTD 2,318m); 16 open points listed in the dataset README (source: observed)

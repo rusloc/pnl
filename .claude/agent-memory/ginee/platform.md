@@ -41,3 +41,4 @@
 - [2026-10-26] Windows Application Control (Smart App Control) blocks pandas 3.1.0 native DLLs on this machine (ImportError "An Application Control policy has blocked this file"); pandas 2.3.3 + numpy 2.5.4 + pyarrow 26.0.0 load fine. Mirelo venv: data/mirelo_sales_dummy_data/generator/.venv (source: observed)
 - [2026-10-26] fabric-data/.venv has pyarrow but no numpy/pandas (source: observed)
 - [2026-10-26] Bash tool truncates very long heredoc commands silently: write long scripts with Write, then run them (source: observed)
+- [2026-10-28] RAW capacity per-query memory limit = 10,240 MB (executeQueries "Resource Governance" error): the T-P parity blocks (UNION of 145 ROW items) exceed it on the service though Desktop runs them; run them in chunks of <= 10 ROW items (scratchpad runner run_tp_chunks.py pattern) (source: observed)
