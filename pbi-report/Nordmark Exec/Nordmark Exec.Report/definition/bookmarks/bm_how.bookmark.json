@@ -5,8 +5,8 @@
   "options": {
     "applyOnlyToTargetVisuals": true,
     "targetVisualNames": [
+      "layer_scrim",
       "grp_filters",
-      "grp_filters_scrim",
       "menu_panel",
       "menu_reset",
       "grp_filters_close",
@@ -17,20 +17,13 @@
       "menu_param_attr_lever",
       "menu_param_attr_horizon",
       "menu_param_attr_owner",
-      "menu_param_attr_statement",
       "grp_how",
-      "grp_how_scrim",
       "how_panel",
       "grp_how_close",
       "grp_more",
-      "grp_more_scrim",
       "more_panel",
       "grp_more_close",
-      "more_table",
-      "grp_notes",
-      "grp_notes_scrim",
-      "notes_panel",
-      "grp_notes_close"
+      "more_table"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -41,12 +34,9 @@
     "sections": {
       "exec_landing": {
         "visualContainers": {
-          "grp_filters_scrim": {
+          "layer_scrim": {
             "singleVisual": {
-              "visualType": "shape",
-              "display": {
-                "mode": "hidden"
-              }
+              "visualType": "shape"
             }
           },
           "menu_panel": {
@@ -129,19 +119,6 @@
               }
             }
           },
-          "menu_param_attr_statement": {
-            "singleVisual": {
-              "visualType": "advancedSlicerVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "grp_how_scrim": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
           "how_panel": {
             "singleVisual": {
               "visualType": "image"
@@ -150,14 +127,6 @@
           "grp_how_close": {
             "singleVisual": {
               "visualType": "actionButton"
-            }
-          },
-          "grp_more_scrim": {
-            "singleVisual": {
-              "visualType": "shape",
-              "display": {
-                "mode": "hidden"
-              }
             }
           },
           "more_panel": {
@@ -183,30 +152,6 @@
                 "mode": "hidden"
               }
             }
-          },
-          "grp_notes_scrim": {
-            "singleVisual": {
-              "visualType": "shape",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "notes_panel": {
-            "singleVisual": {
-              "visualType": "image",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "grp_notes_close": {
-            "singleVisual": {
-              "visualType": "actionButton",
-              "display": {
-                "mode": "hidden"
-              }
-            }
           }
         },
         "visualContainerGroups": {
@@ -217,9 +162,6 @@
             "isHidden": false
           },
           "grp_more": {
-            "isHidden": true
-          },
-          "grp_notes": {
             "isHidden": true
           }
         }

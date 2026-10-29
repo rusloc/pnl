@@ -64,7 +64,7 @@ table dim_kpi
 
 		annotation SummarizationSetBy = User
 
-	column 'group'
+	column group
 		dataType: string
 		lineageTag: bba8e52b-bf0d-5109-aec4-d767e7f26ed9
 		summarizeBy: none
@@ -276,3 +276,4 @@ table dim_kpi
 				    oc
 
 	annotation PBI_ResultType = Table
+

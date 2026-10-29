@@ -1779,6 +1779,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 88040771-4758-5c0d-a0ae-09cc9b14288b
 
+	/// NET_SALES status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text NET_SALES' =
+			VAR _v          = [Card Basis NET_SALES]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f1 = _v RETURN IF ( _f1 < 0, "−", "" ) & "€" & IF ( ABS ( _f1 ) / 1000000 >= 1000, FORMAT ( ABS ( _f1 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f1 / 1000000 ), "#,0.0" ) ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 0836deef-f7e2-4bd3-aa73-d0482caf4280
+
 	/// NET_SALES delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text NET_SALES' =
 			VAR _v          = [Card Value NET_SALES]
@@ -1881,6 +1889,14 @@ table _measures
 	measure 'Card Unit Text TOTAL_MARGIN' = IF ( ISBLANK ( [Card Value TOTAL_MARGIN] ), "", "%" )
 		displayFolder: 8 Cards
 		lineageTag: e69e2290-9ba0-5b1a-8c98-a86bc293f296
+
+	/// TOTAL_MARGIN status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text TOTAL_MARGIN' =
+			VAR _v          = [Card Basis TOTAL_MARGIN]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f4 = _v RETURN IF ( _f4 < 0, "−", "" ) & FORMAT ( ABS ( _f4 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 3436bfa1-9a8e-4ce8-ab7c-ceb6990371c9
 
 	/// TOTAL_MARGIN delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text TOTAL_MARGIN' =
@@ -1985,6 +2001,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: d4d09e5c-50eb-5ca9-89ec-2f609cfd05ea
 
+	/// WEEKS_OF_COVER status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text WEEKS_OF_COVER' =
+			VAR _v          = [Card Basis WEEKS_OF_COVER]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f8 = _v RETURN IF ( _f8 < 0, "−", "" ) & FORMAT ( ABS ( _f8 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 0983c503-6127-40e5-87b6-790dc7733538
+
 	/// WEEKS_OF_COVER delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text WEEKS_OF_COVER' =
 			VAR _v          = [Card Value WEEKS_OF_COVER]
@@ -2087,6 +2111,14 @@ table _measures
 	measure 'Card Unit Text MARKDOWN' = IF ( ISBLANK ( [Card Value MARKDOWN] ), "", "%" )
 		displayFolder: 8 Cards
 		lineageTag: dcb1b021-d753-542d-a38a-476931fc3de4
+
+	/// MARKDOWN status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text MARKDOWN' =
+			VAR _v          = [Card Basis MARKDOWN]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f11 = _v RETURN IF ( _f11 < 0, "−", "" ) & FORMAT ( ABS ( _f11 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 5e44336b-8913-4cd4-8eb7-ba0d90fb9fc3
 
 	/// MARKDOWN delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text MARKDOWN' =
@@ -2191,6 +2223,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 6481d5eb-ab49-5ac3-a192-a8f219c1fc4e
 
+	/// AVAILABILITY status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text AVAILABILITY' =
+			VAR _v          = [Card Basis AVAILABILITY]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f15 = _v RETURN IF ( _f15 < 0, "−", "" ) & FORMAT ( ABS ( _f15 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 9031f3ce-b31f-4358-a343-4c79f124ad3f
+
 	/// AVAILABILITY delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text AVAILABILITY' =
 			VAR _v          = [Card Value AVAILABILITY]
@@ -2293,6 +2333,14 @@ table _measures
 	measure 'Card Unit Text EBITDA' = IF ( ISBLANK ( [Card Value EBITDA] ), "", "m" )
 		displayFolder: 8 Cards
 		lineageTag: 73f5aa3f-035f-58b1-94bd-f47a3176da26
+
+	/// EBITDA status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text EBITDA' =
+			VAR _v          = [Card Basis EBITDA]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f20 = _v RETURN IF ( _f20 < 0, "−", "" ) & "€" & IF ( ABS ( _f20 ) / 1000000 >= 1000, FORMAT ( ABS ( _f20 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f20 / 1000000 ), "#,0.0" ) ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 6ed24a2d-b69a-4378-a0e7-524c81e25504
 
 	/// EBITDA delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text EBITDA' =
@@ -2397,6 +2445,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 0e7086ff-060c-56a5-89d2-48c39130f2ec
 
+	/// LFL_GROWTH status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text LFL_GROWTH' =
+			VAR _v          = [Card Basis LFL_GROWTH]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", SUBSTITUTE ( ( VAR _f24 = _v RETURN IF ( _f24 >= 0, "+", "−" ) & FORMAT ( ABS ( _f24 * 100 ), "#,0.0" ) & "%" ), "%", "" ) )
+		displayFolder: 8 Cards
+		lineageTag: fe9aee49-fa95-4407-a2ee-87ef32374f46
+
 	/// LFL_GROWTH delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text LFL_GROWTH' =
 			VAR _v          = [Card Value LFL_GROWTH]
@@ -2499,6 +2555,14 @@ table _measures
 	measure 'Card Unit Text FRONT_GM' = IF ( ISBLANK ( [Card Value FRONT_GM] ), "", "%" )
 		displayFolder: 8 Cards
 		lineageTag: 2808f5d6-1114-5681-b9c1-5b304c489fe6
+
+	/// FRONT_GM status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text FRONT_GM' =
+			VAR _v          = [Card Basis FRONT_GM]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f28 = _v RETURN IF ( _f28 < 0, "−", "" ) & FORMAT ( ABS ( _f28 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 26714d07-5d8e-4d06-9a1f-6c6fcd75955b
 
 	/// FRONT_GM delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text FRONT_GM' =
@@ -2603,6 +2667,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 5fdd4d11-cd8a-5d2e-876a-0ec96e74bd2b
 
+	/// SELL_THROUGH status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text SELL_THROUGH' =
+			VAR _v          = [Card Basis SELL_THROUGH]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f32 = _v RETURN IF ( _f32 < 0, "−", "" ) & FORMAT ( ABS ( _f32 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 80fe0698-4faf-4c4d-9c72-461cdc351ce8
+
 	/// SELL_THROUGH delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text SELL_THROUGH' =
 			VAR _v          = [Card Value SELL_THROUGH]
@@ -2705,6 +2777,14 @@ table _measures
 	measure 'Card Unit Text GMROI' = IF ( ISBLANK ( [Card Value GMROI] ), "", "×" )
 		displayFolder: 8 Cards
 		lineageTag: a5b8b84c-dd6b-5584-8c30-8b995d668db5
+
+	/// GMROI status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text GMROI' =
+			VAR _v          = [Card Basis GMROI]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f37 = _v RETURN IF ( _f37 < 0, "−", "" ) & FORMAT ( ABS ( _f37 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: f05c8713-6773-470e-987c-c4af55e01f26
 
 	/// GMROI delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text GMROI' =
@@ -2809,6 +2889,14 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 69af3b84-cbfc-5e7d-b5bd-1c5ecc7a5449
 
+	/// SUPPLIER_OTIF status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text SUPPLIER_OTIF' =
+			VAR _v          = [Card Basis SUPPLIER_OTIF]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f40 = _v RETURN IF ( _f40 < 0, "−", "" ) & FORMAT ( ABS ( _f40 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 10303afa-3847-480e-9b02-41e8838cd7af
+
 	/// SUPPLIER_OTIF delta row vs the comparator (E-14, E-42; labels as js-exec view.ts).
 	measure 'Card Delta Text SUPPLIER_OTIF' =
 			VAR _v          = [Card Value SUPPLIER_OTIF]
@@ -2911,6 +2999,14 @@ table _measures
 	measure 'Card Unit Text CHANNEL_MIX' = IF ( ISBLANK ( [Card Value CHANNEL_MIX] ), "", "% store" )
 		displayFolder: 8 Cards
 		lineageTag: f90a160a-b6bd-541d-894a-0f59c5dfc5a0
+
+	/// CHANNEL_MIX status basis as displayed on the i pop-up target line (USER 2026-10-29; same format as the card value), without the unit; n/a when blank.
+	measure 'Card Basis Text CHANNEL_MIX' =
+			VAR _v          = [Card Basis CHANNEL_MIX]
+			RETURN
+			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f45 = _v RETURN IF ( _f45 < 0, "−", "" ) & FORMAT ( ABS ( _f45 * 100 ), "#,0.0" ) ) )
+		displayFolder: 8 Cards
+		lineageTag: 976c3f7c-a2ba-422c-9682-a3edde7780a4
 
 	/// Channel mix delta vs the comparator mix, packed: channel x 1000 + signed share deviation (1 store, 2 online, 3 wholesale; first on a tie).
 	measure 'Card Mix Dev Channel' =
@@ -3048,7 +3144,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "NET_SALES" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "NET_SALES" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "NET_SALES" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "NET_SALES" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 33b12b31-6777-59f2-bf30-a1bd9db26ff4
 
@@ -3058,7 +3153,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "TOTAL_MARGIN" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "TOTAL_MARGIN" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "TOTAL_MARGIN" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "TOTAL_MARGIN" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 6b57a144-1475-574a-8d19-c939304ffca4
 
@@ -3068,7 +3162,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "WEEKS_OF_COVER" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "WEEKS_OF_COVER" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "WEEKS_OF_COVER" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "WEEKS_OF_COVER" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 177c63f9-55de-5359-872b-bb048836564f
 
@@ -3078,7 +3171,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "MARKDOWN" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "MARKDOWN" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "MARKDOWN" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "MARKDOWN" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: d2ddde5e-7303-5e9b-bb71-93e731e12e7a
 
@@ -3088,7 +3180,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "AVAILABILITY" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "AVAILABILITY" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "AVAILABILITY" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "AVAILABILITY" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 10c4b685-f65b-536d-b2bf-43cc2dbfc240
 
@@ -3098,7 +3189,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "EBITDA" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "EBITDA" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "EBITDA" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "EBITDA" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: a75a1706-f329-5e77-9984-447b4e0ca81e
 
@@ -3108,7 +3198,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "LFL_GROWTH" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "LFL_GROWTH" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "LFL_GROWTH" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "LFL_GROWTH" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 16a2c7c0-adff-569d-aa80-6c452bd89444
 
@@ -3118,7 +3207,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "FRONT_GM" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "FRONT_GM" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "FRONT_GM" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "FRONT_GM" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: b0626613-ab91-539d-b126-0765d4c26451
 
@@ -3128,7 +3216,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "SELL_THROUGH" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "SELL_THROUGH" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "SELL_THROUGH" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "SELL_THROUGH" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: eeafd4fd-81f5-530d-9cad-06d53285ae20
 
@@ -3138,7 +3225,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "GMROI" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "GMROI" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "GMROI" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "GMROI" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: d62b6efd-a1ee-5fc8-bcf4-cac3445d74a9
 
@@ -3148,7 +3234,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "SUPPLIER_OTIF" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "SUPPLIER_OTIF" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "SUPPLIER_OTIF" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "SUPPLIER_OTIF" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: 8b93450b-3243-5e4f-a8de-41f0e9566cb7
 
@@ -3158,7 +3243,6 @@ table _measures
 			    && ( NOT ISFILTERED ( param_attr_lever ) || LOOKUPVALUE ( dim_kpi[lever], dim_kpi[kpi_code], "CHANNEL_MIX" ) IN VALUES ( param_attr_lever[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_horizon ) || LOOKUPVALUE ( dim_kpi[horizon], dim_kpi[kpi_code], "CHANNEL_MIX" ) IN VALUES ( param_attr_horizon[attr_code] ) )
 			    && ( NOT ISFILTERED ( param_attr_owner ) || LOOKUPVALUE ( dim_kpi[owner], dim_kpi[kpi_code], "CHANNEL_MIX" ) IN VALUES ( param_attr_owner[attr_code] ) )
-			    && ( NOT ISFILTERED ( param_attr_statement ) || LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "CHANNEL_MIX" ) IN VALUES ( param_attr_statement[attr_code] ) )
 		displayFolder: 8 Cards
 		lineageTag: ec92f675-285e-517e-bcec-91954d1aad9e
 
@@ -3174,10 +3258,9 @@ table _measures
 			VAR _lever      = IF ( ISFILTERED ( param_attr_lever ), CONCATENATEX ( VALUES ( param_attr_lever ), param_attr_lever[attr_label], ", ", param_attr_lever[sort_order], ASC ) )
 			VAR _horizon    = IF ( ISFILTERED ( param_attr_horizon ), CONCATENATEX ( VALUES ( param_attr_horizon ), param_attr_horizon[attr_label], ", ", param_attr_horizon[sort_order], ASC ) )
 			VAR _owner      = IF ( ISFILTERED ( param_attr_owner ), CONCATENATEX ( VALUES ( param_attr_owner ), param_attr_owner[attr_label], ", ", param_attr_owner[sort_order], ASC ) )
-			VAR _statement  = IF ( ISFILTERED ( param_attr_statement ), CONCATENATEX ( VALUES ( param_attr_statement ), param_attr_statement[attr_label], ", ", param_attr_statement[sort_order], ASC ) )
 			VAR _all        =
 			    CONCATENATEX (
-			        FILTER ( { ( 1, _group ), ( 2, _lever ), ( 3, _horizon ), ( 4, _owner ), ( 5, _statement ) }, [Value2] <> "" )
+			        FILTER ( { ( 1, _group ), ( 2, _lever ), ( 3, _horizon ), ( 4, _owner ) }, [Value2] <> "" )
 			        ,[Value2]
 			        ,", "
 			        ,[Value1], ASC
@@ -3188,7 +3271,7 @@ table _measures
 		lineageTag: 2d26fa1f-6f95-5d2c-a8cd-8271bd312582
 
 	/// Active attribute picks (side-bar badge, E-52).
-	measure 'Filter Pick Count' = IF ( ISFILTERED ( param_attr_group ), COUNTROWS ( VALUES ( param_attr_group[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_lever ), COUNTROWS ( VALUES ( param_attr_lever[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_horizon ), COUNTROWS ( VALUES ( param_attr_horizon[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_owner ), COUNTROWS ( VALUES ( param_attr_owner[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_statement ), COUNTROWS ( VALUES ( param_attr_statement[attr_code] ) ), 0 )
+	measure 'Filter Pick Count' = IF ( ISFILTERED ( param_attr_group ), COUNTROWS ( VALUES ( param_attr_group[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_lever ), COUNTROWS ( VALUES ( param_attr_lever[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_horizon ), COUNTROWS ( VALUES ( param_attr_horizon[attr_code] ) ), 0 ) + IF ( ISFILTERED ( param_attr_owner ), COUNTROWS ( VALUES ( param_attr_owner[attr_code] ) ), 0 )
 		formatString: 0
 		displayFolder: 8 Cards
 		lineageTag: e805757f-a526-5733-99ba-47b66abca765
@@ -4740,7 +4823,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 33786e15-19cb-54cb-90c4-35ddf91f0b08
 
-	/// NET_SALES i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// NET_SALES i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG NET_SALES' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -4825,10 +4908,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "NET_SALES" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "vs LY " & SWITCH ( [_Period Code], "PTD", "period", "YTD", "year", "week" ), "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( IF ( CALCULATE ( [Net Sales], REMOVEFILTERS ( dim_week ), TREATAS ( _ly, dim_week[week_key] ) ) = 0, "n/a", ( VAR _f54 = DIVIDE ( CALCULATE ( [Net Sales], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ), CALCULATE ( [Net Sales], REMOVEFILTERS ( dim_week ), TREATAS ( _ly, dim_week[week_key] ) ) ) - 1 RETURN IF ( _f54 >= 0, "+", "−" ) & FORMAT ( ABS ( _f54 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Period " & [Period No] & " to date", "&", "&amp;" )
@@ -5030,22 +5109,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget " & ( VAR _f57 = CALCULATE ( [Net Sales Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f57 ), "n/a", IF ( _f57 < 0, "−", "" ) & "€" & IF ( ABS ( _f57 ) / 1000000 >= 1000, FORMAT ( ABS ( _f57 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f57 / 1000000 ), "#,0.0" ) ) & "m" ) ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "NET_SALES" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis NET_SALES] ), "", "m" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Net sales</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text NET_SALES]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text NET_SALES] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text NET_SALES]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text NET_SALES] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The money customers actually paid us this week, after</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>returns, discounts and VAT.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>It is the top line every other number divides by or adds up</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>to; if it slips, the margin and stock numbers follow.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Gross sales at ticket price − markdowns and discounts −</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>returns, excluding VAT.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -5063,9 +5153,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -5073,7 +5162,7 @@ table _measures
 		lineageTag: 2b10f390-9946-59c6-b173-3ed8cefda86c
 		dataCategory: ImageUrl
 
-	/// TOTAL_MARGIN i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// TOTAL_MARGIN i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG TOTAL_MARGIN' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -5158,10 +5247,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "TOTAL_MARGIN" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "Front margin", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f65 = CALCULATE ( [Front GM %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f65 ), "n/a", IF ( _f65 < 0, "−", "" ) & FORMAT ( ABS ( _f65 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Back margin", "&", "&amp;" )
@@ -5363,22 +5448,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 564 + _dy
+			VAR _h          = 594 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget " & ( VAR _f68 = CALCULATE ( [Total Margin % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f68 ), "n/a", IF ( _f68 < 0, "−", "" ) & FORMAT ( ABS ( _f68 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _footr      = IF ( LOOKUPVALUE ( dim_kpi[is_provisional], dim_kpi[kpi_code], "TOTAL_MARGIN" ), "Provisional · true-up 10 Nov", [Updated Text] )
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "TOTAL_MARGIN" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis TOTAL_MARGIN] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Total margin</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text TOTAL_MARGIN]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text TOTAL_MARGIN] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text TOTAL_MARGIN]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text TOTAL_MARGIN] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The share of each euro of sales we keep after paying</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>suppliers for the goods, counting the money suppliers pay</text><text x='156' y='265' font-size='13' font-weight='400' fill='#111827'>back to us.</text><text x='24' y='290' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>Front margin alone hides half of a reseller’s profit; this is</text><text x='156' y='310' font-size='13' font-weight='400' fill='#111827'>the margin the business really keeps.</text><text x='24' y='335' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>(Front margin + back margin) ÷ Net sales. Front = sales −</text><text x='156' y='355' font-size='13' font-weight='400' fill='#111827'>cost of goods; back = supplier rebates, promo funding and</text><text x='156' y='374' font-size='13' font-weight='400' fill='#111827'>listing fees.</text>"
 			        & "<text x='24' y='399' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -5396,9 +5492,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='470' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='484' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='470' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='484' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='496' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='510' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='496' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='510' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -5406,7 +5501,7 @@ table _measures
 		lineageTag: 2c9a5682-b13e-5500-8393-de8f39cf73ec
 		dataCategory: ImageUrl
 
-	/// WEEKS_OF_COVER i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// WEEKS_OF_COVER i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG WEEKS_OF_COVER' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -5491,10 +5586,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "WEEKS_OF_COVER" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "On hand at cost", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f74 = ( CALCULATE ( [On Hand Cost], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f74 ), "n/a", IF ( _f74 < 0, "−", "" ) & "€" & FORMAT ( ABS ( _f74 / 1000000 ), "#,0" ) & "m" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "On order", "&", "&amp;" )
@@ -5696,22 +5787,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target " & ( VAR _f77 = CALCULATE ( [Cover Target Wks], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f77 ), "n/a", IF ( _f77 < 0, "−", "" ) & FORMAT ( ABS ( _f77 ), "#,0.0" ) ) ) & " wks (by category)", "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "WEEKS_OF_COVER" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis WEEKS_OF_COVER] ), "", "wks" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Weeks of cover</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text WEEKS_OF_COVER]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text WEEKS_OF_COVER] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text WEEKS_OF_COVER]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text WEEKS_OF_COVER] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>How many weeks our stock would last at the sales we</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>expect, if nothing more arrived.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>Too little and shelves go empty; too much and the stock</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>ends in markdown. It decides this week’s buying actions.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>(Stock on hand + stock on order, at cost) ÷ forecast cost of</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>goods sold per week.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -5729,9 +5831,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -5739,7 +5840,7 @@ table _measures
 		lineageTag: 71884368-530c-5539-9029-6986ebd95e96
 		dataCategory: ImageUrl
 
-	/// MARKDOWN i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// MARKDOWN i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG MARKDOWN' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -5824,10 +5925,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "MARKDOWN" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "Markdown value", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f83 = ( CALCULATE ( [Markdown], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f83 ), "n/a", IF ( _f83 < 0, "−", "" ) & "€" & IF ( ABS ( _f83 ) / 1000000 >= 1000, FORMAT ( ABS ( _f83 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f83 / 1000000 ), "#,0.0" ) ) & "m" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "vs LY " & SWITCH ( [_Period Code], "PTD", "period", "YTD", "year", "week" ), "&", "&amp;" )
@@ -6029,22 +6126,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 545 + _dy
+			VAR _h          = 575 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget " & ( VAR _f86 = CALCULATE ( [Markdown % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f86 ), "n/a", IF ( _f86 < 0, "−", "" ) & FORMAT ( ABS ( _f86 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "MARKDOWN" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis MARKDOWN] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Markdown</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text MARKDOWN]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text MARKDOWN] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text MARKDOWN]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text MARKDOWN] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The part of the ticket price we gave away through price</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>cuts and promotions.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>Every point of markdown is margin lost; rising markdown is</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>the first sign of too much or the wrong stock.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Markdown value (permanent + promotional) ÷ gross sales</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>at ticket price.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -6062,9 +6170,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='451' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='465' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='451' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='465' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='477' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='491' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='477' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='491' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -6072,7 +6179,7 @@ table _measures
 		lineageTag: b7c036dc-d6c9-5148-9dd9-3c0a2a35d4fe
 		dataCategory: ImageUrl
 
-	/// AVAILABILITY i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// AVAILABILITY i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG AVAILABILITY' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -6157,10 +6264,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "AVAILABILITY" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "vs last week", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( IF ( ISBLANK ( CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) ), "n/a", IF ( ISBLANK ( CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) ) || ISBLANK ( CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) ), "n/a", ( VAR _f95 = CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) - CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) RETURN IF ( _f95 >= 0, "+", "−" ) & FORMAT ( ABS ( _f95 * 100 ), "#,0.0" ) & " pp" ) ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Netherlands · Belgium", "&", "&amp;" )
@@ -6362,22 +6465,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target ≥ " & ( VAR _f98 = ( CALCULATE ( [Availability Target], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN ( VAR _f99 = FORMAT ( ABS ( _f98 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f99, 2 ) = ".0", LEFT ( _f99, LEN ( _f99 ) - 2 ), _f99 ) ) & "%" ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "AVAILABILITY" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis AVAILABILITY] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Availability</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text AVAILABILITY]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text AVAILABILITY] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text AVAILABILITY]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text AVAILABILITY] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>How often our best-selling products were actually on the</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>shelf when a customer could buy them.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>A gap on the shelf is a sale that never happens; it is the</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>""too little stock"" failure mode.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>SKU-store-days in stock ÷ SKU-store-days ranged, for the</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>top-500 sellers, weighted by sales.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -6395,9 +6509,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -6405,7 +6518,7 @@ table _measures
 		lineageTag: 245381e4-1e9f-5e87-a233-de82c5af211b
 		dataCategory: ImageUrl
 
-	/// EBITDA i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// EBITDA i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG EBITDA' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -6490,10 +6603,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "EBITDA" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "EBITDA margin", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f111 = CALCULATE ( [EBITDA Margin %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ps, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f111 ), "n/a", IF ( _f111 < 0, "−", "" ) & FORMAT ( ABS ( _f111 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Budget margin", "&", "&amp;" )
@@ -6695,22 +6804,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget " & ( VAR _f114 = CALCULATE ( [EBITDA Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ps, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f114 ), "n/a", IF ( _f114 < 0, "−", "" ) & "€" & IF ( ABS ( _f114 ) / 1000000 >= 1000, FORMAT ( ABS ( _f114 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f114 / 1000000 ), "#,0.0" ) ) & "m" ) ), "&", "&amp;" )
 			VAR _footr      = IF ( LOOKUPVALUE ( dim_kpi[is_provisional], dim_kpi[kpi_code], "EBITDA" ), "Provisional · weekly flash", [Updated Text] )
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "EBITDA" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis EBITDA] ), "", "m" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>EBITDA flash</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text EBITDA]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text EBITDA] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text EBITDA]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text EBITDA] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>Profit before interest, tax and depreciation for the period</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>so far: what is left after all operating costs.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>It is the bottom line the board sees; every margin and cost</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>move lands here.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Total margin − shrink − store costs − central costs −</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>fulfilment costs; ÷ Net sales for the margin %.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -6728,9 +6848,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -6738,7 +6857,7 @@ table _measures
 		lineageTag: 66d14b32-7915-516a-a1f4-bf172b19b038
 		dataCategory: ImageUrl
 
-	/// LFL_GROWTH i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// LFL_GROWTH i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG LFL_GROWTH' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -6823,10 +6942,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "LFL_GROWTH" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "LFL stores", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( IF ( ISBLANK ( CALCULATE ( [LFL Growth %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) ), "n/a", ( VAR _f115 = ( CALCULATE ( [LFL Store Count], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f115 ), "n/a", IF ( _f115 < 0, "−", "" ) & FORMAT ( ABS ( _f115 ), "#,0" ) ) ) & " of " & ( VAR _f121 = ( CALCULATE ( [Trading Store Count], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f121 ), "n/a", IF ( _f121 < 0, "−", "" ) & FORMAT ( ABS ( _f121 ), "#,0" ) ) ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Non-LFL effect", "&", "&amp;" )
@@ -7028,22 +7143,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 545 + _dy
+			VAR _h          = 575 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget LFL " & ( VAR _f124 = CALCULATE ( [LFL Growth % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f124 ), "n/a", IF ( _f124 < 0, "−", "" ) & FORMAT ( ABS ( _f124 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "LFL_GROWTH" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis LFL_GROWTH] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Like-for-like growth</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text LFL_GROWTH]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text LFL_GROWTH] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text LFL_GROWTH]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text LFL_GROWTH] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>Sales growth in the stores that were open a year ago too,</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>so new openings and closures do not distort it.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>It tells you whether the existing business is growing, not</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>just the estate.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Sales of stores open ≥ 13 months this week ÷ the same</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>stores’ sales in the same retail week last year − 1.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -7061,9 +7187,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='451' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='465' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='451' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='465' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='477' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='491' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='477' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='491' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -7071,7 +7196,7 @@ table _measures
 		lineageTag: 7df6fa69-27df-5779-a0e2-7abcf58d698f
 		dataCategory: ImageUrl
 
-	/// FRONT_GM i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// FRONT_GM i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG FRONT_GM' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -7156,10 +7281,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "FRONT_GM" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "Cost of goods", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f131 = ( CALCULATE ( [COGS], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f131 ), "n/a", IF ( _f131 < 0, "−", "" ) & "€" & IF ( ABS ( _f131 ) / 1000000 >= 1000, FORMAT ( ABS ( _f131 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f131 / 1000000 ), "#,0.0" ) ) & "m" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Front margin", "&", "&amp;" )
@@ -7361,22 +7482,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 507 + _dy
+			VAR _h          = 537 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target budget " & ( VAR _f134 = CALCULATE ( [Front GM % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f134 ), "n/a", IF ( _f134 < 0, "−", "" ) & FORMAT ( ABS ( _f134 * 100 ), "#,0.0" ) & "%" ) ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "FRONT_GM" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis FRONT_GM] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Front gross margin</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text FRONT_GM]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text FRONT_GM] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text FRONT_GM]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text FRONT_GM] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The share of sales left after paying what the goods cost us,</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>landed in our warehouse.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>It is the price-minus-cost half of profit; pricing, buying cost</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>and category mix show up here first.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>(Net sales − cost of goods at landed cost) ÷ Net sales.</text>"
 			        & "<text x='24' y='342' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -7394,9 +7526,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='413' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='427' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='413' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='427' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='439' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='453' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='439' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='453' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -7404,7 +7535,7 @@ table _measures
 		lineageTag: 08556716-8117-538f-81a0-224e92493866
 		dataCategory: ImageUrl
 
-	/// SELL_THROUGH i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// SELL_THROUGH i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG SELL_THROUGH' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -7489,10 +7620,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "SELL_THROUGH" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( LOOKUPVALUE ( dim_category[category_name], dim_category[category_code], "APPAREL" ), "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f143 = CALCULATE ( CALCULATE ( [Sell-through %], dim_category[category_code] = "APPAREL" ), REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f143 ), "n/a", IF ( _f143 < 0, "−", "" ) & FORMAT ( ABS ( _f143 * 100 ), "#,0" ) & "%" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( LOOKUPVALUE ( dim_category[category_name], dim_category[category_code], "HOME" ), "&", "&amp;" )
@@ -7694,22 +7821,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target " & ( VAR _f146 = CALCULATE ( [Sell-through Target], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f146 ), "n/a", ( VAR _f147 = FORMAT ( ABS ( _f146 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f147, 2 ) = ".0", LEFT ( _f147, LEN ( _f147 ) - 2 ), _f147 ) ) & "%" ) ) & " by season week " & IF ( ISBLANK ( CALCULATE ( MAX ( dim_week[season_week] ), REMOVEFILTERS ( dim_week ), dim_week[sort_index] = _e ) ), "n/a", FORMAT ( CALCULATE ( MAX ( dim_week[season_week] ), REMOVEFILTERS ( dim_week ), dim_week[sort_index] = _e ), "0" ) ), "&", "&amp;" )
 			VAR _footr      = "Updated weekly"
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "SELL_THROUGH" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis SELL_THROUGH] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Sell-through</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text SELL_THROUGH]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text SELL_THROUGH] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text SELL_THROUGH]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text SELL_THROUGH] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The share of the season’s stock we have sold so far.</text><text x='24' y='252' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='253' font-size='13' font-weight='400' fill='#111827'>It says whether the season is clearing on time or heading</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>for clearance markdown.</text><text x='24' y='297' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='298' font-size='13' font-weight='400' fill='#111827'>Units sold season to date ÷ (opening stock units + units</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>received).</text>"
 			        & "<text x='24' y='342' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -7727,9 +7865,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -7737,7 +7874,7 @@ table _measures
 		lineageTag: 52c69bd4-3b0a-59bb-8ba2-769deb5b3c25
 		dataCategory: ImageUrl
 
-	/// GMROI i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// GMROI i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG GMROI' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -7822,10 +7959,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "GMROI" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "R52W front margin", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f153 = ( CALCULATE ( [GMROI Front Margin R52W], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f153 ), "n/a", IF ( _f153 < 0, "−", "" ) & "€" & FORMAT ( ABS ( _f153 / 1000000 ), "#,0" ) & "m" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Average stock at cost", "&", "&amp;" )
@@ -8027,22 +8160,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target ≥ " & ( VAR _f157 = CALCULATE ( [GMROI Target], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( ISBLANK ( _f157 ), "n/a", IF ( _f157 < 0, "−", "" ) & FORMAT ( ABS ( _f157 ), "#,0.0" ) ) ) & "× (by category)", "&", "&amp;" )
 			VAR _footr      = "Updated weekly"
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "GMROI" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis GMROI] ), "", "×" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>GMROI</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text GMROI]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text GMROI] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text GMROI]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text GMROI] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>How many euros of margin each euro tied up in stock</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>earned over the last 12 months.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>Stock costs money to hold; this says whether it is earning</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>its keep.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Front gross margin for the last 52 weeks ÷ average stock at</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>cost over the same 52 week-ends.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -8060,9 +8204,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -8070,7 +8213,7 @@ table _measures
 		lineageTag: 091f8d5c-b74a-5b45-8291-d4adb863a0d9
 		dataCategory: ImageUrl
 
-	/// SUPPLIER_OTIF i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// SUPPLIER_OTIF i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG SUPPLIER_OTIF' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -8155,10 +8298,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "SUPPLIER_OTIF" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "PO lines due", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f164 = ( CALCULATE ( [PO Lines Due], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( ISBLANK ( _f164 ), "n/a", IF ( _f164 < 0, "−", "" ) & FORMAT ( ABS ( _f164 ), "#,0" ) ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "vs last week", "&", "&amp;" )
@@ -8360,22 +8499,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 507 + _dy
+			VAR _h          = 537 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target ≥ " & ( VAR _f167 = ( CALCULATE ( [OTIF Target], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN ( VAR _f168 = FORMAT ( ABS ( _f167 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f168, 2 ) = ".0", LEFT ( _f168, LEN ( _f168 ) - 2 ), _f168 ) ) & "%" ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "SUPPLIER_OTIF" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis SUPPLIER_OTIF] ), "", "%" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Supplier OTIF</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text SUPPLIER_OTIF]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text SUPPLIER_OTIF] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text SUPPLIER_OTIF]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text SUPPLIER_OTIF] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>The share of purchase-order lines suppliers delivered on</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>the agreed day and in the agreed quantity.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>Late or short deliveries become empty shelves two weeks</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>later.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>PO lines received on time and in full ÷ PO lines due.</text>"
 			        & "<text x='24' y='342' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -8393,9 +8543,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='413' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='427' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='413' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='427' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='439' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='453' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='439' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='453' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -8403,7 +8552,7 @@ table _measures
 		lineageTag: 2837bcf7-3610-5bd6-973f-21a07605756a
 		dataCategory: ImageUrl
 
-	/// CHANNEL_MIX i pop-up (tooltip page tt_info, E-57): value, delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags, footer (js-exec view.ts).
+	/// CHANNEL_MIX i pop-up (tooltip page tt_info, E-57): value, target line (status basis, USER 2026-10-29), delta, labelled bars, 3 stats, what / why / formula / worked example / rule / owner note, tags (group, lever, horizon, owner), footer (js-exec view.ts).
 	measure 'Info SVG CHANNEL_MIX' =
 			VAR _a          = [_AsOf Index]
 			VAR _s          = [_Window Start]
@@ -8452,10 +8601,6 @@ table _measures
 			VAR _tl3        = SUBSTITUTE ( _tr3, "&", "&amp;" )
 			VAR _tw3        = SWITCH ( _tr3, "Commercial", 112.5, "Supply chain", 117.5, "Finance", 91.2, "Digital", 86.5, 90 )
 			VAR _tx3        = 24
-			VAR _tr4        = LOOKUPVALUE ( param_attr_statement[attr_label], param_attr_statement[attr_code], LOOKUPVALUE ( dim_kpi[statement], dim_kpi[kpi_code], "CHANNEL_MIX" ) )
-			VAR _tl4        = SUBSTITUTE ( _tr4, "&", "&amp;" )
-			VAR _tw4        = SWITCH ( _tr4, "P&L", 90.5, "Balance sheet", 139.2, "Operational", 130.0, 90 )
-			VAR _tx4        = _tx3 + _tw3 + 6
 			VAR _sl0        = SUBSTITUTE ( "Store", "&", "&amp;" )
 			VAR _sv0        = SUBSTITUTE ( ( VAR _f183 = ( CALCULATE ( [Mix Store %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) RETURN IF ( _f183 < 0, "−", "" ) & FORMAT ( ABS ( _f183 * 100 ), "#,0.0" ) & "%" ) & " · " & IF ( ISBLANK ( CALCULATE ( [Mix Store % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) ), "n/a", ( VAR _f184 = ( CALCULATE ( [Mix Store %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) + 0 ) - CALCULATE ( [Mix Store % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN IF ( _f184 >= 0, "+", "−" ) & FORMAT ( ABS ( _f184 * 100 ), "#,0.0" ) & " pp" ) ), "&", "&amp;" )
 			VAR _sl1        = SUBSTITUTE ( "Online", "&", "&amp;" )
@@ -8657,22 +8802,33 @@ table _measures
 			VAR _xc48        = IF ( _xw48 = "", _xc47, IF ( _xf48, _xc47 & " " & _xw48, _xw48 ) )
 			VAR _n          = MIN ( PATHLENGTH ( _xa48 ), 6 )
 			VAR _dy         = _n * 19 + 7
-			VAR _h          = 526 + _dy
+			VAR _h          = 556 + _dy
 			VAR _footl      = SUBSTITUTE ( "Target plan mix " & IF ( ISBLANK ( CALCULATE ( [Mix Store % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) ), "n/a", ( VAR _f169 = CALCULATE ( [Mix Store % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN ( VAR _f170 = FORMAT ( ABS ( _f169 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f170, 2 ) = ".0", LEFT ( _f170, LEN ( _f170 ) - 2 ), _f170 ) ) ) & " / " & ( VAR _f171 = CALCULATE ( [Mix Online % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN ( VAR _f172 = FORMAT ( ABS ( _f171 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f172, 2 ) = ".0", LEFT ( _f172, LEN ( _f172 ) - 2 ), _f172 ) ) ) & " / " & ( VAR _f173 = CALCULATE ( [Mix Wholesale % Bud], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s, dim_week[sort_index] <= _e ) RETURN ( VAR _f174 = FORMAT ( ABS ( _f173 * 100 ), "#,0.0" ) RETURN IF ( RIGHT ( _f174, 2 ) = ".0", LEFT ( _f174, LEN ( _f174 ) - 2 ), _f174 ) ) ) ), "&", "&amp;" )
 			VAR _footr      = [Updated Text]
+			VAR _tlab       = SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "CHANNEL_MIX" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan", "" )
+			VAR _tunit      = IF ( ISBLANK ( [Card Basis CHANNEL_MIX] ), "", "% store" )
 			VAR _head       =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='689' viewBox='0 0 520 689' font-family='Segoe UI, sans-serif'>"
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='719' viewBox='0 0 520 719' font-family='Segoe UI, sans-serif'>"
 			        & "<rect x='0.5' y='0.5' width='519' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='#E5E7EB'/>"
 			        & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Explains Tier 1 · " & _sub ) & "</text>"
 			        & "<text x='24' y='58' font-size='18' font-weight='600' fill='#111827'>Channel mix</text>"
 			        & "<text x='496' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
 			        & "<text x='24' y='116' font-size='44' font-weight='600' fill='#111827' letter-spacing='-1'>" & [Card Value Text CHANNEL_MIX]
 			        & "<tspan font-size='16' font-weight='500' fill='#5F6878' letter-spacing='0' dx='6'>" & [Card Unit Text CHANNEL_MIX] & "</tspan></text>"
+			        & IF (
+			            _tlab <> ""
+			            ,"<line x1='24' y1='140' x2='40' y2='140' stroke='#9CA3AF' stroke-width='2' stroke-dasharray='2 2'/>"
+			                & "<text x='48' y='145' font-size='13' font-weight='500' fill='#5F6878'>" & _tlab
+			                & "<tspan dx='8' font-size='20' font-weight='600' fill='#111827' letter-spacing='-0.4'>" & [Card Basis Text CHANNEL_MIX]
+			                & "<tspan dx='3' font-size='13' font-weight='500' fill='#5F6878' letter-spacing='0'>" & _tunit & "</tspan></tspan></text>"
+			        )
+			        & "<g transform='translate(0 30)'>"
 			        & "<text x='24' y='138' font-size='13.5' font-weight='600' fill='" & _ink & "'>" & [Card Delta Text CHANNEL_MIX] & "</text>"
 			        & "<line x1='24' y1='158' x2='496' y2='158' stroke='#EDEEF0'/>"
 			        & "<text x='24.0' y='178' font-size='12' fill='#5F6878'>" & _sl0 & "</text><text x='24.0' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv0 & "</text>"
 			        & "<text x='177.3' y='178' font-size='12' fill='#5F6878'>" & _sl1 & "</text><text x='177.3' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv1 & "</text>"
 			        & "<text x='330.7' y='178' font-size='12' fill='#5F6878'>" & _sl2 & "</text><text x='330.7' y='198' font-size='15' font-weight='600' fill='#111827'>" & _sv2 & "</text>"
+			        & "</g>"
 			VAR _body       =
 			    "<text x='24' y='226' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHAT IT IS</text><text x='156' y='227' font-size='13' font-weight='400' fill='#111827'>What share of sales came through stores, online and</text><text x='156' y='246' font-size='13' font-weight='400' fill='#111827'>wholesale.</text><text x='24' y='271' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WHY IT MATTERS</text><text x='156' y='272' font-size='13' font-weight='400' fill='#111827'>A shift between channels changes margin and cost to serve</text><text x='156' y='291' font-size='13' font-weight='400' fill='#111827'>even when total sales look fine.</text><text x='24' y='316' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>FORMULA</text><text x='156' y='317' font-size='13' font-weight='400' fill='#111827'>Each channel’s net sales ÷ total net sales, compared with</text><text x='156' y='336' font-size='13' font-weight='400' fill='#111827'>the planned mix.</text>"
 			        & "<text x='24' y='361' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>WORKED EXAMPLE</text>"
@@ -8690,9 +8846,8 @@ table _measures
 			        & "<rect x='" & FORMAT ( _tx1, "0.0" ) & "' y='432' width='" & FORMAT ( _tw1, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx1 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Lever <tspan font-weight='600' fill='#111827'>" & _tl1 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx2, "0.0" ) & "' y='432' width='" & FORMAT ( _tw2, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx2 + 9, "0.0" ) & "' y='446' font-size='11' fill='#5F6878'>Horizon <tspan font-weight='600' fill='#111827'>" & _tl2 & "</tspan></text>"
 			        & "<rect x='" & FORMAT ( _tx3, "0.0" ) & "' y='458' width='" & FORMAT ( _tw3, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx3 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Owner <tspan font-weight='600' fill='#111827'>" & _tl3 & "</tspan></text>"
-			        & "<rect x='" & FORMAT ( _tx4, "0.0" ) & "' y='458' width='" & FORMAT ( _tw4, "0.0" ) & "' height='20' rx='10' fill='#FFFFFF' stroke='#DBDCDF'/><text x='" & FORMAT ( _tx4 + 9, "0.0" ) & "' y='472' font-size='11' fill='#5F6878'>Statement <tspan font-weight='600' fill='#111827'>" & _tl4 & "</tspan></text>"
 			        & "</g>"
-			VAR _svg        = _head & _bars & _body & "</svg>"
+			VAR _svg        = _head & _bars & "<g transform='translate(0 30)'>" & _body & "</g></svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 		isHidden
@@ -9485,7 +9640,7 @@ table _measures
 			        & "<text x='24' y='36' font-size='10.5' font-weight='600' fill='#5F6878' letter-spacing='0.6'>" & UPPER ( "Nordmark · " & _wl ) & "</text>"
 			        & "<text x='24' y='60' font-size='18' font-weight='600' fill='#111827'>How to read this page</text>"
 			        & "<circle cx='540' cy='36' r='15.5' fill='#FFFFFF' stroke='#DBDCDF'/>"
-			        & SUBSTITUTE ( "<circle cx='30' cy='88' r='2.2' fill='#111827'/><text x='42' y='92.0' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Three numbers</tspan> carry the page: Net sales (sell more), Total margin % (keep more), Weeks</text><text x='42' y='111.5' font-size='13' font-weight='400' fill='#111827'>of cover (turn stock faster). The nine tiles below explain them: card size follows</text><text x='42' y='131.0' font-size='13' font-weight='400' fill='#111827'>importance, worst first.</text><circle cx='30' cy='152.5' r='2.2' fill='#111827'/><text x='42' y='156.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Status</tspan> is vs the metric’s target: ▲ On track · ● Watch · ▼ Off track; the card is washed in</text><text x='42' y='176.0' font-size='13' font-weight='400' fill='#111827'>the status colour; hover a chip for the rule. The <tspan font-weight='600'>Δ line</tspan> is vs the comparator in the header</text><text x='42' y='195.5' font-size='13' font-weight='400' fill='#111827'>({cmp}). The <tspan font-weight='600'>dot</tspan> before the counts is the overall status over all 12 cards; hover it for</text><text x='42' y='215.0' font-size='13' font-weight='400' fill='#111827'>the rule.</text><circle cx='30' cy='236.5' r='2.2' fill='#111827'/><text x='42' y='240.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Bars</tspan> = the last 13 retail weeks; the current week is in the status colour, the dotted line is</text><text x='42' y='260.0' font-size='13' font-weight='400' fill='#111827'>the target.</text><circle cx='30' cy='281.5' r='2.2' fill='#111827'/><text x='42' y='285.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>ⓘ</tspan> opens the plain-English explanation, a worked example and the owner’s note; the</text><text x='42' y='305.0' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>binoculars</tspan> open the drill path to the drill page and its lowest grain.</text><circle cx='30' cy='326.5' r='2.2' fill='#111827'/><text x='42' y='330.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Side bar</tspan>: Filters (period, comparator, region and the metric attributes; inside one attribute</text><text x='42' y='350.0' font-size='13' font-weight='400' fill='#111827'>a choice is OR, across attributes AND; filtered-out cards fade in place so nothing moves;</text><text x='42' y='369.5' font-size='13' font-weight='400' fill='#111827'>the badge counts active choices; Reset clears), How to read, More KPIs (the 20 bench</text><text x='42' y='389.0' font-size='13' font-weight='400' fill='#111827'>metrics, inactive), Notes.</text><circle cx='30' cy='410.5' r='2.2' fill='#111827'/><text x='42' y='414.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>prov.</tspan> in a title = provisional until close (true-up 10 Nov). Illustrative data · EUR · NL + BE ·</text><text x='42' y='434.0' font-size='13' f"
+			        & SUBSTITUTE ( "<circle cx='30' cy='88' r='2.2' fill='#111827'/><text x='42' y='92.0' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Three numbers</tspan> carry the page: Net sales (sell more), Total margin % (keep more), Weeks</text><text x='42' y='111.5' font-size='13' font-weight='400' fill='#111827'>of cover (turn stock faster). The nine tiles below explain them: card size follows</text><text x='42' y='131.0' font-size='13' font-weight='400' fill='#111827'>importance, worst first.</text><circle cx='30' cy='152.5' r='2.2' fill='#111827'/><text x='42' y='156.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Status</tspan> is vs the metric’s target: ▲ On track · ● Watch · ▼ Off track; the card is washed in</text><text x='42' y='176.0' font-size='13' font-weight='400' fill='#111827'>the status colour; hover a chip for the rule. The <tspan font-weight='600'>Δ line</tspan> is vs the comparator in the header</text><text x='42' y='195.5' font-size='13' font-weight='400' fill='#111827'>({cmp}). The <tspan font-weight='600'>dot</tspan> before the counts is the overall status over all 12 cards; hover it for</text><text x='42' y='215.0' font-size='13' font-weight='400' fill='#111827'>the rule.</text><circle cx='30' cy='236.5' r='2.2' fill='#111827'/><text x='42' y='240.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Bars</tspan> = the last 13 retail weeks; the current week is in the status colour, the dotted line is</text><text x='42' y='260.0' font-size='13' font-weight='400' fill='#111827'>the target.</text><circle cx='30' cy='281.5' r='2.2' fill='#111827'/><text x='42' y='285.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>ⓘ</tspan> opens the plain-English explanation, a worked example and the owner’s note; the</text><text x='42' y='305.0' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>binoculars</tspan> open the drill path to the drill page and its lowest grain.</text><circle cx='30' cy='326.5' r='2.2' fill='#111827'/><text x='42' y='330.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>Side bar</tspan>: Filters (period, comparator, region and the metric attributes; inside one attribute</text><text x='42' y='350.0' font-size='13' font-weight='400' fill='#111827'>a choice is OR, across attributes AND; filtered-out cards fade in place so nothing moves;</text><text x='42' y='369.5' font-size='13' font-weight='400' fill='#111827'>the badge counts active choices; Reset clears), How to read, More KPIs (the 20 bench</text><text x='42' y='389.0' font-size='13' font-weight='400' fill='#111827'>metrics, inactive).</text><circle cx='30' cy='410.5' r='2.2' fill='#111827'/><text x='42' y='414.5' font-size='13' font-weight='400' fill='#111827'><tspan font-weight='600'>prov.</tspan> in a title = provisional until close (true-up 10 Nov). Illustrative data · EUR · NL + BE ·</text><text x='42' y='434.0' font-size='13' f"
 			        & "ont-weight='400' fill='#111827'>LY = same retail week.</text><line x1='24' y1='465.5' x2='556' y2='465.5' stroke='#EDEEF0'/><text x='24' y='489.5' font-size='12.5' fill='#5F6878'>Illustrative data</text>", "{cmp}", _cmp )
 			        & "<text x='556' y='489.5' text-anchor='end' font-size='12.5' font-weight='500' fill='#111827'>" & [Refreshed Text] & "</text>"
 			        & "</svg>"
@@ -9534,3 +9689,4 @@ table _measures
 		source = ROW ( "measure_table", 0 )
 
 	annotation PBI_ResultType = Table
+

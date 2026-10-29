@@ -226,7 +226,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -533,7 +533,6 @@
           }
         },
         "type": "Categorical",
-        "isHiddenInViewMode": true,
         "filter": {
           "Version": 2,
           "From": [
@@ -572,7 +571,8 @@
               }
             }
           ]
-        }
+        },
+        "isHiddenInViewMode": true
       }
     ]
   },

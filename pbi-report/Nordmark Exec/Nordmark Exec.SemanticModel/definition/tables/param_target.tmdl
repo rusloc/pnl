@@ -1,7 +1,7 @@
 /// KPI x category (or ALL) targets. Joins nothing.
 table param_target
-	lineageTag: 2d9eb999-c384-55df-a9fe-4903a0541943
 	isHidden
+	lineageTag: 2d9eb999-c384-55df-a9fe-4903a0541943
 
 	column kpi_code
 		dataType: string
@@ -50,3 +50,4 @@ table param_target
 				    typed
 
 	annotation PBI_ResultType = Table
+

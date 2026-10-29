@@ -1,7 +1,7 @@
 /// Status rule per landing card (watch_from / off_from) + the 3 dot constants (E-22, E-26, E-75). Joins nothing.
 table param_status_rule
-	lineageTag: 30a95b57-40eb-5f1f-a000-0a06a96cd230
 	isHidden
+	lineageTag: 30a95b57-40eb-5f1f-a000-0a06a96cd230
 
 	column rule_code
 		dataType: string
@@ -113,3 +113,4 @@ table param_status_rule
 				    typed
 
 	annotation PBI_ResultType = Table
+

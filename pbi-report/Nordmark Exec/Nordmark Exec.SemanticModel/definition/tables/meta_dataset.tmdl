@@ -1,7 +1,7 @@
 /// Dataset metadata from parquet/manifest.json: as-of week (drives every window, E-05) and the refresh stamp.
 table meta_dataset
-	lineageTag: ea0e8ba6-cb22-59db-bba8-f46eeccc5abc
 	isHidden
+	lineageTag: ea0e8ba6-cb22-59db-bba8-f46eeccc5abc
 
 	column current_week_key
 		dataType: string
@@ -32,8 +32,6 @@ table meta_dataset
 		summarizeBy: none
 		sourceColumn: refreshed
 
-		annotation UnderlyingDateTimeDataType = Date
-
 		annotation SummarizationSetBy = User
 
 	column seed
@@ -60,3 +58,4 @@ table meta_dataset
 				    tbl
 
 	annotation PBI_ResultType = Table
+

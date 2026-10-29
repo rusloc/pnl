@@ -4,7 +4,7 @@
 // Tolerances as checks/verify.py: amounts 0.0051, units / SKU-days 0.06, ratios 1e-6, counts and status codes exact;
 // expected BLANK = the row is absent in the CSV (N/A).
 // T-N1 base layer per scope x key (window = dim_week rows) | T-N2 card layer per scope x period x comparator
-// T-N3 card texts = v5 (ET-02) | T-N4 13-week bar points | T-N5 identities (ET-07, ET-12) | T-N6 conceal in place (ET-13)
+// T-N3 card texts = v5 (ET-02) | T-N4 13-week bar points | T-N5 identities (ET-07, ET-12) | T-N6 conceal in place (ET-13) | T-N7 i target line
 
 // ==== BLOCK T-N1-ALL-W26: base layer, scope ALL, keys W-FY2026-30 .. W-FY2026-43 (ET-01)
 EVALUATE
@@ -15015,6 +15015,84 @@ VAR _t =
         ,CALCULATETABLE (
             ROW ( "block", "T-N6 none", "metric", "summary", "actual", [Filter Picks Text], "expected", "All" )
             ,TREATAS ( { "ALL" }, param_region[scope_code] )
+        )
+    )
+RETURN
+    SELECTCOLUMNS ( _t, "block", [block], "metric", [metric], "actual", [actual], "expected", [expected], "_pass", [actual] == [expected] )
+
+// ==== BLOCK T-N7: i pop-up target line = status basis under the value, any comparator (USER 2026-10-29, E-24 / E-57); no Statement tag
+EVALUATE
+VAR _t =
+    UNION (
+        CALCULATETABLE (
+            UNION (
+                ROW ( "block", "T-N7", "metric", "target.NET_SALES", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "NET_SALES" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text NET_SALES] & IF ( ISBLANK ( [Card Basis NET_SALES] ), "", "m" ), "expected", "Budget €62.9m" )
+                ,ROW ( "block", "T-N7", "metric", "target.TOTAL_MARGIN", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "TOTAL_MARGIN" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text TOTAL_MARGIN] & IF ( ISBLANK ( [Card Basis TOTAL_MARGIN] ), "", "%" ), "expected", "Budget 36.2%" )
+                ,ROW ( "block", "T-N7", "metric", "target.WEEKS_OF_COVER", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "WEEKS_OF_COVER" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text WEEKS_OF_COVER] & IF ( ISBLANK ( [Card Basis WEEKS_OF_COVER] ), "", "wks" ), "expected", "Target 9.5wks" )
+                ,ROW ( "block", "T-N7", "metric", "target.MARKDOWN", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "MARKDOWN" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text MARKDOWN] & IF ( ISBLANK ( [Card Basis MARKDOWN] ), "", "%" ), "expected", "Budget 8.5%" )
+                ,ROW ( "block", "T-N7", "metric", "target.AVAILABILITY", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "AVAILABILITY" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text AVAILABILITY] & IF ( ISBLANK ( [Card Basis AVAILABILITY] ), "", "%" ), "expected", "Target 97.0%" )
+                ,ROW ( "block", "T-N7", "metric", "target.EBITDA", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "EBITDA" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text EBITDA] & IF ( ISBLANK ( [Card Basis EBITDA] ), "", "m" ), "expected", "Budget €16.1m" )
+                ,ROW ( "block", "T-N7", "metric", "target.LFL_GROWTH", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "LFL_GROWTH" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text LFL_GROWTH] & IF ( ISBLANK ( [Card Basis LFL_GROWTH] ), "", "%" ), "expected", "Budget +3.0%" )
+                ,ROW ( "block", "T-N7", "metric", "target.FRONT_GM", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "FRONT_GM" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text FRONT_GM] & IF ( ISBLANK ( [Card Basis FRONT_GM] ), "", "%" ), "expected", "Budget 30.0%" )
+                ,ROW ( "block", "T-N7", "metric", "target.SELL_THROUGH", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "SELL_THROUGH" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text SELL_THROUGH] & IF ( ISBLANK ( [Card Basis SELL_THROUGH] ), "", "%" ), "expected", "Target 62.0%" )
+                ,ROW ( "block", "T-N7", "metric", "target.GMROI", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "GMROI" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text GMROI] & IF ( ISBLANK ( [Card Basis GMROI] ), "", "×" ), "expected", "Target 2.5×" )
+                ,ROW ( "block", "T-N7", "metric", "target.SUPPLIER_OTIF", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "SUPPLIER_OTIF" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text SUPPLIER_OTIF] & IF ( ISBLANK ( [Card Basis SUPPLIER_OTIF] ), "", "%" ), "expected", "Target 95.0%" )
+                ,ROW ( "block", "T-N7", "metric", "target.CHANNEL_MIX", "actual", SWITCH ( LOOKUPVALUE ( dim_kpi[basis], dim_kpi[kpi_code], "CHANNEL_MIX" ), "BUDGET", "Budget", "TARGET", "Target", "PLAN", "Plan" ) & " " & [Card Basis Text CHANNEL_MIX] & IF ( ISBLANK ( [Card Basis CHANNEL_MIX] ), "", "% store" ), "expected", "Plan 70.0% store" )
+                ,ROW ( "block", "T-N7", "metric", "svg.NET_SALES", "actual", IF ( CONTAINSSTRING ( [Info SVG NET_SALES], ">€62.9<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG NET_SALES], "Statement" ) && CONTAINSSTRING ( [Info SVG NET_SALES], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.TOTAL_MARGIN", "actual", IF ( CONTAINSSTRING ( [Info SVG TOTAL_MARGIN], ">36.2<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG TOTAL_MARGIN], "Statement" ) && CONTAINSSTRING ( [Info SVG TOTAL_MARGIN], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.WEEKS_OF_COVER", "actual", IF ( CONTAINSSTRING ( [Info SVG WEEKS_OF_COVER], ">9.5<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG WEEKS_OF_COVER], "Statement" ) && CONTAINSSTRING ( [Info SVG WEEKS_OF_COVER], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.MARKDOWN", "actual", IF ( CONTAINSSTRING ( [Info SVG MARKDOWN], ">8.5<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG MARKDOWN], "Statement" ) && CONTAINSSTRING ( [Info SVG MARKDOWN], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.AVAILABILITY", "actual", IF ( CONTAINSSTRING ( [Info SVG AVAILABILITY], ">97.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG AVAILABILITY], "Statement" ) && CONTAINSSTRING ( [Info SVG AVAILABILITY], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.EBITDA", "actual", IF ( CONTAINSSTRING ( [Info SVG EBITDA], ">€16.1<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG EBITDA], "Statement" ) && CONTAINSSTRING ( [Info SVG EBITDA], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.LFL_GROWTH", "actual", IF ( CONTAINSSTRING ( [Info SVG LFL_GROWTH], ">+3.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG LFL_GROWTH], "Statement" ) && CONTAINSSTRING ( [Info SVG LFL_GROWTH], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.FRONT_GM", "actual", IF ( CONTAINSSTRING ( [Info SVG FRONT_GM], ">30.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG FRONT_GM], "Statement" ) && CONTAINSSTRING ( [Info SVG FRONT_GM], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.SELL_THROUGH", "actual", IF ( CONTAINSSTRING ( [Info SVG SELL_THROUGH], ">62.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG SELL_THROUGH], "Statement" ) && CONTAINSSTRING ( [Info SVG SELL_THROUGH], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.GMROI", "actual", IF ( CONTAINSSTRING ( [Info SVG GMROI], ">2.5<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG GMROI], "Statement" ) && CONTAINSSTRING ( [Info SVG GMROI], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.SUPPLIER_OTIF", "actual", IF ( CONTAINSSTRING ( [Info SVG SUPPLIER_OTIF], ">95.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG SUPPLIER_OTIF], "Statement" ) && CONTAINSSTRING ( [Info SVG SUPPLIER_OTIF], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+                ,ROW ( "block", "T-N7", "metric", "svg.CHANNEL_MIX", "actual", IF ( CONTAINSSTRING ( [Info SVG CHANNEL_MIX], ">70.0<tspan dx='3'" ) && NOT CONTAINSSTRING ( [Info SVG CHANNEL_MIX], "Statement" ) && CONTAINSSTRING ( [Info SVG CHANNEL_MIX], ">Owner <tspan" ), "ok", "missing" ), "expected", "ok" )
+            )
+            ,TREATAS ( { "ALL" }, param_region[scope_code] )
+        )
+        ,CALCULATETABLE (
+            UNION (
+                ROW ( "block", "T-N7 LY", "metric", "target.NET_SALES", "actual", [Card Basis Text NET_SALES], "expected", "€62.9" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.TOTAL_MARGIN", "actual", [Card Basis Text TOTAL_MARGIN], "expected", "36.2" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.WEEKS_OF_COVER", "actual", [Card Basis Text WEEKS_OF_COVER], "expected", "9.5" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.MARKDOWN", "actual", [Card Basis Text MARKDOWN], "expected", "8.5" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.AVAILABILITY", "actual", [Card Basis Text AVAILABILITY], "expected", "97.0" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.EBITDA", "actual", [Card Basis Text EBITDA], "expected", "€16.1" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.LFL_GROWTH", "actual", [Card Basis Text LFL_GROWTH], "expected", "+3.0" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.FRONT_GM", "actual", [Card Basis Text FRONT_GM], "expected", "30.0" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.SELL_THROUGH", "actual", [Card Basis Text SELL_THROUGH], "expected", "62.0" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.GMROI", "actual", [Card Basis Text GMROI], "expected", "2.5" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.SUPPLIER_OTIF", "actual", [Card Basis Text SUPPLIER_OTIF], "expected", "95.0" )
+                ,ROW ( "block", "T-N7 LY", "metric", "target.CHANNEL_MIX", "actual", [Card Basis Text CHANNEL_MIX], "expected", "70.0" )
+            )
+            ,TREATAS ( { "LY" }, param_comparator[comparator_code] )
+        )
+        ,CALCULATETABLE (
+            UNION (
+                ROW ( "block", "T-N7 LW", "metric", "target.NET_SALES", "actual", [Card Basis Text NET_SALES], "expected", "€62.9" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.TOTAL_MARGIN", "actual", [Card Basis Text TOTAL_MARGIN], "expected", "36.2" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.WEEKS_OF_COVER", "actual", [Card Basis Text WEEKS_OF_COVER], "expected", "9.5" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.MARKDOWN", "actual", [Card Basis Text MARKDOWN], "expected", "8.5" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.AVAILABILITY", "actual", [Card Basis Text AVAILABILITY], "expected", "97.0" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.EBITDA", "actual", [Card Basis Text EBITDA], "expected", "€16.1" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.LFL_GROWTH", "actual", [Card Basis Text LFL_GROWTH], "expected", "+3.0" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.FRONT_GM", "actual", [Card Basis Text FRONT_GM], "expected", "30.0" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.SELL_THROUGH", "actual", [Card Basis Text SELL_THROUGH], "expected", "62.0" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.GMROI", "actual", [Card Basis Text GMROI], "expected", "2.5" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.SUPPLIER_OTIF", "actual", [Card Basis Text SUPPLIER_OTIF], "expected", "95.0" )
+                ,ROW ( "block", "T-N7 LW", "metric", "target.CHANNEL_MIX", "actual", [Card Basis Text CHANNEL_MIX], "expected", "70.0" )
+            )
+            ,TREATAS ( { "LW" }, param_comparator[comparator_code] )
+        )
+        ,CALCULATETABLE (
+            UNION (
+                ROW ( "block", "T-N7 ONLINE", "metric", "target.LFL_GROWTH", "actual", "Budget " & [Card Basis Text LFL_GROWTH] & IF ( ISBLANK ( [Card Basis LFL_GROWTH] ), "", "%" ), "expected", "Budget n/a" )
+                ,ROW ( "block", "T-N7 ONLINE", "metric", "svg.LFL_GROWTH", "actual", IF ( CONTAINSSTRING ( [Info SVG LFL_GROWTH], ">Budget<tspan dx='8' font-size='20' font-weight='600' fill='%23111827' letter-spacing='-0.4'>n/a<tspan" ), "ok", "missing" ), "expected", "ok" )
+            )
+            ,TREATAS ( { "ONLINE" }, param_region[scope_code] )
         )
     )
 RETURN

@@ -11,9 +11,9 @@
 | Path | What |
 |---|---|
 | `Nordmark Exec.pbip` | Open this in Power BI Desktop |
-| `Nordmark Exec.SemanticModel/` | TMDL, Import, 17 Parquet tables + `meta_dataset` (manifest.json) + 8 disconnected picker tables + `_measures` (361 measures), 25 relationships, compatibility level 1702 |
-| `Nordmark Exec.Report/` | PBIR: page `exec_landing` (1440 x 810, FitToPage) + hidden tooltip pages `tt_info`, `tt_drill`, `tt_rule`, `tt_dot`; 5 bookmarks; custom theme and 4 SVG resources |
-| `tests/control-totals.dax` | DAX tests against `data/nordmark_retail_dummy_data/checks/control_totals_eur.csv` (23 blocks, 13,273 rows) |
+| `Nordmark Exec.SemanticModel/` | TMDL, Import, 17 Parquet tables + `meta_dataset` (manifest.json) + 7 disconnected picker tables + `_measures` (373 measures), 25 relationships, compatibility level 1702 |
+| `Nordmark Exec.Report/` | PBIR: page `exec_landing` (1440 x 810, FitToPage) + hidden tooltip pages `tt_info`, `tt_drill`, `tt_rule`, `tt_dot`; 4 bookmarks; custom theme and 3 SVG resources |
+| `tests/control-totals.dax` | DAX tests against `data/nordmark_retail_dummy_data/checks/control_totals_eur.csv` (24 blocks, 13,323 rows) |
 | `docs/model/nordmark-measure-dictionary.md` (repo) | Every measure: definition, spec IDs, folder, format, DAX |
 
 ## How to open
@@ -46,18 +46,21 @@ with the thresholds of `param_status_rule`. Details: `docs/model/nordmark-measur
 
 | Zone | Power BI |
 |---|---|
-| Side bar 56 px | Static SVG (mark, 4 icons) + transparent buttons: Filters, How to read, More KPIs, Notes (bookmarks `bm_filters`, `bm_how`, `bm_more`, `bm_notes`; one layer at a time, `bm_close` from × and the scrim). Badge = image measure (active attribute picks) |
+| Side bar 56 px | Static SVG (mark, 3 icons) + transparent buttons: Filters, How to read, More KPIs (bookmarks `bm_filters`, `bm_how`, `bm_more`; one layer at a time, `bm_close` from × and the scrim). Badge = image measure (active attribute picks) |
 | Header | One SVG image measure: brand, period · comparator · region line (dates from `dim_week`, YTD from 29 Dec 2025), refresh stamp |
 | Status line | SVG: dot (literal v5 rule, static), three count pills, "n of 12 metrics · picks". Hover target on the dot → `tt_dot` |
 | Cards | 12 image visuals at the v5 rectangles (3 hero 437 x 236, 3 medium 437 x 176, 6 small 213 x 168, grid bottom 754 px), one `Card SVG <KPI>` measure each: wash (Watch / Off-track gradient), 2 px red border on Off track, title + sub-title (+ prov. from `dim_kpi.is_provisional`), chip (glyph-only on small cards), value, Δ vs the comparator in the status colour, 13 bottom-aligned bars with the dotted target, ⓘ and binoculars |
-| Hover targets per card | ⓘ → `tt_info` (value, Δ, labelled bars, 3 stats, What / Why / Formula / Worked example / Status rule / Owner note, tags, footer); binoculars → `tt_drill` (drill page + 4 steps); chip → `tt_rule` |
-| Filters menu | Solid panel (glass → solid) with button slicers: Period, Comparator, Region / format (single, force selection), Group, Lever, Horizon, Owner, Statement (multi select). Reset = *Clear all slicers* (the switchers snap back to Week / Budget / All by force selection); filtered-out cards fade in place (opacity 0.08 + greyscale inside the card SVG) |
-| How to read · Notes · More KPIs | SVG panels (How to read is a measure: week and comparator name are data); More KPIs = a table of the 20 bench KPIs from `dim_kpi` (domain, KPI, formula, owner · cadence), sorted by catalogue order |
+| Layer scrim | One shared `layer_scrim` (ink #111827 at 78 % transparency, full page incl. the side bar, z below every layer group) shown by `bm_filters` / `bm_how` / `bm_more`, hidden by `bm_close`; a click on it runs `bm_close` (USER 2026-10-29: the same overlay under every pop-up) |
+| Hover targets per card | ⓘ → `tt_info` (value, target line, Δ, labelled bars, 3 stats, What / Why / Formula / Worked example / Status rule / Owner note, tags Group · Lever · Horizon · Owner, footer; the target line under the value = the status basis whatever the comparator: dotted swatch, `Budget` / `Target` / `Plan` from `dim_kpi.basis`, `[Card Basis Text <KPI>]` in the card value's format, n/a when blank, USER 2026-10-29); binoculars → `tt_drill` (drill page + 4 steps); chip → `tt_rule` |
+| Filters menu | Solid panel (glass → solid) with button slicers: Period, Comparator, Region / format (single, force selection), Group, Lever, Horizon, Owner (multi select; Statement removed USER 2026-10-29, `dim_kpi.statement` stays in the data). Reset = *Clear all slicers* (the switchers snap back to Week / Budget / All by force selection); filtered-out cards fade in place (opacity 0.08 + greyscale inside the card SVG) |
+| How to read · More KPIs | SVG panels (How to read is a measure: week and comparator name are data); More KPIs = a table of the 20 bench KPIs from `dim_kpi` (domain, KPI, formula, owner · cadence), sorted by catalogue order |
 
 ## Tests
 
-`tests/control-totals.dax` holds 23 blocks; run each `// ==== BLOCK` as its own query (one ADOMD batch of all blocks runs out of
+`tests/control-totals.dax` holds 24 blocks; run each `// ==== BLOCK` as its own query (one ADOMD batch of all blocks runs out of
 memory). Every row returns `_pass`. On 2026-10-28: **13,273 rows, 0 not TRUE** (refreshed scratch copy, ADOMD, 39.9 min serially).
+On 2026-10-29 after the Statement / Notes removal and the ⓘ target line: T-N3, T-N5, T-N6, T-N7 re-run on a scratch copy of the
+USER-saved PBIP (its own data cache, no refresh): 145 rows, 0 not TRUE; 373 measures, 0 in an error state. T-N1, T-N2, T-N4 touch no changed measure.
 
 | Block | Checks |
 |---|---|
@@ -67,6 +70,7 @@ memory). Every row returns `_pass`. On 2026-10-28: **13,273 rows, 0 not TRUE** (
 | T-N4 (4) | the 13 bar values per card per scope = the W-FY2026-31 .. 43 control totals (E-29) |
 | T-N5 | back margin = supplier income (ET-07); NL + BE + Online + Wholesale = All (ET-12) |
 | T-N6 | conceal in place: B3 shows 4 of 12, counts and dot unchanged; (B1 OR B4) AND Sales shows 3 (ET-13) |
+| T-N7 | ⓘ target line at Week 43 / All: label + basis value per card (Budget €62.9m … Plan 70.0% store), the same under Last year and Last week, "Budget n/a" for LFL under Online; every ⓘ SVG carries the line and no Statement tag |
 
 ## Timings (E-84)
 
@@ -93,21 +97,24 @@ instead of the responsive breakpoints; Segoe UI instead of Inter; filters concea
 | 3 | Responsive breakpoints 1200 / 720 px | FitToPage at 1440 x 810 | Accepted (E-61, E-87) |
 | 4 | Inter | Segoe UI (inside the SVGs and the native visuals) | Accepted (E-60) |
 | 5 | ⓘ, binoculars and chip open on click; focus trap, Esc, pills between explanation and drill path | Hover (and keyboard focus) report-page tooltips `tt_info`, `tt_drill`, `tt_rule`; no pills inside the pop-ups | Tooltips are not interactive; click pop-ups per card would need 24 bookmarked groups |
-| 6 | Side bar layers close with Esc; active side-bar button tinted | × and a click on the dark scrim close (bookmark `bm_close`); no active tint, the scrim covers the side bar as in v5 | Bookmarks cannot react to keys; one layer at a time is kept |
-| 7 | Filter chips: cobalt-tinted selected chip | Native button slicers (pill tiles); the picked chip shows Desktop's default dark style | Selected-state formatting written in PBIR is not applied (also with the P&L's measure-bound form); fix once from a Desktop-saved file |
+| 6 | Side bar layers close with Esc; active side-bar button tinted | × and a click on the dark scrim close (bookmark `bm_close`); no active tint; one shared scrim covers the whole page incl. the side bar under every layer (js-exec `LayerFrame`) | Bookmarks cannot react to keys; one layer at a time is kept |
+| 7 | Filter chips: cobalt-tinted selected chip | Native button slicers (pill tiles); the picked chip shows Desktop's default dark style | Selected-state formatting written in PBIR is not applied (also with the P&L's measure-bound form); fix once from a Desktop-saved file (the USER's 2026-10-29 save carried no chip restyle) |
 | 8 | Concealed card: opacity 0.08 + greyscale, `inert`, out of the tab order | Same look inside the card SVG; its hover targets return blank (no tooltip) | Visuals cannot be made inert |
 | 9 | More KPIs drawer grouped under domain headings | A scrolling table: Domain · KPI · Formula · Owner, catalogue order | Native table; matrix expand states cannot be authored reliably in PBIR |
 | 10 | Worked-example and Δ line breaks by browser layout | Static copy wrapped with Segoe UI metrics; worked examples and small-card Δ rows wrapped by character count (52 / 14) | SVG text does not wrap |
-| 11 | ⓘ pop-up sized to its content | Fixed tooltip page 524 x 681 (white space under shorter cards) | Tooltip page size is fixed |
-| 12 | Notes › Data contract bullet 3 (js-exec: pre-aggregated cubes) | "This report imports the week-grain tables from Parquet …" | The JS text describes the JS build |
-| 13 | `dim_date` (ADR-0013 (d)) | Not loaded | No fact joins it; every label comes from dim_week |
+| 11 | ⓘ pop-up sized to its content | Fixed tooltip page 548 x 737 (SVG 520 x 719; white space under shorter cards) | Tooltip page size is fixed |
+| 12 | `dim_date` (ADR-0013 (d)) | Not loaded | No fact joins it; every label comes from dim_week |
 
 ## First-open checklist (USER)
 
 1. Open, set DataFolder if needed, Refresh. The page should read Week 43 · vs Budget · All, 7 / 3 / 2, orange dot.
+   The 2026-10-29 save opens on Year to date with all four Group chips picked (badge 4): Filters › Reset, then save, if the
+   report should open on Week / no picks.
 2. Hover each ⓘ, binoculars and status chip on 2-3 cards: the pop-up must show *that* card (tooltip pages are filtered by the
-   hover target's visual filter on `dim_kpi`; hover cannot be automated here).
+   hover target's visual filter on `dim_kpi`; hover cannot be automated here). In the ⓘ pop-up the target line sits under the value
+   (Week 43 / All: Net sales "Budget €62.9m", Weeks of cover "Target 9.5 wks", Channel mix "Plan 70.0 % store"), Δ below it.
 3. Side bar: Filters → pick Group B3 → 8 cards fade, summary "4 of 12 metrics · B3 stock & supply", badge 1; Reset → all back,
    switchers back to Week / Budget / All. Try Period to date + Last year + Netherlands.
-4. How to read, Notes, More KPIs open one at a time; × and the dark area close them.
+4. Filters, How to read, More KPIs open one at a time, each over the same dark overlay that covers the whole page and the side bar;
+   × and the dark area close them. The side bar has three buttons (no Notes); Filters has no Statement row.
 5. Save once in Desktop so it writes its own serialization (diagram layout, slicer states); after that, edit the PBIP surgically.
