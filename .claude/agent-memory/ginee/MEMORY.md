@@ -16,7 +16,8 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
-- Nordmark dataset (2026-10-28): built + verify green; 16 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (E-23 edge, E-15 dot scope, E-41 mix window, GMROI example, ST bars, scoped EBITDA)
+- Nordmark dataset (2026-10-28): built + verify green; 18 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (8, 11, 16 superseded 2026-10-29; new 17 ET-26 GMROI, 18 mix plan window)
+- Nordmark period keys (2026-10-29): legacy PTD-/YTD- rows kept frozen; remove once nerd + bip read item keys (steps in dataset README › Control totals)
 - .sync packs (2026-10-28): pnl/power-bi (Parquet via DataFolder) + mirelo-sales/power-bi + data written, draft; pending USER Desktop first-open + bip DAX test run; re-copy if pbi-report changes after fcfa19c
 - Mirelo: USER to decide on committing 96 MB of fact_loan CSVs (split in 3) vs gitignoring CSVs / Git LFS; later lh_raw schema mirelo_sales (ADR-0011 (a), not in the draft)
 - ACME Trucks: USER Desktop refresh + baseline-live.dax; Q-01 sensitive values (data, DAX literals); propose CLAUDE.md row for workspace Showcase (personal tenant)
@@ -33,6 +34,7 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-29/30 (delegated, late): Nordmark period-model control totals: 93 keys / 26,143 rows (incl. EBITDA Previous P-@k), verify 86 green, Parquet identical; generate.py control_totals edited (CSV writer only, flagged); no Fabric calls, no git
 - 2026-10-28 (delegated, evening): Nordmark Retail dummy dataset (ADR-0013 phase 1): generator + verify (76 green, byte-identical rerun) + README contract; no Fabric calls, no git
 - 2026-10-28 (delegated, later): RAW model republish: preflight verify green, backup service-2026-10-28, updateDefinition 50 parts, refresh 42.9 s, service tests all green (T-P chunked, 10 GB query memory cap), frozen perf re-timed; ADR-0008 §5.2 + semantic-model.md header written; no git
 - 2026-10-28 (delegated): .sync Power BI packs for vosk.dev; loader --parquet-out/--tables; no Fabric calls, no pbi-report edits, no git

@@ -1,4 +1,4 @@
-<!-- next-id: DEC-006 -->
+<!-- next-id: DEC-007 -->
 
 # Decisions (durable)
 
@@ -61,3 +61,16 @@
 **Last-verified:** 2026-10-28
 **Related:** DEC-001, DEC-003
 **Status:** active (ADR-0013 Proposed; the four USER points inside it are decided)
+
+### DEC-006 · Nordmark exec: granularity picker (W/P/Q/FY + one item) replaces the Week/PTD/YTD switcher; items derived from dim_week, like-length "previous item", `@k` control keys · 2026-10-29
+**Decision:** period model = granularity (Week · Month=4-5-4 period · Quarter · Year) + one item, default W43 FY2026 so the v5 story is untouched; bars follow the granularity (13 / 12 / 8 / 2); comparator kept with "Last week" → "Previous item" (previous member, cut to the current item's week count when the current item is partial; **at Year "Previous" is hidden** because it would ≡ LY — USER 2026-10-29, overturning "keep both"; `c=prev` + Year item normalises to `ly`); Δ suffix always short `vs prev. wk / mth / qtr` (USER); "Month" is the only UI word for the 4-5-4 period, chips stay P1…P12 (USER round 3); EBITDA-at-Week Previous = previous month cut to the week's position, control value = the W key's `P-…@k` key (always `@k`; 87 item keys; week 5 of a 5-week month → N/A) (USER round 3 + main-agent ruling); ⓘ fixed copy period-neutral, owner notes dropped (USER round 3); Channel mix = window shares at P/Q/FY, exit mix only at W (USER, overturning the as-built reading; `mix_*` control rows move, ET-24 excludes them); Budget stays FY2026-only → budget cards N/A in FY2025, target cards still rated; EBITDA = PTD at Week (v5), own window at P/Q/FY; control keys `{W|P|Q|FY}-FY{yyyy}[-{n}][@{k}]` (`@k` = first k weeks; 62 keys, ≈ 17.2 k rows); items derived per flavour from `dim_week` (no generator table); JS URL = single `i=` item key with granularity implied, legacy `p=`/`c=lw` parse-only.
+**Why:** USER first-open feedback 2026-10-29 (coms §7): "a proper calendar / history", no date picker, both flavours. Like-length cut chosen over full-previous-item because € deltas of the two partial items (Q4 FY2026, FY2026) would compare 4 vs 13 weeks; chosen over N/A because it makes "previous year" coincide with LY at Year. No FY2025 budget generated: it would rewrite the story data for a history view the N/A pattern already covers.
+**Reversal cost:** low–medium — only `calendar.ts`/`metrics.ts`/`view.ts`/`url-state.ts` window functions and the PBI folder-9 window measures move; cube, Parquet and story untouched. Key grammar change forces a `verify.py` + DAX test regeneration (≈ 65 min serial DAX run unless sampled).
+**Applied at:** `docs/ADR/0013-nordmark-executive-dashboard.md` (k) + "Resolved"; `docs/Requirements-exec.md` §2b E-90…E-99, ET-21…ET-30; `docs/ADD/features/exec-period-model.md` §8 (resolved) + §9
+**Hits:** 2
+**Tags:** nordmark, period-model, calendar, 4-5-4, granularity, comparator, control-totals, url-state, pbi-picker, parity
+**Confidence:** high (USER decision; all 9 §8 points ruled 2026-10-29 — 6 defaults held, 3 overturned: Year comparator, channel-mix window, Δ length)
+**Last-verified:** 2026-10-29
+**Last-refined:** 2026-10-29
+**Related:** DEC-005, CNV-001
+**Status:** active

@@ -75,12 +75,6 @@ export const SideIcons = {
       <path d="M14 12v4M12 14h4" />
     </svg>
   ),
-  notes: (
-    <svg viewBox="0 0 20 20" {...SIDE} aria-hidden="true">
-      <path d="M5 3h7l4 4v10H5z" />
-      <path d="M12 3v4h4M7.5 10.5h5M7.5 13.5h5" />
-    </svg>
-  ),
 };
 
 /** 13-week bars with the dotted target (E-29). Card: stretched to the CSS box; pop-up: fixed size with week labels. */

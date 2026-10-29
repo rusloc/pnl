@@ -787,14 +787,21 @@ def control_totals(T):
     rule = T['param_status_rule'].set_index('rule_code')
     swk = wk.season_week.fillna(0).astype(int).values
 
-    def window(t, fy, w):
+    per, qtr = wk.period.values, wk.quarter.values
+
+    def window(t, fy, w, k=None):
+        """Key grammar {W|P|Q|FY}-FY{yyyy}[-{n}][@{k}] (exec-period-model.md §6, E-99): item weeks ∩ actuals, @k = first k weeks.
+        PTD / YTD = legacy keys (w = as-of week), frozen as written on 2026-10-28 until both flavours have migrated."""
         base = (fy - 2025) * 52
         if t == 'W': return [base + w - 1]
         if t == 'PTD': i = base + w - 1; return list(range(PSI[i], i + 1))
-        return list(range(base, base + w))
+        if t == 'YTD': return list(range(base, base + w))
+        ix = [i for i in range(base, min(base + 52, NACT)) if t == 'FY' or (per if t == 'P' else qtr)[i] == w]
+        return ix[:k] if k else ix
 
-    def evaluate(s, t, fy, w):
-        g = G[s]; ix = window(t, fy, w); L = ix[-1]; S_ = lambda k: g[k][ix].sum()
+    def evaluate(s, t, fy, w, k=None):
+        g = G[s]; ix = window(t, fy, w, k); L = ix[-1]; S_ = lambda k: g[k][ix].sum()
+        MX = (lambda c: g[c][ix].sum()) if t in ('P', 'Q', 'FY') else (lambda c: g[c][L])   # channel mix: window shares at P / Q / FY (USER 2026-10-29), last week at W
         v = {}
         v.update(gross_sales=S_('gross_sales'), markdown=S_('markdown_value'), returns=S_('returns'), net_sales=S_('net_sales'), cogs=S_('cogs_landed'),
                  back_margin=S_('back_margin_alloc'))
@@ -829,10 +836,10 @@ def control_totals(T):
         if L >= 51:
             r = list(range(L - 51, L + 1)); fm52 = (g['net_sales'][r] - g['cogs_landed'][r]).sum(); av = g['on_hand_cost'][r].mean()
             if av: v.update(gmroi_front_margin_r52w=fm52, gmroi_avg_on_hand_cost=av, gmroi=fm52 / av, gmroi_target=2.5)
-        nl = g['net_sales'][L]
+        nl = MX('net_sales')
         if nl:
             for chn, k in [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]:
-                v[f'mix_{k}_net_sales'] = g[f'ch_{chn}'][L]; v[f'mix_{k}_pct'] = g[f'ch_{chn}'][L] / nl
+                v[f'mix_{k}_net_sales'] = MX(f'ch_{chn}'); v[f'mix_{k}_pct'] = MX(f'ch_{chn}') / nl
         if fy == 2026:
             v.update(net_sales_bud=S_('net_sales_bud'), gross_sales_bud=S_('gross_sales_bud'), markdown_bud=S_('markdown_bud'), cogs_bud=S_('cogs_bud'),
                      back_margin_bud=S_('back_margin_bud'))
@@ -844,9 +851,9 @@ def control_totals(T):
             v['ebitda_margin_pct_bud'] = v['ebitda_bud'] / v['net_sales_bud']
             if 'lfl_net_sales_ly' in v:
                 v['lfl_net_sales_bud'] = S_('lfl_bud'); v['lfl_growth_pct_bud'] = v['lfl_net_sales_bud'] / v['lfl_net_sales_ly'] - 1
-            nb = g['net_sales_bud'][L]
+            nb = MX('net_sales_bud')
             if nb and nl:
-                for chn, k in [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]: v[f'mix_{k}_pct_bud'] = g[f'chb_{chn}'][L] / nb
+                for chn, k in [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]: v[f'mix_{k}_pct_bud'] = MX(f'chb_{chn}') / nb
                 devs = [v[f'mix_{k}_pct'] - v[f'mix_{k}_pct_bud'] for k in ['store', 'online', 'wholesale']]
                 j_ = int(np.argmax(np.abs(devs))); v['mix_max_dev_pp'] = devs[j_]; v['mix_max_dev_channel'] = j_ + 1     # first channel on a tie
         return v
@@ -856,40 +863,49 @@ def control_totals(T):
         return 1 if b <= r_.watch_from else (2 if b <= r_.off_from else 3)
 
     def card_status(s, t, fy, w, v):
-        if fy != 2026: return {}
-        p = evaluate(s, 'PTD', fy, w) if t != 'PTD' else v
+        if t in ('PTD', 'YTD') and fy != 2026: return {}                       # legacy keys: as written on 2026-10-28 (no status before FY2026)
+        p = v if t in ('PTD', 'P', 'Q', 'FY') else evaluate(s, 'PTD', fy, w)    # EBITDA: period to date at W (and legacy YTD), own window at P / Q / FY
         out = {}
         def put(k, cond, b):
             out[f'status.{k.lower()}'] = status(k, b) if cond else None
         put('NET_SALES', v.get('net_sales_bud'), -(v['net_sales'] / v['net_sales_bud'] - 1) if v.get('net_sales_bud') else 0)
-        put('TOTAL_MARGIN', 'total_margin_pct' in v, v.get('total_margin_pct_bud', 0) - v.get('total_margin_pct', 0))
+        put('TOTAL_MARGIN', 'total_margin_pct' in v and 'total_margin_pct_bud' in v, v.get('total_margin_pct_bud', 0) - v.get('total_margin_pct', 0))
         put('WEEKS_OF_COVER', 'weeks_of_cover' in v, abs(v.get('weeks_of_cover', 0) - v.get('cover_target_wks', 0)))
-        put('MARKDOWN', 'markdown_pct' in v, v.get('markdown_pct', 0) - v.get('markdown_pct_bud', 0))
+        put('MARKDOWN', 'markdown_pct' in v and 'markdown_pct_bud' in v, v.get('markdown_pct', 0) - v.get('markdown_pct_bud', 0))
         put('AVAILABILITY', 'availability_pct' in v, .97 - v.get('availability_pct', 0))
         put('EBITDA', bool(p.get('ebitda_bud')), -(p['ebitda'] / p['ebitda_bud'] - 1) if p.get('ebitda_bud') else 0)
         put('LFL_GROWTH', 'lfl_growth_pct_bud' in v, v.get('lfl_growth_pct_bud', 0) - v.get('lfl_growth_pct', 0))
-        put('FRONT_GM', 'front_gm_pct' in v, v.get('front_gm_pct_bud', 0) - v.get('front_gm_pct', 0))
+        put('FRONT_GM', 'front_gm_pct' in v and 'front_gm_pct_bud' in v, v.get('front_gm_pct_bud', 0) - v.get('front_gm_pct', 0))
         put('SELL_THROUGH', 'sell_through_pct' in v, .62 - v.get('sell_through_pct', 0))
         put('GMROI', 'gmroi' in v, 2.5 - v.get('gmroi', 0))
         put('SUPPLIER_OTIF', 'otif_pct' in v, .95 - v.get('otif_pct', 0))
         put('CHANNEL_MIX', 'mix_max_dev_pp' in v, abs(v.get('mix_max_dev_pp', 0)))
         st_ = [x for x in out.values() if x is not None]
         n = len(st_); on, wa, of = st_.count(1), st_.count(2), st_.count(3)
-        dot = 3 if of / n >= rule.loc['DOT_RED_OFF'].threshold else (2 if (wa + of) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold
-              else (1 if on / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2))
-        out.update({'status.count_on': on, 'status.count_watch': wa, 'status.count_off': of, 'status.count_na': 12 - n, 'status.dot': dot,
-                    'ebitda_ptd': p['ebitda'], 'ebitda_bud_ptd': p.get('ebitda_bud')})
+        dot = None if not n else 3 if of / n >= rule.loc['DOT_RED_OFF'].threshold else (2 if (wa + of) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold
+              else (1 if on / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2))       # n = 0: no dot row (grey dot, E-95)
+        out.update({'status.count_on': on, 'status.count_watch': wa, 'status.count_off': of, 'status.count_na': 12 - n, 'status.dot': dot})
+        if t in ('W', 'PTD', 'YTD'): out.update({'ebitda_ptd': p['ebitda'], 'ebitda_bud_ptd': p.get('ebitda_bud')})   # W keys only (+ legacy)
         return out
 
-    keys = [('W', 2026, w) for w in range(30, 44)] + [('W', 2025, w) for w in range(31, 44)]
-    keys += [('PTD', 2026, 43), ('PTD', 2026, 42), ('PTD', 2025, 43), ('YTD', 2026, 43), ('YTD', 2026, 42), ('YTD', 2025, 43)]
+    keys = [('W', 2026, w, None) for w in range(30, 44)] + [('W', 2025, w, None) for w in range(31, 44)]
+    keys += [('P', y, n, None) for y in (2025, 2026) for n in range(1, 13) if window('P', y, n)]       # every Month item (22)
+    keys += [('Q', y, n, None) for y in (2025, 2026) for n in range(1, 5) if window('Q', y, n)]        # every Quarter item (8)
+    keys += [('FY', 2025, None, None), ('FY', 2026, None, None), ('Q', 2026, 3, 4), ('Q', 2025, 4, 4), ('FY', 2025, None, 43)]
+    def ebitda_prev(fy, w):     # EBITDA card, Previous at Week (USER 2026-10-29): the previous period's first k weeks, k = week of period;
+        i = (fy - 2025) * 52 + w - 1; fy_, p_ = (fy, per[i] - 1) if per[i] > 1 else (fy - 1, 12)     # None = N/A when the previous period is shorter than k
+        k_ = i - PSI[i] + 1; return ('P', fy_, p_, k_) if k_ <= len(window('P', fy_, p_)) else None  # (week 5 of a 5-week period; main agent 2026-10-30)
+    for (_, fy, w, _) in [x for x in keys if x[0] == 'W']:                                         # the covered W keys
+        if ebitda_prev(fy, w) and ebitda_prev(fy, w) not in keys: keys.append(ebitda_prev(fy, w))
+    keys += [('PTD', 2026, 43, None), ('PTD', 2026, 42, None), ('PTD', 2025, 43, None),               # legacy, removed once both flavours
+             ('YTD', 2026, 43, None), ('YTD', 2026, 42, None), ('YTD', 2025, 43, None)]               # read the item keys (README)
     rows = []
-    for (t, fy, w) in keys:
-        pk = f'{t}-FY{fy}-{w:02d}'
+    for (t, fy, w, kw) in keys:
+        pk = (f'FY-FY{fy}' if t == 'FY' else f'Q-FY{fy}-{w}' if t == 'Q' else f'{t}-FY{fy}-{w:02d}') + (f'@{kw}' if kw else '')
         for s in SCOPES:
-            v = evaluate(s, t, fy, w); v.update(card_status(s, t, fy, w, v))
+            v = evaluate(s, t, fy, w, kw); v.update(card_status(s, t, fy, w, v))
             if s == 'ALL':
-                ix = window(t, fy, w); L = ix[-1]
+                ix = window(t, fy, w, kw); L = ix[-1]
                 for c, gc in GC.items():
                     if L >= 51: v[f'gmroi.{c}'] = gc['fm'][L - 51:L + 1].sum() / gc['oh'][L - 51:L + 1].mean()
                     if swk[L] and c in seasonal:
@@ -937,7 +953,7 @@ def story_expect():
 
 def story_actual(get):
     """Render the Week-43 ALL story from control-total values; get(period_key, metric) -> float."""
-    W, P, Y = 'W-FY2026-43', 'PTD-FY2026-43', 'YTD-FY2026-43'
+    W, P, Y = 'W-FY2026-43', 'P-FY2026-10', 'FY-FY2026'
     g = lambda k, p=W: get(p, k)
     def eur(x, d=1): return (M if x < 0 else '') + f'€{abs(x) / 1e6:,.{d}f}m'
     def pc(x, d=1): return f'{x * 100:.{d}f}%'

@@ -1,14 +1,16 @@
 import type { Scope } from '../data/manifest.ts';
-import { lyWeek, windowWeeks, weekRow } from './calendar.ts';
-import type { PeriodKind } from './calendar.ts';
+import { lyWeek, weekRow } from './calendar.ts';
 import { SCOPE_GROUPS, SELLING_GROUPS, STORE_GROUPS, groupIndex, sum, sumOpex, sumSites } from './cube.ts';
 import type { ExecData, Measure } from './cube.ts';
+import { toDate } from './items.ts';
+import type { Window } from './items.ts';
 import { DOT_CODE, STATUS_CODE, countStatuses, dotOf, dotRule, statusOf } from './status.ts';
 import type { Status } from './status.ts';
 
 // The metric set of one scope × window (E-30 … E-41), keyed by the control-total metric codes of
 // data/nordmark_retail_dummy_data/checks/control_totals_eur.csv. An absent key is N/A (data README "Control totals").
-// Full precision throughout; rounding happens only in format.ts (E-42).
+// Full precision throughout; rounding happens only in format.ts (E-42). One window = one item or a comparator window of
+// it (items.ts); the status block runs for every window and a card is N/A where its input or basis is blank (E-95).
 
 export type Metrics = Readonly<Record<string, number>>;
 
@@ -22,31 +24,39 @@ const CHANNELS: readonly (readonly [string, readonly number[]])[] = [
   ['wholesale', [groupIndex('WHOLESALE')]],
 ];
 
-export function computeMetrics(d: ExecData, scope: Scope, kind: PeriodKind, asOf: number): Metrics {
-  const m = base(d, scope, kind, asOf);
-  const fy = weekRow(d, asOf).fy;
-  if (fy === d.currentFy) {
-    const ptd = kind === 'PTD' ? m : base(d, scope, 'PTD', asOf);
+export function computeMetrics(d: ExecData, scope: Scope, win: Window): Metrics {
+  const m = base(d, scope, win.weeks);
+  const L = lastOf(win.weeks);
+  if (win.gran === 'W') {
+    // EBITDA flash at Week = period to date through the week (E-40, E-93); at P / Q / FY the card reads `ebitda`
+    const ptd = base(d, scope, toDate(d, 'P', L).weeks);
     if (ptd.ebitda !== undefined) m.ebitda_ptd = ptd.ebitda;
     if (ptd.ebitda_bud !== undefined) m.ebitda_bud_ptd = ptd.ebitda_bud;
-    const statuses = d.cards.map((k) => {
-      const b = badness(k.kpi_code, m);
-      const rule = d.rules.get(k.kpi_code);
-      if (!rule) throw new Error(`metrics: no status rule for ${k.kpi_code}`);
-      const s: Status | null = b === null ? null : statusOf(b, rule);
-      if (s) m[statusKey(k.kpi_code)] = STATUS_CODE[s];
-      return s;
-    });
-    const c = countStatuses(statuses);
-    m['status.count_on'] = c.on;
-    m['status.count_watch'] = c.watch;
-    m['status.count_off'] = c.off;
-    m['status.count_na'] = c.na;
-    m['status.dot'] = DOT_CODE[dotOf(c, dotRule(d.rules))];
   }
-  if (scope === 'ALL') Object.assign(m, categoryStats(d, kind, asOf));
+  const statuses = d.cards.map((k) => {
+    const b = badness(k.kpi_code, m);
+    const rule = d.rules.get(k.kpi_code);
+    if (!rule) throw new Error(`metrics: no status rule for ${k.kpi_code}`);
+    const s: Status | null = b === null ? null : statusOf(b, rule);
+    if (s) m[statusKey(k.kpi_code)] = STATUS_CODE[s];
+    return s;
+  });
+  const c = countStatuses(statuses);
+  m['status.count_on'] = c.on;
+  m['status.count_watch'] = c.watch;
+  m['status.count_off'] = c.off;
+  m['status.count_na'] = c.na;
+  // no rated card → no dot (the view shows it grey, E-95); OTIF is always rated, so the shipped data never hits it
+  if (c.on + c.watch + c.off > 0) m['status.dot'] = DOT_CODE[dotOf(c, dotRule(d.rules))];
+  if (scope === 'ALL') Object.assign(m, categoryStats(d, win.gran, L));
   return m;
 }
+
+const lastOf = (weeks: readonly number[]): number => {
+  const L = weeks.at(-1);
+  if (L === undefined) throw new Error('metrics: empty window');
+  return L;
+};
 
 /** Direction-adjusted shortfall vs Budget / target (E-22, E-24); null = N/A. Targets come from the metric set. */
 export function badness(kpi: string, m: Readonly<Record<string, number>>): number | null {
@@ -65,8 +75,11 @@ export function badness(kpi: string, m: Readonly<Record<string, number>>): numbe
       return has('markdown_pct', 'markdown_pct_bud') ? v('markdown_pct') - v('markdown_pct_bud') : null;
     case 'AVAILABILITY':
       return has('availability_pct') ? v('availability_target') - v('availability_pct') : null;
-    case 'EBITDA':
-      return has('ebitda_ptd', 'ebitda_bud_ptd') ? 1 - v('ebitda_ptd') / v('ebitda_bud_ptd') : null;
+    case 'EBITDA': {
+      // Week reads the period-to-date pair, Month / Quarter / Year the window's own (E-93)
+      const [a, bud] = 'ebitda_ptd' in m ? ['ebitda_ptd', 'ebitda_bud_ptd'] : ['ebitda', 'ebitda_bud'];
+      return has(a, bud) ? 1 - v(a) / v(bud) : null;
+    }
     case 'LFL_GROWTH':
       return has('lfl_growth_pct', 'lfl_growth_pct_bud') ? v('lfl_growth_pct_bud') - v('lfl_growth_pct') : null;
     case 'FRONT_GM':
@@ -91,9 +104,8 @@ function target(d: ExecData, kpi: string): number {
   return t.target_value;
 }
 
-function base(d: ExecData, scope: Scope, kind: PeriodKind, asOf: number): Record<string, number> {
-  const ws = windowWeeks(d, kind, asOf);
-  const L = asOf;
+function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, number> {
+  const L = lastOf(ws);
   const groups = SCOPE_GROUPS[scope];
   const S = (
     measure: Measure,
@@ -183,14 +195,14 @@ function base(d: ExecData, scope: Scope, kind: PeriodKind, asOf: number): Record
     m.gmroi_target = target(d, 'GMROI');
   }
 
-  // Channel mix (point in time, E-41)
-  const net = S('net_sales', [L]);
+  // Channel mix (E-41): shares over the window (USER 2026-10-29; at Week the window is the week itself)
+  const net = S('net_sales');
   for (const [name, channelGroups] of CHANNELS) {
-    m[`mix_${name}_net_sales`] = S('net_sales', [L], within(groups, channelGroups));
+    m[`mix_${name}_net_sales`] = S('net_sales', ws, within(groups, channelGroups));
     m[`mix_${name}_pct`] = (m[`mix_${name}_net_sales`] ?? 0) / net;
   }
 
-  // Budget (the as-of FY only, E-14)
+  // Budget (the as-of FY only, E-14): absent in FY2025, so every budget-based value and status is N/A there (E-95)
   if (weekRow(d, L).fy === d.currentFy) {
     m.net_sales_bud = S('net_sales_bud');
     m.gross_sales_bud = S('gross_sales_bud');
@@ -217,10 +229,10 @@ function base(d: ExecData, scope: Scope, kind: PeriodKind, asOf: number): Record
       m.lfl_net_sales_bud = S('net_sales_bud_lfl');
       m.lfl_growth_pct_bud = m.lfl_net_sales_bud / m.lfl_net_sales_ly - 1;
     }
-    const netBud = S('net_sales_bud', [L]);
+    const netBud = m.net_sales_bud;
     let worst = 0;
     CHANNELS.forEach(([name, channelGroups], i) => {
-      const pct = S('net_sales_bud', [L], within(groups, channelGroups)) / netBud;
+      const pct = S('net_sales_bud', ws, within(groups, channelGroups)) / netBud;
       m[`mix_${name}_pct_bud`] = pct;
       const dev = (m[`mix_${name}_pct`] ?? 0) - pct;
       if (i === 0 || Math.abs(dev) > Math.abs(m.mix_max_dev_pp ?? 0)) {
@@ -295,10 +307,10 @@ export function availabilityByCategory(d: ExecData, scope: Scope, L: number): Ma
 }
 
 /** ALL-only control-total extras: GMROI per category, sell-through per seasonal category, suppliers below 85 % (W). */
-function categoryStats(d: ExecData, kind: PeriodKind, L: number): Record<string, number> {
+function categoryStats(d: ExecData, gran: Window['gran'], L: number): Record<string, number> {
   const out: Record<string, number> = {};
   for (const [code, v] of gmroiByCategory(d, 'ALL', L) ?? []) out[`gmroi.${code}`] = v;
   for (const [code, v] of sellThroughByCategory(d, 'ALL', L) ?? []) out[`sell_through_pct.${code}`] = v;
-  if (kind === 'W') out.otif_suppliers_below_85 = d.poBelow85[L] ?? 0;
+  if (gran === 'W') out.otif_suppliers_below_85 = d.poBelow85[L] ?? 0;
   return out;
 }

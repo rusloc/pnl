@@ -18,7 +18,7 @@ cd data\nordmark_retail_dummy_data
 py -3.12 -m venv generator\.venv                                   # once; .venv is gitignored
 generator\.venv\Scripts\python.exe -m pip install -r generator\requirements.txt
 generator\.venv\Scripts\python.exe generator\generate.py           # writes parquet\ and checks\ (~3 s)
-generator\.venv\Scripts\python.exe checks\verify.py                # 76 checks incl. a byte-identical rerun, exit 1 on any failure (~15 s)
+generator\.venv\Scripts\python.exe checks\verify.py                # 86 checks incl. a byte-identical rerun, exit 1 on any failure (~15 s)
 ```
 
 - `generate.py --out <folder>` writes the dataset somewhere else. `verify.py --data <folder>` checks that folder; `--no-rerun` skips the determinism rerun (ET-20).
@@ -48,8 +48,8 @@ generator\.venv\Scripts\python.exe checks\verify.py                # 76 checks i
 | parquet/param_status_rule.parquet | 15 | status rule per landing card + the 3 dot constants |
 | parquet/param_target.parquet | 27 | KPI × category (or ALL) target |
 | parquet/manifest.json | — | rows, bytes, column → Arrow type per table; seed, as-of, current week, refresh stamp, calendar anchor |
-| checks/control_totals_eur.csv | 9,328 | scope × period × metric (see Control totals) |
-| checks/verify.py | — | independent recomputation and story checks (ET-01, 02, 03, 04, 05, 20) |
+| checks/control_totals_eur.csv | 26,143 | scope × period key × metric (see Control totals) |
+| checks/verify.py | — | independent recomputation and story checks (ET-01 … 05, 20 … 24, 27) |
 | generator/generate.py | — | the generator (Python 3.12, seed 20261028) |
 
 ## Format
@@ -133,17 +133,19 @@ generator\.venv\Scripts\python.exe checks\verify.py                # 76 checks i
 - Availability is store-only, so it is N/A for ONLINE. LFL is store-only, so it is N/A for ONLINE.
 - Stock-based cards in a scope use that scope's locations only: DC stock is in ALL, never in NL / BE.
 
-**Windows (period switcher, E-13).** Week = the as-of week. Period to date = the as-of week's period from its first week. Year to date = FY W1 … as-of week.
+**Windows (granularity picker, E-90 … E-93, `docs/ADD/features/exec-period-model.md`).** An item is one Week, Month (the 4-5-4 retail period), Quarter (13 weeks) or Year (52 weeks) of `dim_week`. Its window = its weeks ∩ actuals. At the as-of week, Q4 FY2026 (W40–W43) and FY2026 (W1–W43) are partial ("to date"); P10 FY2026 is complete.
 
 - Flow metrics sum over the window: sales, margins, markdown, LFL, OTIF, EBITDA, budget.
-- Point-in-time metrics take the window's last week: Weeks of cover, Availability, GMROI, Sell-through, Channel mix.
-- The EBITDA card always shows period to date (`ebitda_ptd`), whatever the switcher says. Its bars are weekly EBITDA.
+- Point-in-time metrics take the window's last week: Weeks of cover, Availability, GMROI, Sell-through (N/A when that week is outside a season).
+- Channel mix: the last week at Week; shares over the whole window at Month / Quarter / Year (USER 2026-10-29).
+- The EBITDA card shows period to date through the week at Week (`ebitda_ptd`) and the item's own window at Month / Quarter / Year (`ebitda`). Its bars are one per item.
 
 **Comparators (E-14).**
 
 - Budget = `fact_budget_week` / `fact_opex_week` scenario BUD, or the card's target.
 - Last year = the same window one year back by week key (`ly_week_key`; `W-FY2025-43` is the LY of `W-FY2026-43`). Never join LY on dates: 19 Oct 2025 is in FY2025 W42 (ET-05).
-- Last week = the same window type with the as-of week moved back one week. For PTD and YTD that is the window "as of last week" (`PTD-FY2026-42` = W40–W42).
+- Previous item = the item before at the same granularity (`lw_week_key` at Week). Exception, the EBITDA card at Week: its value is period to date, so Previous = the previous period cut to the same number of weeks (week k of P10 → P9 weeks 1 … k; P1 → P12 of the FY before; USER 2026-10-29). Week 5 of a 5-week period (W9, W22, W35, W48) has no like-length window, so its EBITDA Previous is N/A: no value, no Δ (main agent 2026-10-30). A complete item compares with the whole previous item, even when the 4-5-4 lengths differ. A partial item compares with the previous item's first k weeks (`Q-FY2026-3@4`). Year has no previous-year comparator, only Last year (USER 2026-10-29).
+- FY2025 items: no budget (budget-based values, Δ and status N/A) and no LY (the data starts at FY2025 W1).
 - The status chip is always vs Budget / target (E-24). Only the Δ row follows the comparator.
 
 **Card formulas (E-30 … E-41).**
@@ -162,7 +164,7 @@ generator\.venv\Scripts\python.exe checks\verify.py                # 76 checks i
 | Supplier OTIF % | Σ `po_lines_otif` ÷ Σ `po_lines_due` |
 | EBITDA | Total margin € − Σ `amount` (SHRINK, STORE_OPEX, CENTRAL_OPEX, FULFILMENT). Budget = scenario BUD with the budget total margin. Margin % = ÷ Net sales |
 | LFL growth % | See LFL |
-| Channel mix | Net sales by `channel_code` ÷ Net sales, last week. Plan = Budget Net-sales shares, last week. The Δ row shows the channel with the largest absolute deviation (first channel on a tie) |
+| Channel mix | Net sales by `channel_code` ÷ Net sales: the last week at Week, the whole window at Month / Quarter / Year. Plan = Budget Net-sales shares on the same weeks. The Δ row shows the channel with the largest absolute deviation (first channel on a tie) |
 
 **LFL (E-31).** A store is LFL for a retail period when:
 
@@ -193,7 +195,7 @@ Then: **On track** if *b* ≤ `watch_from`; **Watch** if *b* ≤ `off_from`; els
 
 This keeps the E-22 table: a value exactly on the Watch edge (−3 %, −1.0 pp, 2 wks …) is Watch, and Off track starts strictly beyond it. E-23's sentence "a Δ of exactly the off-track edge is Off track" contradicts the table; see Open points.
 
-**Overall dot (E-26).** Over the 12 cards with a status (N/A excluded from the denominator), attribute filters ignored:
+**Overall dot (E-26).** Over the cards with a status (N/A excluded from the denominator; n = 0 gives no `status.dot` row = grey dot), attribute filters ignored:
 
 1. **red** if off ÷ n ≥ `DOT_RED_OFF` (1/3);
 2. else **orange** if (watch + off) ÷ n > `DOT_ORANGE_WATCH_OFF` (0.5);
@@ -206,21 +208,37 @@ Week 43 ALL: 7 / 3 / 2 → orange.
 
 ## Control totals
 
-`checks/control_totals_eur.csv` is long format: `scope, period_key, metric_code, value`. It holds 9,328 values. The generator computes them from the tables it writes; `verify.py` recomputes every one independently (ET-01).
+`checks/control_totals_eur.csv` is long format: `scope, period_key, metric_code, value`. It holds 26,143 values: 87 item keys and 6 legacy keys × 4 scopes. The generator computes them from the tables it writes; `verify.py` recomputes every one independently (ET-01).
 
 - **Tolerance:** amounts 0.005, ratios 1e-6, counts and codes exact.
 - **Scopes:** ALL, NL, BE, ONLINE.
-- **Period keys** `{W|PTD|YTD}-FY{yyyy}-{as-of week}`:
-  - `W-FY2026-30` … `W-FY2026-43` (the 13 bar weeks and the LW of W31);
-  - `W-FY2025-31` … `W-FY2025-43` (their LY);
-  - `PTD-FY2026-43` (P10 = W40–W43), `PTD-FY2026-42` (its LW: W40–W42), `PTD-FY2025-43` (its LY);
-  - `YTD-FY2026-43`, `YTD-FY2026-42`, `YTD-FY2025-43`.
-- **Absent row** = N/A for that scope and window. Examples: no budget or status in FY2025, no LFL or GMROI where the LY or R52W history is missing, no availability or LFL for ONLINE.
+- **Key grammar** `{W|P|Q|FY}-FY{yyyy}[-{n}][@{k}]` (E-99, `docs/ADD/features/exec-period-model.md` §6):
+  - `W-FY2026-43` week (two digits) · `P-FY2026-10` retail period, the "Month" (two digits) · `Q-FY2026-4` quarter · `FY-FY2026` year;
+  - without `@`: the item's weeks ∩ actuals, so `Q-FY2026-4` = W40–W43 and `FY-FY2026` = W1–W43 at this as-of;
+  - `@k`: the item's first k weeks, the like-length window a partial item compares with.
+- **Item keys (87):**
+  - weeks `W-FY2026-30` … `W-FY2026-43` (the 13 bar weeks and the previous week of W31) and `W-FY2025-31` … `W-FY2025-43` (their LY). FY2026 W01–W29 and FY2025 W01–W30 have no rows: same code path, and the parity tests pick one of them (ET-25);
+  - every Month item `P-FY2025-01` … `P-FY2025-12`, `P-FY2026-01` … `P-FY2026-10`;
+  - every Quarter item `Q-FY2025-1` … `Q-FY2025-4`, `Q-FY2026-1` … `Q-FY2026-4`;
+  - both Year items `FY-FY2025`, `FY-FY2026`;
+  - like-length windows `Q-FY2026-3@4` (previous item of Q4 to date: W27–W30), `Q-FY2025-4@4` (its LY: FY2025 W40–W43), `FY-FY2025@43` (LY of FY2026 to date: FY2025 W1–W43);
+  - EBITDA Previous at Week (25): `P-FY{yyyy}-{p−1}@{k}` for every covered W key, k = its `week_of_period`: `P-FY2026-06@4`, `P-FY2026-07@1` … `@4`, `P-FY2026-08@1` … `@4`, `P-FY2026-09@1` … `@4`, `P-FY2025-07@1` … `@4`, `P-FY2025-08@1` … `@4`, `P-FY2025-09@1` … `@4`. The key always carries `@k`, even when k covers the whole previous period (`P-FY2026-09@4` = P9 = W36–W39; same values as `P-FY2026-09`). Week 5 of a 5-week period has no key: `W-FY2026-35` and `W-FY2025-35` read N/A (the previous period has 4 weeks). `P-FY2026-07@4` / `P-FY2025-07@4` stay, for W34.
+- **Comparator key of an item** (ET-23):
+  - Last year = the same granularity and number in FY2025, with `@k` when the item is partial. FY2025 items have no LY.
+  - Previous item = the item before, at the same granularity. It is whole when the picked item is complete, even across 4-5-4 lengths, and `@k` when it is partial. There is none for the first item of the data (W01 / P01 / Q1 FY2025) and none at Year.
+  - EBITDA card at a W key: Δ vs Previous = `ebitda_ptd` of the W key − `ebitda` of its `P-…@k` key (above), not the previous week's `ebitda_ptd`; N/A at week 5 of a 5-week period. Every other W-key comparator reads the previous W key (`lw_week_key`).
+- **Legacy keys, to be removed:** `PTD-FY2026-43`, `PTD-FY2026-42`, `PTD-FY2025-43`, `YTD-FY2026-43`, `YTD-FY2026-42`, `YTD-FY2025-43`.
+  - They stay byte-identical to the 2026-10-28 file (pinned hash, ET-22) under the old rules: exit channel mix, no status before FY2026, EBITDA status on P10 to date. Do not build on them.
+  - They keep the current js-exec and PBI tests fed while both flavours move to the item keys.
+  - Successors: `P-FY2026-10`, `P-FY2025-10`, `FY-FY2026` and `FY-FY2025@43`. The "as of last week" windows (`-42`) have none.
+  - ET-24 asserts the successors equal them and prints every difference. Allowed differences: channel mix, which now uses window shares; the EBITDA status of `FY-FY2026`, which now uses the FY window; and `ebitda_ptd` / `ebitda_bud_ptd`, which now exist on W keys only.
+  - Removal: delete them from both key lists (`generate.py` › `control_totals`, `verify.py` › `KEYS`). Then drop the `LEGACY` branches, the legacy ET-22 hash, ET-24 and the YTD clause of ET-27, regenerate, and run `verify.py`.
+- **Absent row** = N/A for that scope and window. Examples: no budget in FY2025, no LFL or GMROI where the LY or R52W history is missing, no sell-through when the window ends outside a season, no availability or LFL for ONLINE.
 
 Metrics:
 
 - **Sales and margin (window):** `gross_sales`, `markdown`, `returns`, `net_sales`, `cogs`, `front_margin`, `back_margin`, `total_margin`, `front_gm_pct`, `back_margin_pct`, `total_margin_pct`, `markdown_pct`.
-- **EBITDA (window):** `opex_shrink`, `opex_store`, `opex_central`, `opex_fulfilment`, `ebitda`, `ebitda_margin_pct`. The card values are `ebitda_ptd` and `ebitda_bud_ptd`.
+- **EBITDA (window):** `opex_shrink`, `opex_store`, `opex_central`, `opex_fulfilment`, `ebitda`, `ebitda_margin_pct`. The card value at W keys is `ebitda_ptd` / `ebitda_bud_ptd` (period to date through the week, W keys only). At P / Q / FY keys it is `ebitda` / `ebitda_bud` of the key.
 - **LFL:** `lfl_net_sales`, `lfl_net_sales_ly`, `lfl_store_count`, `lfl_growth_pct`, `store_net_sales`, `store_net_sales_ly`, `nonlfl_effect_pp`.
 - **Supplier:** `po_lines_due`, `po_lines_otif`, `otif_pct`, `otif_target`, `otif_suppliers_below_85` (W keys, ALL).
 - **Point in time:**
@@ -228,14 +246,14 @@ Metrics:
   - availability: `ranged_sku_days`, `in_stock_sku_days`, `availability_pct`, `availability_target`;
   - sell-through: `season_opening_units`, `season_receipt_units`, `season_units_sold`, `sell_through_pct`, `sell_through_target`;
   - GMROI: `gmroi_front_margin_r52w`, `gmroi_avg_on_hand_cost`, `gmroi`, `gmroi_target`;
-  - channel mix: `mix_{store|online|wholesale}_net_sales`, `mix_{…}_pct`.
-- **Budget (FY2026):** `net_sales_bud`, `gross_sales_bud`, `markdown_bud`, `cogs_bud`, `back_margin_bud`, `markdown_pct_bud`, `front_gm_pct_bud`, `total_margin_pct_bud`, `opex_*_bud`, `ebitda_bud`, `ebitda_margin_pct_bud`, `lfl_net_sales_bud`, `lfl_growth_pct_bud`, `mix_{…}_pct_bud`, `mix_max_dev_pp` (signed), `mix_max_dev_channel` (1 store, 2 online, 3 wholesale).
-- **Status (FY2026):**
+  - channel mix: `mix_{store|online|wholesale}_net_sales`, `mix_{…}_pct`. These are last-week values at W keys and window sums and shares at P / Q / FY keys.
+- **Budget (FY2026 keys):** `net_sales_bud`, `gross_sales_bud`, `markdown_bud`, `cogs_bud`, `back_margin_bud`, `markdown_pct_bud`, `front_gm_pct_bud`, `total_margin_pct_bud`, `opex_*_bud`, `ebitda_bud`, `ebitda_margin_pct_bud`, `lfl_net_sales_bud`, `lfl_growth_pct_bud`, `mix_{…}_pct_bud` (same weeks as `mix_{…}_pct`), `mix_max_dev_pp` (signed), `mix_max_dev_channel` (1 store, 2 online, 3 wholesale).
+- **Status (every key):**
   - `status.<kpi_code lower>`: 1 On track, 2 Watch, 3 Off track; absent = N/A;
-  - `status.count_on`, `status.count_watch`, `status.count_off`, `status.count_na`;
+  - `status.count_on`, `status.count_watch`, `status.count_off`, `status.count_na`, counted over the rated cards;
   - `status.dot`: 1 green, 2 orange, 3 red.
 
-  A W key's status uses the Week window. A PTD key's uses Period to date and a YTD key's uses Year to date. EBITDA is always PTD.
+  A key's status uses its own window. EBITDA uses period to date at W keys and the key's window at P / Q / FY keys. FY2025 keys rate only the target-based cards where their input exists: Weeks of cover, Availability, Sell-through, GMROI, OTIF. That gives 4 for `P-FY2025-10` (no GMROI) and 3 for `Q-FY2025-1`.
 - **ALL only, the (i) mini stats:** `gmroi.<CATEGORY>`, `sell_through_pct.<SEASONAL CATEGORY>`.
 
 ### Week 43 · ALL · vs Budget (ET-02, asserted at display precision)
@@ -307,14 +325,16 @@ Store, category, week, supplier, region, format and cluster grains exist, so the
    - `fact_forecast_week` is week × site × category, not week × category: scoped Weeks of cover needs a scoped denominator;
    - `fact_receipts_week` includes ONLINE;
    - the inventory fact carries the ONLINE fulfilment centre.
-8. **Period-key naming.** ADR-0013 (f) uses `P-FY2026-10` and `YTD-FY2026`. The file uses `PTD-FY2026-43` and `YTD-FY2026-43`, because every key names its as-of week, which the LW keys need.
+8. **Period-key naming.** ADR-0013 (f) uses `P-FY2026-10` and `YTD-FY2026`. The file uses `PTD-FY2026-43` and `YTD-FY2026-43`, because every key names its as-of week, which the LW keys need. *Superseded 2026-10-29: item keys `{W|P|Q|FY}-FY{yyyy}[-{n}][@{k}]` (Control totals); the PTD- / YTD- keys are legacy.*
 9. **E-23 vs E-22.** The table has −3 % ≤ Δ < 0 → Watch, so the edge is Watch. The next sentence says "exactly the off-track edge is Off track". The data follows the table; one sentence needs fixing.
 10. **E-15 vs E-25 / ET-03.** E-15 says the dot ignores the region switcher; E-25 and ET-03 say the dot and counts follow it. Control totals carry a dot per scope, so either reading can be built. Also undecided: whether N/A cards count in the dot denominator (here they do not).
-11. **E-41 vs E-13 / ET-09.** E-41 defines Channel mix "in the window"; E-13 and ET-09 call it point-in-time. The data follows E-13 / ET-09 (last week).
+11. **E-41 vs E-13 / ET-09.** E-41 defines Channel mix "in the window"; E-13 and ET-09 call it point-in-time. The data follows E-13 / ET-09 (last week). *Superseded 2026-10-29 (USER): Week keeps the last-week shares. Month / Quarter / Year use window shares: Σ net sales per channel ÷ Σ net sales over the item's weeks, not the exit mix at the last week. Plan uses budget shares on the same weeks (see 18).*
 12. **GMROI example.** "€1,016m ÷ €376m" cannot match OQ 11's front-margin definition with YTD sales of €2,318m (it would need R52W sales of ≈ €3.4 bn). The data gives €862m ÷ €319m = 2.7×. The v5 GMROI formula text ("Total margin for the last 12 months") and the "R12M total margin" stat label also contradict OQ 11.
 13. **Sell-through bars.**
     - The v5 series 41 → 63 % is not reachable with the (i) example's units: 8.4m sold over 12 weeks on 4.2m + 9.1m makes season week 1 about 12 %.
     - W31 lies before the AW26 season (W32–W51), so its bar is N/A. The bars read 12 → 63 %.
 14. **Net-sales bar W31–W39.** It is lowered from the v5 57.8 → 59.8 to 54.3 → 58.3. With YTD fixed at €2,318m and P10 at €241.7m, the v5 values would leave a jump between W30 and W31. P10 itself reconciles: W40–W42 sum to €180.3m, not the v5 bars' €182.8m.
 15. **Scoped EBITDA.** Central costs exist only in ALL, so the NL / BE / ONLINE EBITDA cards show a contribution. ONLINE reads about 26 %. This needs a copy note or a cost-allocation decision.
-16. **Last-week comparator for PTD / YTD.** The data assumes "the same window as of last week". The requirements do not define it.
+16. **Last-week comparator for PTD / YTD.** The data assumes "the same window as of last week". The requirements do not define it. *Superseded 2026-10-29: Previous item replaces Last week (Comparators).*
+17. **ET-26 vs GMROI history.** ET-26 says `FY2025-P10` rates the 5 target-based cards. GMROI needs R52W history (last week ≥ FY2025 W52), so P10 FY2025 rates 4: Weeks of cover, Availability, Sell-through and OTIF. GMROI is rated only from P12 / Q4 / FY2025.
+18. **Channel-mix plan at Month / Quarter / Year.** The USER answer fixes the actual shares over the window. The plan shares and the max-deviation status use budget shares on the same weeks. This is ginee's reading and not yet confirmed.

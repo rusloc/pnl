@@ -42,7 +42,7 @@ export function Card({
             {card.value}
             <small>{card.unit}</small>
           </div>
-          <div className="delta">{card.delta}</div>
+          <div className={card.deltaNa ? 'delta muted' : 'delta'}>{card.delta}</div>
           <div className="acts2">
             <button
               type="button"

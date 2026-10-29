@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { controlTotals, loadExecData } from '../test-utils/exec-data.ts';
-import { dateRange, lwWeek, lyWeek, parsePeriodKey, periodKey, windowWeeks, weekRow } from './calendar.ts';
+import { dateRange, lwWeek, lyWeek, weekRow } from './calendar.ts';
 import type { ExecData } from './cube.ts';
+import { toDate } from './items.ts';
 import { computeMetrics } from './metrics.ts';
 import { DEFAULT_SELECTION } from './url-state.ts';
 import { buildView } from './view.ts';
@@ -13,7 +14,7 @@ beforeAll(async () => {
   d = await loadExecData();
 });
 const ix = (key: string) => d.weekIx.get(key) ?? -1;
-const keys = (weeks: number[]) => weeks.map((w) => weekRow(d, w).week_key);
+const keys = (weeks: readonly number[]) => weeks.map((w) => weekRow(d, w).week_key);
 
 describe('ET-04 retail calendar', () => {
   it('104 weeks FY2025 W1 … FY2026 W52, 52 per year (no 53-week year), Mon–Sun', () => {
@@ -47,12 +48,11 @@ describe('ET-04 retail calendar', () => {
     expect(keys([lwWeek(d, d.asOf) ?? -1])).toEqual(['FY2026-W42']);
   });
 
-  it('windows: Week = W43, Period to date = W40–W43 (28 Sep–25 Oct), Year to date = W1–W43 (from 29 Dec 2025)', () => {
-    expect(keys(windowWeeks(d, 'W', d.asOf))).toEqual(['FY2026-W43']);
-    expect(keys(windowWeeks(d, 'PTD', d.asOf))).toEqual(['FY2026-W40', 'FY2026-W41', 'FY2026-W42', 'FY2026-W43']);
-    const ytd = windowWeeks(d, 'YTD', d.asOf);
+  it('windows to date: period 10 = W40–W43 (28 Sep–25 Oct), year = W1–W43 (from 29 Dec 2025); date ranges', () => {
+    expect(keys(toDate(d, 'P', d.asOf).weeks)).toEqual(['FY2026-W40', 'FY2026-W41', 'FY2026-W42', 'FY2026-W43']);
+    const ytd = toDate(d, 'FY', d.asOf).weeks;
     expect([ytd.length, keys(ytd)[0]]).toEqual([43, 'FY2026-W01']);
-    expect(keys(windowWeeks(d, 'PTD', ix('FY2026-W42')))).toEqual(['FY2026-W40', 'FY2026-W41', 'FY2026-W42']);
+    expect(keys(toDate(d, 'P', ix('FY2026-W42')).weeks)).toEqual(['FY2026-W40', 'FY2026-W41', 'FY2026-W42']);
     expect(dateRange('2026-09-28', '2026-10-25')).toBe('28 Sep–25 Oct 2026');
     expect(dateRange('2025-12-29', '2026-10-25')).toBe('29 Dec 2025–25 Oct 2026');
     expect(dateRange('2026-10-19', '2026-10-25')).toBe('19–25 Oct 2026');
@@ -68,14 +68,6 @@ describe('ET-04 retail calendar', () => {
       expect(ly === null).toBe(weekRow(d, i).fy === 2025);
     }
   });
-
-  it('period keys round-trip (W / PTD / YTD)', () => {
-    for (const key of ['W-FY2026-43', 'PTD-FY2026-42', 'YTD-FY2025-43']) {
-      const p = parsePeriodKey(d, key);
-      expect(p && periodKey(d, p.kind, p.asOf)).toBe(key);
-    }
-    expect(parsePeriodKey(d, 'P-FY2026-10')).toBeNull();
-  });
 });
 
 describe('ET-05 LY by week key, not by date', () => {
@@ -87,7 +79,7 @@ describe('ET-05 LY by week key, not by date', () => {
 
   it('the LY comparator reads the key-joined week (control total W-FY2025-43), not the date-joined one', () => {
     const ct = new Map(controlTotals().map((r) => [`${r.scope}|${r.periodKey}|${r.metric}`, r.value]));
-    const lyNet = computeMetrics(d, 'ALL', 'W', lyWeek(d, d.asOf) ?? -1).net_sales ?? NaN;
+    const lyNet = computeMetrics(d, 'ALL', { gran: 'W', weeks: [lyWeek(d, d.asOf) ?? -1] }).net_sales ?? NaN;
     expect(Math.abs(lyNet - (ct.get('ALL|W-FY2025-43|net_sales') ?? NaN))).toBeLessThan(0.0051);
     expect(Math.abs(lyNet - (ct.get('ALL|W-FY2025-42|net_sales') ?? NaN))).toBeGreaterThan(1e5);
     const card = buildView(d, { ...DEFAULT_SELECTION, compare: 'ly' }).cards.find((c) => c.id === 'NET_SALES');

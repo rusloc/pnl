@@ -1,6 +1,9 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-10-29 · js-exec period model (ADR-0013 (k)): lib/engine/items.ts (127 items, windows, LY / prev like-length, bars); computeMetrics(d, scope, Window); 204 tests, 68 control keys reconciled; CAND-016
+- 2026-10-29 · PG-005: harness heredoc quoting + Windows Python CRLF → write scripts to scratchpad, prettier --write touched files
+- 2026-10-29 · js-exec USER feedback: one LayerFrame scrim for all layers, ⓘ target line (dim_kpi.basis), Statement + Notes removed; 117 tests; CAND-014/015
 - 2026-10-28 · Nordmark exec JS flavour built in js-exec/ (ADR-0013 (h)): 86 tests, ET-01 = all 9,328 control rows both ways, 452 kB data, 32/32 headless; CAND-012/013
 - 2026-10-28 · Standalone packs (USER option a): .sync/pnl/js-app (P&L, chat out) + .sync/mirelo-sales/js-app (/sales kept, / → 307); js-report stays source of truth; CAND-011
 - 2026-10-27 · Parity B vs C fixes done (0 Track C expected-fail); harness js-report/lib/test-utils/parity/; ⓘ copy export `npm run export:info-copy`
@@ -17,9 +20,9 @@
 - 2026-10-22 · PG-002: Zod 4 union of number literals breaks kind-driven CSV coercion; use bounded z.number()
 
 ## Topic files
-- platform-gotchas.md — 4 entries · stalest 2026-10-22 · PG-NNN
+- platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 13 awaiting second hit
+- candidates.md        — 15 awaiting second hit (CAND-013 promoted to PG-005)
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
@@ -49,6 +52,7 @@
 - js-exec/: engine in lib/engine (brief + CLAUDE.md, not ADR-0013's lib/exec); cube week × site group (NL, BE, ONLINE, WHOLESALE, DC, CENTRAL) × category; metrics.ts mirrors data/nordmark_retail_dummy_data/checks/verify.py metrics().
 - Status: badness rounded to 10 dp; ≤ watch_from good, ≤ off_from watch (edge = Watch: data README beats the E-23 sentence); dot over rated cards, N/A excluded.
 - Copy source = lib/engine/copy.ts + view.ts (examples / stats from data); export to docs/ADD/features/exec-info-popovers.md not done (sync point 1 open).
+- 2026-10-29/30 period model: Selection.item (null = as-of week), URL `i`; Channel mix = window shares + window plan at P/Q/FY; FY2025 statuses per card; EBITDA at W vs Previous = previous month first k weeks (items.ts prevMonthToDate, CSV P-…@k keys); UI says "Month" never "Period n"; no owner-note row; fixed copy period-neutral.
 - Headless checks: Python Playwright (`py -3.12`) works on this box; scripts stay in the session scratchpad.
 
 ## Open questions

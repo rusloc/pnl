@@ -29,20 +29,52 @@ Zod 4.6.7, Vitest 5.0.5, ESLint 9.39.5, TypeScript 5.9.3); `package-lock.json` d
 app/              layout.tsx (Inter via next/font), page.tsx (static shell + Suspense), globals.css (the v5 stylesheet)
 components/       ExecApp.tsx (client root: data load, URL state, layers, tooltip), Card.tsx, Layers.tsx, ui.tsx, bars.ts
 lib/data/         manifest.ts (Zod contract of public/data), loader.ts, parquet-columns.ts (vendored from js-report)
-lib/engine/       cube.ts, calendar.ts, metrics.ts, status.ts, format.ts, copy.ts, view.ts, url-state.ts (+ tests)
+lib/engine/       cube.ts, calendar.ts, items.ts, metrics.ts, status.ts, format.ts, copy.ts, view.ts, url-state.ts (+ tests)
 lib/test-utils/   exec-data.ts (Node loader + control totals reader)
 scripts/          build-exec-data.ts, csv.ts (vendored from js-report)
 public/data/      build output, gitignored here (as js-report/public/data); the .sync pack ships it prebuilt
 ```
 
-- **Engine** (`lib/engine/`, framework-free): `metrics.ts` computes every control-total metric for a scope × window;
+- **Engine** (`lib/engine/`, framework-free): `items.ts` derives the period model's items from `dim_week` (95 weeks,
+  22 periods, 8 quarters, 2 years; ADR-0013 (k), E-90 … E-99) with their windows, the Last-year and Previous windows and
+  the bar series; `metrics.ts` computes every control-total metric for a scope × window;
   `status.ts` holds the status bands and the literal v5 dot rule, reading the thresholds from `param_status_rule` only
   (E-75); `view.ts` turns metrics into card faces, Δ texts, bars, ⓘ worked examples and mini stats. Components render
   strings; they compute nothing.
 - **Rendering:** the route is a static shell (`○ /`); the client reads the query string and loads `public/data` (no server,
-  no API). URL keys: `p` (week · ptd · ytd), `c` (budget · ly · lw), `r` (all · nl · be · online), `group`, `lever`,
-  `horizon`, `owner`, `statement` (comma lists). Each key is validated with Zod; unknown keys and bad values are dropped and
-  the URL is rewritten to the canonical form.
+  no API). URL keys: `i` (item key `FY2026-P10` · `FY2026-Q4` · `FY2026` · `FY2025-W12` …; the as-of week `FY2026-W43`
+  is the default and is omitted), `c` (budget · ly · prev), `r` (all · nl · be · online), `group`, `lever`, `owner`
+  (comma lists). Each key is validated with Zod and `i` must be a listed item; unknown keys and bad values are dropped and
+  the URL is rewritten to the canonical form. `c=prev` with a Year item becomes `c=ly`. Retired keys still parse:
+  `p=week|ptd|ytd` → the default item · `FY2026-P10` · `FY2026` (ignored when `i` is present, never written), `c=lw` →
+  `prev`; `statement` and `horizon` (USER 2026-10-29) parse as unknown: an old link opens with no pick.
+- **Period model** (E-90 … E-98, USER 2026-10-29): Filters → Period = three radio groups (granularity Week · Month ·
+  Quarter · Year → fiscal year, hidden at Year → one item; one tab stop each, arrows move and select) and a live
+  "Showing …" line. Month = the 4-5-4 retail period (items P1 … P12; every UI word is "Month": header "Month 10",
+  "vs LY month", "month 10 to date" — "Period" stays only as a column / key name, USER 2026-10-30); partial items read
+  "to date".
+  Switching the granularity keeps the item that holds the current item's last week. Comparator Budget · Last year ·
+  Previous (previous week / month / quarter; a partial item vs the previous item cut to the same week count); Previous
+  is not offered at Year. Bars follow the granularity (13 · 12 · 8 · 2) ending at the picked item. Per-KPI rules as
+  built: `exec-period-model.md` §4, with Channel mix = window shares (plan = budget shares over the same weeks) at
+  Month / Quarter / Year. FY2025 items: budget-based cards N/A, target-based cards rated (GMROI from FY2025 W52), the
+  counts and dot over the rated cards; no rated card → grey dot. **EBITDA at Week vs Previous** (USER 2026-10-30):
+  month to date through the week vs the previous month's first k weeks (W43 = P10 weeks 1–4 vs P9 weeks 1–4; P1 crosses
+  to the previous FY's P12; `items.ts` prevMonthToDate); the card Δ stays short ("vs prev. mth"), the ⓘ Δ names the
+  window ("vs P9 weeks 1–4", "vs P12 FY2025 week 1"); every other card compares with the previous week.
+- **Period-neutral ⓘ copy** (USER 2026-10-30): What / Why / Formula / worked examples read right at Week, Month, Quarter
+  and Year ("in the picked period"); the worked examples quote the selection's own numbers (Availability at Month /
+  Quarter / Year says "Last week of the month: …"); the Week-43-specific "Owner note" row is gone from every ⓘ.
+- **Layers** (E-52): Filters, How to read, More KPIs and the card ⓘ / drill pop-ups all open through `LayerFrame`
+  (`components/Layers.tsx`), so every one sits on the same scrim: ink `#111827` at 22 % (`rgba(17, 24, 39, 0.22)`,
+  Power BI: transparency 78 %), full viewport, z-index 40 (side bar 30, panels 50, tooltip 60), a click on it, Esc or ×
+  closes and returns focus to the opener.
+- **ⓘ target line** (USER 2026-10-29, spec shared with the PBI flavour): right under the 48 px ⓘ value, 4 px gap, a
+  20 px dotted swatch (the bars' target line), the basis label from `dim_kpi.basis` (Budget · Target · Plan) at 16 px /
+  600 `#374151`, the status-basis value at 32 px / 700 ink and its unit at 16 px / 600 `#374151`, formatted exactly like
+  the card value ("Budget €62.9m", "Target 9.5 wks", "Plan 70.0% store"); then the Δ. It never follows the comparator
+  (E-24); a blank basis reads "n/a". The old footer line "Target budget …" is gone; the refresh / provisional note closes
+  the tags row instead of a footer of its own (saves the footer's height; no ⓘ scrolls at 1440 × 810).
 - **Security headers** (`next.config.ts`, ADR-0002 §2.6, E-82): CSP `default-src 'self'`, `frame-ancestors` from
   `EMBED_ALLOWED_ORIGINS`, no `X-Frame-Options`, nosniff, referrer and permissions policies. `script-src 'unsafe-inline'` is
   the same day-one compromise as the P&L and Mirelo apps (nonces deferred).
@@ -63,17 +95,19 @@ suppliers and SKUs never ship (E-83). Every fold is reconciled to the source tot
 | `manifest.json` |     — |      55,380 | calendar (104 weeks), categories, the 32 KPIs, status rules, targets, file index (strict Zod)                                                                                   |
 | **Total**       |       | **451,779** | all of it loads at first paint (E-83 budget 600 kB)                                                                                                                             |
 
-## Tests (Vitest, 86 tests in 7 files)
+## Tests (Vitest, 231 tests in 9 files)
 
-| File                                | Tests | Covers                                                                                                                                                                                                           |
-| ----------------------------------- | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/engine/control-totals.test.ts` |    34 | **ET-01**: every one of the 9,328 rows of `checks/control_totals_eur.csv` (4 scopes × 33 period keys) within verify.py's tolerances, and no engine value the CSV leaves out (absent = N/A)                       |
-| `lib/engine/story.test.ts`          |    17 | **ET-02** Week 43 · ALL · Budget = the v5 story on all 12 cards (value, Δ text, chip), the ⓘ worked examples and mini stats; **ET-03** 7 / 3 / 2, orange, unchanged under every attribute pick                   |
-| `lib/engine/calendar.test.ts`       |     7 | **ET-04** calendar keys and windows (P10 = W40–W43, YTD from 29 Dec 2025, LY / LW keys); **ET-05** LY by key (FY2025 W43), not by date (FY2025 W42)                                                              |
-| `lib/engine/status.test.ts`         |    13 | **ET-10** every rule at its edges, float noise at −3 %, Markdown ↓, cover and mix bands, N/A; the dot rule (7/3/2 orange, 11/0/1 green, N/A excluded)                                                            |
-| `lib/engine/view.test.ts`           |     9 | **ET-09** flow vs point in time, EBITDA always PTD; **ET-11** comparator changes Δ rows only; **ET-12** NL + BE + Online + Wholesale = ALL, Online only; **ET-13** B3 conceals 8, (B1 or B4) and Sales → 3; bars |
-| `lib/engine/url-state.test.ts`      |     4 | E-62 parse / serialise / fallback / unknown keys                                                                                                                                                                 |
-| `components/bars.test.ts`           |     2 | v5 bar geometry                                                                                                                                                                                                  |
+| File                                | Tests | Covers                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/engine/control-totals.test.ts` |    94 | **ET-01**: every one of the 26,143 rows of `checks/control_totals_eur.csv` (4 scopes × 62 period-model keys `W-` · `P-` · `Q-` · `FY-` · `@k`, E-99, + 25 EBITDA previous-month keys `P-…@k`, present for every W key) within verify.py's tolerances, and no engine value the CSV leaves out; the 6 retired `PTD-` / `YTD-` keys still reconcile on their as-built reading (exit-week mix and the EBITDA PTD pair at the last week; their statuses are not compared) |
+| `lib/engine/period-model.test.ts`   |    55 | **ET-21** item lists, partial flags, key grammar, windows to date; **ET-22** default Week · FY2026 · W43; **ET-23** LY / Previous windows per granularity (= the control keys), FY2025 N/A, Year without Previous; ET-09 amended (flow, point in time, window mix); **ET-25** bars 13 · 12 · 8 · 2 vs the control rows, blank bars; **ET-26** N/A cards and the grey dot; **ET-27** EBITDA per granularity; E-98 labels; **ET-28** URL state and picker moves        |
+| `lib/engine/story.test.ts`          |    30 | **ET-02** Week 43 · ALL · Budget = the v5 story on all 12 cards (value, Δ text, chip), the ⓘ worked examples and mini stats; the ⓘ target line on all 12 cards and its label from `dim_kpi.basis`; **ET-03** 7 / 3 / 2, orange, unchanged under every attribute pick                                                                                                                                                                                                 |
+| `lib/engine/calendar.test.ts`       |     6 | **ET-04** calendar keys and windows to date (P10 = W40–W43, FY2026 from 29 Dec 2025, LY / LW keys); **ET-05** LY by key (FY2025 W43), not by date (FY2025 W42)                                                                                                                                                                                                                                                                                                       |
+| `lib/engine/status.test.ts`         |    13 | **ET-10** every rule at its edges, float noise at −3 %, Markdown ↓, cover and mix bands, N/A; the dot rule (7/3/2 orange, 11/0/1 green, N/A excluded)                                                                                                                                                                                                                                                                                                                |
+| `lib/engine/view.test.ts`           |    13 | **ET-11** comparator changes Δ rows only; ⓘ target line ignores the comparator, n/a when blank; **ET-12** NL + BE + Online + Wholesale = ALL, Online only; **ET-13** B3 conceals 8, (B1 or B4) and Sales → 3; bars; no Statement / Horizon attribute, no Notes; ⓘ note without "Target …"                                                                                                                                                                            |
+| `lib/engine/url-state.test.ts`      |     5 | E-62 parse / serialise / fallback / unknown keys; retired `statement` and `horizon` keys ignored                                                                                                                                                                                                                                                                                                                                                                     |
+| `components/bars.test.ts`           |     3 | v5 bar geometry; labels counted back from the picked bar (every 3rd of 12–13, every 2nd of 8, both of 2)                                                                                                                                                                                                                                                                                                                                                             |
+| `components/layers.test.tsx`        |    12 | One scrim under every layer (Filters, How to read, More KPIs, ⓘ, drill), scrim click closes, panel shells, scrim colour and z-order in `globals.css`                                                                                                                                                                                                                                                                                                                 |
 
 A headless Chromium check (Playwright, run outside the repo on 2026-10-28) passed 32 / 32 against `next start`: fold
 761 px and no scroll at 1440 × 810, card rectangles equal to prototype.html's, washes and the 2 px red border, bar sizes
@@ -82,13 +116,28 @@ trap, Notes / More KPIs / How to read, B3 conceals 8 in place with identical rec
 Online N/A cards, invalid query canonicalised, two columns and no horizontal scroll at 1000 px, reduced motion, no console
 errors. `buildView` takes about 1.4 ms per selection in Node (E-84 budget 100 ms).
 
+Re-check on 2026-10-29 after the USER's first-open feedback (same set-up): three side-bar buttons, the same scrim
+(`rgba(17, 24, 39, 0.22)`, z 40, 1440 × 810, covering the side bar) under Filters, How to read and More KPIs, a scrim
+click closes each with focus back on its button; Filters lists Group · Lever · Horizon · Owner; `?statement=pl&owner=finance`
+canonicalises to `?owner=finance` (badge 1); the ⓘ target line on all 12 cards at 1440, 1000 and 390 px, never clipped;
+no console errors. The EBITDA flash ⓘ now scrolls 15 px inside the pop-up at 1440 × 810 (the other 11 fit).
+
+Period-model check on 2026-10-29 (same set-up, 32 / 32): default W43 story 7 / 3 / 2, orange, 13 bars, no page scroll;
+Filters shows three radio groups (Week · FY2026 · W43 checked), no Horizon group, the live "Showing" line; ArrowRight on
+the granularity moves to Month (`?i=FY2026-P10`, focus follows); P9 renders with 12 bars; `?i=FY2026-Q3` renders with 8
+bar slots (Q4 FY24 blank) and no page scroll; `?i=FY2026&c=prev` canonicalises to `c=ly`, the comparator row has no
+Previous and the FY row is hidden, 2 bars, 4 / 6 / 2; legacy `?p=ptd`, `?p=ytd&c=lw`, `?c=lw`, `?horizon=week` rewrite
+as specified; FY2025 P10 shows 8 N/A cards; the target line measures 16 / 600 #374151 label, 32 / 700 value, 20 px swatch,
+4 px under the value; **no ⓘ scrolls** for any of the 12 cards at W43, P9, Q3, FY2026 and FY2025 P10; no console errors.
+
 ## Deviations from v5 (deliberate)
 
 1. **Status sentence** ("Off track: Availability …") not shown: ADR-0013 §3 makes it an option, off by default.
 2. **"Draft v5"** side-bar label not shown (prototype marker).
-3. **Switchers are real** (v5 re-labels only). Comparators Budget · Last year · Last week; Forecast dropped (ADR-0013 OQ 6).
+3. **Switchers are real** (v5 re-labels only). Comparators Budget · Last year · Previous (was Last week, ADR-0013 (k));
+   Forecast dropped (ADR-0013 OQ 6). The period switcher is the granularity picker of ADR-0013 (k).
    The menu hint now reads "Status is always vs budget or target; the comparator changes the Δ line."
-4. **YTD label** "FY2026 to date · 29 Dec 2025–25 Oct 2026" (ADR-0013 (e), E-11; v5 said 2 Feb).
+4. **YTD label** "FY2026 to date · 29 Dec 2025–25 Oct 2026" (ADR-0013 (e), E-11; v5 said 2 Feb): now the Year item.
 5. **Bars come from the data**: Net sales W31–W39 lower than v5 (data README open point 14), Sell-through W31 is N/A and the
    bars run 12 → 63 % (open point 13), GMROI 2.67 → 2.70, EBITDA weekly bars from the data.
 6. **ⓘ copy**: worked examples, mini stats and footers are computed for the current selection. GMROI reads €862m ÷ €319m
@@ -97,14 +146,21 @@ errors. `buildView` takes about 1.4 ms per selection in Node (E-84 budget 100 ms
    EBITDA "Payroll vs plan" → "Store costs vs plan" (store OpEx % of sales vs budget).
 7. **How to read**: "↗" → "binoculars", the comparator name follows the switcher, footer "Illustrative data · Refreshed …"
    instead of "Draft v3 · nothing built".
-8. **Notes**: "Number corrections vs v1" dropped (prototype history); the data contract describes the built grain
-   (week × site × category).
+8. **Notes pop-up removed** (USER 2026-10-29), with its side-bar button and copy; How to read no longer names it. The
+   per-card "Owner note" row in the ⓘ is removed too (USER 2026-10-30: Week-43-specific text).
 9. **N/A status** (new): grey "–" chip and muted Δ, for Availability and LFL under Online only (E-21).
 10. **Header** keeps v5's brand block ("Nordmark Retail · Executive dashboard"); E-51's "Nordmark · Week 43" title is not
     applied, the week sits in the context line as in v5.
 11. **Base cube grain** week × site group × category, LFL as measure columns, not E-83's week × country × format × channel ×
     category × is_lfl: no landing card reads format, and the file is smaller.
 12. **Engine folder** `lib/engine/` (CLAUDE.md Track C convention and the build brief), not ADR-0013 (h)'s `lib/exec/`.
+13. **Statement attribute removed** from the Filters menu (USER 2026-10-29): no menu block, no URL key, no badge count, no
+    filter logic, and no "Statement" tag in the ⓘ tags row (the tags mirror the menu attributes). `dim_kpi.statement`
+    stays in the data contract and the manifest.
+14. **ⓘ target line** (USER 2026-10-29), not in v5: see Rendering above. The ⓘ footer is gone (note in the tags row).
+15. **Horizon attribute removed** (USER 2026-10-29), like Statement; `dim_kpi.horizon` stays in the manifest.
+16. **Period model** (ADR-0013 (k)): granularity picker, item-driven header and How-to-read title ("Nordmark · Month 10"),
+    bars per granularity, Previous comparator; see Rendering above.
 
 ## Open items
 
@@ -112,11 +168,10 @@ errors. `buildView` takes about 1.4 ms per selection in Node (E-84 budget 100 ms
   `docs/ADD/features/exec-info-popovers.md` is not written yet (this build kept to no shared files). The Power BI flavour
   must take the data-driven examples and the replaced stats of deviation 6, or parity will show them as gaps.
 - **Parity rows** (`lib/test-utils/parity/`, `parity_selections_nordmark.csv`): phase 4, hunter.
-- **Δ colour under LY / LW**: the Δ text keeps the status colour (v5 CSS), so "+€2.2m vs LY" can read red on an Off-track
+- **Δ colour under LY / Previous**: the Δ text keeps the status colour (v5 CSS), so "+€2.2m vs LY" can read red on an Off-track
   card. Keep, or switch the Δ to muted ink when the comparator is not Budget?
 - **Data README story text** says NL 93.4 % vs BE 95.0 % availability; the control totals give 93.5 % / 94.9 %.
-- **Owner notes** are fixed v5 text (true for Week 43 · ALL); scoped EBITDA is a contribution before central costs with no
-  copy note yet (data README open point 15).
+- **Scoped EBITDA** is a contribution before central costs with no copy note (data README open point 15).
 - **Not verified:** screen-reader behaviour of `inert`, backdrop-filter outside Chromium, a real 1440 × 810 window with
   browser chrome. No CI job for `js-exec/` yet. No `.sync` pack yet (ADR-0014; the pack ships `public/data` prebuilt and the
   control totals under `fixtures/checks/`, which `lib/test-utils/exec-data.ts` already reads as a fallback).

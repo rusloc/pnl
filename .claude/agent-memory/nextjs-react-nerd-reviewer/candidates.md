@@ -1,4 +1,4 @@
-<!-- next-id: CAND-014 -->
+<!-- next-id: CAND-017 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -53,4 +53,17 @@ Seen: js-exec/components/ExecApp.tsx status pills (2026-10-28)
 ### CAND-013 · Bash tool chokes on quote-heavy heredocs / node -e bodies · 2026-10-28 · expires 2027-01-26
 Quoted heredocs holding TS test files or a Playwright script, and `node -e` bodies with backticks, fail with "unexpected EOF while looking for matching quote" in the harness. Write files with the Write tool (or Edit), use Bash only to run them.
 Seen: js-exec test files, scratchpad checks.py, this memory update (2026-10-28)
+Promoted-to: PG-005 on 2026-10-29
 
+### CAND-014 · Component wiring tests without jsdom: renderToStaticMarkup + call the component as a function · 2026-10-29 · expires 2027-01-27
+No RTL / jsdom in js-exec (new dep = ask first). Markup order/attrs via `react-dom/server` renderToStaticMarkup in the Vitest node env; handler wiring by calling the (hook-free) component and checking `el.props.children[0].props.onClick === onClose`. Needs the component to be hook-free; extract the shell (LayerFrame) to make it so.
+Seen: js-exec/components/layers.test.tsx (2026-10-29)
+
+### CAND-015 · Adding a row to a max-height pop-up silently tips one card into scroll · 2026-10-29 · expires 2027-01-27
+ⓘ target line (+26 px) made only EBITDA's ⓘ scroll 15 px at 1440 × 810 (86vh cap); unit tests cannot see it. Measure scrollHeight − clientHeight for every card's pop in a headless pass after any ⓘ height change.
+Seen: js-exec ExplainPop (2026-10-29)
+
+
+### CAND-016 · Retired control keys: reconcile on their as-built reading, not by exemption · 2026-10-29 · expires 2027-01-27
+When the reading of a metric changes by design (exit-week mix → window shares, EBITDA PTD pair → Week only), legacy rows still in the CSV can be checked against the engine's *old* reading (Week metrics at the window's last week) instead of being skipped; only the derived statuses are skipped. Keeps the old rows useful as a regression net until they retire. The test should parse both key grammars from the CSV's own key set, so it passes before and after the data owner lands new rows.
+Seen: js-exec/lib/engine/control-totals.test.ts (2026-10-29)

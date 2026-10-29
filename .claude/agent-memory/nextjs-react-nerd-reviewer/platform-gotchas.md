@@ -1,4 +1,4 @@
-<!-- next-id: PG-005 -->
+<!-- next-id: PG-006 -->
 
 # Platform gotchas
 
@@ -40,4 +40,14 @@
 **Confidence:** high — reproduced
 **Last-verified:** 2026-10-27
 **Related:** PG-001
+**Status:** active
+
+### PG-005 · Harness Bash chokes on quote-heavy heredocs; Windows Python text mode writes CRLF · 2026-10-29
+**Symptom:** (a) a quoted heredoc or `node -e` body holding TS, Markdown tables or many `'` / backticks fails with "unexpected EOF while looking for matching quote"; (b) files patched by a `python -` heredoc come back with CRLF, so `prettier --check` flags every touched file (untouched ones pass).
+**Cause:** (a) the harness's bash quoting; (b) `open(p, 'w')` on Windows translates `\n` → `\r\n`.
+**Fix:** put patch scripts / Playwright checks in the scratchpad with the Write tool and run them (`py -3.12 -I script.py`; add `sys.stdout.reconfigure(encoding='utf-8')`, since `-I` ignores PYTHONIOENCODING); open files with `newline='\n'`, or run `npx prettier --write <changed files>` before the gate.
+**Seen:** js-exec 2026-10-28 (CAND-013, test files, checks.py); js-exec 2026-10-29 (README patch heredoc; 17 files CRLF after python patches)
+**Confidence:** high — reproduced
+**Last-verified:** 2026-10-29
+**Related:** PG-004
 **Status:** active

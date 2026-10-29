@@ -20,4 +20,20 @@ describe('barGeometry', () => {
     expect(g.labels.map((l) => l.text)).toEqual(['W31', 'W34', 'W37', 'W40', 'W43']);
     expect(g.targetY).toBeNull();
   });
+
+  it('labels counted back from the picked bar: 12 periods every third, 8 quarters every second, 2 years both (E-96)', () => {
+    const text = (labels: string[]) =>
+      barGeometry(
+        labels.map((_, i) => i + 1),
+        null,
+        240,
+        72,
+        labels,
+      ).labels.map((l) => l.text);
+    const p = ['P11', 'P12', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10'];
+    expect(text(p)).toEqual(['P1', 'P4', 'P7', 'P10']);
+    const q = ['Q1 FY25', 'Q2 FY25', 'Q3 FY25', 'Q4 FY25', 'Q1 FY26', 'Q2 FY26', 'Q3 FY26', 'Q4 FY26'];
+    expect(text(q)).toEqual(['Q2 FY25', 'Q4 FY25', 'Q2 FY26', 'Q4 FY26']);
+    expect(text(['FY25', 'FY26'])).toEqual(['FY25', 'FY26']);
+  });
 });

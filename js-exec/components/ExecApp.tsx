@@ -8,11 +8,12 @@ import { createData } from '@/lib/engine/cube';
 import type { ExecData } from '@/lib/engine/cube';
 import { SIDEBAR_TIPS } from '@/lib/engine/copy';
 import type { AttrKey } from '@/lib/engine/copy';
+import { catalog } from '@/lib/engine/items';
 import { DEFAULT_SELECTION, parseSelection, serializeSelection } from '@/lib/engine/url-state';
 import type { Selection } from '@/lib/engine/url-state';
 import { buildView } from '@/lib/engine/view';
 import { Card } from './Card';
-import { BenchDrawer, DrillPop, ExplainPop, FiltersMenu, HowPop, NotesPop } from './Layers';
+import { BenchDrawer, DrillPop, ExplainPop, FiltersMenu, HowPop, LayerFrame } from './Layers';
 import { RichText, SideIcons, tip } from './ui';
 
 // Client root (ADR-0013 (h)): loads public/data in the browser, owns Selection ↔ URL (E-62), the one open layer
@@ -60,7 +61,7 @@ export function ExecApp() {
   );
 }
 
-type Layer = { kind: 'menu' | 'how' | 'notes' | 'more' } | { kind: 'explain' | 'drill'; id: string };
+type Layer = { kind: 'menu' | 'how' | 'more' } | { kind: 'explain' | 'drill'; id: string };
 type Tip = { title: string; body: string; el: HTMLElement };
 
 const FOCUSABLE = 'button,[tabindex="0"],a[href]';
@@ -70,7 +71,7 @@ function Dashboard({ data }: { data: ExecData }) {
   const router = useRouter();
   const pathname = usePathname();
   const search = params.toString();
-  const sel = useMemo(() => parseSelection(new URLSearchParams(search)), [search]);
+  const sel = useMemo(() => parseSelection(new URLSearchParams(search), catalog(data)), [search, data]);
   const canonical = serializeSelection(sel);
   const go = useCallback(
     (next: Selection) => {
@@ -194,7 +195,7 @@ function Dashboard({ data }: { data: ExecData }) {
     layer && (layer.kind === 'explain' || layer.kind === 'drill')
       ? view.cards.find((c) => c.id === layer.id)
       : undefined;
-  const sideButton = (kind: 'menu' | 'how' | 'more' | 'notes', label: string, icon: keyof typeof SideIcons) => (
+  const sideButton = (kind: 'menu' | 'how' | 'more', label: string, icon: keyof typeof SideIcons) => (
     <button
       type="button"
       className="ib"
@@ -223,7 +224,6 @@ function Dashboard({ data }: { data: ExecData }) {
         {sideButton('menu', `Filters and switchers${status.picked ? `, ${status.picked} active` : ''}`, 'filters')}
         {sideButton('how', 'How to read', 'how')}
         {sideButton('more', `More KPIs, ${view.bench.count} on the bench`, 'more')}
-        {sideButton('notes', 'Notes for the owner', 'notes')}
         <span className="sp" />
       </nav>
 
@@ -289,53 +289,32 @@ function Dashboard({ data }: { data: ExecData }) {
         </section>
       </div>
 
-      {layer ? <div className="scrim" onClick={close} /> : null}
-      {layer?.kind === 'menu' ? (
-        <aside
-          ref={setContainer}
-          className="menu glass"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="menu-title"
-          tabIndex={-1}
-          onClick={onLayerClick}
-        >
-          <FiltersMenu sel={sel} onSelect={go} onToggle={toggle} onReset={() => go(DEFAULT_SELECTION)} />
-        </aside>
-      ) : null}
-      {layer && layer.kind !== 'menu' && layer.kind !== 'more' ? (
-        <div
-          ref={setContainer}
+      {layer ? (
+        <LayerFrame
           key={'id' in layer ? `${layer.kind}-${layer.id}` : layer.kind}
-          className="pop glass"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="pop-title"
-          tabIndex={-1}
+          kind={layer.kind}
+          onClose={close}
           onClick={onLayerClick}
+          panelRef={setContainer}
         >
+          {layer.kind === 'menu' ? (
+            <FiltersMenu
+              sel={sel}
+              menu={view.menu}
+              onSelect={go}
+              onToggle={toggle}
+              onReset={() => go(DEFAULT_SELECTION)}
+            />
+          ) : null}
           {layer.kind === 'how' ? <HowPop how={view.how} /> : null}
-          {layer.kind === 'notes' ? <NotesPop notes={view.notes} /> : null}
+          {layer.kind === 'more' ? <BenchDrawer bench={view.bench} /> : null}
           {card && layer.kind === 'explain' ? (
             <ExplainPop card={card} onDrill={() => setLayer({ kind: 'drill', id: card.id })} />
           ) : null}
           {card && layer.kind === 'drill' ? (
             <DrillPop card={card} onExplain={() => setLayer({ kind: 'explain', id: card.id })} />
           ) : null}
-        </div>
-      ) : null}
-      {layer?.kind === 'more' ? (
-        <aside
-          ref={setContainer}
-          className="drawer glass"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="drawer-title"
-          tabIndex={-1}
-          onClick={onLayerClick}
-        >
-          <BenchDrawer bench={view.bench} />
-        </aside>
+        </LayerFrame>
       ) : null}
       <div ref={tipEl} className="tip glass" role="tooltip" hidden={tipState === null}>
         {tipState ? (

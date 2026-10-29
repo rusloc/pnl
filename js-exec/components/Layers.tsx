@@ -1,13 +1,57 @@
 import { Fragment } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { ATTRIBUTES, SWITCH_LABELS } from '@/lib/engine/copy';
 import type { AttrKey } from '@/lib/engine/copy';
-import { COMPARATORS, PERIODS, REGIONS } from '@/lib/engine/url-state';
 import type { Selection } from '@/lib/engine/url-state';
-import type { CardView, DashboardView } from '@/lib/engine/view';
+import type { CardView, Chip, DashboardView, MenuView } from '@/lib/engine/view';
 import { DrillIcon, InfoIcon, MixBar, RichText, Spark } from './ui';
 
-// Contents of the frosted layers (E-52 … E-59): Filters menu, ⓘ explanation, drill path, How to read, Notes and the
-// More-KPIs drawer. ExecApp owns which one is open, focus and the scrim; these only render view-model text.
+// The frosted layers (E-52 … E-59): Filters menu, ⓘ explanation, drill path, How to read and the More-KPIs drawer.
+// ExecApp owns which one is open and the focus; LayerFrame gives every layer the same scrim; the rest render
+// view-model text.
+
+export type LayerKind = 'menu' | 'how' | 'more' | 'explain' | 'drill';
+
+const FRAME = {
+  menu: { tag: 'aside', className: 'menu glass', labelledBy: 'menu-title' },
+  more: { tag: 'aside', className: 'drawer glass', labelledBy: 'drawer-title' },
+  pop: { tag: 'div', className: 'pop glass', labelledBy: 'pop-title' },
+} as const;
+
+/** One overlay for every layer (USER 2026-10-29): the same scrim (globals.css .scrim, above the side bar, below the
+ *  panel) under each side-bar panel and card pop-up; a click on it closes. The panel is the modal dialog. */
+export function LayerFrame({
+  kind,
+  onClose,
+  onClick,
+  panelRef,
+  children,
+}: {
+  kind: LayerKind;
+  onClose: () => void;
+  onClick: (e: ReactMouseEvent) => void;
+  panelRef: (el: HTMLElement | null) => void;
+  children: ReactNode;
+}) {
+  const f = FRAME[kind === 'menu' || kind === 'more' ? kind : 'pop'];
+  const Panel = f.tag;
+  return (
+    <>
+      <div className="scrim" onClick={onClose} />
+      <Panel
+        ref={panelRef}
+        className={f.className}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={f.labelledBy}
+        tabIndex={-1}
+        onClick={onClick}
+      >
+        {children}
+      </Panel>
+    </>
+  );
+}
 
 function Close() {
   return (
@@ -30,13 +74,59 @@ function Head({ eyebrow, title, word, status }: { eyebrow: string; title: string
   );
 }
 
+const STEP: Readonly<Record<string, number>> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+
+/** Single-select chip row as a radio group (period picker, E-90): one tab stop on the checked chip, arrows move and
+ *  select (the WAI-ARIA radio-group pattern), Home / End jump. */
+function Radios({
+  label,
+  chips,
+  onSelect,
+  className = 'chips',
+}: {
+  label: string;
+  chips: readonly Chip[];
+  onSelect: (next: Selection) => void;
+  className?: string;
+}) {
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const i = chips.findIndex((c) => c.checked);
+    const j = e.key === 'Home' ? 0 : e.key === 'End' ? chips.length - 1 : i + (STEP[e.key] ?? NaN);
+    const next = chips[(j + chips.length) % chips.length];
+    if (Number.isNaN(j) || !next) return;
+    e.preventDefault();
+    e.currentTarget.querySelector<HTMLElement>(`[data-id="${next.id}"]`)?.focus();
+    onSelect(next.next);
+  };
+  return (
+    <div role="radiogroup" aria-label={label} className={className} onKeyDown={onKeyDown}>
+      {chips.map((c) => (
+        <button
+          key={c.id}
+          type="button"
+          role="radio"
+          className="chip"
+          aria-checked={c.checked}
+          tabIndex={c.checked ? 0 : -1}
+          data-id={c.id}
+          onClick={() => onSelect(c.next)}
+        >
+          {c.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function FiltersMenu({
   sel,
+  menu,
   onSelect,
   onToggle,
   onReset,
 }: {
   sel: Selection;
+  menu: MenuView;
   onSelect: (next: Selection) => void;
   onToggle: (key: AttrKey, code: string) => void;
   onReset: () => void;
@@ -51,35 +141,34 @@ export function FiltersMenu({
         <Close />
       </div>
       <div className="hint">Status is always vs budget or target; the comparator changes the Δ line.</div>
+      <div className="gh">{SWITCH_LABELS.granularity.label}</div>
+      <Radios label="Period type" chips={menu.granularity} onSelect={onSelect} />
+      {menu.fy ? <Radios label="Fiscal year" chips={menu.fy} onSelect={onSelect} className="chips row2" /> : null}
+      <Radios
+        label="Period"
+        chips={menu.items}
+        onSelect={onSelect}
+        className={menu.itemGrid ? 'chips row2 items' : 'chips row2'}
+      />
+      <div className="showing" aria-live="polite">
+        Showing <RichText rich={menu.showing} />
+      </div>
       {[
-        {
-          key: 'period',
-          label: SWITCH_LABELS.period.label,
-          chips: PERIODS.map(
-            (v) => [v, SWITCH_LABELS.period.options[v], v === sel.period, { ...sel, period: v }] as const,
-          ),
-        },
-        {
-          key: 'compare',
-          label: SWITCH_LABELS.compare.label,
-          chips: COMPARATORS.map(
-            (v) => [v, SWITCH_LABELS.compare.options[v], v === sel.compare, { ...sel, compare: v }] as const,
-          ),
-        },
-        {
-          key: 'region',
-          label: SWITCH_LABELS.region.label,
-          chips: REGIONS.map(
-            (v) => [v, SWITCH_LABELS.region.options[v], v === sel.region, { ...sel, region: v }] as const,
-          ),
-        },
+        { key: 'compare', label: SWITCH_LABELS.compare.label, chips: menu.compare },
+        { key: 'region', label: SWITCH_LABELS.region.label, chips: menu.region },
       ].map((g) => (
         <div key={g.key}>
           <div className="gh">{g.label}</div>
           <div className="chips">
-            {g.chips.map(([v, label, pressed, next]) => (
-              <button key={v} type="button" className="chip" aria-pressed={pressed} onClick={() => onSelect(next)}>
-                {label}
+            {g.chips.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className="chip"
+                aria-pressed={c.checked}
+                onClick={() => onSelect(c.next)}
+              >
+                {c.label}
               </button>
             ))}
           </div>
@@ -121,8 +210,20 @@ export function ExplainPop({ card, onDrill }: { card: CardView; onDrill: () => v
             {card.value}
             <small>{card.unit}</small>
           </div>
-          <div className="delta" style={{ color: `var(--${card.status === 'na' ? 'muted' : card.status})` }}>
-            {card.delta}
+          {card.target ? (
+            <div className="tgt">
+              <span>{card.target.label}</span>{' '}
+              <b>
+                {card.target.value}
+                <small>{card.target.unit}</small>
+              </b>
+            </div>
+          ) : null}
+          <div
+            className="delta"
+            style={{ color: `var(--${card.status === 'na' || card.deltaNa ? 'muted' : card.status})` }}
+          >
+            {e.delta}
           </div>
         </div>
         {card.mix ? <MixBar mix={card.mix} /> : null}
@@ -154,18 +255,14 @@ export function ExplainPop({ card, onDrill }: { card: CardView; onDrill: () => v
           </Fragment>
         ))}
       </dl>
+      {/* the footer's "Target …" moved under the value (USER 2026-10-29): the remaining note closes the tags row */}
       <div className="tags">
         {e.tags.map(([label, value]) => (
           <span key={label} className="tag">
             {label} <b>{value}</b>
           </span>
         ))}
-      </div>
-      <div className="pop-f">
-        <span>{e.foot[0]}</span>
-        <span>
-          <b>{e.foot[1]}</b>
-        </span>
+        <span className="note">{e.updated}</span>
       </div>
       <button type="button" className="pill" onClick={onDrill}>
         <span className="n">
@@ -219,38 +316,6 @@ export function HowPop({ how }: { how: DashboardView['how'] }) {
         <span>
           <b>{how.foot[1]}</b>
         </span>
-      </div>
-    </>
-  );
-}
-
-export function NotesPop({ notes }: { notes: DashboardView['notes'] }) {
-  return (
-    <>
-      <Head eyebrow="For the owner" title="Notes" />
-      <h4>Status rules (vs target, independent of the comparator)</h4>
-      <table className="t">
-        <tbody>
-          {notes.rules.map(([title, rule]) => (
-            <tr key={title}>
-              <td>
-                <b>{title}</b>
-              </td>
-              <td>{rule}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <h4>Where the margins meet</h4>
-      <p>{notes.margin}</p>
-      <h4>Data contract</h4>
-      <ul className="plain">
-        {notes.contract.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      <div className="pop-f">
-        <span>{notes.foot}</span>
       </div>
     </>
   );

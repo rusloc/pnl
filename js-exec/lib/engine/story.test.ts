@@ -78,7 +78,7 @@ describe('ET-02 Week 43 · ALL · Budget = the v5 story', () => {
     const stats = (id: string) => buildView(d, DEFAULT_SELECTION).cards.find((c) => c.id === id)?.explain.stats;
     expect(stats('NET_SALES')).toEqual([
       ['vs LY week', '+3.8%'],
-      ['Period 10 to date', '€241.7m'],
+      ['Month 10 to date', '€241.7m'],
       ['Year to date', '€2,318m'],
     ]);
     expect(stats('TOTAL_MARGIN')).toEqual([
@@ -116,6 +116,39 @@ describe('ET-02 Week 43 · ALL · Budget = the v5 story', () => {
       ['vs last week', '−0.2 pp'],
       ['Netherlands · Belgium', '93.5% · 94.9%'], // control totals NL 0.935395 / BE 0.948770 (README story text says 93.4 / 95.0)
     ]);
+  });
+});
+
+describe('ⓘ target line under the value (USER 2026-10-29)', () => {
+  // dim_kpi.basis label + the status basis, formatted exactly like the card value (value + unit).
+  const V5_TARGET: Record<string, string> = {
+    NET_SALES: 'Budget €62.9m',
+    TOTAL_MARGIN: 'Budget 36.2%',
+    WEEKS_OF_COVER: 'Target 9.5wks',
+    MARKDOWN: 'Budget 8.5%',
+    AVAILABILITY: 'Target 97.0%',
+    EBITDA: 'Budget €16.1m',
+    LFL_GROWTH: 'Budget +3.0%',
+    FRONT_GM: 'Budget 30.0%',
+    SELL_THROUGH: 'Target 62.0%',
+    GMROI: 'Target 2.5×',
+    SUPPLIER_OTIF: 'Target 95.0%',
+    CHANNEL_MIX: 'Plan 70.0% store',
+  };
+  const line = (c: { target: { label: string; value: string; unit: string } | null } | undefined) =>
+    c?.target ? `${c.target.label} ${c.target.value}${c.target.unit}` : null;
+
+  it.each(Object.entries(V5_TARGET))('%s', (id, want) => {
+    expect(line(buildView(d, DEFAULT_SELECTION).cards.find((c) => c.id === id))).toBe(want);
+  });
+
+  it('the label follows dim_kpi.basis on every card', () => {
+    const label = { BUDGET: 'Budget', TARGET: 'Target', PLAN: 'Plan' } as const;
+    for (const c of buildView(d, DEFAULT_SELECTION).cards) {
+      const basis = d.cards.find((k) => k.kpi_code === c.id)?.basis;
+      expect(basis).toBeTruthy();
+      expect(c.target?.label).toBe(basis ? label[basis] : undefined);
+    }
   });
 });
 

@@ -3,15 +3,21 @@
 
 Usage:  python checks/verify.py [--data <dataset folder>] [--no-rerun]     (default: the folder above checks/)
 Independent of the generator: every control total is recomputed here from the Parquet files with its own code.
-  ET-01  control totals per scope x period x metric (amounts 0.005, ratios 1e-6, counts and codes exact)
+  ET-01  control totals per scope x period key x metric (amounts 0.005, ratios 1e-6, counts and codes exact);
+         keys {W|P|Q|FY}-FY{yyyy}[-{n}][@{k}] (docs/ADD/features/exec-period-model.md §6, E-99) + the legacy PTD- / YTD- keys
   ET-02  the v5 Week-43 story at display precision (values, deltas, chips, counts 7 / 3 / 2)
-  ET-03  overall dot orange at Week 43; a dot for every FY2026 period x scope
+  ET-03  overall dot orange at Week 43; a dot and three counts for every period key x scope (legacy keys: FY2026 only)
   ET-04  retail calendar recomputed from dates (4-5-4, Jan anchor, LY / LW keys, no 53-week year)
   ET-05  LY by week key, not by date (FY2026 W43 vs the date-shifted week)
   ET-20  byte-identical rerun of generate.py with the same seed (skipped with --no-rerun)
+  ET-21  item lists from dim_week: 95 Week, 22 Month, 8 Quarter, 2 Year items; exactly Q4 FY2026 and FY2026 partial
+  ET-22  the W-FY2026-43 rows (and the legacy PTD- / YTD- rows) byte-identical to the 2026-10-28 CSV
+  ET-23  comparator windows per granularity (LY by key, previous item cut like-length when partial; EBITDA at Week: previous period @k);
+         FY2025 keys: no budget, no LY
+  ET-24  one-off migration: P-FY2026-10 = PTD-FY2026-43 and FY-FY2026 = YTD-FY2026-43 except the listed rule changes
 Exit code 0 = all checks green, 1 = at least one failure.
 """
-import argparse, filecmp, json, subprocess, sys, tempfile
+import argparse, filecmp, hashlib, json, re, subprocess, sys, tempfile
 from datetime import date, timedelta
 from pathlib import Path
 import numpy as np
@@ -169,14 +175,35 @@ WK = list(wk.week_key); IX = {k: i for i, k in enumerate(WK)}
 def val(t, s, ws, col):
     t = t.reindex(pd.MultiIndex.from_product([[s], ws]), fill_value=0); return float(t[col].sum())
 
-def win(kind, fy, w):
-    i = IX[f'FY{fy}-W{w:02d}']
-    if kind == 'W': return [WK[i]]
-    if kind == 'PTD': p = wk.period_key[i]; return [k for k, pk in zip(WK[:i + 1], wk.period_key[:i + 1]) if pk == p]
-    return WK[IX[f'FY{fy}-W01']:i + 1]
+LEGACY = ('PTD', 'YTD')                 # retired keys, kept as written on 2026-10-28 until both flavours read the item keys (README)
+KEY_RE = re.compile(r'^(W|P|Q|FY|PTD|YTD)-FY(\d{4})(?:-(\d{1,2}))?(?:@(\d+))?$')
 
-def metrics(s, kind, fy, w):
-    ws = win(kind, fy, w); L = ws[-1]; m = {}
+def key_of(kind, fy, n=None, k=None):
+    """Emit a period key: W-FY2026-43 · P-FY2026-10 · Q-FY2026-4 · FY-FY2026 · Q-FY2026-3@4 · FY-FY2025@43 (legacy PTD- / YTD- as W)."""
+    return (f'FY-FY{fy}' if kind == 'FY' else f'Q-FY{fy}-{n}' if kind == 'Q' else f'{kind}-FY{fy}-{n:02d}') + (f'@{k}' if k else '')
+
+def parse_key(key):
+    """'Q-FY2026-3@4' -> ('Q', 2026, 3, 4); None unless the key round-trips through key_of (digits, n per granularity, @k)."""
+    x = KEY_RE.match(key)
+    if not x: return None
+    kind, fy, n, k = x.group(1), int(x.group(2)), None if x.group(3) is None else int(x.group(3)), None if x.group(4) is None else int(x.group(4))
+    if (kind == 'FY') != (n is None) or (k is not None and kind in ('W',) + LEGACY): return None
+    return (kind, fy, n, k) if key_of(kind, fy, n, k) == key else None
+
+def win(kind, fy, n=None, k=None):
+    """Weeks of a key: W = the week; P / Q / FY = the item's weeks (dim_week period / quarter / fy) ∩ is_actual; @k = first k weeks.
+    Legacy PTD / YTD: n = the as-of week."""
+    if kind == 'W': return [f'FY{fy}-W{n:02d}']
+    if kind in LEGACY:
+        i = IX[f'FY{fy}-W{n:02d}']
+        if kind == 'PTD': p = wk.period_key[i]; return [k_ for k_, pk in zip(WK[:i + 1], wk.period_key[:i + 1]) if pk == p]
+        return WK[IX[f'FY{fy}-W01']:i + 1]
+    ws = [r.week_key for r in wk.itertuples() if r.fy == fy and r.is_actual and (kind == 'FY' or (r.period if kind == 'P' else r.quarter) == n)]
+    return ws[:k] if k else ws
+
+def metrics(s, kind, fy, num, k=None):
+    ws = win(kind, fy, num, k); L = ws[-1]; m = {}
+    mw = ws if kind in ('P', 'Q', 'FY') else [L]     # channel mix: shares over the whole window at P / Q / FY (USER 2026-10-29), last week at W
     S = lambda col, t=Q['s'], ws=ws: val(t, s, ws, col)
     m.update(gross_sales=S('gross_sales'), markdown=S('markdown_value'), returns=S('returns'), net_sales=S('net_sales'), cogs=S('cogs_landed'), back_margin=S('back_margin_alloc'))
     m['front_margin'] = m['net_sales'] - m['cogs']; m['total_margin'] = m['front_margin'] + m['back_margin']
@@ -211,9 +238,9 @@ def metrics(s, kind, fy, w):
         r52 = WK[IX[L] - 51:IX[L] + 1]; fm = val(Q['s'], s, r52, 'fm')
         av = Q['inv'].reindex(pd.MultiIndex.from_product([[s], r52]), fill_value=0).on_hand_cost.mean()
         m.update(gmroi_front_margin_r52w=fm, gmroi_avg_on_hand_cost=av, gmroi=fm / av, gmroi_target=2.5)
-    nl = val(Q['s'], s, [L], 'net_sales')
+    nl = val(Q['s'], s, mw, 'net_sales')
     names = [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]
-    for c, n in names: m[f'mix_{n}_net_sales'] = val(Q['ch'][c], s, [L], 'net_sales'); m[f'mix_{n}_pct'] = m[f'mix_{n}_net_sales'] / nl
+    for c, n in names: m[f'mix_{n}_net_sales'] = val(Q['ch'][c], s, mw, 'net_sales'); m[f'mix_{n}_pct'] = m[f'mix_{n}_net_sales'] / nl
     if fy == 2026:
         B = lambda col, ws=ws: val(Q['b'], s, ws, col)
         m.update(net_sales_bud=B('net_sales_bud'), gross_sales_bud=B('gross_sales_bud'), markdown_bud=B('markdown_bud'), cogs_bud=B('cogs_bud'), back_margin_bud=B('back_margin_bud'))
@@ -224,8 +251,8 @@ def metrics(s, kind, fy, w):
         m['ebitda_bud'] = m['net_sales_bud'] - m['cogs_bud'] + m['back_margin_bud'] - sum(m[f'opex_{k_}_bud'] for k_ in ['shrink', 'store', 'central', 'fulfilment'])
         m['ebitda_margin_pct_bud'] = m['ebitda_bud'] / m['net_sales_bud']
         if 'lfl_net_sales_ly' in m: m['lfl_net_sales_bud'] = val(Q['lb'], s, ws, 'net_sales_bud'); m['lfl_growth_pct_bud'] = m['lfl_net_sales_bud'] / m['lfl_net_sales_ly'] - 1
-        nb = val(Q['b'], s, [L], 'net_sales_bud')
-        for c, n in names: m[f'mix_{n}_pct_bud'] = val(Q['chb'][c], s, [L], 'net_sales_bud') / nb
+        nb = val(Q['b'], s, mw, 'net_sales_bud')
+        for c, n in names: m[f'mix_{n}_pct_bud'] = val(Q['chb'][c], s, mw, 'net_sales_bud') / nb
         dv = [m[f'mix_{n}_pct'] - m[f'mix_{n}_pct_bud'] for _, n in names]; j = int(np.argmax(np.abs(dv)))
         m['mix_max_dev_pp'] = dv[j]; m['mix_max_dev_channel'] = j + 1
     return m
@@ -233,26 +260,41 @@ def metrics(s, kind, fy, w):
 def badness(k, m, p):
     """Direction-adjusted shortfall vs basis (E-22); None = N/A."""
     g = m.get
+    def d(a, b): return None if a is None or b is None else a - b       # None-safe: a missing actual or basis (FY2025 budget) = N/A
+    def ab(x): return None if x is None else abs(x)
     return {'NET_SALES': (1 - g('net_sales') / g('net_sales_bud')) if g('net_sales_bud') else None,
-            'TOTAL_MARGIN': g('total_margin_pct_bud') - g('total_margin_pct') if 'total_margin_pct' in m else None,
-            'WEEKS_OF_COVER': abs(g('weeks_of_cover') - g('cover_target_wks')) if 'weeks_of_cover' in m else None,
-            'MARKDOWN': g('markdown_pct') - g('markdown_pct_bud') if 'markdown_pct' in m else None,
-            'AVAILABILITY': .97 - g('availability_pct') if 'availability_pct' in m else None,
-            'EBITDA': 1 - p['ebitda'] / p['ebitda_bud'], 'LFL_GROWTH': g('lfl_growth_pct_bud') - g('lfl_growth_pct') if 'lfl_growth_pct' in m else None,
-            'FRONT_GM': g('front_gm_pct_bud') - g('front_gm_pct') if 'front_gm_pct' in m else None,
-            'SELL_THROUGH': .62 - g('sell_through_pct') if 'sell_through_pct' in m else None, 'GMROI': 2.5 - g('gmroi') if 'gmroi' in m else None,
-            'SUPPLIER_OTIF': .95 - g('otif_pct'), 'CHANNEL_MIX': abs(g('mix_max_dev_pp')) if 'mix_max_dev_pp' in m else None}[k]
+            'TOTAL_MARGIN': d(g('total_margin_pct_bud'), g('total_margin_pct')),
+            'WEEKS_OF_COVER': ab(d(g('weeks_of_cover'), g('cover_target_wks'))),
+            'MARKDOWN': d(g('markdown_pct'), g('markdown_pct_bud')),
+            'AVAILABILITY': d(.97, g('availability_pct')),
+            'EBITDA': (1 - p['ebitda'] / p['ebitda_bud']) if p.get('ebitda_bud') else None, 'LFL_GROWTH': d(g('lfl_growth_pct_bud'), g('lfl_growth_pct')),
+            'FRONT_GM': d(g('front_gm_pct_bud'), g('front_gm_pct')),
+            'SELL_THROUGH': d(.62, g('sell_through_pct')), 'GMROI': d(2.5, g('gmroi')),
+            'SUPPLIER_OTIF': d(.95, g('otif_pct')), 'CHANNEL_MIX': ab(g('mix_max_dev_pp'))}[k]
 
 CARDS = list(kpi[kpi.is_landing].sort_values('card_order').kpi_code)
 exp = {}
-periods = [('W', 2026, w) for w in range(30, 44)] + [('W', 2025, w) for w in range(31, 44)] + [(k, y, w) for k in ('PTD', 'YTD') for y, w in ((2026, 43), (2026, 42), (2025, 43))]
-for kind, fy, w in periods:
-    pk = f'{kind}-FY{fy}-{w:02d}'
+# key set (exec-period-model.md §6): bar weeks + their LY, every Month / Quarter / Year item with an actual week, the like-length windows, legacy
+ITEMS = {g_: [(g_, fy, n) for fy in (2025, 2026) for n in ((None,) if g_ == 'FY' else range(1, 13 if g_ == 'P' else 5)) if win(g_, fy, n)]
+         for g_ in ('P', 'Q', 'FY')}
+KEYS = ([key_of('W', 2026, w) for w in range(30, 44)] + [key_of('W', 2025, w) for w in range(31, 44)]
+        + [key_of(*it) for g_ in ('P', 'Q', 'FY') for it in ITEMS[g_]] + ['Q-FY2026-3@4', 'Q-FY2025-4@4', 'FY-FY2025@43'])
+def ebitda_prev(wkey):
+    """EBITDA card, Previous at Week (USER 2026-10-29): previous period (P1 -> P12 of the FY before), its first k weeks, k = week_of_period.
+    None = N/A when the previous period has fewer than k weeks (week 5 of a 5-week period; main agent 2026-10-30): no like-length window."""
+    r = wk.set_index('week_key').loc[wkey]; fy, p = (int(r.fy), int(r.period) - 1) if r.period > 1 else (int(r.fy) - 1, 12)
+    return key_of('P', fy, p, int(r.week_of_period)) if int(r.week_of_period) <= len(item_weeks('P', fy, p)) else None
+def item_weeks(g_, fy, n): return [r.week_key for r in wk.itertuples() if r.fy == fy and (g_ == 'FY' or (r.period if g_ == 'P' else r.quarter) == n)]
+for k_ in [k_ for k_ in KEYS if k_.startswith('W-')]:
+    if ebitda_prev(win(*parse_key(k_))[0]) and ebitda_prev(win(*parse_key(k_))[0]) not in KEYS: KEYS.append(ebitda_prev(win(*parse_key(k_))[0]))
+KEYS += [key_of(k_, y, w) for k_ in LEGACY for y, w in ((2026, 43), (2026, 42), (2025, 43))]
+for pk in KEYS:
+    kind, fy, num, kw = parse_key(pk)
     for s in SC:
-        m = metrics(s, kind, fy, w)
-        if fy == 2026:
-            p = m if kind == 'PTD' else metrics(s, 'PTD', fy, w)
-            m['ebitda_ptd'] = p['ebitda']; m['ebitda_bud_ptd'] = p['ebitda_bud']
+        m = metrics(s, kind, fy, num, kw)
+        if not (kind in LEGACY and fy != 2026):       # every key carries its rated cards; legacy keys keep the 2026-10-28 FY2026-only gate
+            p = m if kind in ('PTD', 'P', 'Q', 'FY') else metrics(s, 'PTD', fy, num)    # EBITDA: period to date at W (and YTD), own window at P / Q / FY
+            if kind in ('W',) + LEGACY: m['ebitda_ptd'] = p['ebitda']; m['ebitda_bud_ptd'] = p.get('ebitda_bud')
             stt = {}
             for k_ in CARDS:
                 b = badness(k_, m, p)
@@ -261,10 +303,10 @@ for kind, fy, w in periods:
             for k_, v_ in stt.items(): m[f'status.{k_.lower()}'] = v_
             n = len(stt); c = [list(stt.values()).count(x) for x in (1, 2, 3)]
             m.update({'status.count_on': c[0], 'status.count_watch': c[1], 'status.count_off': c[2], 'status.count_na': 12 - n})
-            m['status.dot'] = 3 if c[2] / n >= rule.loc['DOT_RED_OFF'].threshold else 2 if (c[1] + c[2]) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold \
-                else 1 if c[0] / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2
+            if n: m['status.dot'] = 3 if c[2] / n >= rule.loc['DOT_RED_OFF'].threshold else 2 if (c[1] + c[2]) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold \
+                else 1 if c[0] / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2     # n = 0: no dot row = grey dot (E-95)
         if s == 'ALL':
-            L = win(kind, fy, w)[-1]; i = IX[L]
+            L = win(kind, fy, num, kw)[-1]; i = IX[L]
             if i >= 51:
                 r52 = WK[i - 51:i + 1]
                 fmc = fs[fs.week_key.isin(r52)].assign(fm=fs.net_sales - fs.cogs_landed).groupby('category_code').fm.sum()
@@ -288,7 +330,7 @@ def tol(k):
     return .06 if k.endswith(('_units', '_sku_days')) else .0051
 bad = [(k, got.get(k), e) for k, e in exp.items() if k not in got or abs(got[k] - e) > tol(k[2])]
 extra = set(got) - set(exp)
-check(f'ET-01 control totals: {len(exp):,} values recomputed from the Parquet files (4 scopes x {len(periods)} periods)', not bad and not extra,
+check(f'ET-01 control totals: {len(exp):,} values recomputed from the Parquet files (4 scopes x {len(KEYS)} period keys)', not bad and not extra,
       f'{len(bad)} mismatches, {len(extra)} unexpected, e.g. {bad[:3]} {list(extra)[:3]}')
 
 # ---- ET-02 / ET-03 the v5 Week-43 story ------------------------------------------------------------------------------------
@@ -320,7 +362,7 @@ v5 = {'NET_SALES': ('€61.4m', f'{MINUS}€1.5m ({MINUS}2.4%)', 'Watch'), 'TOTA
 for k_ in CARDS:
     have = cards[k_] + (STAT[int(g(f'status.{k_.lower()}'))],)
     check(f'ET-02 {k_:<15} {" | ".join(v5[k_])}', have == v5[k_], have)
-P = 'PTD-FY2026-43'
+P = 'P-FY2026-10'
 info = {  # inputs quoted in the v5 (i) worked examples and mini stats
     '€68.4m gross, €6.7m markdown, €0.3m returns, budget €62.9m': [eur(g('gross_sales')), eur(g('markdown')), eur(g('returns')), eur(g('net_sales_bud'))] == ['€68.4m', '€6.7m', '€0.3m', '€62.9m'],
     'front €18.5m + back €3.8m (6.2%) = €22.3m; COGS €42.9m': [eur(g('front_margin')), eur(g('back_margin')), pct(g('back_margin_pct')), eur(g('total_margin')), eur(g('cogs'))]
@@ -341,7 +383,7 @@ info = {  # inputs quoted in the v5 (i) worked examples and mini stats
     'OTIF 4,591 ÷ 4,812; vs last week +0.4 pp; 2 suppliers below 85%': (g('po_lines_otif'), g('po_lines_due'), sgn(g('otif_pct') - g('otif_pct', 'W-FY2026-42')),
         g('otif_suppliers_below_85')) == (4591, 4812, '+0.4 pp', 2),
     'channels €42.0m / €12.2m / €7.2m': [eur(g(f'mix_{n}_net_sales')) for n in ['store', 'online', 'wholesale']] == ['€42.0m', '€12.2m', '€7.2m'],
-    'stats: vs LY +3.8%, P10 €241.7m, YTD €2,318m': [sgn(g('net_sales') / g('net_sales', 'W-FY2025-43') - 1, u='%'), eur(g('net_sales', P)), eur(g('net_sales', 'YTD-FY2026-43'), 0)]
+    'stats: vs LY +3.8%, P10 €241.7m, YTD €2,318m': [sgn(g('net_sales') / g('net_sales', 'W-FY2025-43') - 1, u='%'), eur(g('net_sales', P)), eur(g('net_sales', 'FY-FY2026'), 0)]
         == ['+3.8%', '€241.7m', '€2,318m'],
     'stats vs LY: markdown +1.9 pp, total margin −0.2 pp, front margin −0.3 pp':
         [sgn(g(k) - g(k, 'W-FY2025-43')) for k in ['markdown_pct', 'total_margin_pct', 'front_gm_pct']] == ['+1.9 pp', f'{MINUS}0.2 pp', f'{MINUS}0.3 pp'],
@@ -354,7 +396,8 @@ x = fp[fp.week_key == 'FY2026-W43']; low = x[x.po_lines_otif < .85 * x.po_lines_
 check('E-74 the two suppliers below 85 % OTIF at Week 43 are Electronics suppliers', len(low) == 2 and set(low.map(sup.set_index('supplier_code').primary_category_code)) == {'ELEC'})
 cnt = tuple(int(g(f'status.count_{k}')) for k in ['on', 'watch', 'off', 'na'])
 check('ET-02 / ET-03 Week 43 ALL: 7 on track / 3 watch / 2 off track, overall dot orange (literal v5 rule)', cnt == (7, 3, 2, 0) and g('status.dot') == 2, cnt)
-check('ET-03 a dot and three counts for every FY2026 period x scope', all((s, f'{k}-FY{y}-{w:02d}', m) in got for s in SC for k, y, w in periods if y == 2026
+check('ET-03 a dot and three counts for every period key x scope (legacy PTD- / YTD- keys: FY2026 only)', all((s, k, m) in got for s in SC for k in KEYS
+      if not (parse_key(k)[0] in LEGACY and parse_key(k)[1] != 2026)
       for m in ['status.dot', 'status.count_on', 'status.count_watch', 'status.count_off']))
 check('ET-07 front + back = total margin (EUR) for every scope x period', all(abs(exp[(s, p, 'front_margin')] + exp[(s, p, 'back_margin')] - exp[(s, p, 'total_margin')]) < .01
       for (s, p, m) in exp if m == 'total_margin'))
@@ -370,6 +413,78 @@ check('ET-05 FY2026 W43 LY = FY2025-W43 by key; DATEADD(-1 year) of 19 Oct 2026 
       and abs(got[('ALL', 'W-FY2025-43', 'net_sales')] - fs[fs.week_key == 'FY2025-W42'].net_sales.sum()) > 1e5)
 check('ET-05 every FY2026 week: LY week starts exactly 364 days earlier (key join = same weekday, same week number)',
       all((pd.Timestamp(w2.week_start[i]) - pd.Timestamp(w2.week_start[i - 52])).days == 364 for i in range(52, 104)))
+
+# ---- ET-21 ... ET-24 period model (docs/ADD/features/exec-period-model.md §2, §3, §6) ---------------------------------------
+GOT_KEYS = set(ct.period_key)
+partial = {key_of(*it): len(win(*it)) < len(item_weeks(*it)) for g_ in ITEMS for it in ITEMS[g_]}
+check('ET-21 items from dim_week: 95 Week, 22 Month, 8 Quarter, 2 Year; partial = exactly Q-FY2026-4 and FY-FY2026; P-FY2026-10 complete (4 of 4); every item has rows',
+      (int(wk.is_actual.sum()), len(ITEMS['P']), len(ITEMS['Q']), len(ITEMS['FY'])) == (95, 22, 8, 2)
+      and sorted(k for k, v in partial.items() if v) == ['FY-FY2026', 'Q-FY2026-4'] and len(win('P', 2026, 10)) == len(item_weeks('P', 2026, 10)) == 4
+      and set(partial) <= GOT_KEYS and all(parse_key(k) for k in GOT_KEYS) and GOT_KEYS == set(KEYS))
+
+raw = (D / 'checks' / 'control_totals_eur.csv').read_bytes().split(b'\n')
+def rows_hash(f):
+    r = [l for l in raw if l.count(b',') == 3 and f(l.split(b',')[1].decode())]; return len(r), hashlib.sha256(b'\n'.join(r)).hexdigest()
+check('ET-22 W-FY2026-43 rows byte-identical to the 2026-10-28 CSV (378 rows, SHA-256 pinned)',
+      rows_hash(lambda k: k == 'W-FY2026-43') == (378, '1ebd435f7357fd7a38dcf86bf50ad71fc29e0e1c2c17dbf6400a7997a04b57f1'))
+check('ET-22 legacy PTD- / YTD- rows byte-identical to the 2026-10-28 CSV (1,854 rows, SHA-256 pinned; drop with the legacy keys)',
+      rows_hash(lambda k: k.startswith(LEGACY)) == (1854, '9e632c5564acb286962cfa0ea953ebfcf90a678d294236c64daf874c915148e3'))
+
+lyk = dict(zip(wk.week_key, wk.ly_week_key))
+need, cmp_ok = set(), True
+for g_ in ITEMS:
+    for it in ITEMS[g_]:
+        _, fy, n = it; ws = win(*it); cut = len(ws) if partial[key_of(*it)] else None
+        if g_ != 'FY' and (fy, n) != (2025, 1):           # previous item: whole when complete, first k weeks when partial; none at Year (USER 2026-10-29)
+            pv = (g_, fy, n - 1) if n > 1 else (g_, fy - 1, 12 if g_ == 'P' else 4); need.add(key_of(*pv, cut))
+        if fy == 2026:                                     # Last year: the same weeks one year back by ly_week_key
+            lk = key_of(g_, 2025, n, cut); need.add(lk); cmp_ok &= [lyk[w] for w in ws] == win(*parse_key(lk))
+check('ET-23 comparator keys exist: every previous item (whole; like-length @k for the partial Q4 / no previous year at Year) and every LY window by key',
+      cmp_ok and need <= GOT_KEYS and {'Q-FY2026-3@4', 'Q-FY2025-4@4', 'FY-FY2025@43', 'P-FY2026-09', 'P-FY2025-10'} <= need
+      and win('Q', 2026, 3, 4) == [f'FY2026-W{w}' for w in range(27, 31)] and win('Q', 2025, 4, 4) == [f'FY2025-W{w}' for w in range(40, 44)]
+      and win('FY', 2025, None, 43) == WK[:43] and len(win('P', 2026, 9)) == 4)
+wprev = {k_: ebitda_prev(win(*parse_key(k_))[0]) for k_ in KEYS if k_.startswith('W-')}
+na_prev = sorted(k_ for k_, v in wprev.items() if v is None); wprev = {k_: v for k_, v in wprev.items() if v}
+used = set(wprev.values()) | {k_ for k_ in KEYS if '@' not in k_ or not k_.startswith('P-')} | {'Q-FY2026-3@4', 'Q-FY2025-4@4', 'FY-FY2025@43'}
+check('ET-23 EBITDA Previous at Week = the previous period cut to the week of period (W43 = P10 wk 4 -> P-FY2026-09@4; P1 crosses to P12 of the FY before); '
+      'week 5 of a 5-week period = N/A (W-FY2026-35, W-FY2025-35); every P-@k key is referenced',
+      set(wprev.values()) <= GOT_KEYS and wprev['W-FY2026-43'] == 'P-FY2026-09@4' and wprev['W-FY2026-31'] == 'P-FY2026-07@1'
+      and wprev['W-FY2026-34'] == 'P-FY2026-07@4' and na_prev == ['W-FY2025-35', 'W-FY2026-35']
+      and all(ebitda_prev(f'FY2026-W{w:02d}') is None for w in (9, 22, 35, 48)) and GOT_KEYS == used
+      and ebitda_prev('FY2026-W01') == 'P-FY2025-12@1' and ebitda_prev('FY2026-W04') == 'P-FY2025-12@4'
+      and all(win(*parse_key(v)) == item_weeks('P', *parse_key(v)[1:3])[:parse_key(v)[3]] for v in wprev.values())
+      and all(got[(s, v, 'ebitda')] == got[(s, v.split('@')[0], 'ebitda')] for s in SC for v in wprev.values()
+              if parse_key(v)[3] == len(item_weeks('P', *parse_key(v)[1:3]))))
+TARGET_CARDS = {'weeks_of_cover', 'availability', 'sell_through', 'gmroi', 'supplier_otif'}
+f25 = [(s, k, m) for (s, k, m) in got if parse_key(k)[1] == 2025 and parse_key(k)[0] not in LEGACY]
+rated25 = {(s, k): {m[7:] for (s_, k_, m) in f25 if (s_, k_) == (s, k) and m.startswith('status.') and not m.startswith(('status.count', 'status.dot'))}
+           for (s, k, _) in f25}
+check('ET-23 FY2025 keys: Last year N/A (no ly_week_key), no budget value, status only on the 5 target-based cards, counts = rated cards',
+      wk[wk.fy == 2025].ly_week_key.isna().all() and not any('_bud' in m or m.startswith('mix_max_dev') for (_, _, m) in f25)
+      and all(r <= TARGET_CARDS and got[(s, k, 'status.count_on')] + got[(s, k, 'status.count_watch')] + got[(s, k, 'status.count_off')] == len(r)
+              and got[(s, k, 'status.count_na')] == 12 - len(r) for (s, k), r in rated25.items())
+      and rated25[('ALL', 'P-FY2025-10')] == TARGET_CARDS - {'gmroi'} and rated25[('ALL', 'Q-FY2025-1')] == {'weeks_of_cover', 'availability', 'supplier_otif'})
+season = dict(zip(wk.week_key, wk.season_code))
+check('E-93 Sell-through N/A when the window ends outside a season (dim_week.season_code); GMROI N/A before FY2025 W52',
+      all((('ALL', k, 'sell_through_pct') in got) == pd.notna(season[win(*parse_key(k))[-1]]) for k in KEYS)
+      and all((('ALL', k, 'gmroi') in got) == (IX[win(*parse_key(k))[-1]] >= 51) for k in KEYS)
+      and ('ALL', 'FY-FY2026', 'sell_through_pct') in got and ('ALL', 'FY-FY2025', 'sell_through_pct') not in got)
+check('ET-27 EBITDA: P-FY2026-10 = Q-FY2026-4 (to date) = the W43 card (period 10 to date, €15.3m); FY-FY2026 = the legacy YTD window',
+      got[('ALL', 'P-FY2026-10', 'ebitda')] == got[('ALL', 'Q-FY2026-4', 'ebitda')] == got[('ALL', 'W-FY2026-43', 'ebitda_ptd')]
+      and got[('ALL', 'FY-FY2026', 'ebitda')] == got[('ALL', 'YTD-FY2026-43', 'ebitda')] and ('ALL', 'FY-FY2026', 'ebitda_ptd') not in got)
+
+# ET-24 one-off migration (drop together with the legacy keys): same rows and values as the retired keys, except the rule changes of 2026-10-29
+txt = {(a, b, c): v for a, b, c, v in zip(ct.scope, ct.period_key, ct.metric_code, ct.value)}
+for new, old in (('P-FY2026-10', 'PTD-FY2026-43'), ('FY-FY2026', 'YTD-FY2026-43')):
+    a = {(s, m): v for (s, k, m), v in txt.items() if k == new}; b = {(s, m): v for (s, k, m), v in txt.items() if k == old}
+    changed = sorted(x for x in set(a) & set(b) if a[x] != b[x])
+    rule_change = lambda m: m.startswith('mix_') or m == 'status.channel_mix' or (new.startswith('FY-') and m == 'status.ebitda')
+    cards_changed = any(m.startswith('status.') and not m.startswith(('status.count', 'status.dot')) for _, m in changed)
+    ok = (not set(a) - set(b) and {m for _, m in set(b) - set(a)} == {'ebitda_ptd', 'ebitda_bud_ptd'}
+          and all(rule_change(m) or (cards_changed and m.startswith(('status.count', 'status.dot'))) for _, m in changed))
+    check(f'ET-24 migration {new} = {old} except: no ebitda_ptd / ebitda_bud_ptd (W keys only), channel mix over the window (USER 2026-10-29)'
+          + (', EBITDA status on the FY window (E-93)' if new.startswith('FY-') else ''), ok, changed)
+    for x in changed: print(f'      exception {new}  {x[0]:<6} {x[1]:<24} {b[x]:>16} -> {a[x]}')
 
 # ---- ET-20 determinism ---------------------------------------------------------------------------------------------------------
 if not args.no_rerun:

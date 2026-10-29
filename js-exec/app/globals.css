@@ -1,7 +1,7 @@
 /* Nordmark executive dashboard: the prototype v5 stylesheet (docs/design/executive dashboard (reseller)/prototype.html,
    lines 12-188), ported as is so the page can be diffed against the design target. Changes, each marked "js-exec":
    Inter from next/font (CSP font-src 'self'), no "Draft v5" side-bar label, no status sentence (ADR-0013 §3), N/A
-   status styles (E-21), loading / error line. One page, one stylesheet: global class names on purpose. */
+   status styles (E-21), loading / error line, ⓘ target line and no Notes pop-up (USER 2026-10-29). One page, one stylesheet: global class names on purpose. */
 /* ===== tokens: flat minimal, one accent (cobalt #2048C6, 7.2:1 on white) ===== */
 :root {
   --bg: #ffffff;
@@ -402,6 +402,10 @@ section > h2 {
 .na .delta {
   color: var(--muted);
 }
+/* a Δ with no comparison value ("n/a vs prev. mth") is muted on a rated card too (E-21 pattern) */
+.card .delta.muted {
+  color: var(--muted);
+}
 .st.na {
   background: var(--soft);
   color: var(--muted);
@@ -565,6 +569,14 @@ svg.spark text.cur {
   background: #b3261e;
   color: #b3261e;
 }
+/* no rated card in the selection (E-95): grey, no pulse */
+.dot.grey {
+  background: #9aa1ad;
+  color: #9aa1ad;
+}
+.dot.grey::after {
+  animation: none;
+}
 @keyframes pulse {
   0% {
     transform: scale(0.6);
@@ -608,7 +620,8 @@ svg.spark text.cur {
   border-color: var(--ink);
   color: var(--ink);
 }
-.chip[aria-pressed='true'] {
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'] {
   color: var(--acc);
   border-color: rgba(32, 72, 198, 0.45);
   background: rgba(32, 72, 198, 0.12);
@@ -620,7 +633,8 @@ svg.spark text.cur {
   .glass {
     background: rgba(255, 255, 255, 0.92);
   }
-  .chip[aria-pressed='true'] {
+  .chip[aria-pressed='true'],
+  .chip[aria-checked='true'] {
     background: #e6ecfa;
   }
 }
@@ -700,6 +714,30 @@ svg.spark text.cur {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+/* period picker (E-90): fiscal-year and item rows under the granularity row; Week / Month items in a compact grid */
+.menu .chips.row2 {
+  margin-top: 6px;
+}
+.menu .chips.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 4px;
+}
+.menu .chips.items .chip {
+  height: 26px;
+  padding: 0;
+  justify-content: center;
+  font-size: 12px;
+}
+.menu .showing {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.menu .showing b {
+  color: var(--ink);
+  font-weight: 600;
 }
 .x {
   width: 32px;
@@ -790,6 +828,39 @@ svg.spark text.cur {
   font-size: 13.5px;
   margin-top: 4px;
 }
+/* js-exec (USER 2026-10-29, spec shared with the PBI flavour): the status basis right under the 48 px value, big and
+   bold — 4 px gap, 20 px dotted swatch (the bars' target line), label 16 px / 600 #374151, value 32 px / 700 ink, unit
+   16 px / 600 #374151, then the Δ. #374151 on the glass ≥ 9:1, ink ≥ 14:1. */
+.pop-v .tgt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+.pop-v .tgt::before {
+  content: '';
+  width: 20px;
+  align-self: center;
+  border-top: 2px dotted var(--tgt);
+}
+.pop-v .tgt b {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.pop-v .tgt b small {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-left: 4px;
+  letter-spacing: 0;
+}
 .pop-v svg.spark {
   width: 240px;
   height: 72px;
@@ -854,6 +925,14 @@ svg.spark text.cur {
 .tag b {
   color: var(--ink);
   font-weight: 600;
+}
+/* refresh / provisional note: closes the tags row since the footer's "Target …" moved under the value (USER 2026-10-29) */
+.tags .note {
+  margin-left: auto;
+  align-self: center;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
 }
 .pop-f {
   display: flex;
@@ -949,38 +1028,7 @@ svg.spark text.cur {
 .pop ul.plain li {
   margin-bottom: 6px;
 }
-.pop h4 {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 16px 0 6px;
-}
-.pop p {
-  font-size: 13px;
-  line-height: 1.5;
-}
-table.t {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-table.t th {
-  text-align: left;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 5px 8px 5px 0;
-  border-bottom: 1px solid rgba(17, 24, 39, 0.12);
-}
-table.t td {
-  padding: 4px 8px 4px 0;
-  border-bottom: 1px solid rgba(17, 24, 39, 0.07);
-  vertical-align: top;
-}
+/* js-exec: v5's .pop h4, .pop p and table.t (Notes pop-up only) dropped with the Notes pop-up (USER 2026-10-29) */
 .drawer {
   position: fixed;
   top: 12px;

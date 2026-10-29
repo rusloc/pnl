@@ -1,33 +1,42 @@
 import { z } from 'zod';
 import { ATTRIBUTES } from './copy.ts';
 import type { AttrKey } from './copy.ts';
+import type { Catalog } from './items.ts';
 
 // URL state (E-62, F-37 analogue): the query string is the only untrusted input (E-82). Each key is validated on its
 // own with Zod; unknown keys are ignored and an invalid value falls back to its default, so a hand-edited link never
 // breaks the page. serialize() writes the canonical form (defaults omitted, attribute picks in menu order).
+// Item `i` (E-91 key, granularity implied) must also be a listed item; the default item (the as-of week) is `null`.
+// Retired keys still parse: `p` (week · ptd · ytd → the as-of week · its period · its year; ignored when `i` is present,
+// never written), `c=lw` (→ prev). Retired keys parsed as unknown (ignored, dropped by the canonical rewrite):
+// `statement`, `horizon` (attributes removed from the Filters menu, USER 2026-10-29).
 
-export const PERIODS = ['week', 'ptd', 'ytd'] as const;
-export const COMPARATORS = ['budget', 'ly', 'lw'] as const;
+export const COMPARATORS = ['budget', 'ly', 'prev'] as const;
 export const REGIONS = ['all', 'nl', 'be', 'online'] as const;
 
-export type Period = (typeof PERIODS)[number];
 export type Comparator = (typeof COMPARATORS)[number];
 export type Region = (typeof REGIONS)[number];
 export type Picks = Readonly<Record<AttrKey, readonly string[]>>;
 
 export interface Selection {
-  period: Period;
+  /** Item key (FY2026-P10, FY2026-Q4, FY2026, FY2025-W12 …); null = the default item, the as-of week. */
+  item: string | null;
   compare: Comparator;
   region: Region;
   picks: Picks;
 }
 
-export const NO_PICKS: Picks = { group: [], lever: [], horizon: [], owner: [], statement: [] };
-export const DEFAULT_SELECTION: Selection = { period: 'week', compare: 'budget', region: 'all', picks: NO_PICKS };
+export const NO_PICKS: Picks = { group: [], lever: [], owner: [] };
+export const DEFAULT_SELECTION: Selection = { item: null, compare: 'budget', region: 'all', picks: NO_PICKS };
 
 const SINGLE = {
-  p: z.enum(PERIODS).catch('week'),
-  c: z.enum(COMPARATORS).catch('budget'),
+  i: z
+    .string()
+    .regex(/^FY\d{4}(-(W\d{2}|P\d{2}|Q[1-4]))?$/)
+    .nullable()
+    .catch(null),
+  p: z.enum(['week', 'ptd', 'ytd']).nullable().catch(null),
+  c: z.enum(['budget', 'ly', 'prev', 'lw']).catch('budget'),
   r: z.enum(REGIONS).catch('all'),
 } as const;
 
@@ -43,24 +52,37 @@ function picksOf(params: URLSearchParams, key: AttrKey): string[] {
   return options.map(([code]) => code).filter((code) => wanted.has(code));
 }
 
-export function parseSelection(params: URLSearchParams): Selection {
-  return {
-    period: SINGLE.p.parse(params.get('p') ?? undefined),
-    compare: SINGLE.c.parse(params.get('c') ?? undefined),
-    region: SINGLE.r.parse(params.get('r') ?? undefined),
-    picks: {
-      group: picksOf(params, 'group'),
-      lever: picksOf(params, 'lever'),
-      horizon: picksOf(params, 'horizon'),
-      owner: picksOf(params, 'owner'),
-      statement: picksOf(params, 'statement'),
+/** Canonical form: the default item as null; no "Previous" at Year (USER 2026-10-29: it equals Last year) → Last year. */
+export function normalize(s: Selection, cat: Catalog): Selection {
+  const item = s.item !== null && cat.byKey.has(s.item) && s.item !== cat.defaultKey ? s.item : null;
+  const year = item !== null && cat.byKey.get(item)?.gran === 'FY';
+  return { ...s, item, compare: year && s.compare === 'prev' ? 'ly' : s.compare };
+}
+
+export function parseSelection(params: URLSearchParams, cat: Catalog): Selection {
+  const legacy = SINGLE.p.parse(params.get('p'));
+  const item = params.has('i')
+    ? SINGLE.i.parse(params.get('i'))
+    : legacy === 'ptd'
+      ? cat.asOf.P.key
+      : legacy === 'ytd'
+        ? cat.asOf.FY.key
+        : null;
+  const c = SINGLE.c.parse(params.get('c') ?? undefined);
+  return normalize(
+    {
+      item,
+      compare: c === 'lw' ? 'prev' : c,
+      region: SINGLE.r.parse(params.get('r') ?? undefined),
+      picks: { group: picksOf(params, 'group'), lever: picksOf(params, 'lever'), owner: picksOf(params, 'owner') },
     },
-  };
+    cat,
+  );
 }
 
 export function serializeSelection(s: Selection): string {
   const q = new URLSearchParams();
-  if (s.period !== DEFAULT_SELECTION.period) q.set('p', s.period);
+  if (s.item !== null) q.set('i', s.item);
   if (s.compare !== DEFAULT_SELECTION.compare) q.set('c', s.compare);
   if (s.region !== DEFAULT_SELECTION.region) q.set('r', s.region);
   for (const a of ATTRIBUTES) {

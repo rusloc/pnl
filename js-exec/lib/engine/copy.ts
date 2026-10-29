@@ -26,15 +26,6 @@ export const ATTRIBUTES = [
     ],
   },
   {
-    key: 'horizon',
-    label: 'Horizon',
-    options: [
-      ['week', 'Week'],
-      ['month', 'Month'],
-      ['quarter', 'Quarter'],
-    ],
-  },
-  {
     key: 'owner',
     label: 'Owner',
     options: [
@@ -44,27 +35,32 @@ export const ATTRIBUTES = [
       ['digital', 'Digital'],
     ],
   },
-  {
-    key: 'statement',
-    label: 'Statement',
-    options: [
-      ['pl', 'P&L'],
-      ['bs', 'Balance sheet'],
-      ['ops', 'Operational'],
-    ],
-  },
 ] as const;
 
+// Horizon attribute removed (USER 2026-10-29): the period picker replaces it; dim_kpi.horizon stays in the manifest.
 export type AttrKey = (typeof ATTRIBUTES)[number]['key'];
 
 export const SWITCH_LABELS = {
-  period: { label: 'Period', options: { week: 'Week', ptd: 'Period to date', ytd: 'Year to date' } },
-  compare: { label: 'Comparator', options: { budget: 'Budget', ly: 'Last year', lw: 'Last week' } },
+  /** Period picker (E-90): granularity chips; "Month" is the 4-5-4 retail period (items P1 … P12, header "Month 10";
+   *  "Period" stays only as a column / key name, USER 2026-10-30). */
+  granularity: { label: 'Period', options: { W: 'Week', P: 'Month', Q: 'Quarter', FY: 'Year' } },
+  /** "Previous" = the previous week / month / quarter; not offered at Year (USER 2026-10-29). */
+  compare: { label: 'Comparator', options: { budget: 'Budget', ly: 'Last year', prev: 'Previous' } },
   region: {
     label: 'Region / format',
     options: { all: 'All', nl: 'Netherlands', be: 'Belgium', online: 'Online only' },
   },
 } as const;
+
+/** Words of the period model per granularity (E-98, USER 2026-10-29 / 30). `header`: header line / title; `noun`: ⓘ
+ *  stat labels and sub-titles ("vs LY month"); `prev`: header comparator line; `short`: Δ suffix "vs prev. mth". */
+export const PERIOD_WORDS = {
+  W: { header: 'Week', noun: 'week', prev: 'Previous week', short: 'vs prev. wk' },
+  P: { header: 'Month', noun: 'month', prev: 'Previous month', short: 'vs prev. mth' },
+  Q: { header: 'Quarter', noun: 'quarter', prev: 'Previous quarter', short: 'vs prev. qtr' },
+  FY: { header: 'FY', noun: 'year', prev: 'Last year', short: 'vs LY' },
+} as const;
+export const TO_DATE = 'to date';
 
 export const DRILL_PAGES: Readonly<Record<string, string>> = {
   Sales: 'Sales page',
@@ -76,6 +72,8 @@ export const DRILL_PAGES: Readonly<Record<string, string>> = {
 
 export const STATUS_WORD = { good: 'On track', watch: 'Watch', off: 'Off track', na: 'N/A' } as const;
 export const STATUS_GLYPH = { good: '▲', watch: '●', off: '▼', na: '–' } as const;
+/** Label of the status basis (dim_kpi.basis) on the ⓘ target line under the value (USER 2026-10-29). */
+export const BASIS_LABEL = { BUDGET: 'Budget', TARGET: 'Target', PLAN: 'Plan' } as const;
 
 export interface CardCopy {
   /** Basis sub-title (hero and medium cards); "prov." is appended from dim_kpi.is_provisional (E-27). */
@@ -84,7 +82,6 @@ export interface CardCopy {
   what: string;
   why: string;
   formula: string;
-  note: string;
   /** Footer right when the card is not provisional: the refresh stamp or "Updated weekly". */
   cadence: 'refresh' | 'weekly';
   /** Footer right of a provisional card (E-27). */
@@ -96,10 +93,9 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
   NET_SALES: {
     sub: 'all channels', // the window is prefixed in view.ts: "week 43, all channels"
     rule: 'Watch when −3% to 0% vs budget; Off track below −3%.',
-    what: 'The money customers actually paid us this week, after returns, discounts and VAT.',
+    what: 'The money customers actually paid us in the picked period, after returns, discounts and VAT.',
     why: 'It is the top line every other number divides by or adds up to; if it slips, the margin and stock numbers follow.',
     formula: 'Gross sales at ticket price − markdowns and discounts − returns, excluding VAT.',
-    note: 'Stores −1.2 pp from three closures; online +12% LFL; wholesale order book −4%.',
     cadence: 'refresh',
     drill: [
       [
@@ -121,11 +117,10 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     why: 'Front margin alone hides half of a reseller’s profit; this is the margin the business really keeps.',
     formula:
       '(Front margin + back margin) ÷ Net sales. Front = sales − cost of goods; back = supplier rebates, promo funding and listing fees.',
-    note: 'Q4 volume rebates accrued; finance true-up 10 Nov.',
     cadence: 'refresh',
     provisional: 'Provisional · true-up 10 Nov',
     drill: [
-      ['Margin bridge', 'LY margin % → price → mix → landed cost → markdown → back margin → this week.'],
+      ['Margin bridge', 'LY margin % → price → mix → landed cost → markdown → back margin → the picked period.'],
       ['Category × subcategory matrix', 'Net sales, front %, back %, total %, markdown %, shrink %, Δ pp vs plan.'],
       ['SKU × promotion list', 'Sell price, landed cost, markdown €, promo funding, margin €.'],
       ['Contract accrual lines', 'Rate, qualifying purchases, accrued, invoiced, provisional flag.'],
@@ -135,9 +130,8 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     sub: 'forward',
     rule: 'On track within ±1 wk of target 9.5; Watch 1–2 wks away; Off track beyond ±2 wks.',
     what: 'How many weeks our stock would last at the sales we expect, if nothing more arrived.',
-    why: 'Too little and shelves go empty; too much and the stock ends in markdown. It decides this week’s buying actions.',
+    why: 'Too little and shelves go empty; too much and the stock ends in markdown. It decides the next buying actions.',
     formula: '(Stock on hand + stock on order, at cost) ÷ forecast cost of goods sold per week.',
-    note: 'Toys intake landed 2 weeks early; Garden overstock.',
     cadence: 'refresh',
     drill: [
       ['Stock at cost by category vs target cover', 'Bars with target markers, over and under coloured.'],
@@ -152,7 +146,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'The part of the ticket price we gave away through price cuts and promotions.',
     why: 'Every point of markdown is margin lost; rising markdown is the first sign of too much or the wrong stock.',
     formula: 'Markdown value (permanent + promotional) ÷ gross sales at ticket price.',
-    note: 'Apparel autumn clearance 4 weeks early; Garden end of season.',
     cadence: 'refresh',
     drill: [
       ['Markdown by promo type', 'TPR, multibuy, clearance, loyalty: value and % of sales.'],
@@ -167,7 +160,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'How often our best-selling products were actually on the shelf when a customer could buy them.',
     why: 'A gap on the shelf is a sale that never happens; it is the "too little stock" failure mode.',
     formula: 'SKU-store-days in stock ÷ SKU-store-days ranged, for the top-500 sellers, weighted by sales.',
-    note: 'DC Tilburg WMS outage Tuesday; Fresh top-50 at 91%.',
     cadence: 'refresh',
     drill: [
       ['Availability by store cluster', 'Heatmap: cluster × week.'],
@@ -177,12 +169,11 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     ],
   },
   EBITDA: {
-    sub: 'to date', // "period 10 to date" from the calendar in view.ts
+    sub: 'to date', // at Week "month 10 to date" from the calendar in view.ts
     rule: 'Watch when −5% to 0 vs budget; Off track below −5%. Provisional until month-end close.',
-    what: 'Profit before interest, tax and depreciation for the period so far: what is left after all operating costs.',
+    what: 'Profit before interest, tax and depreciation in the picked period (at Week: the month so far): what is left after all operating costs.',
     why: 'It is the bottom line the board sees; every margin and cost move lands here.',
     formula: 'Total margin − shrink − store costs − central costs − fulfilment costs; ÷ Net sales for the margin %.',
-    note: 'Energy below plan; payroll over on Sunday trading.',
     cadence: 'refresh',
     provisional: 'Provisional · weekly flash',
     drill: [
@@ -198,8 +189,7 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'Sales growth in the stores that were open a year ago too, so new openings and closures do not distort it.',
     why: 'It tells you whether the existing business is growing, not just the estate.',
     formula:
-      'Sales of stores open ≥ 13 months this week ÷ the same stores’ sales in the same retail week last year − 1.',
-    note: 'Online LFL +12.1%; hyper formats +1.8%, convenience +4.0%.',
+      'Sales of stores open ≥ 13 months in the picked period ÷ the same stores’ sales in the same retail weeks last year − 1.',
     cadence: 'refresh',
     drill: [
       ['LFL vs non-LFL bridge', 'LY → LFL growth → new stores → closures → online → wholesale → actual.'],
@@ -214,7 +204,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'The share of sales left after paying what the goods cost us, landed in our warehouse.',
     why: 'It is the price-minus-cost half of profit; pricing, buying cost and category mix show up here first.',
     formula: '(Net sales − cost of goods at landed cost) ÷ Net sales.',
-    note: 'H&B and Electronics mix offsets Apparel clearance.',
     cadence: 'refresh',
     drill: [
       ['Margin % by category vs plan', 'Dumbbell: plan vs actual per category.'],
@@ -229,7 +218,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'The share of the season’s stock we have sold so far.',
     why: 'It says whether the season is clearing on time or heading for clearance markdown.',
     formula: 'Units sold season to date ÷ (opening stock units + units received).',
-    note: 'Apparel 58% after clearance; Home & kitchen 69%. Season week 12 of 20.',
     cadence: 'weekly',
     drill: [
       ['Sell-through by season × category', 'Curve vs target curve per category.'],
@@ -245,7 +233,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     why: 'Stock costs money to hold; this says whether it is earning its keep.',
     // v5 said "Total margin for the last 12 months"; ADR-0013 OQ 11 / data README open point 12: front margin, 52 weeks
     formula: 'Front gross margin for the last 52 weeks ÷ average stock at cost over the same 52 week-ends.',
-    note: 'Electronics 1.9× below target; H&B 4.1×.',
     cadence: 'weekly',
     drill: [
       ['GMROI by category', 'Ranked bar vs category target.'],
@@ -260,7 +247,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'The share of purchase-order lines suppliers delivered on the agreed day and in the agreed quantity.',
     why: 'Late or short deliveries become empty shelves two weeks later.',
     formula: 'PO lines received on time and in full ÷ PO lines due.',
-    note: 'Two Electronics suppliers below 85%; see the scorecard.',
     cadence: 'refresh',
     drill: [
       ['OTIF trend and by supplier', 'Ranked bar, volume-weighted.'],
@@ -275,7 +261,6 @@ export const CARD_COPY: Readonly<Record<string, CardCopy>> = {
     what: 'What share of sales came through stores, online and wholesale.',
     why: 'A shift between channels changes margin and cost to serve even when total sales look fine.',
     formula: 'Each channel’s net sales ÷ total net sales, compared with the planned mix.',
-    note: 'Online ahead of plan; stores −1.6 pp after three closures.',
     cadence: 'refresh',
     drill: [
       ['Channel mix trend', '100% stacked area, 13–26 weeks.'],
@@ -291,16 +276,6 @@ export const SIDEBAR_TIPS = {
   filters: ['Filters', ' · period, comparator, region and the metric attributes'],
   how: ['How to read', ' this page'],
   more: ['More KPIs', ' · 20 bench metrics, inactive'],
-  notes: ['Notes', ' · status rules, margin logic, data contract'],
   explain: ['Explain', ' · what it is, why it matters, formula, worked example'],
   drill: ['Drill path', ' · from this card to the lowest grain'],
 } as const;
-
-export const MARGIN_LOGIC =
-  'Front margin = Net sales − COGS at landed cost. Back margin = contract rate × qualifying purchases, accrued weekly, provisional until the monthly true-up. Total margin = front + back. Markdown already reduces the sell price, so it is shown as % of gross sales and never enters the margin sum twice. EBITDA = Total margin − shrink − store OpEx − central OpEx − fulfilment.';
-
-export const DATA_CONTRACT = [
-  'Facts at week × site × category: sales, budget, week-end stock, forecast cost of goods, availability, receipts; supplier income and PO lines at week × supplier; OpEx at week × cost type × site × scenario.',
-  'LY by week key on the 4-5-4 retail calendar (week 43 ↔ LY week 43, never the same dates). LFL flag per retail period (open ≥ 13 months, not closed, not refitted). Provisional flag on back margin and EBITDA flash until close.',
-  'This page reads pre-aggregated cubes (week × region / channel × category); stores, suppliers and SKUs stay in the source data.',
-] as const;
