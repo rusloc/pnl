@@ -28,10 +28,13 @@ One self-contained folder per report; each sub-folder has its own README with th
 
 | Pack | From → To | Status | What |
 |------|-----------|--------|------|
-| `2026-10-28-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | ready | Entry point: what each pack holds, which to take, order of work, what is deferred |
+| `2026-10-30-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | draft (ready once the PBI packs carry their data) | **Entry point** for all three reports: what each pack holds, data inside every artifact, publish / embed path per flavour, `EMBED_ALLOWED_ORIGINS`, rules |
+| `2026-10-28-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | **superseded** 2026-10-30 by `2026-10-30-report-packs.md` | Former entry point (P&L + Mirelo only) |
 | `pnl/js-app/` | rusloc/pnl (nerd) → vosk.dev repo agent | ready | P&L standalone Next.js app (Vitals / Statement / Analysis / Profitability), prebuilt data 1.7 MB, AI chat excluded; typecheck / lint / test (196 + 1 skipped) / build green |
 | `pnl/power-bi/` | rusloc/pnl (ginee, bip) → vosk.dev repo agent | ready | P&L PBIP reading local Parquet via `DataFolder` + 23 Parquet files (31.8 MB) + `control_totals_usd.csv` · verified by bip 2026-10-28 (refresh, 23 test blocks, T-06 552/552) |
 | `mirelo-sales/js-app/` | rusloc/pnl (nerd) → vosk.dev repo agent | ready (report content still draft, see its README) | Mirelo standalone Next.js app (`/sales`, `/` redirects), prebuilt data 915 kB; 92 + 4 skipped tests, build green |
 | `mirelo-sales/power-bi/` | rusloc/pnl (ginee, bip) → vosk.dev repo agent | ready | Mirelo PBIP with `DataFolder` placeholder · verified by bip 2026-10-28 (refresh, 19 test blocks / 3,452 rows) |
 | `mirelo-sales/data/` | rusloc/pnl (ginee) → vosk.dev repo agent | ready | Parquet (22.8 MB) + deterministic generator (seed 20261026) + control totals + params; CSVs regenerate byte-identically |
+| `nordmark-exec/data/` | rusloc/pnl (ginee) → vosk.dev repo agent | ready | Nordmark dataset: 18 Parquet + manifest (15.4 MB, 878,695 rows), deterministic generator (seed 20261028), checks incl. `control_totals_eur.csv` (26,143) + `control_totals_category_eur.csv` (10,514); verify 91 green and byte-identical regen from the pack (2026-10-30) |
+| `nordmark-exec/js-app/` | rusloc/pnl (nerd) → vosk.dev repo agent | ready | Nordmark Exec standalone Next.js app (ADR-0013: period model, category filter, stacked ⓘ), 1440 × 810, prebuilt data 452 kB + control-totals fixtures; 458 tests, build green, headless 28 / 28 (2026-10-30) |
 

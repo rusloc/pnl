@@ -1,6 +1,6 @@
 # Report packs: P&L and Mirelo Sales, hand-off for publishing and hosting
 
-from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-28 · status: ready (all five packs verified 2026-10-28)
+from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-28 · status: **superseded** 2026-10-30 by `2026-10-30-report-packs.md` (was: ready, all five packs verified 2026-10-28)
 
 The USER publishes and hosts these reports from the vosk.dev repo. Each report is one self-contained folder. Take what you need without the rest of this repo. Decision record: ADR-0014 in rusloc/pnl.
 

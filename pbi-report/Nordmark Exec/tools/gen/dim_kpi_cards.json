@@ -1,0 +1,122 @@
+{
+ "NET_SALES": {
+  "group": "B1",
+  "lever": "sales",
+  "owner": "commercial",
+  "horizon": "week",
+  "basis": "BUDGET",
+  "is_provisional": false,
+  "size": "hero",
+  "card_order": 1
+ },
+ "LFL_GROWTH": {
+  "group": "B4",
+  "lever": "sales",
+  "owner": "commercial",
+  "horizon": "week",
+  "basis": "BUDGET",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 7
+ },
+ "CHANNEL_MIX": {
+  "group": "B4",
+  "lever": "sales",
+  "owner": "digital",
+  "horizon": "month",
+  "basis": "PLAN",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 12
+ },
+ "FRONT_GM": {
+  "group": "B2",
+  "lever": "margin",
+  "owner": "finance",
+  "horizon": "week",
+  "basis": "BUDGET",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 8
+ },
+ "TOTAL_MARGIN": {
+  "group": "B1",
+  "lever": "margin",
+  "owner": "finance",
+  "horizon": "month",
+  "basis": "BUDGET",
+  "is_provisional": true,
+  "size": "hero",
+  "card_order": 2
+ },
+ "MARKDOWN": {
+  "group": "B2",
+  "lever": "margin",
+  "owner": "commercial",
+  "horizon": "week",
+  "basis": "BUDGET",
+  "is_provisional": false,
+  "size": "medium",
+  "card_order": 4
+ },
+ "WEEKS_OF_COVER": {
+  "group": "B1",
+  "lever": "stock",
+  "owner": "supply",
+  "horizon": "week",
+  "basis": "TARGET",
+  "is_provisional": false,
+  "size": "hero",
+  "card_order": 3
+ },
+ "SELL_THROUGH": {
+  "group": "B3",
+  "lever": "stock",
+  "owner": "commercial",
+  "horizon": "quarter",
+  "basis": "TARGET",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 9
+ },
+ "GMROI": {
+  "group": "B3",
+  "lever": "cash",
+  "owner": "finance",
+  "horizon": "quarter",
+  "basis": "TARGET",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 10
+ },
+ "AVAILABILITY": {
+  "group": "B3",
+  "lever": "supply",
+  "owner": "supply",
+  "horizon": "week",
+  "basis": "TARGET",
+  "is_provisional": false,
+  "size": "medium",
+  "card_order": 5
+ },
+ "SUPPLIER_OTIF": {
+  "group": "B3",
+  "lever": "supply",
+  "owner": "supply",
+  "horizon": "week",
+  "basis": "TARGET",
+  "is_provisional": false,
+  "size": "small",
+  "card_order": 11
+ },
+ "EBITDA": {
+  "group": "B2",
+  "lever": "margin",
+  "owner": "finance",
+  "horizon": "month",
+  "basis": "BUDGET",
+  "is_provisional": true,
+  "size": "medium",
+  "card_order": 6
+ }
+}
