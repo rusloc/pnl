@@ -28,8 +28,18 @@ fabric-app/.env.fabric*
 *.pbix
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
-# Hand-off packs ship the refreshed model cache so they open with data (USER 2026-10-30, ADR-0014 amendment)
-!.sync/**/.pbi/cache.abf
+
+# Hand-off packs: generated data stays out of git; .sync/data-gen/ regenerates it (USER 2026-10-30)
+# kept: data-gen scripts + checks/control_totals*.csv, js-app public/data/ and fixtures/
+.sync/**/*.parquet
+.sync/**/parquet/manifest.json
+.sync/data-gen/*/dims/
+.sync/data-gen/*/facts/
+.sync/data-gen/*/params/
+.sync/data-gen/*/checks/_counts.json
+.sync/*/data/
+.sync/*/power-bi/data/
+!.sync/*/js-app/public/data/**
 
 # OS / editor
 .DS_Store

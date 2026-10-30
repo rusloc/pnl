@@ -1,16 +1,16 @@
 from rusloc/pnl (ginee, bip) · to vosk.dev repo agent · 2026-10-30 · status: ready
 
-**Opens with loaded data (ADR-0014 item 7).** The model cache `Mirelo Sales.SemanticModel/.pbi/cache.abf` (25 MB) was refreshed on 2026-10-30 from this pack's own Parquet in `../data/parquet/`. Open the `.pbip` and the report shows numbers at once; no refresh is needed. Verified 2026-10-30 by bip on the pack as committed: opened from disk in Power BI Desktop with `DataFolder` = the placeholder, all 28 tables loaded (1,030,587 rows, every partition Ready, no refresh), the Overview rendered with the expected hero values, and three test blocks passed without a refresh (T-M1 192 rows, T-M4 8 rows, T-P Sep 2026 / All 133 rows, all TRUE). `powerbi-report-author validate`: 0 errors, 0 warnings. Content ships as is (USER 2026-10-30); the caveats below still apply.
+**Generate the data, then refresh (USER 2026-10-30).** The pack ships no data and no model cache: the Parquet files and `.pbi/cache.abf` are not in git. Generate the 18 Parquet files + `manifest.json` with `../../data-gen/` (`mirelo-sales\generator\generate.py`, output `data-gen\mirelo-sales\parquet`), set `DataFolder` to that folder, refresh in Power BI Desktop, check, then publish (see How to open). The generated files are byte-identical to the `../data/parquet/` files this pack used until 2026-10-30 (checked 2026-10-30 by ginee), so the earlier verification still holds: on 2026-10-30 bip opened the loaded pack (28 tables, 1,030,587 rows), the Overview rendered with the expected hero values, and three test blocks passed (T-M1 192 rows, T-M4 8 rows, T-P Sep 2026 / All 133 rows, all TRUE). `powerbi-report-author validate`: 0 errors, 0 warnings. Content ships as is (USER 2026-10-30); the caveats below still apply.
 
-**Publish the loaded model as is.** Do not refresh on upload and do not schedule a refresh: the source is local Parquet, which the service could only read through an on-premises gateway. The published report is a snapshot of this data. `DataFolder` is a placeholder and matters only for a refresh in Desktop. No workspace, dataset, tenant or capacity IDs belong in `.sync/`.
+**Publish after the Desktop refresh; no refresh in the service.** Do not schedule a refresh: the source is local Parquet, which the service could only read through an on-premises gateway. The published report is a snapshot of the generated data. `DataFolder` ships as a placeholder. No workspace, dataset, tenant or capacity IDs belong in `.sync/`.
 
-Earlier check, 2026-10-28, by bip: opened in Power BI Desktop with `DataFolder` = `mirelo-sales\data\parquet`; full refresh 15 s, all 18 tables match the row counts in `../data/parquet/manifest.json`. `tests/control-totals.dax`: 19 of 19 blocks, 3,452 rows `_pass` TRUE (T-M1 … T-M6 2,619, T-P 833), 43 s in total. `powerbi-report-author validate`: 0 errors, 0 warnings.
+Earlier check, 2026-10-28, by bip: opened in Power BI Desktop with `DataFolder` = `mirelo-sales\data\parquet`; full refresh 15 s, all 18 tables match the row counts in `manifest.json`. `tests/control-totals.dax`: 19 of 19 blocks, 3,452 rows `_pass` TRUE (T-M1 … T-M6 2,619, T-P 833), 43 s in total. `powerbi-report-author validate`: 0 errors, 0 warnings.
 
 # Mirelo Sales — Power BI pack (PBIP + local Parquet)
 
 A clean copy of the repo's draft report `pbi-report/Mirelo Sales/` (ADR-0011 (b), built by bip on 2026-10-27). It already read local
 Parquet files through a `DataFolder` parameter. This copy only changes that parameter's value from a repo path to a placeholder.
-The data that rebuilds it is in the sibling folder `../data/` (Parquet, generator, checks; see its README). The pack was copied from
+The generator that builds its data is in `../../data-gen/mirelo-sales/` (generator, checks, data README; the data itself is not in git). The pack was copied from
 the repo state of commit `fcfa19c`, and `pbi-report/` had no uncommitted changes at copy time.
 
 Data, names and numbers are fictional: Mirelo is an invented neobank and microlender.
@@ -21,56 +21,52 @@ Data, names and numbers are fictional: Mirelo is an invented neobank and microle
 |---|---|
 | `Mirelo Sales.pbip` | Open this in Power BI Desktop |
 | `Mirelo Sales.SemanticModel/` | TMDL, Import, 18 Parquet tables + 9 calculated tables + `_measures` (338 measures), 28 relationships, compatibility level 1702 |
-| `Mirelo Sales.SemanticModel/.pbi/cache.abf` | The loaded model (Desktop's data cache, 25 MB), refreshed 2026-10-30 from `../data/parquet/` |
 | `Mirelo Sales.Report/` | PBIR: page `sales_one_pager` (1440 × 810, five views) + hidden drill-through pages `loan_detail`, `client_detail` + hidden tooltip page `tt_card_info` |
-| `tests/control-totals.dax` | DAX query view tests (T-M1 … T-M6 + T-P parity). Expected values are embedded, generated from `../data/checks/control_totals_eur.csv` |
-| `../data/` | `parquet/` (the 18 tables + `manifest.json`), `generator/`, `checks/`, `params/`, data README |
+| `tests/control-totals.dax` | DAX query view tests (T-M1 … T-M6 + T-P parity). Expected values are embedded, generated from `../../data-gen/mirelo-sales/checks/control_totals_eur.csv` |
+| `../../data-gen/mirelo-sales/` | Not in this folder: `generator/`, `checks/` (committed) and the data README; a generate run writes `parquet/` (the 18 tables + `manifest.json`, not in git) and the CSVs |
 
 ## How to open
 
 1. Use a current Power BI Desktop that opens Power BI Projects (`.pbip`) with a TMDL model and a PBIR report.
-2. Open `Mirelo Sales.pbip`. The pack carries its data cache, so every table is loaded and the report shows numbers. Do not
-   refresh before publishing.
-3. Only if you want to refresh in Desktop: set the parameter first, Transform data > Manage parameters > **DataFolder** = the full
-   local path of the pack's `mirelo-sales\data\parquet` folder, without a trailing backslash. The shipped value is the placeholder
-   `<folder holding the Parquet files>`, so a refresh fails until you change it. Close & Apply, then Home > Refresh (about 30 s on
-   the source machine: 634 k loans, 302 k clients). Do not commit that machine path back to `.sync/`.
-4. Desktop writes its own `.pbi/localSettings.json` on open; keep it out of git.
-
-How the cache was built (re-pack = refresh again): open a copy with `DataFolder` = the real Parquet path, full refresh, set
-`DataFolder` back to the placeholder in the open model without refreshing (the loaded data stays), save in Desktop, then copy only
-`cache.abf` into the pack. Editing the placeholder into `expressions.tmdl` after the save does not work: on the next open Desktop
-sees the changed parameter and empties every imported table.
+2. Generate the data: in `.sync\data-gen`, `.venv\Scripts\python.exe mirelo-sales\generator\generate.py` (setup and requirements
+   in `../../data-gen/README.md`; about 20 s). It writes `data-gen\mirelo-sales\parquet\` (18 files + `manifest.json`).
+3. Open `Mirelo Sales.pbip`. There is no data cache, so the tables are empty; if Desktop offers to refresh, cancel. Set the
+   parameter first: Transform data > Manage parameters > **DataFolder** = the full local path of `data-gen\mirelo-sales\parquet`,
+   without a trailing backslash. The shipped value is the placeholder `<folder holding the Parquet files>`, so a refresh fails until
+   you change it. Close & Apply, then Home > Refresh (15–30 s on the source machine: 634 k loans, 302 k clients).
+4. Check (How to verify), then publish from Desktop (Home > Publish).
+5. Desktop writes its own `.pbi/localSettings.json` and `.pbi/cache.abf` (both ignored by git), and a save writes your machine path
+   into `definition/expressions.tmdl`: put the placeholder back there before committing anything in `.sync/`.
 
 ## How to verify
 
 1. Overview hero values for Sep 2026 / Month / All: 24.4k loans, €9.6m, 9,796 new clients, 59.9 % returning, 4.6 % 30+ DPD.
 2. Run `tests/control-totals.dax` in DAX query view, one `EVALUATE` at a time (19 blocks). Every row's `_pass` must be TRUE.
    Tolerances: EUR 0.011, ratios 0.000001, counts exact.
-3. The data itself: `../data/checks/verify.py` (47 checks) after regenerating the CSVs. See `../data/README.md`.
+3. The data itself: `mirelo-sales\checks\verify.py` in `../../data-gen/` (47 checks) after the generate run. See `../../data-gen/mirelo-sales/README.md`.
 4. Optional: `powerbi-report-author validate "Mirelo Sales.pbip"` (0 errors and 0 warnings in the repo on 2026-10-27).
 
 ## What changed vs the repo copy
 
 | Where | Repo (`pbi-report/Mirelo Sales/`) | This pack |
 |---|---|---|
-| `definition/expressions.tmdl`, `DataFolder` | Absolute repo path of `data/mirelo_sales_dummy_data/parquet`; comment says so | Placeholder `<folder holding the Parquet files>`; comment points to `mirelo-sales/data/parquet` |
+| `definition/expressions.tmdl`, `DataFolder` | Absolute repo path of `data/mirelo_sales_dummy_data/parquet`; comment says so | Placeholder `<folder holding the Parquet files>`; comment points to `mirelo-sales/data/parquet` (written before the data moved: the folder is now `data-gen/mirelo-sales/parquet`) |
 | `README.md` | Repo README | This file: pack sections first, then the repo README's report notes below. Only "What is here" and "How to open" were rewritten, because they named repo paths |
 | Excluded | `__backup__/`, `.pbi/localSettings.json` | — |
-| Added | — | `.pbi/cache.abf` refreshed from `../data/parquet/` (2026-10-30) |
+| Added | — | — (the data is generated by `../../data-gen/mirelo-sales/`, not in git) |
 
 Everything else, including the partitions, helper queries, measures, report and tests, is byte-identical to the repo copy.
 
 ## Known caveats
 
-- **Desktop visual check pending.** bip refreshed this pack from its own Parquet and ran every DAX test on 2026-10-28 (all green, see Verified). ADR-0011 is Accepted (2026-10-27); some report content is still draft (see the JS pack README). The first-open checklist below is still the USER's open item.
-- **Publishing.** In the Power BI service, a model that reads local files needs an on-premises data gateway to refresh. Publish the
-  loaded model as it is and do not schedule a refresh. The data is static.
+- **Desktop visual check pending.** bip refreshed this pack from the same Parquet and ran every DAX test on 2026-10-28 (all green, see Verified). ADR-0011 is Accepted (2026-10-27); some report content is still draft (see the JS pack README). The first-open checklist below is still the USER's open item.
+- **Publishing.** In the Power BI service, a model that reads local files needs an on-premises data gateway to refresh. Publish after the
+  Desktop refresh and do not schedule a refresh. The data is static.
 - **Repo drift.** If the repo report changes after `fcfa19c`, this pack has to be re-copied, with the `DataFolder` value reset to the
-  placeholder and the cache refreshed again (see How to open).
+  placeholder (see How to open).
 - `.platform` files keep the repo's `logicalId` values. They only matter if a workspace is connected to Git.
-- The data files are byte-identical to the repo's `data/mirelo_sales_dummy_data/parquet/`. A regeneration on 2026-10-28 from the
-  pack's own generator (seed 20261026) reproduced them exactly.
+- The generated data files are byte-identical to the repo's `data/mirelo_sales_dummy_data/parquet/`. A regeneration on 2026-10-30
+  from `../../data-gen/mirelo-sales/generator/` (seed 20261026) reproduced them exactly.
 
 ---
 
@@ -112,7 +108,7 @@ the P&L engine pattern. Period-end metrics (30+ DPD, MRR, subscribers) use the a
 
 ### First-open checklist (USER)
 
-1. Open the pack (loaded data, no refresh needed) and check the Overview hero values for Sep 2026 / Month / All: 24.4k loans, €9.6m, 9,796 new clients,
+1. Generate the data, set `DataFolder`, refresh (How to open), then check the Overview hero values for Sep 2026 / Month / All: 24.4k loans, €9.6m, 9,796 new clients,
    59.9 % returning, 4.6 % 30+ DPD.
 2. Click each tab; the bookmarks are hand-written (display only, data unchanged). If a tab shows the wrong group, select the view and
    Update its bookmark in the Bookmarks pane.

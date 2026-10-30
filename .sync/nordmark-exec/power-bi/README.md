@@ -1,15 +1,15 @@
 from rusloc/pnl (bip) · to vosk.dev repo agent · 2026-10-30 · status: ready
 
-**Opens with loaded data (ADR-0014 items 7 and 9).** The model cache `Nordmark Exec.SemanticModel/.pbi/cache.abf` (25 MB) was refreshed on 2026-10-30 from this pack's own Parquet in `../data/parquet/`. Open the `.pbip` and the dashboard shows numbers at once; no refresh is needed. Verified 2026-10-30 by bip on the pack as committed: opened from disk in Power BI Desktop with `DataFolder` = the placeholder, all 26 tables loaded (878,120 rows, every partition Ready, no refresh), the landing page rendered Week 43 · vs Budget · All with 7 / 3 / 2 and the v5 card faces, and a test sample passed without a refresh (see How to verify). `powerbi-report-author validate`: 0 errors, 0 warnings.
+**Generate the data, then refresh (USER 2026-10-30).** The pack ships no data and no model cache: the Parquet files and `.pbi/cache.abf` are not in git. Generate the 18 Parquet files + `manifest.json` with `../../data-gen/` (`nordmark-exec\generator\generate.py`, output `data-gen\nordmark-exec\parquet`), set `DataFolder` to that folder, refresh in Power BI Desktop, check, then publish (see How to open). The generated files are byte-identical to the `../data/parquet/` files this pack used until 2026-10-30 (checked 2026-10-30 by ginee), so the earlier verification still holds: on 2026-10-30 bip opened the loaded pack (26 tables, 878,120 rows), the landing page rendered Week 43 · vs Budget · All with 7 / 3 / 2 and the v5 card faces, and a test sample passed (see How to verify). `powerbi-report-author validate`: 0 errors, 0 warnings.
 
-**Publish the loaded model as is.** Do not refresh on upload and do not schedule a refresh: the source is local Parquet, which the service could only read through an on-premises gateway. The published report is a snapshot of this data. `DataFolder` is a placeholder and matters only for a refresh in Desktop. No workspace, dataset, tenant or capacity IDs belong in `.sync/`. Embed size 1440 × 810.
+**Publish after the Desktop refresh; no refresh in the service.** Do not schedule a refresh: the source is local Parquet, which the service could only read through an on-premises gateway. The published report is a snapshot of the generated data. `DataFolder` ships as a placeholder. No workspace, dataset, tenant or capacity IDs belong in `.sync/`. Embed size 1440 × 810.
 
-# Nordmark Exec — Power BI pack (PBIP + loaded model)
+# Nordmark Exec — Power BI pack (PBIP + local Parquet)
 
 A copy of the repo's Power BI flavour `pbi-report/Nordmark Exec/` (ADR-0013, built by bip, finished 2026-10-30 with the period model
 and the category filter). The model reads local Parquet through a `DataFolder` parameter; this copy only changes that parameter's value
-from a repo path to a placeholder (and its `///` comment) and adds the refreshed data cache. The data that rebuilds it is in the sibling
-folder `../data/` (Parquet + `manifest.json`, generator, checks; see its README). Saved state = the default view: Week 43 FY2026 ·
+from a repo path to a placeholder (and its `///` comment). The generator that builds its data is in `../../data-gen/nordmark-exec/`
+(generator, checks, data README; the data itself is not in git). Saved state = the default view: Week 43 FY2026 ·
 Budget · All · no category, no attribute picks.
 
 Data, names and numbers are fictional: Nordmark Retail is an invented NL / BE multi-category reseller.
@@ -20,35 +20,31 @@ Data, names and numbers are fictional: Nordmark Retail is an invented NL / BE mu
 |---|---|
 | `Nordmark Exec.pbip` | Open this in Power BI Desktop |
 | `Nordmark Exec.SemanticModel/` | TMDL, Import, 17 Parquet tables + `meta_dataset` (manifest.json) + `dim_item` (calculated, the period-model items) + 6 picker tables + `_measures` (390 measures), 26 relationships, compatibility level 1702 |
-| `Nordmark Exec.SemanticModel/.pbi/cache.abf` | The loaded model (Desktop's data cache, 25 MB), refreshed 2026-10-30 from `../data/parquet/` |
 | `Nordmark Exec.Report/` | PBIR: page `exec_landing` (1440 x 810, FitToPage) + hidden tooltip pages `tt_info`, `tt_drill`, `tt_rule`, `tt_dot`; 4 bookmarks; custom theme and 3 SVG resources |
-| `tests/control-totals.dax` | DAX query tests against `../data/checks/control_totals_eur.csv` and `../data/checks/control_totals_category_eur.csv` (207 blocks, 50,390 rows); expected values are embedded |
+| `tests/control-totals.dax` | DAX query tests against `control_totals_eur.csv` and `control_totals_category_eur.csv` in `../../data-gen/nordmark-exec/checks/` (207 blocks, 50,390 rows); expected values are embedded |
 | `tests/parity/2026-10-30-pbi-faces.csv` | Rendered card faces, ⓘ texts, header line and dot / counts of 7 picker states, for the cross-flavour check with the JS app |
 
 ## How to open
 
 1. Use a current Power BI Desktop that opens Power BI Projects (`.pbip`) with a TMDL model and a PBIR report.
-2. Open `Nordmark Exec.pbip`. The pack carries its data cache, so every table is loaded and the page shows Week 43 · vs Budget · All.
-   Do not refresh before publishing.
-3. Only if you want to refresh in Desktop: set the parameter first, Transform data > Manage parameters > **DataFolder** = the full
-   local path of the pack's `nordmark-exec\data\parquet` folder, without a trailing backslash (the folder also holds `manifest.json`,
-   which the model reads for the as-of week and the header's refresh stamp). The shipped value is the placeholder
-   `<folder holding the Parquet files>`, so a refresh fails until you change it. Close & Apply, then Home > Refresh (about 8 s on the
-   source machine, 0.88 M rows). Do not commit that machine path back to `.sync/`.
-4. Desktop writes its own `.pbi/localSettings.json` on open; keep it out of git.
-
-How the cache was built (re-pack = refresh again): open a copy with `DataFolder` = the real Parquet path, full refresh, set
-`DataFolder` back to the placeholder in the open model without refreshing (the loaded data stays), save in Desktop, then copy only
-`cache.abf` into the pack. Editing the placeholder into `expressions.tmdl` after the save does not work: on the next open Desktop
-sees the changed parameter and empties every imported table.
+2. Generate the data: in `.sync\data-gen`, `.venv\Scripts\python.exe nordmark-exec\generator\generate.py` (setup and
+   requirements in `../../data-gen/README.md`; about 5 s). It writes `data-gen\nordmark-exec\parquet\` (18 files + `manifest.json`).
+3. Open `Nordmark Exec.pbip`. There is no data cache, so the tables are empty; if Desktop offers to refresh, cancel. Set the
+   parameter first: Transform data > Manage parameters > **DataFolder** = the full local path of `data-gen\nordmark-exec\parquet`,
+   without a trailing backslash (the folder also holds `manifest.json`, which the model reads for the as-of week and the header's
+   refresh stamp). The shipped value is the placeholder `<folder holding the Parquet files>`, so a refresh fails until you change it.
+   Close & Apply, then Home > Refresh (about 8 s on the source machine, 0.88 M rows). The page then shows Week 43 · vs Budget · All.
+4. Check (How to verify), then publish from Desktop (Home > Publish).
+5. Desktop writes its own `.pbi/localSettings.json` and `.pbi/cache.abf` (both ignored by git), and a save writes your machine path
+   into `definition/expressions.tmdl`: put the placeholder back there before committing anything in `.sync/`.
 
 ## How to verify
 
-1. The landing page at open: Week 43 · 19–25 Oct 2026 · vs Budget · All regions & formats; 7 on track / 3 watch / 2 off track, orange
+1. The landing page after the refresh: Week 43 · 19–25 Oct 2026 · vs Budget · All regions & formats; 7 on track / 3 watch / 2 off track, orange
    dot; Net sales €61.4m, Total margin 36.3 %, Weeks of cover 11.4 wks.
 2. Run `tests/control-totals.dax` one `// ==== BLOCK` at a time (DAX query view or ADOMD); every row's `_pass` must be TRUE. The whole
    file in one batch runs out of memory, and a full serial run takes about 4 hours (the T-N1 blocks take 2–4 min each).
-   Run by bip on the pack as committed, without a refresh (2026-10-30): T-N1-ALL-W26 (1,496 rows), T-N1-NL-P25 (1,511), T-N1-ONLINE-W26,
+   Run by bip on the loaded pack (2026-10-30, same data as a generate run): T-N1-ALL-W26 (1,496 rows), T-N1-NL-P25 (1,511), T-N1-ONLINE-W26,
    T-N9-1, T-N9-5, T-N9-9, T-N10-ALL-ELEC, T-N10-BE-ELEC_TOYS, T-N10-ALL-FRESH_AMBIENT_HB: 9 blocks, 6,977 rows, all TRUE (T-N1 3 blocks / 4,231 rows, T-N9 3 / 75, T-N10 3 / 2,671). The full run (207 blocks,
    50,390 rows, all TRUE) was done on the repo PBIP on 2026-10-30.
 3. Optional: `powerbi-report-author validate "Nordmark Exec.pbip"`.
@@ -57,22 +53,21 @@ sees the changed parameter and empties every imported table.
 
 | Where | Repo (`pbi-report/Nordmark Exec/`) | This pack |
 |---|---|---|
-| `definition/expressions.tmdl`, `DataFolder` | Absolute repo path of `data/nordmark_retail_dummy_data/parquet`; comment says so | Placeholder `<folder holding the Parquet files>`; comment points to `nordmark-exec/data/parquet` |
+| `definition/expressions.tmdl`, `DataFolder` | Absolute repo path of `data/nordmark_retail_dummy_data/parquet`; comment says so | Placeholder `<folder holding the Parquet files>`; comment points to `nordmark-exec/data/parquet` (written before the data moved: the folder is now `data-gen/nordmark-exec/parquet`) |
 | `README.md` | Repo README | This file: pack sections first, then the repo README's report notes below (repo paths there name files in rusloc/pnl) |
 | Excluded | `tools/` (generator and runners), `__backup__/`, `.pbi/localSettings.json` (report and model) | — |
-| Added | — | `.pbi/cache.abf` refreshed from `../data/parquet/` (2026-10-30) |
+| Added | — | — (the data is generated by `../../data-gen/nordmark-exec/`, not in git) |
 
 Everything else, including the partitions, measures, report, bookmarks, theme and tests, is byte-identical to the repo copy.
 
 ## Known caveats
 
-- **Desktop interaction check pending.** bip render-checked the landing page of the loaded pack; hover pop-ups (ⓘ, binoculars, chip,
+- **Desktop interaction check pending.** bip render-checked the landing page of the loaded pack (same data); hover pop-ups (ⓘ, binoculars, chip,
   dot) and slicer clicks cannot be automated and are still the USER's first-open items (checklist below). Picked filter chips show
   Power BI's default dark selected style (deviation 7).
-- **Repo drift.** The source of truth is rusloc/pnl. Any change there means re-copy, reset `DataFolder` to the placeholder and refresh
-  the cache again.
+- **Repo drift.** The source of truth is rusloc/pnl. Any change there means re-copy and reset `DataFolder` to the placeholder.
 - `.platform` files keep the repo's `logicalId` values. They only matter if a workspace is connected to Git.
-- The Parquet in `../data/parquet/` is byte-identical to the repo's `data/nordmark_retail_dummy_data/parquet/` (ginee, 2026-10-30).
+- A generate run from `../../data-gen/nordmark-exec/` is byte-identical to the repo's `data/nordmark_retail_dummy_data/parquet/` (ginee, 2026-10-30).
 
 ---
 
@@ -233,7 +228,7 @@ instead of the responsive breakpoints; Segoe UI instead of Inter; filters concea
 
 ### First-open checklist (USER)
 
-1. Open (the model computes `dim_item` and `param_granularity` on open; no refresh needed with your cache). The page should read
+1. Generate, set `DataFolder` and refresh (How to open; the model computes `dim_item` and `param_granularity` on refresh). The page should read
    Week 43 · vs Budget · All, 7 / 3 / 2, orange dot, no Group / Lever / Owner picks (badge empty): the saved state is the default again.
 2. Filters › Period: Week → Month → Quarter → Year. The header, sub-titles, bars (13 / 12 / 8 / 2) and the "Showing" line follow
    (W43 → Month 10 → Quarter 4 to date → FY2026 to date). Click a Month / Quarter chip to see it selected (see deviation 13).
