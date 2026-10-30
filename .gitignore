@@ -28,6 +28,8 @@ fabric-app/.env.fabric*
 *.pbix
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
+# Hand-off packs ship the refreshed model cache so they open with data (USER 2026-10-30, ADR-0014 amendment)
+!.sync/**/.pbi/cache.abf
 
 # OS / editor
 .DS_Store
