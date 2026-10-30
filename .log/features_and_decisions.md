@@ -33,6 +33,8 @@ TODO: lock North Star
 - **2026-10-28 — Pack script for `.sync/`:** a copy list + staleness test re-issues the hand-off packs from the repo (today they are copied by hand; ADR-0014 §3).
 - **2026-10-28 — Exec parity rows B vs C:** generate from `control_totals_eur.csv` + card texts, using bip's hidden `Card Bar Points <KPI>` and card text measures.
 
+- **2026-10-29 — Power BI packs ship with data:** each PBI pack carries a model cache refreshed from its own Parquet (`.pbi/cache.abf`, gitignore exception), so the receiving repo opens it with numbers without Desktop; plus a publish path (Publish to web) for the site embed (ADR-0014 amendment candidate; USER decision in `plan-2026-10-30.md` § C).
+
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
 - **2026-10-21** — This repo delivers assets only; vosk.dev embedding lives in a separate repo. (ADR-0001)
@@ -84,6 +86,16 @@ TODO: lock North Star
 - **2026-10-28** — **AI chat deferred in all tracks** (USER): Track A `services.functions.enabled: false` + `RAYFIN_PUBLIC_PNL_CHAT=off` (code kept); no chat code in any pack; chat `.sync` notes marked deferred.
 - **2026-10-28** — P&L model `ACME Unified PnL` republished to RAW (ADR-0008 rollout + redesign measures), then the Rayfin app deployed (USER).
 - **2026-10-28** — **ADR-0013 accepted: Nordmark exec dashboard** — two flavours (`js-exec/` standalone app + PBIP "Nordmark Exec", page `exec_landing`); overall dot = literal v5 count rule (7 / 3 / 2 orange; 11 / 0 / 1 may read green; no off-track guard); January-anchored 4-5-4 (FY2026 = 29 Dec 2025 – 27 Dec 2026); grain week × store × category; comparators Budget / LY / LW, no Forecast; v5 + README = design contract. `js-exec/lib/engine/copy.ts` = copy source for both flavours.
+- **2026-10-29** — **ADR-0013 §(k) period model (Nordmark, both flavours):**
+  - Picker in 3 rows (Week / Month / Quarter / Year → FY → item), single item, default W43 FY2026; no date picker. Replaces Week / PTD / YTD.
+  - Comparator kept (Budget / Last year / Previous; Previous hidden at Year).
+  - Bars follow the type (13 / 12 / 8 / 2).
+  - FY2025: budget-based cards N/A, target-based cards rated.
+  - Channel mix = shares over the whole window.
+  - Δ labels always short; "Month" wording; ⓘ copy period-neutral.
+  - Horizon, Statement and owner notes removed; one shared dark overlay under every pop-up; ⓘ target line big under the actual, footer target dropped.
+- **2026-10-29** — **EBITDA vs Previous at Week** = same weeks of the previous month (W43 = P10 wk 1–4 vs P9 wk 1–4; P1 → previous FY P12). Week 5 of a 5-week month (W9 / W22 / W35 / W48) = N/A (main-agent ruling, USER may overturn).
+- **2026-10-29** — **Control-total key grammar** `{W|P|Q|FY}-FY{yyyy}[-{n}][@{k}]`: 87 item keys + 6 legacy PTD / YTD keys (to be retired after both flavours migrate), 26,143 rows. `generate.py` › `control_totals()` may change with the checks (ET-20 byte-compares the CSV); the data path stays fixed.
 - **2026-10-28** — Nordmark data rulings (pending USER review): E-22 table edge wins; dot + counts follow the region, N/A excluded; channel mix = last week; GMROI from front margin (€862m ÷ €319m = 2.7×); sell-through bars 12 → 63 %; net-sales bars W31–W39 lowered; period keys `PTD-` / `YTD-FY2026-43`; scoped EBITDA excludes central costs; LW for PTD / YTD = same window as of last week.
 
 ## Features
@@ -99,7 +111,8 @@ TODO: lock North Star
 - P&L round 1 from the spec gap analysis (2026-10-24): P1 sub-lines → P3 Price / Mix → P4 FX column → P2 memo block (ADR) → D-1 ARR snapshot
 - Mirelo Sales & Revenue — `mirelo_sales` schema in `lh_raw` + Power Query switch (ADR-0011 a); `docs/Requirements-sales.md`; Track B publish target; per-region PY measure for bubble trails
 - P&L redesign — Track A: USER click-test of the deployed app; slow zones QP ~10 s / QV3 ~21 s → TREATAS on `fx_basis_name`; PV re-audit; Track A parity rows in the harness
-- Nordmark exec dashboard — USER first open + hover check; `.sync/nordmark-exec/` pack (ADR-0014); parity B vs C (hunter) + `parity-rules.md` rows; CI job; USER review of the data rulings
+- Nordmark exec dashboard — USER first open of the PBI period model + save + commit; PBI perf pass (EBITDA card 2.0–2.5 s, ⓘ 9–10 s cold); `.sync/nordmark-exec/` pack (ADR-0014); parity B vs C (hunter) + `parity-rules.md` rows; retire the 6 legacy PTD / YTD control rows; CI job; USER review of the data rulings; chip restyle (USER)
+- All three reports — `.sync` hand-off with data in every artifact + one hand-off note (`plan-2026-10-30.md`): PBI data in packs, Power BI publish path, Rayfin public access
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -119,3 +132,10 @@ TODO: lock North Star
 - **2026-10-27** — P&L redesign v3 (2-page Analysis / Profitability, expanded variances, levels on growth × margin); exec dashboard v4 (sized cards, status wash, overall dot, conceal in place); Mirelo clean-ups per ADR-0012 in PBIP (240 measures, 181 visuals), Track C and contract v3; ADR-0011 accepted, ADR-0012 written
 - **2026-10-27** — P&L redesign v4 (Vitals, Region-only growth × margin, build brief) **built in all three tracks**: Track B (253 measures, 5 new tables, pagers, tooltip-page ⓘ; 257 + 601 parity rows TRUE; Vitals 2.5 s cold; validator 0 / 0), Track C (engine modules, URL keys `p / lvn / lvm / lvc`, 362 tests, `.sync` note), Track A (13 zones, 9 query builders, glass dialogs; 263 + 20 tests, dry-run clean; service verification pending); B-vs-C parity harness (601 P&L + 833 Mirelo rows) green, 42 findings closed, profit-bridge GM-rate bug in B fixed; Mirelo ADR-0012 follow-ups in both tracks (B 338 measures / 3,452 TRUE; C 95 sales tests); exec dashboard v5; Mirelo mockup v4.1; shared ⓘ copy exported to Markdown
 - **2026-10-28** — Hand-off packs (ADR-0014) ready: `.sync/pnl/{js-app,power-bi}/` (196 tests; PBIP on local Parquet, 23 / 23 blocks, T-P 601 / 601) and `.sync/mirelo-sales/{js-app,power-bi,data}/` (92 tests; 19 / 19 blocks; generator byte-identical, verify 47 / 47); `load_acme_pl.py --parquet-out / --tables`; P&L model republished to RAW (253 measures / 44 tables, refresh 42.9 s, all tests TRUE); **Rayfin app deployed** with the redesign views and chat off (16 / 16 probes, QL + blank-leaf fixes; click-test pending); **Nordmark exec built in both flavours**: dataset (18 Parquet, 0.88 M rows, 9,328 control totals, verify 76 / 76), `js-exec/` (86 tests, Playwright 32 / 32, cards pixel-identical to v5), `pbi-report/Nordmark Exec/` (361 measures, 13,273 test rows TRUE, validator 0 / 0, slowest visual ~0.7 s)
+- **2026-10-29** — Nordmark rounds 1–3 in both flavours:
+  - Shared layer scrim and ⓘ target line; Statement, Notes and Horizon removed.
+  - **Period model** (ADR-0013 §(k)):
+    - `js-exec/`: 231 tests, headless 37 / 37 (committed `a8bf58e`).
+    - Control totals: 93 keys / 26,143 rows, verify green.
+    - PBIP: `param_granularity` + `dim_item`, 388 measures, 172 blocks / 34,118 rows TRUE, validator 0 / 0. Built, uncommitted; perf pass open.
+  - Docs: E-90…E-99, ET-21…ET-32, `exec-period-model.md`.
