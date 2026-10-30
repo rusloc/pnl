@@ -105,6 +105,12 @@ export function createData(files: ExecFiles): ExecData {
   };
 }
 
+/** Category pick (E-100) → cube category indices in sort_order; null = All (nothing picked, or all of them picked). */
+export function categoryMask(d: ExecData, codes: readonly string[]): number[] | null {
+  const ix = d.categories.flatMap((c, i) => (codes.includes(c.category_code) ? [i] : []));
+  return ix.length === 0 || ix.length === d.categories.length ? null : ix;
+}
+
 /** Σ of a cube measure over weeks × groups, optionally restricted to some categories. */
 export function sum(
   d: ExecData,

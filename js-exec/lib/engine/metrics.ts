@@ -11,6 +11,9 @@ import type { Status } from './status.ts';
 // data/nordmark_retail_dummy_data/checks/control_totals_eur.csv. An absent key is N/A (data README "Control totals").
 // Full precision throughout; rounding happens only in format.ts (E-42). One window = one item or a comparator window of
 // it (items.ts); the status block runs for every window and a card is N/A where its input or basis is blank (E-95).
+// Category pick (E-100 … E-102): `cats` = category indices (cube.ts categoryMask; null = All). Every cube sum runs on
+// those cells; EBITDA and Supplier OTIF have no category key, so their blocks are absent (N/A) under a pick; sell-through
+// runs on the seasonal part of the pick; targets under a pick are the denominator-weighted category targets.
 
 export type Metrics = Readonly<Record<string, number>>;
 
@@ -24,12 +27,12 @@ const CHANNELS: readonly (readonly [string, readonly number[]])[] = [
   ['wholesale', [groupIndex('WHOLESALE')]],
 ];
 
-export function computeMetrics(d: ExecData, scope: Scope, win: Window): Metrics {
-  const m = base(d, scope, win.weeks);
+export function computeMetrics(d: ExecData, scope: Scope, win: Window, cats: Cats = null): Metrics {
+  const m = base(d, scope, win.weeks, cats);
   const L = lastOf(win.weeks);
-  if (win.gran === 'W') {
+  if (win.gran === 'W' && cats === null) {
     // EBITDA flash at Week = period to date through the week (E-40, E-93); at P / Q / FY the card reads `ebitda`
-    const ptd = base(d, scope, toDate(d, 'P', L).weeks);
+    const ptd = base(d, scope, toDate(d, 'P', L).weeks, null);
     if (ptd.ebitda !== undefined) m.ebitda_ptd = ptd.ebitda;
     if (ptd.ebitda_bud !== undefined) m.ebitda_bud_ptd = ptd.ebitda_bud;
   }
@@ -46,11 +49,14 @@ export function computeMetrics(d: ExecData, scope: Scope, win: Window): Metrics 
   m['status.count_watch'] = c.watch;
   m['status.count_off'] = c.off;
   m['status.count_na'] = c.na;
-  // no rated card → no dot (the view shows it grey, E-95); OTIF is always rated, so the shipped data never hits it
+  // no rated card → no dot (the view shows it grey, E-95); at All OTIF is always rated, so only a category pick can hit it
   if (c.on + c.watch + c.off > 0) m['status.dot'] = DOT_CODE[dotOf(c, dotRule(d.rules))];
-  if (scope === 'ALL') Object.assign(m, categoryStats(d, win.gran, L));
+  if (scope === 'ALL') Object.assign(m, categoryStats(d, win.gran, L, cats));
   return m;
 }
+
+/** Picked category indices (cube.ts categoryMask); null = All categories. */
+export type Cats = readonly number[] | null;
 
 const lastOf = (weeks: readonly number[]): number => {
   const L = weeks.at(-1);
@@ -104,15 +110,16 @@ function target(d: ExecData, kpi: string): number {
   return t.target_value;
 }
 
-function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, number> {
+function base(d: ExecData, scope: Scope, ws: readonly number[], cats: Cats): Record<string, number> {
   const L = lastOf(ws);
   const groups = SCOPE_GROUPS[scope];
+  const K = cats ?? d.categories.map((_, i) => i);
   const S = (
     measure: Measure,
     weeks: readonly number[] = ws,
     g: readonly number[] = groups,
-    cats?: readonly number[],
-  ) => sum(d, measure, weeks, g, cats);
+    ks: readonly number[] = K,
+  ) => sum(d, measure, weeks, g, ks);
   const m: Record<string, number> = {};
 
   // Sales and margin (window, E-30 · E-32 · E-33 · E-34)
@@ -131,19 +138,22 @@ function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, 
   }
   if (m.gross_sales !== 0) m.markdown_pct = m.markdown / m.gross_sales;
 
-  // EBITDA (window, E-40): scoped EBITDA is a contribution before central costs (data README open point 15)
-  m.opex_shrink = sumOpex(d, 'ACT', 'SHRINK', ws, groups);
-  m.opex_store = sumOpex(d, 'ACT', 'STORE_OPEX', ws, groups);
-  m.opex_central = sumOpex(d, 'ACT', 'CENTRAL_OPEX', ws, groups);
-  m.opex_fulfilment = sumOpex(d, 'ACT', 'FULFILMENT', ws, groups);
-  m.ebitda = m.total_margin - m.opex_shrink - m.opex_store - m.opex_central - m.opex_fulfilment;
-  if (m.net_sales !== 0) m.ebitda_margin_pct = m.ebitda / m.net_sales;
+  // EBITDA (window, E-40): scoped EBITDA is a contribution before central costs (data README open point 15).
+  // OpEx has no category key: N/A under a category pick (E-101)
+  if (cats === null) {
+    m.opex_shrink = sumOpex(d, 'ACT', 'SHRINK', ws, groups);
+    m.opex_store = sumOpex(d, 'ACT', 'STORE_OPEX', ws, groups);
+    m.opex_central = sumOpex(d, 'ACT', 'CENTRAL_OPEX', ws, groups);
+    m.opex_fulfilment = sumOpex(d, 'ACT', 'FULFILMENT', ws, groups);
+    m.ebitda = m.total_margin - m.opex_shrink - m.opex_store - m.opex_central - m.opex_fulfilment;
+    if (m.net_sales !== 0) m.ebitda_margin_pct = m.ebitda / m.net_sales;
 
-  // Supplier OTIF (window, E-39): no site, so the same in every scope
-  m.po_lines_due = ws.reduce((s, w) => s + (d.poDue[w] ?? 0), 0);
-  m.po_lines_otif = ws.reduce((s, w) => s + (d.poOtif[w] ?? 0), 0);
-  m.otif_pct = m.po_lines_otif / m.po_lines_due;
-  m.otif_target = target(d, 'SUPPLIER_OTIF');
+    // Supplier OTIF (window, E-39): no site, so the same in every scope; per supplier, so N/A under a pick (E-101)
+    m.po_lines_due = ws.reduce((s, w) => s + (d.poDue[w] ?? 0), 0);
+    m.po_lines_otif = ws.reduce((s, w) => s + (d.poOtif[w] ?? 0), 0);
+    m.otif_pct = m.po_lines_otif / m.po_lines_due;
+    m.otif_target = target(d, 'SUPPLIER_OTIF');
+  }
 
   // LFL (E-31): needs the LY window by key; store-only, so N/A where the scope has no LFL LY sales
   const ly = ws.map((w) => lyWeek(d, w));
@@ -167,7 +177,10 @@ function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, 
   m.stock_incl_on_order = m.on_hand_cost + m.on_order_cost;
   if (m.forecast_cogs !== 0) {
     m.weeks_of_cover = m.stock_incl_on_order / m.forecast_cogs;
-    const weighted = d.categories.reduce((s, c, i) => s + S('forecast_cogs', [L], groups, [i]) * c.cover_target_wks, 0);
+    const weighted = K.reduce(
+      (s, i) => s + S('forecast_cogs', [L], groups, [i]) * (d.categories[i]?.cover_target_wks ?? 0),
+      0,
+    );
     m.cover_target_wks = weighted / m.forecast_cogs;
   }
 
@@ -181,18 +194,23 @@ function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, 
   m.availability_target = target(d, 'AVAILABILITY');
 
   // Sell-through (season to date, E-37): seasonal categories, selling locations
-  const st = sellThrough(d, L, groups);
-  if (st) Object.assign(m, st, { sell_through_target: target(d, 'SELL_THROUGH') });
+  const st = sellThrough(d, L, groups, cats);
+  if (st) Object.assign(m, st);
 
   // GMROI (R52W, E-38): front margin ÷ average on-hand cost over the 52 week-ends (zero weeks count)
   if (L >= 51) {
     const r52 = Array.from({ length: 52 }, (_, i) => L - 51 + i);
     const fm = S('net_sales', r52) - S('cogs', r52);
     const avg = r52.reduce((s, w) => s + S('on_hand_cost', [w]), 0) / 52;
+    const aoh = (i: number) => S('on_hand_cost', r52, groups, [i]) / 52;
     m.gmroi_front_margin_r52w = fm;
     m.gmroi_avg_on_hand_cost = avg;
     m.gmroi = fm / avg;
-    m.gmroi_target = target(d, 'GMROI');
+    // At All the param_target ALL row; under a pick the average-on-hand-cost-weighted category targets (E-102)
+    m.gmroi_target =
+      cats === null
+        ? target(d, 'GMROI')
+        : K.reduce((s, i) => s + aoh(i) * (d.categories[i]?.gmroi_target ?? 0), 0) / K.reduce((s, i) => s + aoh(i), 0);
   }
 
   // Channel mix (E-41): shares over the window (USER 2026-10-29; at Week the window is the week itself)
@@ -212,19 +230,21 @@ function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, 
     m.markdown_pct_bud = m.markdown_bud / m.gross_sales_bud;
     m.front_gm_pct_bud = 1 - m.cogs_bud / m.net_sales_bud;
     m.total_margin_pct_bud = (m.net_sales_bud - m.cogs_bud + m.back_margin_bud) / m.net_sales_bud;
-    m.opex_shrink_bud = sumOpex(d, 'BUD', 'SHRINK', ws, groups);
-    m.opex_store_bud = sumOpex(d, 'BUD', 'STORE_OPEX', ws, groups);
-    m.opex_central_bud = sumOpex(d, 'BUD', 'CENTRAL_OPEX', ws, groups);
-    m.opex_fulfilment_bud = sumOpex(d, 'BUD', 'FULFILMENT', ws, groups);
-    m.ebitda_bud =
-      m.net_sales_bud -
-      m.cogs_bud +
-      m.back_margin_bud -
-      m.opex_shrink_bud -
-      m.opex_store_bud -
-      m.opex_central_bud -
-      m.opex_fulfilment_bud;
-    m.ebitda_margin_pct_bud = m.ebitda_bud / m.net_sales_bud;
+    if (cats === null) {
+      m.opex_shrink_bud = sumOpex(d, 'BUD', 'SHRINK', ws, groups);
+      m.opex_store_bud = sumOpex(d, 'BUD', 'STORE_OPEX', ws, groups);
+      m.opex_central_bud = sumOpex(d, 'BUD', 'CENTRAL_OPEX', ws, groups);
+      m.opex_fulfilment_bud = sumOpex(d, 'BUD', 'FULFILMENT', ws, groups);
+      m.ebitda_bud =
+        m.net_sales_bud -
+        m.cogs_bud +
+        m.back_margin_bud -
+        m.opex_shrink_bud -
+        m.opex_store_bud -
+        m.opex_central_bud -
+        m.opex_fulfilment_bud;
+      m.ebitda_margin_pct_bud = m.ebitda_bud / m.net_sales_bud;
+    }
     if (m.lfl_net_sales_ly !== undefined) {
       m.lfl_net_sales_bud = S('net_sales_bud_lfl');
       m.lfl_growth_pct_bud = m.lfl_net_sales_bud / m.lfl_net_sales_ly - 1;
@@ -248,20 +268,31 @@ function base(d: ExecData, scope: Scope, ws: readonly number[]): Record<string, 
 const within = (groups: readonly number[], wanted: readonly number[]) => groups.filter((g) => wanted.includes(g));
 const storeGroups = (groups: readonly number[]) => within(groups, STORE_GROUPS);
 
-function sellThrough(d: ExecData, L: number, groups: readonly number[]): Record<string, number> | null {
+/** Season to date on the seasonal part of the pick (E-101); null outside a season or when the pick has no seasonal
+ *  category. Target: the ALL row at All, else the (opening + receipts)-weighted category targets (E-102). */
+function sellThrough(d: ExecData, L: number, groups: readonly number[], cats: Cats): Record<string, number> | null {
   const sw = weekRow(d, L).season_week;
   if (sw === null || L - sw < 0) return null;
-  const seasonal = d.categories.flatMap((c, i) => (c.is_seasonal ? [i] : []));
+  const seasonal = d.categories.flatMap((c, i) => (c.is_seasonal && (cats === null || cats.includes(i)) ? [i] : []));
+  if (seasonal.length === 0) return null;
   const sell = groups.filter((g) => SELLING_GROUPS.includes(g));
   const weeks = Array.from({ length: sw }, (_, i) => L - sw + 1 + i);
-  const opening = sum(d, 'on_hand_units', [L - sw], sell, seasonal);
-  const receipts = sum(d, 'receipt_units', weeks, groups, seasonal);
+  const open = (ks: readonly number[]) => sum(d, 'on_hand_units', [L - sw], sell, ks);
+  const received = (ks: readonly number[]) => sum(d, 'receipt_units', weeks, groups, ks);
+  const opening = open(seasonal);
+  const receipts = received(seasonal);
   const sold = sum(d, 'units', weeks, sell, seasonal);
+  const tgt =
+    cats === null
+      ? target(d, 'SELL_THROUGH')
+      : seasonal.reduce((s, i) => s + (open([i]) + received([i])) * (d.categories[i]?.sellthrough_target ?? 0), 0) /
+        (opening + receipts);
   return {
     season_opening_units: opening,
     season_receipt_units: receipts,
     season_units_sold: sold,
     sell_through_pct: sold / (opening + receipts),
+    sell_through_target: tgt,
   };
 }
 
@@ -306,11 +337,14 @@ export function availabilityByCategory(d: ExecData, scope: Scope, L: number): Ma
   );
 }
 
-/** ALL-only control-total extras: GMROI per category, sell-through per seasonal category, suppliers below 85 % (W). */
-function categoryStats(d: ExecData, gran: Window['gran'], L: number): Record<string, number> {
+/** ALL-only control-total extras: GMROI per category, sell-through per seasonal category (the picked categories only
+ *  under a pick, E-101), suppliers below 85 % (W; not under a pick). */
+function categoryStats(d: ExecData, gran: Window['gran'], L: number, cats: Cats): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const [code, v] of gmroiByCategory(d, 'ALL', L) ?? []) out[`gmroi.${code}`] = v;
-  for (const [code, v] of sellThroughByCategory(d, 'ALL', L) ?? []) out[`sell_through_pct.${code}`] = v;
-  if (gran === 'W') out.otif_suppliers_below_85 = d.poBelow85[L] ?? 0;
+  const picked = (code: string) => cats === null || cats.some((i) => d.categories[i]?.category_code === code);
+  for (const [code, v] of gmroiByCategory(d, 'ALL', L) ?? []) if (picked(code)) out[`gmroi.${code}`] = v;
+  for (const [code, v] of sellThroughByCategory(d, 'ALL', L) ?? [])
+    if (picked(code)) out[`sell_through_pct.${code}`] = v;
+  if (gran === 'W' && cats === null) out.otif_suppliers_below_85 = d.poBelow85[L] ?? 0;
   return out;
 }

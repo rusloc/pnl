@@ -10,6 +10,8 @@ import type { Catalog } from './items.ts';
 // Retired keys still parse: `p` (week · ptd · ytd → the as-of week · its period · its year; ignored when `i` is present,
 // never written), `c=lw` (→ prev). Retired keys parsed as unknown (ignored, dropped by the canonical rewrite):
 // `statement`, `horizon` (attributes removed from the Filters menu, USER 2026-10-29).
+// Category `cat` (E-62, E-100): comma-separated dim_category codes, normalised to sort_order, deduplicated, unknown codes
+// dropped (case-sensitive); nothing valid, or all of them, = All = key absent. Written after `r`, before the attributes.
 
 export const COMPARATORS = ['budget', 'ly', 'prev'] as const;
 export const REGIONS = ['all', 'nl', 'be', 'online'] as const;
@@ -23,11 +25,19 @@ export interface Selection {
   item: string | null;
   compare: Comparator;
   region: Region;
+  /** Picked dim_category codes in sort_order; empty = All (E-100). Never all of them (normalize). */
+  categories: readonly string[];
   picks: Picks;
 }
 
 export const NO_PICKS: Picks = { group: [], lever: [], owner: [] };
-export const DEFAULT_SELECTION: Selection = { item: null, compare: 'budget', region: 'all', picks: NO_PICKS };
+export const DEFAULT_SELECTION: Selection = {
+  item: null,
+  compare: 'budget',
+  region: 'all',
+  categories: [],
+  picks: NO_PICKS,
+};
 
 const SINGLE = {
   i: z
@@ -52,11 +62,18 @@ function picksOf(params: URLSearchParams, key: AttrKey): string[] {
   return options.map(([code]) => code).filter((code) => wanted.has(code));
 }
 
-/** Canonical form: the default item as null; no "Previous" at Year (USER 2026-10-29: it equals Last year) → Last year. */
+/** Canonical form: the default item as null; no "Previous" at Year (USER 2026-10-29: it equals Last year) → Last year;
+ *  the category pick in sort_order, valid codes only, all of them = All (E-100). */
 export function normalize(s: Selection, cat: Catalog): Selection {
   const item = s.item !== null && cat.byKey.has(s.item) && s.item !== cat.defaultKey ? s.item : null;
   const year = item !== null && cat.byKey.get(item)?.gran === 'FY';
-  return { ...s, item, compare: year && s.compare === 'prev' ? 'ly' : s.compare };
+  const picked = cat.categories.filter((code) => s.categories.includes(code));
+  return {
+    ...s,
+    item,
+    compare: year && s.compare === 'prev' ? 'ly' : s.compare,
+    categories: picked.length === cat.categories.length ? [] : picked,
+  };
 }
 
 export function parseSelection(params: URLSearchParams, cat: Catalog): Selection {
@@ -74,6 +91,12 @@ export function parseSelection(params: URLSearchParams, cat: Catalog): Selection
       item,
       compare: c === 'lw' ? 'prev' : c,
       region: SINGLE.r.parse(params.get('r') ?? undefined),
+      categories: z
+        .string()
+        .max(128)
+        .catch('')
+        .parse(params.get('cat') ?? '')
+        .split(','),
       picks: { group: picksOf(params, 'group'), lever: picksOf(params, 'lever'), owner: picksOf(params, 'owner') },
     },
     cat,
@@ -85,6 +108,7 @@ export function serializeSelection(s: Selection): string {
   if (s.item !== null) q.set('i', s.item);
   if (s.compare !== DEFAULT_SELECTION.compare) q.set('c', s.compare);
   if (s.region !== DEFAULT_SELECTION.region) q.set('r', s.region);
+  if (s.categories.length) q.set('cat', s.categories.join(','));
   for (const a of ATTRIBUTES) {
     const options: readonly (readonly [string, string])[] = a.options;
     const codes = options.map(([code]) => code).filter((code) => s.picks[a.key].includes(code));

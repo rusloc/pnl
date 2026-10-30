@@ -52,6 +52,21 @@ export const SWITCH_LABELS = {
   },
 } as const;
 
+/** Category filter (E-100 … E-103, USER 2026-10-30): dropdown of dim_category names; header segment rule in view.ts
+ *  (" · <name>", " · <name> & <name>", " · <n> categories"); the N/A face of the cards a pick cannot split. */
+export const CATEGORY_COPY = {
+  label: 'Category',
+  all: 'All categories',
+  many: (n: number) => `${n} categories`,
+  deltaNa: 'n/a by category',
+  note: {
+    EBITDA: 'Not split by category — OpEx is booked per site and centrally.',
+    SUPPLIER_OTIF: 'Not split by category — PO lines are per supplier.',
+    SELL_THROUGH: 'No seasonal category in the selection.',
+  },
+  seasonalOnly: ' Seasonal categories only.',
+} as const;
+
 /** Words of the period model per granularity (E-98, USER 2026-10-29 / 30). `header`: header line / title; `noun`: ⓘ
  *  stat labels and sub-titles ("vs LY month"); `prev`: header comparator line; `short`: Δ suffix "vs prev. mth". */
 export const PERIOD_WORDS = {
@@ -74,6 +89,10 @@ export const STATUS_WORD = { good: 'On track', watch: 'Watch', off: 'Off track',
 export const STATUS_GLYPH = { good: '▲', watch: '●', off: '▼', na: '–' } as const;
 /** Label of the status basis (dim_kpi.basis) on the ⓘ target line under the value (USER 2026-10-29). */
 export const BASIS_LABEL = { BUDGET: 'Budget', TARGET: 'Target', PLAN: 'Plan' } as const;
+/** ⓘ figure block (USER 2026-10-30, shared with the PBI flavour): the label over the actual value, and the muted mark
+ *  under the basis label when the basis value is blank (FY2025 budget cards, LFL Online), so the block keeps its shape. */
+export const ACTUAL_LABEL = 'Actual';
+export const NO_BASIS_VALUE = '–';
 
 export interface CardCopy {
   /** Basis sub-title (hero and medium cards); "prov." is appended from dim_kpi.is_provisional (E-27). */

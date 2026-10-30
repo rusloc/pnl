@@ -119,6 +119,7 @@ function Dashboard({ data }: { data: ExecData }) {
       'keydown',
       (e) => {
         if (e.key === 'Escape') {
+          if (e.defaultPrevented) return; // an inner control (the Category list) closed itself
           close();
           return;
         }
@@ -240,7 +241,7 @@ function Dashboard({ data }: { data: ExecData }) {
             <span>
               <RichText rich={view.header.compare} />
             </span>
-            <span>
+            <span title={view.header.regionTitle ?? undefined}>
               <RichText rich={view.header.region} />
             </span>
           </div>

@@ -1,9 +1,10 @@
-import { Fragment } from 'react';
+import { Fragment, useId, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
-import { ATTRIBUTES, SWITCH_LABELS } from '@/lib/engine/copy';
+import { ACTUAL_LABEL, ATTRIBUTES, NO_BASIS_VALUE, SWITCH_LABELS } from '@/lib/engine/copy';
 import type { AttrKey } from '@/lib/engine/copy';
 import type { Selection } from '@/lib/engine/url-state';
-import type { CardView, Chip, DashboardView, MenuView } from '@/lib/engine/view';
+import { NA } from '@/lib/engine/view';
+import type { CardView, CategoryMenu, Chip, DashboardView, MenuView } from '@/lib/engine/view';
 import { DrillIcon, InfoIcon, MixBar, RichText, Spark } from './ui';
 
 // The frosted layers (E-52 … E-59): Filters menu, ⓘ explanation, drill path, How to read and the More-KPIs drawer.
@@ -118,6 +119,54 @@ function Radios({
   );
 }
 
+/** Category dropdown (E-100): a button showing the pick ("All categories", a name, two names, "n categories") opens a
+ *  list of checkboxes (names only, menu order); "All categories" clears the pick. Esc closes the list, not the menu. */
+function CategoryDropdown({ menu, onSelect }: { menu: CategoryMenu; onSelect: (next: Selection) => void }) {
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const list = useId();
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Escape' || !open) return;
+    e.preventDefault(); // handled: the layer's Esc listener on document skips a prevented Esc (React's root is document)
+    setOpen(false);
+    button.current?.focus();
+  };
+  return (
+    <div className="dd" onKeyDown={onKeyDown}>
+      <div className="gh">{menu.label}</div>
+      <button
+        ref={button}
+        type="button"
+        className="dd-b"
+        aria-label={`${menu.label}: ${menu.summary}`}
+        aria-expanded={open}
+        aria-controls={list}
+        title={menu.title ?? undefined}
+        onClick={() => setOpen((o) => !o)}
+        data-dd=""
+      >
+        <span>{menu.summary}</span>
+        <span className="dd-c" aria-hidden="true" />
+      </button>
+      <div id={list} role="group" aria-label={menu.label} className="dd-l" hidden={!open}>
+        {[menu.all, ...menu.options].map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="checkbox"
+            aria-checked={o.checked}
+            className="dd-o"
+            data-id={o.id}
+            onClick={() => onSelect(o.next)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function FiltersMenu({
   sel,
   menu,
@@ -174,6 +223,7 @@ export function FiltersMenu({
           </div>
         </div>
       ))}
+      <CategoryDropdown menu={menu.category} onSelect={onSelect} />
       <div className="gh sec">
         Metric attributes <span>OR within a group · AND across groups</span>
       </div>
@@ -206,19 +256,30 @@ export function ExplainPop({ card, onDrill }: { card: CardView; onDrill: () => v
       <Head eyebrow={e.eyebrow} title={card.title} word={card.word} status={card.status} />
       <div className="pop-v">
         <div>
-          <div className="big">
-            {card.value}
-            <small>{card.unit}</small>
-          </div>
-          {card.target ? (
-            <div className="tgt">
-              <span>{card.target.label}</span>{' '}
-              <b>
-                {card.target.value}
-                <small>{card.target.unit}</small>
-              </b>
+          {/* figure block (USER 2026-10-30, shared with the PBI flavour): Actual → value, basis → value, stacked; one
+              dt / dd pair each, so a screen reader reads the label with its number */}
+          <dl className="fig">
+            <div>
+              <dt>{ACTUAL_LABEL}</dt>
+              <dd className="big">
+                {card.value}
+                <small>{card.unit}</small>
+              </dd>
             </div>
-          ) : null}
+            {card.target ? (
+              <div className="tgt">
+                <dt>{card.target.label}</dt>
+                {card.target.value === NA ? (
+                  <dd className="none">{NO_BASIS_VALUE}</dd>
+                ) : (
+                  <dd>
+                    {card.target.value}
+                    <small>{card.target.unit}</small>
+                  </dd>
+                )}
+              </div>
+            ) : null}
+          </dl>
           <div
             className="delta"
             style={{ color: `var(--${card.status === 'na' || card.deltaNa ? 'muted' : card.status})` }}

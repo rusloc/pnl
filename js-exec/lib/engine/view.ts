@@ -1,11 +1,12 @@
 import type { Scope } from '../data/manifest.ts';
 import { dateRange, seasonLength, weekRow, windowDates } from './calendar.ts';
-import { sum, sumSites, SCOPE_GROUPS } from './cube.ts';
+import { categoryMask, sum, sumSites, SCOPE_GROUPS } from './cube.ts';
 import type { ExecData } from './cube.ts';
 import {
   ATTRIBUTES,
   BASIS_LABEL,
   CARD_COPY,
+  CATEGORY_COPY,
   DRILL_PAGES,
   PERIOD_WORDS,
   STATUS_GLYPH,
@@ -42,7 +43,7 @@ import {
 } from './items.ts';
 import type { Catalog, Granularity, Item, Window } from './items.ts';
 import { availabilityByCategory, computeMetrics, gmroiByCategory, sellThroughByCategory } from './metrics.ts';
-import type { Metrics } from './metrics.ts';
+import type { Cats, Metrics } from './metrics.ts';
 import type { Dot, Status } from './status.ts';
 import { COMPARATORS, normalize, REGIONS } from './url-state.ts';
 import type { Comparator, Region, Selection } from './url-state.ts';
@@ -125,10 +126,23 @@ export interface MenuView {
   /** "Previous" is not offered at Year (USER 2026-10-29). */
   compare: readonly Chip[];
   region: readonly Chip[];
+  category: CategoryMenu;
+}
+
+/** Category dropdown (E-100): multi-select over the dim_category names in sort_order; "All" clears the pick. */
+export interface CategoryMenu {
+  label: string;
+  /** Closed state: "All categories", one name, "<name> & <name>" or "<n> categories" (E-103). */
+  summary: string;
+  /** The picked names when the summary is "<n> categories"; null otherwise. */
+  title: string | null;
+  all: Chip;
+  options: readonly Chip[];
 }
 
 export interface DashboardView {
-  header: { period: Rich; compare: Rich; region: Rich; refreshed: string };
+  /** `regionTitle`: the picked category names when the region segment says "<n> categories" (E-103). */
+  header: { period: Rich; compare: Rich; region: Rich; regionTitle: string | null; refreshed: string };
   status: {
     dot: DotView;
     dotTip: readonly [string, string];
@@ -152,7 +166,7 @@ const SIZE: Readonly<Record<string, CardSize>> = { hero: 'hero', medium: 'med', 
 const STATUS_OF: Readonly<Record<number, Status>> = { 1: 'good', 2: 'watch', 3: 'off' };
 const DOT_OF: Readonly<Record<number, Dot>> = { 1: 'green', 2: 'orange', 3: 'red' };
 const CHANNELS = ['store', 'online', 'wholesale'] as const;
-const NA = 'n/a';
+export const NA = 'n/a';
 
 type M = Metrics | null;
 const val = (m: M, key: string): number | undefined => (m ? m[key] : undefined);
@@ -163,6 +177,8 @@ interface Ctx {
   cat: Catalog;
   sel: Selection;
   scope: Scope;
+  /** Category pick as cube indices; null = All (E-100). */
+  cats: Cats;
   item: Item;
   /** Last week of the item's window: point-in-time cards and their mini stats read here (E-93). */
   L: number;
@@ -182,11 +198,12 @@ interface Ctx {
 export function buildView(d: ExecData, sel: Selection): DashboardView {
   const cat = catalog(d);
   const scope = SCOPE[sel.region];
+  const cats = categoryMask(d, sel.categories);
   const item = (sel.item === null ? undefined : cat.byKey.get(sel.item)) ?? cat.asOf.W;
-  const at = (w: Window | null): M => (w === null ? null : computeMetrics(d, scope, w));
+  const at = (w: Window | null): M => (w === null ? null : computeMetrics(d, scope, w, cats));
   const s = seriesOf(d, item);
   const series = s.items.map(at);
-  const cur = series.at(-1) ?? computeMetrics(d, scope, item);
+  const cur = series.at(-1) ?? computeMetrics(d, scope, item, cats);
   const ly = at(lyWindow(d, item));
   const prev = at(prevWindow(d, item));
   let eb: Ctx['eb'] = { cur, ly, prev, prevName: null };
@@ -196,7 +213,7 @@ export function buildView(d: ExecData, sel: Selection): DashboardView {
     const pm = prevMonthToDate(d, item.last);
     const k = pm?.win.weeks.length ?? 0;
     eb = {
-      cur: computeMetrics(d, scope, ptd),
+      cur: computeMetrics(d, scope, ptd, cats),
       ly: at(lyWindow(d, ptd)),
       prev: pm ? at(pm.win) : null,
       prevName: pm
@@ -209,6 +226,7 @@ export function buildView(d: ExecData, sel: Selection): DashboardView {
     cat,
     sel,
     scope,
+    cats,
     item,
     L: item.last,
     cur,
@@ -294,8 +312,24 @@ function header(c: Ctx): DashboardView['header'] {
       : sel.region === 'online'
         ? [b('Online'), t(' only')]
         : [b(SWITCH_LABELS.region.options[sel.region]), t(' · all formats')];
-  return { period, compare, region, refreshed: `Refreshed ${c.refresh.long}` };
+  // category segment (E-103): nothing at All, so every All string stays as before (ET-16)
+  const names = pickedNames(c);
+  return {
+    period,
+    compare,
+    region: names.length ? [...region, t(` · ${pickLabel(names)}`)] : region,
+    regionTitle: names.length >= 3 ? names.join(', ') : null,
+    refreshed: `Refreshed ${c.refresh.long}`,
+  };
 }
+
+/** Picked category names in sort_order. */
+const pickedNames = (c: Ctx): string[] =>
+  c.d.categories.filter((x) => c.sel.categories.includes(x.category_code)).map((x) => x.category_name);
+
+/** "Electronics" · "Electronics & Toys & leisure" · "3 categories" (E-103); "All categories" when nothing is picked. */
+const pickLabel = (names: readonly string[]): string =>
+  names.length === 0 ? CATEGORY_COPY.all : names.length <= 2 ? names.join(' & ') : CATEGORY_COPY.many(names.length);
 
 /** Window phrase for sub-titles: "week 43" · "month 10" · "quarter 4 to date" · "FY2026 to date" (E-92). */
 function windowPhrase(c: Ctx): string {
@@ -351,7 +385,45 @@ function menu(c: Ctx, showing: Rich): MenuView {
       checked: v === sel.region,
       next: { ...sel, region: v },
     })),
+    category: categoryMenu(c),
   };
+}
+
+function categoryMenu(c: Ctx): CategoryMenu {
+  const { d, cat, sel } = c;
+  const names = pickedNames(c);
+  return {
+    label: CATEGORY_COPY.label,
+    summary: pickLabel(names),
+    title: names.length >= 3 ? names.join(', ') : null,
+    all: { id: 'all', label: CATEGORY_COPY.all, checked: names.length === 0, next: { ...sel, categories: [] } },
+    options: d.categories.map((x) => {
+      const on = sel.categories.includes(x.category_code);
+      return {
+        id: x.category_code,
+        label: x.category_name,
+        checked: on,
+        next: normalize(
+          {
+            ...sel,
+            categories: on
+              ? sel.categories.filter((code) => code !== x.category_code)
+              : [...sel.categories, x.category_code],
+          },
+          cat,
+        ),
+      };
+    }),
+  };
+}
+
+/** One-line ⓘ note of a card the category pick cannot split (E-101); null when the card is computed on the pick. */
+function categoryNote(c: Ctx, id: string): string | null {
+  if (c.cats === null) return null;
+  if (id === 'EBITDA' || id === 'SUPPLIER_OTIF') return CATEGORY_COPY.note[id];
+  if (id === 'SELL_THROUGH' && !c.cats.some((i) => c.d.categories[i]?.is_seasonal))
+    return CATEGORY_COPY.note.SELL_THROUGH;
+  return null;
 }
 
 // ---------- cards ----------
@@ -380,7 +452,20 @@ function card(c: Ctx, id: string): CardView {
   const code = c.cur[`status.${id.toLowerCase()}`];
   const status: CardStatus = code === undefined ? 'na' : (STATUS_OF[code] ?? 'na');
   const sub = subTitle(c, id, copy.sub) + (kpi.is_provisional ? ' · prov.' : '');
-  const x = numbers(c, id);
+  const note = categoryNote(c, id);
+  const computed = numbers(c, id);
+  // N/A face under a category pick (E-101): value "–", Δ "n/a by category", blank bars, mini stats n/a, the note
+  const x: Numbers = note
+    ? {
+        ...computed,
+        value: ['–', ''],
+        target: null,
+        delta: CATEGORY_COPY.deltaNa,
+        deltaLong: undefined,
+        stats: computed.stats.map(([label]) => [label, NA] as const),
+        example: [t(note)],
+      }
+    : computed;
   const tags = { group: kpi.group ?? '', lever: kpi.lever ?? '', owner: kpi.owner };
   const revealed = ATTRIBUTES.every((a) => c.sel.picks[a.key].length === 0 || c.sel.picks[a.key].includes(tags[a.key]));
   const page = DRILL_PAGES[kpi.drill_page] ?? `${kpi.drill_page} page`;
@@ -594,7 +679,7 @@ function numbers(c: Ctx, id: string): Numbers {
       const tgt = v('availability_target') ?? 0;
       const stores = sumSites(c.d.tradingStores, c.L, SCOPE_GROUPS[c.scope]);
       const byCountry = (['NL', 'BE'] as const).map(
-        (s) => computeMetrics(c.d, s, { gran: 'W', weeks: [c.L] }).availability_pct,
+        (s) => computeMetrics(c.d, s, { gran: 'W', weeks: [c.L] }, c.cats).availability_pct,
       );
       const lowest = lowestCategoryAvailability(c);
       return {
@@ -733,7 +818,10 @@ function numbers(c: Ctx, id: string): Numbers {
                   `${unitsM(v('season_units_sold') ?? 0)} units sold ÷ (${unitsM(v('season_opening_units') ?? 0)} opening + ${unitsM(v('season_receipt_units') ?? 0)} received = ${unitsM((v('season_opening_units') ?? 0) + (v('season_receipt_units') ?? 0))}) = `,
                 ),
                 b(pct(st)),
-                t(`. Target ${pctTarget(tgt)} at week ${w.season_week ?? NA} of ${len ?? NA}, so ${pp(st - tgt)}.`),
+                t(
+                  `. Target ${pctTarget(tgt)} at week ${w.season_week ?? NA} of ${len ?? NA}, so ${pp(st - tgt)}.` +
+                    (c.cats === null ? '' : CATEGORY_COPY.seasonalOnly),
+                ),
               ],
       };
     }
@@ -741,7 +829,6 @@ function numbers(c: Ctx, id: string): Numbers {
       const g = v('gmroi');
       const tgt = v('gmroi_target');
       const byCat = gmroiByCategory(c.d, c.scope, c.L);
-      const cat = (code: string) => fmt(byCat?.get(code), (x) => `${num(x)}×`);
       const cmp = cmpOf(c);
       const basis = cmp ? val(cmp.m, 'gmroi') : tgt;
       const label = cmp ? cmp.label : 'vs target';
@@ -757,7 +844,7 @@ function numbers(c: Ctx, id: string): Numbers {
         stats: [
           ['R52W front margin', eurM(v('gmroi_front_margin_r52w') ?? 0, 0)],
           ['Average stock at cost', eurM(v('gmroi_avg_on_hand_cost') ?? 0, 0)],
-          ['H&B · Electronics', `${cat('HB')} · ${cat('ELEC')}`],
+          gmroiStat(c, byCat),
         ],
         example:
           g === undefined || tgt === undefined
@@ -834,7 +921,8 @@ function numbers(c: Ctx, id: string): Numbers {
 function netSalesStats(c: Ctx): (readonly [string, string])[] {
   const { d, L, item } = c;
   const groups = SCOPE_GROUPS[c.scope];
-  const net = (w: Window) => eurM(sum(d, 'net_sales', w.weeks, groups));
+  const K = c.cats ?? undefined;
+  const net = (w: Window) => eurM(sum(d, 'net_sales', w.weeks, groups, K));
   const ytd = ['Year to date', net(toDate(d, 'FY', L))] as const;
   const w = weekRow(d, L);
   switch (item.gran) {
@@ -850,7 +938,7 @@ function netSalesStats(c: Ctx): (readonly [string, string])[] {
     case 'FY': {
       // the whole FY's budget, future weeks included (Budget exists for the as-of FY only, E-95)
       const all = d.weeks.flatMap((x, i) => (x.fy === item.fy ? [i] : []));
-      const bud = item.fy === d.currentFy ? sum(d, 'net_sales_bud', all, groups) : undefined;
+      const bud = item.fy === d.currentFy ? sum(d, 'net_sales_bud', all, groups, K) : undefined;
       return [
         ['Budget full year', fmt(bud, (x) => eurM(x))],
         ['Last year', fmt(val(c.ly, 'net_sales'), (x) => eurM(x))],
@@ -903,19 +991,33 @@ function storeCostsVsPlan(p: Metrics): string {
 
 /** Lowest category availability in the scope's last week, e.g. "Fresh food 91.2%". */
 function lowestCategoryAvailability(c: Ctx): string {
-  const byCat = [...availabilityByCategory(c.d, c.scope, c.L)].sort((x, y) => x[1] - y[1]);
+  const byCat = [...availabilityByCategory(c.d, c.scope, c.L)]
+    .filter(([code]) => inPick(c, code))
+    .sort((x, y) => x[1] - y[1]);
   const low = byCat[0];
   return low ? `${categoryName(c.d, low[0])} ${pct(low[1])}` : NA;
 }
 const categoryName = (d: ExecData, code: string): string =>
   d.categories.find((x) => x.category_code === code)?.category_name ?? code;
+/** The category is in the pick (always at All). */
+const inPick = (c: Ctx, code: string): boolean => c.sel.categories.length === 0 || c.sel.categories.includes(code);
 
-/** Apparel and Home & kitchen sell-through (v5 mini stats), in the selected scope. */
+/** Apparel and Home & kitchen sell-through (v5 mini stats), in the selected scope; under a pick the first two picked
+ *  seasonal categories (E-101: the picked categories only). */
 function seasonalStats(c: Ctx): (readonly [string, string])[] {
   const byCat = sellThroughByCategory(c.d, c.scope, c.L);
-  return (['APPAREL', 'HOME'] as const).map(
-    (code) => [categoryName(c.d, code), fmt(byCat?.get(code), (x) => pct(x, 0))] as const,
-  );
+  const codes =
+    c.cats === null
+      ? ['APPAREL', 'HOME']
+      : c.d.categories.filter((x) => x.is_seasonal && inPick(c, x.category_code)).map((x) => x.category_code);
+  return codes.slice(0, 2).map((code) => [categoryName(c.d, code), fmt(byCat?.get(code), (x) => pct(x, 0))] as const);
+}
+
+/** GMROI mini stat: H&B · Electronics (v5); under a pick the first two picked categories (E-101). */
+function gmroiStat(c: Ctx, byCat: ReadonlyMap<string, number> | null): readonly [string, string] {
+  const codes = c.cats === null ? ['HB', 'ELEC'] : c.sel.categories.slice(0, 2);
+  const label = codes.map((code) => (code === 'HB' && c.cats === null ? 'H&B' : categoryName(c.d, code)));
+  return [label.join(' · '), codes.map((code) => fmt(byCat?.get(code), (x) => `${num(x)}×`)).join(' · ')];
 }
 
 // ---------- pop-ups ----------
@@ -955,7 +1057,7 @@ function how(c: Ctx): DashboardView['how'] {
       [
         b('Side bar'),
         t(
-          ': Filters (period, comparator, region and the metric attributes; inside one attribute a choice is OR, across attributes AND; filtered-out cards fade in place so nothing moves; the badge counts active choices; Reset clears), How to read, More KPIs (the 20 bench metrics, inactive).',
+          ': Filters (period, comparator, region, category and the metric attributes; inside one attribute a choice is OR, across attributes AND; filtered-out cards fade in place so nothing moves; the badge counts active choices; Reset clears), How to read, More KPIs (the 20 bench metrics, inactive).',
         ),
       ],
       [

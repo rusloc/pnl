@@ -39,6 +39,8 @@ export interface Catalog {
   asOf: Readonly<Record<Granularity, Item>>;
   /** Default on open (E-90): the as-of week. */
   defaultKey: string;
+  /** dim_category codes in sort_order: the valid values of the category pick (E-100, URL key `cat`). */
+  categories: readonly string[];
 }
 
 export const quarterOf = (w: WeekRow): number => Math.ceil(w.period / 3);
@@ -91,7 +93,13 @@ export function catalog(d: ExecData): Catalog {
     return x;
   };
   const asOf = { W: at('W'), P: at('P'), Q: at('Q'), FY: at('FY') };
-  const out: Catalog = { items, byKey, asOf, defaultKey: asOf.W.key };
+  const out: Catalog = {
+    items,
+    byKey,
+    asOf,
+    defaultKey: asOf.W.key,
+    categories: d.categories.map((c) => c.category_code),
+  };
   cache.set(d, out);
   return out;
 }

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { csvTable } from '../../scripts/csv.ts';
 import { createLoader } from '../data/loader.ts';
@@ -23,10 +24,14 @@ const load = createLoader(async (name) => {
 
 export const loadExecData = async (): Promise<ExecData> => createData(await load());
 
-const CHECKS = [
-  new URL('../../../data/nordmark_retail_dummy_data/checks/control_totals_eur.csv', import.meta.url),
-  new URL('../../fixtures/checks/control_totals_eur.csv', import.meta.url),
-].map((u) => fileURLToPath(u));
+const checks = (name: string) =>
+  [
+    new URL(`../../../data/nordmark_retail_dummy_data/checks/${name}`, import.meta.url),
+    new URL(`../../fixtures/checks/${name}`, import.meta.url),
+  ].map((u) => fileURLToPath(u));
+const CHECKS = checks('control_totals_eur.csv');
+/** Category control totals (E-104), a separate CSV from ginee (2026-10-30); absent until it lands. */
+export const CATEGORY_CHECKS = checks('control_totals_category_eur.csv');
 
 export interface ControlRow {
   scope: string;
@@ -38,14 +43,25 @@ export interface ControlRow {
 export function controlTotals(): ControlRow[] {
   const path = CHECKS.find((p) => existsSync(p));
   if (!path) throw new Error(`control_totals_eur.csv not found in ${CHECKS.join(' or ')}`);
-  return [
-    ...csvTable(readFileSync(path, 'utf8'), ['scope', 'period_key', 'metric_code', 'value'], 'control_totals_eur.csv'),
-  ].map(([scope = '', periodKey = '', metric = '', value = '']) => ({
-    scope,
-    periodKey,
-    metric,
-    value: Number(value),
-  }));
+  return readRows(path);
+}
+
+/** The category control rows (E-104), or null while the file does not exist yet. */
+export function categoryControlTotals(): ControlRow[] | null {
+  const path = CATEGORY_CHECKS.find((p) => existsSync(p));
+  return path ? readRows(path) : null;
+}
+
+function readRows(path: string): ControlRow[] {
+  const name = basename(path);
+  return [...csvTable(readFileSync(path, 'utf8'), ['scope', 'period_key', 'metric_code', 'value'], name)].map(
+    ([scope = '', periodKey = '', metric = '', value = '']) => ({
+      scope,
+      periodKey,
+      metric,
+      value: Number(value),
+    }),
+  );
 }
 
 /** Tolerance per metric, as data/nordmark_retail_dummy_data/checks/verify.py tol(): amounts 0.005, ratios 1e-6. */
