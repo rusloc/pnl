@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "menu_param_period",
+  "name": "menu_item_fy",
   "position": {
     "x": 86,
-    "y": 114,
-    "z": 1660,
+    "y": 148,
+    "z": 1661,
     "height": 28,
     "width": 320,
-    "tabOrder": 740
+    "tabOrder": 761
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -20,14 +20,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "param_period"
+                      "Entity": "dim_item"
                     }
                   },
-                  "Property": "period_name"
+                  "Property": "fy_label"
                 }
               },
-              "queryRef": "param_period.period_name",
-              "nativeQueryRef": "period_name",
+              "queryRef": "dim_item.fy_label",
+              "nativeQueryRef": "fy_label",
               "active": true
             }
           ]
@@ -48,7 +48,7 @@
             "strictSingleSelect": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -75,7 +75,7 @@
             "columnCount": {
               "expr": {
                 "Literal": {
-                  "Value": "3L"
+                  "Value": "2L"
                 }
               }
             },
@@ -96,7 +96,7 @@
             "maxTiles": {
               "expr": {
                 "Literal": {
-                  "Value": "3L"
+                  "Value": "2L"
                 }
               }
             },
@@ -535,7 +535,7 @@
                 "From": [
                   {
                     "Name": "p",
-                    "Entity": "param_period",
+                    "Entity": "dim_item",
                     "Type": 0
                   }
                 ],
@@ -551,7 +551,7 @@
                                   "Source": "p"
                                 }
                               },
-                              "Property": "period_name"
+                              "Property": "fy_label"
                             }
                           }
                         ],
@@ -559,7 +559,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Year to date'"
+                                "Value": "'FY2026'"
                               }
                             }
                           ]
@@ -646,7 +646,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Period picker'"
+                  "Value": "'Fiscal year picker'"
                 }
               }
             }

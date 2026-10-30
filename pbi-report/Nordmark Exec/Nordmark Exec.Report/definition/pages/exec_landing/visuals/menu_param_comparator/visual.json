@@ -3,7 +3,7 @@
   "name": "menu_param_comparator",
   "position": {
     "x": 86,
-    "y": 168,
+    "y": 428,
     "z": 1670,
     "height": 28,
     "width": 320,
@@ -691,5 +691,58 @@
     "drillFilterOtherVisuals": true
   },
   "parentGroupName": "grp_filters",
-  "isHidden": true
+  "isHidden": true,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f_cmp_row_visible",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_measures"
+              }
+            },
+            "Property": "_Comparator Row Visible"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "m",
+              "Entity": "_measures",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Comparison": {
+                  "ComparisonKind": 0,
+                  "Left": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "m"
+                        }
+                      },
+                      "Property": "_Comparator Row Visible"
+                    }
+                  },
+                  "Right": {
+                    "Literal": {
+                      "Value": "1L"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
 }

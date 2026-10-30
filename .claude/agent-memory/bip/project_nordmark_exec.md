@@ -1,6 +1,6 @@
 ---
 name: project-nordmark-exec
-description: Nordmark Exec PBI flavour (ADR-0013) - model/report shape, generator in scratch, copy source js-exec copy.ts, tooltip/image-visual findings, test status as of 2026-10-28
+description: Nordmark Exec PBI flavour (ADR-0013 incl. (k) period model) - model/report shape, generator fork bip_nx2 + splice, copy source js-exec copy.ts, picker mechanics, test status as of 2026-10-30
 metadata:
   type: project
 ---
@@ -12,7 +12,15 @@ metadata:
 
 - [2026-10-28] Verified: validator 0/0; tests 23 blocks / 13,273 rows all TRUE (every CSV row + card layer 3 periods x 3 comparators x 4 scopes + v5 texts + bars + identities + 0 measures in error); slowest visual ~0.7 s cold, status line was 2.1 s until counts + dot became one packed measure. Renders checked: landing, 4 layers, tt_info / tt_drill / tt_rule / tt_dot (tooltip pages via scratch visual filter; real hover not automatable). (observed)
 
-**Why:** two-flavour parity build; JS flavour reconciles to the same 9,328 control totals.
-**How to apply:** after the USER saves in Desktop, edit surgically instead of regenerating. Hover pop-ups still need a USER hover check.
+- [2026-10-29] USER feedback built on top of the USER's Desktop save (21:25): Statement attribute removed (slicer, `param_attr_statement`, Revealed / picks / badge terms, ⓘ tag); Notes removed (sb_notes, bm_notes, grp_notes*, notes.svg, side-bar icon, How-to-read "Notes."); one shared top-level `layer_scrim` (z 1605) replaces the 3 grouped scrims; ⓘ target line under the value via 12 new `Card Basis Text <KPI>` + label from dim_kpi.basis, everything below shifted +30 (tt_info 548x737, SVG 520x719). 373 measures. Tests T-N3/5/6/7 all TRUE on a fresh copy with the USER's cache. (observed)
+- [2026-10-29] Why the USER saw no scrim under How / More was NOT found: grouped scrims were byte-identical to Filters' and render statically; bookmark clicks cannot be automated. The shared scrim is the robust replacement; USER click-check pending. (observed)
+- [2026-10-29] USER's save opens on Year to date with all 4 Group chips picked (badge 4); no selected-chip restyle in the save. (observed)
+
+- [2026-10-30] Period model (ADR-0013 (k), exec-period-model.md) built on the USER's 22:49 save: `param_period` + `param_attr_horizon` retired; `param_granularity` (W/P/Q/FY) 1->* `dim_item` (calculated from dim_week + meta as-of: 127 items, every window as sort_index bounds incl. ly / prev (like-length) / eb_prev (EBITDA prev month first k weeks), label, label_wide, header, phrase, title). `[_Item Key]` = the one dim_item row left by the slicers, else the item of the picked type holding the anchor week (label from FILTERS(), fy from FILTERS(fy_label)) -> Reset = W43. Comparator code LW kept (label "Previous"), reads LY at FY; Previous row hidden by visual filter `[_Comparator Row Visible] = 1`. EBITDA card = `[EBITDA Flash]` (PTD when the window is one week). Mix = window shares. 388 measures. (observed)
+- [2026-10-30] Generator fork with all of this: session `cc04b6a9-.../scratchpad/bip_nx2/gen/` (+ engine_k.py, dim_item.py); repo apply = `splice.py` (repo order + Desktop lineageTags kept, Card LW -> Card Prev in place) + `model_patch.py` + `report_patch.py ROOT 683`; scratch helpers sync.sh (regen + splice + TOM push), show.py (layer + slicer state), backup.py. Old generator (336bd115) is superseded. (observed)
+- [2026-10-30] Picker layout: one button slicer cannot fit both 52 week chips and "Q4 · to date" (autoGrid = 3 huge tiles + scroll): two item slicers, `menu_item` (label, W/P, 8x7) and `menu_item_wide` (label_wide, Q/FY, 4 wide), visual filters on granularity_code, NoFilter interactions item<->item and item->FY. No chip restyle in either USER save (all 7 chip slicers byte-identical, colours = my `_Chip * Selected` measures). (observed)
+
+**Why:** two-flavour parity build; JS flavour reconciles to the same control totals (26,143 rows, 93 keys since 2026-10-30).
+**How to apply:** after the USER saves in Desktop, regenerate measures with the bip_nx2 generator and splice; patch PBIR surgically. Hover pop-ups and slicer clicks still need a USER check.
 
 Related: [[pbir-authoring-notes]] [[project-mirelo-report]]

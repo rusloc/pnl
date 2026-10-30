@@ -6,9 +6,11 @@
 - [Track B Copilot](project_track_b_copilot.md) — no anonymous Copilot chat; param-table window breaks naive Copilot DAX; prep limits (2026-10-23)
 - [P&L redesign v4](project_pl_redesign_v4.md) — Vitals / Analysis 2p / Profitability 2p built 2026-10-27, 241 measures, tests 257 TRUE, timings
 - [Mirelo Sales report](project_mirelo_report.md) — ADR-0011 Track B PBIP draft: model shape, generator in scratch, 2,560 tests TRUE, placeholders
-- [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour built 2026-10-28: window-in-context model, SVG cards, copy from js-exec copy.ts, tooltip-table trick
+- [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; period model (k) 2026-10-30: dim_item picker, generator fork bip_nx2 + splice
 
 ## Open threads
+- 2026-10-30 Nordmark Exec period model built (validator 0/0, 172 blocks / 34,118 rows TRUE). Open: USER first open + picker / hover checks (README checklist); perf pass on EBITDA card (~2.5 s) and ⓘ (~9-10 s cold, was 5 s); chips still default style (no restyle in either save)
+- 2026-10-29 Nordmark Exec USER feedback items 1/2/4/5 built in the PBIP (validator 0/0, T-N3/5/6/7 TRUE). Open: USER clicks Filters / How / More (shared scrim), hovers ⓘ (target line), Reset + save (opens YTD + 4 groups)
 - 2026-10-28 Nordmark Exec built (validator 0/0, tests 23 blocks / 13,273 rows, slowest visual ~0.7 s). Open: USER first open + hover check of the 3 tooltip pages; selected-chip style; parity-rules.md rows (main agent); USER closes my scratch Desktop PIDs 28300 (UI hung) and 13356
 - 2026-10-28 .sync packs pnl/power-bi + mirelo-sales verified (refresh, tests all green, validator 0/0), READMEs flipped to ready. Open: stale 'Not opened in Desktop yet' caveats + Mirelo '272 measures' (model has 338) in pack READMEs -> ginee/main agent
 - 2026-10-27 Parity check B vs C fixed in both PBIPs (Mirelo MS-01..14, P&L PV-01..22 bip items); T-P 601 + 257 rows TRUE, Vitals 2.5 s cold; open: USER first open, ginee republish

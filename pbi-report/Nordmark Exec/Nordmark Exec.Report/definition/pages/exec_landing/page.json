@@ -54,5 +54,27 @@
         }
       }
     ]
-  }
+  },
+  "visualInteractions": [
+    {
+      "source": "menu_item",
+      "target": "menu_item_fy",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_item_wide",
+      "target": "menu_item_fy",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_item",
+      "target": "menu_item_wide",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_item_wide",
+      "target": "menu_item",
+      "type": "NoFilter"
+    }
+  ]
 }

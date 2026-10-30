@@ -10,12 +10,15 @@
       "menu_panel",
       "menu_reset",
       "grp_filters_close",
-      "menu_param_period",
+      "menu_param_granularity",
+      "menu_item_fy",
+      "menu_item_wide",
+      "menu_item",
+      "menu_showing",
       "menu_param_comparator",
       "menu_param_region",
       "menu_param_attr_group",
       "menu_param_attr_lever",
-      "menu_param_attr_horizon",
       "menu_param_attr_owner",
       "grp_how",
       "how_panel",
@@ -66,9 +69,41 @@
               }
             }
           },
-          "menu_param_period": {
+          "menu_param_granularity": {
             "singleVisual": {
               "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item_fy": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item_wide": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_showing": {
+            "singleVisual": {
+              "visualType": "image",
               "display": {
                 "mode": "hidden"
               }
@@ -99,14 +134,6 @@
             }
           },
           "menu_param_attr_lever": {
-            "singleVisual": {
-              "visualType": "advancedSlicerVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "menu_param_attr_horizon": {
             "singleVisual": {
               "visualType": "advancedSlicerVisual",
               "display": {

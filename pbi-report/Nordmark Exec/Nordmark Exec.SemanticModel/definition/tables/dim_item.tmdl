@@ -1,0 +1,426 @@
+/// Period-model items (ADR-0013 (k), E-91, E-92): Week 95 · Month 22 · Quarter 8 · Year 2 at the shipped data, derived from dim_week (weeks within actuals, as-of week from manifest.json) with every comparator window as sort_index bounds. Joins param_granularity; no fact.
+table dim_item
+	lineageTag: 88f7a280-ba02-5080-9a3a-52993145e6d6
+
+	/// FY2026-W43 (= week_key) · FY2026-P10 (= period_key) · FY2026-Q4 · FY2026.
+	column item_key
+		dataType: string
+		isHidden
+		lineageTag: 8b671fe3-1fc0-55d1-905b-dbedc9e6e8ae
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [item_key]
+
+		annotation SummarizationSetBy = User
+
+	/// W, P (Month), Q or FY; joins param_granularity.
+	column granularity_code
+		dataType: string
+		isHidden
+		lineageTag: 63fa3bbb-0dc1-579c-97b8-10ea9393b29e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [granularity_code]
+
+		annotation SummarizationSetBy = User
+
+	/// Fiscal year.
+	column fy
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dfc2a489-c7c6-528d-8b34-a465063e98f6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [fy]
+
+		annotation SummarizationSetBy = User
+
+	/// FY2025 / FY2026: the fiscal-year row of the period picker.
+	column fy_label
+		dataType: string
+		lineageTag: aed2913a-b14c-5c77-927f-ce47efb7ff5c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [fy_label]
+
+		annotation SummarizationSetBy = User
+
+	/// Week / month (period) / quarter number in the FY; 0 for a year.
+	column n
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e5640cd1-16e9-51d4-9447-99c8a11a3915
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [n]
+
+		annotation SummarizationSetBy = User
+
+	/// Picker chip: W43 · P10 · Q4 · Q4 · to date · FY2025 · FY2026 · to date (E-91, E-92).
+	column label
+		dataType: string
+		lineageTag: 7f0cf40a-f28d-5db0-8dc9-80328b4bf5be
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [label]
+		sortByColumn: label_order
+
+		annotation SummarizationSetBy = User
+
+	/// Copy of label for the wide Quarter / Year chip row (menu_item_wide), so its selection is independent of the Week / Month grid.
+	column label_wide
+		dataType: string
+		lineageTag: 775b23d6-9fda-5ca0-95ab-502d5049871c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [label_wide]
+		sortByColumn: label_order
+
+		annotation SummarizationSetBy = User
+
+	/// Sort order of label (n, or the FY at Year).
+	column label_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2f680510-5644-5ceb-9eec-bd3d8df4be02
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [label_order]
+
+		annotation SummarizationSetBy = User
+
+	/// Week 43 · Month 10 · Quarter 4 · FY2026, + FY2025 when not the as-of FY (E-98).
+	column title
+		dataType: string
+		isHidden
+		lineageTag: 4a6bcebc-54db-5178-85be-424fa31ce5f1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [title]
+
+		annotation SummarizationSetBy = User
+
+	/// Sub-title phrase: week 43 · month 10 · quarter 4 to date · FY2026 to date (E-92).
+	column phrase
+		dataType: string
+		isHidden
+		lineageTag: 55d4ab60-bd12-517e-b702-3d4ca2b4b77f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [phrase]
+
+		annotation SummarizationSetBy = User
+
+	/// Header period line, ** = bold: **Week 43** · 19–25 Oct 2026, **Quarter 4** to date · 28 Sep–25 Oct 2026 (E-51, E-98).
+	column header
+		dataType: string
+		isHidden
+		lineageTag: 360e51a5-d387-5a82-b0ac-b94b72dc1c06
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [header]
+
+		annotation SummarizationSetBy = User
+
+	/// First dim_week sort_index of the window.
+	column start_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1ba9d3ea-b692-559f-a9dd-c29f56e08a69
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [start_index]
+
+		annotation SummarizationSetBy = User
+
+	/// Last sort_index of the window (item end, capped at the as-of week).
+	column end_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ccb8ee34-70ce-508e-bb11-a83b9cf9f1c9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [end_index]
+
+		annotation SummarizationSetBy = User
+
+	/// Weeks in the window (k).
+	column weeks
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 12400f6f-6e0f-58b0-9d5c-46cc0ed9ab26
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [weeks]
+
+		annotation SummarizationSetBy = User
+
+	/// Weeks of the complete item (1 / 4-5 / 13 / 52).
+	column size
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6b88b638-dc07-5375-b181-26f8f90b48ab
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [size]
+
+		annotation SummarizationSetBy = User
+
+	/// The item's last week is after the as-of week: named to date (E-92).
+	column is_partial
+		dataType: boolean
+		isHidden
+		lineageTag: f4eaaa42-1537-5160-9f97-d768e2e2bbf4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_partial]
+
+		annotation SummarizationSetBy = User
+
+	/// Position among the items of the type, 1 = the first item of the data (bars, previous item).
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5ad7b1a0-cf15-5e9e-a714-a38fde57c338
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	/// LY window start: the start week one year back by ly_week_key (E-12); blank in FY2025.
+	column ly_start
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 28b9d214-9caf-5967-a351-4b5182a649d3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ly_start]
+
+		annotation SummarizationSetBy = User
+
+	/// LY window end; blank in FY2025.
+	column ly_end
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ed6559c8-1356-5cb6-af31-fede781948f9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ly_end]
+
+		annotation SummarizationSetBy = User
+
+	/// Previous item (E-94): lw_week_key at Week; else the item before, cut to this item's weeks when partial; blank for the first item.
+	column prev_start
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5c32358a-ad46-599b-af50-42237ec56fba
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [prev_start]
+
+		annotation SummarizationSetBy = User
+
+	/// Previous-item window end.
+	column prev_end
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d9ea6163-d037-5554-b0d9-a6c49cd793e7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [prev_end]
+
+		annotation SummarizationSetBy = User
+
+	/// EBITDA flash vs Previous (E-93, ET-31): at Week the previous month's first k weeks (k = week of the month); blank for week 5 of a 5-week month and the first month; else = prev_start.
+	column eb_prev_start
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d32ee8a9-0f2b-571c-b94f-a25885ca019e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [eb_prev_start]
+
+		annotation SummarizationSetBy = User
+
+	/// EBITDA Previous window end.
+	column eb_prev_end
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 14bad643-1277-5d6b-8602-92899c53ece6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [eb_prev_end]
+
+		annotation SummarizationSetBy = User
+
+	/// At Week: P9 weeks 1–4 / P12 FY2025 week 1 (the i delta line); else empty.
+	column eb_prev_name
+		dataType: string
+		isHidden
+		lineageTag: ba7e4048-9e0f-59d1-9707-2f8d5681474c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [eb_prev_name]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_item = calculated
+		mode: import
+		source =
+				VAR _asof =
+				    MAXX ( FILTER ( dim_week, dim_week[week_key] = MAX ( meta_dataset[current_week_key] ) ), dim_week[sort_index] )
+				VAR _afy        = MAXX ( FILTER ( dim_week, dim_week[sort_index] = _asof ), dim_week[fy] )
+				VAR _act        = FILTER ( dim_week, dim_week[is_actual] && dim_week[sort_index] <= _asof )
+				VAR _wk =
+				    SELECTCOLUMNS (
+				        _act
+				        ,"item_key", dim_week[week_key]
+				        ,"granularity_code", "W"
+				        ,"fy", dim_week[fy]
+				        ,"n", dim_week[week_of_fy]
+				        ,"start_index", dim_week[sort_index]
+				        ,"end_index", dim_week[sort_index]
+				        ,"size", 1
+				    )
+				VAR _pe =
+				    SELECTCOLUMNS (
+				        SUMMARIZE ( _act, dim_week[period_key], dim_week[fy], dim_week[period] )
+				        ,"item_key", dim_week[period_key]
+				        ,"granularity_code", "P"
+				        ,"fy", dim_week[fy]
+				        ,"n", dim_week[period]
+				        ,"start_index", CALCULATE ( MIN ( dim_week[sort_index] ) )
+				        ,"end_index", MIN ( CALCULATE ( MAX ( dim_week[sort_index] ) ), _asof )
+				        ,"size", CALCULATE ( COUNTROWS ( dim_week ) )
+				    )
+				VAR _qu =
+				    SELECTCOLUMNS (
+				        SUMMARIZE ( _act, dim_week[fy], dim_week[quarter] )
+				        ,"item_key", "FY" & dim_week[fy] & "-Q" & dim_week[quarter]
+				        ,"granularity_code", "Q"
+				        ,"fy", dim_week[fy]
+				        ,"n", dim_week[quarter]
+				        ,"start_index", CALCULATE ( MIN ( dim_week[sort_index] ) )
+				        ,"end_index", MIN ( CALCULATE ( MAX ( dim_week[sort_index] ) ), _asof )
+				        ,"size", CALCULATE ( COUNTROWS ( dim_week ) )
+				    )
+				VAR _yr =
+				    SELECTCOLUMNS (
+				        SUMMARIZE ( _act, dim_week[fy] )
+				        ,"item_key", "FY" & dim_week[fy]
+				        ,"granularity_code", "FY"
+				        ,"fy", dim_week[fy]
+				        ,"n", 0
+				        ,"start_index", CALCULATE ( MIN ( dim_week[sort_index] ) )
+				        ,"end_index", MIN ( CALCULATE ( MAX ( dim_week[sort_index] ) ), _asof )
+				        ,"size", CALCULATE ( COUNTROWS ( dim_week ) )
+				    )
+				VAR _base       = UNION ( _wk, _pe, _qu, _yr )
+				VAR _r1 =
+				    ADDCOLUMNS (
+				        _base
+				        ,"weeks", [end_index] - [start_index] + 1
+				        ,"is_partial", [end_index] - [start_index] + 1 < [size]
+				        ,"sort_order", VAR _g = [granularity_code] VAR _st = [start_index] RETURN COUNTROWS ( FILTER ( _base, [granularity_code] = _g && [start_index] <= _st ) )
+				    )
+				VAR _r2 =
+				    ADDCOLUMNS (
+				        _r1
+				        ,"@d0", VAR _i = [start_index] RETURN MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[week_start] )
+				        ,"@d1", VAR _i = [end_index] RETURN MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[week_end] )
+				        ,"ly_start", VAR _i = [start_index] VAR _k = MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[ly_week_key] )
+				            RETURN MAXX ( FILTER ( dim_week, dim_week[week_key] = _k ), dim_week[sort_index] )
+				        ,"ly_end", VAR _i = [end_index] VAR _k = MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[ly_week_key] )
+				            RETURN MAXX ( FILTER ( dim_week, dim_week[week_key] = _k ), dim_week[sort_index] )
+				        ,"@lw", VAR _i = [start_index] VAR _k = MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[lw_week_key] )
+				            RETURN MAXX ( FILTER ( dim_week, dim_week[week_key] = _k ), dim_week[sort_index] )
+				        ,"@pk", VAR _i = [start_index] RETURN MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[period_key] )
+				        ,"@wop", VAR _i = [start_index] RETURN MAXX ( FILTER ( dim_week, dim_week[sort_index] = _i ), dim_week[week_of_period] )
+				    )
+				VAR _r3 =
+				    ADDCOLUMNS (
+				        _r2
+				        ,"@ps", VAR _g = [granularity_code] VAR _o = [sort_order]
+				            RETURN IF ( _g = "W", [@lw], MAXX ( FILTER ( _r1, [granularity_code] = _g && [sort_order] = _o - 1 ), [start_index] ) )
+				        ,"@pe", VAR _g = [granularity_code] VAR _o = [sort_order]
+				            RETURN IF ( _g = "W", [@lw], MAXX ( FILTER ( _r1, [granularity_code] = _g && [sort_order] = _o - 1 ), [end_index] ) )
+				        ,"@mo", VAR _pk = [@pk] RETURN MAXX ( FILTER ( _r1, [granularity_code] = "P" && [item_key] = _pk ), [sort_order] )
+				    )
+				VAR _r4 =
+				    ADDCOLUMNS (
+				        _r3
+				        ,"prev_start", [@ps]
+				        ,"prev_end", IF ( ISBLANK ( [@ps] ), BLANK (), IF ( [is_partial], [@ps] + [weeks] - 1, [@pe] ) )
+				        ,"@ms", VAR _o = [@mo] - 1 RETURN MAXX ( FILTER ( _r1, [granularity_code] = "P" && [sort_order] = _o ), [start_index] )
+				        ,"@mw", VAR _o = [@mo] - 1 RETURN MAXX ( FILTER ( _r1, [granularity_code] = "P" && [sort_order] = _o ), [weeks] )
+				        ,"@mn", VAR _o = [@mo] - 1 RETURN MAXX ( FILTER ( _r1, [granularity_code] = "P" && [sort_order] = _o ), [n] )
+				        ,"@mf", VAR _o = [@mo] - 1 RETURN MAXX ( FILTER ( _r1, [granularity_code] = "P" && [sort_order] = _o ), [fy] )
+				    )
+				VAR _r5 =
+				    ADDCOLUMNS (
+				        _r4
+				        ,"@ok", [granularity_code] = "W" && NOT ISBLANK ( [@ms] ) && [@mw] >= [@wop]
+				        ,"@title", IF ( [granularity_code] = "FY", "FY" & [fy], SWITCH ( [granularity_code], "W", "Week ", "P", "Month ", "Quarter " ) & [n] & IF ( [fy] <> _afy, " FY" & [fy], "" ) )
+				        ,"@dates",
+				            IF (
+				                YEAR ( [@d0] ) <> YEAR ( [@d1] )
+				                ,FORMAT ( [@d0], "d mmm yyyy" )
+				                ,IF ( MONTH ( [@d0] ) <> MONTH ( [@d1] ), FORMAT ( [@d0], "d mmm" ), FORMAT ( [@d0], "d" ) )
+				            ) & "–" & FORMAT ( [@d1], "d mmm yyyy" )
+				    )
+				RETURN
+				    SELECTCOLUMNS (
+				        _r5
+				        ,"item_key", [item_key]
+				        ,"granularity_code", [granularity_code]
+				        ,"fy", [fy]
+				        ,"fy_label", "FY" & [fy]
+				        ,"n", [n]
+				        ,"label", IF ( [granularity_code] = "FY", "FY" & [fy], [granularity_code] & [n] ) & IF ( [is_partial], " · to date", "" )
+				        ,"label_wide", IF ( [granularity_code] = "FY", "FY" & [fy], [granularity_code] & [n] ) & IF ( [is_partial], " · to date", "" )
+				        ,"label_order", IF ( [granularity_code] = "FY", [fy], [n] )
+				        ,"title", [@title]
+				        ,"phrase",
+				            IF (
+				                [granularity_code] = "FY"
+				                ,"FY" & [fy]
+				                ,SWITCH ( [granularity_code], "W", "week ", "P", "month ", "quarter " ) & [n] & IF ( [fy] <> _afy, " FY" & [fy], "" )
+				            ) & IF ( [is_partial], " to date", "" )
+				        ,"header", "**" & [@title] & "**" & IF ( [is_partial], " to date", "" ) & " · " & [@dates]
+				        ,"start_index", [start_index]
+				        ,"end_index", [end_index]
+				        ,"weeks", [weeks]
+				        ,"size", [size]
+				        ,"is_partial", [is_partial]
+				        ,"sort_order", [sort_order]
+				        ,"ly_start", [ly_start]
+				        ,"ly_end", [ly_end]
+				        ,"prev_start", [prev_start]
+				        ,"prev_end", [prev_end]
+				        ,"eb_prev_start", IF ( [granularity_code] = "W", IF ( [@ok], [@ms] ), [prev_start] )
+				        ,"eb_prev_end", IF ( [granularity_code] = "W", IF ( [@ok], [@ms] + [@wop] - 1 ), [prev_end] )
+				        ,"eb_prev_name",
+				            IF (
+				                [@ok]
+				                ,"P" & [@mn] & IF ( [@mf] <> [fy], " FY" & [@mf], "" ) & IF ( [@wop] = 1, " week 1", " weeks 1–" & [@wop] )
+				                ,""
+				            )
+				    )
+
+	annotation PBI_ResultType = Table
+

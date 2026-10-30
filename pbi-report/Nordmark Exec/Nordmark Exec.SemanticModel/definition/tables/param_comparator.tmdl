@@ -1,4 +1,4 @@
-/// Comparator switcher (E-14): Budget, Last year, Last week (no Forecast, ADR-0013 OQ 6). Disconnected.
+/// Comparator switcher (E-14, E-94): Budget, Last year, Previous (week / month / quarter; hidden at Year). No Forecast (ADR-0013 OQ 6). Disconnected.
 table param_comparator
 	lineageTag: 66cb8812-6b87-5c7e-886f-1491516419cf
 
@@ -43,7 +43,7 @@ table param_comparator
 				    ,{
 				        { "BUD", "Budget", 1 }
 				        ,{ "LY", "Last year", 2 }
-				        ,{ "LW", "Last week", 3 }
+				        ,{ "LW", "Previous", 3 }
 				    }
 				)
 

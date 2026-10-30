@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "menu_param_attr_horizon",
+  "name": "menu_item",
   "position": {
     "x": 86,
-    "y": 458,
-    "z": 1710,
-    "height": 28,
+    "y": 214,
+    "z": 1663,
+    "height": 164,
     "width": 320,
-    "tabOrder": 790
+    "tabOrder": 763
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -20,14 +20,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "param_attr_horizon"
+                      "Entity": "dim_item"
                     }
                   },
-                  "Property": "attr_label"
+                  "Property": "label"
                 }
               },
-              "queryRef": "param_attr_horizon.attr_label",
-              "nativeQueryRef": "attr_label",
+              "queryRef": "dim_item.label",
+              "nativeQueryRef": "label",
               "active": true
             }
           ]
@@ -41,7 +41,7 @@
             "singleSelect": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -68,14 +68,14 @@
             "rowCount": {
               "expr": {
                 "Literal": {
-                  "Value": "1L"
+                  "Value": "7L"
                 }
               }
             },
             "columnCount": {
               "expr": {
                 "Literal": {
-                  "Value": "3L"
+                  "Value": "8L"
                 }
               }
             },
@@ -96,7 +96,7 @@
             "maxTiles": {
               "expr": {
                 "Literal": {
-                  "Value": "3L"
+                  "Value": "56L"
                 }
               }
             },
@@ -117,14 +117,14 @@
             "rowPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "6L"
+                  "Value": "4L"
                 }
               }
             },
             "columnPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "6L"
+                  "Value": "4L"
                 }
               }
             }
@@ -382,7 +382,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9.5D"
+                  "Value": "9D"
                 }
               }
             },
@@ -525,6 +525,53 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "p",
+                    "Entity": "dim_item",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "p"
+                                }
+                              },
+                              "Property": "label"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'W43'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -599,7 +646,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Horizon picker'"
+                  "Value": "'Week or month picker'"
                 }
               }
             }
@@ -644,5 +691,70 @@
     "drillFilterOtherVisuals": true
   },
   "parentGroupName": "grp_filters",
-  "isHidden": true
+  "isHidden": true,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f_item_types",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_item"
+              }
+            },
+            "Property": "granularity_code"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dim_item",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "granularity_code"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'W'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'P'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
 }
