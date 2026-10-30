@@ -46,8 +46,8 @@
 **Symptom:** (a) a quoted heredoc or `node -e` body holding TS, Markdown tables or many `'` / backticks fails with "unexpected EOF while looking for matching quote"; (b) files patched by a `python -` heredoc come back with CRLF, so `prettier --check` flags every touched file (untouched ones pass).
 **Cause:** (a) the harness's bash quoting; (b) `open(p, 'w')` on Windows translates `\n` → `\r\n`.
 **Fix:** put patch scripts / Playwright checks in the scratchpad with the Write tool and run them (`py -3.12 -I script.py`; add `sys.stdout.reconfigure(encoding='utf-8')`, since `-I` ignores PYTHONIOENCODING); open files with `newline='\n'`, or run `npx prettier --write <changed files>` before the gate.
-**Seen:** js-exec 2026-10-28 (CAND-013, test files, checks.py); js-exec 2026-10-29 (README patch heredoc; 17 files CRLF after python patches)
+**Seen:** js-exec 2026-10-28 (CAND-013, test files, checks.py); js-exec 2026-10-29 (README patch heredoc; 17 files CRLF after python patches); .sync/nordmark-exec pack check 2026-10-30 (UnicodeEncodeError on "ⓘ" until stdout reconfigure)
 **Confidence:** high — reproduced
-**Last-verified:** 2026-10-29
+**Last-verified:** 2026-10-30
 **Related:** PG-004
 **Status:** active

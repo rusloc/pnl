@@ -1,4 +1,4 @@
-<!-- next-id: DEC-007 -->
+<!-- next-id: DEC-009 -->
 
 # Decisions (durable)
 
@@ -73,4 +73,28 @@
 **Last-verified:** 2026-10-29
 **Last-refined:** 2026-10-29
 **Related:** DEC-005, CNV-001
+**Status:** active
+
+### DEC-007 · Nordmark exec: scope = region × category; N/A (not allocation) where a fact has no category key; denominator-weighted category targets; category in the control-total `scope` column · 2026-10-30
+**Decision:** the Category filter (USER 2026-10-30, ADR-0013 (l)) is a second data-scope switcher next to Region (dropdown of names, All / single / multi). Cards whose inputs all carry `category_code` (9: Net sales, Total margin incl. `back_margin_alloc`, cover, Markdown, Availability, LFL, Front GM, GMROI, Channel mix) are computed on the picked cells with unchanged formulas; Sell-through is conditional (seasonal part of the pick, N/A for a non-seasonal-only pick); EBITDA flash and Supplier OTIF are **N/A under any pick** (`fact_opex_week`, `fact_po_week` have no category key; `dim_supplier.primary_category_code` not used). Targets under a pick = denominator-weighted mean of the `dim_category` rows (cover by forecast COGS — existing formula; GMROI by average on-hand cost; sell-through formal 0.62); All keeps the `param_target` ALL row. Counts / dot follow the pick (rated cards only). JS URL key `cat` (comma list, `sort_order` order, All = absent). Control totals: the pick extends the **`scope` column** (`ALL#ELEC`, `NL#ELEC+TOYS`), period-key grammar untouched; sampled set 9 singles + 3 mixes × 12 keys at ALL + 2 picks × 3 regions × 6 keys = 180 cells ≈ 10.4 k rows.
+**Why:** USER ruling (N/A for non-splittable cards; multi-select; combined with Region). N/A over allocation because allocating OpEx is a data decision, not a filter. Scope-column grammar because the key names the window, not the scope, and the 4-column CSV + ET-22 hashes + three parsers (verify.py `KEY_RE`, DAX generator, JS tests) stay untouched. PBI trap found: measures on the two unrelated facts silently return the All value under a pick — every EBITDA / OTIF measure needs an `ISFILTERED ( dim_category[category_name] )` guard (blanking OpEx alone leaves `Total Margin − BLANK () = Total Margin`). Dataset fact: back margin is exact per category (generator allocates each week × category total to cells and to that category's suppliers; ET-07 max diff 2e-10), so the "approximation" caveat applies to OTIF only.
+**Reversal cost:** low — one mask in the engine, one slicer + guard set in the model, one URL key; no Parquet change (the cube already carries category, E-83).
+**Applied at:** `docs/ADR/0013-nordmark-executive-dashboard.md` (l), (m); `docs/Requirements-exec.md` §2c E-100…E-104, ET-33…ET-36, amended E-15/57/62/76, ET-30/32; `docs/ADD/features/exec-category-filter.md`
+**Hits:** 1
+**Tags:** nordmark, category-filter, scope-model, n/a-pattern, weighted-targets, control-totals, scope-grammar, isfiltered-guard, url-state
+**Confidence:** high (USER decision + archi defaults listed in the spec §9; ginee's data check pending)
+**Last-verified:** 2026-10-30
+**Related:** DEC-006, DEC-005
+**Status:** active — all doubts closed by the main agent 2026-10-30 after ginee's 259/259 proof: OTIF N/A (no supplier snowflake), GMROI rule as written, all 9 ticked = All (PBI guard needs a count test, not ISFILTERED alone), EBITDA N/A, badge ignores the pick, chips accepted as not story-tuned; category control totals in a separate `checks/control_totals_category_eur.csv` (4 columns, scope suffix `ALL#ELEC+TOYS`, 10,514 rows as built); ⓘ fix = pop-up `max-height: min(calc(100vh - 32px), 820px)`
+
+### DEC-008 · Hand-off packs: PBI packs ship with the loaded model cache; publishing/embedding by another agent from the USER's account; no scheduled refresh · 2026-10-30
+**Decision:** every Power BI pack in `.sync/` (P&L, Mirelo, Nordmark) carries `<name>.SemanticModel/.pbi/cache.abf` refreshed from the pack's own Parquet (`DataFolder` stays a placeholder; root `.gitignore` exception `!.sync/**/.pbi/cache.abf`; ≈ 14–25 MB each; re-pack = refresh again). Another agent publishes to the USER's Power BI account and embeds on vosk.dev — this repo never publishes; pack READMEs + hand-off note must say: publish the loaded model, no scheduled refresh (local Parquet would need a gateway), no IDs in `.sync`. Mirelo ships as is; Nordmark joins as `.sync/nordmark-exec/{js-app,power-bi,data}/`.
+**Why:** USER rulings C1 / C2 / C4, 2026-10-30 — the recipient must open the report with numbers and cannot reach this repo's data; a gateway for local files is out of scope. Price accepted: binary caches in git history; published reports are snapshots (data change = re-pack + re-publish).
+**Reversal cost:** low — drop the gitignore exception and the cache files; READMEs lose three lines.
+**Applied at:** `docs/ADR/0014-sync-hand-off-packs.md` status line, §2 items 7–9, §3 (three bullets)
+**Hits:** 1
+**Tags:** sync-handoff, power-bi, pbip-cache, publishing, vosk-dev, gitignore, nordmark, mirelo
+**Confidence:** high
+**Last-verified:** 2026-10-30
+**Related:** DEC-003, DEC-005, DEC-007
 **Status:** active

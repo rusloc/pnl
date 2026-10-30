@@ -1,4 +1,4 @@
-<!-- next-id: CAND-017 -->
+<!-- next-id: CAND-020 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -62,8 +62,21 @@ Seen: js-exec/components/layers.test.tsx (2026-10-29)
 ### CAND-015 · Adding a row to a max-height pop-up silently tips one card into scroll · 2026-10-29 · expires 2027-01-27
 ⓘ target line (+26 px) made only EBITDA's ⓘ scroll 15 px at 1440 × 810 (86vh cap); unit tests cannot see it. Measure scrollHeight − clientHeight for every card's pop in a headless pass after any ⓘ height change.
 Seen: js-exec ExplainPop (2026-10-29)
+Promoted-to: AP-001 on 2026-10-30
 
 
 ### CAND-016 · Retired control keys: reconcile on their as-built reading, not by exemption · 2026-10-29 · expires 2027-01-27
 When the reading of a metric changes by design (exit-week mix → window shares, EBITDA PTD pair → Week only), legacy rows still in the CSV can be checked against the engine's *old* reading (Week metrics at the window's last week) instead of being skipped; only the derived statuses are skipped. Keeps the old rows useful as a regression net until they retire. The test should parse both key grammars from the CSV's own key set, so it passes before and after the data owner lands new rows.
 Seen: js-exec/lib/engine/control-totals.test.ts (2026-10-29)
+
+### CAND-017 · Inner Esc vs a document keydown listener: stopPropagation does nothing in the App Router · 2026-10-30 · expires 2027-01-28
+Next.js App Router hydrates with the React root on `document`, so a React onKeyDown's `e.stopPropagation()` runs on the same node as a `document.addEventListener('keydown')` layer-close handler and cannot stop it (only stopImmediatePropagation, order-dependent). Fix used: the inner control calls `e.preventDefault()` and the document handler returns early on `e.defaultPrevented` (React's root listener is registered at hydration, before any effect).
+Seen: js-exec CategoryDropdown in components/Layers.tsx + ExecApp.tsx Esc handler (2026-10-30, headless: Esc closed the whole menu)
+
+### CAND-018 · Pack copy hazards: nested data .gitignore, gate leftovers · 2026-10-30 · expires 2027-01-28
+Copying a Next app into a `.sync` pack: (1) leave out the source's `public/data/.gitignore` (`*`), or git silently ignores the shipped prebuilt data; (2) the gate re-creates `tsconfig.tsbuildinfo` (`incremental` + `tsc --noEmit`) and `next-env.d.ts` (`next typegen`) inside the pack besides node_modules / .next: all gitignored, but the folder is not clean afterwards. Lockfile after dropping a devDep: `npm install --package-lock-only --ignore-scripts`, then diff `packages` versions against the source lock (only the dropped entry may differ).
+Seen: .sync/nordmark-exec/js-app (2026-10-30)
+
+### CAND-019 · Harness blocks any command whose text holds Remove-Item next to a slash switch · 2026-10-30 · expires 2027-01-28
+A PowerShell call with robocopy's `/E` switch and a Remove-Item in the same text was refused as "Remove-Item on system path '/E'" and ran nothing; the same happened to an Add-Content here-string that merely quoted that text. Run robocopy alone (quoted absolute paths; exit codes 0–7 are success, 1 = files copied, shown as "Exit code 1"); write memory / docs with Edit or Write, never via shell strings.
+Seen: .sync/nordmark-exec/js-app copy + this memory write (2026-10-30)

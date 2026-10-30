@@ -17,6 +17,7 @@
 
 ## Open threads
 - Nordmark dataset (2026-10-28): built + verify green; 18 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (8, 11, 16 superseded 2026-10-29; new 17 ET-26 GMROI, 18 mix plan window)
+- Nordmark .sync data pack (2026-10-30): issued; re-copy on any data/ change; power-bi pack (DataFolder -> ../data/parquet, cache.abf) pending bip/ginee
 - Nordmark period keys (2026-10-29): legacy PTD-/YTD- rows kept frozen; remove once nerd + bip read item keys (steps in dataset README › Control totals)
 - .sync packs (2026-10-28): pnl/power-bi (Parquet via DataFolder) + mirelo-sales/power-bi + data written, draft; pending USER Desktop first-open + bip DAX test run; re-copy if pbi-report changes after fcfa19c
 - Mirelo: USER to decide on committing 96 MB of fact_loan CSVs (split in 3) vs gitignoring CSVs / Git LFS; later lh_raw schema mirelo_sales (ADR-0011 (a), not in the draft)
@@ -34,6 +35,8 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-30 (delegated): Nordmark data pack .sync/nordmark-exec/data (copy of data/nordmark_retail_dummy_data, README .sync header ready); verify 91 green + regen byte-identical from the pack in a scratch venv; scan clean; no Fabric calls, no git, .sync/README.md left to main agent
+- 2026-10-30 (delegated): Nordmark category filter: read-only data proof (259/259) then build of control_totals_category_eur.csv (10,514 rows, scope ALL#ELEC grammar), verify 91 green ~50 s; flagged ET-34 "10 rated at ALL#ELEC" (E-103 gives 9) + E-76/E-104 file name; no Fabric calls, no git
 - 2026-10-29/30 (delegated, late): Nordmark period-model control totals: 93 keys / 26,143 rows (incl. EBITDA Previous P-@k), verify 86 green, Parquet identical; generate.py control_totals edited (CSV writer only, flagged); no Fabric calls, no git
 - 2026-10-28 (delegated, evening): Nordmark Retail dummy dataset (ADR-0013 phase 1): generator + verify (76 green, byte-identical rerun) + README contract; no Fabric calls, no git
 - 2026-10-28 (delegated, later): RAW model republish: preflight verify green, backup service-2026-10-28, updateDefinition 50 parts, refresh 42.9 s, service tests all green (T-P chunked, 10 GB query memory cap), frozen perf re-timed; ADR-0008 §5.2 + semantic-model.md header written; no git

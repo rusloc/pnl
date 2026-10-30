@@ -1,6 +1,9 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-10-30 · Nordmark JS pack .sync/nordmark-exec/js-app issued (52 files, 2.45 MB, 458 tests, headless 28/28); CAND-018 (pack copy hazards), CAND-019 (harness Remove-Item false positive)
+- 2026-10-30 · js-exec category filter (ADR-0013 (l)): computeMetrics(d, scope, win, cats) + cube.categoryMask; URL `cat`; 10,514 category control rows reconcile; CAND-017 (Esc under App Router)
+- 2026-10-30 · AP-001: ⓘ figure block stacked (dl.fig, ACTUAL_LABEL / NO_BASIS_VALUE); .pop max-height now calc(100vh - 32px) → no ⓘ scrolls
 - 2026-10-29 · js-exec period model (ADR-0013 (k)): lib/engine/items.ts (127 items, windows, LY / prev like-length, bars); computeMetrics(d, scope, Window); 204 tests, 68 control keys reconciled; CAND-016
 - 2026-10-29 · PG-005: harness heredoc quoting + Windows Python CRLF → write scripts to scratchpad, prettier --write touched files
 - 2026-10-29 · js-exec USER feedback: one LayerFrame scrim for all layers, ⓘ target line (dim_kpi.basis), Statement + Notes removed; 117 tests; CAND-014/015
@@ -20,9 +23,10 @@
 - 2026-10-22 · PG-002: Zod 4 union of number literals breaks kind-driven CSV coercion; use bounded z.number()
 
 ## Topic files
-- platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN
+- anti-patterns.md     — 1 entry   · stalest 2026-10-30 · AP-NNN
+- platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN (PG-005 verified 2026-10-30)
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 15 awaiting second hit (CAND-013 promoted to PG-005)
+- candidates.md        — 17 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001)
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
