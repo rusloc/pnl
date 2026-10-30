@@ -15,9 +15,12 @@ Independent of the generator: every control total is recomputed here from the Pa
   ET-23  comparator windows per granularity (LY by key, previous item cut like-length when partial; EBITDA at Week: previous period @k);
          FY2025 keys: no budget, no LY
   ET-24  one-off migration: P-FY2026-10 = PTD-FY2026-43 and FY-FY2026 = YTD-FY2026-43 except the listed rule changes
+  ET-33  category scopes (checks/control_totals_category_eur.csv, scope {region}#{code}[+{code}…]): recomputed, additivity, targets;
+         in memory at every item key x scope: 9-category pick = All, Σ of the 9 singles = All
+  ET-34  category scopes: no EBITDA / OTIF rows, sell-through on the seasonal part, counts over the rated cards
 Exit code 0 = all checks green, 1 = at least one failure.
 """
-import argparse, filecmp, hashlib, json, re, subprocess, sys, tempfile
+import argparse, filecmp, hashlib, json, re, subprocess, sys, tempfile, time
 from datetime import date, timedelta
 from pathlib import Path
 import numpy as np
@@ -269,8 +272,21 @@ def badness(k, m, p):
             'AVAILABILITY': d(.97, g('availability_pct')),
             'EBITDA': (1 - p['ebitda'] / p['ebitda_bud']) if p.get('ebitda_bud') else None, 'LFL_GROWTH': d(g('lfl_growth_pct_bud'), g('lfl_growth_pct')),
             'FRONT_GM': d(g('front_gm_pct_bud'), g('front_gm_pct')),
-            'SELL_THROUGH': d(.62, g('sell_through_pct')), 'GMROI': d(2.5, g('gmroi')),
+            'SELL_THROUGH': d(.62, g('sell_through_pct')), 'GMROI': d(g('gmroi_target'), g('gmroi')),     # 2.5 at ALL; AOH-weighted under a pick (E-102)
             'SUPPLIER_OTIF': d(.95, g('otif_pct')), 'CHANNEL_MIX': ab(g('mix_max_dev_pp'))}[k]
+
+def rate(m, p):
+    """Status per card, the three counts and the dot over the rated cards (E-22, E-26, E-95); writes into m."""
+    stt = {}
+    for k_ in CARDS:
+        b = badness(k_, m, p)
+        if b is not None:
+            b = round(b, 10); r_ = rule.loc[k_]; stt[k_] = 1 if b <= r_.watch_from else 2 if b <= r_.off_from else 3
+    for k_, v_ in stt.items(): m[f'status.{k_.lower()}'] = v_
+    n = len(stt); c = [list(stt.values()).count(x) for x in (1, 2, 3)]
+    m.update({'status.count_on': c[0], 'status.count_watch': c[1], 'status.count_off': c[2], 'status.count_na': 12 - n})
+    if n: m['status.dot'] = 3 if c[2] / n >= rule.loc['DOT_RED_OFF'].threshold else 2 if (c[1] + c[2]) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold \
+        else 1 if c[0] / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2     # n = 0: no dot row = grey dot (E-95)
 
 CARDS = list(kpi[kpi.is_landing].sort_values('card_order').kpi_code)
 exp = {}
@@ -295,16 +311,7 @@ for pk in KEYS:
         if not (kind in LEGACY and fy != 2026):       # every key carries its rated cards; legacy keys keep the 2026-10-28 FY2026-only gate
             p = m if kind in ('PTD', 'P', 'Q', 'FY') else metrics(s, 'PTD', fy, num)    # EBITDA: period to date at W (and YTD), own window at P / Q / FY
             if kind in ('W',) + LEGACY: m['ebitda_ptd'] = p['ebitda']; m['ebitda_bud_ptd'] = p.get('ebitda_bud')
-            stt = {}
-            for k_ in CARDS:
-                b = badness(k_, m, p)
-                if b is not None:
-                    b = round(b, 10); r_ = rule.loc[k_]; stt[k_] = 1 if b <= r_.watch_from else 2 if b <= r_.off_from else 3
-            for k_, v_ in stt.items(): m[f'status.{k_.lower()}'] = v_
-            n = len(stt); c = [list(stt.values()).count(x) for x in (1, 2, 3)]
-            m.update({'status.count_on': c[0], 'status.count_watch': c[1], 'status.count_off': c[2], 'status.count_na': 12 - n})
-            if n: m['status.dot'] = 3 if c[2] / n >= rule.loc['DOT_RED_OFF'].threshold else 2 if (c[1] + c[2]) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold \
-                else 1 if c[0] / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2     # n = 0: no dot row = grey dot (E-95)
+            rate(m, p)
         if s == 'ALL':
             L = win(kind, fy, num, kw)[-1]; i = IX[L]
             if i >= 51:
@@ -486,11 +493,166 @@ for new, old in (('P-FY2026-10', 'PTD-FY2026-43'), ('FY-FY2026', 'YTD-FY2026-43'
           + (', EBITDA status on the FY window (E-93)' if new.startswith('FY-') else ''), ok, changed)
     for x in changed: print(f'      exception {new}  {x[0]:<6} {x[1]:<24} {b[x]:>16} -> {a[x]}')
 
+# ---- ET-33 / ET-34 category scopes (E-100 ... E-104, docs/ADD/features/exec-category-filter.md §6) ---------------------------------
+# Own engine: dense Σ arrays scope x category x week, so any category pick is a sum over category rows. Scope label {region}#{code}[+{code}...].
+CODES = list(cat.category_code); CI = {c: i for i, c in enumerate(CODES)}
+CTW, GTG = cat.cover_target_wks.values, cat.gmroi_target.values
+def dense(df, col, mask=None):
+    """Σ col per scope x category x week -> array (4, 9, 104); scope 0 = ALL (every row), 1 … 3 = NL / BE / ONLINE (dim_store.scope_code)."""
+    d = df if mask is None else df[np.asarray(mask)]; out = np.zeros((len(SC), len(CODES), len(WK)))
+    ci, wi, v, s = d.category_code.map(CI).values, d.week_key.map(IX).values, d[col].values.astype(float), d.store_code.map(scope).values
+    for r, x in enumerate(SC):
+        m_ = np.ones(len(d), bool) if x == 'ALL' else s == x
+        np.add.at(out[r], (ci[m_], wi[m_]), v[m_])
+    return out
+chs, chb_ = fs.store_code.map(chan).values, fb.store_code.map(chan).values
+X = {a: dense(fs, col) for a, col in [('gross_sales', 'gross_sales'), ('markdown', 'markdown_value'), ('returns', 'returns'), ('net_sales', 'net_sales'),
+                                      ('cogs', 'cogs_landed'), ('back_margin', 'back_margin_alloc')]}
+X.update(lfl=dense(fs, 'net_sales', fs.is_lfl), lly=dense(fs, 'net_sales', fs.is_lfl_as_ly), sold=dense(fs, 'units', sell_s & fs.category_code.isin(seasonal)),
+         lfl_bud=dense(fb, 'net_sales_bud', fb.is_lfl), oh=dense(fi, 'on_hand_cost'), oo=dense(fi, 'on_order_cost'),
+         ou=dense(fi, 'on_hand_units', sell_i & fi.category_code.isin(seasonal)), f=dense(ff, 'forecast_cogs'), rg=dense(fa, 'ranged_sku_days'),
+         ins=dense(fa, 'in_stock_sku_days'), rc=dense(fr, 'receipt_units', fr.category_code.isin(seasonal)))
+for c_ in ['STORE', 'ONLINE', 'WHOLESALE']: X[f'ch_{c_}'] = dense(fs, 'net_sales', chs == c_); X[f'chb_{c_}'] = dense(fb, 'net_sales_bud', chb_ == c_)
+for c_ in ['net_sales_bud', 'gross_sales_bud', 'markdown_bud', 'cogs_bud', 'back_margin_bud']: X[c_] = dense(fb, c_)
+lf_ = s_[s_.is_lfl]; SI = {c: i for i, c in enumerate(stores.store_code)}; LF = np.zeros((len(SC), len(CODES), len(WK), len(SI)), bool)
+ax_ = (lf_.category_code.map(CI).values, lf_.week_key.map(IX).values, lf_.store_code.map(SI).values); sc_ = lf_.store_code.map(scope).values
+LF[0][ax_] = True
+for r in (1, 2): LF[r][tuple(a[sc_ == SC[r]] for a in ax_)] = True              # LFL stores per scope x category x week (ONLINE has none)
+
+def metrics_c(r, cix, kind, fy, num, k=None):
+    """Card inputs on the categories cix (indices) of region r (index into SC): the formulas of metrics(), no OpEx / EBITDA and no PO / OTIF
+    (no category key, E-101), sell-through on the pick's seasonal part (none when it has no seasonal category), GMROI target AOH-weighted (E-102)."""
+    ws = [IX[w] for w in win(kind, fy, num, k)]; L = ws[-1]; mw = ws if kind in ('P', 'Q', 'FY') else [L]; m = {}
+    S = lambda t, w=ws: float(X[t][r][np.ix_(cix, w)].sum())
+    for a in ['gross_sales', 'markdown', 'returns', 'net_sales', 'cogs', 'back_margin']: m[a] = S(a)
+    m['front_margin'] = m['net_sales'] - m['cogs']; m['total_margin'] = m['front_margin'] + m['back_margin']
+    if m['net_sales']: m.update(front_gm_pct=m['front_margin'] / m['net_sales'], back_margin_pct=m['back_margin'] / m['net_sales'], total_margin_pct=m['total_margin'] / m['net_sales'])
+    if m['gross_sales']: m['markdown_pct'] = m['markdown'] / m['gross_sales']
+    if fy == 2026:
+        ly = [i - 52 for i in ws]; lyv = S('lly', ly)
+        m['store_net_sales'] = S('ch_STORE'); m['store_net_sales_ly'] = S('ch_STORE', ly)
+        if lyv:
+            m.update(lfl_net_sales=S('lfl'), lfl_net_sales_ly=lyv, lfl_store_count=float(LF[r][cix, L].any(0).sum()))
+            m['lfl_growth_pct'] = m['lfl_net_sales'] / lyv - 1
+            m['nonlfl_effect_pp'] = m['store_net_sales'] / m['store_net_sales_ly'] - 1 - m['lfl_growth_pct']
+    m.update(on_hand_cost=S('oh', [L]), on_order_cost=S('oo', [L]), forecast_cogs=S('f', [L])); m['stock_incl_on_order'] = m['on_hand_cost'] + m['on_order_cost']
+    if m['forecast_cogs']:
+        m['weeks_of_cover'] = m['stock_incl_on_order'] / m['forecast_cogs']; m['cover_target_wks'] = float((X['f'][r][cix, L] * CTW[cix]).sum()) / m['forecast_cogs']
+    rg = S('rg', [L])
+    if rg: m.update(ranged_sku_days=rg, in_stock_sku_days=S('ins', [L])); m['availability_pct'] = m['in_stock_sku_days'] / rg
+    m['availability_target'] = .97
+    sw = wk.season_week[L]
+    if pd.notna(sw):
+        sws = list(range(L - int(sw) + 1, L + 1)); o = S('ou', [L - int(sw)]); rc = S('rc', sws)
+        if o + rc:
+            m.update(season_opening_units=o, season_receipt_units=rc, season_units_sold=S('sold', sws))
+            m['sell_through_pct'] = m['season_units_sold'] / (o + rc); m['sell_through_target'] = .62
+    if L >= 51:
+        r52 = list(range(L - 51, L + 1)); ohc = X['oh'][r][np.ix_(cix, r52)].mean(1); fm = S('net_sales', r52) - S('cogs', r52)
+        m.update(gmroi_front_margin_r52w=fm, gmroi_avg_on_hand_cost=float(ohc.sum()), gmroi=fm / ohc.sum(), gmroi_target=float((ohc * GTG[cix]).sum() / ohc.sum()))
+    nl = S('net_sales', mw); names = [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]
+    for c_, n_ in names:
+        m[f'mix_{n_}_net_sales'] = S(f'ch_{c_}', mw)
+        if nl: m[f'mix_{n_}_pct'] = m[f'mix_{n_}_net_sales'] / nl
+    if fy == 2026:
+        for a in ['net_sales_bud', 'gross_sales_bud', 'markdown_bud', 'cogs_bud', 'back_margin_bud']: m[a] = S(a)
+        m['markdown_pct_bud'] = m['markdown_bud'] / m['gross_sales_bud']; m['front_gm_pct_bud'] = 1 - m['cogs_bud'] / m['net_sales_bud']
+        m['total_margin_pct_bud'] = (m['net_sales_bud'] - m['cogs_bud'] + m['back_margin_bud']) / m['net_sales_bud']
+        if 'lfl_net_sales_ly' in m: m['lfl_net_sales_bud'] = S('lfl_bud'); m['lfl_growth_pct_bud'] = m['lfl_net_sales_bud'] / m['lfl_net_sales_ly'] - 1
+        nb = S('net_sales_bud', mw)
+        if nb and nl:
+            for c_, n_ in names: m[f'mix_{n_}_pct_bud'] = S(f'chb_{c_}', mw) / nb
+            dv = [m[f'mix_{n_}_pct'] - m[f'mix_{n_}_pct_bud'] for _, n_ in names]; j = int(np.argmax(np.abs(dv)))
+            m['mix_max_dev_pp'] = dv[j]; m['mix_max_dev_channel'] = j + 1
+    return m
+
+NA_PICK = ('opex_', 'ebitda', 'po_lines_', 'otif_', 'status.ebitda', 'status.supplier_otif')     # never under a pick (E-101, ET-34)
+ADDITIVE = ['gross_sales', 'markdown', 'returns', 'net_sales', 'cogs', 'back_margin', 'front_margin', 'total_margin', 'on_hand_cost', 'on_order_cost',
+            'stock_incl_on_order', 'forecast_cogs', 'ranged_sku_days', 'in_stock_sku_days', 'season_opening_units', 'season_receipt_units', 'season_units_sold',
+            'lfl_net_sales', 'lfl_net_sales_ly', 'store_net_sales', 'store_net_sales_ly', 'net_sales_bud', 'gross_sales_bud', 'markdown_bud', 'cogs_bud',
+            'back_margin_bud', 'lfl_net_sales_bud', 'mix_store_net_sales', 'mix_online_net_sales', 'mix_wholesale_net_sales', 'gmroi_front_margin_r52w',
+            'gmroi_avg_on_hand_cost']
+# in memory, every item key x scope: the 9-category pick reproduces the published All rows, and the 9 singles add up to them (no CSV rows)
+ITEM_KEYS = [k_ for k_ in KEYS if parse_key(k_)[0] not in LEGACY]; t_c = time.time(); bad9, badsum, n9 = [], [], 0
+ALL9 = list(range(len(CODES)))
+for pk in ITEM_KEYS:
+    for r, s in enumerate(SC):
+        a9 = metrics_c(r, ALL9, *parse_key(pk)); one = [metrics_c(r, [c], *parse_key(pk)) for c in ALL9]
+        pub = {m: v for (s_x, k_x, m), v in exp.items() if s_x == s and k_x == pk and not m.startswith(NA_PICK + ('status.', 'gmroi.', 'sell_through_pct.'))}
+        pub.pop('gmroi_target', None); pub.pop('ebitda_bud_ptd', None)
+        a9.pop('gmroi_target', None); n9 += len(pub)
+        if set(pub) != set(a9) or any(abs(a9[m] - v) > max(tol(m), 1e-9) for m, v in pub.items()): bad9.append((s, pk, sorted(set(pub) ^ set(a9))[:4]))
+        for m in ADDITIVE:
+            if m in pub and abs(sum(o_.get(m, 0.) for o_ in one) - pub[m]) > (.06 if m.endswith(('_units', '_sku_days')) else .011): badsum.append((s, pk, m))
+check(f'category engine: the 9-category pick = the published All values on {n9:,} metrics (87 item keys x 4 scopes; EBITDA, OTIF, status and mini stats aside)',
+      not bad9, bad9[:3])
+check(f'category additivity in memory: Σ of the 9 single-category picks = All for {len(ADDITIVE)} additive inputs, every item key x scope', not badsum, badsum[:5])
+print(f'      ({len(ITEM_KEYS) * len(SC) * 10:,} category evaluations in {time.time() - t_c:.1f} s)')
+
+# the sampled file (E-104): Block A = 12 picks at ALL x K12, Block B = NL / BE / ONLINE x {ELEC, ELEC+TOYS} x K6
+PICKS = CODES + ['ELEC+TOYS', 'FRESH+AMBIENT+HB', 'APPAREL+HOME+GARDEN+TOYS']
+K12 = ['W-FY2026-43', 'W-FY2025-43', 'W-FY2026-42', 'P-FY2026-10', 'P-FY2025-10', 'P-FY2026-09', 'Q-FY2026-4', 'Q-FY2025-4@4', 'Q-FY2026-3@4',
+       'FY-FY2026', 'FY-FY2025@43', 'FY-FY2025']
+CELLS = [(f'ALL#{p_}', k_) for k_ in K12 for p_ in PICKS] + [(f'{r_}#{p_}', k_) for k_ in K12[:6] for r_ in ('NL', 'BE', 'ONLINE') for p_ in ('ELEC', 'ELEC+TOYS')]
+def parse_scope(lab):
+    """'NL#ELEC+TOYS' -> ('NL', ['ELEC', 'TOYS']); None unless region known, codes known, unique, in sort_order, 1 … 8 codes."""
+    reg, _, cs = lab.partition('#'); cs = cs.split('+')
+    ok = reg in SC and all(c in CI for c in cs) and len(set(cs)) == len(cs) and 0 < len(cs) < 9 and [CI[c] for c in cs] == sorted(CI[c] for c in cs)
+    return (reg, cs) if ok else None
+ctc = pd.read_csv(D / 'checks' / 'control_totals_category_eur.csv', dtype={'value': str})
+gotc = {(a, b, c): float(v) for a, b, c, v in zip(ctc.scope, ctc.period_key, ctc.metric_code, ctc.value)}
+expc = {}
+for lab, pk in CELLS:
+    reg, cs = parse_scope(lab); m = {k_: v_ for k_, v_ in metrics_c(SC.index(reg), [CI[c] for c in cs], *parse_key(pk)).items()}
+    rate(m, m)                                                                   # EBITDA and OTIF inputs absent -> N/A
+    if reg == 'ALL':                                                             # (i) mini stats: the picked categories only, ALL region only
+        for c in cs:
+            mc = metrics_c(0, [CI[c]], *parse_key(pk))
+            if 'gmroi' in mc: m[f'gmroi.{c}'] = mc['gmroi']
+            if c in seasonal and 'sell_through_pct' in mc: m[f'sell_through_pct.{c}'] = mc['sell_through_pct']
+    for k_, v_ in m.items():
+        if v_ is not None and not (isinstance(v_, float) and np.isnan(v_)): expc[(lab, pk, k_)] = float(v_)
+badc = [(k_, gotc.get(k_), e) for k_, e in expc.items() if k_ not in gotc or abs(gotc[k_] - e) > tol(k_[2])]; extrac = set(gotc) - set(expc)
+cellc = ctc.groupby(['scope', 'period_key']).size()
+check(f'ET-01 category control totals: {len(expc):,} values recomputed ({len(CELLS)} cells = 144 Block A + 36 Block B), four columns, scope labels '
+      '{region}#{code}[+{code}…] in sort_order', list(ctc.columns) == ['scope', 'period_key', 'metric_code', 'value'] and not badc and not extrac
+      and set(cellc.index) == set(CELLS) and all(parse_scope(s) for s in ctc.scope.unique()) and set(ctc.period_key) <= set(K12),
+      f'{len(badc)} mismatches, {len(extrac)} unexpected, e.g. {badc[:3]} {list(extrac)[:3]}')
+SUM33 = ['gross_sales', 'markdown', 'returns', 'net_sales', 'cogs', 'back_margin', 'on_hand_cost', 'on_order_cost', 'forecast_cogs', 'ranged_sku_days',
+         'in_stock_sku_days', 'season_receipt_units', 'season_units_sold']
+add33 = [(k_, m) for k_ in K12 for m in SUM33 if ('ALL', k_, m) in got
+         and abs(sum(gotc.get((f'ALL#{c}', k_, m), 0.) for c in CODES) - got[('ALL', k_, m)]) > (.5 if m.endswith(('_units', '_sku_days')) else .05)]
+st33 = all(abs(gotc[('ALL#APPAREL+HOME+GARDEN+TOYS', k_, 'sell_through_pct')] - got[('ALL', k_, 'sell_through_pct')]) < 1e-6
+           for k_ in K12 if ('ALL', k_, 'sell_through_pct') in got) and all((('ALL#APPAREL+HOME+GARDEN+TOYS', k_, 'sell_through_pct') in gotc)
+                                                                            == (('ALL', k_, 'sell_through_pct') in got) for k_ in K12)
+tg33 = all(abs(gotc[(lab, k_, 'cover_target_wks')] - CTW[CI[lab.split('#')[1]]]) < 1e-6 for lab, k_ in CELLS if '+' not in lab and (lab, k_, 'cover_target_wks') in gotc) \
+       and all(abs(gotc[(lab, k_, 'gmroi_target')] - GTG[CI[lab.split('#')[1]]]) < 1e-6 for lab, k_ in CELLS if '+' not in lab and (lab, k_, 'gmroi_target') in gotc) \
+       and all(gotc[(lab, k_, 'availability_target')] == .97 for lab, k_ in CELLS) \
+       and all(v_ == 2.5 for (s_x, k_x, m), v_ in got.items() if m == 'gmroi_target') and any(m == 'gmroi_target' for (_, _, m) in gotc)
+check('ET-33 Σ of the 9 single ALL#<cat> rows = the ALL row for 13 additive metrics at every K12 key; ALL#APPAREL+HOME+GARDEN+TOYS sell-through = ALL; '
+      'single-category cover / GMROI target = the dim_category row; availability target 0.97; GMROI target 2.5 on every All row',
+      not add33 and st33 and tg33, add33[:4])
+cnt_ = {(lab, k_): {m: gotc[(lab, k_, m)] for m in ('status.count_on', 'status.count_watch', 'status.count_off', 'status.count_na')} for lab, k_ in CELLS}
+rated43 = {lab: 12 - cnt_[(lab, 'W-FY2026-43')]['status.count_na'] for lab, k_ in CELLS if k_ == 'W-FY2026-43'}
+exp43 = {lab: (8 if lab.startswith('ONLINE#') else 10) - (0 if set(parse_scope(lab)[1]) & seasonal else 1) for lab in rated43}
+mini = all(m.split('.', 1)[1] in parse_scope(lab)[1] and lab.startswith('ALL#') for (lab, k_, m) in gotc if m.startswith(('gmroi.', 'sell_through_pct.')))
+check('ET-34 under every # scope: no opex_* / ebitda* / po_lines_* / otif_* / status.ebitda / status.supplier_otif row; ALL#FRESH+AMBIENT+HB has no sell-through; '
+      'ALL#ELEC+TOYS sell-through = ALL#TOYS; count_na >= 2 and the counts add to 12; rated at W43 = 10 / 9 (no seasonal category), ONLINE 8 / 7 (E-103); '
+      'ONLINE x category: no availability or LFL; mini stats = picked categories at ALL only',
+      not any(m.startswith(NA_PICK) for (_, _, m) in gotc)
+      and not any(lab == 'ALL#FRESH+AMBIENT+HB' and m.startswith(('sell_through', 'season_')) for (lab, _, m) in gotc)
+      and all(gotc.get(('ALL#ELEC+TOYS', k_, 'sell_through_pct')) == gotc.get(('ALL#TOYS', k_, 'sell_through_pct')) for k_ in K12)
+      and all(c['status.count_na'] >= 2 and sum(c.values()) == 12 for c in cnt_.values()) and rated43 == exp43
+      and not any(lab.startswith('ONLINE#') and m in ('availability_pct', 'lfl_growth_pct', 'status.availability', 'status.lfl_growth') for (lab, _, m) in gotc)
+      and mini, {k_: (rated43[k_], exp43[k_]) for k_ in rated43 if rated43[k_] != exp43[k_]})
+print(f'      category file: {len(ctc):,} rows (Block A {int(ctc.scope.str.startswith("ALL#").sum()):,}, Block B {int((~ctc.scope.str.startswith("ALL#")).sum()):,})')
+
 # ---- ET-20 determinism ---------------------------------------------------------------------------------------------------------
 if not args.no_rerun:
     with tempfile.TemporaryDirectory() as tmp:
         r = subprocess.run([sys.executable, str(D / 'generator' / 'generate.py'), '--out', tmp], capture_output=True, text=True)
-        files = [f'parquet/{t["table"]}.parquet' for t in man['tables']] + ['parquet/manifest.json', 'checks/control_totals_eur.csv']
+        files = [f'parquet/{t["table"]}.parquet' for t in man['tables']] + ['parquet/manifest.json', 'checks/control_totals_eur.csv',
+                                                                            'checks/control_totals_category_eur.csv']
         same = r.returncode == 0 and all(filecmp.cmp(D / f, Path(tmp) / f, shallow=False) for f in files)
         check(f'ET-20 rerun with seed 20261028 is byte-identical ({len(files)} files)', same, r.stderr[-300:])
 print(f'\n{len(fails)} failure(s)' if fails else '\nALL CHECKS GREEN')

@@ -18,7 +18,7 @@ cd data\nordmark_retail_dummy_data
 py -3.12 -m venv generator\.venv                                   # once; .venv is gitignored
 generator\.venv\Scripts\python.exe -m pip install -r generator\requirements.txt
 generator\.venv\Scripts\python.exe generator\generate.py           # writes parquet\ and checks\ (~3 s)
-generator\.venv\Scripts\python.exe checks\verify.py                # 86 checks incl. a byte-identical rerun, exit 1 on any failure (~15 s)
+generator\.venv\Scripts\python.exe checks\verify.py                # 91 checks incl. a byte-identical rerun, exit 1 on any failure (~50 s)
 ```
 
 - `generate.py --out <folder>` writes the dataset somewhere else. `verify.py --data <folder>` checks that folder; `--no-rerun` skips the determinism rerun (ET-20).
@@ -49,7 +49,8 @@ generator\.venv\Scripts\python.exe checks\verify.py                # 86 checks i
 | parquet/param_target.parquet | 27 | KPI × category (or ALL) target |
 | parquet/manifest.json | — | rows, bytes, column → Arrow type per table; seed, as-of, current week, refresh stamp, calendar anchor |
 | checks/control_totals_eur.csv | 26,143 | scope × period key × metric (see Control totals) |
-| checks/verify.py | — | independent recomputation and story checks (ET-01 … 05, 20 … 24, 27) |
+| checks/control_totals_category_eur.csv | 10,514 | category scope × period key × metric, sampled (see Category control totals) |
+| checks/verify.py | — | independent recomputation and story checks (ET-01 … 05, 20 … 24, 27, 33, 34) |
 | generator/generate.py | — | the generator (Python 3.12, seed 20261028) |
 
 ## Format
@@ -132,6 +133,20 @@ generator\.venv\Scripts\python.exe checks\verify.py                # 86 checks i
 - `fact_po_week` has no site: Supplier OTIF is the same in every scope.
 - Availability is store-only, so it is N/A for ONLINE. LFL is store-only, so it is N/A for ONLINE.
 - Stock-based cards in a scope use that scope's locations only: DC stock is in ALL, never in NL / BE.
+
+**Category (filter, E-100 … E-104, `docs/ADD/features/exec-category-filter.md`).** A pick is one or more `dim_category.category_code`s. It combines with Region: scope = region × pick. All 9 picked = All (no pick).
+
+- Every fact with a `category_code` filters on the pick: sales, budget, inventory, forecast, availability, receipts. Each card keeps its formulas and status bands. The card is computed on the picked cells.
+- Back margin is exact per category: `back_margin_alloc` per week × category equals the category's supplier accruals (ET-07).
+- **EBITDA flash and Supplier OTIF are N/A under any pick.** `fact_opex_week` and `fact_po_week` have no category key. `dim_supplier.primary_category_code` is not used.
+- **Sell-through** runs on the seasonal part of the pick. A pick without a seasonal category is N/A.
+- **Targets under a pick:**
+  - Weeks of cover: the cover-target formula above (a single category gives its `cover_target_wks`).
+  - GMROI: Σ (average on-hand cost × `gmroi_target`) ÷ Σ average on-hand cost over the picked categories (a single category gives its row).
+  - Sell-through: 0.62. Availability: 0.97.
+  - At All every card keeps its `param_target` ALL row (GMROI 2.5).
+- The (i) mini stats `gmroi.<CATEGORY>` and `sell_through_pct.<CATEGORY>` list the picked categories only.
+- Status chips per category were not tuned to a story (accepted 2026-10-30): many cover and GMROI chips are Watch or Off track.
 
 **Windows (granularity picker, E-90 … E-93, `docs/ADD/features/exec-period-model.md`).** An item is one Week, Month (the 4-5-4 retail period), Quarter (13 weeks) or Year (52 weeks) of `dim_week`. Its window = its weeks ∩ actuals. At the as-of week, Q4 FY2026 (W40–W43) and FY2026 (W1–W43) are partial ("to date"); P10 FY2026 is complete.
 
@@ -256,6 +271,27 @@ Metrics:
   A key's status uses its own window. EBITDA uses period to date at W keys and the key's window at P / Q / FY keys. FY2025 keys rate only the target-based cards where their input exists: Weeks of cover, Availability, Sell-through, GMROI, OTIF. That gives 4 for `P-FY2025-10` (no GMROI) and 3 for `Q-FY2025-1`.
 - **ALL only, the (i) mini stats:** `gmroi.<CATEGORY>`, `sell_through_pct.<SEASONAL CATEGORY>`.
 
+### Category control totals (E-104)
+
+`checks/control_totals_category_eur.csv` holds 10,514 values for 180 sampled cells. It uses the same four columns and tolerances as the main file and the same period keys. The main file and its ET-22 hashes are unchanged.
+
+- **Scope grammar** `{ALL|NL|BE|ONLINE}#{code}[+{code}…]`: codes in `dim_category.sort_order`, joined by `+` (`ALL#ELEC`, `NL#ELEC+TOYS`). A scope without `#` (main file) = All categories.
+- **Picks (12):** the 9 singles · `ELEC+TOYS` (seasonal + non-seasonal) · `FRESH+AMBIENT+HB` (non-seasonal only) · `APPAREL+HOME+GARDEN+TOYS` (all seasonal).
+- **K12 keys:** `W-FY2026-43`, `W-FY2025-43`, `W-FY2026-42`, `P-FY2026-10`, `P-FY2025-10`, `P-FY2026-09`, `Q-FY2026-4`, `Q-FY2025-4@4`, `Q-FY2026-3@4`, `FY-FY2026`, `FY-FY2025@43`, `FY-FY2025`. K6 = its W and P keys.
+- **Block A:** the 12 picks at `ALL#…` × K12 = 144 cells, 8,466 rows.
+- **Block B:** `{NL, BE, ONLINE}#{ELEC, ELEC+TOYS}` × K6 = 36 cells, 2,048 rows.
+- **Metrics:** those of the main file, except the following, which have no rows under a pick:
+  - every `opex_*` and `ebitda*` metric (including `ebitda_ptd`), and `status.ebitda`;
+  - `po_lines_*`, `otif_*` and `status.supplier_otif`;
+  - the sell-through block when the pick has no seasonal category.
+- **Mini stats:** at `ALL#…` only, for the picked categories only. Counts and dot run over the rated cards. FY2026 at W43 rates 10 cards, or 9 without a seasonal category; ONLINE rates 8 or 7.
+- **`verify.py` checks:**
+  - ET-01 recomputes every row with its own dense category engine.
+  - In memory, for all 87 item keys × 4 scopes: the 9-category pick reproduces the published All values, and Σ of the 9 singles = All for 32 additive inputs.
+  - ET-33: additivity of the file rows, the sell-through identity and the targets.
+  - ET-34: the N/A rows and the rated counts.
+  - ET-20 covers this file too.
+
 ### Week 43 · ALL · vs Budget (ET-02, asserted at display precision)
 
 | Card | Value | Δ vs Budget / target | Status | (i) inputs in the data |
@@ -338,3 +374,6 @@ Store, category, week, supplier, region, format and cluster grains exist, so the
 16. **Last-week comparator for PTD / YTD.** The data assumes "the same window as of last week". The requirements do not define it. *Superseded 2026-10-29: Previous item replaces Last week (Comparators).*
 17. **ET-26 vs GMROI history.** ET-26 says `FY2025-P10` rates the 5 target-based cards. GMROI needs R52W history (last week ≥ FY2025 W52), so P10 FY2025 rates 4: Weeks of cover, Availability, Sell-through and OTIF. GMROI is rated only from P12 / Q4 / FY2025.
 18. **Channel-mix plan at Month / Quarter / Year.** The USER answer fixes the actual shares over the window. The plan shares and the max-deviation status use budget shares on the same weeks. This is ginee's reading and not yet confirmed.
+19. **Category control totals, spec wording.**
+    - E-76 and E-104 place the `#` scopes in `control_totals_eur.csv`. The file built is the separate `control_totals_category_eur.csv` (main agent, 2026-10-30), with the same grammar and columns.
+    - ET-34 says "10 rated at `ALL#ELEC` · `W-FY2026-43`". ELEC is not seasonal, so E-103 gives 9 (count_na 3). The data follows E-103.

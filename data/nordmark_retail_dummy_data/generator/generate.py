@@ -2,7 +2,7 @@
 """Nordmark Retail executive-dashboard dummy dataset - deterministic generator (seed 20261028).
 
 Usage:  python generate.py [--out <folder>]      (default: the dataset folder, one level up)
-Writes  parquet/ (one file per table + manifest.json) and checks/control_totals_eur.csv.
+Writes  parquet/ (one file per table + manifest.json), checks/control_totals_eur.csv and checks/control_totals_category_eur.csv.
 Contract: ADR-0013, docs/Requirements-exec.md (E-nn, ET-nn) and the README.md of the dataset folder.
 
 Story-first (ADR-0013 (c), E-73): the ALL-scope weekly totals of every card input are fixed in a story table
@@ -622,6 +622,8 @@ def main():
     man = [write(out, n, df) for n, df in T.items()]
     ct = control_totals(T); ct.to_csv(out / 'checks' / 'control_totals_eur.csv', index=False, lineterminator='\n')
     story_check(ct)
+    cc = control_totals(T, CAT_CELLS); cc.to_csv(out / 'checks' / 'control_totals_category_eur.csv', index=False, lineterminator='\n')
+    print(f'category control totals: {len(cc):,} rows, {cc.groupby(["scope", "period_key"]).ngroups} cells')
     (out / 'parquet' / 'manifest.json').write_text(json.dumps(dict(
         dataset='nordmark_retail_dummy_data', seed=SEED, as_of=AS_OF, current_week_key=KEY[CUR], refreshed=REFRESHED,
         calendar=dict(rule='4-5-4; FY = 52 Mon-Sun weeks starting on the Monday of the week that contains 1 January', fy2025_start=str(WS[0]),
@@ -738,8 +740,17 @@ def write(out, name, df):
 
 # ---- control totals (E-76): scope x period x metric, computed from the tables as written ---------------------------------------
 SCOPES = ['ALL', 'NL', 'BE', 'ONLINE']
+# Category scopes (E-104, docs/ADD/features/exec-category-filter.md §6): scope = {region}#{code}[+{code}...], codes in dim_category.sort_order
+CAT_PICKS = ['FRESH', 'AMBIENT', 'HB', 'HOUSEHOLD', 'ELEC', 'APPAREL', 'HOME', 'GARDEN', 'TOYS', 'ELEC+TOYS', 'FRESH+AMBIENT+HB', 'APPAREL+HOME+GARDEN+TOYS']
+K12 = [('W', 2026, 43, None), ('W', 2025, 43, None), ('W', 2026, 42, None), ('P', 2026, 10, None), ('P', 2025, 10, None), ('P', 2026, 9, None),
+       ('Q', 2026, 4, None), ('Q', 2025, 4, 4), ('Q', 2026, 3, 4), ('FY', 2026, None, None), ('FY', 2025, None, 43), ('FY', 2025, None, None)]
+CAT_CELLS = [([f'ALL#{p}' for p in CAT_PICKS], K12),                                                   # Block A: every pick at ALL x K12
+             ([f'{r}#{p}' for r in ('NL', 'BE', 'ONLINE') for p in ('ELEC', 'ELEC+TOYS')], K12[:6])]  # Block B: region x pick x K6 (W and P keys)
+assert all(sorted(p.split('+'), key=list(CC).index) == p.split('+') for p in CAT_PICKS)
 
-def control_totals(T):
+def control_totals(T, cells=None):
+    """cells = None: the scope x period-key file (E-76). cells = [(scope labels, keys), ...]: the category file (E-104); under a pick
+    EBITDA and Supplier OTIF have no rows (their facts carry no category key), sell-through runs on the pick's seasonal part."""
     wk = T['dim_week'].reset_index(drop=True); key2i = {k: i for i, k in enumerate(wk.week_key)}
     st = T['dim_store'].set_index('store_code'); cat = T['dim_category'].set_index('category_code')
     seasonal = set(cat.index[cat.is_seasonal])
@@ -756,27 +767,32 @@ def control_totals(T):
     seas_i = fi.category_code.isin(seasonal).values; ch_i = fi.store_code.map(st.channel_code).values
     po = agg(T['fact_po_week'], ['po_lines_due', 'po_lines_otif'], np.ones(len(T['fact_po_week']), bool))
     ctgt = cat.cover_target_wks
-    G = {}
-    for s in SCOPES:
-        m = sc(fs, s); g = agg(fs, ['gross_sales', 'markdown_value', 'returns', 'net_sales', 'cogs_landed', 'back_margin_alloc'], m)
+    def build(s, cats=None):
+        """Weekly cubes of one scope; cats = a category pick: every category-keyed fact is masked to it (opex and PO lines are not)."""
+        k = (lambda df: np.ones(len(df), bool)) if cats is None else (lambda df: df.category_code.isin(cats).values)
+        m = sc(fs, s) & k(fs); g = agg(fs, ['gross_sales', 'markdown_value', 'returns', 'net_sales', 'cogs_landed', 'back_margin_alloc'], m)
         g['lfl'] = agg(fs, ['net_sales'], m & fs.is_lfl.values)['net_sales']; g['lfl_as_ly'] = agg(fs, ['net_sales'], m & fs.is_lfl_as_ly.values)['net_sales']
         g['lfl_n'] = np.bincount(W(fs[m & fs.is_lfl.values].drop_duplicates(['week_key', 'store_code'])), minlength=NWK).astype(float)
         for chn in ['STORE', 'ONLINE', 'WHOLESALE']:
-            g[f'ch_{chn}'] = agg(fs, ['net_sales'], m & (ch_s == chn))['net_sales']; g[f'chb_{chn}'] = agg(fb, ['net_sales_bud'], sc(fb, s) & (ch_b == chn))['net_sales_bud']
+            g[f'ch_{chn}'] = agg(fs, ['net_sales'], m & (ch_s == chn))['net_sales']; g[f'chb_{chn}'] = agg(fb, ['net_sales_bud'], sc(fb, s) & k(fb) & (ch_b == chn))['net_sales_bud']
         g['sold'] = agg(fs, ['units'], m & seas_s & np.isin(ch_s, ['STORE', 'ONLINE']))['units']
-        g.update(agg(fb, ['net_sales_bud', 'gross_sales_bud', 'markdown_bud', 'cogs_bud', 'back_margin_bud'], sc(fb, s)))
-        g['lfl_bud'] = agg(fb, ['net_sales_bud'], sc(fb, s) & fb.is_lfl.values)['net_sales_bud']
-        mi = sc(fi, s); g.update(agg(fi, ['on_hand_cost', 'on_order_cost'], mi))
+        g.update(agg(fb, ['net_sales_bud', 'gross_sales_bud', 'markdown_bud', 'cogs_bud', 'back_margin_bud'], sc(fb, s) & k(fb)))
+        g['lfl_bud'] = agg(fb, ['net_sales_bud'], sc(fb, s) & k(fb) & fb.is_lfl.values)['net_sales_bud']
+        mi = sc(fi, s) & k(fi); g.update(agg(fi, ['on_hand_cost', 'on_order_cost'], mi))
         g['open_u'] = agg(fi, ['on_hand_units'], mi & seas_i & np.isin(ch_i, ['STORE', 'ONLINE']))['on_hand_units']
-        mf = sc(ff, s); g['f'] = agg(ff, ['forecast_cogs'], mf)['forecast_cogs']
+        mf = sc(ff, s) & k(ff); g['f'] = agg(ff, ['forecast_cogs'], mf)['forecast_cogs']
         g['ft'] = agg(ff.assign(x=ff.forecast_cogs * ff.category_code.map(ctgt)), ['x'], mf)['x']
-        g.update(agg(fa, ['ranged_sku_days', 'in_stock_sku_days'], sc(fa, s)))
-        g['rcv'] = agg(fr, ['receipt_units'], sc(fr, s) & fr.category_code.isin(seasonal).values)['receipt_units']
+        g.update(agg(fa, ['ranged_sku_days', 'in_stock_sku_days'], sc(fa, s) & k(fa)))
+        g['rcv'] = agg(fr, ['receipt_units'], sc(fr, s) & k(fr) & fr.category_code.isin(seasonal).values)['receipt_units']
         for scen in ['ACT', 'BUD']:
             for c in ['SHRINK', 'STORE_OPEX', 'CENTRAL_OPEX', 'FULFILMENT']:
                 mo = (fo.scenario_code.values == scen) & (fo.cost_type_code.values == c) & (sc(fo, s) if s != 'ALL' else True)
                 g[f'{scen}_{c}'] = agg(fo, ['amount'], mo)['amount']
-        g.update(po); G[s] = g
+        g.update(po)
+        if cats is not None: g['oh_c'] = {c: agg(fi, ['on_hand_cost'], mi & (fi.category_code.values == c))['on_hand_cost'] for c in cats}   # GMROI target weights (E-102)
+        return g
+    if cells is None: G = {s: build(s) for s in SCOPES}
+    else: G = {lab: build(lab.split('#')[0], lab.split('#')[1].split('+')) for labs, _ in cells for lab in labs}
     GC = {}                                                                     # ALL scope by category, for the category GMROI / sell-through rows
     for c in cat.index:
         m = fs.category_code.values == c
@@ -831,11 +847,13 @@ def control_totals(T):
         v['availability_target'] = .97
         if swk[L]:
             sw_ix = list(range(L - swk[L] + 1, L + 1)); o = g['open_u'][L - swk[L]]
-            v.update(season_opening_units=o, season_receipt_units=g['rcv'][sw_ix].sum(), season_units_sold=g['sold'][sw_ix].sum())
-            v['sell_through_pct'] = v['season_units_sold'] / (o + v['season_receipt_units']); v['sell_through_target'] = .62
+            if o + g['rcv'][sw_ix].sum():                                     # 0 = a category pick without a seasonal category: N/A (E-101)
+                v.update(season_opening_units=o, season_receipt_units=g['rcv'][sw_ix].sum(), season_units_sold=g['sold'][sw_ix].sum())
+                v['sell_through_pct'] = v['season_units_sold'] / (o + v['season_receipt_units']); v['sell_through_target'] = .62
         if L >= 51:
             r = list(range(L - 51, L + 1)); fm52 = (g['net_sales'][r] - g['cogs_landed'][r]).sum(); av = g['on_hand_cost'][r].mean()
-            if av: v.update(gmroi_front_margin_r52w=fm52, gmroi_avg_on_hand_cost=av, gmroi=fm52 / av, gmroi_target=2.5)
+            gt = 2.5 if 'oh_c' not in g else sum(cat.gmroi_target[c] * x[r].mean() for c, x in g['oh_c'].items()) / av   # pick: AOH-weighted (E-102)
+            if av: v.update(gmroi_front_margin_r52w=fm52, gmroi_avg_on_hand_cost=av, gmroi=fm52 / av, gmroi_target=gt)
         nl = MX('net_sales')
         if nl:
             for chn, k in [('STORE', 'store'), ('ONLINE', 'online'), ('WHOLESALE', 'wholesale')]:
@@ -864,7 +882,8 @@ def control_totals(T):
 
     def card_status(s, t, fy, w, v):
         if t in ('PTD', 'YTD') and fy != 2026: return {}                       # legacy keys: as written on 2026-10-28 (no status before FY2026)
-        p = v if t in ('PTD', 'P', 'Q', 'FY') else evaluate(s, 'PTD', fy, w)    # EBITDA: period to date at W (and legacy YTD), own window at P / Q / FY
+        cat_ = '#' in s                                                          # category pick: EBITDA N/A (no ebitda rows in v), no ebitda_ptd
+        p = v if cat_ or t in ('PTD', 'P', 'Q', 'FY') else evaluate(s, 'PTD', fy, w)    # EBITDA: period to date at W (and legacy YTD), own window at P / Q / FY
         out = {}
         def put(k, cond, b):
             out[f'status.{k.lower()}'] = status(k, b) if cond else None
@@ -877,7 +896,7 @@ def control_totals(T):
         put('LFL_GROWTH', 'lfl_growth_pct_bud' in v, v.get('lfl_growth_pct_bud', 0) - v.get('lfl_growth_pct', 0))
         put('FRONT_GM', 'front_gm_pct' in v and 'front_gm_pct_bud' in v, v.get('front_gm_pct_bud', 0) - v.get('front_gm_pct', 0))
         put('SELL_THROUGH', 'sell_through_pct' in v, .62 - v.get('sell_through_pct', 0))
-        put('GMROI', 'gmroi' in v, 2.5 - v.get('gmroi', 0))
+        put('GMROI', 'gmroi' in v, v.get('gmroi_target', 2.5) - v.get('gmroi', 0))
         put('SUPPLIER_OTIF', 'otif_pct' in v, .95 - v.get('otif_pct', 0))
         put('CHANNEL_MIX', 'mix_max_dev_pp' in v, abs(v.get('mix_max_dev_pp', 0)))
         st_ = [x for x in out.values() if x is not None]
@@ -885,7 +904,7 @@ def control_totals(T):
         dot = None if not n else 3 if of / n >= rule.loc['DOT_RED_OFF'].threshold else (2 if (wa + of) / n > rule.loc['DOT_ORANGE_WATCH_OFF'].threshold
               else (1 if on / n >= rule.loc['DOT_GREEN_GOOD'].threshold else 2))       # n = 0: no dot row (grey dot, E-95)
         out.update({'status.count_on': on, 'status.count_watch': wa, 'status.count_off': of, 'status.count_na': 12 - n, 'status.dot': dot})
-        if t in ('W', 'PTD', 'YTD'): out.update({'ebitda_ptd': p['ebitda'], 'ebitda_bud_ptd': p.get('ebitda_bud')})   # W keys only (+ legacy)
+        if t in ('W', 'PTD', 'YTD') and not cat_: out.update({'ebitda_ptd': p['ebitda'], 'ebitda_bud_ptd': p.get('ebitda_bud')})   # W keys only (+ legacy)
         return out
 
     keys = [('W', 2026, w, None) for w in range(30, 44)] + [('W', 2025, w, None) for w in range(31, 44)]
@@ -899,24 +918,27 @@ def control_totals(T):
         if ebitda_prev(fy, w) and ebitda_prev(fy, w) not in keys: keys.append(ebitda_prev(fy, w))
     keys += [('PTD', 2026, 43, None), ('PTD', 2026, 42, None), ('PTD', 2025, 43, None),               # legacy, removed once both flavours
              ('YTD', 2026, 43, None), ('YTD', 2026, 42, None), ('YTD', 2025, 43, None)]               # read the item keys (README)
+    pairs = [(x, s) for x in keys for s in SCOPES] if cells is None else [(x, lab) for labs, ks in cells for x in ks for lab in labs]
     rows = []
-    for (t, fy, w, kw) in keys:
+    for (t, fy, w, kw), s in pairs:
         pk = (f'FY-FY{fy}' if t == 'FY' else f'Q-FY{fy}-{w}' if t == 'Q' else f'{t}-FY{fy}-{w:02d}') + (f'@{kw}' if kw else '')
-        for s in SCOPES:
-            v = evaluate(s, t, fy, w, kw); v.update(card_status(s, t, fy, w, v))
-            if s == 'ALL':
-                ix = window(t, fy, w, kw); L = ix[-1]
-                for c, gc in GC.items():
-                    if L >= 51: v[f'gmroi.{c}'] = gc['fm'][L - 51:L + 1].sum() / gc['oh'][L - 51:L + 1].mean()
-                    if swk[L] and c in seasonal:
-                        sw_ix = list(range(L - swk[L] + 1, L + 1))
-                        v[f'sell_through_pct.{c}'] = gc['sold'][sw_ix].sum() / (gc['open_u'][L - swk[L]] + gc['rcv'][sw_ix].sum())
-                if t == 'W':
-                    x = T['fact_po_week']; x = x[x.week_key == KEY[L]]
-                    v['otif_suppliers_below_85'] = int((x.po_lines_otif / x.po_lines_due < .85).sum())
-            for k, val in v.items():
-                if val is None or (isinstance(val, float) and np.isnan(val)): continue
-                rows.append((s, pk, k, fmt(k, val)))
+        v = evaluate(s, t, fy, w, kw)
+        if '#' in s: v = {k: x for k, x in v.items() if not k.startswith(('opex_', 'ebitda', 'po_lines_', 'otif_'))}   # no category key (E-101)
+        v.update(card_status(s, t, fy, w, v))
+        if s == 'ALL' or s.startswith('ALL#'):
+            ix = window(t, fy, w, kw); L = ix[-1]; picked = s.split('#')[1].split('+') if '#' in s else list(GC)
+            for c, gc in GC.items():
+                if c not in picked: continue                                 # (i) mini stats list the picked categories only (E-101)
+                if L >= 51: v[f'gmroi.{c}'] = gc['fm'][L - 51:L + 1].sum() / gc['oh'][L - 51:L + 1].mean()
+                if swk[L] and c in seasonal:
+                    sw_ix = list(range(L - swk[L] + 1, L + 1))
+                    v[f'sell_through_pct.{c}'] = gc['sold'][sw_ix].sum() / (gc['open_u'][L - swk[L]] + gc['rcv'][sw_ix].sum())
+            if t == 'W' and '#' not in s:
+                x = T['fact_po_week']; x = x[x.week_key == KEY[L]]
+                v['otif_suppliers_below_85'] = int((x.po_lines_otif / x.po_lines_due < .85).sum())
+        for k, val in v.items():
+            if val is None or (isinstance(val, float) and np.isnan(val)): continue
+            rows.append((s, pk, k, fmt(k, val)))
     return pd.DataFrame(rows, columns=['scope', 'period_key', 'metric_code', 'value'])
 
 COUNTS = ('lfl_store_count', 'po_lines_due', 'po_lines_otif', 'mix_max_dev_channel', 'otif_suppliers_below_85')
