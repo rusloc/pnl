@@ -9,12 +9,6 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: e5e570da-063a-561a-b459-50c611ce9db1
 
-	/// Period type (E-90): W (Week), P (Month = 4-5-4 retail period), Q (Quarter) or FY (Year); W when nothing is picked.
-	measure '_Granularity Code' = SELECTEDVALUE ( param_granularity[granularity_code], "W" )
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 1b2a22d2-486c-5a9a-89f0-30919d03f12a
-
 	/// Comparator switcher (E-14, E-94): BUD, LY or LW (= Previous item); BUD when nothing is picked. Previous is not offered at Year and reads LY there. Drives the delta row only (E-24).
 	measure '_Comparator Code' =
 			VAR _c          = SELECTEDVALUE ( param_comparator[comparator_code], "BUD" )
@@ -23,13 +17,6 @@ table _measures
 		isHidden
 		displayFolder: 9 Engine
 		lineageTag: 55b28a4b-8588-5bef-8eb8-63989485ecea
-
-	/// 1 when a comparator row is offered; 0 for Previous at Year (E-94). Visual-level filter of menu_param_comparator.
-	measure '_Comparator Row Visible' = IF ( SELECTEDVALUE ( param_comparator[comparator_code] ) = "LW" && [_Granularity Code] = "FY", 0, 1 )
-		formatString: 0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: ca5fb43d-1cdf-55fd-8778-9773dd833e25
 
 	/// dim_week sort_index of the as-of week (manifest.json current_week_key, FY2026-W43 = 95, E-05).
 	measure '_AsOf Index' =
@@ -45,45 +32,6 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 5b99e071-b254-522c-9e76-595f39e4e7c2
 
-	/// The picked item (E-91): the one dim_item row left by the type, FY and item slicers (Week / Month grid on label, Quarter / Year row on label_wide); otherwise the item of the picked type that holds the last week of the item last picked in the picked FY (or of that FY's last item, the as-of week in the as-of FY), so W43 -> P10 -> Q4 -> FY2026 and Reset lands on Week 43 FY2026 (js-exec menu(), E-90).
-	measure '_Item Key' =
-			VAR _g          = [_Granularity Code]
-			VAR _one        = HASONEVALUE ( dim_item[item_key] )
-			VAR _hitk       = IF ( _one, SELECTEDVALUE ( dim_item[item_key] ) )
-			VAR _hitg       = IF ( _one, SELECTEDVALUE ( dim_item[granularity_code] ) )
-			VAR _a          = [_AsOf Index]
-			VAR _afy        = CALCULATE ( MAX ( dim_week[fy] ), REMOVEFILTERS ( dim_week ), dim_week[sort_index] = _a )
-			VAR _fyf        = IF ( ISFILTERED ( dim_item[fy_label] ), MAXX ( FILTERS ( dim_item[fy_label] ), dim_item[fy_label] ) )
-			VAR _fy         = IF ( ISBLANK ( _fyf ), _afy, VALUE ( RIGHT ( _fyf, 4 ) ) )
-			VAR _lab        =
-			    IF (
-			        _g IN { "Q", "FY" }
-			        ,IF ( ISFILTERED ( dim_item[label_wide] ), MAXX ( FILTERS ( dim_item[label_wide] ), dim_item[label_wide] ) )
-			        ,IF ( ISFILTERED ( dim_item[label] ), MAXX ( FILTERS ( dim_item[label] ), dim_item[label] ) )
-			    )
-			VAR _anchor0    =
-			    CALCULATE (
-			        MAX ( dim_item[end_index] )
-			        ,REMOVEFILTERS ( dim_item )
-			        ,dim_item[fy] = _fy
-			        ,dim_item[label] = _lab
-			    )
-			VAR _fyend      = CALCULATE ( MAX ( dim_item[end_index] ), REMOVEFILTERS ( dim_item ), dim_item[fy] = _fy )
-			VAR _anchor     = IF ( ISBLANK ( _anchor0 ), _fyend, _anchor0 )
-			VAR _fallback   =
-			    CALCULATE (
-			        MAX ( dim_item[item_key] )
-			        ,REMOVEFILTERS ( dim_item )
-			        ,dim_item[granularity_code] = _g
-			        ,dim_item[start_index] <= _anchor
-			        ,dim_item[end_index] >= _anchor
-			    )
-			RETURN
-			    IF ( _hitg = _g, _hitk, _fallback )
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 9949ea3f-e78a-5d0f-a649-cd643d479631
-
 	/// First sort_index of the picked item's window (item weeks within actuals, E-92).
 	measure '_Window Start' =
 			VAR _k          = [_Item Key]
@@ -93,106 +41,6 @@ table _measures
 		isHidden
 		displayFolder: 9 Engine
 		lineageTag: 6f126bde-f9da-5297-9a19-476cc3a46aa4
-
-	/// Last sort_index of the picked item's window = L, the week point-in-time cards read (E-92, E-93).
-	measure '_Window End' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[end_index] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: b1a0da8f-362e-57e3-8c3b-c0ce574a818b
-
-	/// First sort_index of the LY window: the window's weeks one year back by ly_week_key (E-12, E-94); blank in FY2025.
-	measure '_LY Window Start' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[ly_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: e7bd6517-3a3d-55f3-b08e-01eda5a55137
-
-	/// Last sort_index of the LY window; blank in FY2025.
-	measure '_LY Window End' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[ly_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: d2d5eb6b-753c-5432-92ec-d003768a4678
-
-	/// First sort_index of the previous-item window (E-94): lw_week_key at Week; the item before at Month / Quarter / Year, cut to the picked item's week count when it is partial; blank for the first item.
-	measure '_Prev Window Start' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[prev_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 019ce2bd-9072-5e3a-8516-9938f15c0b6b
-
-	/// Last sort_index of the previous-item window.
-	measure '_Prev Window End' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[prev_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: b1ee0f83-32f8-5d54-8565-656182395dbf
-
-	/// EBITDA flash, comparator Previous (E-93, ET-31): at Week the previous month's first k weeks (k = the week's position in its month; P1 -> previous FY P12; blank for week 5 of a 5-week month); else = _Prev Window Start.
-	measure '_EB Prev Start' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[eb_prev_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: dc1ebf50-2bdf-51f3-9989-62dec52f3d72
-
-	/// Last sort_index of the EBITDA Previous window.
-	measure '_EB Prev End' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[eb_prev_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 553b6a52-80fb-5711-b49c-a825ec71bb14
-
-	/// Name of the EBITDA Previous window at Week for the i delta line, e.g. P9 weeks 1-4 (USER 2026-10-30).
-	measure '_EB Prev Name' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[eb_prev_name] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 1b3c67ae-4d3b-5605-8d27-70a0e4f88ce4
-
-	/// Position of the picked item among the items of its type (1 = FY2025 W1 / P1 / Q1 / FY2025).
-	measure '_Item Sort' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[sort_order] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		formatString: #,0
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 05476e61-dbb5-5c51-8392-6920a0c7f8e6
-
-	/// Delta suffix of the Previous comparator, always short (E-98): vs prev. wk / mth / qtr (vs LY at Year).
-	measure '_Prev Short' = SWITCH ( [_Granularity Code], "P", "vs prev. mth", "Q", "vs prev. qtr", "FY", "vs LY", "vs prev. wk" )
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: 24964582-5be4-51ff-945e-e88982526d54
-
-	/// Noun of the picked type for stat labels and sub-titles: week, month, quarter or year (E-98).
-	measure 'Window Noun' = SWITCH ( [_Granularity Code], "P", "month", "Q", "quarter", "FY", "year", "week" )
-		displayFolder: 8 Cards
-		lineageTag: 5d449bea-8e83-533a-89c6-cb0cfe09a5f6
 
 	/// Gross sales at ticket, ex-VAT. Flow: sums over the weeks in context. Scoped by the region switcher (dim_store.scope_code; ALL = no filter).
 	measure 'Gross Sales' =
@@ -475,24 +323,6 @@ table _measures
 		formatString: #,0.00
 		displayFolder: 2 Profit
 		lineageTag: 6b6de772-eba3-59e8-8230-df2b0cee895a
-
-	/// EBITDA card reading (E-40, E-93): [EBITDA PTD] (month to date through the week) when the window is one week (Week items, their LY week, the first week of a month), else [EBITDA] of the window (Month / Quarter / Year items and their comparators).
-	measure 'EBITDA Flash' =
-			VAR _one        = COUNTROWS ( VALUES ( dim_week[sort_index] ) ) = 1
-			RETURN
-			    IF ( _one, [EBITDA PTD], [EBITDA] )
-		formatString: #,0.00
-		displayFolder: 2 Profit
-		lineageTag: 8b6d705f-9a48-5d0f-8aaa-f8211eab1260
-
-	/// EBITDA card reading (E-40, E-93): [EBITDA Bud PTD] (month to date through the week) when the window is one week (Week items, their LY week, the first week of a month), else [EBITDA Bud] of the window (Month / Quarter / Year items and their comparators).
-	measure 'EBITDA Flash Bud' =
-			VAR _one        = COUNTROWS ( VALUES ( dim_week[sort_index] ) ) = 1
-			RETURN
-			    IF ( _one, [EBITDA Bud PTD], [EBITDA Bud] )
-		formatString: #,0.00
-		displayFolder: 6 Budget
-		lineageTag: 1786cb14-7e67-5584-ae22-c563ed99bf0f
 
 	/// Budget net_sales_bud (FY2026 W1-W52). Scoped by the region switcher (dim_store.scope_code; ALL = no filter).
 	measure 'Net Sales Bud' =
@@ -1747,15 +1577,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 544f3c81-f289-5e3c-bbc7-ebdd118fe5d0
 
-	/// NET_SALES value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev NET_SALES' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Net Sales], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 8ecf8d75-72e1-5362-9d6d-07ab963d2ec0
-
 	/// NET_SALES comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare NET_SALES' =
 			SWITCH (
@@ -1842,15 +1663,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [Total Margin %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: c69fbb26-d2fb-51b5-8d64-a477b3670d3d
-
-	/// TOTAL_MARGIN value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev TOTAL_MARGIN' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Total Margin %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 7d76001f-9801-5fdc-80d9-b51ca0cd3b3d
 
 	/// TOTAL_MARGIN comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare TOTAL_MARGIN' =
@@ -1939,15 +1751,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 92c5ddfa-5208-5abc-a455-4c8ef4064413
 
-	/// WEEKS_OF_COVER value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev WEEKS_OF_COVER' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Weeks of Cover], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: fb2f5128-1ab1-5160-8854-118228e51611
-
 	/// WEEKS_OF_COVER comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare WEEKS_OF_COVER' =
 			SWITCH (
@@ -2034,15 +1837,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [Markdown %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: 347af33a-ff55-54c9-961e-0a9503d5c01e
-
-	/// MARKDOWN value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev MARKDOWN' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Markdown %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 31d31444-41ba-5722-b662-54c3864fea5a
 
 	/// MARKDOWN comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare MARKDOWN' =
@@ -2131,15 +1925,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 03b0e27e-013e-53bc-b0b0-2d212fc63113
 
-	/// AVAILABILITY value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev AVAILABILITY' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 1cc7428d-4353-5579-8b9e-a56df6593e06
-
 	/// AVAILABILITY comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare AVAILABILITY' =
 			SWITCH (
@@ -2226,15 +2011,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [EBITDA Flash], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: e66fa76e-4122-5185-83e8-4dd55d62cf70
-
-	/// EBITDA value in the previous window: at Week the previous month cut to the same number of weeks (E-93, ET-31), else the previous item (E-94).
-	measure 'Card Prev EBITDA' =
-			VAR _s2         = [_EB Prev Start]
-			VAR _e2         = [_EB Prev End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [EBITDA Flash], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 9306ae34-ca04-56af-adb1-0b6ba37f90ad
 
 	/// EBITDA comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare EBITDA' =
@@ -2323,15 +2099,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: e2653f3f-43b4-57e8-ba8a-1f3927629cff
 
-	/// LFL_GROWTH value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev LFL_GROWTH' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [LFL Growth %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 28accd28-5fb1-5d9b-924f-6c68b11bdb50
-
 	/// LFL_GROWTH comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare LFL_GROWTH' =
 			SWITCH (
@@ -2418,15 +2185,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [Front GM %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: ba7a5436-53a9-5e35-9700-671a34e13102
-
-	/// FRONT_GM value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev FRONT_GM' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Front GM %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 9cf9055b-831b-5d80-99d4-7e83e5bda414
 
 	/// FRONT_GM comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare FRONT_GM' =
@@ -2515,15 +2273,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: ef8f641d-15db-5972-8b7d-2f885c249716
 
-	/// SELL_THROUGH value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev SELL_THROUGH' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Sell-through %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: dc075aa3-2374-58c2-addc-bb0c18495d35
-
 	/// SELL_THROUGH comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare SELL_THROUGH' =
 			SWITCH (
@@ -2610,15 +2359,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [GMROI], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: 18f968a9-4237-5347-961b-749ebc36f1ab
-
-	/// GMROI value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev GMROI' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [GMROI], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 1c3a8ed1-ae78-5456-9e57-07c8b3470769
 
 	/// GMROI comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare GMROI' =
@@ -2707,15 +2447,6 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 4f46b4bc-1280-57f7-98e7-c5fea2f64a92
 
-	/// SUPPLIER_OTIF value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev SUPPLIER_OTIF' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [OTIF %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: 3687d8eb-8d81-550e-b069-1313b5f94807
-
 	/// SUPPLIER_OTIF comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare SUPPLIER_OTIF' =
 			SWITCH (
@@ -2802,15 +2533,6 @@ table _measures
 			    IF ( NOT ISBLANK ( _ls ), CALCULATE ( [Mix Store %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _ls, dim_week[sort_index] <= _le ) )
 		displayFolder: 8 Cards
 		lineageTag: b3c95640-9af1-5c32-b2b3-60d1f9e18d80
-
-	/// CHANNEL_MIX value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
-	measure 'Card Prev CHANNEL_MIX' =
-			VAR _s2         = [_Prev Window Start]
-			VAR _e2         = [_Prev Window End]
-			RETURN
-			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Mix Store %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
-		displayFolder: 8 Cards
-		lineageTag: deb9526a-a994-5bc1-b814-65c9cfa39343
 
 	/// CHANNEL_MIX comparator value: Budget / target, LY or the previous item (E-14, E-94).
 	measure 'Card Compare CHANNEL_MIX' =
@@ -3166,14 +2888,6 @@ table _measures
 			    CALCULATE ( MAX ( dim_item[phrase] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
 		displayFolder: 8 Cards
 		lineageTag: d5dfaa52-1646-5e5a-b195-337066996228
-
-	/// Title of the picked item (E-51, E-98): Week 43, Month 10, Quarter 4, FY2026 (+ FY2025 when not the as-of FY); How-to-read eyebrow Nordmark · <title>.
-	measure 'Item Title' =
-			VAR _k          = [_Item Key]
-			RETURN
-			    CALCULATE ( MAX ( dim_item[title] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
-		displayFolder: 8 Cards
-		lineageTag: d003ae10-9d95-5432-b77c-e8efdbb766cb
 
 	/// Retail month (dim_week.period) of the window's last week: the EBITDA sub-title at Week, month 10 to date (E-40).
 	measure 'Period No' =
@@ -4900,26 +4614,6 @@ table _measures
 	measure 'KPI Hit' = IF ( [KPI Revealed], UNICHAR ( 160 ) )
 		displayFolder: 8 Cards
 		lineageTag: 33786e15-19cb-54cb-90c4-35ddf91f0b08
-
-	/// EBITDA delta line of the i pop-up: at Week vs Previous it names the compared weeks (vs P9 weeks 1-4, vs P12 FY2025 week 1); else the card delta (E-93, ET-31).
-	measure 'Card Delta Long Text EBITDA' =
-			VAR _nm         = [_EB Prev Name]
-			VAR _v          = [Card Value EBITDA]
-			VAR _c          = [Card Compare EBITDA]
-			VAR _d          = _v - _c
-			VAR _lab        = "vs " & _nm
-			RETURN
-			    IF (
-			        [_Comparator Code] = "LW" && [_Granularity Code] = "W" && _nm <> ""
-			        ,IF (
-			            ISBLANK ( _v ) || ISBLANK ( _c )
-			            ,"n/a " & _lab
-			            ,( VAR _f47 = _d RETURN IF ( _f47 >= 0, "+", "−" ) & "€" & IF ( ABS ( _f47 ) / 1000000 >= 1000, FORMAT ( ABS ( _f47 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f47 / 1000000 ), "#,0.0" ) ) & "m" ) & " (" & ( VAR _f48 = DIVIDE ( _v, _c ) - 1 RETURN IF ( _f48 >= 0, "+", "−" ) & FORMAT ( ABS ( _f48 * 100 ), "#,0.0" ) & "%" ) & ") " & _lab
-			        )
-			        ,[Card Delta Text EBITDA]
-			    )
-		displayFolder: 8 Cards
-		lineageTag: d7dc41db-abeb-5ab5-8830-7c9363f283bc
 
 	/// NET_SALES i pop-up (tooltip page tt_info, E-57, ET-30, ET-32): value, the status basis big and bold under it, delta, labelled bars of the picked type, 3 stats, what / why / formula / worked example / rule, tags closed by the refresh or provisional note (js-exec view.ts, Layers.tsx).
 	measure 'Info SVG NET_SALES' =
@@ -9636,20 +9330,6 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 90c7661a-0eda-5b7e-99e7-1404da3bd87b
 
-	/// Filters menu: live summary under the period picker = the header period line (E-90; js-exec menu showing).
-	measure 'Menu Showing SVG' =
-			VAR _p          = [Header Period Text]
-			VAR _p1         = SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _p, "&", "&amp;" ), "**", "<tspan font-weight='600' fill='#111827'>", 1 ), "**", "</tspan>", 1 )
-			VAR _svg        =
-			    "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='18' viewBox='0 0 320 18' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='0' y='13' font-size='12' fill='#5F6878'>Showing " & _p1 & "</text>"
-			        & "</svg>"
-			RETURN
-			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
-		displayFolder: 8 Cards SVG
-		lineageTag: 4859cdb1-a06b-5567-86b9-f6d254314e3b
-		dataCategory: ImageUrl
-
 	/// NET_SALES status basis as displayed on the i pop-up target line (E-57; same format as the card value), without the unit; n/a when blank.
 	measure 'Card Basis Text NET_SALES' =
 			VAR _v          = [Card Basis NET_SALES]
@@ -9745,6 +9425,326 @@ table _measures
 			    IF ( ISBLANK ( _v ), "n/a", ( VAR _f45 = _v RETURN IF ( _f45 < 0, "−", "" ) & FORMAT ( ABS ( _f45 * 100 ), "#,0.0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 976c3f7c-a2ba-422c-9682-a3edde7780a4
+
+	/// Period type (E-90): W (Week), P (Month = 4-5-4 retail period), Q (Quarter) or FY (Year); W when nothing is picked.
+	measure '_Granularity Code' = SELECTEDVALUE ( param_granularity[granularity_code], "W" )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1b2a22d2-486c-5a9a-89f0-30919d03f12a
+
+	/// 1 when a comparator row is offered; 0 for Previous at Year (E-94). Visual-level filter of menu_param_comparator.
+	measure '_Comparator Row Visible' = IF ( SELECTEDVALUE ( param_comparator[comparator_code] ) = "LW" && [_Granularity Code] = "FY", 0, 1 )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: ca5fb43d-1cdf-55fd-8778-9773dd833e25
+
+	/// The picked item (E-91): the one dim_item row left by the type, FY and item slicers (Week / Month grid on label, Quarter / Year row on label_wide); otherwise the item of the picked type that holds the last week of the item last picked in the picked FY (or of that FY's last item, the as-of week in the as-of FY), so W43 -> P10 -> Q4 -> FY2026 and Reset lands on Week 43 FY2026 (js-exec menu(), E-90).
+	measure '_Item Key' =
+			VAR _g          = [_Granularity Code]
+			VAR _one        = HASONEVALUE ( dim_item[item_key] )
+			VAR _hitk       = IF ( _one, SELECTEDVALUE ( dim_item[item_key] ) )
+			VAR _hitg       = IF ( _one, SELECTEDVALUE ( dim_item[granularity_code] ) )
+			VAR _a          = [_AsOf Index]
+			VAR _afy        = CALCULATE ( MAX ( dim_week[fy] ), REMOVEFILTERS ( dim_week ), dim_week[sort_index] = _a )
+			VAR _fyf        = IF ( ISFILTERED ( dim_item[fy_label] ), MAXX ( FILTERS ( dim_item[fy_label] ), dim_item[fy_label] ) )
+			VAR _fy         = IF ( ISBLANK ( _fyf ), _afy, VALUE ( RIGHT ( _fyf, 4 ) ) )
+			VAR _lab        =
+			    IF (
+			        _g IN { "Q", "FY" }
+			        ,IF ( ISFILTERED ( dim_item[label_wide] ), MAXX ( FILTERS ( dim_item[label_wide] ), dim_item[label_wide] ) )
+			        ,IF ( ISFILTERED ( dim_item[label] ), MAXX ( FILTERS ( dim_item[label] ), dim_item[label] ) )
+			    )
+			VAR _anchor0    =
+			    CALCULATE (
+			        MAX ( dim_item[end_index] )
+			        ,REMOVEFILTERS ( dim_item )
+			        ,dim_item[fy] = _fy
+			        ,dim_item[label] = _lab
+			    )
+			VAR _fyend      = CALCULATE ( MAX ( dim_item[end_index] ), REMOVEFILTERS ( dim_item ), dim_item[fy] = _fy )
+			VAR _anchor     = IF ( ISBLANK ( _anchor0 ), _fyend, _anchor0 )
+			VAR _fallback   =
+			    CALCULATE (
+			        MAX ( dim_item[item_key] )
+			        ,REMOVEFILTERS ( dim_item )
+			        ,dim_item[granularity_code] = _g
+			        ,dim_item[start_index] <= _anchor
+			        ,dim_item[end_index] >= _anchor
+			    )
+			RETURN
+			    IF ( _hitg = _g, _hitk, _fallback )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 9949ea3f-e78a-5d0f-a649-cd643d479631
+
+	/// Last sort_index of the picked item's window = L, the week point-in-time cards read (E-92, E-93).
+	measure '_Window End' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[end_index] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b1a0da8f-362e-57e3-8c3b-c0ce574a818b
+
+	/// First sort_index of the LY window: the window's weeks one year back by ly_week_key (E-12, E-94); blank in FY2025.
+	measure '_LY Window Start' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[ly_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e7bd6517-3a3d-55f3-b08e-01eda5a55137
+
+	/// Last sort_index of the LY window; blank in FY2025.
+	measure '_LY Window End' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[ly_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: d2d5eb6b-753c-5432-92ec-d003768a4678
+
+	/// First sort_index of the previous-item window (E-94): lw_week_key at Week; the item before at Month / Quarter / Year, cut to the picked item's week count when it is partial; blank for the first item.
+	measure '_Prev Window Start' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[prev_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 019ce2bd-9072-5e3a-8516-9938f15c0b6b
+
+	/// Last sort_index of the previous-item window.
+	measure '_Prev Window End' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[prev_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b1ee0f83-32f8-5d54-8565-656182395dbf
+
+	/// EBITDA flash, comparator Previous (E-93, ET-31): at Week the previous month's first k weeks (k = the week's position in its month; P1 -> previous FY P12; blank for week 5 of a 5-week month); else = _Prev Window Start.
+	measure '_EB Prev Start' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[eb_prev_start] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: dc1ebf50-2bdf-51f3-9989-62dec52f3d72
+
+	/// Last sort_index of the EBITDA Previous window.
+	measure '_EB Prev End' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[eb_prev_end] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 553b6a52-80fb-5711-b49c-a825ec71bb14
+
+	/// Name of the EBITDA Previous window at Week for the i delta line, e.g. P9 weeks 1-4 (USER 2026-10-30).
+	measure '_EB Prev Name' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[eb_prev_name] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1b3c67ae-4d3b-5605-8d27-70a0e4f88ce4
+
+	/// Position of the picked item among the items of its type (1 = FY2025 W1 / P1 / Q1 / FY2025).
+	measure '_Item Sort' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[sort_order] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 05476e61-dbb5-5c51-8392-6920a0c7f8e6
+
+	/// Delta suffix of the Previous comparator, always short (E-98): vs prev. wk / mth / qtr (vs LY at Year).
+	measure '_Prev Short' = SWITCH ( [_Granularity Code], "P", "vs prev. mth", "Q", "vs prev. qtr", "FY", "vs LY", "vs prev. wk" )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 24964582-5be4-51ff-945e-e88982526d54
+
+	/// Noun of the picked type for stat labels and sub-titles: week, month, quarter or year (E-98).
+	measure 'Window Noun' = SWITCH ( [_Granularity Code], "P", "month", "Q", "quarter", "FY", "year", "week" )
+		displayFolder: 8 Cards
+		lineageTag: 5d449bea-8e83-533a-89c6-cb0cfe09a5f6
+
+	/// EBITDA card reading (E-40, E-93): [EBITDA PTD] (month to date through the week) when the window is one week (Week items, their LY week, the first week of a month), else [EBITDA] of the window (Month / Quarter / Year items and their comparators).
+	measure 'EBITDA Flash' =
+			VAR _one        = COUNTROWS ( VALUES ( dim_week[sort_index] ) ) = 1
+			RETURN
+			    IF ( _one, [EBITDA PTD], [EBITDA] )
+		formatString: #,0.00
+		displayFolder: 2 Profit
+		lineageTag: 8b6d705f-9a48-5d0f-8aaa-f8211eab1260
+
+	/// EBITDA card reading (E-40, E-93): [EBITDA Bud PTD] (month to date through the week) when the window is one week (Week items, their LY week, the first week of a month), else [EBITDA Bud] of the window (Month / Quarter / Year items and their comparators).
+	measure 'EBITDA Flash Bud' =
+			VAR _one        = COUNTROWS ( VALUES ( dim_week[sort_index] ) ) = 1
+			RETURN
+			    IF ( _one, [EBITDA Bud PTD], [EBITDA Bud] )
+		formatString: #,0.00
+		displayFolder: 6 Budget
+		lineageTag: 1786cb14-7e67-5584-ae22-c563ed99bf0f
+
+	/// NET_SALES value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev NET_SALES' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Net Sales], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 8ecf8d75-72e1-5362-9d6d-07ab963d2ec0
+
+	/// TOTAL_MARGIN value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev TOTAL_MARGIN' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Total Margin %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 7d76001f-9801-5fdc-80d9-b51ca0cd3b3d
+
+	/// WEEKS_OF_COVER value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev WEEKS_OF_COVER' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Weeks of Cover], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: fb2f5128-1ab1-5160-8854-118228e51611
+
+	/// MARKDOWN value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev MARKDOWN' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Markdown %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 31d31444-41ba-5722-b662-54c3864fea5a
+
+	/// AVAILABILITY value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev AVAILABILITY' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Availability %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 1cc7428d-4353-5579-8b9e-a56df6593e06
+
+	/// EBITDA value in the previous window: at Week the previous month cut to the same number of weeks (E-93, ET-31), else the previous item (E-94).
+	measure 'Card Prev EBITDA' =
+			VAR _s2         = [_EB Prev Start]
+			VAR _e2         = [_EB Prev End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [EBITDA Flash], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 9306ae34-ca04-56af-adb1-0b6ba37f90ad
+
+	/// LFL_GROWTH value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev LFL_GROWTH' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [LFL Growth %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 28accd28-5fb1-5d9b-924f-6c68b11bdb50
+
+	/// FRONT_GM value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev FRONT_GM' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Front GM %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 9cf9055b-831b-5d80-99d4-7e83e5bda414
+
+	/// SELL_THROUGH value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev SELL_THROUGH' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Sell-through %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: dc075aa3-2374-58c2-addc-bb0c18495d35
+
+	/// GMROI value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev GMROI' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [GMROI], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 1c3a8ed1-ae78-5456-9e57-07c8b3470769
+
+	/// SUPPLIER_OTIF value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev SUPPLIER_OTIF' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [OTIF %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: 3687d8eb-8d81-550e-b069-1313b5f94807
+
+	/// CHANNEL_MIX value in the previous-item window (previous week / month / quarter, like-length when the item is partial, E-94).
+	measure 'Card Prev CHANNEL_MIX' =
+			VAR _s2         = [_Prev Window Start]
+			VAR _e2         = [_Prev Window End]
+			RETURN
+			    IF ( NOT ISBLANK ( _s2 ), CALCULATE ( [Mix Store %], REMOVEFILTERS ( dim_week ), dim_week[sort_index] >= _s2, dim_week[sort_index] <= _e2 ) )
+		displayFolder: 8 Cards
+		lineageTag: deb9526a-a994-5bc1-b814-65c9cfa39343
+
+	/// Title of the picked item (E-51, E-98): Week 43, Month 10, Quarter 4, FY2026 (+ FY2025 when not the as-of FY); How-to-read eyebrow Nordmark · <title>.
+	measure 'Item Title' =
+			VAR _k          = [_Item Key]
+			RETURN
+			    CALCULATE ( MAX ( dim_item[title] ), REMOVEFILTERS ( dim_item ), dim_item[item_key] = _k )
+		displayFolder: 8 Cards
+		lineageTag: d003ae10-9d95-5432-b77c-e8efdbb766cb
+
+	/// EBITDA delta line of the i pop-up: at Week vs Previous it names the compared weeks (vs P9 weeks 1-4, vs P12 FY2025 week 1); else the card delta (E-93, ET-31).
+	measure 'Card Delta Long Text EBITDA' =
+			VAR _nm         = [_EB Prev Name]
+			VAR _v          = [Card Value EBITDA]
+			VAR _c          = [Card Compare EBITDA]
+			VAR _d          = _v - _c
+			VAR _lab        = "vs " & _nm
+			RETURN
+			    IF (
+			        [_Comparator Code] = "LW" && [_Granularity Code] = "W" && _nm <> ""
+			        ,IF (
+			            ISBLANK ( _v ) || ISBLANK ( _c )
+			            ,"n/a " & _lab
+			            ,( VAR _f47 = _d RETURN IF ( _f47 >= 0, "+", "−" ) & "€" & IF ( ABS ( _f47 ) / 1000000 >= 1000, FORMAT ( ABS ( _f47 / 1000000 ), "#,0" ), FORMAT ( ABS ( _f47 / 1000000 ), "#,0.0" ) ) & "m" ) & " (" & ( VAR _f48 = DIVIDE ( _v, _c ) - 1 RETURN IF ( _f48 >= 0, "+", "−" ) & FORMAT ( ABS ( _f48 * 100 ), "#,0.0" ) & "%" ) & ") " & _lab
+			        )
+			        ,[Card Delta Text EBITDA]
+			    )
+		displayFolder: 8 Cards
+		lineageTag: d7dc41db-abeb-5ab5-8830-7c9363f283bc
+
+	/// Filters menu: live summary under the period picker = the header period line (E-90; js-exec menu showing).
+	measure 'Menu Showing SVG' =
+			VAR _p          = [Header Period Text]
+			VAR _p1         = SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( _p, "&", "&amp;" ), "**", "<tspan font-weight='600' fill='#111827'>", 1 ), "**", "</tspan>", 1 )
+			VAR _svg        =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='18' viewBox='0 0 320 18' font-family='Segoe UI, sans-serif'>"
+			        & "<text x='0' y='13' font-size='12' fill='#5F6878'>Showing " & _p1 & "</text>"
+			        & "</svg>"
+			RETURN
+			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+		displayFolder: 8 Cards SVG
+		lineageTag: 4859cdb1-a06b-5567-86b9-f6d254314e3b
+		dataCategory: ImageUrl
 
 	column measure_table
 		dataType: int64

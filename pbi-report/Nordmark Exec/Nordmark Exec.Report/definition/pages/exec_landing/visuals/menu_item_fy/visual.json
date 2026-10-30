@@ -4,10 +4,10 @@
   "position": {
     "x": 86,
     "y": 148,
-    "z": 1661,
+    "z": 4000,
     "height": 28,
     "width": 320,
-    "tabOrder": 761
+    "tabOrder": 6000
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -534,7 +534,7 @@
                 "Version": 2,
                 "From": [
                   {
-                    "Name": "p",
+                    "Name": "d",
                     "Entity": "dim_item",
                     "Type": 0
                   }
@@ -548,7 +548,7 @@
                             "Column": {
                               "Expression": {
                                 "SourceRef": {
-                                  "Source": "p"
+                                  "Source": "d"
                                 }
                               },
                               "Property": "fy_label"
@@ -559,7 +559,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'FY2026'"
+                                "Value": "'FY2025'"
                               }
                             }
                           ]

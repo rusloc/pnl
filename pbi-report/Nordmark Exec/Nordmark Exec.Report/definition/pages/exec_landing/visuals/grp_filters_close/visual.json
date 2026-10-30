@@ -4,10 +4,10 @@
   "position": {
     "x": 374,
     "y": 25,
-    "z": 1650,
+    "z": 2000,
     "height": 32,
     "width": 32,
-    "tabOrder": 730
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "actionButton",
@@ -33,8 +33,9 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#5F6878'"
+                    "ThemeDataColor": {
+                      "ColorId": 1,
+                      "Percent": 0
                     }
                   }
                 }
@@ -57,7 +58,7 @@
             "bold": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -72,6 +73,13 @@
               "expr": {
                 "Literal": {
                   "Value": "'middle'"
+                }
+              }
+            },
+            "topMargin": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
                 }
               }
             }
