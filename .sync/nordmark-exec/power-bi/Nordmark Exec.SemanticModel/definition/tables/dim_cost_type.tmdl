@@ -1,0 +1,61 @@
+/// Cost type of the EBITDA bridge.
+table dim_cost_type
+	lineageTag: 09c426f3-c3c9-5ed6-9035-e67cf7fdf90f
+
+	column cost_type_code
+		dataType: string
+		isHidden
+		lineageTag: b2d47034-d7eb-5a19-a742-86aac95da666
+		summarizeBy: none
+		sourceColumn: cost_type_code
+
+		annotation SummarizationSetBy = User
+
+	column cost_type_name
+		dataType: string
+		lineageTag: c9ebba15-69d3-5ced-ab97-be8ea0d915dc
+		summarizeBy: none
+		sourceColumn: cost_type_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column site_level
+		dataType: string
+		lineageTag: a476f5bb-7003-59fc-9693-90e3aff88593
+		summarizeBy: none
+		sourceColumn: site_level
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bbec3699-7f90-5fc4-b675-9df742a153aa
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_cost_type = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_cost_type.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"cost_type_code", type text},
+				            {"cost_type_name", type text},
+				            {"site_level", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

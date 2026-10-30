@@ -1,0 +1,52 @@
+/// Filters menu attribute Group (E-53): multi-select, OR within, AND across. Disconnected; matched to dim_kpi[group].
+table param_attr_group
+	lineageTag: 36affb43-ddf5-5fcb-b111-306f8232ae63
+
+	column attr_code
+		dataType: string
+		isHidden
+		lineageTag: 5921579b-8b28-503a-a877-5d070185bcfd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_code]
+
+		annotation SummarizationSetBy = User
+
+	column attr_label
+		dataType: string
+		lineageTag: e13580c5-9fff-5079-bd25-506795dd7ee5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c23ef54f-5c62-5d84-8427-395d18d5a638
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_attr_group = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "attr_code", STRING
+				    ,"attr_label", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "B1", "B1 base-crucial", 1 }
+				        ,{ "B2", "B2 margin & cost", 2 }
+				        ,{ "B3", "B3 stock & supply", 3 }
+				        ,{ "B4", "B4 channel & customer", 4 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

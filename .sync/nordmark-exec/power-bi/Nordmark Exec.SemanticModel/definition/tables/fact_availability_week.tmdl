@@ -1,0 +1,73 @@
+/// Top-500 SKU-days ranged / in stock, week x store x category.
+table fact_availability_week
+	lineageTag: 79a3a0eb-3b67-56b1-826d-a506facdfb9c
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: d4fcfeb2-025a-599e-bf9d-8f6a2ba8fc8c
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 775447e1-fcba-5309-89e3-9446c0663dad
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: 2e39cf4c-2b1c-5da3-8635-bbe3e69c8237
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column ranged_sku_days
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: be9aee3d-b6c2-5839-bd83-68de374af7b4
+		summarizeBy: none
+		sourceColumn: ranged_sku_days
+
+		annotation SummarizationSetBy = User
+
+	column in_stock_sku_days
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 16bbb123-814e-5a30-9b93-6cdf7b0df3f9
+		summarizeBy: none
+		sourceColumn: in_stock_sku_days
+
+		annotation SummarizationSetBy = User
+
+	partition fact_availability_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_availability_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"ranged_sku_days", type number},
+				            {"in_stock_sku_days", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

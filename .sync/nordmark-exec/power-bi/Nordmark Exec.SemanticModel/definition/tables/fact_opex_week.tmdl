@@ -1,0 +1,72 @@
+/// OpEx, scenario (ACT / BUD) x week x cost type x site (null = central).
+table fact_opex_week
+	lineageTag: f54fae72-f927-5d0c-b329-7072290b6bf1
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: d3ad9d11-9e6c-5753-94a4-a7069b73d378
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column scenario_code
+		dataType: string
+		isHidden
+		lineageTag: bb967538-7931-5746-ba00-f9941c66be6c
+		summarizeBy: none
+		sourceColumn: scenario_code
+
+		annotation SummarizationSetBy = User
+
+	column cost_type_code
+		dataType: string
+		isHidden
+		lineageTag: 6759173b-3d97-59af-8db2-6f7718dea027
+		summarizeBy: none
+		sourceColumn: cost_type_code
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 383fbfb5-8be6-5dba-b0fd-b2c6061ad346
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column amount
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 04e40226-97d8-551f-8900-644379223792
+		summarizeBy: none
+		sourceColumn: amount
+
+		annotation SummarizationSetBy = User
+
+	partition fact_opex_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_opex_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"scenario_code", type text},
+				            {"cost_type_code", type text},
+				            {"store_code", type text},
+				            {"amount", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

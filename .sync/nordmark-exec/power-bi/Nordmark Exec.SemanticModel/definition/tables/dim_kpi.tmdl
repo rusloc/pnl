@@ -1,0 +1,279 @@
+/// The 32 KPIs of the spec catalogue: 12 landing cards (card_order 1-12) + 20 bench KPIs (More KPIs drawer). Attributes group / lever / horizon / owner / statement drive the Filters menu (E-53). Joins no fact. Derived on load: domain_order, owner_cadence.
+table dim_kpi
+	lineageTag: b7394b99-9a50-5671-ade8-9648b1c57080
+
+	column kpi_code
+		dataType: string
+		lineageTag: bc9cace5-5249-5dc7-a5cc-6b1f87052701
+		summarizeBy: none
+		sourceColumn: kpi_code
+
+		annotation SummarizationSetBy = User
+
+	column catalogue_no
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 413d23f7-216b-5402-bed2-0ca967b58bda
+		summarizeBy: none
+		sourceColumn: catalogue_no
+
+		annotation SummarizationSetBy = User
+
+	column kpi_name
+		dataType: string
+		lineageTag: b5a6df26-9dc5-56fe-a3fd-69a7e49e864f
+		summarizeBy: none
+		sourceColumn: kpi_name
+		sortByColumn: catalogue_no
+
+		annotation SummarizationSetBy = User
+
+	column domain
+		dataType: string
+		lineageTag: f8d15801-a595-5b74-bef5-9f749efd889d
+		summarizeBy: none
+		sourceColumn: domain
+		sortByColumn: domain_order
+
+		annotation SummarizationSetBy = User
+
+	column is_landing
+		dataType: boolean
+		lineageTag: fce0c649-4e0f-51cd-a616-3b5570d054b7
+		summarizeBy: none
+		sourceColumn: is_landing
+
+		annotation SummarizationSetBy = User
+
+	column size
+		dataType: string
+		lineageTag: 560eb281-4289-5e29-a4c9-6e068acf416e
+		summarizeBy: none
+		sourceColumn: size
+
+		annotation SummarizationSetBy = User
+
+	column card_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 95b91482-e7a0-511b-85d0-146a1e7cfa03
+		summarizeBy: none
+		sourceColumn: card_order
+
+		annotation SummarizationSetBy = User
+
+	column group
+		dataType: string
+		lineageTag: bba8e52b-bf0d-5109-aec4-d767e7f26ed9
+		summarizeBy: none
+		sourceColumn: group
+
+		annotation SummarizationSetBy = User
+
+	column lever
+		dataType: string
+		lineageTag: 000b8b4b-5aa8-50f7-aa28-11dec7e058dc
+		summarizeBy: none
+		sourceColumn: lever
+
+		annotation SummarizationSetBy = User
+
+	column horizon
+		dataType: string
+		lineageTag: 472dbdfc-00a6-5e7a-becb-28d5576cd5df
+		summarizeBy: none
+		sourceColumn: horizon
+
+		annotation SummarizationSetBy = User
+
+	column owner
+		dataType: string
+		lineageTag: 4ee8435e-c9ad-516b-a553-76128d3c15b2
+		summarizeBy: none
+		sourceColumn: owner
+
+		annotation SummarizationSetBy = User
+
+	column statement
+		dataType: string
+		lineageTag: f790f652-5309-55f2-ad48-22877075b110
+		summarizeBy: none
+		sourceColumn: statement
+
+		annotation SummarizationSetBy = User
+
+	column drill_page
+		dataType: string
+		lineageTag: 9e26be49-a4d3-5a08-8996-00ab86aa5edd
+		summarizeBy: none
+		sourceColumn: drill_page
+
+		annotation SummarizationSetBy = User
+
+	column is_provisional
+		dataType: boolean
+		lineageTag: 9948a841-b64c-556c-95c7-cb1a275ad697
+		summarizeBy: none
+		sourceColumn: is_provisional
+
+		annotation SummarizationSetBy = User
+
+	column is_stock
+		dataType: boolean
+		lineageTag: 740e4983-e3c4-5c05-8f9b-6f8bcc607460
+		summarizeBy: none
+		sourceColumn: is_stock
+
+		annotation SummarizationSetBy = User
+
+	column direction
+		dataType: string
+		lineageTag: 717ea1dc-e8df-5dfe-9661-b56be071869b
+		summarizeBy: none
+		sourceColumn: direction
+
+		annotation SummarizationSetBy = User
+
+	column unit
+		dataType: string
+		lineageTag: 5fe71481-983d-5f89-b071-66ca8762f2ab
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = User
+
+	column period_basis
+		dataType: string
+		lineageTag: 53d24182-b7e0-5297-93d2-1396471a3cc0
+		summarizeBy: none
+		sourceColumn: period_basis
+
+		annotation SummarizationSetBy = User
+
+	column basis
+		dataType: string
+		lineageTag: 33a1ae6a-0dbd-5098-a2a5-737042716e2a
+		summarizeBy: none
+		sourceColumn: basis
+
+		annotation SummarizationSetBy = User
+
+	column value_metric
+		dataType: string
+		isHidden
+		lineageTag: b13a65f8-cd93-5524-b5a8-4a2697ff2f40
+		summarizeBy: none
+		sourceColumn: value_metric
+
+		annotation SummarizationSetBy = User
+
+	column basis_metric
+		dataType: string
+		isHidden
+		lineageTag: 1bb19383-5273-5f83-9edc-e0b80cf56f9a
+		summarizeBy: none
+		sourceColumn: basis_metric
+
+		annotation SummarizationSetBy = User
+
+	column status_metric
+		dataType: string
+		isHidden
+		lineageTag: a64c43e1-7a8f-512c-a76a-797b6d137c97
+		summarizeBy: none
+		sourceColumn: status_metric
+
+		annotation SummarizationSetBy = User
+
+	column formula
+		dataType: string
+		lineageTag: 25ba1ae1-1aeb-5511-b337-28c4676a1dc5
+		summarizeBy: none
+		sourceColumn: formula
+
+		annotation SummarizationSetBy = User
+
+	column owner_initials
+		dataType: string
+		lineageTag: 2ac8dc72-6681-5381-8484-455bb2c263a2
+		summarizeBy: none
+		sourceColumn: owner_initials
+
+		annotation SummarizationSetBy = User
+
+	column cadence
+		dataType: string
+		lineageTag: 35fb7b57-810f-5333-adf5-4242e499f174
+		summarizeBy: none
+		sourceColumn: cadence
+
+		annotation SummarizationSetBy = User
+
+	/// Lowest catalogue_no of the domain (sorts the More KPIs drawer by domain).
+	column domain_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e601637e-b8e8-50d6-976d-5bf318c71fbb
+		summarizeBy: none
+		sourceColumn: domain_order
+
+		annotation SummarizationSetBy = User
+
+	/// Owner initials · cadence for the bench KPIs (e.g. CM · daily).
+	column owner_cadence
+		dataType: string
+		lineageTag: 8ff788e6-d1c2-53fd-98df-1fc6582ba5ad
+		summarizeBy: none
+		sourceColumn: owner_cadence
+
+		annotation SummarizationSetBy = User
+
+	partition dim_kpi = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_kpi.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"kpi_code", type text},
+				            {"catalogue_no", Int64.Type},
+				            {"kpi_name", type text},
+				            {"domain", type text},
+				            {"is_landing", type logical},
+				            {"size", type text},
+				            {"card_order", Int64.Type},
+				            {"group", type text},
+				            {"lever", type text},
+				            {"horizon", type text},
+				            {"owner", type text},
+				            {"statement", type text},
+				            {"drill_page", type text},
+				            {"is_provisional", type logical},
+				            {"is_stock", type logical},
+				            {"direction", type text},
+				            {"unit", type text},
+				            {"period_basis", type text},
+				            {"basis", type text},
+				            {"value_metric", type text},
+				            {"basis_metric", type text},
+				            {"status_metric", type text},
+				            {"formula", type text},
+				            {"owner_initials", type text},
+				            {"cadence", type text}
+				        }
+				    ),
+				    dom = Table.Group(typed, {"domain"}, {{"domain_order", each List.Min([catalogue_no]), Int64.Type}}),
+				    joined = Table.NestedJoin(typed, {"domain"}, dom, {"domain"}, "d", JoinKind.LeftOuter),
+				    expanded = Table.ExpandTableColumn(joined, "d", {"domain_order"}),
+				    oc = Table.AddColumn(expanded, "owner_cadence", each if [owner_initials] = null then null else [owner_initials] & " · " & [cadence], type text)
+				in
+				    oc
+
+	annotation PBI_ResultType = Table
+

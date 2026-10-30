@@ -1,0 +1,116 @@
+/// Status rule per landing card (watch_from / off_from) + the 3 dot constants (E-22, E-26, E-75). Joins nothing.
+table param_status_rule
+	isHidden
+	lineageTag: 30a95b57-40eb-5f1f-a000-0a06a96cd230
+
+	column rule_code
+		dataType: string
+		isHidden
+		lineageTag: acccbfa2-0804-5e69-ac1a-1f37ef2f86e9
+		summarizeBy: none
+		sourceColumn: rule_code
+
+		annotation SummarizationSetBy = User
+
+	column kpi_code
+		dataType: string
+		isHidden
+		lineageTag: 8d5d01da-d696-55db-91c1-0b8e756bc3d2
+		summarizeBy: none
+		sourceColumn: kpi_code
+
+		annotation SummarizationSetBy = User
+
+	column basis
+		dataType: string
+		isHidden
+		lineageTag: f437769f-d388-5f14-bb45-1985e3ac2d5b
+		summarizeBy: none
+		sourceColumn: basis
+
+		annotation SummarizationSetBy = User
+
+	column direction
+		dataType: string
+		isHidden
+		lineageTag: d837ca8a-e852-5649-9e10-99352d05d042
+		summarizeBy: none
+		sourceColumn: direction
+
+		annotation SummarizationSetBy = User
+
+	column unit
+		dataType: string
+		isHidden
+		lineageTag: 5d995414-db7c-585a-b273-3e07522b280b
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = User
+
+	column watch_from
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: aa9d14a8-0c2e-5bad-8ee8-7dc33652ee60
+		summarizeBy: none
+		sourceColumn: watch_from
+
+		annotation SummarizationSetBy = User
+
+	column off_from
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 8aa719b1-059d-55af-a1a4-54505a4d8e6d
+		summarizeBy: none
+		sourceColumn: off_from
+
+		annotation SummarizationSetBy = User
+
+	column threshold
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 76ee0ddc-1730-591b-918e-927f0300fe76
+		summarizeBy: none
+		sourceColumn: threshold
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0f9e7037-f7d4-5800-8046-af12498acc95
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition param_status_rule = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_status_rule.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"rule_code", type text},
+				            {"kpi_code", type text},
+				            {"basis", type text},
+				            {"direction", type text},
+				            {"unit", type text},
+				            {"watch_from", type number},
+				            {"off_from", type number},
+				            {"threshold", type number},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

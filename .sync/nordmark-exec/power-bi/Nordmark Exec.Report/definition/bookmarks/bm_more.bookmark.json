@@ -1,0 +1,204 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Open More KPIs",
+  "name": "bm_more",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "layer_scrim",
+      "grp_filters",
+      "menu_panel",
+      "menu_reset",
+      "grp_filters_close",
+      "menu_param_granularity",
+      "menu_item_fy",
+      "menu_item_wide",
+      "menu_item",
+      "menu_showing",
+      "menu_param_comparator",
+      "menu_param_region",
+      "menu_param_category",
+      "menu_param_attr_group",
+      "menu_param_attr_lever",
+      "menu_param_attr_owner",
+      "grp_how",
+      "how_panel",
+      "grp_how_close",
+      "grp_more",
+      "more_panel",
+      "grp_more_close",
+      "more_table"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "exec_landing",
+    "sections": {
+      "exec_landing": {
+        "visualContainers": {
+          "layer_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "menu_panel": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_reset": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_granularity": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item_fy": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item_wide": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_item": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_showing": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_comparator": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_region": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_category": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_group": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_lever": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "menu_param_attr_owner": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "how_panel": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "grp_how_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "more_panel": {
+            "singleVisual": {
+              "visualType": "image"
+            }
+          },
+          "grp_more_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "more_table": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_filters": {
+            "isHidden": true
+          },
+          "grp_how": {
+            "isHidden": true
+          },
+          "grp_more": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

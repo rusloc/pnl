@@ -1,0 +1,152 @@
+/// Site: 145 stores (142 trading at W43), ONLINE, WHOLESALE, DC_TIL, DC_WIL. scope_code = region switcher value (NL / BE / ONLINE; null for WHOLESALE and DCs).
+table dim_store
+	lineageTag: 17b65ce0-75f7-5ad2-9fd5-2ff6f0d354d0
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: 12791bea-1f50-5b15-a463-ab2f26263bb7
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column store_name
+		dataType: string
+		lineageTag: 93e78eeb-1f29-5e05-ac4e-40280427fc2e
+		summarizeBy: none
+		sourceColumn: store_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		lineageTag: 6f5a25b3-404d-5201-9643-33222abaa3f0
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column format
+		dataType: string
+		lineageTag: cd08d085-cb54-5bc1-9d02-a3936f3081f9
+		summarizeBy: none
+		sourceColumn: format
+
+		annotation SummarizationSetBy = User
+
+	column country
+		dataType: string
+		lineageTag: 45323586-a2d5-56d2-aa25-4750e253654a
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = User
+
+	column region
+		dataType: string
+		lineageTag: b6d6e982-06dc-53fb-af17-856d6fb3e0e8
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = User
+
+	column scope_code
+		dataType: string
+		lineageTag: 1919ae31-8660-594b-adc1-63cddccd238d
+		summarizeBy: none
+		sourceColumn: scope_code
+
+		annotation SummarizationSetBy = User
+
+	column cluster
+		dataType: string
+		lineageTag: f1370fb4-8bf7-52a5-a4b5-df8a132fe670
+		summarizeBy: none
+		sourceColumn: cluster
+
+		annotation SummarizationSetBy = User
+
+	column sales_area_sqm
+		dataType: int64
+		formatString: 0
+		lineageTag: ef886a13-7c26-56b1-9f8f-956b1fc51c6d
+		summarizeBy: none
+		sourceColumn: sales_area_sqm
+
+		annotation SummarizationSetBy = User
+
+	column open_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 802ed18f-5188-5c0d-a98e-a76198d5d560
+		summarizeBy: none
+		sourceColumn: open_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column close_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 6ff13e37-ebd5-54bc-b605-7311b3f0441b
+		summarizeBy: none
+		sourceColumn: close_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column refit_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: f81a29f2-758e-5831-8748-90111a5fb687
+		summarizeBy: none
+		sourceColumn: refit_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ec2566ff-07da-5cd2-a2b5-fc2b2349d656
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_store = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_store.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"store_code", type text},
+				            {"store_name", type text},
+				            {"channel_code", type text},
+				            {"format", type text},
+				            {"country", type text},
+				            {"region", type text},
+				            {"scope_code", type text},
+				            {"cluster", type text},
+				            {"sales_area_sqm", Int64.Type},
+				            {"open_date", type date},
+				            {"close_date", type date},
+				            {"refit_date", type date},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

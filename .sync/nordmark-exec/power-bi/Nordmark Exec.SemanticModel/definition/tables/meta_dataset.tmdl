@@ -1,0 +1,61 @@
+/// Dataset metadata from parquet/manifest.json: as-of week (drives every window, E-05) and the refresh stamp.
+table meta_dataset
+	isHidden
+	lineageTag: ea0e8ba6-cb22-59db-bba8-f46eeccc5abc
+
+	column current_week_key
+		dataType: string
+		isHidden
+		lineageTag: 94bf471b-997e-55f6-bf33-e9fca17d5a25
+		summarizeBy: none
+		sourceColumn: current_week_key
+
+		annotation SummarizationSetBy = User
+
+	column as_of
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 4f8ad566-e78d-57a5-afa7-b183d9b433f1
+		summarizeBy: none
+		sourceColumn: as_of
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column refreshed
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: 4d467c20-5923-5805-a2d1-a5aac9525583
+		summarizeBy: none
+		sourceColumn: refreshed
+
+		annotation SummarizationSetBy = User
+
+	column seed
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 24add428-944c-541b-b969-eaf086bb092c
+		summarizeBy: none
+		sourceColumn: seed
+
+		annotation SummarizationSetBy = User
+
+	partition meta_dataset = m
+		mode: import
+		source =
+				let
+				    // manifest.json is written by the generator next to the Parquet files (data README Files).
+				    src = Json.Document(File.Contents(DataFolder & "\manifest.json")),
+				    tbl = #table(
+				        type table [current_week_key = text, as_of = date, refreshed = datetime, seed = Int64.Type],
+				        {{src[current_week_key], Date.FromText(src[as_of]), DateTime.FromText(src[refreshed]), src[seed]}}
+				    )
+				in
+				    tbl
+
+	annotation PBI_ResultType = Table
+

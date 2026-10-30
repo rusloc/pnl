@@ -1,6 +1,10 @@
-from rusloc/pnl (ginee) · to vosk.dev repo agent · 2026-10-28 · status: ready
+from rusloc/pnl (ginee, bip) · to vosk.dev repo agent · 2026-10-30 · status: ready
 
-Verified 2026-10-28 by bip: opened in Power BI Desktop with `DataFolder` = this pack's `data` folder; full refresh 18 s, the Parquet DECIMAL columns load unchanged and all 23 tables match the row counts below. `tests/control-totals.dax`: 23 of 23 blocks green, 18 `_pass` blocks / 846 rows TRUE (T-06 552/552, T-P 601/601) and 5 inspection blocks as expected (T-01/T-02, T-03, T-17, T-07 empty). Run one `EVALUATE` at a time: the whole file in one batch ran out of memory, and the T-P blocks took 19 min in total. `powerbi-report-author validate`: 0 errors, 0 warnings.
+**Opens with loaded data (ADR-0014 item 7).** The model cache `ACME Unified PnL.SemanticModel/.pbi/cache.abf` (61 MB) was refreshed on 2026-10-30 from this pack's own `data/` Parquet. Open the `.pbip` and the report shows numbers at once; no refresh is needed. Verified 2026-10-30 by bip on the pack as committed: opened from disk in Power BI Desktop with `DataFolder` = the placeholder, all 44 tables loaded (1,251,954 rows, every partition Ready, no refresh), the P&L statement rendered with data, and T-06 passed without a refresh (headline 24 rows TRUE, full reconciliation 552 / 552). `powerbi-report-author validate`: 0 errors, 0 warnings.
+
+**Publish the loaded model as is.** Do not refresh on upload and do not schedule a refresh: the source is local Parquet, which the service could only read through an on-premises gateway. The published report is a snapshot of this data. `DataFolder` is a placeholder and matters only for a refresh in Desktop. No workspace, dataset, tenant or capacity IDs belong in `.sync/`.
+
+Earlier check, 2026-10-28, by bip: opened in Power BI Desktop with `DataFolder` = this pack's `data` folder; full refresh 18 s, the Parquet DECIMAL columns load unchanged and all 23 tables match the row counts below. `tests/control-totals.dax`: 23 of 23 blocks green, 18 `_pass` blocks / 846 rows TRUE (T-06 552/552, T-P 601/601) and 5 inspection blocks as expected (T-01/T-02, T-03, T-17, T-07 empty). Run one `EVALUATE` at a time: the whole file in one batch ran out of memory, and the T-P blocks took 19 min in total. `powerbi-report-author validate`: 0 errors, 0 warnings.
 
 # ACME Unified P&L — Power BI pack (PBIP + local Parquet)
 
@@ -17,6 +21,7 @@ Data, names and numbers are fictional: ACME is an invented company with 3 entiti
 |---|---|
 | `ACME Unified PnL.pbip` | Open this in Power BI Desktop |
 | `ACME Unified PnL.SemanticModel/` | TMDL, Import, 23 tables from Parquet + 20 calculated / disconnected tables + `_measures` (253 measures), 35 relationships, 0 RLS roles, compatibility level 1702 |
+| `ACME Unified PnL.SemanticModel/.pbi/cache.abf` | The loaded model (Desktop's data cache, 61 MB), refreshed 2026-10-30 from `data/` |
 | `ACME Unified PnL.Report/` | PBIR: page `pnl_one_pager` (views and side-bar menus as bookmarks) + tooltip page `tt_pl_info`, theme and SVG icons |
 | `tests/control-totals.dax` | DAX query view tests (spec §10: T-01 … T-17, T-06 full reconciliation, ADR-0008 rate paths, views v4, B-vs-C parity) |
 | `data/*.parquet` | The 23 source tables the model imports, one file per table (31.8 MB in total) |
@@ -26,21 +31,25 @@ Data, names and numbers are fictional: ACME is an invented company with 3 entiti
 
 1. Use a current Power BI Desktop that opens Power BI Projects (`.pbip`) with a TMDL model and a PBIR report. On an older build,
    turn these on under Options > Preview features.
-2. Open `ACME Unified PnL.pbip`. The pack has no data cache (`.pbi/cache.abf` is excluded), so every table is empty until the first
-   refresh.
-3. Set the parameter first: Transform data > Manage parameters > **DataFolder** = the full local path of this pack's `data`
-   folder, without a trailing backslash (for example `<pack root>\data`). The shipped value is the placeholder
-   `<folder holding the Parquet files>`, so a refresh fails until you change it.
-4. Close & Apply, then Home > Refresh. Expect roughly half a minute (1.25 M fact rows). The lakehouse version took 28 s in the
-   service. Local timing for this pack has not been measured.
-5. Save. Desktop then writes its own `.pbi/localSettings.json` and `cache.abf`. Keep both out of git.
+2. Open `ACME Unified PnL.pbip`. The pack carries its data cache, so every table is loaded and the report shows numbers. Do not
+   refresh before publishing.
+3. Only if you want to refresh in Desktop: set the parameter first, Transform data > Manage parameters > **DataFolder** = the full
+   local path of this pack's `data` folder, without a trailing backslash (for example `<pack root>\data`). The shipped value is the
+   placeholder `<folder holding the Parquet files>`, so a refresh fails until you change it. Close & Apply, then Home > Refresh
+   (23 s on the source machine, 1.25 M fact rows). Do not commit that machine path back to `.sync/`.
+4. Desktop writes its own `.pbi/localSettings.json` on open; keep it out of git.
+
+How the cache was built (re-pack = refresh again): open a copy with `DataFolder` = the real `data` path, full refresh, set
+`DataFolder` back to the placeholder in the open model without refreshing (the loaded data stays), save in Desktop, then copy only
+`cache.abf` into the pack. Editing the placeholder into `expressions.tmdl` after the save does not work: on the next open Desktop
+sees the changed parameter and empties every imported table.
 
 Every imported table reads `Parquet.Document(File.Contents(DataFolder & "\<table>.parquet"))`. A file source does not fold, so each
 file is read whole. The rest of each partition (column selection and explicit types) is unchanged from the repo model.
 
 ## How to verify
 
-1. Row counts after the refresh (Model view or a `COUNTROWS` query):
+1. Row counts as shipped, and after any refresh (Model view or a `COUNTROWS` query):
 
    | Table | Rows | Table | Rows |
    |---|---:|---|---:|
@@ -64,8 +73,8 @@ file is read whole. The rest of each partition (column selection and explicit ty
 | `definition/expressions.tmdl` | Parameters `SqlEndpoint` (lakehouse SQL endpoint host) and `Database` | One text parameter `DataFolder` (placeholder value, described in a `///` comment) |
 | `definition/model.tmdl` | `PBI_QueryOrder` starts with `SqlEndpoint`, `Database` | Starts with `DataFolder`; the rest is unchanged |
 | 23 table partitions in `definition/tables/` | `Sql.Database(SqlEndpoint, Database)` + navigation to `acme_pl.<table>` | One comment line + `Data = Parquet.Document(File.Contents(DataFolder & "\<table>.parquet"))`; the column selection and type steps are unchanged |
-| Excluded | `.pbi/localSettings.json` (report and model), `.pbi/cache.abf`, `__backup__/` | — |
-| Added | — | `data/`, `checks/`, this README |
+| Excluded | `.pbi/localSettings.json` (report and model), `__backup__/` | — |
+| Added | — | `data/`, `checks/`, this README, `.pbi/cache.abf` refreshed from `data/` (2026-10-30) |
 
 How the Parquet files were produced: from the repo CSVs by the same script that loads the lakehouse
 (`fabric-data/lh_raw/load_acme_pl.py --parquet-out <dir> --tables <23 tables>`). It applies the same strict CSV parse, the same type
@@ -81,14 +90,16 @@ Parquet types: text = `string`; whole numbers = `int32` (the model stores int64,
 
 ## Known caveats
 
-- **Desktop visual check pending.** bip refreshed this pack from its own Parquet and ran every DAX test on 2026-10-28 (all green, see Verified). The USER has not yet done the visual first-open check of the report pages.
+- **Desktop visual check pending.** bip refreshed this pack from its own Parquet and ran every DAX test on 2026-10-28 (all green, see Verified), and on 2026-10-30 render-checked the P&L statement view of the loaded pack. The USER has not yet done the visual first-open check of the other views.
+- **Cache size.** `cache.abf` is 61 MB: above the 50 MB at which GitHub warns, below its 100 MB hard limit. Every re-pack adds a new copy to the repo history.
 - **Parquet DECIMAL columns.** The amounts are stored as Parquet DECIMAL, not double, so the values are exact and match the lakehouse.
   Power Query reads DECIMAL as Decimal Number, and the partitions then apply the repo's explicit types. If Desktop rejects a DECIMAL
   column on refresh, report it back. The fix is a regenerated file set, not a model edit.
 - **Publishing.** In the Power BI service, a model that reads local files needs an on-premises data gateway for scheduled or manual
-  refresh. Without a gateway, publish the model already refreshed in Desktop and do not schedule a refresh. The data is static.
+  refresh. Publish the loaded model as it is and do not schedule a refresh. The data is static.
 - **Repo drift.** The repo model is maintained in rusloc/pnl. If its measures or report change after `fcfa19c`, this pack has to be
-  re-copied: re-run the copy and re-apply the 3 source edits above. The data only changes if the dataset or the derivations change.
+  re-copied: re-run the copy, re-apply the 3 source edits above and refresh the cache again. The data only changes if the dataset or
+  the derivations change.
 - `_meta_refresh` shows the time of the last refresh (`NOW()`).
 - `.platform` files keep the repo's `logicalId` values. They only matter if a workspace is connected to Git; give them new GUIDs if
   both copies ever share one workspace.

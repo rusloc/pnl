@@ -1,0 +1,52 @@
+/// Filters menu attribute Owner (E-53): multi-select, OR within, AND across. Disconnected; matched to dim_kpi[owner].
+table param_attr_owner
+	lineageTag: 6899171c-f555-5db5-af1a-5ffd483591a6
+
+	column attr_code
+		dataType: string
+		isHidden
+		lineageTag: f57370de-8c63-58a4-af37-e7ecb9980e51
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_code]
+
+		annotation SummarizationSetBy = User
+
+	column attr_label
+		dataType: string
+		lineageTag: 1cec808e-42ee-569e-b246-0e9e0bb6e1c5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 32ce6673-18c8-57b8-b375-5f2215c869eb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_attr_owner = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "attr_code", STRING
+				    ,"attr_label", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "commercial", "Commercial", 1 }
+				        ,{ "supply", "Supply chain", 2 }
+				        ,{ "finance", "Finance", 3 }
+				        ,{ "digital", "Digital", 4 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

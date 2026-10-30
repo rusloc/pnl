@@ -1,0 +1,52 @@
+/// Period type of the picker (E-90): Week, Month (4-5-4 retail period), Quarter, Year. Filters dim_item.
+table param_granularity
+	lineageTag: 1c08b56c-4bff-5c30-9ce4-c9df927e4d16
+
+	column granularity_code
+		dataType: string
+		isHidden
+		lineageTag: 1d23b211-53a9-57dc-817a-fc0faac2d0f2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [granularity_code]
+
+		annotation SummarizationSetBy = User
+
+	column granularity_name
+		dataType: string
+		lineageTag: 4a22edf9-7b4f-552e-b246-c0ec8a775269
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [granularity_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c365d379-67d3-5979-ab54-9db294e1a012
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_granularity = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "granularity_code", STRING
+				    ,"granularity_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "W", "Week", 1 }
+				        ,{ "P", "Month", 2 }
+				        ,{ "Q", "Quarter", 3 }
+				        ,{ "FY", "Year", 4 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

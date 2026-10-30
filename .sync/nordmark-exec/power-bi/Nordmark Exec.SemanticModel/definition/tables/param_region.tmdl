@@ -1,0 +1,52 @@
+/// Region / format switcher (E-15): All, Netherlands, Belgium, Online only. Disconnected; leaf measures read scope_code.
+table param_region
+	lineageTag: 84dfdcda-14fd-5264-bd65-3987dd194c6d
+
+	column scope_code
+		dataType: string
+		isHidden
+		lineageTag: 8a8e797c-68fa-5230-9776-4ea0f9177e99
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [scope_code]
+
+		annotation SummarizationSetBy = User
+
+	column region_name
+		dataType: string
+		lineageTag: d9609462-c90f-5e8b-9b67-08f5df600400
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [region_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ed30f60e-b49d-58cf-a8f6-dc3af1fccd44
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_region = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "scope_code", STRING
+				    ,"region_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "ALL", "All", 1 }
+				        ,{ "NL", "Netherlands", 2 }
+				        ,{ "BE", "Belgium", 3 }
+				        ,{ "ONLINE", "Online only", 4 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

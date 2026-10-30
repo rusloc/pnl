@@ -1,0 +1,53 @@
+/// Filters menu attribute Lever (E-53): multi-select, OR within, AND across. Disconnected; matched to dim_kpi[lever].
+table param_attr_lever
+	lineageTag: 64a3e6e9-2035-5081-956d-7fee6768f894
+
+	column attr_code
+		dataType: string
+		isHidden
+		lineageTag: 58e0517a-6ba1-59de-bf8e-8f67fa514df7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_code]
+
+		annotation SummarizationSetBy = User
+
+	column attr_label
+		dataType: string
+		lineageTag: 800081bc-d4d0-528d-9a14-85788d60e044
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [attr_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ec0c05e9-4f35-50c6-9609-4c5dd337517d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_attr_lever = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "attr_code", STRING
+				    ,"attr_label", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "sales", "Sales", 1 }
+				        ,{ "margin", "Margin", 2 }
+				        ,{ "stock", "Stock", 3 }
+				        ,{ "supply", "Supply", 4 }
+				        ,{ "cash", "Cash", 5 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

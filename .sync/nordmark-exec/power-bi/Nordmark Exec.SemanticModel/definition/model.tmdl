@@ -1,0 +1,48 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder", "meta_dataset", "dim_week", "dim_store", "dim_category", "dim_supplier", "dim_cost_type", "dim_kpi", "fact_sales_week", "fact_budget_week", "fact_supplier_income_week", "fact_inventory_week", "fact_forecast_week", "fact_availability_week", "fact_receipts_week", "fact_po_week", "fact_opex_week", "param_status_rule", "param_target"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_week
+ref table dim_store
+ref table dim_category
+ref table dim_supplier
+ref table dim_cost_type
+ref table dim_kpi
+ref table fact_sales_week
+ref table fact_budget_week
+ref table fact_supplier_income_week
+ref table fact_inventory_week
+ref table fact_forecast_week
+ref table fact_availability_week
+ref table fact_receipts_week
+ref table fact_po_week
+ref table fact_opex_week
+ref table param_status_rule
+ref table param_target
+ref table meta_dataset
+ref table param_comparator
+ref table param_region
+ref table param_attr_group
+ref table param_attr_lever
+ref table param_attr_owner
+ref table _measures
+ref table param_granularity
+ref table dim_item
+
+ref cultureInfo en-US
+

@@ -1,6 +1,6 @@
 # Report packs v2: P&L, Mirelo Sales, Nordmark Exec, hand-off for publishing and embedding
 
-from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-30 · status: draft (the Power BI packs are being refreshed with their data; this line flips to ready when they are verified)
+from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-30 · status: **ready** (all eight folders verified 2026-10-30; the three Power BI packs open with their data, no refresh)
 
 This note supersedes `2026-10-28-report-packs.md`. It is the single entry point to every report this repo hands over. Each report sits in one self-contained folder, and each sub-folder has its own README with build steps, test counts and caveats. Read those before you build. Decision record: ADR-0014 (amended 2026-10-30) in rusloc/pnl.
 
@@ -38,7 +38,8 @@ The P&L also has a Microsoft Fabric (Rayfin) app. It needs an Entra sign-in, so 
 
 ## Per report
 
-- **P&L:** unchanged since 2026-10-28 apart from the loaded model in the PBI pack. JS 196 tests; PBI 23 test blocks, T-06 552 / 552.
+- **All Power BI packs:** the loaded model is `<name>.SemanticModel/.pbi/cache.abf`, refreshed 2026-10-30 from the pack's own Parquet; `DataFolder` is the placeholder. Open, check, publish. Don't save the PBIP in Desktop before publishing: it rewrites the text files and adds a `.gitignore` that excludes the cache.
+- **P&L:** unchanged since 2026-10-28 apart from the loaded model in the PBI pack. Its cache is 61 MB, over GitHub's 50 MB warning but under the 100 MB limit. JS 196 tests; PBI 23 test blocks, T-06 552 / 552 (re-run on the loaded pack).
 - **Mirelo:** content is shipped as is (USER 2026-10-30). Open items are listed in `mirelo-sales/js-app/README.md`: the L11 placeholder, no cross-filtering, and three open questions.
 - **Nordmark Exec (new):** a 12-card executive dashboard with:
   - a period picker (Week / Month / Quarter / Year → FY → item; default Week 43 FY2026);
@@ -46,7 +47,7 @@ The P&L also has a Microsoft Fabric (Rayfin) app. It needs an Entra sign-in, so 
   - Region and a Category filter (All, one category or a mix; EBITDA and Supplier OTIF are N/A under a category);
   - ⓘ pop-ups with stacked Actual and Budget / Target figures.
 
-  Both flavours reconcile to the same control totals (26,143 + 10,514 rows). Accepted platform differences are listed in each README.
+  Both flavours reconcile to the same control totals (26,143 + 10,514 rows): JS 458 tests; PBI 207 test blocks / 50,390 rows TRUE. A card-face comparison of the two flavours across 7 states found 0 mismatches in 945 fields. Accepted platform differences are listed in each README.
 
 ## Superseded
 

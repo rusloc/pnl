@@ -1,0 +1,76 @@
+/// Supplier (1,100); joins supplier income and PO lines.
+table dim_supplier
+	lineageTag: 172c2830-b48a-5d2b-a714-15e447bfee15
+
+	column supplier_code
+		dataType: string
+		isHidden
+		lineageTag: fa628216-2995-5a05-bea7-11b52f8b921a
+		summarizeBy: none
+		sourceColumn: supplier_code
+
+		annotation SummarizationSetBy = User
+
+	column supplier_name
+		dataType: string
+		lineageTag: 45d9d94a-cd84-5b2e-82b0-99cf314e3923
+		summarizeBy: none
+		sourceColumn: supplier_name
+
+		annotation SummarizationSetBy = User
+
+	column supplier_group
+		dataType: string
+		lineageTag: 674f5caf-542c-5b61-8338-94f974406eeb
+		summarizeBy: none
+		sourceColumn: supplier_group
+
+		annotation SummarizationSetBy = User
+
+	column country
+		dataType: string
+		lineageTag: 7d2729d6-b168-55f5-8fd5-8af28f8fdff8
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = User
+
+	column primary_category_code
+		dataType: string
+		lineageTag: a451f577-b201-5b1e-aa01-4e0bb8551896
+		summarizeBy: none
+		sourceColumn: primary_category_code
+
+		annotation SummarizationSetBy = User
+
+	column rebate_scheme
+		dataType: string
+		lineageTag: a8dcecf2-0914-5a71-8643-3d8744ed4d59
+		summarizeBy: none
+		sourceColumn: rebate_scheme
+
+		annotation SummarizationSetBy = User
+
+	partition dim_supplier = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_supplier.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"supplier_code", type text},
+				            {"supplier_name", type text},
+				            {"supplier_group", type text},
+				            {"country", type text},
+				            {"primary_category_code", type text},
+				            {"rebate_scheme", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

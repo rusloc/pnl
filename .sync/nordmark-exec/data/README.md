@@ -6,7 +6,7 @@ Verified 2026-10-30 by ginee on this pack's own files: `checks/verify.py` prints
 
 The dataset behind the Nordmark Retail executive dashboard (ADR-0013): one fictional NL / BE multi-category reseller, EUR only, weekly grain on a 4-5-4 retail calendar, built story-first so the Week-43 landing cards show a fixed set of values. All figures are invented.
 
-This folder is a copy of the repo's `data/nordmark_retail_dummy_data/`. The source of truth stays in that repo folder: any change is made there first and re-packed here (ADR-0014). The Power BI pack in `../power-bi/` (issued later) imports `parquet/` directly through its `DataFolder` parameter, so the Parquet file names here must not change. The JS app pack in `../js-app/` (issued later) ships its own prebuilt data.
+This folder is a copy of the repo's `data/nordmark_retail_dummy_data/`. The source of truth stays in that repo folder: any change is made there first and re-packed here (ADR-0014). The Power BI pack in `../power-bi/` ships its loaded model and reads `parquet/` through its `DataFolder` parameter only on a Desktop refresh, so the Parquet file names here must not change. The JS app pack in `../js-app/` ships its own prebuilt data.
 
 | Path | What |
 |---|---|

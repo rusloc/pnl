@@ -1,0 +1,116 @@
+/// Budget FY2026 W1-W52, week x selling site x category.
+table fact_budget_week
+	lineageTag: dc3a6bd0-78f7-5c56-a846-8e5ec78704b0
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: f567108f-5baa-5d1d-a34d-2c44ac4b99b7
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column store_code
+		dataType: string
+		isHidden
+		lineageTag: b48cf09f-4e83-5d52-985b-b1a54fd7d4ea
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = User
+
+	column category_code
+		dataType: string
+		isHidden
+		lineageTag: f54261b8-6704-518f-abe7-a5f9a541a147
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = User
+
+	column net_sales_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: fe001ec0-3b74-5b2a-a591-1e5a707f2122
+		summarizeBy: none
+		sourceColumn: net_sales_bud
+
+		annotation SummarizationSetBy = User
+
+	column gross_sales_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: b81cd6bc-2d7c-504c-9ddb-07a396a3bd5d
+		summarizeBy: none
+		sourceColumn: gross_sales_bud
+
+		annotation SummarizationSetBy = User
+
+	column markdown_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 2e3a9d6e-20da-5ea0-a372-3fa092cca378
+		summarizeBy: none
+		sourceColumn: markdown_bud
+
+		annotation SummarizationSetBy = User
+
+	column cogs_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 4f099532-35d5-556a-b2d3-def1e9859d6d
+		summarizeBy: none
+		sourceColumn: cogs_bud
+
+		annotation SummarizationSetBy = User
+
+	column back_margin_bud
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: c2bed4e2-21d0-5a75-8bc4-604eebc5f01a
+		summarizeBy: none
+		sourceColumn: back_margin_bud
+
+		annotation SummarizationSetBy = User
+
+	column is_lfl
+		dataType: boolean
+		isHidden
+		lineageTag: c6773d74-2df3-5a97-93fa-5a50b1f761d7
+		summarizeBy: none
+		sourceColumn: is_lfl
+
+		annotation SummarizationSetBy = User
+
+	partition fact_budget_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_budget_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"store_code", type text},
+				            {"category_code", type text},
+				            {"net_sales_bud", type number},
+				            {"gross_sales_bud", type number},
+				            {"markdown_bud", type number},
+				            {"cogs_bud", type number},
+				            {"back_margin_bud", type number},
+				            {"is_lfl", type logical}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

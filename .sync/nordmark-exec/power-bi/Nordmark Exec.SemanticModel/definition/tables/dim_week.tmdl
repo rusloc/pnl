@@ -1,0 +1,218 @@
+/// Retail week, 4-5-4 calendar, FY2025 W1 .. FY2026 W52 (104 rows). sort_index 1-104 drives every window; ly_week_key / lw_week_key are the LY / LW keys (E-10 .. E-12).
+table dim_week
+	lineageTag: 48d1f990-6dae-5253-be36-30a8e7f2cc6d
+
+	column week_key
+		dataType: string
+		isHidden
+		lineageTag: a4b91d68-21a7-5743-85b0-0a607514be98
+		summarizeBy: none
+		sourceColumn: week_key
+
+		annotation SummarizationSetBy = User
+
+	column fy
+		dataType: int64
+		formatString: 0
+		lineageTag: 4010f6c5-331d-501c-8f6f-653042a88635
+		summarizeBy: none
+		sourceColumn: fy
+
+		annotation SummarizationSetBy = User
+
+	column week_of_fy
+		dataType: int64
+		formatString: 0
+		lineageTag: 5b1b6fc9-19c5-5eb3-b13f-94ca6eb2ab4d
+		summarizeBy: none
+		sourceColumn: week_of_fy
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 05220a93-236e-563b-91ef-166bed9dbff7
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column period
+		dataType: int64
+		formatString: 0
+		lineageTag: bd2eec58-7824-5627-870e-26e5ff3c844e
+		summarizeBy: none
+		sourceColumn: period
+
+		annotation SummarizationSetBy = User
+
+	column period_key
+		dataType: string
+		lineageTag: f3ecaf88-102a-5387-984f-05e66fc08aed
+		summarizeBy: none
+		sourceColumn: period_key
+		sortByColumn: sort_index
+
+		annotation SummarizationSetBy = User
+
+	column week_of_period
+		dataType: int64
+		formatString: 0
+		lineageTag: d9bf10e0-0020-5fde-aa66-1df2b5badb09
+		summarizeBy: none
+		sourceColumn: week_of_period
+
+		annotation SummarizationSetBy = User
+
+	column weeks_in_period
+		dataType: int64
+		formatString: 0
+		lineageTag: b69159f0-4b9c-5b3d-bdff-192c1393f8f3
+		summarizeBy: none
+		sourceColumn: weeks_in_period
+
+		annotation SummarizationSetBy = User
+
+	column week_start
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: b26be3d6-7a3b-5a71-a3b8-4e66d0c06f88
+		summarizeBy: none
+		sourceColumn: week_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column week_end
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 38b6f633-ff28-5c1b-96a5-23f553bb4a60
+		summarizeBy: none
+		sourceColumn: week_end
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column period_start
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 1aada040-5c76-5034-8d7c-a59911fd24ce
+		summarizeBy: none
+		sourceColumn: period_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column period_end
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: d78bf681-c0de-5886-9d8b-e7da03af1e42
+		summarizeBy: none
+		sourceColumn: period_end
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column ly_week_key
+		dataType: string
+		isHidden
+		lineageTag: 7d1f0ea8-481f-58e2-8750-8a8528872826
+		summarizeBy: none
+		sourceColumn: ly_week_key
+
+		annotation SummarizationSetBy = User
+
+	column lw_week_key
+		dataType: string
+		isHidden
+		lineageTag: 720df45d-1e48-53eb-97f6-f25cc7747ec5
+		summarizeBy: none
+		sourceColumn: lw_week_key
+
+		annotation SummarizationSetBy = User
+
+	column is_actual
+		dataType: boolean
+		lineageTag: 9fd45b89-688c-5780-bcac-64c6b91bbcd2
+		summarizeBy: none
+		sourceColumn: is_actual
+
+		annotation SummarizationSetBy = User
+
+	column season_code
+		dataType: string
+		lineageTag: 2dd8adae-b595-5a33-83ba-564dbdcedd77
+		summarizeBy: none
+		sourceColumn: season_code
+
+		annotation SummarizationSetBy = User
+
+	column season_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 24e53b28-a64d-5786-a6b5-c13526647dde
+		summarizeBy: none
+		sourceColumn: season_week
+
+		annotation SummarizationSetBy = User
+
+	column week_label
+		dataType: string
+		lineageTag: 8d1988c8-3a82-5d19-bb0c-7d28610007f9
+		summarizeBy: none
+		sourceColumn: week_label
+		sortByColumn: sort_index
+
+		annotation SummarizationSetBy = User
+
+	column sort_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 362a8d7c-bef8-5b65-8146-d81ac8d6a15d
+		summarizeBy: none
+		sourceColumn: sort_index
+
+		annotation SummarizationSetBy = User
+
+	partition dim_week = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0013 (b), E-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly (the data README Format section).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_week.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"week_key", type text},
+				            {"fy", Int64.Type},
+				            {"week_of_fy", Int64.Type},
+				            {"quarter", Int64.Type},
+				            {"period", Int64.Type},
+				            {"period_key", type text},
+				            {"week_of_period", Int64.Type},
+				            {"weeks_in_period", Int64.Type},
+				            {"week_start", type date},
+				            {"week_end", type date},
+				            {"period_start", type date},
+				            {"period_end", type date},
+				            {"ly_week_key", type text},
+				            {"lw_week_key", type text},
+				            {"is_actual", type logical},
+				            {"season_code", type text},
+				            {"season_week", Int64.Type},
+				            {"week_label", type text},
+				            {"sort_index", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+
