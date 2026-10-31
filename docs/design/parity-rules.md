@@ -44,6 +44,7 @@ Track A (2026-10-27, `fabric-app/`, see `docs/ADD/features/track-a-pnl-views.md`
 - Track C: "Copy link" on the tabs row (F-37).
 - Nordmark Exec (2026-10-30, ADR-0013 (l) "Doc alignment", E-53 / E-91): **the FY row of the period picker at Year** — the JS flavour hides the FY row and offers the two FY items (`FY2025`, `FY2026 · to date`) as the item chips; the Power BI flavour keeps the FY row (`menu_item_fy`), which then drives the single Year chip, because a slicer cannot select a value on behalf of another slicer. Same items, same windows, same header; only the picker rows differ.
 - Nordmark Exec (2026-10-30, ADR-0013 (l), E-103): **the Category dropdown's closed-state wording** — the JS shows "All categories" in the closed dropdown and as the clearing option; the Power BI dropdown slicer shows its native "All" when nothing is picked. Same semantics (no pick = All, all 9 ticked = All), same header segment, same numbers.
+- Nordmark Exec (2026-10-30, hunter parity run): **small-card sub-titles below 1200 px** — the 6 small cards (LFL growth, Front GM, Sell-through, GMROI, Supplier OTIF, Channel mix) have no sub-title in Power BI; the JS engine still emits one ("vs LY week", "% of net sales" …) and hides it from 1200 px up (`.sm .ch h3 span`, as the v5 prototype), so at the 1440 × 810 embed both show none. Below 1200 px only the JS shows it.
 
 ## Check
 

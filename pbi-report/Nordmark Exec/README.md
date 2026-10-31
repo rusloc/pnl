@@ -13,9 +13,9 @@
 | Path | What |
 |---|---|
 | `Nordmark Exec.pbip` | Open this in Power BI Desktop |
-| `Nordmark Exec.SemanticModel/` | TMDL, Import, 17 Parquet tables + `meta_dataset` (manifest.json) + `dim_item` (calculated, the period-model items) + 6 picker tables + `_measures` (388 measures), 26 relationships, compatibility level 1702 |
+| `Nordmark Exec.SemanticModel/` | TMDL, Import, 17 Parquet tables + `meta_dataset` (manifest.json) + `dim_item` (calculated, the period-model items) + 6 picker tables + `_measures` (390 measures), 26 relationships, compatibility level 1702 |
 | `Nordmark Exec.Report/` | PBIR: page `exec_landing` (1440 x 810, FitToPage) + hidden tooltip pages `tt_info`, `tt_drill`, `tt_rule`, `tt_dot`; 4 bookmarks; custom theme and 3 SVG resources |
-| `tests/control-totals.dax` | DAX tests against `data/nordmark_retail_dummy_data/checks/control_totals_eur.csv` (180 blocks, 34,329 rows) |
+| `tests/control-totals.dax` | DAX tests against `data/nordmark_retail_dummy_data/checks/control_totals_eur.csv` and `checks/control_totals_category_eur.csv` (207 blocks, 50,390 rows) |
 | `tools/` | The generator of `_measures`, the tests and the dictionary, plus the test and timing runners (`tools/README.md`) |
 | `docs/model/nordmark-measure-dictionary.md` (repo) | Every measure: definition, spec IDs, folder, format, DAX |
 
@@ -49,7 +49,14 @@ blank in FY2025), the previous item (`lw_week_key` at Week; else the item before
 the EBITDA Previous window at Week (the previous month's first k weeks; none for week 5 of a 5-week month). `param_granularity`
 (Week / Month / Quarter / Year) filters `dim_item` (one relationship, single direction). `[_Item Key]` reads the picker and every card
 measure reads its window from `dim_item`. Status, counts and the dot are window-context measures with the thresholds of
-`param_status_rule`; status is N/A where the value or its basis is blank (FY2025 has no budget). Details:
+`param_status_rule`; status is N/A where the value or its basis is blank (FY2025 has no budget). **Category filter (ADR-0013 (l),
+E-100 … E-104):** the Category dropdown filters `dim_category[category_name]`, which joins the six category facts (sales, budget,
+inventory, forecast, availability, receipts) natively, so 9 cards follow the pick with unchanged formulas and combine with the region.
+`[_Category Active]` (a pick of fewer than all 9 categories; all 9 ticked = All) blanks the facts without a category key — every OpEx
+and EBITDA measure (`Total margin − BLANK ()` would otherwise be Total margin) and the PO / OTIF measures — so EBITDA flash and
+Supplier OTIF show the N/A face (value `–`, Δ `n/a by category`, grey chip, no bars, the one-line ⓘ note); sell-through runs on the
+seasonal part of the pick and is N/A without one; GMROI target = the pick's own row (single) or its average-on-hand-weighted mean;
+cover target keeps its forecast-weighted rule; availability 97 %. `supplier.primary_category_code` is deliberately not related. Details:
 `docs/model/nordmark-measure-dictionary.md`.
 
 ## The page (v5 map)
@@ -57,34 +64,35 @@ measure reads its window from `dim_item`. Status, counts and the dot are window-
 | Zone | Power BI |
 |---|---|
 | Side bar 56 px | Static SVG (mark, 3 icons) + transparent buttons: Filters, How to read, More KPIs (bookmarks `bm_filters`, `bm_how`, `bm_more`; one layer at a time, `bm_close` from × and the scrim). Badge = image measure (active attribute picks) |
-| Header | One SVG image measure: brand, the picked item's period line (`Week 43 · 19–25 Oct 2026`, `Quarter 4 to date · 28 Sep–25 Oct 2026`, `Month 10 FY2025 · …`, bold up to " to date"), comparator line (`vs Budget`, `vs Last year (same retail week / weeks)`, `vs Previous week / month / quarter`), region, refresh stamp |
+| Header | One SVG image measure: brand, the picked item's period line (`Week 43 · 19–25 Oct 2026`, `Quarter 4 to date · 28 Sep–25 Oct 2026`, `Month 10 FY2025 · …`, bold up to " to date"), comparator line (`vs Budget`, `vs Last year (same retail week / weeks)`, `vs Previous week / month / quarter`), region + the category segment of a pick (` · Electronics`, ` · Electronics & Toys & leisure`, ` · 3 categories`; nothing at All or with all 9 ticked), refresh stamp |
 | Status line | SVG: dot (literal v5 rule over the rated cards, grey with "no rated card" when none, static), three count pills, "n of 12 metrics · picks". Hover target on the dot → `tt_dot` |
 | Cards | 12 image visuals at the v5 rectangles (3 hero 437 x 236, 3 medium 437 x 176, 6 small 213 x 168), one `Card SVG <KPI>` measure each: wash, title + sub-title (`week 43, all channels` / `month 10` / `quarter 4 to date`; EBITDA `month 10 to date` at Week; LFL `vs LY week / month / quarter / year`; + prov.), chip (– N/A grey where the card has no status), value, Δ vs the comparator in the status colour (`vs prev. wk / mth / qtr` for Previous; any `n/a vs …` in muted ink #5F6878), bars of the picked type (13 weeks / 12 months / 8 quarters / 2 years ending at the item, picked one in the status colour, dotted target = the item's basis, blank before the data starts), ⓘ and binoculars |
 | Layer scrim | One shared `layer_scrim` (ink at 78 % transparency, full page incl. the side bar, below every layer group) shown by `bm_filters` / `bm_how` / `bm_more`, hidden by `bm_close`; a click on it runs `bm_close` |
 | Hover targets per card | ⓘ → `tt_info` (548 x 715): stacked block (USER 2026-10-30) — `Actual` 16 px / 600 #374151 → value 48 px / 700 ink (unit 16 px / 500 muted) → 12 px → dotted 20 px swatch + basis name (`Budget` / `Target` / `Plan`) 16 px / 600 #374151 → target value 40 px / 700 ink, unit 16 px / 600 #374151 (no basis: the name and a muted `–`); 4 px between each label and its number; any comparator; then Δ (EBITDA at Week vs Previous names the weeks: `vs P9 weeks 1–4`), labelled bars, 3 stats by type, What it is / Why it matters / Formula / Worked example / Status rule (no owner note), tags Group · Lever · Owner closed by the refresh / provisional note, no footer row; binoculars → `tt_drill`; chip → `tt_rule` |
-| Filters menu | Solid panel with button slicers. **Period:** type `menu_param_granularity` (Week · Month · Quarter · Year; single, force selection) → FY `menu_item_fy` (FY2025 · FY2026) → item: `menu_item_wide` (Quarter / Year chips incl. `Q4 · to date`, `FY2026 · to date`) and `menu_item` (Week / Month chips W1 … W52 / P1 … P12, 8 x 7 grid), then `menu_showing` = "Showing" + the header period line. Comparator (Budget · Last year · Previous; the Previous row is hidden at Year by a visual filter on `[_Comparator Row Visible]`), Region / format, then Group, Lever, Owner (multi select; Horizon and Statement removed, `dim_kpi.horizon` / `statement` stay in the data). Reset = *Clear all slicers*: type back to Week (force selection), FY and item empty → Week 43 FY2026 · Budget · All |
+| Filters menu | Solid panel with button slicers. **Period:** type `menu_param_granularity` (Week · Month · Quarter · Year; single, force selection) → FY `menu_item_fy` (FY2025 · FY2026) → item: `menu_item_wide` (Quarter / Year chips incl. `Q4 · to date`, `FY2026 · to date`) and `menu_item` (Week / Month chips W1 … W52 / P1 … P12, 8 x 7 grid), then `menu_showing` = "Showing" + the header period line. Comparator (Budget · Last year · Previous; the Previous row is hidden at Year by a visual filter on `[_Comparator Row Visible]`), Region / format, **Category** (`menu_param_category`: dropdown on `dim_category[category_name]`, multi select, no Select all; shows Power BI's own "All" when nothing is picked), then Group, Lever, Owner (multi select; Horizon and Statement removed, `dim_kpi.horizon` / `statement` stay in the data). Reset = *Clear all slicers*: type back to Week (force selection), FY, item and category empty → Week 43 FY2026 · Budget · All · all categories. The layer bookmarks only show / hide the menu (the category slicer is one of their targets); they never reset it |
 | How to read · More KPIs | SVG panels (How to read is a measure: eyebrow `Nordmark · <item title>`, comparator name, the bars bullet names the four lengths); More KPIs = a table of the 20 bench KPIs from `dim_kpi` |
 
 ## Tests
 
-`tests/control-totals.dax` holds 180 blocks; run each `// ==== BLOCK` as its own query (one ADOMD batch of all blocks runs out of
-memory; one large UNION of card or SVG measures also explodes the plan (13 GB), so T-N2, T-N3, T-N4, T-N7 and T-N9 are one scenario per block). Every row returns `_pass`.
+`tests/control-totals.dax` holds 207 blocks; run each `// ==== BLOCK` as its own query (one ADOMD batch of all blocks runs out of
+memory; one large UNION of card or SVG measures also explodes the plan (13 GB), so T-N2, T-N3, T-N4, T-N7, T-N9 and T-N10 are one scenario per block). Every row returns `_pass`.
 Full run on 2026-10-30 (period model): 34,118 rows, 0 not TRUE (about 2 h 10 min serially). After the 2026-10-30 perf pass and ⓘ
 block, the behaviour blocks T-N2 … T-N9 and the slowest T-N1 block per scope (`ALL-P26`, `NL-P25`, `BE-P26`, `ONLINE-P25`) were run
-on a scratch copy of this PBIP with the USER's data cache (ADOMD): 164 blocks, 14,471 rows, 0 not TRUE (T-N1 4 / 7,373; T-N2 100 / 4,932; T-N3 30 / 148; T-N4 16 / 1,716; T-N5 27; T-N6 11; T-N7 4 / 84; T-N8 5; T-N9 7 / 175). The full run follows after the category round.
-Runner: `tools/run/run-tests.ps1 -Port <port> -Pattern "T-N[2-9]|T-N1-(ALL-P26|NL-P25|BE-P26|ONLINE-P25)"`.
+on a scratch copy of this PBIP with the USER's data cache (ADOMD): 164 blocks, 14,471 rows, 0 not TRUE (T-N1 4 / 7,373; T-N2 100 / 4,932; T-N3 30 / 148; T-N4 16 / 1,716; T-N5 27; T-N6 11; T-N7 4 / 84; T-N8 5; T-N9 7 / 175). **Full run after the category round (2026-10-30):** 207 blocks, 50,390 rows, 0 not TRUE on a scratch copy of this PBIP with the USER's data cache (ADOMD, about 3 h 50 min serially incl. a repeat of the 18 T-N10 blocks): T-N1 20 / 27,231; T-N2 100 / 4,932; T-N3 36 / 179; T-N4 16 / 1,716; T-N5 27; T-N6 11; T-N7 5 / 90; T-N8 5; T-N9 9 / 225; T-N10 18 / 15,974.
+Runner: `tools/run/run-tests.ps1 -Port <port>` (all blocks) or `-Pattern "T-N10"` (category scopes only).
 
 | Block | Checks |
 |---|---|
 | T-N1 (20) | every row of the 87 item keys of the CSV (27,231 rows: W / P / Q / FY keys and the `@k` like-length and EBITDA-Previous keys) through the base layer, per scope; N/A rows (absent in the CSV = blank). The 6 legacy `PTD-` / `YTD-` keys are retired here: their mix rows carried the W43 exit mix, the model now reads window shares (ET-24) |
 | T-N2 (100) | card layer through the picker slicers, per scope x {W43, P10, Q4 to date, FY2026 to date, FY2025 P10 / P12 / Q1 / FY2025} x {Budget, Last year, Previous}: value, comparator, Δ, status, mix deviation, counts + dot; EBITDA vs Previous at W39 / W31 / W35 (ET-22 … ET-26, ET-31) |
-| T-N3 (30) | texts: the v5 card faces at Reset and in the saved state (ET-02, ET-22); headers, titles and phrases per item; comparator lines and short Δ suffixes per type; Year offers Budget · Last year and reads LY for Previous (ET-23); EBITDA ⓘ `vs P9 weeks 1–4`, W35 `n/a vs prev. mth` muted (ET-31); FY2025 N/A cards and rated counts 4 / 3 (ET-26); picker fallbacks W43 → P10 → Q4 → FY2026 (ET-28); Online N/A |
+| T-N3 (36) | texts: the v5 card faces at Reset and in the saved state (ET-02, ET-22); headers, titles and phrases per item; comparator lines and short Δ suffixes per type; Year offers Budget · Last year and reads LY for Previous (ET-23); EBITDA ⓘ `vs P9 weeks 1–4`, W35 `n/a vs prev. mth` muted (ET-31); FY2025 N/A cards and rated counts 4 / 3 (ET-26); picker fallbacks W43 → P10 → Q4 → FY2026 (ET-28); Online N/A; category (c1–c6): header segment for 1 / 2 / 3 categories and none for all 9 ticked, the N/A faces of EBITDA, OTIF and non-seasonal sell-through, rated 9 (ELEC) / 10 (ELEC + TOYS), GMROI target 2.2 / cover 15.0 / availability 97.0 at ELEC, badge ignores the pick, sub-titles unchanged, How to read names the category |
 | T-N4 (16) | bars per type per scope: count 13 / 12 / 8 / 2 and every bar = the item-key value (ET-25) |
 | T-N5 | back margin = supplier income (ET-07); NL + BE + Online + Wholesale = All (ET-12); no measure in an error state |
 | T-N6 | conceal in place with the three attribute groups (ET-13) |
-| T-N7 (4) | ⓘ stacked block per card under Budget, Last year and Previous: `Actual` + value, then swatch + basis name + target value (+ the Δ line at Budget), in this order and with the specified sizes; SVG height = the page image; Owner tag, no Horizon, Statement, owner note or footer target; FY2025 P10: basis name + muted `–` for the 8 cards without a basis, the target value for the other 4 (ET-30, ET-32) |
+| T-N7 (5) | ⓘ stacked block per card under Budget, Last year and Previous: `Actual` + value, then swatch + basis name + target value (+ the Δ line at Budget), in this order and with the specified sizes; SVG height = the page image; Owner tag, no Horizon, Statement, owner note or footer target; FY2025 P10: basis name + muted `–` for the 8 cards without a basis, the target value for the other 4 (ET-30, ET-32); ELEC: the one-line notes of EBITDA, OTIF and sell-through, `–` value and basis, n/a stats (E-101) |
 | T-N8 | item lists 95 / 22 / 8 / 2, partial `FY2026-Q4` and `FY2026`, `FY2026-P10` complete, no P11 FY2026 (ET-21) |
-| T-N9 (7) | frame parity: in 7 picker states (Reset, P10 · LY · All, Q4 · Previous · NL, FY2026 · Budget · BE, FY2025 P10 · Budget · Online, W43 · Previous · All, W35 · Previous · BE) every card face shows the card-layer value and chip (and Δ on hero / medium cards), every ⓘ the value, basis, Δ (EBITDA long form) and status word; the status line and dot tip show `[Window Status Pack]` |
+| T-N9 (9) | frame parity: in 9 picker states (Reset, P10 · LY · All, Q4 · Previous · NL, FY2026 · Budget · BE, FY2025 P10 · Budget · Online, W43 · Previous · All, W35 · Previous · BE, ALL#ELEC W43 · Budget, NL#ELEC+TOYS P10 · Previous) every card face shows the card-layer value and chip (and Δ on hero / medium cards), every ⓘ the value, basis, Δ (EBITDA long form) and status word; the status line and dot tip show `[Window Status Pack]` |
+| T-N10 (18) | category scopes: all 10,514 rows of `checks/control_totals_category_eur.csv` (12 picks × 12 keys at All; NL / BE / Online × {ELEC, ELEC + TOYS} × 6 keys) through the base layer with the Category slicer on top of the region, plus 5,460 N/A rows (EBITDA / OPEX / OTIF families, sell-through without a seasonal category, mini stats of categories outside the pick) (ET-33, ET-34) |
 
 ## Timings (E-84)
 
@@ -113,6 +121,19 @@ a `dim_store[scope_code]` filter, every window `CALCULATE` is one VAR, and value
 with the same DAX as the card-layer measures (kept for the tests; T-N9 proves both agree). A real dimension filter such as the coming
 `dim_category` slicer passes through the frame unchanged (no extra disconnected-table work).
 
+**Category round, with and without a pick** (same method, `tools/run/time.ps1` now interleaves the states):
+
+| Selection | Header (≈ query floor) | Slowest card | Slowest ⓘ | Status line |
+|---|---:|---:|---:|---:|
+| Week 43 · Budget · All | 296 | 363 (SELL_THROUGH) | 887 (EBITDA) | 550 |
+| Month 10 · Last year · All | 296 | 393 (SELL_THROUGH) | 932 (EBITDA) | 521 |
+| Quarter 4 to date · Previous · NL | 298 | 378 (SELL_THROUGH) | 940 (EBITDA) | 533 |
+| FY2026 to date · Budget · All | 292 | 367 (SELL_THROUGH) | 863 (CHANNEL_MIX) | 500 |
+| **ALL#ELEC** · Week 43 · Budget | 291 | 359 (SELL_THROUGH) | 959 (EBITDA) | 560 |
+| **NL#ELEC+TOYS** · Month 10 · Previous | 301 | 381 (SELL_THROUGH) | 945 (EBITDA) | 570 |
+
+Interleaved runs (each measure timed in all six states back to back, 3 runs, median; fresh instance, 2026-10-30 evening). A pick costs nothing measurable: same instance, same measure, pick vs no pick within ±10 %. An afternoon run on a loaded machine (a browser holding one core; constant-query floor 1.1–1.3 s) showed the same parity at about 3× the absolute times.
+
 ## Platform differences and deviations
 
 Platform rows for `docs/design/parity-rules.md` (E-87): solid panels instead of frosted glass; static dot (no pulse ring); FitToPage
@@ -135,11 +156,16 @@ instead of the responsive breakpoints; Segoe UI instead of Inter; filters concea
 | 13 | Picker: switching the type selects the item that holds the last pick (W43 → P10 → Q4 → FY2026), and that chip is shown selected; the FY row is hidden at Year | The cards, header and "Showing" line switch the same way (`[_Item Key]` fallback), but no chip of the new type is highlighted until one is clicked; the FY row stays at Year (it then drives the single Year chip) | A slicer cannot select a value on behalf of another slicer |
 | 14 | One item row | Two item rows: a wide Quarter / Year row (so `Q4 · to date` fits) and an 8 x 7 Week / Month grid; the row of the other types stays empty | Button-slicer tiles have one fixed size per visual; `autoGrid` gave three huge tiles per row |
 | 15 | At Year the comparator menu renders two options and a user on Previous snaps to Last year | The Previous row of the comparator slicer is filtered out at Year; a Previous pick made before switching to Year stays selected underneath but reads Last year (header, Δ) | Slicers cannot be re-selected by a measure |
+| 17 | Category dropdown reads "All categories" when nothing is picked | Power BI's native dropdown reads "All" | Accepted platform difference (`docs/design/parity-rules.md`, 2026-10-30) |
+| 18 | Category list opens inside the Filters layer | The dropdown list opens in Power BI's overlay above the menu and the scrim; close it before a screenshot | Native slicer behaviour |
 | 16 | Dot tooltip grey state | Same text (`Overall: grey · no rated card.`); not reachable with the shipped data (OTIF and Weeks of cover are always rated) | Same guard as js-exec |
 
 ## Parity notes (for hunter)
 
 - Default open = Reset = Week 43 FY2026 · Budget · All: 7 / 3 / 2, orange dot, v5 card faces (T-N3-01, T-N3-02).
+- Category scope in DAX tests: `TREATAS ( { "Electronics", "Toys & leisure" }, dim_category[category_name] )` on top of the region;
+  scope `NL#ELEC+TOYS` of the category CSV = `TREATAS ( { "NL" }, param_region[scope_code] )` + those names.
+- Rendered faces for the cross-flavour check: `tests/parity/2026-10-30-pbi-faces.csv` (`tools/run/export_faces.py`).
 - Picker state is three slicers: `param_granularity[granularity_name]`, `dim_item[fy_label]`, then `dim_item[label]` (Week / Month) or
   `dim_item[label_wide]` (Quarter / Year). In DAX tests set the codes: `TREATAS ( { "Q" }, param_granularity[granularity_code] )`,
   `TREATAS ( { "FY2026" }, dim_item[fy_label] )`, `TREATAS ( { "Q4 · to date" }, dim_item[label_wide] )`; `[_Item Key]` returns the
@@ -167,5 +193,8 @@ instead of the responsive breakpoints; Segoe UI instead of Inter; filters concea
 5. Hover each ⓘ on 2-3 cards: the numbers stack — `Actual`, the value, the dotted swatch with `Budget` / `Target` / `Plan`, the target
    value (Net sales: Actual €61.4m, Budget €62.9m), then the Δ line; no "Target …" footer; tags Group · Lever · Owner with the refresh or
    provisional note at the right; the pop-up does not scroll or clip. With FY2025 P10 the budget cards show `Budget` and a grey `–`.
-6. Selection changes and ⓘ hovers should feel quicker (cards about 0.4–0.65 s, ⓘ about 0.8–1.4 s query time on this machine).
-7. Reset → Week 43 · Budget · All. Save once in Desktop so it writes its own serialization; after that, edit surgically.
+6. Filters › Category: pick Electronics. Header `… · Electronics`; EBITDA flash and Supplier OTIF show `–` with `n/a by category`
+   and a grey chip; Sell-through too (Electronics is not seasonal); Weeks of cover target 15.0, GMROI target 2.2; 9 cards rated.
+   Add Toys & leisure: `… · Electronics & Toys & leisure`, Sell-through comes back (seasonal part only). Tick all 9: same as All.
+7. Selection changes and ⓘ hovers should feel quicker (cards about 0.4–0.65 s, ⓘ about 0.8–1.4 s query time on this machine).
+8. Reset → Week 43 · Budget · All · all categories. Save once in Desktop so it writes its own serialization; after that, edit surgically.

@@ -1,4 +1,4 @@
-<!-- next-id: DEC-009 -->
+<!-- next-id: DEC-010 -->
 
 # Decisions (durable)
 
@@ -96,5 +96,17 @@
 **Tags:** sync-handoff, power-bi, pbip-cache, publishing, vosk-dev, gitignore, nordmark, mirelo
 **Confidence:** high
 **Last-verified:** 2026-10-30
-**Related:** DEC-003, DEC-005, DEC-007
+**Related:** DEC-003, DEC-005, DEC-007, DEC-009
+**Status:** superseded by DEC-009 on 2026-10-30 (same day; the C2/C4 parts — another agent publishes, no scheduled refresh, no IDs, Mirelo as is, Nordmark joins — carry over unchanged)
+
+### DEC-009 · Hand-off packs: no model caches or generated data in git; `.sync/data-gen/` ships generators, receiving agent generates + refreshes + publishes · 2026-10-30
+**Decision:** `.sync/**/.pbi/cache.abf` and the generated Parquet / CSV in pack `data/` are gitignored (exception from DEC-008 withdrawn); already-committed copies leave the index with `git rm --cached`, history untouched. One folder `.sync/data-gen/` carries the deterministic generators + a README per report (P&L, Mirelo, Nordmark). Receiving agent: generate → set `DataFolder` → Desktop refresh → check against committed control totals → publish to the USER's account (still another agent, no scheduled refresh, no IDs). JS packs keep their small prebuilt `public/data/`; control totals stay committed.
+**Why:** USER, 2026-10-30 (later than DEC-008): P&L cache measured 61.2 MB (over GitHub's 50 MB warning; three caches + 62 Parquet ≈ 110 MB of binaries), and every re-pack would add a full copy to history; the data is byte-reproducible from seeded generators, so the binaries carry nothing the scripts don't. General rule derived: in this repo, ship generators + control totals, never generated binaries, when the output is deterministic.
+**Reversal cost:** low — re-add the gitignore exception and commit the files; but the one-time 110 MB already in history is permanent without a rewrite (USER chose not to).
+**Applied at:** `docs/ADR/0014-sync-hand-off-packs.md` status line, §2 item 7 (struck), items 4/8/9 pointers, item 10, §3 (three bullets), §4 note (CAND-029 placeholder-reset method); `.sync/data-gen/` + ignore rules by ginee
+**Hits:** 1
+**Tags:** sync-handoff, power-bi, pbip-cache, gitignore, repo-size, reproducible-data, data-gen, publishing, nordmark, mirelo
+**Confidence:** high
+**Last-verified:** 2026-10-30
+**Related:** DEC-008 (supersedes), DEC-003, DEC-005
 **Status:** active

@@ -725,6 +725,6 @@ head = f"""// Nordmark Exec - DAX control-total tests (ADR-0013 incl. (k) period
 """
 order = []
 for tag in ["T-N1", "T-N2", "T-N3", "T-N4", "T-N5", "T-N6", "T-N7", "T-N8", "T-N9", "T-N10"]:
-    order += [b for b in blocks if f"BLOCK {tag}" in b]
+    order += [b for b in blocks if b.startswith((f"// ==== BLOCK {tag}-", f"// ==== BLOCK {tag}:"))]  # T-N1 must not catch T-N10
 write_text(os.path.join(ROOT, "tests", "control-totals.dax"), head + "\n".join(order))
 print(f"tests: {len(order)} blocks, {total:,} rows (T-N1 {T1_ROWS:,}, T-N2/4 {T2_ROWS:,}, T-N5 {T5_ROWS}, T-N10 {T10_ROWS:,}, strings {S_ROWS})")
