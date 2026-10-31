@@ -33,7 +33,11 @@ TODO: lock North Star
 - **2026-10-28 — Pack script for `.sync/`:** a copy list + staleness test re-issues the hand-off packs from the repo (today they are copied by hand; ADR-0014 §3).
 - **2026-10-28 — Exec parity rows B vs C:** generate from `control_totals_eur.csv` + card texts, using bip's hidden `Card Bar Points <KPI>` and card text measures.
 
-- **2026-10-29 — Power BI packs ship with data:** each PBI pack carries a model cache refreshed from its own Parquet (`.pbi/cache.abf`, gitignore exception), so the receiving repo opens it with numbers without Desktop; plus a publish path (Publish to web) for the site embed (ADR-0014 amendment candidate; USER decision in `plan-2026-10-30.md` § C).
+- **2026-10-29 — Power BI packs ship with data:** each PBI pack carries a model cache refreshed from its own Parquet (`.pbi/cache.abf`, gitignore exception), so the receiving repo opens it with numbers without Desktop; plus a publish path (Publish to web) for the site embed (ADR-0014 amendment candidate; USER decision in `plan-2026-10-30.md` § C). → decided 2026-10-30 (C1), then reversed the same day (see Decisions).
+
+- **2026-10-30 — Parity capture v2 (Nordmark):** extend bip's faces CSV to the ⓘ mini stats / header, Region BE / ONLINE, a pick of 3+ categories, all 9 ticked and EBITDA Week vs Previous; optional Vitest parity test in `js-exec` that skips when the CSV is absent.
+
+- **2026-10-31 — "Known gaps per report" in every hand-off entry note (CAND-034):** copy each pack README's "not built" list into the entry note, so the receiving agent and the USER see what a report can't do before they embed it. Also: a pip constraints file for `data-gen/` (CAND-007).
 
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
@@ -96,6 +100,22 @@ TODO: lock North Star
   - Horizon, Statement and owner notes removed; one shared dark overlay under every pop-up; ⓘ target line big under the actual, footer target dropped.
 - **2026-10-29** — **EBITDA vs Previous at Week** = same weeks of the previous month (W43 = P10 wk 1–4 vs P9 wk 1–4; P1 → previous FY P12). Week 5 of a 5-week month (W9 / W22 / W35 / W48) = N/A (main-agent ruling, USER may overturn).
 - **2026-10-29** — **Control-total key grammar** `{W|P|Q|FY}-FY{yyyy}[-{n}][@{k}]`: 87 item keys + 6 legacy PTD / YTD keys (to be retired after both flavours migrate), 26,143 rows. `generate.py` › `control_totals()` may change with the checks (ET-20 byte-compares the CSV); the data path stays fixed.
+- **2026-10-30** — **ADR-0013 §(l) category filter (Nordmark, both flavours):**
+  - Dropdown with names only: All / one / a mix of 2+; combines with Region; all 9 ticked = All; URL key `cat` (codes).
+  - EBITDA and Supplier OTIF are N/A under a pick: the facts have no category key.
+  - Sell-through = the seasonal part of the pick (a non-seasonal pick = N/A).
+  - GMROI target: own row / avg-on-hand-weighted mix / 2.5 at All. Cover target forecast-weighted; availability 0.97.
+  - Per-category chips not story-tuned (accepted).
+  - Category control totals in a separate `control_totals_category_eur.csv`: `{region}#{code}[+{code}]`, 12 picks, 10,514 rows.
+- **2026-10-30** — **ADR-0013 §(m) ⓘ stacked block:** "Actual" → value → basis name (Budget / Target / Plan) → value → Δ; no basis = "–"; no ⓘ scrolls.
+- **2026-10-30** — **Parity:** small-card sub-titles below 1200 px are an accepted platform difference (JS hides them from 1200 px; PBI has none).
+- **2026-10-30** — **ADR-0014 amended (hand-off):**
+  - The USER's other agent publishes Power BI to the USER's account and embeds it.
+  - Mirelo ships as is.
+  - JS packs need `EMBED_ALLOWED_ORIGINS` at build time (CSP frame-ancestors).
+  - "PBI packs ship the loaded model" (C1) was built and committed, then **reversed the same day**: model caches + generated data are kept out of git, and `.sync/data-gen/` ships scripts + a README per report. JS prebuilt data stays; git history left as is (`git rm --cached`). ADR-0014 item 10 (item 7 superseded); the `data-gen/` build was still running at the close.
+- **2026-10-31** — **Hand-off note v3** is a new dated note (`.sync/2026-10-31-report-packs.md`), v2 superseded. Track A on the site stays a video (2026-10-22).
+- **2026-10-31** — **USER: the P&L must be fully functional in both Power BI and JS.** Track C build steps 4 (Group view) and 5 (slice filters) move from the vosk.dev repo to this repo; re-packed via `.sync`. ADR-0002 / ADR-0014 amendment pending (archi, 2026-11-01).
 - **2026-10-28** — Nordmark data rulings (pending USER review): E-22 table edge wins; dot + counts follow the region, N/A excluded; channel mix = last week; GMROI from front margin (€862m ÷ €319m = 2.7×); sell-through bars 12 → 63 %; net-sales bars W31–W39 lowered; period keys `PTD-` / `YTD-FY2026-43`; scoped EBITDA excludes central costs; LW for PTD / YTD = same window as of last week.
 
 ## Features
@@ -111,8 +131,9 @@ TODO: lock North Star
 - P&L round 1 from the spec gap analysis (2026-10-24): P1 sub-lines → P3 Price / Mix → P4 FX column → P2 memo block (ADR) → D-1 ARR snapshot
 - Mirelo Sales & Revenue — `mirelo_sales` schema in `lh_raw` + Power Query switch (ADR-0011 a); `docs/Requirements-sales.md`; Track B publish target; per-region PY measure for bubble trails
 - P&L redesign — Track A: USER click-test of the deployed app; slow zones QP ~10 s / QV3 ~21 s → TREATAS on `fx_basis_name`; PV re-audit; Track A parity rows in the harness
-- Nordmark exec dashboard — USER first open of the PBI period model + save + commit; PBI perf pass (EBITDA card 2.0–2.5 s, ⓘ 9–10 s cold); `.sync/nordmark-exec/` pack (ADR-0014); parity B vs C (hunter) + `parity-rules.md` rows; retire the 6 legacy PTD / YTD control rows; CI job; USER review of the data rulings; chip restyle (USER)
-- All three reports — `.sync` hand-off with data in every artifact + one hand-off note (`plan-2026-10-30.md`): PBI data in packs, Power BI publish path, Rayfin public access
+- Nordmark exec dashboard — USER hover / click check of the PBI category filter + ⓘ, save; retire the 6 legacy PTD / YTD control rows; CI job; USER review of the data rulings; chip restyle (USER); parity capture v2
+- All three reports — hand-off note v3 → ready (hunter warnings + "Known gaps per report"); then the USER's other agent publishes Power BI (embed method open) and hosts / embeds the JS apps
+- **P&L fully functional (USER 2026-10-31)** — JS: Group view (step 4) + slice filters F-09…F-11 with C-31 allocation (step 5); PBI: deferred controls M-25, F-16, F-17, M-05, "n/a", M-27; B vs C parity; re-pack both (`plan-2026-11-01.md`)
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -139,3 +160,19 @@ TODO: lock North Star
     - Control totals: 93 keys / 26,143 rows, verify green.
     - PBIP: `param_granularity` + `dim_item`, 388 measures, 172 blocks / 34,118 rows TRUE, validator 0 / 0. Built, uncommitted; perf pass open.
   - Docs: E-90…E-99, ET-21…ET-32, `exec-period-model.md`.
+- **2026-10-30** — Nordmark Exec finished in both flavours:
+  - **Category filter** (ADR-0013 §(l)) and **ⓘ stacked block** (§(m)):
+    - `js-exec/` 458 tests, all 10,514 category rows reconcile;
+    - PBIP 390 measures, 207 blocks / 50,390 rows TRUE, validator 0 / 0.
+  - **PBI perf:** cards ≤ 0.65 s, ⓘ ≤ 1.4 s cold; under a pick ≤ 0.39 s / ≤ 0.96 s.
+  - **Data:** category control totals 10,514 rows, verify 91 green.
+  - **Parity B vs C:** 945 fields, 0 mismatches.
+  - **`.sync`:**
+    - `nordmark-exec/{data,js-app,power-bi}` packs issued;
+    - the 3 PBI packs opened with loaded models (superseded the same day by the data-gen decision);
+    - hand-off note v2 `2026-10-30-report-packs.md`.
+- **2026-10-31** — `.sync` hand-off hardened:
+  - `.sync/data-gen/` committed (`1062764`).
+  - The PBI pack `DataFolder` descriptions now point to data-gen.
+  - Fresh-clone acceptance (hunter): JS ×3 green, data-gen byte-identical, scans clean, 0 blockers.
+  - Hand-off note v3 (draft).
