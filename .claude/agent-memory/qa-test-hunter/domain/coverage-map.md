@@ -8,3 +8,5 @@
 
 Test baselines 2026-10-23: Track A `npm test` 28 files / 207 tests green (Vitest 4.1.11); Track C `npx vitest run` 14 files / 145 tests green (Vitest 5.0.5); Track B DAX not run (Desktop).
 Test baseline 2026-10-27: Track C `npm test` 23 files / 360 passed + 36 expected-fail (parity spec js-report/lib/test-utils/parity; it.fails = known Track C gaps); Track B DAX not run.
+| Nordmark Exec card faces, B vs C (pbi-report Nordmark Exec faces CSV 7 states × 135; js-exec lib/engine view.ts) | 2026-10-30 | qa-test-hunter | 0 real mismatches, 42 display-only (small-card sub-title); CAND-006; report pbi-report/Nordmark Exec/tests/parity/2026-10-30-parity-report.md | 2027-01-28 |
+| .sync hand-off packs, receiver acceptance (clean `git ls-files -co` copy: 3 js-app, 3 power-bi, data-gen) | 2026-10-31 | qa-test-hunter | JS 3/3 green (196+1s / 92+4s / 458), CSP frame-ancestors OK; data-gen 3 gens + verify 47/91 green, control totals + 61 data blobs byte-identical; DEF-006, CAND-007 | 2027-01-29 |

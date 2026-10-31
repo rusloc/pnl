@@ -1,4 +1,4 @@
-<!-- next-id: DEF-006 -->
+<!-- next-id: DEF-007 -->
 
 # Defect Patterns
 
@@ -23,7 +23,7 @@
 **Tags:** spec-drift, adr, defaults, parity
 **Confidence:** medium
 **Last-verified:** 2026-10-27
-**Related:** DEF-005
+**Related:** DEF-005, DEF-006
 **Status:** active
 
 ### DEF-003 · Separator drift " · " vs " - " in header-adjacent copy · 2026-10-23
@@ -59,5 +59,17 @@
 **Tags:** copy, popover, info, how-to-read, parity, spec-drift
 **Confidence:** medium
 **Last-verified:** 2026-10-27
+**Related:** DEF-002
+**Status:** active
+
+### DEF-006 · Cross-repo .sync hand-off text left "ready" after the decision it describes changed · 2026-10-31
+**Symptom:** the receiving agent (vosk.dev repo) gets instructions that contradict the current packs: a note says the PBI packs "open with data" after caches left git; pack READMEs cite removed folders (`../data/parquet/`, `mirelo-sales\data\parquet`) as the data source "until 2026-10-30"
+**Cause:** ADR amended (ADR-0014 item 10 supersedes item 7 the same day); notes / README preambles edited only where the builder touched them, status not flipped
+**Fix / test:** on every ADR-0014 amendment: fresh `git ls-files -co --exclude-standard .sync` copy outside the repo + relative-link resolver over every .md (scratch `linkcheck.py` pattern: OK / GENERATED / BROKEN) + grep notes for the superseded claim; the source machine's ignored leftovers (`.sync/*/data/`) mask the break, only the clean copy shows it
+**Seen:** .sync/2026-10-22-track-c-spec-change-adr-0007.md row 5 (2026-10-23, ex CAND-002); .sync/2026-10-30-report-packs.md line 3 / 28 "open with data" + mirelo-sales/power-bi/README.md:3 and nordmark-exec/power-bi/README.md:3 `../data/parquet/` (2026-10-31)
+**Hits:** 2
+**Tags:** sync, hand-off, spec-drift, readme, stale, adr
+**Confidence:** medium
+**Last-verified:** 2026-10-31
 **Related:** DEF-002
 **Status:** active

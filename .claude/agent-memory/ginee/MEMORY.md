@@ -17,7 +17,7 @@
 
 ## Open threads
 - Nordmark dataset (2026-10-28): built + verify green; 18 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (8, 11, 16 superseded 2026-10-29; new 17 ET-26 GMROI, 18 mix plan window)
-- .sync/data-gen (2026-10-30): built + verified; USER to run the git block (caches + pack data leave the index); open: 3 PBIP `///` DataFolder comments still name old data paths (description-only fix, needs go-ahead); track-c/data still tracked (superseded); re-sync = re-copy generators from data/ + fabric-data/
+- .sync/data-gen (2026-10-30): built + verified; USER to run the git block (caches + pack data leave the index); 3 PBIP `///` DataFolder comments fixed 2026-10-31 (point to data-gen/<report>/parquet); track-c/data still tracked (superseded); re-sync = re-copy generators from data/ + fabric-data/
 - Nordmark period keys (2026-10-29): legacy PTD-/YTD- rows kept frozen; remove once nerd + bip read item keys (steps in dataset README › Control totals)
 - .sync packs (2026-10-28): pnl/power-bi (Parquet via DataFolder) + mirelo-sales/power-bi + data written, draft; pending USER Desktop first-open + bip DAX test run; re-copy if pbi-report changes after fcfa19c
 - Mirelo: USER to decide on committing 96 MB of fact_loan CSVs (split in 3) vs gitignoring CSVs / Git LFS; later lh_raw schema mirelo_sales (ADR-0011 (a), not in the draft)
@@ -35,6 +35,7 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-10-31 (delegated): .sync PBI packs: DataFolder `///` comment + README 'What changed' row now point to data-gen/<report>/parquet (3 packs), validate 0/0 each; local untracked .sync/pnl/power-bi/data/ (23 Parquet) left; no Fabric calls, no git
 - 2026-10-30 (delegated, night): .sync/data-gen (USER: data + caches leave git): generators moved, pnl wrapper, READMEs, .gitignore (cache.abf exception removed, generated-data rules tested with pathspec vs the v2 index); regen byte-identical, verify 47 + 91 green; no Fabric calls, no git
 - 2026-10-30 (delegated): Nordmark data pack .sync/nordmark-exec/data (copy of data/nordmark_retail_dummy_data, README .sync header ready); verify 91 green + regen byte-identical from the pack in a scratch venv; scan clean; no Fabric calls, no git, .sync/README.md left to main agent
 - 2026-10-30 (delegated): Nordmark category filter: read-only data proof (259/259) then build of control_totals_category_eur.csv (10,514 rows, scope ALL#ELEC grammar), verify 91 green ~50 s; flagged ET-34 "10 rated at ALL#ELEC" (E-103 gives 9) + E-76/E-104 file name; no Fabric calls, no git
