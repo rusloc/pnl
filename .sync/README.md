@@ -28,7 +28,8 @@ One self-contained folder per report; each sub-folder has its own README with th
 
 | Pack | From → To | Status | What |
 |------|-----------|--------|------|
-| `2026-10-30-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | ready (2026-10-30) | **Entry point** for all three reports: what each pack holds, data inside every artifact, publish / embed path per flavour, `EMBED_ALLOWED_ORIGINS`, rules |
+| `2026-10-31-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | draft (2026-10-31, fresh-clone acceptance test running) | **Entry point** for all three reports: what each pack holds, JS data prebuilt / Power BI data generated with `data-gen/`, generate → `DataFolder` → refresh → check → publish, `EMBED_ALLOWED_ORIGINS`, rules |
+| `2026-10-30-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | **superseded** 2026-10-31 by `2026-10-31-report-packs.md` | Former entry point (said the Power BI packs open with loaded data; reversed by ADR-0014 item 10) |
 | `2026-10-28-report-packs.md` | rusloc/pnl (main agent) → vosk.dev repo agent · USER | **superseded** 2026-10-30 by `2026-10-30-report-packs.md` | Former entry point (P&L + Mirelo only) |
 | `pnl/js-app/` | rusloc/pnl (nerd) → vosk.dev repo agent | ready | P&L standalone Next.js app (Vitals / Statement / Analysis / Profitability), prebuilt data 1.7 MB, AI chat excluded; typecheck / lint / test (196 + 1 skipped) / build green |
 | `pnl/power-bi/` | rusloc/pnl (ginee, bip) → vosk.dev repo agent | ready | P&L PBIP, **no data in git** (USER 2026-10-30): generate the 23 Parquet files with `data-gen/pnl/`, set `DataFolder` to `data-gen/pnl/parquet`, refresh in Desktop, check, publish; no scheduled refresh · verified by bip 2026-10-30 on the same data (T-06 552/552, validator 0/0); generated Parquet byte-identical to the former `data/` (ginee 2026-10-30) |

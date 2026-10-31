@@ -1,4 +1,4 @@
-/// Folder that holds the Parquet files and manifest.json of this pack (nordmark-exec/data/parquet): full local path, no trailing backslash. Set it before the first refresh.
+/// Folder that holds the Parquet files and manifest.json of this pack (data-gen/nordmark-exec/parquet): full local path, no trailing backslash. Set it before the first refresh.
 expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
 	lineageTag: 7bec2ec9-43b6-5a34-b2b9-231ab2fc4051
 	queryGroup: Parameters

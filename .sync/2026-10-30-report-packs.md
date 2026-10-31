@@ -1,6 +1,6 @@
 # Report packs v2: P&L, Mirelo Sales, Nordmark Exec, hand-off for publishing and embedding
 
-from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-30 · status: **ready** (all eight folders verified 2026-10-30; the three Power BI packs open with their data, no refresh)
+from rusloc/pnl (main agent) · to vosk.dev repo agent · USER · 2026-10-30 · status: **superseded** 2026-10-31 by `2026-10-31-report-packs.md` (the Power BI packs no longer ship data or a model cache: ADR-0014 item 10)
 
 This note supersedes `2026-10-28-report-packs.md`. It is the single entry point to every report this repo hands over. Each report sits in one self-contained folder, and each sub-folder has its own README with build steps, test counts and caveats. Read those before you build. Decision record: ADR-0014 (amended 2026-10-30) in rusloc/pnl.
 

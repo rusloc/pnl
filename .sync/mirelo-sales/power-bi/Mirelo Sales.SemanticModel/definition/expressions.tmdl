@@ -1,4 +1,4 @@
-/// Folder that holds the Parquet files of this pack (mirelo-sales/data/parquet): full local path, no trailing backslash. Set it before the first refresh.
+/// Folder that holds the Parquet files of this pack (data-gen/mirelo-sales/parquet): full local path, no trailing backslash. Set it before the first refresh.
 expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
 	lineageTag: 3c02a267-effe-53bf-bf8a-b1e4ae5106f1
 	queryGroup: Parameters

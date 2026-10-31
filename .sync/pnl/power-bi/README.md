@@ -66,7 +66,7 @@ file is read whole. The rest of each partition (column selection and explicit ty
 
 | Where | Repo (`pbi-report/ACME Unified PnL/`) | This pack |
 |---|---|---|
-| `definition/expressions.tmdl` | Parameters `SqlEndpoint` (lakehouse SQL endpoint host) and `Database` | One text parameter `DataFolder` (placeholder value, described in a `///` comment) |
+| `definition/expressions.tmdl` | Parameters `SqlEndpoint` (lakehouse SQL endpoint host) and `Database` | One text parameter `DataFolder` (placeholder value, described in a `///` comment that points to `data-gen/pnl/parquet`) |
 | `definition/model.tmdl` | `PBI_QueryOrder` starts with `SqlEndpoint`, `Database` | Starts with `DataFolder`; the rest is unchanged |
 | 23 table partitions in `definition/tables/` | `Sql.Database(SqlEndpoint, Database)` + navigation to `acme_pl.<table>` | One comment line + `Data = Parquet.Document(File.Contents(DataFolder & "\<table>.parquet"))`; the column selection and type steps are unchanged |
 | Excluded | `.pbi/localSettings.json` (report and model), `__backup__/` | — |
