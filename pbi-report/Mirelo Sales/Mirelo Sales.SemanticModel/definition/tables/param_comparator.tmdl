@@ -1,4 +1,4 @@
-/// Comparator picker: Budget or PY (disconnected).
+/// Comparator picker: Budget or Prior year (disconnected; codes BUD / PY).
 table param_comparator
 	lineageTag: 9461f1ce-8410-5ede-9dc5-91e95db3f870
 
@@ -42,7 +42,7 @@ table param_comparator
 				    ,"sort_order", INTEGER
 				    ,{
 				        { "BUD", "Budget", 1 }
-				        ,{ "PY", "PY", 2 }
+				        ,{ "PY", "Prior year", 2 }
 				    }
 				)
 

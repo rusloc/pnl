@@ -1,4 +1,4 @@
-/// Market picker: All, PL, RO, PT (disconnected; All = all markets, no market filter). market_name feeds the sentences.
+/// Market picker: All markets, PL, RO, PT (disconnected; All = all markets, no market filter). market_name feeds the sentences.
 table param_market
 	lineageTag: 194040e8-c242-55c1-ba6a-b657ed7c68d6
 
@@ -52,7 +52,7 @@ table param_market
 				    ,"market_name", STRING
 				    ,"sort_order", INTEGER
 				    ,{
-				        { "ALL", "All", "All markets", 0 }
+				        { "ALL", "All markets", "All markets", 0 }
 				        ,{ "PL", "PL", "Poland", 1 }
 				        ,{ "RO", "RO", "Romania", 2 }
 				        ,{ "PT", "PT", "Portugal", 3 }

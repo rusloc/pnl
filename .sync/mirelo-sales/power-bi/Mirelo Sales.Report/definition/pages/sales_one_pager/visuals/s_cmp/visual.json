@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "s_cmp",
   "position": {
-    "x": 1304,
-    "y": 20,
-    "z": 1070,
+    "x": 20,
+    "y": 182,
+    "z": 3655,
     "height": 28,
-    "width": 104,
-    "tabOrder": 170
+    "width": 206,
+    "tabOrder": 3655
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -280,7 +280,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E9E8E4'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -624,7 +624,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Comparator picker'"
+                  "Value": "'Comparison: Budget or Prior year'"
                 }
               }
             }
@@ -667,5 +667,7 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  }
+  },
+  "parentGroupName": "grp_filters",
+  "isHidden": true
 }

@@ -1,0 +1,1679 @@
+diff --git a/src/components/mirelo/cards.tsx b/src/components/mirelo/cards.tsx
+index e1a5107..910df33 100644
+--- a/src/components/mirelo/cards.tsx
++++ b/src/components/mirelo/cards.tsx
+@@ -1,4 +1,5 @@
+ import type { CSSProperties } from "react";
++import { useBoardHeight } from "@/components/report-board";
+ import type { CmpRow, Status } from "@/lib/mirelo/status";
+ import type { ViewId } from "@/lib/mirelo/types";
+ import type {
+@@ -41,21 +42,28 @@ const place = (b: Box) => ({
+ });
+ 
+ // Pop-up placement (design-tokens §5a: 360 px wide, max 420 high), in card coordinates: the side with more room, and
+-// flipped to the card's right edge when 360 px would leave the frame (x 1408).
++// flipped to the card's right edge when 360 px would leave the frame (x 1408). The board can be taller than 810 px
++// since 2026-11-01 (it fills the popup), so the room below is read from the board's height.
+ const FRAME_R = 1408;
+-const BOARD_H = 810;
+ const TABS_BOTTOM = 104;
+ const POP_W = 360;
+ const xSide = (b: Box): CSSProperties =>
+   b.x + 8 + POP_W > FRAME_R ? { right: 8 } : { left: 8 };
+-/** ⓘ at the bottom-left of a card or panel. */
+-function belowOrAbove(b: Box): CSSProperties {
+-  const down = BOARD_H - (b.y + b.h) - 8;
++/** ⓘ at the bottom-left of a chart card. */
++function belowOrAbove(b: Box, boardH: number): CSSProperties {
++  const down = boardH - (b.y + b.h) - 8;
+   const up = b.y + b.h - 32 - TABS_BOTTOM;
+   return down >= up
+     ? { ...xSide(b), top: b.h + 4, maxHeight: Math.min(420, down) }
+     : { ...xSide(b), bottom: 32, maxHeight: Math.min(420, up) };
+ }
++/** ⓘ at the top-left of a hero or KPI card (2026-11-01): the pop-up opens under the card, or over it near the bottom. */
++function underCard(b: Box, boardH: number): CSSProperties {
++  const down = boardH - (b.y + b.h) - 8;
++  return down >= 220
++    ? { ...xSide(b), top: b.h + 4, maxHeight: Math.min(420, down) }
++    : { ...xSide(b), top: 36, maxHeight: 420 };
++}
+ /** ⓘ in a table's title row: tables sit at the bottom of the frame, so the pop-up opens above the card. */
+ const aboveCard = (b: Box): CSSProperties => ({
+   right: 8,
+@@ -146,68 +154,65 @@ export function HeroCardView({
+   box: Box;
+   onOpen: (v: ViewId) => void;
+ }) {
++  const boardH = useBoardHeight();
+   return (
+     <section
+       className={`${styles.card} ${styles.hero}`}
+       style={place(box)}
+       aria-label={card.label}
+     >
+-      {/* stretched button: the whole card opens the metric's view; the ⓘ sits above it */}
++      {/* stretched button: the whole card opens the metric's view, and its visible "Details" label says so
++          (2026-11-01: there was no sign the card was clickable); the ⓘ sits above it */}
+       <button
+         type="button"
+         className={styles.heroOpen}
+-        aria-label={`${card.label}: ${card.value}${card.second ? `, ${card.second}` : ""}. ${card.rows.map((r) => `${r.label} ${r.text}`).join(", ")}. Open the view.`}
++        aria-label={`${card.label}: ${card.value}${card.second ? `, ${card.second}` : ""}. ${card.rows.map((r) => `${r.label} ${r.text}`).join(", ")}. Open the details.`}
+         onClick={() => onOpen(card.open)}
+-      />
+-      <span className={styles.lab}>{card.label}</span>
++      >
++        <span className={styles.heroCta} aria-hidden="true">
++          Details →
++        </span>
++      </button>
++      <span className={`${styles.lab} ${styles.labI}`}>{card.label}</span>
+       <StatusChip chip={card.status} className={styles.heroChip} />
+       <span className={styles.heroVal}>
+         {card.value}
+         {card.second ? <small>{card.second}</small> : null}
+       </span>
+-      <Comparator row={card.rows[0]} top={124} bar />
+-      <Comparator row={card.rows[1]} top={148} bar />
++      <Comparator row={card.rows[0]} top={108} bar />
++      <Comparator row={card.rows[1]} top={132} bar />
+       <InfoButton
+         id={card.id}
+         title={card.label}
+         info={card.info}
+-        className={styles.infoCorner}
+-        popupStyle={belowOrAbove(box)}
++        className={styles.infoTop}
++        popupStyle={underCard(box, boardH)}
+       />
+     </section>
+   );
+ }
+ 
++/** KPI card (2026-11-01): ⓘ top-left beside the title; "vs Budget" and "vs PY" both shown, no hover swap. */
+ export function KpiCardView({ card, box }: { card: KpiCard; box: Box }) {
++  const boardH = useBoardHeight();
+   return (
+     <section
+       className={`${styles.card} ${styles.kpi}`}
+       style={place(box)}
+       aria-label={card.label}
+     >
+-      <span className={styles.lab}>{card.label}</span>
++      <span className={`${styles.lab} ${styles.labI}`}>{card.label}</span>
+       <span className={styles.kpiVal}>{card.value}</span>
+       <StatusChip chip={card.status} className={styles.kpiChip} />
+-      <Comparator
+-        row={card.row}
+-        top={80}
+-        bar={false}
+-        className={card.alt ? styles.main : undefined}
+-      />
+-      {card.alt ? (
+-        <Comparator
+-          row={card.alt}
+-          top={80}
+-          bar={false}
+-          className={styles.alt}
+-        />
+-      ) : null}
++      {card.rows.map((row, i) => (
++        <Comparator key={row.label} row={row} top={78 + i * 20} bar={false} />
++      ))}
+       <InfoButton
+         id={card.id}
+         title={card.label}
+         info={card.info}
+-        className={styles.infoCorner}
+-        popupStyle={belowOrAbove(box)}
++        className={styles.infoTop}
++        popupStyle={underCard(box, boardH)}
+       />
+     </section>
+   );
+@@ -219,25 +224,30 @@ function Legend({ items }: { items: LegendItem[] }) {
+     <div className={styles.legend} aria-hidden="true">
+       {items.map((it) => {
+         const square =
+-          it.role === "selected" || it.role === "ghost" || it.role === "c5";
++          it.role === "selected" ||
++          it.role === "ghost" ||
++          it.role === "pyFill" ||
++          it.role === "c5";
+         const style =
+           it.role === "selected"
+             ? { background: C.accent, border: `1px solid ${C.ink}` }
+-            : it.role === "ghost"
+-              ? { background: "transparent", border: `1px solid ${C.g400}` }
+-              : it.role === "py"
+-                ? {
+-                    background: `repeating-linear-gradient(90deg, ${C.g400} 0 4px, transparent 4px 7px)`,
+-                  }
+-                : {
+-                    background:
+-                      FILL[it.role].fill === "none"
+-                        ? "transparent"
+-                        : FILL[it.role].fill,
+-                    border: FILL[it.role].stroke
+-                      ? `1px solid ${FILL[it.role].stroke}`
+-                      : undefined,
+-                  };
++            : it.role === "pyFill"
++              ? { background: C.accent }
++              : it.role === "ghost"
++                ? { background: "transparent", border: `1px solid ${C.g400}` }
++                : it.role === "py"
++                  ? {
++                      background: `repeating-linear-gradient(90deg, ${C.g400} 0 4px, transparent 4px 7px)`,
++                    }
++                  : {
++                      background:
++                        FILL[it.role].fill === "none"
++                          ? "transparent"
++                          : FILL[it.role].fill,
++                      border: FILL[it.role].stroke
++                        ? `1px solid ${FILL[it.role].stroke}`
++                        : undefined,
++                    };
+         return (
+           <span key={it.label}>
+             <i
+@@ -271,6 +281,7 @@ export function ChartCardView({
+   onOpen: (v: ViewId) => void;
+   onMonth: (m: number) => void;
+ }) {
++  const boardH = useBoardHeight();
+   const width = box.w - 32;
+   const height = box.h - 40 - 30; // bottom strip: ⓘ + legend
+   const ch = card.chart;
+@@ -321,7 +332,7 @@ export function ChartCardView({
+         title={card.title}
+         info={card.info}
+         className={styles.infoCorner}
+-        popupStyle={belowOrAbove(box)}
++        popupStyle={belowOrAbove(box, boardH)}
+       />
+       <Legend items={card.legend} />
+     </section>
+diff --git a/src/components/mirelo/charts.tsx b/src/components/mirelo/charts.tsx
+index bf4878e..86734c3 100644
+--- a/src/components/mirelo/charts.tsx
++++ b/src/components/mirelo/charts.tsx
+@@ -19,6 +19,7 @@ export const C = {
+   accent: "#FFD54A",
+   white: "#FFFFFF",
+   marker: "#2F2F2D",
++  panel: "#E9E8E4",
+ } as const;
+ 
+ const STROKE: Record<
+@@ -159,7 +160,11 @@ function XLabels({
+   );
+ }
+ 
+-/** Story callout (design-tokens §5): placed in the empty half of the plot at the event's month. */
++/**
++ * Story callout (design-tokens §5): placed in the empty half of the plot at the event's month. Since 2026-11-01 plain
++ * annotation text beside the dashed marker, no yellow box: the box read as a button that did nothing. The text is also
++ * in the chart's aria-label, so it is not visual-only.
++ */
+ function Callout({
+   x,
+   text,
+@@ -171,10 +176,10 @@ function Callout({
+   width: number;
+   top: number;
+ }) {
+-  const w = text.length * 6.4 + 20;
+-  const left = Math.min(Math.max(x + 8, 0), width - w);
++  const w = text.length * 5.9 + 8;
++  const right = x + 6 + w <= width;
+   return (
+-    <g pointerEvents="none">
++    <g pointerEvents="none" aria-hidden="true">
+       <line
+         x1={x}
+         x2={x}
+@@ -183,18 +188,20 @@ function Callout({
+         stroke={C.marker}
+         strokeDasharray="2 2"
+       />
+-      <rect
+-        x={left}
+-        y={top}
+-        width={w}
+-        height={22}
+-        fill={C.accent}
+-        stroke={C.white}
+-        strokeWidth={2}
+-      />
+-      <T x={left + 10} y={top + 15} fill={C.ink} size={12} weight={600}>
++      <text
++        x={right ? x + 6 : x - 6}
++        y={top + 15}
++        fontSize={11}
++        fontWeight={600}
++        fill={C.ink}
++        textAnchor={right ? "start" : "end"}
++        stroke={C.panel}
++        strokeWidth={3}
++        strokeLinejoin="round"
++        paintOrder="stroke"
++      >
+         {text}
+-      </T>
++      </text>
+     </g>
+   );
+ }
+@@ -269,7 +276,7 @@ export function LineChart({
+       width={width}
+       height={height}
+       role="img"
+-      aria-label={chart.series.map((s) => s.name).join(", ")}
++      aria-label={`${chart.series.map((s) => s.name).join(", ")}${chart.callout ? `. ${chart.callout.text}` : ""}`}
+     >
+       <YAxis ticks={ticks} Y={Y} x={padL} unit={chart.unit} x2={width - padR} />
+       <XLabels labels={chart.x} X={X} y={height - 3} sparse={step < 36} edges />
+@@ -469,6 +476,11 @@ export function Bars({
+       {chart.rows.map((r, i) => {
+         const cy = i * rowH + rowH / 2;
+         const bh = Math.min(10, rowH - 6);
++        // with a prior year the row holds two bars: actual (ink) on top, prior year (filled yellow) under it
++        const py = r.ghost !== null;
++        const ah = py ? Math.max(Math.round(bh * 0.6), 4) : bh;
++        const ph = py ? Math.max(Math.round(bh * 0.5), 3) : 0;
++        const top = py ? cy - (ah + ph + 1) / 2 : cy - bh / 2;
+         return (
+           <g key={r.label}>
+             <T x={0} y={cy + 4} fill={C.ink} size={12} weight={500}>
+@@ -476,28 +488,27 @@ export function Bars({
+             </T>
+             <rect
+               x={labW}
+-              y={cy - bh / 2}
++              y={top}
+               width={pw}
+-              height={bh}
++              height={py ? ah + ph + 1 : bh}
+               fill={C.panel2}
+             />
+             {r.value !== null ? (
+               <rect
+                 x={labW}
+-                y={cy - bh / 2}
++                y={top}
+                 width={Math.max(X(r.value), 0)}
+-                height={bh}
++                height={ah}
+                 fill={C.ink}
+               />
+             ) : null}
+             {r.ghost !== null ? (
+               <rect
+-                x={labW + 0.5}
+-                y={cy - bh / 2 - 2.5}
++                x={labW}
++                y={top + ah + 1}
+                 width={Math.max(X(r.ghost), 0)}
+-                height={bh + 5}
+-                fill="none"
+-                stroke={C.g400}
++                height={ph}
++                fill={C.accent}
+               />
+             ) : null}
+             {r.tick !== null ? (
+diff --git a/src/components/mirelo/controls.tsx b/src/components/mirelo/controls.tsx
+index c40e396..115022b 100644
+--- a/src/components/mirelo/controls.tsx
++++ b/src/components/mirelo/controls.tsx
+@@ -3,6 +3,7 @@ import type { KeyboardEvent } from "react";
+ import styles from "./sales.module.css";
+ 
+ // Keyboard-complete controls (WAI-ARIA radio group and tabs patterns: roving tabindex, arrows / Home / End).
++// The header's segmented controls went with the filter pop-up (2026-11-01); its radio rows use <Radios>.
+ 
+ function roving<T>(
+   e: KeyboardEvent,
+@@ -31,30 +32,28 @@ function roving<T>(
+   focus(next);
+ }
+ 
+-export function Segmented<T extends string>({
+-  label,
++/** Radio row of the filter pop-up: roving tabindex, arrows / Home / End; a disabled option says why on hover. */
++export function Radios<T extends string>({
++  labelledBy,
+   options,
+   value,
+   onChange,
+-  x,
+-  title,
+ }: {
+-  label: string;
+-  title?: string; // tooltip (the period picker carries the "Showing …" sentence and any clipped-window note)
+-  options: readonly { value: T; label: string; width: number }[];
+-  value: T;
++  labelledBy: string;
++  options: readonly { value: T; label: string; disabledReason?: string }[];
++  value: string;
+   onChange: (v: T) => void;
+-  x: number;
+ }) {
+   const refs = useRef<(HTMLButtonElement | null)[]>([]);
+-  const width = options.reduce((s, o) => s + o.width, 0) + 2;
++  const enabled = options.filter((o) => !o.disabledReason);
++  const tabbable = enabled.some((o) => o.value === value)
++    ? value
++    : enabled[0]?.value;
+   return (
+     <div
+-      className={`${styles.abs} ${styles.seg}`}
+-      style={{ left: x, top: 20, width }}
++      className={styles.radios}
+       role="radiogroup"
+-      aria-label={label}
+-      title={title}
++      aria-labelledby={labelledBy}
+     >
+       {options.map((o, i) => (
+         <button
+@@ -65,16 +64,20 @@ export function Segmented<T extends string>({
+           type="button"
+           role="radio"
+           aria-checked={o.value === value}
+-          tabIndex={o.value === value ? 0 : -1}
+-          style={{ width: o.width }}
+-          onClick={() => onChange(o.value)}
++          aria-disabled={o.disabledReason ? true : undefined}
++          title={o.disabledReason}
++          tabIndex={o.value === tabbable ? 0 : -1}
++          onClick={() => !o.disabledReason && onChange(o.value)}
+           onKeyDown={(e) =>
+             roving(
+               e,
+-              options.map((p) => p.value),
+-              value,
++              enabled.map((p) => p.value),
++              (tabbable ?? "") as T,
+               onChange,
+-              (k) => refs.current[k]?.focus(),
++              (k) =>
++                refs.current[
++                  options.findIndex((p) => p.value === enabled[k]?.value)
++                ]?.focus(),
+             )
+           }
+         >
+diff --git a/src/components/mirelo/glass.module.css b/src/components/mirelo/glass.module.css
+index 3537639..083b50e 100644
+--- a/src/components/mirelo/glass.module.css
++++ b/src/components/mirelo/glass.module.css
+@@ -1,6 +1,7 @@
+-/* vendored from rusloc/pnl js-report/components/glass.module.css, 2026-10-28; source of truth stays there */
+-/* Glass pop-ups (ADR-0012 §2.5; Mirelo design-tokens §5a; P&L build-brief §0): translucent white, blur, 1 px light
+-   border, 16 px radius; solid fallback without backdrop-filter. Ink colours are neutral so both routes can use it. */
++/* vendored from rusloc/pnl js-report/components/glass.module.css, 2026-10-28; Mirelo's own since 2026-11-01 */
++/* Glass pop-ups (ADR-0012 §2.5; Mirelo design-tokens §5a). Redesigned here 2026-11-01 (owner): matte frosted glass,
++   a strong blur of what lies under it, a clear 1 px near-black border and a drop shadow; no glossy top highlight.
++   Solid fallback without backdrop-filter. This copy is Mirelo's own since then (the P&L keeps its glass). */
+ .glass {
+   position: absolute;
+   z-index: 60;
+@@ -8,14 +9,14 @@
+   max-height: 420px;
+   overflow-y: auto;
+   padding: 14px 20px 16px;
+-  border: 1px solid rgba(255, 255, 255, 0.65);
+-  border-radius: 16px;
+-  background: rgba(255, 255, 255, 0.74);
+-  -webkit-backdrop-filter: blur(16px);
+-  backdrop-filter: blur(16px);
++  border: 1px solid #1a1a1a;
++  border-radius: 12px;
++  background: rgba(244, 243, 240, 0.62);
++  -webkit-backdrop-filter: blur(28px) saturate(1.05);
++  backdrop-filter: blur(28px) saturate(1.05);
+   box-shadow:
+-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+-    0 10px 28px rgba(16, 27, 43, 0.14);
++    0 18px 44px rgba(17, 17, 17, 0.26),
++    0 2px 6px rgba(17, 17, 17, 0.14);
+   color: #111827;
+   font-size: 12.5px;
+   line-height: 18px;
+@@ -28,8 +29,8 @@
+   (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+ ) {
+   .glass {
+-    border-color: #cfd6de;
+-    background: #fafbfc;
++    border-color: #1a1a1a;
++    background: #f4f3f0;
+   }
+ }
+ .hd {
+diff --git a/src/components/mirelo/glass.tsx b/src/components/mirelo/glass.tsx
+index 5f43bff..980648e 100644
+--- a/src/components/mirelo/glass.tsx
++++ b/src/components/mirelo/glass.tsx
+@@ -1,4 +1,4 @@
+-// vendored from rusloc/pnl js-report/components/glass.tsx, 2026-10-28; source of truth stays there
++// vendored from rusloc/pnl js-report/components/glass.tsx, 2026-10-28; Mirelo's own since 2026-11-01
+ import {
+   createContext,
+   useCallback,
+@@ -62,7 +62,8 @@ export function usePopup(id: string) {
+   return { open, close, toggle };
+ }
+ 
+-const FOCUSABLE = 'button, [href], [tabindex]:not([tabindex="-1"])';
++const FOCUSABLE =
++  'button:not([tabindex="-1"]), select, [href], [tabindex]:not([tabindex="-1"])';
+ 
+ export function GlassPopup({
+   title,
+diff --git a/src/components/mirelo/header.tsx b/src/components/mirelo/header.tsx
+index 8272a91..224112b 100644
+--- a/src/components/mirelo/header.tsx
++++ b/src/components/mirelo/header.tsx
+@@ -1,3 +1,4 @@
++import { useRef } from "react";
+ import type {
+   Comparator,
+   MarketSel,
+@@ -7,27 +8,39 @@ import type {
+ } from "@/lib/mirelo/types";
+ import type { HeaderVM } from "@/lib/mirelo/view-model";
+ import { monthIndex, monthKey } from "@/lib/mirelo/windows";
+-import { CopyLink, Segmented, Tabs } from "./controls";
++import { CopyLink, Radios, Tabs } from "./controls";
++import { GlassPopup, usePopup } from "./glass";
+ import { HowToReadButton } from "./popup";
+ import styles from "./sales.module.css";
+ 
+-// Header (layout-spec §0.1): identical in every view. Widths and x positions are the spec's px.
++// Header (layout-spec §0.1): identical in every view. Since 2026-11-01 (owner) the Market / Period / Month /
++// Comparator controls are gone from the bar: one Filters button opens a glass pop-up with Period (granularity + the
++// closed month it runs to), Comparison and Region; the applied filters read as one line beside the button.
+ 
+-const MARKETS: readonly { value: MarketSel; label: string; width: number }[] = [
+-  { value: "ALL", label: "All markets", width: 88 },
+-  { value: "PL", label: "PL", width: 48 },
+-  { value: "RO", label: "RO", width: 48 },
+-  { value: "PT", label: "PT", width: 48 },
++const PERIODS: readonly {
++  value: TimeView | "W";
++  label: string;
++  disabledReason?: string;
++}[] = [
++  {
++    value: "W",
++    label: "Week",
++    disabledReason:
++      "The data set is monthly: weekly figures are not in the data.",
++  },
++  { value: "M", label: "Month" },
++  { value: "Q", label: "Quarter to date" },
++  { value: "Y", label: "Year to date" },
+ ];
+-const PERIODS: readonly { value: TimeView; label: string; width: number }[] = [
+-  { value: "M", label: "Month", width: 49 },
+-  { value: "Q", label: "QTD", width: 49 },
+-  { value: "Y", label: "YTD", width: 49 },
+-  { value: "R", label: "R12M", width: 49 },
++const CMPS: readonly { value: Comparator; label: string }[] = [
++  { value: "BUD", label: "Budget" },
++  { value: "PY", label: "Prior year" },
+ ];
+-const CMPS: readonly { value: Comparator; label: string; width: number }[] = [
+-  { value: "BUD", label: "Budget", width: 56 },
+-  { value: "PY", label: "PY", width: 46 },
++const MARKETS: readonly { value: MarketSel; label: string }[] = [
++  { value: "ALL", label: "All markets" },
++  { value: "PL", label: "PL" },
++  { value: "RO", label: "RO" },
++  { value: "PT", label: "PT" },
+ ];
+ const TABS: readonly { value: ViewId; label: string; width: number }[] = [
+   { value: "overview", label: "Overview", width: 104 },
+@@ -37,15 +50,147 @@ const TABS: readonly { value: ViewId; label: string; width: number }[] = [
+   { value: "revenue", label: "Revenue & targets", width: 164 },
+ ];
+ 
++function FunnelIcon() {
++  return (
++    <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true">
++      <path
++        d="M3 4h14l-5.5 6.5V16l-3-1.5v-4z"
++        fill="none"
++        stroke="currentColor"
++        strokeWidth="1.8"
++        strokeLinejoin="round"
++      />
++    </svg>
++  );
++}
++
++function Filters({
++  vm,
++  sel,
++  defaults,
++  onChange,
++}: {
++  vm: HeaderVM;
++  sel: SalesSelection;
++  defaults: SalesSelection;
++  onChange: (patch: Partial<SalesSelection>) => void;
++}) {
++  const { open, close, toggle } = usePopup("filters");
++  const opener = useRef<HTMLButtonElement>(null);
++  const changed =
++    sel.tv !== defaults.tv ||
++    sel.anchor !== defaults.anchor ||
++    sel.cmp !== defaults.cmp ||
++    sel.market !== defaults.market;
++  return (
++    <div className={`${styles.abs} ${styles.filters}`}>
++      <span className={styles.filterLine} title={vm.periodLine}>
++        {vm.filterLine}
++      </span>
++      <button
++        ref={opener}
++        type="button"
++        className={styles.filterBtn}
++        aria-expanded={open}
++        aria-label={`Filters: ${vm.filterLine}`}
++        onClick={toggle}
++      >
++        <FunnelIcon />
++        Filters
++      </button>
++      {open ? (
++        <GlassPopup
++          title="Filters"
++          opener={opener}
++          style={{ right: 0, top: 36, width: 420, maxHeight: 520 }}
++          onClose={close}
++        >
++          <div className={styles.fGroup}>
++            <span id="mf-period" className={styles.fLabel}>
++              Period
++            </span>
++            <Radios
++              labelledBy="mf-period"
++              options={PERIODS}
++              value={sel.tv}
++              onChange={(tv) => tv !== "W" && onChange({ tv })}
++            />
++            <label className={styles.fRow}>
++              <span>Up to</span>
++              <select
++                className={styles.fSelect}
++                value={monthKey(sel.anchor)}
++                onChange={(e) =>
++                  onChange({ anchor: monthIndex(e.target.value) })
++                }
++              >
++                {vm.months.map((m) => (
++                  <option key={m.value} value={m.value}>
++                    {m.label}
++                  </option>
++                ))}
++              </select>
++            </label>
++          </div>
++          <div className={styles.fGroup}>
++            <span id="mf-cmp" className={styles.fLabel}>
++              Comparison
++            </span>
++            <Radios
++              labelledBy="mf-cmp"
++              options={CMPS}
++              value={sel.cmp}
++              onChange={(cmp) => onChange({ cmp })}
++            />
++          </div>
++          <div className={styles.fGroup}>
++            <span id="mf-region" className={styles.fLabel}>
++              Region
++            </span>
++            <Radios
++              labelledBy="mf-region"
++              options={MARKETS}
++              value={sel.market}
++              onChange={(market) => onChange({ market })}
++            />
++          </div>
++          <p className={styles.fNote}>{vm.periodLine}</p>
++          <div className={styles.fFoot}>
++            <button
++              type="button"
++              disabled={!changed}
++              onClick={() =>
++                onChange({
++                  tv: defaults.tv,
++                  anchor: defaults.anchor,
++                  cmp: defaults.cmp,
++                  market: defaults.market,
++                })
++              }
++            >
++              Back to default
++            </button>
++            <button type="button" className={styles.fDone} onClick={close}>
++              Done
++            </button>
++          </div>
++        </GlassPopup>
++      ) : null}
++    </div>
++  );
++}
++
+ export function Header({
+   vm,
+   sel,
++  defaults,
+   panelId,
+   shareUrl,
+   onChange,
+ }: {
+   vm: HeaderVM;
+   sel: SalesSelection;
++  defaults: SalesSelection;
+   panelId: string;
+   shareUrl: string;
+   onChange: (patch: Partial<SalesSelection>) => void;
+@@ -59,44 +204,7 @@ export function Header({
+         M
+       </div>
+       <h1 className={`${styles.abs} ${styles.title}`}>{vm.title}</h1>
+-      <Segmented
+-        label="Market"
+-        options={MARKETS}
+-        value={sel.market}
+-        onChange={(market) => onChange({ market })}
+-        x={744}
+-      />
+-      <Segmented
+-        label="Period"
+-        title={vm.periodLine}
+-        options={PERIODS}
+-        value={sel.tv}
+-        onChange={(tv) => onChange({ tv })}
+-        x={988}
+-      />
+-      <label className={styles.srOnly} htmlFor="sales-month">
+-        Month
+-      </label>
+-      <select
+-        id="sales-month"
+-        className={`${styles.abs} ${styles.select}`}
+-        style={{ left: 1192, top: 20, width: 104 }}
+-        value={monthKey(sel.anchor)}
+-        onChange={(e) => onChange({ anchor: monthIndex(e.target.value) })}
+-      >
+-        {vm.months.map((m) => (
+-          <option key={m.value} value={m.value}>
+-            {m.label}
+-          </option>
+-        ))}
+-      </select>
+-      <Segmented
+-        label="Comparator"
+-        options={CMPS}
+-        value={sel.cmp}
+-        onChange={(cmp) => onChange({ cmp })}
+-        x={1304}
+-      />
++      <Filters vm={vm} sel={sel} defaults={defaults} onChange={onChange} />
+       <Tabs
+         tabs={TABS}
+         value={sel.view}
+diff --git a/src/components/mirelo/sales-app.tsx b/src/components/mirelo/sales-app.tsx
+index 619f3a3..0369b33 100644
+--- a/src/components/mirelo/sales-app.tsx
++++ b/src/components/mirelo/sales-app.tsx
+@@ -1,8 +1,9 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useId, useMemo, useState } from "react";
++import type { ReactNode } from "react";
+ import { interFontVariable } from "@/components/inter-font";
+-import { ReportBoard } from "@/components/report-board";
++import { ReportBoard, useBoardHeight } from "@/components/report-board";
+ import { useReportSearch } from "@/components/report-search";
+ import { createSalesLoader } from "@/lib/mirelo/data";
+ import { createSalesEngine } from "@/lib/mirelo";
+@@ -24,7 +25,8 @@ import styles from "./sales.module.css";
+ // Client root (ADR-0011 (c)): loads public/data/mirelo in the browser, owns the Selection and passes engine view
+ // models down. Orchestration only: every number and string comes from lib/mirelo. Embedded in the site's report
+ // popup, the Selection lives in React state as its query string (the standalone app's URL contract), on a
+-// 1440 × 810 board the popup scales to fit.
++// 1440-wide board the popup scales to fit; since 2026-11-01 the board also grows taller than 810 px to fill the popup
++// (no empty band under it) and the extra height goes to the chart rows and the band tables.
+ 
+ const loader = createSalesLoader(async (name) => {
+   const res = await fetch(`/data/mirelo/${name}`);
+@@ -55,7 +57,7 @@ export function SalesApp() {
+ 
+   if (load.status === "ready") return <Dashboard base={load.base} />;
+   return (
+-    <ReportBoard className={`${styles.page} ${interFontVariable}`}>
++    <ReportBoard fill className={`${styles.page} ${interFontVariable}`}>
+       <div className={styles.board}>
+         <p className={styles.status} role="status">
+           {load.status === "loading"
+@@ -78,18 +80,39 @@ export function SalesApp() {
+   );
+ }
+ 
+-// Layout-spec §1–§5 boxes (board px).
++// Layout-spec §1–§5 boxes (board px) at the design height 810; `extra` = board height − 810 (fill, 2026-11-01).
++// Overview: both chart rows grow, the hero band and the 3-row market table keep their size and the table sits at the
++// bottom. Band views: the chart rows and the (scrolling) table share the extra.
++const DESIGN_H = 810;
+ const HERO_X = [32, 380, 728, 1076] as const;
+ const KPI_X = [32, 264, 496, 728, 960, 1192] as const;
+-const THIRDS: readonly Box[] = [252, 430].flatMap((y) =>
+-  [32, 496, 960].map((x) => ({ x, y, w: 448, h: 162 })),
+-);
+-const HALVES: readonly Box[] = [252, 430].flatMap((y) =>
+-  [32, 728].map((x) => ({ x, y, w: 680, h: 162 })),
+-);
+-const WHY: readonly Box[] = [324, 500].flatMap((y) =>
+-  [32, 728].map((x) => ({ x, y, w: 680, h: 160 })),
+-);
++const rows2 = (
++  xs: readonly number[],
++  w: number,
++  y: number,
++  h1: number,
++  h2: number,
++  gap: number,
++): Box[] => [
++  ...xs.map((x) => ({ x, y, w, h: h1 })),
++  ...xs.map((x) => ({ x, y: y + h1 + gap, w, h: h2 })),
++];
++function bandBoxes(layout: BandVM["layout"], extra: number) {
++  const e = Math.floor(extra * 0.3);
++  const xs = layout === "thirds" ? [32, 496, 960] : [32, 728];
++  const w = layout === "thirds" ? 448 : 680;
++  return {
++    charts: rows2(xs, w, 252, 162 + e, 162 + e, 16),
++    table: { x: 32, y: 608 + 2 * e, w: 1376, h: 186 + extra - 2 * e },
++  };
++}
++function overviewBoxes(extra: number) {
++  const e = Math.floor(extra / 2);
++  return {
++    charts: rows2([32, 728], 680, 324, 160 + e, 160 + extra - e, 16),
++    table: { x: 32, y: 676 + extra, w: 1376, h: 118 },
++  };
++}
+ 
+ type Detail = { ix: DetailIndex } | { error: string } | null;
+ 
+@@ -101,6 +124,7 @@ function Dashboard({ base }: { base: SalesBase }) {
+     [engine, search],
+   );
+   const canonical = engine.codec.serialize(sel);
++  const defaults = useMemo(() => engine.codec.defaults(), [engine]);
+   const [stack, setStack] = useState<Drill[]>([]);
+   const [detail, setDetail] = useState<Detail>(null);
+   const panelId = useId();
+@@ -157,13 +181,14 @@ function Dashboard({ base }: { base: SalesBase }) {
+   }, [go, sel]);
+ 
+   return (
+-    <ReportBoard className={`${styles.page} ${interFontVariable}`}>
++    <ReportBoard fill className={`${styles.page} ${interFontVariable}`}>
+       {/* one pop-up open at a time; a view change closes it (remount) */}
+       <PopupProvider key={sel.view}>
+-        <div className={styles.board}>
++        <Board>
+           <Header
+             vm={header}
+             sel={sel}
++            defaults={defaults}
+             panelId={panelId}
+             shareUrl={shareUrl}
+             onChange={update}
+@@ -217,12 +242,22 @@ function Dashboard({ base }: { base: SalesBase }) {
+               }}
+             />
+           ) : null}
+-        </div>
++        </Board>
+       </PopupProvider>
+     </ReportBoard>
+   );
+ }
+ 
++/** The board at the height the popup gives it (inside <ReportBoard fill>). */
++function Board({ children }: { children: ReactNode }) {
++  const height = useBoardHeight();
++  return (
++    <div className={styles.board} style={{ height }}>
++      {children}
++    </div>
++  );
++}
++
+ function OverviewView({
+   vm,
+   onOpen,
+@@ -234,6 +269,7 @@ function OverviewView({
+   onMonth: (m: number) => void;
+   onAction: (a: RowAction) => void;
+ }) {
++  const boxes = overviewBoxes(useBoardHeight() - DESIGN_H);
+   return (
+     <>
+       {vm.heroes.map((h, i) => (
+@@ -248,14 +284,14 @@ function OverviewView({
+         <ChartCardView
+           key={c.id}
+           card={c}
+-          box={WHY[i] ?? { x: 32, y: 324, w: 680, h: 160 }}
++          box={boxes.charts[i] ?? { x: 32, y: 324, w: 680, h: 160 }}
+           onOpen={onOpen}
+           onMonth={onMonth}
+         />
+       ))}
+       <TableCardView
+         card={vm.table}
+-        box={{ x: 32, y: 676, w: 1376, h: 118 }}
++        box={boxes.table}
+         tight
+         onAction={onAction}
+       />
+@@ -272,7 +308,7 @@ function BandView({
+   onMonth: (m: number) => void;
+   onAction: (a: RowAction) => void;
+ }) {
+-  const boxes = vm.layout === "thirds" ? THIRDS : HALVES;
++  const boxes = bandBoxes(vm.layout, useBoardHeight() - DESIGN_H);
+   return (
+     <>
+       {vm.kpis.map((k, i) => (
+@@ -286,14 +322,14 @@ function BandView({
+         <ChartCardView
+           key={c.id}
+           card={c}
+-          box={boxes[i] ?? { x: 32, y: 252, w: 448, h: 162 }}
++          box={boxes.charts[i] ?? { x: 32, y: 252, w: 448, h: 162 }}
+           onOpen={() => undefined}
+           onMonth={onMonth}
+         />
+       ))}
+       <TableCardView
+         card={vm.table}
+-        box={{ x: 32, y: 608, w: 1376, h: 186 }}
++        box={boxes.table}
+         tight={false}
+         onAction={onAction}
+       />
+diff --git a/src/components/mirelo/sales.module.css b/src/components/mirelo/sales.module.css
+index 218fc34..3fbe12c 100644
+--- a/src/components/mirelo/sales.module.css
++++ b/src/components/mirelo/sales.module.css
+@@ -43,7 +43,7 @@
+ .board {
+   position: relative;
+   width: 1440px;
+-  height: 810px;
++  height: 810px; /* the design height; the board's real height comes inline (it fills the popup, 2026-11-01) */
+   overflow: hidden;
+   background: var(--ground);
+ }
+@@ -84,43 +84,130 @@
+   letter-spacing: -0.01em;
+   white-space: nowrap;
+ }
+-.seg {
++/* filters (2026-11-01): the applied-filters line and one Filters button, top right on the wedge */
++.filters {
++  right: 32px;
++  top: 18px;
++  height: 30px;
+   display: flex;
+-  height: 28px;
+-  border: 1px solid var(--line);
+-  background: var(--panel);
++  align-items: center;
++  gap: 12px;
+ }
+-.seg button {
+-  height: 26px;
+-  border: 0;
+-  border-right: 1px solid var(--line);
+-  background: transparent;
+-  padding: 0;
++.filterLine {
+   font-size: 13px;
++  line-height: 16px;
+   font-weight: 600;
+-  line-height: 26px;
+   color: var(--ink);
+   white-space: nowrap;
++}
++.filterBtn {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  height: 30px;
++  padding: 0 12px;
++  border: 1px solid var(--ink);
++  background: var(--white);
++  font-size: 13px;
++  font-weight: 700;
++  color: var(--ink);
+   cursor: pointer;
+ }
+-.seg button:last-child {
+-  border-right: 0;
++.filterBtn:hover,
++.filterBtn[aria-expanded="true"] {
++  background: var(--ink);
++  color: var(--white);
++}
++.fGroup {
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++  margin-top: 12px;
+ }
+-.seg button[aria-checked="true"] {
++.fLabel {
++  font-size: 11px;
++  line-height: 14px;
++  font-weight: 700;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  color: var(--g600);
++}
++.radios {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 6px;
++}
++.radios button {
++  height: 28px;
++  padding: 0 12px;
++  border: 1px solid var(--line);
++  background: var(--white);
++  font-size: 13px;
++  font-weight: 600;
++  color: var(--ink);
++  cursor: pointer;
++}
++.radios button[aria-checked="true"] {
++  border-color: var(--ink);
+   background: var(--ink);
+   color: var(--white);
+ }
+-.select {
++.radios button[aria-disabled="true"] {
++  border-style: dashed;
++  background: transparent;
++  color: var(--g400);
++  cursor: not-allowed;
++}
++.fRow {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  font-size: 12px;
++  font-weight: 600;
++  color: var(--g600);
++}
++.fSelect {
+   height: 28px;
+   border: 1px solid var(--line);
+   border-radius: 0;
+-  background: var(--panel);
++  background: var(--white);
+   padding: 0 6px 0 9px;
+   font-size: 13px;
+   font-weight: 600;
+   color: var(--ink);
+   cursor: pointer;
+ }
++.fNote {
++  margin: 14px 0 0;
++  font-size: 11.5px;
++  line-height: 16px;
++  color: var(--g600);
++}
++.fFoot {
++  display: flex;
++  justify-content: flex-end;
++  gap: 8px;
++  margin-top: 12px;
++}
++.fFoot button {
++  height: 28px;
++  padding: 0 12px;
++  border: 1px solid var(--line);
++  background: var(--white);
++  font-size: 12px;
++  font-weight: 600;
++  color: var(--ink);
++  cursor: pointer;
++}
++.fFoot button:disabled {
++  color: var(--g400);
++  cursor: default;
++}
++.fFoot .fDone {
++  border-color: var(--ink);
++  background: var(--ink);
++  color: var(--white);
++}
+ 
+ .tabs {
+   left: 32px;
+@@ -184,7 +271,7 @@
+   left: 0;
+   top: 116px;
+   width: 1440px;
+-  height: 694px;
++  bottom: 0;
+ }
+ 
+ /* ---------- cards ---------- */
+@@ -330,9 +417,6 @@
+   letter-spacing: -0.01em;
+   white-space: nowrap;
+ }
+-.kpi .cr {
+-  top: 80px;
+-}
+ .kpi .crName {
+   width: auto;
+   min-width: 84px;
+@@ -341,17 +425,6 @@
+ .kpi .crDelta {
+   width: auto;
+ }
+-.alt {
+-  visibility: hidden;
+-}
+-.kpi:hover .main,
+-.kpi:focus-within .main {
+-  visibility: hidden;
+-}
+-.kpi:hover .alt,
+-.kpi:focus-within .alt {
+-  visibility: visible;
+-}
+ 
+ .chart {
+   position: absolute;
+@@ -551,36 +624,51 @@
+   text-decoration: underline;
+ }
+ 
+-/* ---------- slide-over ---------- */
++/* ---------- detail window (was the 720 px slide-over; 2026-11-01: a centred window in the pop-up glass over a
++   20 % dark-grey mask on the whole report) ---------- */
+ .scrim {
+   position: absolute;
+-  left: 0;
+-  top: 100px;
+-  width: 720px;
+-  height: 710px;
++  inset: 0;
++  z-index: 29;
+   border: 0;
+   padding: 0;
+-  background: rgba(17, 17, 17, 0.4);
++  background: rgba(64, 64, 64, 0.2);
+   cursor: default;
+ }
+ .so {
+   position: absolute;
+-  left: 720px;
+-  top: 100px;
+-  width: 720px;
+-  height: 710px;
++  left: 50%;
++  top: 50%;
++  width: 1120px;
++  height: 640px;
++  max-height: calc(100% - 48px);
++  transform: translate(-50%, -50%);
+   z-index: 30;
+-  background: var(--ground);
+-  border-left: 1px solid var(--line);
++  overflow: hidden;
++  border: 1px solid #1a1a1a;
++  border-radius: 12px;
++  background: rgba(244, 243, 240, 0.8);
++  -webkit-backdrop-filter: blur(28px) saturate(1.05);
++  backdrop-filter: blur(28px) saturate(1.05);
++  box-shadow:
++    0 24px 56px rgba(17, 17, 17, 0.3),
++    0 2px 6px rgba(17, 17, 17, 0.14);
++}
++@supports not (
++  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
++) {
++  .so {
++    background: var(--ground);
++  }
+ }
+ .soHd {
+   position: absolute;
+   left: 0;
+   top: 0;
+-  width: 719px;
++  right: 0;
+   height: 64px;
+   padding: 12px 64px 0 24px;
+-  background: var(--white);
++  background: rgba(255, 255, 255, 0.55);
+   border-bottom: 1px solid var(--line);
+ }
+ .soHd h2 {
+@@ -661,7 +749,7 @@
+   top: 196px;
+ }
+ .soTable .table {
+-  table-layout: auto; /* 9 columns in 672 px: size to content, not equal shares */
++  table-layout: auto; /* 9 columns: size to content, not equal shares */
+   font-size: 12px;
+ }
+ .soTable .table th,
+@@ -732,6 +820,36 @@
+   right: 16px;
+   top: 16px;
+ }
++/* the visible "Details →" on the stretched button (2026-11-01: the card gave no sign it opens the view) */
++.heroCta {
++  position: absolute;
++  right: 12px;
++  bottom: 10px;
++  height: 24px;
++  padding: 0 10px;
++  border: 1px solid var(--ink);
++  background: var(--white);
++  font-size: 12px;
++  line-height: 22px;
++  font-weight: 700;
++  color: var(--ink);
++  white-space: nowrap;
++}
++.hero:hover .heroCta,
++.heroOpen:focus-visible .heroCta {
++  background: var(--ink);
++  color: var(--white);
++}
++/* ⓘ top-left beside the title on hero and KPI cards (2026-11-01); the title moves right of it */
++.infoTop {
++  position: absolute;
++  left: 8px;
++  top: 12px;
++  z-index: 2; /* above the hero's stretched button */
++}
++.labI {
++  left: 34px;
++}
+ .kpiChip {
+   position: absolute;
+   right: 12px;
+diff --git a/src/components/mirelo/slide-over.tsx b/src/components/mirelo/slide-over.tsx
+index bf9dacd..53264e7 100644
+--- a/src/components/mirelo/slide-over.tsx
++++ b/src/components/mirelo/slide-over.tsx
+@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
+ import type { SlideOverVM } from "@/lib/mirelo/view-model";
+ import styles from "./sales.module.css";
+ 
+-// 720 px slide-over (layout-spec §6 Row click): modal dialog over the right half, scrim over the left. Focus moves to
+-// the close button on open, Tab stays inside, Escape or the scrim closes, and focus returns to the opener.
++// Detail window (layout-spec §6 Row click; "Show loans"): a modal dialog centred on the board in the pop-up glass, over
++// a 20 % dark-grey mask on the whole report (2026-11-01, owner; it was a 720 px slide-over on the right half). Focus
++// moves to the close button on open, Tab stays inside, Escape or the mask closes, and focus returns to the opener.
+ 
+ const FOCUSABLE = 'button, [href], [tabindex]:not([tabindex="-1"])';
+ 
+diff --git a/src/components/report-board.tsx b/src/components/report-board.tsx
+index aeb9b5b..c950fdc 100644
+--- a/src/components/report-board.tsx
++++ b/src/components/report-board.tsx
+@@ -14,59 +14,94 @@ import {
+  * that scales down to the width it gets. The popup is near full-screen, so on a wide window the board renders at
+  * its own size and on a laptop it shrinks to fit, instead of scrolling sideways.
+  *
++ * `fill` (Mirelo, 2026-11-01): the board scales to fit the popup in both directions (up to 1.25×) and grows taller
++ * than its design height to use the rest of the popup, so no empty band is left under it. The report reads its
++ * height through {@link useBoardHeight} and spreads the extra over its rows.
++ *
+  * The scale is a CSS transform, which also makes the board the containing block of every `position: fixed`
+  * element inside it (Nordmark's side bar, pop-ups and tooltip), so they stay inside the popup rather than
+  * anchoring to the browser window. Code that positions from `getBoundingClientRect()` reads the scale through
+  * {@link useBoardScale} and divides.
+  */
+ const ScaleContext = createContext(1);
++const HeightContext = createContext(810);
+ 
+ export const useBoardScale = () => useContext(ScaleContext);
++/** The board's height in board px: the design height, or more under `fill`. */
++export const useBoardHeight = () => useContext(HeightContext);
++
++const MAX_FILL_SCALE = 1.25;
+ 
+ export function ReportBoard({
+   width = 1440,
+   height = 810,
++  fill = false,
+   className,
+   children,
+ }: {
+   width?: number;
+   height?: number;
++  fill?: boolean;
+   className?: string;
+   children: ReactNode;
+ }) {
+   const host = useRef<HTMLDivElement>(null);
+-  const [scale, setScale] = useState(1);
++  const [fit, setFit] = useState({ scale: 1, height, left: 0 });
+ 
+   useLayoutEffect(() => {
+     const el = host.current;
+     if (!el) return;
+-    const fit = () => setScale(Math.min(1, el.clientWidth / width));
+-    fit();
+-    const ro = new ResizeObserver(fit);
++    const measure = () => {
++      const cw = el.clientWidth;
++      const ch = el.clientHeight;
++      if (!fill) {
++        setFit({ scale: Math.min(1, cw / width), height, left: 0 });
++        return;
++      }
++      const scale = Math.max(
++        0.1,
++        Math.min(MAX_FILL_SCALE, cw / width, ch > 0 ? ch / height : Infinity),
++      );
++      setFit({
++        scale,
++        height: Math.max(height, Math.floor(ch / scale)),
++        left: Math.max(0, (cw - width * scale) / 2),
++      });
++    };
++    measure();
++    const ro = new ResizeObserver(measure);
+     ro.observe(el);
+     return () => ro.disconnect();
+-  }, [width]);
++  }, [width, height, fill]);
+ 
+-  // The host fills the popup (its ground colour continues below a board shorter than the popup) and is at least
+-  // the board's scaled height; at full size the board sits centred in a wider popup.
++  // Without `fill` the host fills the popup (its ground colour continues below a board shorter than the popup) and
++  // is at least the board's scaled height; at full size the board sits centred in a wider popup. With `fill` the
++  // host is exactly the popup and the board is sized to it.
+   return (
+     <div
+       ref={host}
+       className={className}
+-      style={{ height: height * scale, minHeight: "100%" }}
++      style={
++        fill
++          ? { height: "100%", position: "relative", overflow: "hidden" }
++          : { height: height * fit.scale, minHeight: "100%" }
++      }
+     >
+-      <ScaleContext.Provider value={scale}>
+-        <div
+-          style={{
+-            width,
+-            height,
+-            margin: "0 auto",
+-            transform: `scale(${scale})`,
+-            transformOrigin: "top left",
+-          }}
+-        >
+-          {children}
+-        </div>
++      <ScaleContext.Provider value={fit.scale}>
++        <HeightContext.Provider value={fit.height}>
++          <div
++            style={{
++              width,
++              height: fit.height,
++              margin: fill ? undefined : "0 auto",
++              marginLeft: fill ? fit.left : undefined,
++              transform: `scale(${fit.scale})`,
++              transformOrigin: "top left",
++            }}
++          >
++            {children}
++          </div>
++        </HeightContext.Provider>
+       </ScaleContext.Provider>
+     </div>
+   );
+diff --git a/src/lib/mirelo/copy.ts b/src/lib/mirelo/copy.ts
+index dfc35bf..277015a 100644
+--- a/src/lib/mirelo/copy.ts
++++ b/src/lib/mirelo/copy.ts
+@@ -65,6 +65,16 @@ export function periodLine(
+   ].join(" - ");
+ }
+ 
++/** The applied filters in one short line: "Sep 2026 - Month - vs Budget - All markets". */
++export function filterLine(sel: SalesSelection): string {
++  return [
++    windowLabel(windowOf(sel.tv, sel.anchor)),
++    TIME_VIEW_NAMES[sel.tv],
++    `vs ${CMP_NAMES[sel.cmp]}`,
++    MARKET_NAMES[sel.market],
++  ].join(" - ");
++}
++
+ /** Story events annotated on trend charts when their month is in range (README "Stories built into the data"). */
+ export const STORY_EVENTS: readonly {
+   month: string;
+@@ -482,6 +492,8 @@ export interface HowToReadVM {
+ 
+ const LEGEND =
+   "▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.";
++const FILTERS =
++  "Filters (top right): period (month, quarter or year to date, up to a closed month), comparison (Budget or prior year) and region.";
+ const HOW: Readonly<Record<ViewId, readonly [string, readonly InfoValue[]]>> = {
+   overview: [
+     "Overview",
+@@ -489,7 +501,7 @@ const HOW: Readonly<Record<ViewId, readonly [string, readonly InfoValue[]]>> = {
+       {
+         label: "Top band",
+         value:
+-          "The four Tier-1 numbers with their gap to Budget and to the prior year.",
++          "The four Tier-1 numbers with their gap to Budget and to the prior year; Details opens the metric's view.",
+       },
+       {
+         label: "Grid",
+@@ -499,7 +511,7 @@ const HOW: Readonly<Record<ViewId, readonly [string, readonly InfoValue[]]>> = {
+       {
+         label: "Table",
+         value:
+-          "Per market; click filters the page, double-click lists the loans.",
++          "Per market; click filters the page, double-click or Show loans opens the loan list.",
+       },
+     ],
+   ],
+@@ -593,6 +605,7 @@ export function howToRead(
+     lines: [
+       { label: "Showing", value: periodLine(sel, lastClosed, firstMonth) },
+       ...lines,
++      { label: "Filters", value: FILTERS },
+       { label: "Legend", value: LEGEND },
+     ],
+   };
+diff --git a/src/lib/mirelo/engine.test.ts b/src/lib/mirelo/engine.test.ts
+index b6e16fc..d618a9c 100644
+--- a/src/lib/mirelo/engine.test.ts
++++ b/src/lib/mirelo/engine.test.ts
+@@ -70,7 +70,7 @@ describe("Overview (default window: Month · Sep 2026 · All markets · vs Budge
+     expect(
+       engine.header(sel({ market: "RO", tv: "Q", cmp: "PY" })).periodLine,
+     ).toBe(
+-      "Showing Jul–Sep 2026 - QTD - Romania - Actual vs Prior year and Budget - Closed through Sep 2026",
++      "Showing Jul–Sep 2026 - Quarter to date - Romania - Actual vs Prior year and Budget - Closed through Sep 2026",
+     );
+     expect(
+       engine.header(sel({ tv: "R", anchor: monthIndex("2024-06") })).periodLine,
+diff --git a/src/lib/mirelo/index.ts b/src/lib/mirelo/index.ts
+index 3b4cf1e..b166bf0 100644
+--- a/src/lib/mirelo/index.ts
++++ b/src/lib/mirelo/index.ts
+@@ -1,5 +1,5 @@
+ import { clientsView } from "./clients";
+-import { TITLE, howToRead, periodLine } from "./copy";
++import { TITLE, filterLine, howToRead, periodLine } from "./copy";
+ import { createCube } from "./cube";
+ import { indexDetail, slideOver } from "./detail";
+ import type { DetailIndex } from "./detail";
+@@ -30,6 +30,7 @@ export function createSalesEngine(base: SalesBase) {
+     header: (sel: SalesSelection): HeaderVM => ({
+       title: TITLE,
+       periodLine: periodLine(sel, cube.closed, cube.first),
++      filterLine: filterLine(sel),
+       howToRead: howToRead(sel, cube.closed, cube.first),
+       months: months.map((i) => ({ value: monthKey(i), label: monthLabel(i) })),
+     }),
+diff --git a/src/lib/mirelo/kpis.ts b/src/lib/mirelo/kpis.ts
+index c29d206..f6ddaaf 100644
+--- a/src/lib/mirelo/kpis.ts
++++ b/src/lib/mirelo/kpis.ts
+@@ -4,9 +4,10 @@ import type { CmpRow, DeltaKind } from "./status";
+ import type { Comparator } from "./types";
+ import type { Chip } from "./view-model";
+ 
+-// Comparator rows of hero and KPI cards (layout-spec §6 Comparator): hero cards always show Budget and Prior year;
+-// KPI cards show the header comparator, falling back to Prior year when the metric has no Budget, and keep the other
+-// one for hover. `budget: undefined` = the metric has no Budget at all; `null` = no value for this window.
++// Comparator rows of hero and KPI cards (layout-spec §6 Comparator): hero cards always show Budget and Prior year.
++// KPI cards show "vs Budget" and "vs PY" both, Budget first, since 2026-11-01 (owner: the row the ⓘ left is used for
++// Budget); a metric without a Budget shows "vs PY" alone. The status chip follows the chosen comparator, falling back
++// to the other row. `budget: undefined` = the metric has no Budget at all; `null` = no value for this window.
+ 
+ export interface Bundle {
+   actual: number | null;
+@@ -26,17 +27,22 @@ export function kpiRows(
+   kind: DeltaKind,
+   b: Bundle,
+   cmp: Comparator,
+-): { row: CmpRow; alt: CmpRow | null } {
+-  if (b.ref)
+-    return { row: cmpRow(kind, b.ref.label, b.actual, b.ref.value), alt: null };
++): { rows: CmpRow[]; chip: Chip | null } {
++  if (b.ref) {
++    const row = cmpRow(kind, b.ref.label, b.actual, b.ref.value);
++    return { rows: [row], chip: chipOf(row) };
++  }
+   const budget =
+     b.budget === undefined
+       ? null
+       : cmpRow(kind, `vs ${CMP_NAMES.BUD}`, b.actual, b.budget);
+   const py = cmpRow(kind, "vs PY", b.actual, b.py);
+-  return cmp === "BUD" && budget
+-    ? { row: budget, alt: py }
+-    : { row: py, alt: budget };
++  const chosen = cmp === "BUD" && budget ? budget : py;
++  const other = chosen === py ? budget : py;
++  return {
++    rows: budget ? [budget, py] : [py],
++    chip: chipOf(chosen) ?? (other ? chipOf(other) : null),
++  };
+ }
+ 
+ /** Status chip of a comparator row: glyph (direction) + word (meaning); none when there is no comparison. */
+diff --git a/src/lib/mirelo/loans.ts b/src/lib/mirelo/loans.ts
+index fe6846e..30d1956 100644
+--- a/src/lib/mirelo/loans.ts
++++ b/src/lib/mirelo/loans.ts
+@@ -11,7 +11,7 @@ import {
+   fmtPct,
+   fmtPp,
+ } from "./format";
+-import { chipOf, kpiRows } from "./kpis";
++import { kpiRows } from "./kpis";
+ import type { Bundle } from "./kpis";
+ import { MARKETS } from "./manifest";
+ import type { Ctx } from "./overview";
+@@ -40,15 +40,14 @@ export function kpi(
+   b: Bundle,
+   cmp: Comparator,
+ ): KpiCard {
+-  const { row, alt } = kpiRows(kind, b, cmp);
++  const { rows, chip } = kpiRows(kind, b, cmp);
+   return {
+     id,
+     label,
+     info: info(id, values),
+     value,
+-    row,
+-    alt,
+-    status: chipOf(row),
++    rows,
++    status: chip,
+   };
+ }
+ 
+diff --git a/src/lib/mirelo/overview.ts b/src/lib/mirelo/overview.ts
+index da9714a..ee12d71 100644
+--- a/src/lib/mirelo/overview.ts
++++ b/src/lib/mirelo/overview.ts
+@@ -284,7 +284,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
+     open: "clients",
+     legend: [
+       { label: windowLabel(w), role: "actual" },
+-      { label: "Prior year", role: "ghost" },
++      { label: "Prior year", role: "pyFill" },
+     ],
+     chart: {
+       kind: "bars",
+diff --git a/src/lib/mirelo/revenue.ts b/src/lib/mirelo/revenue.ts
+index 4534be4..2f5fd3c 100644
+--- a/src/lib/mirelo/revenue.ts
++++ b/src/lib/mirelo/revenue.ts
+@@ -102,8 +102,7 @@ export function revenueView(ctx: Ctx, sel: SalesSelection): BandVM {
+         { label: "Budget", value: fmtEur(bud) },
+       ]),
+       value: fmtPct(att),
+-      row: { ...attRow, status: attStatus },
+-      alt: null,
++      rows: [{ ...attRow, status: attStatus }],
+       status: chipOf({ ...attRow, status: attStatus }),
+     },
+     // R3 / R4 per layout-spec v4 §5 (MS-04): the Budget carries interest and fees together per loan product, so R3
+diff --git a/src/lib/mirelo/view-model.ts b/src/lib/mirelo/view-model.ts
+index 5f896d7..b6fb406 100644
+--- a/src/lib/mirelo/view-model.ts
++++ b/src/lib/mirelo/view-model.ts
+@@ -18,13 +18,13 @@ export interface Series {
+ 
+ export interface LegendItem {
+   label: string;
+-  role: SeriesRole | "selected" | "ghost";
++  role: SeriesRole | "selected" | "ghost" | "pyFill"; // pyFill: prior year as a filled yellow bar (2026-11-01)
+ }
+ 
+ export interface BarRow {
+   label: string;
+   value: number | null;
+-  ghost: number | null; // PY outline
++  ghost: number | null; // PY: a filled yellow bar under the actual one (2026-11-01; was an outline)
+   tick: number | null; // target / SLA / average tick
+   text: string;
+ }
+@@ -145,9 +145,8 @@ export interface KpiCard {
+   label: string;
+   info: InfoVM;
+   value: string;
+-  row: CmpRow;
+-  status: Chip | null;
+-  alt: CmpRow | null; // the other comparator, shown on hover / focus (layout-spec §6)
++  rows: CmpRow[]; // "vs Budget" (when the metric has one) and "vs PY", or one fixed comparator
++  status: Chip | null; // follows the chosen comparator
+ }
+ 
+ export interface Cell {
+@@ -201,6 +200,7 @@ export interface BandVM {
+ export interface HeaderVM {
+   title: string;
+   periodLine: string;
++  filterLine: string; // the applied filters beside the Filters button: "Sep 2026 - Month - vs Budget - All markets"
+   howToRead: HowToReadVM;
+   months: { value: string; label: string }[]; // closed months, newest first
+ }
+diff --git a/src/lib/mirelo/windows.ts b/src/lib/mirelo/windows.ts
+index 4ebd291..2e61d4e 100644
+--- a/src/lib/mirelo/windows.ts
++++ b/src/lib/mirelo/windows.ts
+@@ -88,9 +88,9 @@ export const trailing13 = (anchor: number): number[] =>
+ 
+ export const TIME_VIEW_NAMES: Readonly<Record<TimeView, string>> = {
+   M: "Month",
+-  Q: "QTD",
+-  Y: "YTD",
+-  R: "R12M",
++  Q: "Quarter to date",
++  Y: "Year to date",
++  R: "Last 12 months",
+ };
+ 
+ /** "Sep 2026", "Jul–Sep 2026", "Oct 2025–Sep 2026" (en dash, as in the period line). */
+diff --git a/src/lib/mirelo/kpis.test.ts b/src/lib/mirelo/kpis.test.ts
+new file mode 100644
+index 0000000..a34e1c3
+--- /dev/null
++++ b/src/lib/mirelo/kpis.test.ts
+@@ -0,0 +1,58 @@
++import { describe, expect, it } from "vitest";
++import { filterLine } from "./copy";
++import { kpiRows } from "./kpis";
++import { monthIndex } from "./windows";
++
++// KPI card rows since 2026-11-01: "vs Budget" and "vs PY" both shown (Budget first), the chip follows the chosen
++// comparator; and the one-line filter summary beside the Filters button.
++
++describe("KPI comparator rows", () => {
++  const b = { actual: 110, budget: 100, py: 120 };
++
++  it("shows vs Budget and vs PY, Budget first, whatever the comparator", () => {
++    for (const cmp of ["BUD", "PY"] as const)
++      expect(kpiRows("countUp", b, cmp).rows.map((r) => r.label)).toEqual([
++        "vs Budget",
++        "vs PY",
++      ]);
++  });
++
++  it("the chip follows the chosen comparator", () => {
++    expect(kpiRows("countUp", b, "BUD").chip?.status).toBe("good"); // 110 vs 100
++    expect(kpiRows("countUp", b, "PY").chip?.status).not.toBe("good"); // 110 vs 120
++  });
++
++  it("a metric without a Budget shows vs PY alone; a fixed comparator shows itself alone", () => {
++    expect(
++      kpiRows("countUp", { actual: 1, py: 1 }, "BUD").rows.map((r) => r.label),
++    ).toEqual(["vs PY"]);
++    expect(
++      kpiRows(
++        "countUp",
++        { actual: 1, py: 1, ref: { label: "vs target", value: 2 } },
++        "BUD",
++      ).rows.map((r) => r.label),
++    ).toEqual(["vs target"]);
++  });
++
++  it("falls back to the other row's chip when the chosen one has no value", () => {
++    const r = kpiRows("countUp", { actual: 110, budget: null, py: 100 }, "BUD");
++    expect(r.rows).toHaveLength(2);
++    expect(r.chip?.status).toBe("good");
++  });
++});
++
++describe("filter line", () => {
++  it("window - granularity - comparison - region", () => {
++    expect(
++      filterLine({
++        view: "overview",
++        market: "RO",
++        tv: "Q",
++        anchor: monthIndex("2026-09"),
++        cmp: "PY",
++        drill: null,
++      }),
++    ).toBe("Jul–Sep 2026 - Quarter to date - vs Prior year - Romania");
++  });
++});

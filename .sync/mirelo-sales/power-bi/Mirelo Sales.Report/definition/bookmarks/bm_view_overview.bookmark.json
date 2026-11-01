@@ -12,18 +12,22 @@
       "ov_o1_svg",
       "ov_o1_btn",
       "ov_o1_info",
+      "ov_o1_details",
       "ov_o2_panel",
       "ov_o2_svg",
       "ov_o2_btn",
       "ov_o2_info",
+      "ov_o2_details",
       "ov_o3_panel",
       "ov_o3_svg",
       "ov_o3_btn",
       "ov_o3_info",
+      "ov_o3_details",
       "ov_o4_panel",
       "ov_o4_svg",
       "ov_o4_btn",
       "ov_o4_info",
+      "ov_o4_details",
       "ov_o5_panel",
       "ov_o5_chart",
       "ov_o5_info",
@@ -248,7 +252,22 @@
       "info_revenue_title",
       "info_revenue_showing",
       "info_revenue_text",
-      "info_revenue_close"
+      "info_revenue_close",
+      "grp_filters",
+      "filters_panel",
+      "filters_title",
+      "filters_period_label",
+      "filters_upto_label",
+      "filters_cmp_label",
+      "filters_region_label",
+      "filters_week",
+      "s_period",
+      "s_month",
+      "s_cmp",
+      "s_market",
+      "filters_showing",
+      "filters_reset",
+      "filters_done"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -2010,6 +2029,138 @@
                 "mode": "hidden"
               }
             }
+          },
+          "ov_o1_details": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "ov_o2_details": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "ov_o3_details": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "ov_o4_details": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "filters_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_period_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_upto_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_cmp_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_region_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_week": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_period": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_month": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_cmp": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_market": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_showing": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_reset": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_done": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
           }
         },
         "visualContainerGroups": {
@@ -2041,6 +2192,9 @@
             "isHidden": true
           },
           "grp_info_revenue": {
+            "isHidden": true
+          },
+          "grp_filters": {
             "isHidden": true
           }
         }

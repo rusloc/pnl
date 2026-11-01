@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "s_market",
   "position": {
-    "x": 744,
-    "y": 20,
-    "z": 1040,
+    "x": 20,
+    "y": 244,
+    "z": 3660,
     "height": 28,
-    "width": 232,
-    "tabOrder": 140
+    "width": 400,
+    "tabOrder": 3660
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -280,7 +280,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E9E8E4'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -624,7 +624,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Market picker'"
+                  "Value": "'Region: All markets, PL, RO or PT'"
                 }
               }
             }
@@ -667,5 +667,7 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  }
+  },
+  "parentGroupName": "grp_filters",
+  "isHidden": true
 }

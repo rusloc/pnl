@@ -1,0 +1,154 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Filters: close",
+  "name": "bm_filters_close",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_filters",
+      "filters_panel",
+      "filters_title",
+      "filters_period_label",
+      "filters_upto_label",
+      "filters_cmp_label",
+      "filters_region_label",
+      "filters_week",
+      "s_period",
+      "s_month",
+      "s_cmp",
+      "s_market",
+      "filters_showing",
+      "filters_reset",
+      "filters_done"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "filters_panel": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_title": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_period_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_upto_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_cmp_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_region_label": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_week": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_period": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_month": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_cmp": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_market": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_showing": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_reset": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_done": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_filters": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

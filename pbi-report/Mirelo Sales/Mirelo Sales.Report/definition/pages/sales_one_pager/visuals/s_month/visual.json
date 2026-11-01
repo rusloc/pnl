@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "s_month",
   "position": {
-    "x": 1192,
-    "y": 10,
-    "z": 1060,
+    "x": 72,
+    "y": 104,
+    "z": 3650,
     "height": 48,
-    "width": 104,
-    "tabOrder": 160
+    "width": 120,
+    "tabOrder": 3650
   },
   "visual": {
     "visualType": "slicer",
@@ -97,7 +97,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E9E8E4'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -253,7 +253,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Month picker (closed months)'"
+                  "Value": "'Up to closed month'"
                 }
               }
             }
@@ -296,5 +296,7 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  }
+  },
+  "parentGroupName": "grp_filters",
+  "isHidden": true
 }

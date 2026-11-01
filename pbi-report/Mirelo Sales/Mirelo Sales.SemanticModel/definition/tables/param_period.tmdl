@@ -1,4 +1,4 @@
-/// Period picker: Month, QTD, YTD, R12M (disconnected).
+/// Period picker: Month, Quarter to date, Year to date, Last 12 months (disconnected; codes MONTH / QTD / YTD / R12M). The Filters panel offers the first three (R12M left the UI 2026-11-01, as Track C).
 table param_period
 	lineageTag: 2fee0b99-bf40-593a-b953-28fdfa21fc5a
 
@@ -42,9 +42,9 @@ table param_period
 				    ,"sort_order", INTEGER
 				    ,{
 				        { "MONTH", "Month", 1 }
-				        ,{ "QTD", "QTD", 2 }
-				        ,{ "YTD", "YTD", 3 }
-				        ,{ "R12M", "R12M", 4 }
+				        ,{ "QTD", "Quarter to date", 2 }
+				        ,{ "YTD", "Year to date", 3 }
+				        ,{ "R12M", "Last 12 months", 4 }
 				    }
 				)
 

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "s_period",
   "position": {
-    "x": 988,
-    "y": 20,
-    "z": 1050,
+    "x": 78,
+    "y": 68,
+    "z": 3645,
     "height": 28,
-    "width": 196,
-    "tabOrder": 150
+    "width": 342,
+    "tabOrder": 3645
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -122,7 +122,7 @@
             "columnCount": {
               "expr": {
                 "Literal": {
-                  "Value": "4L"
+                  "Value": "3L"
                 }
               }
             },
@@ -143,7 +143,7 @@
             "maxTiles": {
               "expr": {
                 "Literal": {
-                  "Value": "4L"
+                  "Value": "3L"
                 }
               }
             },
@@ -280,7 +280,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E9E8E4'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
@@ -624,7 +624,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Period picker'"
+                  "Value": "'Period: Month, Quarter to date or Year to date'"
                 }
               }
             }
@@ -667,5 +667,79 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  }
+  },
+  "parentGroupName": "grp_filters",
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f_s_period_offered",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "param_period"
+              }
+            },
+            "Property": "period_code"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "p",
+              "Entity": "param_period",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "p"
+                          }
+                        },
+                        "Property": "period_code"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'MONTH'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'QTD'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'YTD'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "isHiddenInViewMode": true
+      }
+    ]
+  },
+  "isHidden": true
 }

@@ -10,6 +10,7 @@
 //   T-M4  bridge identity and README rule 2 (8 rows)
 //   T-M5  smoke: card SVGs and 13-month trends (56 rows)
 //   T-M6  ADR-0012 info lookup: title + definition per dim_card row, note per card (59 rows)
+//   T-M7  2026-11-01 owner changes: KPI vs Budget + vs PY rows and chip fallback (64 rows), filter line, period names, hero values (12 rows)
 //   T-P   parity rows vs Track C: 13 selections, 833 rows (parity-check-2026-10-27 section 3)
 // Budget comparisons have no control totals (the generator publishes actuals only); they are not reconciled here.
 
@@ -3012,6 +3013,307 @@ RETURN
             LEN ( [title] ) > 0
                 && LEN ( [definition] ) > 0
                 && ( NOT [is_card] || LEN ( [note] ) > 0 )
+    )
+
+// T-M7a 2026-11-01 owner changes (.sync/2026-11-01-mirelo-sales-changes.md, change 9 = Track C kpiRows): the eight KPI cards
+//       with a Budget carry vs Budget and vs PY rows (items 6-10 of _Card X Parts), items 3-5 still follow the comparator,
+//       the chip (11 / 12) follows the comparator and falls back to the other row when that one is n/a (2024 has no prior
+//       year); the other 16 KPI cards stay one row; every KPI SVG puts the title at x 30 and only the eight draw y 110 (64 rows)
+EVALUATE
+VAR _states       =
+    DATATABLE (
+        "state", STRING
+        ,"anchor"
+            ,STRING
+        ,"mkt"
+            ,STRING
+        ,"period"
+            ,STRING
+        ,"cmp"
+            ,STRING
+        ,{
+            { "default", "2026-09", "ALL", "MONTH", "BUD" }
+            ,{ "py", "2026-09", "ALL", "MONTH", "PY" }
+            ,{ "ro_ytd_py", "2026-09", "RO", "YTD", "PY" }
+            ,{ "fallback", "2024-12", "ALL", "MONTH", "PY" }
+        }
+    )
+VAR _cards        =
+    DATATABLE (
+        "card", STRING
+        ,"rows"
+            ,INTEGER
+        ,{
+            { "L1", 2 }
+            ,{ "L2", 2 }
+            ,{ "L3", 2 }
+            ,{ "L4", 1 }
+            ,{ "L5", 1 }
+            ,{ "L6", 1 }
+            ,{ "C1", 2 }
+            ,{ "C2", 1 }
+            ,{ "C3", 1 }
+            ,{ "C4", 1 }
+            ,{ "C5", 1 }
+            ,{ "C6", 1 }
+            ,{ "P1", 2 }
+            ,{ "P2", 1 }
+            ,{ "P3", 1 }
+            ,{ "P4", 1 }
+            ,{ "P5", 1 }
+            ,{ "P6", 1 }
+            ,{ "R1", 2 }
+            ,{ "R2", 1 }
+            ,{ "R3", 2 }
+            ,{ "R4", 2 }
+            ,{ "R5", 1 }
+            ,{ "R6", 1 }
+        }
+    )
+VAR _expected     =
+    DATATABLE (
+        "card", STRING
+        ,"state"
+            ,STRING
+        ,"expected"
+            ,STRING
+        ,{
+            { "L1", "default", "▲ +0.4%|▲ +15.2%|good" }
+            ,{ "P1", "default", "▲ +0.4pp|▼ −0.9pp|watch" }
+            ,{ "P1", "py", "▲ +0.4pp|▼ −0.9pp|good" }
+            ,{ "L1", "fallback", "▲ +0.8%|n/a|good" }
+        }
+    )
+VAR _grid         =
+    FILTER (
+        CROSSJOIN ( _states, _cards )
+        ,[rows] = 2
+            || [state] IN { "default", "ro_ytd_py" }
+    )
+VAR _rows         =
+    ADDCOLUMNS (
+        _grid
+        ,"parts",
+            VAR _card         = [card]
+            RETURN
+                CALCULATE (
+                    SWITCH (
+                        _card
+                        ,"L1"
+                            ,[_Card L1 Parts]
+                        ,"L2"
+                            ,[_Card L2 Parts]
+                        ,"L3"
+                            ,[_Card L3 Parts]
+                        ,"L4"
+                            ,[_Card L4 Parts]
+                        ,"L5"
+                            ,[_Card L5 Parts]
+                        ,"L6"
+                            ,[_Card L6 Parts]
+                        ,"C1"
+                            ,[_Card C1 Parts]
+                        ,"C2"
+                            ,[_Card C2 Parts]
+                        ,"C3"
+                            ,[_Card C3 Parts]
+                        ,"C4"
+                            ,[_Card C4 Parts]
+                        ,"C5"
+                            ,[_Card C5 Parts]
+                        ,"C6"
+                            ,[_Card C6 Parts]
+                        ,"P1"
+                            ,[_Card P1 Parts]
+                        ,"P2"
+                            ,[_Card P2 Parts]
+                        ,"P3"
+                            ,[_Card P3 Parts]
+                        ,"P4"
+                            ,[_Card P4 Parts]
+                        ,"P5"
+                            ,[_Card P5 Parts]
+                        ,"P6"
+                            ,[_Card P6 Parts]
+                        ,"R1"
+                            ,[_Card R1 Parts]
+                        ,"R2"
+                            ,[_Card R2 Parts]
+                        ,"R3"
+                            ,[_Card R3 Parts]
+                        ,"R4"
+                            ,[_Card R4 Parts]
+                        ,"R5"
+                            ,[_Card R5 Parts]
+                        ,"R6"
+                            ,[_Card R6 Parts]
+                    )
+                    ,TREATAS ( { [anchor] }, param_anchor_month[month_key] )
+                    ,TREATAS ( { [mkt] }, param_market[market_code] )
+                    ,TREATAS ( { [period] }, param_period[period_code] )
+                    ,TREATAS ( { [cmp] }, param_comparator[comparator_code] )
+                )
+        ,"svg",
+            VAR _card         = [card]
+            RETURN
+                CALCULATE (
+                    SWITCH (
+                        _card
+                        ,"L1"
+                            ,[Card L1 SVG]
+                        ,"L2"
+                            ,[Card L2 SVG]
+                        ,"L3"
+                            ,[Card L3 SVG]
+                        ,"L4"
+                            ,[Card L4 SVG]
+                        ,"L5"
+                            ,[Card L5 SVG]
+                        ,"L6"
+                            ,[Card L6 SVG]
+                        ,"C1"
+                            ,[Card C1 SVG]
+                        ,"C2"
+                            ,[Card C2 SVG]
+                        ,"C3"
+                            ,[Card C3 SVG]
+                        ,"C4"
+                            ,[Card C4 SVG]
+                        ,"C5"
+                            ,[Card C5 SVG]
+                        ,"C6"
+                            ,[Card C6 SVG]
+                        ,"P1"
+                            ,[Card P1 SVG]
+                        ,"P2"
+                            ,[Card P2 SVG]
+                        ,"P3"
+                            ,[Card P3 SVG]
+                        ,"P4"
+                            ,[Card P4 SVG]
+                        ,"P5"
+                            ,[Card P5 SVG]
+                        ,"P6"
+                            ,[Card P6 SVG]
+                        ,"R1"
+                            ,[Card R1 SVG]
+                        ,"R2"
+                            ,[Card R2 SVG]
+                        ,"R3"
+                            ,[Card R3 SVG]
+                        ,"R4"
+                            ,[Card R4 SVG]
+                        ,"R5"
+                            ,[Card R5 SVG]
+                        ,"R6"
+                            ,[Card R6 SVG]
+                    )
+                    ,TREATAS ( { [anchor] }, param_anchor_month[month_key] )
+                    ,TREATAS ( { [mkt] }, param_market[market_code] )
+                    ,TREATAS ( { [period] }, param_period[period_code] )
+                    ,TREATAS ( { [cmp] }, param_comparator[comparator_code] )
+                )
+        ,"expected",
+            VAR _card         = [card]
+            VAR _state        = [state]
+            RETURN
+                MAXX ( FILTER ( _expected, [card] = _card && [state] = _state ), [expected] )
+    )
+RETURN
+    ADDCOLUMNS (
+        _rows
+        ,"_pass",
+            VAR _p            = [parts]
+            VAR _py           = [cmp] = "PY"
+            VAR _chosen_row   = IF ( _py, PATHITEM ( _p, 9 ), PATHITEM ( _p, 7 ) )
+            VAR _chosen_s     = IF ( _py, PATHITEM ( _p, 10 ), PATHITEM ( _p, 8 ) )
+            VAR _other_s      = IF ( _py, PATHITEM ( _p, 8 ), PATHITEM ( _p, 10 ) )
+            VAR _two_rows     =
+                PATHITEM ( _p, 6 ) = "2"
+                    && PATHITEM ( _p, 4 ) = _chosen_row
+                    && PATHITEM ( _p, 5 ) = _chosen_s
+                    && PATHITEM ( _p, 11 ) = IF ( _chosen_row = "n/a", _other_s, _chosen_s )
+                    && PATHITEM ( _p, 12 ) = IF ( _chosen_row = "n/a", IF ( _py, PATHITEM ( _p, 7 ), PATHITEM ( _p, 9 ) ), _chosen_row )
+                    && CONTAINSSTRING ( [svg], "y='110'" )
+            VAR _one_row      =
+                PATHITEM ( _p, 6 ) = ""
+                    && NOT CONTAINSSTRING ( [svg], "y='110'" )
+            VAR _literal      =
+                VAR _e            = [expected]
+                RETURN
+                    ISBLANK ( _e )
+                        || PATHITEM ( _p, 7 ) & "|" & PATHITEM ( _p, 9 ) & "|" & PATHITEM ( _p, 11 ) = _e
+            RETURN
+                LEFT ( [svg], 26 ) = "data:image/svg+xml;utf8,<s"
+                    && CONTAINSSTRING ( [svg], "<text x='30' y='36'" )
+                    && IF ( [rows] = 2, _two_rows, _one_row )
+                    && _literal
+    )
+
+// T-M7b filter line beside the Filters button (Track C filterLine), How to read period names (Track C TIME_VIEW_NAMES)
+//       and the four hero values, unchanged at Sep 2026 / Month / All (12 rows)
+EVALUATE
+VAR _cases        =
+    DATATABLE (
+        "what", STRING
+        ,"anchor"
+            ,STRING
+        ,"mkt"
+            ,STRING
+        ,"period"
+            ,STRING
+        ,"cmp"
+            ,STRING
+        ,"expected"
+            ,STRING
+        ,{
+            { "filter", "2026-09", "ALL", "MONTH", "BUD", "Sep 2026 - Month - vs Budget - All markets" }
+            ,{ "filter", "2026-09", "RO", "QTD", "PY", "Jul–Sep 2026 - Quarter to date - vs Prior year - Romania" }
+            ,{ "filter", "2026-09", "PL", "YTD", "BUD", "Jan–Sep 2026 - Year to date - vs Budget - Poland" }
+            ,{ "filter", "2026-07", "PT", "QTD", "BUD", "Jul 2026 - Quarter to date - vs Budget - Portugal" }
+            ,{ "filter", "2025-12", "ALL", "YTD", "PY", "Jan–Dec 2025 - Year to date - vs Prior year - All markets" }
+            ,{ "filter", "2026-09", "ALL", "R12M", "BUD", "Oct 2025–Sep 2026 - Last 12 months - vs Budget - All markets" }
+            ,{ "showing", "2026-09", "RO", "QTD", "PY", "Showing Jul–Sep 2026 - Quarter to date - Romania - Actual vs Prior year and Budget - Closed through Sep 2026" }
+            ,{ "showing", "2026-09", "ALL", "MONTH", "BUD", "Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026" }
+            ,{ "o1", "2026-09", "ALL", "MONTH", "BUD", "24.4k|€9.6m" }
+            ,{ "o2", "2026-09", "ALL", "MONTH", "BUD", "9,796" }
+            ,{ "o3", "2026-09", "ALL", "MONTH", "BUD", "59.9%" }
+            ,{ "o4", "2026-09", "ALL", "MONTH", "BUD", "4.6%" }
+        }
+    )
+VAR _rows         =
+    ADDCOLUMNS (
+        _cases
+        ,"actual",
+            VAR _what         = [what]
+            RETURN
+                CALCULATE (
+                    SWITCH (
+                        _what
+                        ,"filter"
+                            ,[Header Filter Line]
+                        ,"showing"
+                            ,[How To Read Showing]
+                        ,"o1"
+                            ,PATHITEM ( [_Card O1 Parts], 1 ) & "|" & PATHITEM ( [_Card O1 Parts], 2 )
+                        ,"o2"
+                            ,PATHITEM ( [_Card O2 Parts], 1 )
+                        ,"o3"
+                            ,PATHITEM ( [_Card O3 Parts], 1 )
+                        ,"o4"
+                            ,PATHITEM ( [_Card O4 Parts], 1 )
+                    )
+                    ,TREATAS ( { [anchor] }, param_anchor_month[month_key] )
+                    ,TREATAS ( { [mkt] }, param_market[market_code] )
+                    ,TREATAS ( { [period] }, param_period[period_code] )
+                    ,TREATAS ( { [cmp] }, param_comparator[comparator_code] )
+                )
+    )
+RETURN
+    ADDCOLUMNS (
+        _rows
+        ,"_pass"
+            ,[actual] = [expected]
     )
 
 // T-P  parity rows, Track B side (docs/ADD/features/parity-check-2026-10-27.md §3): 13 selections, 833 rows from

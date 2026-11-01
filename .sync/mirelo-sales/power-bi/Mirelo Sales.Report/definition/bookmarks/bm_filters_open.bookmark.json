@@ -1,0 +1,112 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Filters: open",
+  "name": "bm_filters_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_filters",
+      "filters_panel",
+      "filters_title",
+      "filters_period_label",
+      "filters_upto_label",
+      "filters_cmp_label",
+      "filters_region_label",
+      "filters_week",
+      "s_period",
+      "s_month",
+      "s_cmp",
+      "s_market",
+      "filters_showing",
+      "filters_reset",
+      "filters_done"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "filters_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "filters_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_period_label": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_upto_label": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_cmp_label": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_region_label": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_week": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "s_period": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "s_month": {
+            "singleVisual": {
+              "visualType": "slicer"
+            }
+          },
+          "s_cmp": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "s_market": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "filters_showing": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "filters_reset": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "filters_done": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_filters": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}
