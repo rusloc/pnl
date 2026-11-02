@@ -1,6 +1,7 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-11-02 · Mirelo owner changes 1–33 ported to js-report + pack: period = range `from`…`anchor` (old `period=` parses), full detail/ (195 Parquet, 21.7 MB, built in build-sales-data.ts), Mirelo glass forked to components/sales/glass.*, board.ts viewport-height board; CAND-020/021
 - 2026-10-30 · Nordmark JS pack .sync/nordmark-exec/js-app issued (52 files, 2.45 MB, 458 tests, headless 28/28); CAND-018 (pack copy hazards), CAND-019 (harness Remove-Item false positive)
 - 2026-10-30 · js-exec category filter (ADR-0013 (l)): computeMetrics(d, scope, win, cats) + cube.categoryMask; URL `cat`; 10,514 category control rows reconcile; CAND-017 (Esc under App Router)
 - 2026-10-30 · AP-001: ⓘ figure block stacked (dl.fig, ACTUAL_LABEL / NO_BASIS_VALUE); .pop max-height now calc(100vh - 32px) → no ⓘ scrolls
@@ -26,7 +27,7 @@
 - anti-patterns.md     — 1 entry   · stalest 2026-10-30 · AP-NNN
 - platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN (PG-005 verified 2026-10-30)
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 17 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001)
+- candidates.md        — 19 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001)
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
@@ -47,7 +48,7 @@
 ## Mirelo /sales facts (verify before citing)
 - Engine lib/sales (framework-free), build scripts/build-sales-data.ts reads data/mirelo_sales_dummy_data/parquet → public/data/sales (197 kB first paint, 915 kB total). `npm run build:sales-data` before `npm test`.
 - Distinct-client returning % and MEDIANX are per-window precomputed in the build (window-stats.parquet: tv × anchor × market × segment); everything else is additive monthly cubes translated per month × market in cube.ts.
-- Detail sample is exact for its caps (top-N per month × market / agent × month / overdue per market / cohort clients + full client histories); tested against raw fact_loan.
+- 2026-11-02: detail sample replaced by full detail/ (loans-YYYY-MM, cohort-YYYY-MM, overdue, client-NN, client-dim-NN by id % 64, index.json); lists reconciled to aggregates in engine.test.ts. js-report/public/data stays gitignored (pack commits it).
 - 2026-10-27 ADR-0012 applied: card face title · value · Δ rows · status chip; sub-lines → ⓘ values (copy.ts info(id, values)); How to read per view.
 - 2026-10-27 USER review: no period banner (text → period tooltip + How-to-read), no card corner markers, no in-card sparklines (design-requirements §1 "Visual first, minimum text" applies to Mirelo too, overriding design-tokens card anatomy).
 - Control totals (control_totals_eur.csv) reconcile for ALL/PL/RO/PT × Sep 2026, FY2024, FY2025, FY2026 YTD + every closed month.

@@ -1,4 +1,4 @@
-<!-- next-id: CAND-020 -->
+<!-- next-id: CAND-022 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -80,3 +80,12 @@ Seen: .sync/nordmark-exec/js-app (2026-10-30)
 ### CAND-019 · Harness blocks any command whose text holds Remove-Item next to a slash switch · 2026-10-30 · expires 2027-01-28
 A PowerShell call with robocopy's `/E` switch and a Remove-Item in the same text was refused as "Remove-Item on system path '/E'" and ran nothing; the same happened to an Add-Content here-string that merely quoted that text. Run robocopy alone (quoted absolute paths; exit codes 0–7 are success, 1 = files copied, shown as "Exit code 1"); write memory / docs with Edit or Write, never via shell strings.
 Seen: .sync/nordmark-exec/js-app copy + this memory write (2026-10-30)
+
+### CAND-020 · UI copy that names the data shape outlives a data change · 2026-11-02 · expires 2027-01-31
+vosk.dev round 4 replaced the capped detail sample with full data but kept "(draft sample)" in the C11 / P13 ⓘ formulas (copy.ts). When a data contract changes (sample → full, cap removed, grain change), grep copy.ts / ⓘ texts for words describing the old shape ("sample", "top N", "cap") in the same change.
+Seen: js-report/lib/sales/copy.ts c11 + p13 (fixed 2026-11-02; vosk.dev still has it)
+
+### CAND-021 · Porting a patch written under another Prettier config: 3-way merge on a round-tripped base · 2026-11-02 · expires 2027-01-31
+vosk.dev patches (double quotes, width 80, no `.ts` imports) do not apply to the repo (single quotes, width 120, `.ts` imports). Worked: copy the repo files, rewrite imports to the patch's style, prettier with the patch's config, `git apply --reject` (rejects shrank from 29 to 9 hunks once imports matched); convert back + prettier 120 = THEIRS; run the same pipeline on the unpatched files = BASE; `git merge-file ours base theirs` keeps the repo's formatting outside the patched regions. Remaining conflicts were real (imports, rewritten blocks). Prettier keeps width-80-expanded objects expanded at 120 inside patched regions (cosmetic only).
+Seen: Mirelo rounds 1–4 port into js-report/ (2026-11-02)
+

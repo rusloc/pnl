@@ -8,7 +8,8 @@ import type { CompareChoice, EntityCode, Selection, TimeView } from '../../engin
 import { createSalesEngine } from '../../sales/index.ts';
 import type { SalesEngine } from '../../sales/index.ts';
 import type { Comparator, MarketSel, SalesBase, SalesSelection } from '../../sales/types.ts';
-import { monthIndex } from '../../sales/windows.ts';
+import { monthIndex, windowOf } from '../../sales/windows.ts';
+import type { TimeView as SalesTimeView } from '../../sales/windows.ts';
 import { loadPublicDataset } from '../public-data.ts';
 import { loadSalesBase } from '../sales-data.ts';
 import { selection } from '../selection.ts';
@@ -183,14 +184,15 @@ describe('parity P&L (parity_selections.csv)', () => {
 
 const mirRaw = parse('parity_selections_mirelo.csv', MIRELO_COLUMNS);
 const mirRows = mirRaw.map(toRow);
-const TV: Readonly<Record<string, SalesSelection['tv']>> = { MONTH: 'M', QTD: 'Q', YTD: 'Y', R12M: 'R' };
+const TV: Readonly<Record<string, SalesTimeView>> = { MONTH: 'M', QTD: 'Q', YTD: 'Y', R12M: 'R' };
 const mirSel = new Map<string, SalesSelection>(
   mirRaw.map((r) => [
     r.sel_id,
     {
       view: 'overview',
       market: r.market as MarketSel,
-      tv: TV[r.period] ?? 'M',
+      // the period is a range `from`…`anchor` since 2026-11-01; the CSV keeps its Month / QTD / YTD / R12M codes
+      from: Math.max(0, windowOf(TV[r.period] ?? 'M', monthIndex(r.anchor)).start),
       anchor: monthIndex(r.anchor),
       cmp: r.comparator as Comparator,
       drill: null,

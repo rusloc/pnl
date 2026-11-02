@@ -3,17 +3,18 @@
 Generated from `js-report/lib/sales/copy.ts` (INFO, howToRead) and the card builders in `js-report/lib/sales/`
 by `npm run export:info-copy`. The TypeScript is the source: change the copy there and re-run the script; do not
 edit this file by hand. Track B (Power BI) takes the text as is (ADR-0011, ADR-0012 §2.3). Pop-up shape: what it
-is - why it matters - formula in words - sub-values - source. Example values: Sep 2026, Month, All markets, vs
-Budget. 59 cards, 5 How to read.
+is - why it matters - formula in words - sub-values (no source line since 2026-11-01). Example values: Sep 2026,
+Month, All markets, vs Budget. 58 cards, 5 How to read.
 
 ## Overview
 
 ### How to read - Overview
 
 - **Showing**: Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026
-- **Top band**: The four Tier-1 numbers with their gap to Budget and to the prior year.
+- **Top band**: The four Tier-1 numbers with their gap to Budget and to the prior year; Details opens the metric's view.
 - **Grid**: Why each number moved: trend vs Budget, channels, cohorts, risk by market.
-- **Table**: Per market; click filters the page, double-click lists the loans.
+- **Table**: Per market; click filters the page, double-click or Show loans opens the loan list.
+- **Filters**: Filters (top right): period (a month, a quarter, a year or any range of closed months), comparison (Budget or prior year) and region. Returning % and the time medians exist for a month, a quarter, a year or 12 months, not for other ranges.
 - **Legend**: ▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.
 
 ### o1 - Loans issued
@@ -30,8 +31,6 @@ Budget. 59 cards, 5 How to read.
 - Avg ticket: €393 (Budget €404)
 - Prior year: 21.2k - €8.0m
 - 2026 YTD: 209.9k - €82.1m
-
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS - param_fx (ACTUAL_AVG / BUDGET)
 
 ### o2 - New clients locked in
 
@@ -50,8 +49,6 @@ Budget. 59 cards, 5 How to read.
 - Budget: 9,905
 - Prior year: 9,281
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) NEW_CLIENTS
-
 ### o3 - Returning clients
 
 **What it is** Share of borrowers in the window who had borrowed before.
@@ -67,8 +64,6 @@ Budget. 59 cards, 5 How to read.
 - 90-day repeat: 27.6%
 - Prior year: 56.2%
 - Budget: none for this ratio
-
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats)
 
 ### o4 - Bad / overdue loans
 
@@ -86,17 +81,13 @@ Budget. 59 cards, 5 How to read.
 - Budget 30+ appetite: 4.2%
 - Prior year: 5.6%
 
-**Source** fact_loan_month (portfolio-month) - fact_target (BUD) DPD30_RATIO
-
 ### o5 - Loans issued by month vs Budget
 
 **What it is** Loans per month for the 13 months to the selected month.
 
 **Why it matters** Shows whether a gap to Budget is one month or a trend.
 
-**Formula** Monthly count of disbursed loans: Actual, Budget and the same month a year earlier. Click a month to select it.
-
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS
+**Formula** Monthly count of disbursed loans: Actual, Budget and the same month a year earlier.
 
 ### o6 - New clients by acquisition channel
 
@@ -106,8 +97,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Σ first loans by channel; the outline is the same window a year earlier.
 
-**Source** fact_loan (pre-aggregated: loans-month) - dim_channel
-
 ### o7 - Returning clients - cohort repeat curve
 
 **What it is** Share of a first-loan cohort with a second loan within N days.
@@ -115,8 +104,6 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** Early repeat is the leading signal for returning clients.
 
 **Formula** Clients with a second loan ≤ N days after the first ÷ cohort clients; a month counts at day N once all its clients are N days old.
-
-**Source** fact_loan (pre-aggregated: loans-month) (cohort-curve) - dim_client
 
 ### o8 - 30+ DPD by market, 13 months
 
@@ -126,8 +113,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Per market: 30+ DPD balance ÷ outstanding at each month-end.
 
-**Source** fact_loan_month (portfolio-month)
-
 ### o9 - Markets - Sep 2026
 
 **What it is** Loans, principal, new clients, returning % and 30+ DPD per market.
@@ -135,8 +120,6 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** The first drill: which market drives the gap.
 
 **Formula** Card definitions per market; Δ follows the header comparator. Click filters the page; double-click or Show loans lists the loans.
-
-**Source** fact_loan (pre-aggregated: loans-month) - fact_loan_month (portfolio-month) - fact_target (BUD)
 
 ## Loans issued
 
@@ -146,6 +129,7 @@ Budget. 59 cards, 5 How to read.
 - **Top band**: Volume, money, ticket, funnel rates and speed.
 - **Grid**: Trend, funnel, Budget → Actual bridge, product mix, cycle time.
 - **Table**: Agents and partners by quota attainment; click for their loans.
+- **Filters**: Filters (top right): period (a month, a quarter, a year or any range of closed months), comparison (Budget or prior year) and region. Returning % and the time medians exist for a month, a quarter, a year or 12 months, not for other ranges.
 - **Legend**: ▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.
 
 ### l1 - Loans
@@ -159,8 +143,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Budget: 24.3k
 - Prior year: 21.2k
-
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) LOANS
 
 ### l2 - Principal
 
@@ -176,8 +158,6 @@ Budget. 59 cards, 5 How to read.
 - Δ vs Budget at Budget FX: +2.0%
 - Prior year: €8.0m
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) PRINCIPAL_LOCAL - param_fx (ACTUAL_AVG / BUDGET)
-
 ### l3 - Avg ticket
 
 **What it is** Average principal per loan.
@@ -190,8 +170,6 @@ Budget. 59 cards, 5 How to read.
 - Step 12 share of loans: 9.0%
 - Budget ticket: €404
 - Prior year: €379
-
-**Source** fact_loan (pre-aggregated: loans-month)
 
 ### l4 - Approval rate
 
@@ -206,8 +184,6 @@ Budget. 59 cards, 5 How to read.
 - Submitted: 51.0k
 - Approved: 27.4k
 
-**Source** fact_application (funnel-month)
-
 ### l5 - Take-up rate
 
 **What it is** Disbursed share of approved applications.
@@ -220,8 +196,6 @@ Budget. 59 cards, 5 How to read.
 - Approved: 27.4k
 - Disbursed: 24.4k
 
-**Source** fact_application (funnel-month)
-
 ### l6 - Time to cash
 
 **What it is** Median hours from submission to cash.
@@ -233,8 +207,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Prior year: 4.9 h
 
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats)
-
 ### l7 - Loans by month vs Budget
 
 **What it is** Loans per month: Actual columns, Budget line, Prior year outline.
@@ -243,17 +215,13 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Monthly count of disbursed loans; Budget LOANS.
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD)
-
 ### l8 - Application funnel
 
 **What it is** Applications by funnel stage in the window.
 
 **Why it matters** Shows at which step applicants are lost.
 
-**Formula** Each stage counts applications that reached it; % = stage ÷ previous stage; Δ in pp vs the same window a year earlier.
-
-**Source** fact_application (funnel-month)
+**Formula** Each bar counts applications that reached the stage, on the scale of Started; the yellow line on a bar = those that did not reach the next stage. % = stage ÷ previous stage (Started ÷ leads); Δ in pp vs the same window a year earlier.
 
 ### l9 - Originations bridge Budget → Actual
 
@@ -263,27 +231,13 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Volume = Δ loans × Budget ticket; mix = product × market share shift at Budget tickets; ticket = actual loans × ticket change; FX = actual at actual rates − actual at Budget rates.
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) - param_fx (ACTUAL_AVG / BUDGET)
-
 ### l10 - Loans by product × market
 
-**What it is** Loans in the window per market, split by product.
+**What it is** Loans in the window per product × market.
 
 **Why it matters** Product mix drives ticket size and risk.
 
-**Formula** Count of loans by market × product.
-
-**Source** fact_loan (pre-aggregated: loans-month) - dim_product
-
-### l11 - Attainment by channel
-
-**What it is** Loans against a channel target.
-
-**Why it matters** Would show which channel misses its plan.
-
-**Formula** Not available: the dataset has no channel targets (fact_target holds market × product and agent rows only).
-
-**Source** fact_target (BUD)
+**Formula** Count of loans by product × market; grey → yellow → orange → red = few → many loans, graded over every cell of the grid.
 
 ### l12 - Stage cycle time vs SLA
 
@@ -293,8 +247,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Submitted → approved and approved → cash medians; SLA = KYC + credit stage SLA hours.
 
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats) - dim_funnel_stage
-
 ### l13 - Agent & partner leaderboard - Sep 2026
 
 **What it is** Agents and partners against their loan quota.
@@ -303,16 +255,15 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Agent loans ÷ AGENT_LOANS quota in the window, sorted by attainment. Click a row for that agent’s loans.
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) AGENT_LOANS - dim_agent
-
 ## Clients
 
 ### How to read - Clients
 
 - **Showing**: Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026
 - **Top band**: Acquisition, return and the speed of return.
-- **Grid**: Channels, new-client funnel, cohort curves, loyalty by segment.
-- **Table**: Clients of the window’s cohort; click for the client card.
+- **Grid**: Channels, new-client funnel, cohort repeat heatmap, repeat share by product.
+- **Table**: Acquisition by channel; click a row for its clients, then a client for the card.
+- **Filters**: Filters (top right): period (a month, a quarter, a year or any range of closed months), comparison (Budget or prior year) and region. Returning % and the time medians exist for a month, a quarter, a year or 12 months, not for other ranges.
 - **Legend**: ▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.
 
 ### c1 - New clients
@@ -328,8 +279,6 @@ Budget. 59 cards, 5 How to read.
 - Budget: 9,905
 - Prior year: 9,281
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD) NEW_CLIENTS
-
 ### c2 - Returning clients %
 
 **What it is** Borrowers with an earlier loan, share of all borrowers.
@@ -341,8 +290,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Borrowers: 24.4k
 - Returning borrowers: 14.6k
-
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats)
 
 ### c3 - Repeat share (loans)
 
@@ -356,8 +303,6 @@ Budget. 59 cards, 5 How to read.
 - Repeat loans: 14.6k
 - Loans: 24.4k
 
-**Source** fact_loan (pre-aggregated: loans-month)
-
 ### c4 - New-client approval rate
 
 **What it is** Approval rate of first-time applicants.
@@ -370,22 +315,18 @@ Budget. 59 cards, 5 How to read.
 - First-time submitted: 31.7k
 - First-time approved: 11.7k
 
-**Source** fact_application (funnel-month)
+### c5 - Returning-client approval rate
 
-### c5 - 180-day repeat
+**What it is** Approval rate of applicants who have borrowed before.
 
-**What it is** Share of a cohort with a second loan within 180 days.
+**Why it matters** Returning clients are the cheaper book; a falling rate means credit is tightening on known payers.
 
-**Why it matters** The leading indicator of the returning share.
-
-**Formula** Cohort = first loans 6 months before the selected month; second loan ≤ 180 days after the first ÷ cohort clients. Compared with the same cohort month a year earlier.
+**Formula** Approved ÷ submitted for returning applicants.
 
 **Values (example at the default selection)**
-- Cohort: Mar 2026
-- 90-day repeat: 27.6%
-- Mar 2025 cohort (PY): 44.3%
-
-**Source** fact_loan (pre-aggregated: loans-month) (cohort-curve)
+- Returning submitted: 19.3k
+- Returning approved: 15.7k
+- New-client approval rate: 36.9%
 
 ### c6 - Days between loans
 
@@ -398,8 +339,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Prior year: 110 d
 
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats)
-
 ### c7 - New clients by channel, 13 months
 
 **What it is** New clients per month by channel, Budget total as a line.
@@ -408,51 +347,37 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Σ first loans by month × channel; Budget NEW_CLIENTS.
 
-**Source** fact_loan (pre-aggregated: loans-month) - fact_target (BUD)
-
 ### c8 - New-client funnel
 
 **What it is** First-time applicants by stage in the window.
 
 **Why it matters** Where new clients are lost.
 
-**Formula** Leads → submitted → approved → disbursed for new applicants; % of the previous stage.
+**Formula** Leads → submitted → approved → disbursed for new applicants; every step as % of leads.
 
-**Source** fact_application (funnel-month)
+### c9 - Cohort repeat by quarter cohort
 
-### c9 - Cohort repeat curves (quarter cohorts)
+**What it is** Second-loan share by days since the first loan, last four quarter cohorts (oldest on top).
 
-**What it is** Second-loan share by days since first loan, last four quarter cohorts.
+**Why it matters** Compares how fast recent cohorts come back: read a column down.
 
-**Why it matters** Compares how fast recent cohorts come back.
+**Formula** Clients with a second loan ≤ N days ÷ cohort clients, right-censored at the last close: a cohort not yet N days old is blank. Grey → yellow → orange → red = low → high, graded over every cell of the grid.
 
-**Formula** Clients with a second loan ≤ N days ÷ cohort clients, right-censored at the last close.
+### c10 - Repeat share by product
 
-**Source** fact_loan (pre-aggregated: loans-month) (cohort-curve)
+**What it is** Repeat share of loans per microloan product.
 
-### c10 - Returning % by market × segment - repeat share by product
+**Why it matters** Shows which products bring clients back.
 
-**What it is** Returning % per market × client segment; repeat share per product.
+**Formula** Repeat loans ÷ loans per product; tick = company average.
 
-**Why it matters** Shows where loyalty is strong or weak.
+### c11 - Acquisition by channel - Sep 2026 - All markets
 
-**Formula** Matrix: client-weighted returning %; bars: repeat loans ÷ loans per product, tick = company average.
+**What it is** New clients of the window per acquisition channel, with how each channel converts, gets approved and comes back.
 
-**Source** fact_loan (pre-aggregated: loans-month) (window-stats) - dim_client
+**Why it matters** Shows which channel brings clients who borrow again, not only the most clients.
 
-### c11 - Clients - Sep 2026 cohort - All markets
-
-**What it is** Clients whose first loan falls in the window.
-
-**Why it matters** Puts names on the cohort behind the numbers.
-
-**Formula** Top clients by principal since 2024 (draft sample); loan states are the last-close snapshot. Click a row for the client card.
-
-**Values (example at the default selection)**
-- Rows: top 20 by principal to date (draft sample)
-- Loan states: snapshot at Sep 2026
-
-**Source** fact_loan (pre-aggregated: loans-month) - dim_client
+**Formula** New clients = first loans; vs PY = the same window a year earlier (Budget has no channel split); lead → first loan = first loans ÷ first-time leads; approval = approved ÷ submitted (new, returning); repeat share = repeat loans ÷ loans; first ticket = principal of first loans ÷ first loans. Click a row for its clients; Show clients lists all channels.
 
 ## Portfolio quality
 
@@ -461,7 +386,8 @@ Budget. 59 cards, 5 How to read.
 - **Showing**: Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026
 - **Top band**: Arrears by balance and count, vintage quality, roll rate, cost of risk; down is favourable.
 - **Grid**: Buckets, vintages, risk by product × market, roll rates, size × risk.
-- **Table**: Worst overdue loans at the last close; click for the client card.
+- **Table**: Overdue balance by product; click a row for its worst overdue loans.
+- **Filters**: Filters (top right): period (a month, a quarter, a year or any range of closed months), comparison (Budget or prior year) and region. Returning % and the time medians exist for a month, a quarter, a year or 12 months, not for other ranges.
 - **Legend**: ▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.
 
 ### p1 - 30+ DPD %
@@ -478,8 +404,6 @@ Budget. 59 cards, 5 How to read.
 - Outstanding: €32.5m
 - Planned (Budget): 4.2%
 
-**Source** fact_loan_month (portfolio-month) - fact_target (BUD) DPD30_RATIO
-
 ### p2 - 90+ DPD %
 
 **What it is** Balance 90+ days past due.
@@ -490,8 +414,6 @@ Budget. 59 cards, 5 How to read.
 
 **Values (example at the default selection)**
 - 90+ DPD balance: €853k
-
-**Source** fact_loan_month (portfolio-month)
 
 ### p3 - 30+ by count
 
@@ -505,8 +427,6 @@ Budget. 59 cards, 5 How to read.
 - Loans 30+ DPD: 4,782
 - Active loans: 104.9k
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p4 - Vintage 6m bad rate
 
 **What it is** Loans that reached 90+ DPD within 6 months on book.
@@ -519,8 +439,6 @@ Budget. 59 cards, 5 How to read.
 - Vintage: Mar 2026
 - Same vintage a year earlier: 3.4%
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p5 - Roll rate 30→60
 
 **What it is** Overdue balance rolling one bucket per month.
@@ -531,8 +449,6 @@ Budget. 59 cards, 5 How to read.
 
 **Values (example at the default selection)**
 - 1–29 → 30+: 65.5%
-
-**Source** fact_loan_month (portfolio-month)
 
 ### p6 - Cost of risk
 
@@ -545,8 +461,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Basis: annualised over the window
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p7 - DPD buckets, 13 months
 
 **What it is** Overdue balance per bucket at month-end, 13 months.
@@ -554,8 +468,6 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** Shows whether arrears build up or clear.
 
 **Formula** Month-end balance in 1–29, 30–59, 60–89 and 90+ DPD, in EUR.
-
-**Source** fact_loan_month (portfolio-month)
 
 ### p8 - Vintage curves
 
@@ -565,17 +477,13 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** First-30+ loans up to month N ÷ loans disbursed, per vintage quarter.
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p9 - Bad rate by product × market
 
 **What it is** 30+ DPD by balance per product × market.
 
 **Why it matters** Locates the risk.
 
-**Formula** 30+ DPD balance ÷ outstanding at the last month of the window.
-
-**Source** fact_loan_month (portfolio-month)
+**Formula** 30+ DPD balance ÷ outstanding at the last month of the window. Grey → yellow → orange → red = low → high risk, graded over every cell of the grid.
 
 ### p10 - 30+ DPD by market
 
@@ -585,8 +493,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Per market: 30+ DPD balance ÷ outstanding at each month-end.
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p11 - Roll rates by month
 
 **What it is** Balance rolling one bucket per month.
@@ -595,31 +501,21 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** 30→60: 60–89 now ÷ 30–59 last month; 1–29→30+: 30–59 now ÷ 1–29 last month.
 
-**Source** fact_loan_month (portfolio-month)
-
 ### p12 - Segments: size × DPD
 
-**What it is** One bubble per product × market.
+**What it is** One bubble per product; the small filter on the card picks the market.
 
 **Why it matters** Shows whether the risky segments are also the big ones.
 
 **Formula** x = average ticket, y = 30+ DPD by balance, size = outstanding; worst bubble in yellow.
 
-**Source** fact_loan_month (portfolio-month) - fact_loan (pre-aggregated: loans-month)
+### p13 - Overdue by product - Sep 2026 - All markets
 
-### p13 - Overdue loans - Sep 2026 - All markets
+**What it is** The month-end book per microloan product: active loans, outstanding and the balance in each overdue bucket.
 
-**What it is** Loans 30+ days past due at the last close, worst first.
+**Why it matters** Locates the overdue balance by product before the loan list.
 
-**Why it matters** The collection list behind the ratios.
-
-**Formula** Loan-level snapshot at the last closed month (draft sample: top 100 per market by DPD). Click a row for the client card.
-
-**Values (example at the default selection)**
-- Rows: worst 100 by DPD (draft sample)
-- Loan states: Sep 2026 snapshot for every selected month
-
-**Source** fact_loan (detail sample)
+**Formula** Balances in EUR at the last month of the window; 30+ DPD % = (30–59 + 60–89 + 90+) ÷ outstanding; vs PY = the same month a year earlier (Budget 30+ DPD exists per market only); provision = month-end provision. Click a row for its loans 30+ DPD at the last close.
 
 ## Revenue & targets
 
@@ -627,8 +523,9 @@ Budget. 59 cards, 5 How to read.
 
 - **Showing**: Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026
 - **Top band**: Revenue, attainment, the two lending streams and subscriptions.
-- **Grid**: Trend vs Budget, streams, attainment by market, tiers, churn, channel mix.
+- **Grid**: Trend vs Budget, streams, attainment by market, tiers, new vs churned subscribers, channel mix.
 - **Table**: Stream × market against Budget and the prior year; click for the market’s loans.
+- **Filters**: Filters (top right): period (a month, a quarter, a year or any range of closed months), comparison (Budget or prior year) and region. Returning % and the time medians exist for a month, a quarter, a year or 12 months, not for other ranges.
 - **Legend**: ▲ up / ▼ down - green = favourable, amber = watch, red = off. ⓘ on each card opens its definition.
 
 ### r1 - Revenue
@@ -646,8 +543,6 @@ Budget. 59 cards, 5 How to read.
 - Subscriptions: €146k
 - Budget: €1.4m
 
-**Source** fact_revenue_month - fact_target (BUD) REVENUE_LOCAL - param_fx (ACTUAL_AVG / BUDGET)
-
 ### r2 - Attainment
 
 **What it is** Revenue against Budget.
@@ -659,8 +554,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Revenue: €1.3m
 - Budget: €1.4m
-
-**Source** fact_revenue_month - fact_target (BUD) REVENUE_LOCAL - param_thresholds
 
 ### r3 - Interest + fees
 
@@ -676,8 +569,6 @@ Budget. 59 cards, 5 How to read.
 - Budget: €1.1m
 - Prior year: €848k
 
-**Source** fact_revenue_month - fact_target (BUD) REVENUE_LOCAL (loan products)
-
 ### r4 - Interchange
 
 **What it is** Interchange earned on the debit card.
@@ -689,8 +580,6 @@ Budget. 59 cards, 5 How to read.
 **Values (example at the default selection)**
 - Budget: €117k
 - Prior year: €75k
-
-**Source** fact_revenue_month - fact_target (BUD) REVENUE_LOCAL (CARD)
 
 ### r5 - MRR
 
@@ -704,8 +593,6 @@ Budget. 59 cards, 5 How to read.
 - Plus: €74k
 - Pro: €73k
 
-**Source** fact_subscription_month
-
 ### r6 - Paying subscribers
 
 **What it is** Paying subscribers at month-end.
@@ -718,8 +605,6 @@ Budget. 59 cards, 5 How to read.
 - Plus: 15.4k
 - Pro: 8,032
 
-**Source** fact_subscription_month
-
 ### r7 - Revenue by month vs Budget vs PY
 
 **What it is** Revenue per month: Actual, Budget, Prior year.
@@ -727,8 +612,6 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** Month-by-month view of the revenue gap.
 
 **Formula** Monthly revenue in EUR; Budget REVENUE_LOCAL at Budget rates.
-
-**Source** fact_revenue_month - fact_target (BUD)
 
 ### r8 - Revenue by stream, 13 months
 
@@ -738,8 +621,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Monthly revenue in EUR by revenue type.
 
-**Source** fact_revenue_month
-
 ### r9 - Attainment by market
 
 **What it is** Revenue against Budget per market.
@@ -747,8 +628,6 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** Locates the miss.
 
 **Formula** Revenue ÷ Budget revenue in the window; tick = Budget.
-
-**Source** fact_revenue_month - fact_target (BUD)
 
 ### r10 - MRR and subscribers by tier
 
@@ -758,17 +637,17 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Month-end subscribers by tier; label = MRR in EUR.
 
-**Source** fact_subscription_month
+### r11 - New vs churned subscribers
 
-### r11 - Subscriber churn %
+**What it is** Paying subscribers (Plus + Pro) gained and lost per month.
 
-**What it is** Share of paying subscribers lost in the month.
+**Why it matters** The gap between the lines is net growth; churn catching up with sign-ups stalls MRR.
 
-**Why it matters** Churn spikes after price changes.
+**Formula** New = subscribers who started a paid tier in the month; churned = those who left one. Churn rate = churned ÷ subscribers at the start of the month.
 
-**Formula** Churned ÷ subscribers at the start of the month (Plus + Pro).
-
-**Source** fact_subscription_month
+**Values (example at the default selection)**
+- Churn rate Sep 2026: 2.1%
+- Net adds Sep 2026: 255
 
 ### r12 - Channel mix, share of loans
 
@@ -778,8 +657,6 @@ Budget. 59 cards, 5 How to read.
 
 **Formula** Loans by channel ÷ loans, per month.
 
-**Source** fact_loan (pre-aggregated: loans-month)
-
 ### r13 - Stream × market - Sep 2026
 
 **What it is** Revenue per stream × market.
@@ -787,5 +664,3 @@ Budget. 59 cards, 5 How to read.
 **Why it matters** The detail behind the revenue cards.
 
 **Formula** Budget exists for interchange (card), subscriptions (Plus + Pro) and the total; interest and fees share the loan-product Budget, so their rows show n/a. Click a row for that market’s loans.
-
-**Source** fact_revenue_month - fact_target (BUD)

@@ -1,10 +1,10 @@
 // Mirelo sales data build (ADR-0011 (a), (c)): data/mirelo_sales_dummy_data/parquet/*.parquet → pre-aggregated
 // public/data/sales/*.parquet + manifest.json. fact_loan (634 k rows, 19.6 MB) never ships: it is folded into monthly
-// cubes, per-window distinct-client stats and medians, cohort curves, and a capped loan / client sample for the
-// slide-over. Runs on Node's native type stripping (erasable TypeScript, explicit `.ts` imports), like build-data.ts.
+// cubes, per-window distinct-client stats and medians and cohort curves, and cut into the full loan / client detail of
+// the detail window (public/data/sales/detail/, loaded per drill; 2026-11-01). Runs on Node's native type stripping (erasable TypeScript, explicit `.ts` imports), like build-data.ts.
 // Every check throws, which fails `npm run build`.
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parquetRead, parquetReadObjects } from 'hyparquet';
@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { readRows } from '../lib/data/parquet-columns.ts';
 import type { ColumnSpec, RowOf } from '../lib/data/parquet-columns.ts';
 import { createFx } from '../lib/sales/fx.ts';
-import { DETAIL_CAPS, DIMS, FILES, MARKETS, dimsSchema, manifestSchema } from '../lib/sales/manifest.ts';
+import { DETAIL, DIMS, FILES, MARKETS, detailIndexSchema, dimsSchema, manifestSchema } from '../lib/sales/manifest.ts';
 import type { DimName, FileKey } from '../lib/sales/manifest.ts';
 import { dayNumber, lastDayOf, monthIndex, monthKey, windowOf } from '../lib/sales/windows.ts';
 import type { TimeView } from '../lib/sales/windows.ts';
@@ -23,9 +23,10 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SRC = join(ROOT, '..', 'data', 'mirelo_sales_dummy_data', 'parquet');
 const OUT = join(ROOT, 'public', 'data', 'sales');
 
-const BUDGET_TOTAL_BYTES = 3_000_000; // ADR-0011 brief: shipped Parquet under ~3 MB
-const MAX_TOTAL_BYTES = 4_000_000; // hard fail
 const BUDGET_FIRST_LOAD_BYTES = 600_000; // manifest + base files
+const MAX_FIRST_LOAD_BYTES = 3_000_000; // hard fail (ADR-0011 brief: shipped Parquet under ~3 MB)
+// USER 2026-11-02 (owner change 30): the full detail ships, ~28 MB at vosk.dev, loaded per drill; hard fail above this
+const MAX_DETAIL_BYTES = 40_000_000;
 const COHORT_DAYS = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180];
 const MAX_MOB = 12;
 
@@ -142,7 +143,7 @@ for (let m = FIRST; m <= CLOSED; m++)
 const ix = (map: Map<string, number>, v: string, what: string, where: string): number =>
   map.get(v) ?? fail(`${where}: unknown ${what} "${v}"`);
 
-// ---------- 2 · dim_client (segment per client; detail sample) ----------
+// ---------- 2 · dim_client (segment per client; detail files) ----------
 
 const CLIENT_COLUMNS = [
   'client_id',
@@ -187,6 +188,7 @@ const LOAN_COLUMNS = [
   'hours_to_cash',
   'disbursed_date',
   'principal_local',
+  'principal_eur',
   'is_first_loan',
   'is_repeat',
   'status_code',
@@ -209,6 +211,7 @@ const L = {
   agent: [] as (string | null)[],
   repeat: [] as boolean[],
   principal: [] as number[],
+  eur: [] as number[], // fact_loan.principal_eur (checked against the translation at the actual rate)
   cash10: [] as number[],
   appr10: [] as number[],
   status: [] as string[],
@@ -256,6 +259,7 @@ for (let i = 0; i < sourceLoans; i++) {
   L.agent.push(agent);
   L.repeat.push(repeat);
   L.principal.push(principal);
+  L.eur.push(num(get('principal_eur'), where));
   L.cash10.push(cash10);
   L.appr10.push(appr10);
   L.status.push(status);
@@ -276,7 +280,7 @@ const currencyOfIx = MARKETS.map((m) => currencyOf.get(m) ?? fail(`dim_market: n
 const EUR = (i: number) =>
   fx.toEur(at(L.principal, i), at(currencyOfIx, at(L.market, i)), at(L.month, i), 'ACTUAL_AVG');
 
-// Client order: client, day, loan id (the detail file is written in this order, so sums replay identically).
+// Client order: client, day, loan id (the client detail files are written in this order).
 const byClient = Int32Array.from({ length: N }, (_, i) => i).sort(
   (a, b) => at(L.client, a) - at(L.client, b) || at(L.day, a) - at(L.day, b) || at(L.id, a) - at(L.id, b),
 );
@@ -748,103 +752,111 @@ const agentMonth: Rows<'agentMonth'> = [...new Set([...agentLoans.keys(), ...age
     return { month, agent, loans, principal_local: principal, target_loans: tl, target_principal_local: tp };
   });
 
-// ---------- 10 · capped detail sample (slide-over, Clients / Portfolio tables) ----------
+// ---------- 10 · full loan / client detail (detail window; 2026-11-01, owner: every list complete) ----------
+// Port of vosk.dev data/mirelo/build_detail.py: the same files, rows, order and columns (lib/sales/manifest.ts DETAIL).
 
-const pick = new Uint8Array(N);
-const topBy = (indices: number[], cmp: (a: number, b: number) => number, cap: number) =>
-  indices.sort(cmp).slice(0, cap);
-const byPrincipal = (a: number, b: number) => at(L.principal, b) - at(L.principal, a) || at(L.id, a) - at(L.id, b);
+type LoanOut = RowOf<typeof DETAIL.loans>;
+type ClientOut = RowOf<typeof DETAIL.clients>;
+type CohortOut = RowOf<typeof DETAIL.cohort>;
 
-const groups = new Map<string, number[]>();
-const group = (key: string, i: number) => {
-  const g = groups.get(key);
-  if (g) g.push(i);
-  else groups.set(key, [i]);
+const loanOut = (i: number): LoanOut => ({
+  loan_id: at(L.id, i),
+  client_id: at(L.client, i) + MIN_CLIENT,
+  disbursed: at(L.iso, i),
+  market: at(MARKETS, at(L.market, i)),
+  product: at(loanProducts, at(L.product, i)),
+  channel: at(channels, at(L.channel, i)),
+  agent: at(L.agent, i),
+  repeat: at(L.repeat, i),
+  principal_local: at(L.principal, i),
+  hours_to_cash: at(L.cash10, i) / 10,
+  status: at(L.status, i),
+  dpd_close: at(L.dpd, i),
+  outstanding_close_local: at(L.outstanding, i),
+});
+const clientOut = (c: number): ClientOut => {
+  const row = clientRow[c] as number;
+  const get = (name: (typeof CLIENT_COLUMNS)[number]) => column(clientCols, name)[row];
+  const where = `dim_client row ${row}`;
+  return {
+    client_id: c + MIN_CLIENT,
+    market: str(get('market_code'), where),
+    segment: str(get('segment_code'), where),
+    acquisition_channel: str(get('acquisition_channel_code'), where),
+    acquisition_agent: optStr(get('acquisition_agent_code'), where),
+    first_loan_date: str(get('first_loan_date'), where),
+    first_product: str(get('first_product_code'), where),
+    cohort_month: str(get('cohort_month'), where),
+    birth_year_band: str(get('birth_year_band'), where),
+    city_tier: num(get('city_tier'), where),
+    loans_before_2024: num(get('loans_before_2024'), where),
+  };
 };
-for (let i = 0; i < N; i++) {
-  group(`mm|${at(L.month, i)}|${at(L.market, i)}`, i);
-  const agent = at(L.agent, i);
-  if (agent !== null) group(`ag|${agent}|${at(L.month, i)}`, i);
-  if (at(L.dpd, i) >= 30 && at(L.outstanding, i) > 0) group(`od|${at(L.market, i)}`, i);
-}
-for (const [key, idx] of groups) {
-  const kind = key.slice(0, 2);
-  const chosen =
-    kind === 'mm'
-      ? topBy(idx, byPrincipal, DETAIL_CAPS.loansPerMonthMarket)
-      : kind === 'ag'
-        ? topBy(idx, byPrincipal, DETAIL_CAPS.loansPerAgentMonth)
-        : topBy(
-            idx,
-            (a, b) =>
-              at(L.dpd, b) - at(L.dpd, a) || at(L.outstanding, b) - at(L.outstanding, a) || at(L.id, a) - at(L.id, b),
-            DETAIL_CAPS.overduePerMarket,
-          );
-  for (const i of chosen) pick[i] = 1;
-}
 
-// Principal to date per client in EUR, summed in client order (the engine replays the same order from the file).
-const clientPtd = new Map<number, number>();
-const firstLoanOf = new Map<number, number>();
+const detailFiles: { name: string; spec: ColumnSpec; rows: readonly Record<string, unknown>[] }[] = [];
+const byLoanId = (a: number, b: number) => at(L.id, a) - at(L.id, b);
+
+// loans-YYYY-MM: every loan disbursed in that closed month, by loan id
+for (let mo = FIRST; mo <= CLOSED; mo++)
+  detailFiles.push({
+    name: `loans-${monthKey(mo)}.parquet`,
+    spec: DETAIL.loans,
+    rows: [...(byMonth[mo] ?? [])].sort(byLoanId).map(loanOut),
+  });
+
+// cohort-YYYY-MM: every client whose first loan is in that month (dim_client.cohort_month), with its to-date summary;
+// principal to date sums fact_loan.principal_eur in client order, the last loan is the last in that order
+const toDate = new Map<number, { n: number; eur: number; last: number }>();
 for (const i of byClient) {
+  const eur = at(L.eur, i);
+  if (Math.abs(eur - EUR(i)) > 0.01)
+    fail(`fact_loan ${at(L.id, i)}: principal_eur ${eur} ≠ ${EUR(i)} at the actual rate`);
   const c = at(L.client, i);
-  clientPtd.set(c, (clientPtd.get(c) ?? 0) + EUR(i));
-  if (!at(L.repeat, i)) firstLoanOf.set(c, i);
+  const t = toDate.get(c);
+  if (t) {
+    t.n++;
+    t.eur += eur;
+    t.last = i;
+  } else toDate.set(c, { n: 1, eur, last: i });
 }
-const cohortGroups = new Map<string, number[]>();
-for (const [c, i] of firstLoanOf) {
-  const key = `${at(L.month, i)}|${at(L.market, i)}`;
-  const g = cohortGroups.get(key);
-  if (g) g.push(c);
-  else cohortGroups.set(key, [c]);
+const cohortOf = new Map<string, CohortOut[]>();
+for (let c = 0; c < clientSpan; c++) {
+  const t = toDate.get(c);
+  if (clientRow[c] === -1 || !t) continue;
+  const dim = clientOut(c);
+  if (dim.cohort_month < monthKey(FIRST) || dim.cohort_month > monthKey(CLOSED)) continue;
+  const rows = cohortOf.get(dim.cohort_month) ?? [];
+  rows.push({
+    ...dim,
+    loans_to_date: t.n + dim.loans_before_2024,
+    principal_eur_to_date: t.eur,
+    last_disbursed: at(L.iso, t.last),
+    last_status: at(L.status, t.last),
+  });
+  cohortOf.set(dim.cohort_month, rows);
 }
-const referenced = new Set<number>();
-for (const clients of cohortGroups.values())
-  clients
-    .sort((a, b) => (clientPtd.get(b) ?? 0) - (clientPtd.get(a) ?? 0) || a - b)
-    .slice(0, DETAIL_CAPS.clientsPerCohortMarket)
-    .forEach((c) => referenced.add(c));
-for (let i = 0; i < N; i++) if (pick[i]) referenced.add(at(L.client, i));
-// Every referenced client carries its whole history, so the client card and "to date" columns are complete.
-const detailLoans: Rows<'detailLoans'> = [];
-for (const i of byClient) {
-  if (!referenced.has(at(L.client, i))) continue;
-  detailLoans.push({
-    loan_id: at(L.id, i),
-    client_id: at(L.client, i) + MIN_CLIENT,
-    disbursed: at(L.iso, i),
-    market: at(MARKETS, at(L.market, i)),
-    product: at(loanProducts, at(L.product, i)),
-    channel: at(channels, at(L.channel, i)),
-    agent: at(L.agent, i),
-    repeat: at(L.repeat, i),
-    principal_local: at(L.principal, i),
-    hours_to_cash: at(L.cash10, i) / 10,
-    status: at(L.status, i),
-    dpd_close: at(L.dpd, i),
-    outstanding_close_local: at(L.outstanding, i),
+for (const [month, rows] of [...cohortOf].sort(([a], [b]) => a.localeCompare(b)))
+  detailFiles.push({ name: `cohort-${month}.parquet`, spec: DETAIL.cohort, rows });
+
+// overdue: every loan 30+ DPD with a balance at the last close, by loan id
+const overdueIx: number[] = [];
+for (let i = 0; i < N; i++) if (at(L.dpd, i) >= 30 && at(L.outstanding, i) > 0) overdueIx.push(i);
+detailFiles.push({ name: 'overdue.parquet', spec: DETAIL.loans, rows: overdueIx.sort(byLoanId).map(loanOut) });
+
+// client-NN / client-dim-NN: per client_id % buckets, the clients' loans (client order) and their dim rows (by id)
+const bucketLoans: number[][] = Array.from({ length: DETAIL.buckets }, () => []);
+for (const i of byClient) bucketLoans[(at(L.client, i) + MIN_CLIENT) % DETAIL.buckets]?.push(i);
+const bucketClients: number[][] = Array.from({ length: DETAIL.buckets }, () => []);
+for (let c = 0; c < clientSpan; c++) if (clientRow[c] !== -1) bucketClients[(c + MIN_CLIENT) % DETAIL.buckets]?.push(c);
+for (let b = 0; b < DETAIL.buckets; b++) {
+  const nn = String(b).padStart(2, '0');
+  detailFiles.push({ name: `client-${nn}.parquet`, spec: DETAIL.loans, rows: (bucketLoans[b] ?? []).map(loanOut) });
+  detailFiles.push({
+    name: `client-dim-${nn}.parquet`,
+    spec: DETAIL.clients,
+    rows: (bucketClients[b] ?? []).map(clientOut),
   });
 }
-const detailClients: Rows<'detailClients'> = [...referenced]
-  .sort((a, b) => a - b)
-  .map((c) => {
-    const row = clientRow[c] as number;
-    const get = (name: (typeof CLIENT_COLUMNS)[number]) => column(clientCols, name)[row];
-    const where = `dim_client row ${row}`;
-    return {
-      client_id: c + MIN_CLIENT,
-      market: str(get('market_code'), where),
-      segment: str(get('segment_code'), where),
-      acquisition_channel: str(get('acquisition_channel_code'), where),
-      acquisition_agent: optStr(get('acquisition_agent_code'), where),
-      first_loan_date: str(get('first_loan_date'), where),
-      first_product: str(get('first_product_code'), where),
-      cohort_month: str(get('cohort_month'), where),
-      birth_year_band: str(get('birth_year_band'), where),
-      city_tier: num(get('city_tier'), where),
-      loans_before_2024: num(get('loans_before_2024'), where),
-    };
-  });
 
 // ---------- 11 · encode, verify, write ----------
 
@@ -880,6 +892,19 @@ function encode<S extends ColumnSpec>(spec: S, rows: readonly RowOf<S>[], label:
   return parquetWriteBuffer({ columnData, rowGroupSize: rows.length, createdBy: 'mirelo js-report build-sales-data' });
 }
 
+/** Encode, then read back through the browser's reader: same rows, same values. */
+async function encodeChecked<S extends ColumnSpec>(spec: S, rows: readonly RowOf<S>[], file: string) {
+  const buffer = encode(spec, rows, file);
+  const back = await readRows(buffer, spec, file);
+  if (back.length !== rows.length) fail(`${file}: read ${back.length} rows, wrote ${rows.length}`);
+  for (const k of [0, Math.floor(rows.length / 2), rows.length - 1])
+    if (JSON.stringify(back[k]) !== JSON.stringify(rows[k]))
+      fail(
+        `${file}: round-trip mismatch at row ${k}\n  wrote ${JSON.stringify(rows[k])}\n  read  ${JSON.stringify(back[k])}`,
+      );
+  return buffer;
+}
+
 const outputs: { [K in FileKey]: Rows<K> } = {
   loansMonth,
   funnelMonth,
@@ -891,27 +916,25 @@ const outputs: { [K in FileKey]: Rows<K> } = {
   revenueMonth,
   subsMonth,
   targetMonth,
-  detailLoans,
-  detailClients,
 };
-const written = new Map<string, { rows: number; buffer: ArrayBuffer; base: boolean }>();
+const written = new Map<string, { rows: number; buffer: ArrayBuffer }>();
 for (const key of Object.keys(FILES) as FileKey[]) {
-  const { file, columns, load } = FILES[key];
+  const { file, columns } = FILES[key];
   const rows = outputs[key] as readonly RowOf<typeof columns>[];
-  const buffer = encode(columns, rows, file);
-  // Read round-trip through the browser's reader: same rows, same values.
-  const back = await readRows(buffer, columns, file);
-  if (back.length !== rows.length) fail(`${file}: read ${back.length} rows, wrote ${rows.length}`);
-  for (const k of [0, Math.floor(rows.length / 2), rows.length - 1])
-    if (JSON.stringify(back[k]) !== JSON.stringify(rows[k]))
-      fail(
-        `${file}: round-trip mismatch at row ${k}\n  wrote ${JSON.stringify(rows[k])}\n  read  ${JSON.stringify(back[k])}`,
-      );
-  written.set(file, { rows: rows.length, buffer, base: load === 'base' });
+  written.set(file, { rows: rows.length, buffer: await encodeChecked(columns, rows, file) });
 }
+const detailWritten = new Map<string, { rows: number; buffer: ArrayBuffer }>();
+for (const { name, spec, rows } of detailFiles)
+  detailWritten.set(name, { rows: rows.length, buffer: await encodeChecked(spec, rows as RowOf<typeof spec>[], name) });
 
 const totalLoans = loansMonth.reduce((s, r) => s + r.loans, 0);
 if (totalLoans + afterClose !== sourceLoans) fail(`loans ${totalLoans} + open month ${afterClose} ≠ ${sourceLoans}`);
+// The detail files hold every closed loan once per cut, and every client once.
+const detailRows = (prefix: string) =>
+  [...detailWritten].filter(([f]) => f.startsWith(prefix)).reduce((s, [, w]) => s + w.rows, 0);
+if (detailRows('loans-') !== totalLoans) fail(`detail loans-* ${detailRows('loans-')} ≠ ${totalLoans} closed loans`);
+if (detailRows('client-') - detailRows('client-dim-') !== totalLoans) fail('detail client-NN ≠ closed loans');
+if (detailRows('client-dim-') !== clientIds.length) fail(`detail client-dim-* ≠ ${clientIds.length} dim_client rows`);
 
 const manifest = manifestSchema.parse({
   schemaVersion: 1,
@@ -922,30 +945,45 @@ const manifest = manifestSchema.parse({
     lastClosedMonth: sourceManifest.last_closed_month,
     actualsThrough: sourceManifest.actuals_through,
   },
-  caps: DETAIL_CAPS,
   cohortDays: COHORT_DAYS,
   files: Object.fromEntries([...written].map(([f, w]) => [f, { rows: w.rows, bytes: w.buffer.byteLength }])),
   dims,
 });
+const detailIndex = detailIndexSchema.parse({
+  lastClose: new Date(CUT_DAY * 86_400_000).toISOString().slice(0, 10),
+  buckets: DETAIL.buckets,
+  files: Object.fromEntries([...detailWritten].map(([f, w]) => [f, { rows: w.rows, bytes: w.buffer.byteLength }])),
+});
 const manifestText = JSON.stringify(manifest);
 const manifestBytes = Buffer.byteLength(manifestText);
-const firstLoad =
-  manifestBytes + [...written.values()].filter((w) => w.base).reduce((s, w) => s + w.buffer.byteLength, 0);
-const total = manifestBytes + [...written.values()].reduce((s, w) => s + w.buffer.byteLength, 0);
+const firstLoad = manifestBytes + [...written.values()].reduce((s, w) => s + w.buffer.byteLength, 0);
+const detailBytes = [...detailWritten.values()].reduce((s, w) => s + w.buffer.byteLength, 0);
 const kb = (b: number) => `${(b / 1000).toFixed(1)} kB`;
 
 console.log('build-sales-data → public/data/sales');
 for (const [f, w] of written)
-  console.log(
-    `  ${f.padEnd(24)} ${String(w.rows).padStart(7)} rows  ${kb(w.buffer.byteLength).padStart(9)}  ${w.base ? 'base' : 'detail (lazy)'}`,
-  );
+  console.log(`  ${f.padEnd(24)} ${String(w.rows).padStart(7)} rows  ${kb(w.buffer.byteLength).padStart(9)}  base`);
 console.log(`  ${'manifest.json'.padEnd(24)} ${''.padStart(7)}       ${kb(manifestBytes).padStart(9)}`);
 console.log(
-  `  loans ${totalLoans} closed + ${afterClose} open-month (not shipped) · first load ${kb(firstLoad)} (budget ${kb(BUDGET_FIRST_LOAD_BYTES)}) · total ${kb(total)} (budget ${kb(BUDGET_TOTAL_BYTES)}, hard limit ${kb(MAX_TOTAL_BYTES)})`,
+  `  ${`${DETAIL.dir}/`.padEnd(24)} ${String(detailWritten.size).padStart(7)} files ${kb(detailBytes).padStart(9)}  on demand (loans ${detailRows('loans-')}, cohort clients ${detailRows('cohort-')}, overdue ${detailRows('overdue')})`,
 );
-if (firstLoad > BUDGET_FIRST_LOAD_BYTES || total > BUDGET_TOTAL_BYTES) console.warn('  WARNING: over the size budget');
-if (total > MAX_TOTAL_BYTES) fail(`artifacts total ${kb(total)} > ${kb(MAX_TOTAL_BYTES)}`);
+console.log(
+  `  loans ${totalLoans} closed + ${afterClose} open-month (not shipped) · first load ${kb(firstLoad)} (budget ${kb(BUDGET_FIRST_LOAD_BYTES)}, hard limit ${kb(MAX_FIRST_LOAD_BYTES)}) · detail ${kb(detailBytes)} (hard limit ${kb(MAX_DETAIL_BYTES)})`,
+);
+if (firstLoad > BUDGET_FIRST_LOAD_BYTES) console.warn('  WARNING: over the first-load budget');
+if (firstLoad > MAX_FIRST_LOAD_BYTES) fail(`first load ${kb(firstLoad)} > ${kb(MAX_FIRST_LOAD_BYTES)}`);
+if (detailBytes > MAX_DETAIL_BYTES) fail(`detail ${kb(detailBytes)} > ${kb(MAX_DETAIL_BYTES)}`);
 
-mkdirSync(OUT, { recursive: true });
+// Every file is rewritten; Parquet files this build no longer writes (the capped detail-loans / detail-clients sample
+// of 2026-10, an old month) are removed so the folder holds exactly what the manifest and the index list.
+const DETAIL_OUT = join(OUT, DETAIL.dir);
+mkdirSync(DETAIL_OUT, { recursive: true });
+for (const [dir, keep] of [
+  [OUT, written],
+  [DETAIL_OUT, detailWritten],
+] as const)
+  for (const f of readdirSync(dir)) if (f.endsWith('.parquet') && !keep.has(f)) rmSync(join(dir, f));
 for (const [file, w] of written) writeFileSync(join(OUT, file), new Uint8Array(w.buffer));
 writeFileSync(join(OUT, 'manifest.json'), manifestText);
+for (const [file, w] of detailWritten) writeFileSync(join(DETAIL_OUT, file), new Uint8Array(w.buffer));
+writeFileSync(join(DETAIL_OUT, 'index.json'), `${JSON.stringify(detailIndex, null, 1)}\n`);

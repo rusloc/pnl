@@ -2,7 +2,7 @@ import { createCube } from '../../sales/cube.ts';
 import type { SalesEngine } from '../../sales/index.ts';
 import type { SalesBase, SalesSelection } from '../../sales/types.ts';
 import type { CmpRow } from '../../sales/status.ts';
-import { windowOf } from '../../sales/windows.ts';
+import { periodWindow } from '../../sales/windows.ts';
 import type { Resolved } from './pnl.ts';
 
 // Track C side of the Mirelo parity rows (parity_selections_mirelo.csv). Actual Tier-1 values are already reconciled
@@ -23,7 +23,7 @@ export function resolveMirelo(base: SalesBase, engine: SalesEngine, sel: SalesSe
   const out = new Map<string, number | string | null>();
   const put = (k: string, x: number | string | null | undefined) => out.set(k, x ?? null);
   const cube = createCube(base);
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
 
   // ---- Budget values (fact_target BUD; amounts at the BUDGET rate per month × currency) ----
   put('budget.loans', cube.budget(w, sel.market, 'LOANS'));
@@ -41,13 +41,16 @@ export function resolveMirelo(base: SalesBase, engine: SalesEngine, sel: SalesSe
     put(`${h.id}.chip`, h.status ? h.status.status : 'neutral');
   }
 
-  // ---- KPI cards of views 2–5: the row shown is the header comparator, else Prior year (no Budget) ----
+  // ---- KPI cards of views 2–5: the header comparator's row, else Prior year (no Budget). Since 2026-11-01 the card
+  // shows "vs Budget" and "vs PY" both (Budget first); this is the row its status chip follows ----
+  const CMP_LABEL = { BUD: 'vs Budget', PY: 'vs PY' } as const;
   for (const view of ['loans', 'clients', 'portfolio', 'revenue'] as const)
-    for (const k of engine.band({ ...sel, view }, null).kpis) {
+    for (const k of engine.band({ ...sel, view }).kpis) {
+      const row = k.rows.find((r) => r.label === CMP_LABEL[sel.cmp]) ?? k.rows[0];
       put(`${k.id}.label`, k.label);
       put(`${k.id}.value_text`, k.value);
-      put(`${k.id}.row_cmp`, CMP_CODE[k.row.label] ?? k.row.label);
-      put(`${k.id}.row`, k.row.text);
+      put(`${k.id}.row_cmp`, row ? (CMP_CODE[row.label] ?? row.label) : null);
+      put(`${k.id}.row`, row?.text);
       put(`${k.id}.chip`, k.status ? k.status.status : 'neutral');
     }
   return out;

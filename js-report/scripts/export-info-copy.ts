@@ -14,7 +14,7 @@ import { createSalesEngine } from '../lib/sales/index.ts';
 import type { InfoVM as SalesInfoVM } from '../lib/sales/copy.ts';
 import type { ViewId } from '../lib/sales/types.ts';
 import { loadPublicDataset } from '../lib/test-utils/public-data.ts';
-import { loadSalesBase, loadSalesDetail } from '../lib/test-utils/sales-data.ts';
+import { loadSalesBase } from '../lib/test-utils/sales-data.ts';
 import { selection } from '../lib/test-utils/selection.ts';
 
 const docPath = (name: string) => fileURLToPath(new URL(`../../docs/ADD/features/${name}`, import.meta.url));
@@ -148,14 +148,11 @@ function salesCard(id: string, title: string, i: SalesInfoVM): string[] {
     `**Formula** ${i.formula}`,
     ...values(i.values),
     '',
-    `**Source** ${i.source}`,
-    '',
   ];
 }
 
 async function sales(): Promise<string[]> {
   const engine = createSalesEngine(await loadSalesBase());
-  const ix = engine.indexDetail(await loadSalesDetail());
   const d = engine.codec.defaults();
   const out: string[] = [];
   let cards = 0;
@@ -171,7 +168,7 @@ async function sales(): Promise<string[]> {
       list.push(...vm.charts.map((c): [string, string, SalesInfoVM] => [c.id, c.title, c.info]));
       list.push([vm.table.id, vm.table.title, vm.table.info]);
     } else {
-      const vm = engine.band(sel, ix);
+      const vm = engine.band(sel);
       list.push(...vm.kpis.map((k): [string, string, SalesInfoVM] => [k.id, k.label, k.info]));
       list.push(...vm.charts.map((c): [string, string, SalesInfoVM] => [c.id, c.title, c.info]));
       list.push([vm.table.id, vm.table.title, vm.table.info]);
@@ -185,8 +182,8 @@ async function sales(): Promise<string[]> {
     'Generated from `js-report/lib/sales/copy.ts` (INFO, howToRead) and the card builders in `js-report/lib/sales/`',
     'by `npm run export:info-copy`. The TypeScript is the source: change the copy there and re-run the script; do not',
     'edit this file by hand. Track B (Power BI) takes the text as is (ADR-0011, ADR-0012 §2.3). Pop-up shape: what it',
-    'is - why it matters - formula in words - sub-values - source. Example values: Sep 2026, Month, All markets, vs',
-    `Budget. ${cards} cards, ${VIEWS.length} How to read.`,
+    'is - why it matters - formula in words - sub-values (no source line since 2026-11-01). Example values: Sep 2026,',
+    `Month, All markets, vs Budget. ${cards} cards, ${VIEWS.length} How to read.`,
     '',
     ...out,
   ];
