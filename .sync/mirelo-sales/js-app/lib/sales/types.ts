@@ -1,5 +1,5 @@
 import type { RowOf } from '../data/parquet-columns.ts';
-import type { FILES, FileKey, MarketCode, SalesManifest } from './manifest.ts';
+import type { DETAIL, FILES, FileKey, MarketCode, SalesManifest } from './manifest.ts';
 import type { TimeView } from './windows.ts';
 
 export type FileRows<K extends FileKey> = RowOf<(typeof FILES)[K]['columns']>[];
@@ -19,10 +19,15 @@ export interface SalesBase {
   targetMonth: FileRows<'targetMonth'>;
 }
 
-/** Capped loan / client sample, loaded on first need (slide-over, Clients and Portfolio tables). */
-export interface SalesDetail {
-  loans: FileRows<'detailLoans'>;
-  clients: FileRows<'detailClients'>;
+export type LoanRow = RowOf<typeof DETAIL.loans>;
+export type ClientRow = RowOf<typeof DETAIL.clients>;
+export type CohortRow = RowOf<typeof DETAIL.cohort>;
+
+/** The detail files one drill needs, loaded on demand (`detail/`, 2026-11-01: the full data, no sample). */
+export interface DetailParts {
+  loans: LoanRow[]; // loans-YYYY-MM, overdue, client-NN
+  cohort: CohortRow[]; // cohort-YYYY-MM
+  clients: ClientRow[]; // client-dim-NN
 }
 
 export type { MarketCode, TimeView };
@@ -34,13 +39,16 @@ export type ViewId = 'overview' | 'loans' | 'clients' | 'portfolio' | 'revenue';
 export type Drill =
   | { kind: 'loans'; market: MarketSel } // loan grain, window × market
   | { kind: 'agent'; agent: string } // that agent's loans in the window
-  | { kind: 'client'; client: number }; // client card + all loans of the client
+  | { kind: 'client'; client: number } // client card + all loans of the client
+  // 2026-11-01: the Clients and Portfolio tables became aggregates; their rows open these lists
+  | { kind: 'clients'; market: MarketSel; channel: string | null } // cohort clients of the window, one channel or all
+  | { kind: 'overdue'; market: MarketSel; product: string | null }; // loans 30+ DPD at the last close
 
 export interface SalesSelection {
   view: ViewId;
   market: MarketSel;
-  tv: TimeView;
-  anchor: number; // month index of the selected closed month
+  from: number; // first month index of the period (2026-11-01: any closed range, see windows.ts periodKind)
+  anchor: number; // last month index of the period: a closed month
   cmp: Comparator;
   drill: Drill | null;
 }

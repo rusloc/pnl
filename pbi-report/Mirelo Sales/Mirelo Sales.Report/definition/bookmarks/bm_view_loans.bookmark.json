@@ -83,9 +83,6 @@
       "ln_l10_panel",
       "ln_l10_chart",
       "ln_l10_info",
-      "ln_l11_panel",
-      "ln_l11_text",
-      "ln_l11_info",
       "ln_l12_panel",
       "ln_l12_chart",
       "ln_l12_info",
@@ -125,12 +122,10 @@
       "cl_c9_chart",
       "cl_c9_info",
       "cl_c10_panel",
-      "cl_c10_matrix",
       "cl_c10_bars",
       "cl_c10_info",
       "cl_c11_panel",
       "cl_c11_title",
-      "cl_c11_table",
       "cl_c11_info",
       "cl_c11_drill",
       "grp_portfolio",
@@ -175,7 +170,6 @@
       "pf_p12_info",
       "pf_p13_panel",
       "pf_p13_title",
-      "pf_p13_table",
       "pf_p13_info",
       "pf_p13_drill",
       "grp_revenue",
@@ -257,17 +251,20 @@
       "filters_panel",
       "filters_title",
       "filters_period_label",
-      "filters_upto_label",
       "filters_cmp_label",
       "filters_region_label",
-      "filters_week",
-      "s_period",
-      "s_month",
       "s_cmp",
       "s_market",
       "filters_showing",
       "filters_reset",
-      "filters_done"
+      "s_range",
+      "filters_hint",
+      "filters_rule",
+      "cl_c11_channels",
+      "pf_p13_products",
+      "s_p12_market",
+      "grp_list_clients",
+      "grp_list_overdue"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -720,7 +717,7 @@
           },
           "ln_l8_chart": {
             "singleVisual": {
-              "visualType": "clusteredColumnChart"
+              "visualType": "columnChart"
             }
           },
           "ln_l8_info": {
@@ -750,25 +747,10 @@
           },
           "ln_l10_chart": {
             "singleVisual": {
-              "visualType": "columnChart"
+              "visualType": "pivotTable"
             }
           },
           "ln_l10_info": {
-            "singleVisual": {
-              "visualType": "cardVisual"
-            }
-          },
-          "ln_l11_panel": {
-            "singleVisual": {
-              "visualType": "shape"
-            }
-          },
-          "ln_l11_text": {
-            "singleVisual": {
-              "visualType": "textbox"
-            }
-          },
-          "ln_l11_info": {
             "singleVisual": {
               "visualType": "cardVisual"
             }
@@ -1031,7 +1013,7 @@
           },
           "cl_c9_chart": {
             "singleVisual": {
-              "visualType": "lineChart",
+              "visualType": "pivotTable",
               "display": {
                 "mode": "hidden"
               }
@@ -1048,14 +1030,6 @@
           "cl_c10_panel": {
             "singleVisual": {
               "visualType": "shape",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "cl_c10_matrix": {
-            "singleVisual": {
-              "visualType": "pivotTable",
               "display": {
                 "mode": "hidden"
               }
@@ -1088,14 +1062,6 @@
           "cl_c11_title": {
             "singleVisual": {
               "visualType": "cardVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "cl_c11_table": {
-            "singleVisual": {
-              "visualType": "tableEx",
               "display": {
                 "mode": "hidden"
               }
@@ -1440,14 +1406,6 @@
           "pf_p13_title": {
             "singleVisual": {
               "visualType": "cardVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "pf_p13_table": {
-            "singleVisual": {
-              "visualType": "tableEx",
               "display": {
                 "mode": "hidden"
               }
@@ -2077,14 +2035,6 @@
               }
             }
           },
-          "filters_upto_label": {
-            "singleVisual": {
-              "visualType": "textbox",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
           "filters_cmp_label": {
             "singleVisual": {
               "visualType": "textbox",
@@ -2096,30 +2046,6 @@
           "filters_region_label": {
             "singleVisual": {
               "visualType": "textbox",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "filters_week": {
-            "singleVisual": {
-              "visualType": "actionButton",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "s_period": {
-            "singleVisual": {
-              "visualType": "advancedSlicerVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "s_month": {
-            "singleVisual": {
-              "visualType": "slicer",
               "display": {
                 "mode": "hidden"
               }
@@ -2157,9 +2083,49 @@
               }
             }
           },
-          "filters_done": {
+          "s_range": {
             "singleVisual": {
-              "visualType": "actionButton",
+              "visualType": "slicer",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_hint": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_rule": {
+            "singleVisual": {
+              "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "cl_c11_channels": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "pf_p13_products": {
+            "singleVisual": {
+              "visualType": "tableEx",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "s_p12_market": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual",
               "display": {
                 "mode": "hidden"
               }
@@ -2198,6 +2164,12 @@
             "isHidden": true
           },
           "grp_filters": {
+            "isHidden": true
+          },
+          "grp_list_clients": {
+            "isHidden": true
+          },
+          "grp_list_overdue": {
             "isHidden": true
           }
         }

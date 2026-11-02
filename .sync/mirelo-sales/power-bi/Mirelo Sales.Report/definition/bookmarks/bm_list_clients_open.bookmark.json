@@ -1,0 +1,76 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "List new clients: open",
+  "name": "bm_list_clients_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_list_clients",
+      "lc_scrim",
+      "lc_panel",
+      "lc_close",
+      "lc_client",
+      "lc_note",
+      "lc_title",
+      "lc_rule",
+      "cl_c11_table"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "sales_one_pager",
+    "sections": {
+      "sales_one_pager": {
+        "visualContainers": {
+          "lc_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "lc_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "lc_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "lc_client": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "lc_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "lc_title": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "lc_rule": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "cl_c11_table": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_list_clients": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

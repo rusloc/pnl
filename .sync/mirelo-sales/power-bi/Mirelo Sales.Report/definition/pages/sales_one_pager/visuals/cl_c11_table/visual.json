@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "cl_c11_table",
   "position": {
-    "x": 44,
-    "y": 580,
-    "z": 2350,
-    "height": 146,
-    "width": 1352,
-    "tabOrder": 1420
+    "x": 184,
+    "y": 181,
+    "z": 3880,
+    "height": 528,
+    "width": 1072,
+    "tabOrder": 3880
   },
   "visual": {
     "visualType": "tableEx",
@@ -748,7 +748,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'New clients of the window with their loans to date'"
+                  "Value": "'New clients of the window: client, market, type, first loan, first product, channel, loans and principal to date, last loan'"
                 }
               }
             }
@@ -792,7 +792,7 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_clients",
+  "parentGroupName": "grp_list_clients",
   "filterConfig": {
     "filters": [
       {

@@ -9,17 +9,15 @@
       "filters_panel",
       "filters_title",
       "filters_period_label",
-      "filters_upto_label",
       "filters_cmp_label",
       "filters_region_label",
-      "filters_week",
-      "s_period",
-      "s_month",
       "s_cmp",
       "s_market",
       "filters_showing",
       "filters_reset",
-      "filters_done"
+      "s_range",
+      "filters_hint",
+      "filters_rule"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -54,14 +52,6 @@
               }
             }
           },
-          "filters_upto_label": {
-            "singleVisual": {
-              "visualType": "textbox",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
           "filters_cmp_label": {
             "singleVisual": {
               "visualType": "textbox",
@@ -73,30 +63,6 @@
           "filters_region_label": {
             "singleVisual": {
               "visualType": "textbox",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "filters_week": {
-            "singleVisual": {
-              "visualType": "actionButton",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "s_period": {
-            "singleVisual": {
-              "visualType": "advancedSlicerVisual",
-              "display": {
-                "mode": "hidden"
-              }
-            }
-          },
-          "s_month": {
-            "singleVisual": {
-              "visualType": "slicer",
               "display": {
                 "mode": "hidden"
               }
@@ -134,9 +100,25 @@
               }
             }
           },
-          "filters_done": {
+          "s_range": {
             "singleVisual": {
-              "visualType": "actionButton",
+              "visualType": "slicer",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_hint": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_rule": {
+            "singleVisual": {
+              "visualType": "shape",
               "display": {
                 "mode": "hidden"
               }

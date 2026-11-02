@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import styles from './sales.module.css';
 
 // Keyboard-complete controls (WAI-ARIA radio group and tabs patterns: roving tabindex, arrows / Home / End).
+// The header's segmented controls went with the filter pop-up (2026-11-01); its radio rows use <Radios>.
 
 function roving<T>(
   e: KeyboardEvent,
@@ -31,31 +32,23 @@ function roving<T>(
   focus(next);
 }
 
-export function Segmented<T extends string>({
-  label,
+/** Radio row of the filter pop-up: roving tabindex, arrows / Home / End; a disabled option says why on hover. */
+export function Radios<T extends string>({
+  labelledBy,
   options,
   value,
   onChange,
-  x,
-  title,
 }: {
-  label: string;
-  title?: string; // tooltip (the period picker carries the "Showing …" sentence and any clipped-window note)
-  options: readonly { value: T; label: string; width: number }[];
-  value: T;
+  labelledBy: string;
+  options: readonly { value: T; label: string; disabledReason?: string }[];
+  value: string;
   onChange: (v: T) => void;
-  x: number;
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
-  const width = options.reduce((s, o) => s + o.width, 0) + 2;
+  const enabled = options.filter((o) => !o.disabledReason);
+  const tabbable = enabled.some((o) => o.value === value) ? value : enabled[0]?.value;
   return (
-    <div
-      className={`${styles.abs} ${styles.seg}`}
-      style={{ left: x, top: 20, width }}
-      role="radiogroup"
-      aria-label={label}
-      title={title}
-    >
+    <div className={styles.radios} role="radiogroup" aria-labelledby={labelledBy}>
       {options.map((o, i) => (
         <button
           key={o.value}
@@ -65,16 +58,17 @@ export function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={o.value === value}
-          tabIndex={o.value === value ? 0 : -1}
-          style={{ width: o.width }}
-          onClick={() => onChange(o.value)}
+          aria-disabled={o.disabledReason ? true : undefined}
+          title={o.disabledReason}
+          tabIndex={o.value === tabbable ? 0 : -1}
+          onClick={() => !o.disabledReason && onChange(o.value)}
           onKeyDown={(e) =>
             roving(
               e,
-              options.map((p) => p.value),
-              value,
+              enabled.map((p) => p.value),
+              (tabbable ?? '') as T,
               onChange,
-              (k) => refs.current[k]?.focus(),
+              (k) => refs.current[options.findIndex((p) => p.value === enabled[k]?.value)]?.focus(),
             )
           }
         >

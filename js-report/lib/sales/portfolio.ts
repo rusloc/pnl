@@ -1,15 +1,14 @@
-import { bins } from './clients.ts';
-import { CHANNEL_SHORT, MARKET_NAMES, info } from './copy.ts';
-import type { DetailIndex } from './detail.ts';
-import { STATUS_SHORT, overdueLoans } from './detail.ts';
-import { fmtCount, fmtEur, fmtEur0, fmtInt, fmtPct } from './format.ts';
+import { heatLevels } from './clients.ts';
+import { MARKET_NAMES, info } from './copy.ts';
+import { fmtCount, fmtEur, fmtPct } from './format.ts';
 import { kpi } from './loans.ts';
 import { MARKETS } from './manifest.ts';
 import type { Ctx } from './overview.ts';
 import { quarterLabel, quarterMonths, storyCallout, trend } from './overview.ts';
+import { STATUS_WORD, cmpRow } from './status.ts';
 import type { MarketSel, SalesSelection } from './types.ts';
 import type { BandVM, ChartCard, TableCard } from './view-model.ts';
-import { axisLabel, dateLabel, monthLabel, shift, trailing13, windowOf } from './windows.ts';
+import { axisLabel, monthLabel, shift, trailing13, periodWindow } from './windows.ts';
 
 // View 4 — Portfolio quality (layout-spec §4): period-end metrics at the anchor month (fact_loan_month snapshot).
 
@@ -20,11 +19,11 @@ const BUCKETS = [
   ['90+', 'b90p', 'c1'],
 ] as const;
 
-export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): BandVM {
+export function portfolioView(ctx: Ctx, sel: SalesSelection): BandVM {
   const { cube, m } = ctx;
   const mk = sel.market;
   const a = sel.anchor;
-  const w = windowOf(sel.tv, a);
+  const w = periodWindow(sel);
   const S = m.snap(a, mk);
   const SP = m.snap(a - 12, mk);
   const cor = m.costOfRisk(w, mk);
@@ -110,7 +109,6 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
     chart: {
       kind: 'columns',
       x: months.map(axisLabel),
-      months,
       unit: 'eur',
       stacks: BUCKETS.map(([label, key, role]) => ({
         name: label,
@@ -137,7 +135,6 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
     chart: {
       kind: 'line',
       x: Array.from({ length: 13 }, (_, k) => (k % 3 === 0 ? `${k} m` : '')),
-      months: null,
       unit: 'pct',
       series: vintages.map((v, k) => ({
         name: quarterLabel(v[0] ?? a),
@@ -155,7 +152,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
   const cell = cube.snapshotBy(a, 'ALL', (r) => `${r.product}|${r.market}`);
   const shownMarkets: MarketSel[] = mk === 'ALL' ? [...MARKETS] : [mk];
   const values = products.map((p) => shownMarkets.map((c) => m.dpd30(cell?.get(`${p.product_code}|${c}`) ?? null)));
-  const flat = bins(values.flat());
+  const flat = heatLevels(values.flat());
   const p9: ChartCard = {
     id: 'p9',
     title: 'Bad rate by product × market',
@@ -169,7 +166,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
         label: p.product_name,
         cells: shownMarkets.map((_, j) => ({
           text: fmtPct(values[i]?.[j] ?? null),
-          bin: flat[i * shownMarkets.length + j] ?? null,
+          level: flat[i * shownMarkets.length + j] ?? null,
         })),
       })),
       side: null,
@@ -186,7 +183,6 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
     chart: {
       kind: 'line',
       x: months.map(axisLabel),
-      months,
       unit: 'pct',
       series: MARKETS.map((c, k) => ({
         name: MARKET_NAMES[c],
@@ -213,7 +209,6 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
     chart: {
       kind: 'line',
       x: t.x,
-      months: t.months,
       unit: 'pct',
       series: [
         { name: '30 → 60', role: 'c1', values: t.actual },
@@ -229,95 +224,133 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | n
     },
   };
 
-  // P12 Segments: size × DPD (one bubble per product × market)
-  const loansCell = cube.loansBy(w, 'ALL', (r) => `${r.product}|${r.market}`);
-  const points = products
-    .flatMap((p) =>
-      shownMarkets.map((c) => {
-        const key = `${p.product_code}|${c}`;
-        const l = loansCell.get(key);
-        const s = cell?.get(key) ?? null;
+  // P12 Segments: size × DPD, one bubble per product (2026-11-01, owner: no market breakdown; a small market filter
+  // on the card instead, starting at the page's market)
+  const bubbles = (market: MarketSel) => {
+    const lp = cube.loansBy(w, market, (r) => r.product);
+    const sp = cube.snapshotBy(a, market, (r) => r.product);
+    const pts = products
+      .map((p) => {
+        const l = lp.get(p.product_code);
+        const s = sp?.get(p.product_code) ?? null;
         return {
-          label: `${p.product_name} ${c}`,
+          label: p.product_name,
           x: l && l.loans > 0 ? l.principal / l.loans : 0,
           y: m.dpd30(s) ?? 0,
           size: s?.outstanding ?? 0,
-          cls: (MARKETS.indexOf(c as (typeof MARKETS)[number]) % 3) as 0 | 1 | 2,
+          cls: 0 as const,
           highlight: false,
           showLabel: false,
         };
-      }),
-    )
-    .filter((pt) => pt.size > 0);
-  const worst = points.reduce((w0, pt) => (pt.y > (w0?.y ?? -1) ? pt : w0), points[0]);
-  const top3 = [...points].sort((x, y) => y.size - x.size).slice(0, 3);
-  for (const pt of points) {
-    pt.highlight = pt === worst;
-    pt.showLabel = top3.includes(pt) || pt === worst;
-  }
+      })
+      .filter((pt) => pt.size > 0);
+    const worst = pts.reduce((w0, pt) => (pt.y > (w0?.y ?? -1) ? pt : w0), pts[0]);
+    // labels on the three largest bubbles and the worst one (all five collide where tickets are close)
+    const top3 = [...pts].sort((x, y) => y.size - x.size).slice(0, 3);
+    for (const pt of pts) {
+      pt.highlight = pt === worst;
+      pt.showLabel = top3.includes(pt) || pt === worst;
+    }
+    return {
+      kind: 'bubble' as const,
+      xUnit: 'eur' as const,
+      yUnit: 'pct' as const,
+      points: pts,
+    };
+  };
   const p12: ChartCard = {
     id: 'p12',
     title: 'Segments: size × DPD',
     info: info('p12'),
     open: null,
     legend: [
-      ...shownMarkets.map((c) => ({
-        label: MARKET_NAMES[c],
-        role: (['c4', 'c3', 'c1'] as const)[MARKETS.indexOf(c as (typeof MARKETS)[number])] ?? 'c1',
-      })),
+      { label: 'Product', role: 'c4' },
       { label: 'worst 30+ DPD', role: 'selected' as const },
     ],
-    chart: { kind: 'bubble', xUnit: 'eur', yUnit: 'pct', points },
+    chart: bubbles(mk),
+    variants: {
+      label: 'Market',
+      value: mk,
+      options: (['ALL', ...MARKETS] as const).map((c) => ({
+        key: c,
+        label: c === 'ALL' ? 'All' : c,
+        chart: bubbles(c),
+      })),
+    },
   };
 
-  return { kpis, charts: [p7, p8, p9, p10, p11, p12], layout: 'thirds', table: overdueTable(ctx, sel, ix) };
+  return {
+    kpis,
+    charts: [p7, p8, p9, p10, p11, p12],
+    layout: 'thirds',
+    table: overdueTable(ctx, sel),
+  };
 }
 
-function overdueTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): TableCard {
-  const { cube } = ctx;
-  const list = ix ? overdueLoans(ix, sel.market, cube.caps.overduePerMarket) : [];
-  const bucket = (dpd: number) => (dpd >= 90 ? '90+' : dpd >= 60 ? '60–89' : '30–59');
+/**
+ * P13 Overdue by product (2026-11-01, owner: replaces the overdue-loan list, which moved into the detail window): the
+ * month-end book per microloan product, balances by bucket. Budget 30+ DPD exists per market only, so the Δ is vs PY.
+ */
+function overdueTable(ctx: Ctx, sel: SalesSelection): TableCard {
+  const { cube, m } = ctx;
+  const mk = sel.market;
+  const a = sel.anchor;
+  const now = cube.snapshotBy(a, mk, (r) => r.product);
+  const prior = cube.snapshotBy(a - 12, mk, (r) => r.product);
+  const products = cube.dims.product.filter((p) => p.product_line === 'Microloan');
+  const eur = (v: number | undefined) => fmtEur(v ?? null);
   return {
     id: 'p13',
-    title: `Overdue loans - ${monthLabel(cube.closed)} - ${MARKET_NAMES[sel.market]}`,
-    info: info('p13', [
-      { label: 'Rows', value: ix ? `worst ${list.length} by DPD (draft sample)` : 'loading' },
-      { label: 'Loan states', value: `${monthLabel(cube.closed)} snapshot for every selected month` },
-    ]),
+    title: `Overdue by product - ${monthLabel(a)} - ${MARKET_NAMES[mk]}`,
+    info: info('p13'),
     columns: [
-      { key: 'loan', label: 'Loan id', width: 120, align: 'left' },
-      { key: 'client', label: 'Client id', width: 120, align: 'left' },
-      { key: 'market', label: 'Market', width: 70, align: 'left' },
-      { key: 'product', label: 'Product', width: 100, align: 'left' },
-      { key: 'channel', label: 'Channel', width: 90, align: 'left' },
-      { key: 'disbursed', label: 'Disbursed', width: 110, align: 'left' },
-      { key: 'principal', label: 'Principal', width: 100, align: 'right' },
-      { key: 'outstanding', label: 'Outstanding', width: 110, align: 'right' },
-      { key: 'dpd', label: 'DPD', width: 70, align: 'right' },
-      { key: 'bucket', label: 'Bucket', width: 80, align: 'left' },
-      { key: 'status', label: 'Status', width: 110, align: 'left' },
+      { key: 'product', label: 'Product', width: 130, align: 'left' },
+      { key: 'active', label: 'Active loans', width: 110, align: 'right' },
+      { key: 'out', label: 'Outstanding €', width: 120, align: 'right' },
+      ...BUCKETS.map(([label, key]) => ({
+        key,
+        label: `${label} €`,
+        width: 100,
+        align: 'right' as const,
+      })),
+      { key: 'dpd', label: '30+ DPD %', width: 100, align: 'right' },
+      { key: 'delta', label: 'vs PY', width: 100, align: 'right' },
+      { key: 'prov', label: 'Provision €', width: 110, align: 'right' },
+      { key: 'status', label: 'Status', width: 96, align: 'left' },
     ],
-    rows: list.map((r) => ({
-      key: String(r.loan_id),
-      selected: false,
-      action: { kind: 'drill', drill: { kind: 'client', client: r.client_id } },
-      secondary: null,
-      cells: [
-        { text: `L-${r.loan_id}` },
-        { text: `C-${r.client_id}` },
-        { text: r.market },
-        { text: cube.dims.product.find((p) => p.product_code === r.product)?.product_name ?? r.product },
-        { text: CHANNEL_SHORT[r.channel] ?? r.channel },
-        { text: dateLabel(r.disbursed) },
-        { text: fmtEur0(ix?.eur(r) ?? null) },
-        { text: fmtEur0(ix?.outstandingEur(r) ?? null) },
-        { text: fmtInt(r.dpd_close) },
-        { text: bucket(r.dpd_close) },
-        { text: STATUS_SHORT[r.status] ?? r.status, status: r.dpd_close >= 90 ? 'off' : 'watch', chip: true },
-      ],
-    })),
-    empty: ix ? (list.length ? null : 'No overdue loans') : 'Loading the loan sample…',
-    action: null,
-    needsDetail: true,
+    rows: products.map((p) => {
+      const code = p.product_code;
+      const s = now?.get(code) ?? null;
+      const d = cmpRow('riskDown', 'vs PY', m.dpd30(s), m.dpd30(prior?.get(code) ?? null));
+      return {
+        key: code,
+        selected: false,
+        action: {
+          kind: 'drill',
+          drill: { kind: 'overdue', market: mk, product: code },
+        },
+        secondary: null,
+        cells: [
+          { text: p.product_name },
+          { text: fmtCount(s?.active ?? null) },
+          { text: eur(s?.outstanding) },
+          ...BUCKETS.map(([, key]) => ({ text: eur(s?.[key]) })),
+          { text: fmtPct(m.dpd30(s)) },
+          { text: d.text, status: d.status },
+          { text: eur(s?.provision) },
+          {
+            text: d.status === 'neutral' ? STATUS_WORD.neutral : `${d.text.slice(0, 1)} ${STATUS_WORD[d.status]}`,
+            status: d.status,
+            chip: true,
+          },
+        ],
+      };
+    }),
+    empty: now ? null : 'No portfolio snapshot for this month',
+    action: {
+      label: 'Show overdue loans',
+      drill: { kind: 'overdue', market: mk, product: null },
+    },
+    needsDetail: false,
   };
 }

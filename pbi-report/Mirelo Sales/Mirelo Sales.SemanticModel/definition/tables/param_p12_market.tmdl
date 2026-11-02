@@ -1,0 +1,51 @@
+/// The small market pick on the P12 card (change 17): All / PL / RO / PT. Disconnected; no pick = the page region.
+table param_p12_market
+	lineageTag: d76e02db-38ad-5765-894c-9f9831a9e5d3
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 3dccd681-524b-5a5c-ab9a-b744bc5072ce
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [market_code]
+
+		annotation SummarizationSetBy = User
+
+	column market_label
+		dataType: string
+		lineageTag: abcae4d7-9510-5e26-a8d5-36ffd69f804e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [market_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0f2f3554-3752-5e1d-9619-7a2d0182e245
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_p12_market = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "market_code", STRING
+				    ,"market_label", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "ALL", "All", 0 }
+				        ,{ "PL", "PL", 1 }
+				        ,{ "RO", "RO", 2 }
+				        ,{ "PT", "PT", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

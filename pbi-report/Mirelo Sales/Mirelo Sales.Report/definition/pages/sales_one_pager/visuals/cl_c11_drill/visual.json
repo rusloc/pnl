@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "cl_c11_drill",
   "position": {
-    "x": 1272,
+    "x": 1248,
     "y": 554,
     "z": 2370,
     "height": 22,
-    "width": 120,
+    "width": 144,
     "tabOrder": 1440
   },
   "visual": {
@@ -25,7 +25,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Show client'"
+                  "Value": "'Show clients ↗'"
                 }
               }
             },
@@ -222,6 +222,29 @@
             }
           }
         }
+      ],
+      "shape": [
+        {
+          "properties": {
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangleRoundedByPixel'"
+                }
+              }
+            },
+            "rectangleRoundedCurve": {
+              "expr": {
+                "Literal": {
+                  "Value": "6L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -296,7 +319,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Show client for the selected row'"
+                  "Value": "'Show clients: the list window for the selected row, or all'"
                 }
               }
             }
@@ -350,21 +373,21 @@
             "type": {
               "expr": {
                 "Literal": {
-                  "Value": "'Drillthrough'"
+                  "Value": "'Bookmark'"
                 }
               }
             },
-            "drillthroughSection": {
+            "bookmark": {
               "expr": {
                 "Literal": {
-                  "Value": "'client_detail'"
+                  "Value": "'bm_list_clients_open'"
                 }
               }
             },
-            "disabledTooltip": {
+            "tooltip": {
               "expr": {
                 "Literal": {
-                  "Value": "'Select a row first, then show its loans'"
+                  "Value": "'Opens the list for the selected row; with no row selected, for all'"
                 }
               }
             }

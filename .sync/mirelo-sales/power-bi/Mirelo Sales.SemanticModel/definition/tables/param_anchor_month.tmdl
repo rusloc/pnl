@@ -1,4 +1,4 @@
-/// Month picker (closed months only, newest first). Disconnected: the selected month anchors every period window.
+/// Calendar picker (closed months only; 2026-11-02, change 11): the Filters panel slicer is the hierarchy Year > Quarter > Month. Pick a year, a quarter or a month; Ctrl+click a second month for a range (the window runs from the first to the last picked month). Disconnected: the picked months set every period window; no pick = the last closed month.
 table param_anchor_month
 	lineageTag: b3683d95-79e1-5a1b-b644-c34deb8a9a73
 
@@ -44,6 +44,50 @@ table param_anchor_month
 
 		annotation SummarizationSetBy = User
 
+	/// Calendar year (hierarchy level 1).
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: b43240cc-f70f-5e76-8be2-a681ed2daf90
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [year]
+
+		annotation SummarizationSetBy = User
+
+	/// Quarter of the year: Q1 ... Q4 (hierarchy level 2).
+	column quarter_label
+		dataType: string
+		lineageTag: 5c52c210-e361-5b54-b4ce-0bc196067435
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [quarter_label]
+
+		annotation SummarizationSetBy = User
+
+	/// Month of the year: Jan ... Dec (hierarchy level 3).
+	column month_name
+		dataType: string
+		lineageTag: ee95a7b0-9988-5390-9064-6a250202f7fd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_name]
+		sortByColumn: month_of_year
+
+		annotation SummarizationSetBy = User
+
+	/// 1-12, sort key of month_name.
+	column month_of_year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2325f73f-d858-5f73-843c-25a381aff3f0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_of_year]
+
+		annotation SummarizationSetBy = User
+
 	partition param_anchor_month = calculated
 		mode: import
 		source =
@@ -53,6 +97,10 @@ table param_anchor_month
 				    ,"month_label", dim_month[month_label]
 				    ,"month_index", dim_month[month_index]
 				    ,"sort_desc", 0 - dim_month[month_index]
+				    ,"year", 2024 + INT ( ( dim_month[month_index] - 1 ) / 12 )
+				    ,"quarter_label", "Q" & ( INT ( MOD ( dim_month[month_index] - 1, 12 ) / 3 ) + 1 )
+				    ,"month_name", LEFT ( dim_month[month_label], 3 )
+				    ,"month_of_year", MOD ( dim_month[month_index] - 1, 12 ) + 1
 				)
 
 	annotation PBI_ResultType = Table

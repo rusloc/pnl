@@ -43,12 +43,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Churn % Trend"
+                  "Property": "Subscribers New Trend"
                 }
               },
-              "queryRef": "_measures.Churn % Trend",
-              "nativeQueryRef": "Churn % Trend",
-              "displayName": "Churn"
+              "queryRef": "_measures.Subscribers New Trend",
+              "nativeQueryRef": "Subscribers New Trend",
+              "displayName": "New"
             },
             {
               "field": {
@@ -58,12 +58,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Churn % Trend PY"
+                  "Property": "Subscribers Churned Trend"
                 }
               },
-              "queryRef": "_measures.Churn % Trend PY",
-              "nativeQueryRef": "Churn % Trend PY",
-              "displayName": "Prior year"
+              "queryRef": "_measures.Subscribers Churned Trend",
+              "nativeQueryRef": "Subscribers Churned Trend",
+              "displayName": "Churned"
             }
           ]
         }
@@ -195,6 +195,13 @@
                   "Value": "false"
                 }
               }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
             }
           }
         }
@@ -283,34 +290,6 @@
               }
             }
           }
-        },
-        {
-          "properties": {
-            "lineStyle": {
-              "expr": {
-                "Literal": {
-                  "Value": "'dashed'"
-                }
-              }
-            },
-            "strokeWidth": {
-              "expr": {
-                "Literal": {
-                  "Value": "1.5D"
-                }
-              }
-            },
-            "showMarker": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "_measures.Churn % Trend PY"
-          }
         }
       ],
       "dataPoint": [
@@ -329,7 +308,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Churn % Trend"
+            "metadata": "_measures.Subscribers New Trend"
           }
         },
         {
@@ -339,7 +318,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#7F7E79'"
+                      "Value": "'#128C94'"
                     }
                   }
                 }
@@ -347,7 +326,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Churn % Trend PY"
+            "metadata": "_measures.Subscribers Churned Trend"
           }
         }
       ]
@@ -412,7 +391,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Subscriber churn % (Plus + Pro)'"
+                  "Value": "'⠀ New vs churned subscribers'"
                 }
               }
             }
@@ -477,7 +456,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Paying-subscriber churn by month with the prior year. Plus price rise Jan 2026'"
+                  "Value": "'New and churned paying subscribers per month, 13 months; Plus price rise Jan 2026'"
                 }
               }
             }

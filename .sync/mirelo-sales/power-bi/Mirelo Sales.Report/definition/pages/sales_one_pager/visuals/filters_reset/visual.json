@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "filters_reset",
   "position": {
-    "x": 196,
-    "y": 334,
+    "x": 20,
+    "y": 426,
     "z": 3670,
     "height": 28,
-    "width": 128,
+    "width": 96,
     "tabOrder": 3670
   },
   "visual": {
@@ -25,7 +25,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Back to default'"
+                  "Value": "'Reset'"
                 }
               }
             },
@@ -33,8 +33,13 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#111111'"
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "Filters Reset Ink"
                     }
                   }
                 }
@@ -86,8 +91,13 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#111111'"
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "Filters Reset Ink"
                     }
                   }
                 }
@@ -228,8 +238,13 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#CFCDC6'"
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "Filters Reset Outline"
                     }
                   }
                 }
@@ -263,6 +278,29 @@
                 }
               }
             }
+          }
+        }
+      ],
+      "shape": [
+        {
+          "properties": {
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangleRoundedByPixel'"
+                }
+              }
+            },
+            "rectangleRoundedCurve": {
+              "expr": {
+                "Literal": {
+                  "Value": "6L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]
@@ -339,7 +377,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Back to default filters'"
+                  "Value": "'Reset the filters to the defaults'"
                 }
               }
             }
@@ -400,7 +438,7 @@
             "tooltip": {
               "expr": {
                 "Literal": {
-                  "Value": "'Back to default: Month, latest closed month, Budget, All markets'"
+                  "Value": "'Reset: the last closed month, Budget, All markets'"
                 }
               }
             }

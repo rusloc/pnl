@@ -1,11 +1,11 @@
 import type { CSSProperties } from 'react';
 import type { HowToReadVM, InfoVM } from '@/lib/sales/copy';
-import { HowToReadButton as SharedHowToRead, InfoButton as SharedInfoButton } from '../glass';
+import { HowToReadButton as SharedHowToRead, InfoButton as SharedInfoButton } from './glass';
 import styles from './sales.module.css';
 
-// Mirelo wrappers around the shared glass pop-ups (components/glass.tsx, ADR-0012 §2.5).
+// Mirelo wrappers around its glass pop-ups (./glass.tsx, ADR-0012 §2.5; forked from components/glass.tsx 2026-11-01).
 
-export { PopupProvider } from '../glass';
+export { PopupProvider } from './glass';
 
 export function InfoButton({
   id,

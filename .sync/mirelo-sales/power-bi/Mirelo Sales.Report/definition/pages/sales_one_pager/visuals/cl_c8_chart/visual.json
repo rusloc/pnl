@@ -62,12 +62,27 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Funnel New % of Previous"
+                  "Property": "Funnel New % of Leads"
                 }
               },
-              "queryRef": "_measures.Funnel New % of Previous",
-              "nativeQueryRef": "Funnel New % of Previous",
-              "displayName": "% of previous stage"
+              "queryRef": "_measures.Funnel New % of Leads",
+              "nativeQueryRef": "Funnel New % of Leads",
+              "displayName": "% of leads"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel New Label"
+                }
+              },
+              "queryRef": "_measures.Funnel New Label",
+              "nativeQueryRef": "Funnel New Label",
+              "displayName": "Label"
             }
           ]
         }
@@ -296,6 +311,39 @@
                   }
                 }
               }
+            },
+            "enableDetailDataLabel": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "dynamicLabelDetail": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel New Label"
+                }
+              }
+            },
+            "detailContentType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Custom'"
+                }
+              }
+            },
+            "detailFontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -381,7 +429,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'New-client funnel'"
+                  "Value": "'⠀ New-client funnel'"
                 }
               }
             }

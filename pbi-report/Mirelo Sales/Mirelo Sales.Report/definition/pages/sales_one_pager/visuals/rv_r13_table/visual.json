@@ -38,11 +38,11 @@
                       "Entity": "dim_market"
                     }
                   },
-                  "Property": "market_name"
+                  "Property": "market_code"
                 }
               },
-              "queryRef": "dim_market.market_name",
-              "nativeQueryRef": "market_name",
+              "queryRef": "dim_market.market_code",
+              "nativeQueryRef": "market_code",
               "displayName": "MARKET"
             },
             {
@@ -53,12 +53,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue EUR"
+                  "Property": "R13 Actual"
                 }
               },
-              "queryRef": "_measures.Revenue EUR",
-              "nativeQueryRef": "Revenue EUR",
-              "displayName": "ACTUAL EUR"
+              "queryRef": "_measures.R13 Actual",
+              "nativeQueryRef": "R13 Actual",
+              "displayName": "ACTUAL €"
             },
             {
               "field": {
@@ -68,12 +68,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue Budget EUR"
+                  "Property": "R13 Budget"
                 }
               },
-              "queryRef": "_measures.Revenue Budget EUR",
-              "nativeQueryRef": "Revenue Budget EUR",
-              "displayName": "BUDGET EUR"
+              "queryRef": "_measures.R13 Budget",
+              "nativeQueryRef": "R13 Budget",
+              "displayName": "BUDGET €"
             },
             {
               "field": {
@@ -83,12 +83,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue Δ Budget EUR"
+                  "Property": "R13 Δ EUR"
                 }
               },
-              "queryRef": "_measures.Revenue Δ Budget EUR",
-              "nativeQueryRef": "Revenue Δ Budget EUR",
-              "displayName": "Δ EUR"
+              "queryRef": "_measures.R13 Δ EUR",
+              "nativeQueryRef": "R13 Δ EUR",
+              "displayName": "Δ €"
             },
             {
               "field": {
@@ -98,11 +98,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue Δ Budget %"
+                  "Property": "R13 Δ %"
                 }
               },
-              "queryRef": "_measures.Revenue Δ Budget %",
-              "nativeQueryRef": "Revenue Δ Budget %",
+              "queryRef": "_measures.R13 Δ %",
+              "nativeQueryRef": "R13 Δ %",
               "displayName": "Δ %"
             },
             {
@@ -113,12 +113,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue EUR PY"
+                  "Property": "R13 PY"
                 }
               },
-              "queryRef": "_measures.Revenue EUR PY",
-              "nativeQueryRef": "Revenue EUR PY",
-              "displayName": "PY EUR"
+              "queryRef": "_measures.R13 PY",
+              "nativeQueryRef": "R13 PY",
+              "displayName": "PY €"
             },
             {
               "field": {
@@ -128,11 +128,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Revenue Δ PY %"
+                  "Property": "R13 Δ PY %"
                 }
               },
-              "queryRef": "_measures.Revenue Δ PY %",
-              "nativeQueryRef": "Revenue Δ PY %",
+              "queryRef": "_measures.R13 Δ PY %",
+              "nativeQueryRef": "R13 Δ PY %",
               "displayName": "Δ VS PY %"
             },
             {
@@ -155,6 +155,19 @@
       },
       "sortDefinition": {
         "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_market"
+                  }
+                },
+                "Property": "market_code"
+              }
+            },
+            "direction": "Ascending"
+          },
           {
             "field": {
               "Column": {
@@ -501,7 +514,7 @@
             }
           },
           "selector": {
-            "metadata": "dim_market.market_name"
+            "metadata": "dim_market.market_code"
           }
         },
         {
@@ -515,7 +528,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue EUR"
+            "metadata": "_measures.R13 Actual"
           }
         },
         {
@@ -529,7 +542,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Budget EUR"
+            "metadata": "_measures.R13 Budget"
           }
         },
         {
@@ -543,7 +556,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ Budget EUR"
+            "metadata": "_measures.R13 Δ EUR"
           }
         },
         {
@@ -557,7 +570,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ Budget %"
+            "metadata": "_measures.R13 Δ %"
           }
         },
         {
@@ -571,7 +584,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue EUR PY"
+            "metadata": "_measures.R13 PY"
           }
         },
         {
@@ -585,7 +598,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ PY %"
+            "metadata": "_measures.R13 Δ PY %"
           }
         },
         {
@@ -629,7 +642,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue EUR"
+            "metadata": "_measures.R13 Actual"
           }
         },
         {
@@ -657,7 +670,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Budget EUR"
+            "metadata": "_measures.R13 Budget"
           }
         },
         {
@@ -685,7 +698,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ Budget EUR"
+            "metadata": "_measures.R13 Δ EUR"
           }
         },
         {
@@ -713,7 +726,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ Budget %"
+            "metadata": "_measures.R13 Δ %"
           }
         },
         {
@@ -741,7 +754,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue EUR PY"
+            "metadata": "_measures.R13 PY"
           }
         },
         {
@@ -769,7 +782,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Revenue Δ PY %"
+            "metadata": "_measures.R13 Δ PY %"
           }
         }
       ]

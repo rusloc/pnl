@@ -9,17 +9,15 @@
       "filters_panel",
       "filters_title",
       "filters_period_label",
-      "filters_upto_label",
       "filters_cmp_label",
       "filters_region_label",
-      "filters_week",
-      "s_period",
-      "s_month",
       "s_cmp",
       "s_market",
       "filters_showing",
       "filters_reset",
-      "filters_done"
+      "s_range",
+      "filters_hint",
+      "filters_rule"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -45,11 +43,6 @@
               "visualType": "textbox"
             }
           },
-          "filters_upto_label": {
-            "singleVisual": {
-              "visualType": "textbox"
-            }
-          },
           "filters_cmp_label": {
             "singleVisual": {
               "visualType": "textbox"
@@ -58,21 +51,6 @@
           "filters_region_label": {
             "singleVisual": {
               "visualType": "textbox"
-            }
-          },
-          "filters_week": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "s_period": {
-            "singleVisual": {
-              "visualType": "advancedSlicerVisual"
-            }
-          },
-          "s_month": {
-            "singleVisual": {
-              "visualType": "slicer"
             }
           },
           "s_cmp": {
@@ -95,9 +73,19 @@
               "visualType": "actionButton"
             }
           },
-          "filters_done": {
+          "s_range": {
             "singleVisual": {
-              "visualType": "actionButton"
+              "visualType": "slicer"
+            }
+          },
+          "filters_hint": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "filters_rule": {
+            "singleVisual": {
+              "visualType": "shape"
             }
           }
         },

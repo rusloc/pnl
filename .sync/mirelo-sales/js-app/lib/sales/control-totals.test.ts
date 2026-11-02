@@ -65,9 +65,7 @@ describe.each(PERIODS)('control totals %s (%s anchored %s)', (period, tv, anchor
     const stat = cube.windowStat(tv, anchorKey, mk);
     expect(stat?.borrowers).toBe(control(mk, period, 'borrowers'));
     expect(stat?.returning).toBe(control(mk, period, 'returning_clients'));
-    expect(Math.abs((m.returning(tv, anchor, mk) ?? NaN) - control(mk, period, 'returning_pct_clients'))).toBeLessThan(
-      RATIO,
-    );
+    expect(Math.abs((m.returning(w, mk) ?? NaN) - control(mk, period, 'returning_pct_clients'))).toBeLessThan(RATIO);
   });
 
   it.each(MARKETS)('%s: 30+ / 90+ DPD at the last month of the window', (mk) => {

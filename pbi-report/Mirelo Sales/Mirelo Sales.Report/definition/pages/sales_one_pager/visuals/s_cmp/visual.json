@@ -3,7 +3,7 @@
   "name": "s_cmp",
   "position": {
     "x": 20,
-    "y": 182,
+    "y": 324,
     "z": 3655,
     "height": 28,
     "width": 206,
@@ -171,14 +171,14 @@
             "columnPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "0L"
+                  "Value": "4L"
                 }
               }
             },
             "customizeLines": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -255,7 +255,7 @@
             "rectangleRoundedCurve": {
               "expr": {
                 "Literal": {
-                  "Value": "0L"
+                  "Value": "6L"
                 }
               }
             }
@@ -385,7 +385,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "lineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#CFCDC6'"
+                    }
+                  }
+                }
+              }
+            },
+            "weight": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
                 }
               }
             }
@@ -399,7 +417,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }

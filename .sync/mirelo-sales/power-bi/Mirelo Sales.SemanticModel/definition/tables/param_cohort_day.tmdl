@@ -1,0 +1,35 @@
+/// Columns of the C9 cohort heatmap (change 26): days since the first loan, 15-180 every 15 days (Track C cohortDays without day 0). Disconnected.
+table param_cohort_day
+	lineageTag: 33fd26a7-ee2f-5968-b483-8640f7d37244
+
+	column days
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d0cef3d2-ead1-5595-94da-e7a2371efb5e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [days]
+
+		annotation SummarizationSetBy = User
+
+	column day_label
+		dataType: string
+		lineageTag: ee4fcc5d-3615-5db1-87be-f95140737439
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [day_label]
+		sortByColumn: days
+
+		annotation SummarizationSetBy = User
+
+	partition param_cohort_day = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    GENERATESERIES ( 15, 180, 15 )
+				    ,"days", [Value]
+				    ,"day_label", [Value] & " d"
+				)
+
+	annotation PBI_ResultType = Table

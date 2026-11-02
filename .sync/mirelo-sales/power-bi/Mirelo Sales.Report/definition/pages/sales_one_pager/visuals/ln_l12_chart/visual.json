@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ln_l12_chart",
   "position": {
-    "x": 972,
+    "x": 740,
     "y": 378,
     "z": 1920,
     "height": 144,
-    "width": 424,
+    "width": 656,
     "tabOrder": 1000
   },
   "visual": {
@@ -63,7 +63,7 @@
               },
               "queryRef": "_measures.Stage SLA Hours",
               "nativeQueryRef": "Stage SLA Hours",
-              "displayName": "SLA hours"
+              "displayName": "SLA"
             }
           ]
         }
@@ -395,7 +395,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Stage cycle time vs SLA'"
+                  "Value": "'⠀ Stage cycle time vs SLA'"
                 }
               }
             }

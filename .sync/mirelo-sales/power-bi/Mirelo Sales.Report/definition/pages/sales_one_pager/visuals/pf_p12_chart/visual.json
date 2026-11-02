@@ -33,26 +33,6 @@
             }
           ]
         },
-        "Series": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dim_market"
-                    }
-                  },
-                  "Property": "market_name"
-                }
-              },
-              "queryRef": "dim_market.market_name",
-              "nativeQueryRef": "market_name",
-              "displayName": "Market",
-              "active": true
-            }
-          ]
-        },
         "X": {
           "projections": [
             {
@@ -63,12 +43,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Avg Ticket EUR"
+                  "Property": "P12 Avg Ticket EUR"
                 }
               },
-              "queryRef": "_measures.Avg Ticket EUR",
-              "nativeQueryRef": "Avg Ticket EUR",
-              "displayName": "Avg ticket EUR"
+              "queryRef": "_measures.P12 Avg Ticket EUR",
+              "nativeQueryRef": "P12 Avg Ticket EUR",
+              "displayName": "Average ticket"
             }
           ]
         },
@@ -82,11 +62,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "DPD30 %"
+                  "Property": "P12 DPD30 %"
                 }
               },
-              "queryRef": "_measures.DPD30 %",
-              "nativeQueryRef": "DPD30 %",
+              "queryRef": "_measures.P12 DPD30 %",
+              "nativeQueryRef": "P12 DPD30 %",
               "displayName": "30+ DPD %"
             }
           ]
@@ -101,12 +81,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Outstanding EUR"
+                  "Property": "P12 Outstanding EUR"
                 }
               },
-              "queryRef": "_measures.Outstanding EUR",
-              "nativeQueryRef": "Outstanding EUR",
-              "displayName": "Outstanding EUR"
+              "queryRef": "_measures.P12 Outstanding EUR",
+              "nativeQueryRef": "P12 Outstanding EUR",
+              "displayName": "Outstanding"
             }
           ]
         }
@@ -223,7 +203,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -276,8 +256,13 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#BDBBB5'"
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "P12 Bubble Fill"
                     }
                   }
                 }
@@ -287,107 +272,8 @@
           "selector": {
             "data": [
               {
-                "scopeId": {
-                  "Comparison": {
-                    "ComparisonKind": 0,
-                    "Left": {
-                      "Column": {
-                        "Expression": {
-                          "SourceRef": {
-                            "Entity": "dim_market"
-                          }
-                        },
-                        "Property": "market_name"
-                      }
-                    },
-                    "Right": {
-                      "Literal": {
-                        "Value": "'Poland'"
-                      }
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#7F7E79'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "data": [
-              {
-                "scopeId": {
-                  "Comparison": {
-                    "ComparisonKind": 0,
-                    "Left": {
-                      "Column": {
-                        "Expression": {
-                          "SourceRef": {
-                            "Entity": "dim_market"
-                          }
-                        },
-                        "Property": "market_name"
-                      }
-                    },
-                    "Right": {
-                      "Literal": {
-                        "Value": "'Romania'"
-                      }
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "properties": {
-            "fill": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#111111'"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "selector": {
-            "data": [
-              {
-                "scopeId": {
-                  "Comparison": {
-                    "ComparisonKind": 0,
-                    "Left": {
-                      "Column": {
-                        "Expression": {
-                          "SourceRef": {
-                            "Entity": "dim_market"
-                          }
-                        },
-                        "Property": "market_name"
-                      }
-                    },
-                    "Right": {
-                      "Literal": {
-                        "Value": "'Portugal'"
-                      }
-                    }
-                  }
+                "dataViewWildcard": {
+                  "matchingOption": 1
                 }
               }
             ]
@@ -400,7 +286,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#111111'"
+                    }
+                  }
                 }
               }
             }
@@ -499,7 +403,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Segments: avg ticket x 30+ DPD'"
+                  "Value": "'⠀ Segments: size × DPD'"
                 }
               }
             }
@@ -564,7 +468,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Product x market segments: average ticket against 30+ DPD, bubble size = outstanding'"
+                  "Value": "'One bubble per product: x average ticket, y 30+ DPD, size outstanding; worst 30+ DPD in yellow'"
                 }
               }
             }

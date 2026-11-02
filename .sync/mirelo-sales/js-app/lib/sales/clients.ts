@@ -1,43 +1,42 @@
-import { CHANNEL_SHORT, MARKET_NAMES, SEGMENT_NAMES, info } from './copy.ts';
-import type { DetailIndex } from './detail.ts';
-import { cohortClients } from './detail.ts';
-import { fmtCount, fmtDays, fmtEur0, fmtInt, fmtPct } from './format.ts';
+import { CHANNEL_SHORT, MARKET_NAMES, info } from './copy.ts';
+import { fmtCount, fmtDays, fmtEur0, fmtPct } from './format.ts';
 import { CATEGORY_ROLES, kpi } from './loans.ts';
-import { MARKETS } from './manifest.ts';
 import type { Ctx } from './overview.ts';
 import { quarterLabel, quarterMonths, trend } from './overview.ts';
+import { STATUS_WORD, cmpRow } from './status.ts';
 import type { SalesSelection } from './types.ts';
 import type { BandVM, ChartCard, TableCard } from './view-model.ts';
-import { dateLabel, monthKey, monthLabel, shift, windowLabel, windowOf } from './windows.ts';
+import { shift, periodWindow, windowLabel } from './windows.ts';
 
 // View 3 — Clients (layout-spec §3): acquisition and return.
 
-/** 4-step bins over the shown values (design-tokens §7 heat matrix). */
-export function bins(values: readonly (number | null)[]): (0 | 1 | 2 | 3 | null)[] {
+/**
+ * Heat level 0 … 1 of each cell over every shown cell, all rows and columns together (2026-11-01, owner: one gradient
+ * for the whole grid, grey → yellow → orange → red; it was four grey steps). Blank cells stay null.
+ */
+export function heatLevels(values: readonly (number | null)[]): (number | null)[] {
   const v = values.filter((x): x is number => x !== null);
   const lo = Math.min(...v);
   const hi = Math.max(...v);
-  return values.map((x) =>
-    x === null ? null : hi > lo ? (Math.min(3, Math.floor(((x - lo) / (hi - lo)) * 4)) as 0 | 1 | 2 | 3) : 0,
-  );
+  return values.map((x) => (x === null ? null : hi > lo ? (x - lo) / (hi - lo) : 0));
 }
 
-export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): BandVM {
+export function clientsView(ctx: Ctx, sel: SalesSelection): BandVM {
   const { cube, m } = ctx;
   const mk = sel.market;
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
   const py = shift(w, -12);
   const A = m.loans(w, mk);
   const P = m.refLoans(py, mk);
   const FN = m.funnel(w, mk, false);
   const FNP = m.refFunnel(py, mk, false);
-  const r180 = m.repeat180(sel.anchor - 6, mk);
-  const gap = m.median(sel.tv, sel.anchor, mk, 'median_days_between');
+  const FR = m.funnel(w, mk, true);
+  const FRP = m.refFunnel(py, mk, true);
+  const gap = m.median(w, mk, 'median_days_between');
 
-  const ret = m.returning(sel.tv, sel.anchor, mk);
-  const stat = cube.windowStat(sel.tv, monthKey(sel.anchor), mk);
-  const r180py = m.repeat180(sel.anchor - 18, mk);
-  const gapPy = m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_days_between');
+  const ret = m.returning(w, mk);
+  const stat = m.stat(w, mk);
+  const gapPy = m.refMedian(py, mk, 'median_days_between');
   const kpis = [
     kpi(
       'c1',
@@ -61,7 +60,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
         { label: 'Returning borrowers', value: fmtCount(stat?.returning ?? null) },
       ],
       'ratioUp',
-      { actual: ret, py: m.refReturning(sel.tv, sel.anchor - 12, mk) },
+      { actual: ret, py: m.refReturning(py, mk) },
       sel.cmp,
     ),
     kpi(
@@ -88,18 +87,19 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
       { actual: m.approval(FN), py: m.approval(FNP) },
       sel.cmp,
     ),
+    // C5 approval rate of returning applicants (2026-11-01, owner: replaces the 180-day repeat, which the C9 heatmap
+    // already shows by cohort)
     kpi(
       'c5',
-      '180-day repeat',
-      fmtPct(r180),
+      'Returning-client approval rate',
+      fmtPct(m.approval(FR)),
       [
-        { label: 'Cohort', value: monthLabel(sel.anchor - 6) },
-        { label: '90-day repeat', value: fmtPct(m.cohortCurve([sel.anchor - 6], mk)[cube.cohortDays.indexOf(90)] ?? null) },
-        { label: `${monthLabel(sel.anchor - 18)} cohort (PY)`, value: fmtPct(r180py) },
+        { label: 'Returning submitted', value: fmtCount(FR.submitted) },
+        { label: 'Returning approved', value: fmtCount(FR.approved) },
+        { label: 'New-client approval rate', value: fmtPct(m.approval(FN)) },
       ],
       'ratioUp',
-      // vs the same cohort month a year earlier (layout-spec v4 C5, MS-05)
-      { actual: r180, py: null, ref: { label: 'vs PY cohort', value: r180py } },
+      { actual: m.approval(FR), py: m.approval(FRP) },
       sel.cmp,
     ),
     kpi(
@@ -135,7 +135,6 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
     chart: {
       kind: 'columns',
       x: t.x,
-      months: t.months,
       unit: 'count',
       stacks: channels.map((c, k) => ({
         name: CHANNEL_SHORT[c.channel_code] ?? c.channel_name,
@@ -154,68 +153,69 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
     },
   };
 
-  // C8 New-client funnel
+  // C8 New-client funnel: every step as % of Leads, step 1 (owner, 2026-11-01); no "lost at the step" bars
   const steps = [
-    ['Leads', FN.leads, null],
-    ['First application', FN.submitted, FN.leads],
-    ['First approval', FN.approved, FN.submitted],
-    ['First loan', FN.disbursed, FN.approved],
+    ['Leads', FN.leads],
+    ['First application', FN.submitted],
+    ['First approval', FN.approved],
+    ['First loan', FN.disbursed],
   ] as const;
   const c8: ChartCard = {
     id: 'c8',
     title: 'New-client funnel',
     info: info('c8'),
     open: null,
-    legend: [
-      { label: 'First-time applicants', role: 'actual' },
-      { label: 'Lost at the step', role: 'c3' },
-    ],
+    legend: [{ label: 'First-time applicants', role: 'actual' }],
     chart: {
       kind: 'funnel',
-      rows: steps.map(([label, v, prev]) => ({
+      rows: steps.map(([label, v], i) => ({
         label,
         value: v,
         text: fmtCount(v),
-        sub: prev === null ? windowLabel(w) : `${fmtPct(prev > 0 ? v / prev : null)} of previous`,
-        lost: prev === null ? null : prev - v,
+        sub: i === 0 ? windowLabel(w) : `${fmtPct(FN.leads > 0 ? v / FN.leads : null)} of leads`,
+        lost: null,
       })),
     },
   };
 
-  // C9 Cohort repeat curves, last four quarter cohorts
-  const cohorts = [0, 1, 2, 3].map((k) => quarterMonths(sel.anchor, k));
+  // C9 Cohort repeat heatmap (2026-11-01, owner: the four curves sat on top of each other): the last four quarter
+  // cohorts, oldest on top, × days since the first loan; a cohort not yet that old stays blank. The leading days where
+  // no cohort has a second loan yet (the first loan is still running) are dropped.
+  const cohorts = [3, 2, 1, 0].map((k) => quarterMonths(sel.anchor, k));
+  const curves = cohorts.map((c) => m.cohortCurve(c, mk));
+  const from = cube.cohortDays.findIndex((_, k) => curves.some((v) => (v[k] ?? 0) > 0));
+  const days = cube.cohortDays.flatMap((d, k) => (k >= Math.max(from, 1) ? [{ d, k }] : []));
+  const grid = curves.map((curve) => days.map(({ k }) => curve[k] ?? null));
+  const cohortLevels = heatLevels(grid.flat());
   const c9: ChartCard = {
     id: 'c9',
-    title: 'Cohort repeat curves (quarter cohorts)',
+    title: 'Cohort repeat by quarter cohort',
     info: info('c9'),
     open: null,
-    legend: cohorts.map((c, k) => ({ label: quarterLabel(c[0] ?? sel.anchor), role: CATEGORY_ROLES[k] ?? 'c4' })),
+    legend: [],
     chart: {
-      kind: 'line',
-      x: cube.cohortDays.map((d) => (d % 30 === 0 ? `${d} d` : '')),
-      months: null,
-      unit: 'pct',
-      series: cohorts.map((c, k) => ({
-        name: quarterLabel(c[0] ?? sel.anchor),
-        role: CATEGORY_ROLES[k] ?? 'c4',
-        values: m.cohortCurve(c, mk),
+      kind: 'heat',
+      cols: days.map(({ d }) => `${d} d`),
+      rows: cohorts.map((c, i) => ({
+        label: quarterLabel(c[0] ?? sel.anchor),
+        cells: days.map((_, j) => {
+          const v = grid[i]?.[j] ?? null;
+          return {
+            text: v === null ? '' : fmtPct(v, 0),
+            level: cohortLevels[i * days.length + j] ?? null,
+          };
+        }),
       })),
-      selected: null,
-      callout: null,
-      zeroBased: true,
+      side: null,
     },
   };
 
-  // C10 Returning % by market × segment, repeat share by product
-  const segments = ['CONSUMER', 'MICRO_BUSINESS'];
-  const shownMarkets = mk === 'ALL' ? MARKETS : [mk];
-  const cells = shownMarkets.map((c) => segments.map((s) => m.returning(sel.tv, sel.anchor, c, s)));
-  const flatBins = bins(cells.flat());
+  // C10 Repeat share by product (2026-11-01, owner: the market × segment matrix is gone)
   const products = cube.dims.product.filter((p) => p.product_line === 'Microloan');
   const avg = m.repeatShare(A);
   const c10: ChartCard = {
     id: 'c10',
-    title: 'Returning % by market × segment - repeat share by product',
+    title: 'Repeat share by product',
     info: info('c10'),
     open: null,
     legend: [
@@ -223,87 +223,106 @@ export function clientsView(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | nul
       { label: 'company average', role: 'budget' },
     ],
     chart: {
-      kind: 'heat',
-      cols: segments.map((s) => SEGMENT_NAMES[s] ?? s),
-      rows: shownMarkets.map((c, i) => ({
-        label: MARKET_NAMES[c],
-        cells: segments.map((_, j) => ({
-          text: fmtPct(cells[i]?.[j] ?? null),
-          bin: flatBins[i * segments.length + j] ?? null,
-        })),
-      })),
-      side: {
-        title: 'Repeat share by product',
-        unit: 'pct',
-        rows: products.map((p) => {
-          const s = m.repeatShare(m.loans(w, mk, { product: p.product_code }));
-          return { label: p.product_name, value: s, ghost: null, tick: avg, text: fmtPct(s, 0) };
-        }),
-      },
+      kind: 'bars',
+      unit: 'pct',
+      rows: products.map((p) => {
+        const s = m.repeatShare(m.loans(w, mk, { product: p.product_code }));
+        return {
+          label: p.product_name,
+          value: s,
+          ghost: null,
+          tick: avg,
+          text: fmtPct(s, 0),
+        };
+      }),
     },
   };
 
-  return { kpis, charts: [c7, c8, c9, c10], layout: 'halves', table: clientsTable(ctx, sel, ix) };
+  return {
+    kpis,
+    charts: [c7, c8, c9, c10],
+    layout: 'halves',
+    table: acquisitionTable(ctx, sel),
+  };
 }
 
-function clientsTable(ctx: Ctx, sel: SalesSelection, ix: DetailIndex | null): TableCard {
-  const { cube } = ctx;
-  const w = windowOf(sel.tv, sel.anchor);
-  const list = ix ? cohortClients(ix, cube, w, sel.market, cube.caps.clientsPerCohortMarket) : [];
+/**
+ * C11 Acquisition by channel (2026-11-01, owner: replaces the client list, which moved into the detail window): one row
+ * per acquisition channel. Budget exists per market × product only, so the Δ is always vs the prior year.
+ */
+function acquisitionTable(ctx: Ctx, sel: SalesSelection): TableCard {
+  const { cube, m } = ctx;
+  const mk = sel.market;
+  const w = periodWindow(sel);
+  const py = shift(w, -12);
+  const byChannel = (r: { channel: string }) => r.channel;
+  const all = cube.loansBy(w, mk, byChannel);
+  const first = cube.loansBy(w, mk, byChannel, { repeat: false });
+  const firstPy = cube.available(py) ? cube.loansBy(py, mk, byChannel, { repeat: false }) : null;
+  const fNew = cube.funnelBy(w, mk, byChannel, false);
+  const fRet = cube.funnelBy(w, mk, byChannel, true);
+  const totalNew = m.loans(w, mk).first;
   return {
     id: 'c11',
-    title: `Clients - ${windowLabel(w)} cohort - ${MARKET_NAMES[sel.market]}`,
-    info: info('c11', [
-      { label: 'Rows', value: ix ? `top ${list.length} by principal to date (draft sample)` : 'loading' },
-      { label: 'Loan states', value: `snapshot at ${monthLabel(cube.closed)}` },
-    ]),
+    title: `Acquisition by channel - ${windowLabel(w)} - ${MARKET_NAMES[mk]}`,
+    info: info('c11'),
     columns: [
-      { key: 'id', label: 'Client id', width: 130, align: 'left' },
-      { key: 'market', label: 'Market', width: 80, align: 'left' },
-      { key: 'type', label: 'Type', width: 130, align: 'left' },
-      { key: 'first', label: 'First loan', width: 110, align: 'left' },
-      { key: 'product', label: 'First product', width: 110, align: 'left' },
-      { key: 'channel', label: 'Channel', width: 100, align: 'left' },
-      { key: 'loans', label: 'Loans to date', width: 110, align: 'right' },
-      { key: 'ptd', label: 'Principal to date', width: 130, align: 'right' },
-      { key: 'last', label: 'Last loan', width: 110, align: 'left' },
-      { key: 'since', label: 'Days since', width: 90, align: 'right' },
-      { key: 'status', label: 'Status', width: 110, align: 'left' },
+      { key: 'channel', label: 'Channel', width: 150, align: 'left' },
+      { key: 'new', label: 'New clients', width: 120, align: 'right' },
+      { key: 'delta', label: 'vs PY', width: 110, align: 'right' },
+      { key: 'share', label: 'Share of new', width: 120, align: 'right' },
+      { key: 'conv', label: 'Lead → first loan', width: 140, align: 'right' },
+      { key: 'apprN', label: 'New approval %', width: 140, align: 'right' },
+      {
+        key: 'apprR',
+        label: 'Returning approval %',
+        width: 170,
+        align: 'right',
+      },
+      { key: 'repeat', label: 'Repeat share', width: 120, align: 'right' },
+      { key: 'ticket', label: 'First ticket €', width: 120, align: 'right' },
+      { key: 'status', label: 'Status', width: 96, align: 'left' },
     ],
-    rows: list.map((s) => ({
-      key: String(s.client.client_id),
-      selected: false,
-      action: { kind: 'drill', drill: { kind: 'client', client: s.client.client_id } },
-      secondary: null,
-      cells: [
-        { text: `C-${s.client.client_id}` },
-        { text: s.client.market },
-        { text: SEGMENT_NAMES[s.client.segment] ?? s.client.segment },
-        { text: dateLabel(s.client.first_loan_date) },
-        {
-          text:
-            cube.dims.product.find((p) => p.product_code === s.client.first_product)?.product_name ??
-            s.client.first_product,
+    rows: cube.dims.channel.map((c) => {
+      const code = c.channel_code;
+      const n = first.get(code)?.first ?? 0;
+      const ref = firstPy ? (firstPy.get(code)?.first ?? 0) : null;
+      const d = cmpRow('countUp', 'vs PY', n, ref);
+      const fn = fNew.get(code) ?? null;
+      const f1 = first.get(code);
+      return {
+        key: code,
+        selected: false,
+        action: {
+          kind: 'drill',
+          drill: { kind: 'clients', market: mk, channel: code },
         },
-        { text: CHANNEL_SHORT[s.client.acquisition_channel] ?? s.client.acquisition_channel },
-        { text: fmtInt(s.loans) },
-        { text: fmtEur0(s.principalToDate) },
-        { text: dateLabel(s.last.disbursed) },
-        { text: fmtInt(s.daysSince) },
-        {
-          text: s.status,
-          status:
-            s.last.status === 'CURRENT' || s.last.status === 'REPAID'
-              ? 'good'
-              : s.last.status === 'DPD_1_29'
-                ? 'watch'
-                : 'off',
-          chip: true,
-        },
-      ],
-    })),
-    empty: ix ? (list.length ? null : 'No first loans in this window') : 'Loading the client sample…',
-    action: null,
-    needsDetail: true,
+        secondary: null,
+        cells: [
+          { text: CHANNEL_SHORT[code] ?? c.channel_name },
+          { text: fmtCount(n) },
+          { text: d.text, status: d.status },
+          { text: fmtPct(totalNew > 0 ? n / totalNew : null) },
+          { text: fmtPct(fn && fn.leads > 0 ? fn.disbursed / fn.leads : null) },
+          { text: fmtPct(m.approval(fn)) },
+          { text: fmtPct(m.approval(fRet.get(code) ?? null)) },
+          { text: fmtPct(m.repeatShare(all.get(code) ?? null)) },
+          {
+            text: fmtEur0(f1 && f1.loans > 0 ? f1.principal / f1.loans : null),
+          },
+          {
+            text: d.status === 'neutral' ? STATUS_WORD.neutral : `${d.text.slice(0, 1)} ${STATUS_WORD[d.status]}`,
+            status: d.status,
+            chip: true,
+          },
+        ],
+      };
+    }),
+    empty: null,
+    action: {
+      label: 'Show clients',
+      drill: { kind: 'clients', market: mk, channel: null },
+    },
+    needsDetail: false,
   };
 }

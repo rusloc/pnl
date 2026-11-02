@@ -9,6 +9,8 @@
 - [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; period model (k); generator in repo `tools/`; SVG frame perf pattern + timing traps
 
 ## Open threads
+- 2026-11-02 Mirelo Power BI = JS fix-up applied (validator 0/0, 40 blocks / 4,361 rows TRUE, five views render-checked). Open: ginee display-name columns (App organic, Interest income, loan status names); USER clicks / header sort / hover
+- 2026-11-02 Mirelo owner rounds 2-4 (changes 11-33) built in PBIP + pack (validator 0/0, 30 blocks / 3,743 rows TRUE). Open: USER clicks calendar / Show clients / Show overdue loans / header sort, hovers ⓘ; ADR-0011 amendment candidate (list overlays, n/a); hunter re-seeds T-P c5
 - 2026-11-01 Mirelo owner changes 1-10 built in PBIP + pack (validator 0/0, 21 blocks / 3,528 rows TRUE). Open: USER clicks Filters / Back to default / Details / Show loans, hovers ⓘ (transparent tooltip page?), main agent logs change-5 option (b) + parity rows
 - 2026-10-30 .sync PBI packs carry cache.abf (ADR-0014 item 7): nordmark-exec/power-bi new, pnl + mirelo refreshed; placeholder set via TOM before save (TMDL edit after save empties the model, see pbir-authoring-notes). P&L cache 61 MB (> 50 MB GitHub warning). Open: USER first open / hover checks; ginee data README still says power-bi 'issued later'
 - 2026-10-30 Nordmark Exec category filter built (validator 0/0, full run 207 blocks / 50,390 rows TRUE, cards <= 0.39 s / i <= 0.96 s cold under picks; parity CSV tests/parity/2026-10-30-pbi-faces.csv). Commit 852f0a7 already holds part of it (measures, dictionary, tools); rest uncommitted. Open: USER first open of the Category dropdown + hover check of the stacked i

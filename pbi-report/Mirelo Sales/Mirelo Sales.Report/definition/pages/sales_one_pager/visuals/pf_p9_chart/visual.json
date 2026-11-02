@@ -63,11 +63,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "DPD30 %"
+                  "Property": "P9 Cell"
                 }
               },
-              "queryRef": "_measures.DPD30 %",
-              "nativeQueryRef": "DPD30 %",
+              "queryRef": "_measures.P9 Cell",
+              "nativeQueryRef": "P9 Cell",
               "displayName": "30+ DPD %"
             }
           ]
@@ -131,7 +131,7 @@
             "rowPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "1D"
+                  "Value": "0D"
                 }
               }
             },
@@ -145,7 +145,7 @@
             "textSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8D"
                 }
               }
             }
@@ -228,7 +228,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8D"
                 }
               }
             },
@@ -322,7 +322,7 @@
                           "Entity": "_measures"
                         }
                       },
-                      "Property": "Heat Fill DPD30"
+                      "Property": "Heat Fill P9"
                     }
                   }
                 }
@@ -338,7 +338,7 @@
                           "Entity": "_measures"
                         }
                       },
-                      "Property": "Heat Ink DPD30"
+                      "Property": "Heat Ink P9"
                     }
                   }
                 }
@@ -353,11 +353,26 @@
                 }
               }
             ],
-            "metadata": "_measures.DPD30 %"
+            "metadata": "_measures.P9 Cell"
           }
         }
       ],
-      "columnWidth": [],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "96D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.P9 Cell"
+          }
+        }
+      ],
       "subTotals": [
         {
           "properties": {
@@ -384,7 +399,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "10D"
+                  "Value": "8D"
                 }
               }
             },
@@ -488,7 +503,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'30+ DPD by product x market'"
+                  "Value": "'⠀ Bad rate by product × market'"
                 }
               }
             }

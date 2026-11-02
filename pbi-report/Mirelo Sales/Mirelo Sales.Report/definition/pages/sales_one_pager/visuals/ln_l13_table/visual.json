@@ -32,17 +32,17 @@
             },
             {
               "field": {
-                "Column": {
+                "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dim_agent"
+                      "Entity": "_measures"
                     }
                   },
-                  "Property": "agent_type"
+                  "Property": "Agent Type"
                 }
               },
-              "queryRef": "dim_agent.agent_type",
-              "nativeQueryRef": "agent_type",
+              "queryRef": "_measures.Agent Type",
+              "nativeQueryRef": "Agent Type",
               "displayName": "TYPE"
             },
             {
@@ -68,11 +68,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Agent Loans"
+                  "Property": "Agent Loans Shown"
                 }
               },
-              "queryRef": "_measures.Agent Loans",
-              "nativeQueryRef": "Agent Loans",
+              "queryRef": "_measures.Agent Loans Shown",
+              "nativeQueryRef": "Agent Loans Shown",
               "displayName": "LOANS"
             },
             {
@@ -83,12 +83,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Agent Target"
+                  "Property": "Agent Quota Shown"
                 }
               },
-              "queryRef": "_measures.Agent Target",
-              "nativeQueryRef": "Agent Target",
-              "displayName": "TARGET"
+              "queryRef": "_measures.Agent Quota Shown",
+              "nativeQueryRef": "Agent Quota Shown",
+              "displayName": "QUOTA"
             },
             {
               "field": {
@@ -98,12 +98,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Agent Attainment"
+                  "Property": "Agent Attainment Shown"
                 }
               },
-              "queryRef": "_measures.Agent Attainment",
-              "nativeQueryRef": "Agent Attainment",
-              "displayName": "ATTAINMENT"
+              "queryRef": "_measures.Agent Attainment Shown",
+              "nativeQueryRef": "Agent Attainment Shown",
+              "displayName": "ATTAINMENT %"
             },
             {
               "field": {
@@ -113,12 +113,42 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Agent Principal EUR"
+                  "Property": "Agent Principal Shown"
                 }
               },
-              "queryRef": "_measures.Agent Principal EUR",
-              "nativeQueryRef": "Agent Principal EUR",
-              "displayName": "PRINCIPAL EUR"
+              "queryRef": "_measures.Agent Principal Shown",
+              "nativeQueryRef": "Agent Principal Shown",
+              "displayName": "PRINCIPAL €"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Agent Δ Cmp %"
+                }
+              },
+              "queryRef": "_measures.Agent Δ Cmp %",
+              "nativeQueryRef": "Agent Δ Cmp %",
+              "displayName": "VS QUOTA / PY"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Agent Status Rank"
+                }
+              },
+              "queryRef": "_measures.Agent Status Rank",
+              "nativeQueryRef": "Agent Status Rank",
+              "displayName": "STATUS"
             },
             {
               "field": {
@@ -137,18 +167,18 @@
             },
             {
               "field": {
-                "Measure": {
+                "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "_measures"
+                      "Entity": "dim_agent"
                     }
                   },
-                  "Property": "Agent Status"
+                  "Property": "agent_code"
                 }
               },
-              "queryRef": "_measures.Agent Status",
-              "nativeQueryRef": "Agent Status",
-              "displayName": "STATUS"
+              "queryRef": "dim_agent.agent_code",
+              "nativeQueryRef": "agent_code",
+              "displayName": " "
             }
           ]
         }
@@ -163,7 +193,7 @@
                     "Entity": "_measures"
                   }
                 },
-                "Property": "Agent Attainment"
+                "Property": "Agent Attainment Shown"
               }
             },
             "direction": "Descending"
@@ -440,7 +470,62 @@
                 }
               }
             ],
-            "metadata": "_measures.Agent Status"
+            "metadata": "_measures.Agent Status Rank"
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "Agent Δ Ink"
+                    }
+                  }
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ],
+            "metadata": "_measures.Agent Δ Cmp %"
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E9E8E4'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dim_agent.agent_code"
           }
         }
       ],
@@ -483,7 +568,7 @@
             }
           },
           "selector": {
-            "metadata": "dim_agent.agent_type"
+            "metadata": "_measures.Agent Type"
           }
         },
         {
@@ -491,7 +576,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "80D"
+                  "Value": "76D"
                 }
               }
             }
@@ -505,13 +590,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "100D"
+                  "Value": "84D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Loans"
+            "metadata": "_measures.Agent Loans Shown"
           }
         },
         {
@@ -519,13 +604,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "100D"
+                  "Value": "84D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Target"
+            "metadata": "_measures.Agent Quota Shown"
           }
         },
         {
@@ -539,7 +624,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Attainment"
+            "metadata": "_measures.Agent Attainment Shown"
           }
         },
         {
@@ -547,13 +632,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "120D"
+                  "Value": "104D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Principal EUR"
+            "metadata": "_measures.Agent Principal Shown"
           }
         },
         {
@@ -567,7 +652,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Tag"
+            "metadata": "_measures.Agent Δ Cmp %"
           }
         },
         {
@@ -581,7 +666,35 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Status"
+            "metadata": "_measures.Agent Status Rank"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "70D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Agent Tag"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dim_agent.agent_code"
           }
         }
       ],
@@ -611,7 +724,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Loans"
+            "metadata": "_measures.Agent Loans Shown"
           }
         },
         {
@@ -639,7 +752,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Target"
+            "metadata": "_measures.Agent Quota Shown"
           }
         },
         {
@@ -667,7 +780,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Attainment"
+            "metadata": "_measures.Agent Attainment Shown"
           }
         },
         {
@@ -695,7 +808,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Principal EUR"
+            "metadata": "_measures.Agent Principal Shown"
           }
         },
         {
@@ -751,7 +864,63 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Agent Attainment"
+            "metadata": "_measures.Agent Attainment Shown"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Left'"
+                }
+              }
+            },
+            "styleHeader": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Agent Status Rank"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Right'"
+                }
+              }
+            },
+            "styleHeader": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Agent Δ Cmp %"
           }
         }
       ]

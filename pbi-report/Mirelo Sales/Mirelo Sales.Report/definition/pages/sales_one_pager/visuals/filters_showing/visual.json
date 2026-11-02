@@ -3,9 +3,9 @@
   "name": "filters_showing",
   "position": {
     "x": 20,
-    "y": 286,
+    "y": 470,
     "z": 3665,
-    "height": 36,
+    "height": 40,
     "width": 400,
     "tabOrder": 3665
   },
@@ -193,6 +193,29 @@
                 }
               }
             }
+          }
+        }
+      ],
+      "shape": [
+        {
+          "properties": {
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangleRoundedByPixel'"
+                }
+              }
+            },
+            "rectangleRoundedCurve": {
+              "expr": {
+                "Literal": {
+                  "Value": "6L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]

@@ -48,7 +48,22 @@
               },
               "queryRef": "_measures.Roll 30-60 Trend",
               "nativeQueryRef": "Roll 30-60 Trend",
-              "displayName": "30 to 60"
+              "displayName": "30 → 60"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Roll 1-29 30 Trend"
+                }
+              },
+              "queryRef": "_measures.Roll 1-29 30 Trend",
+              "nativeQueryRef": "Roll 1-29 30 Trend",
+              "displayName": "1–29 → 30+"
             }
           ]
         }
@@ -190,7 +205,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -288,6 +303,24 @@
           "selector": {
             "metadata": "_measures.Roll 30-60 Trend"
           }
+        },
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#128C94'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Roll 1-29 30 Trend"
+          }
         }
       ]
     },
@@ -351,7 +384,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Roll rate 30 to 60'"
+                  "Value": "'⠀ Roll rates by month'"
                 }
               }
             }

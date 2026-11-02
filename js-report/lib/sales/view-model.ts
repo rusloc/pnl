@@ -17,13 +17,14 @@ export interface Series {
 
 export interface LegendItem {
   label: string;
-  role: SeriesRole | 'selected' | 'ghost';
+  // pyFill: prior year as a filled yellow bar; lost: the funnel's yellow drop-out line (both 2026-11-01)
+  role: SeriesRole | 'selected' | 'ghost' | 'pyFill' | 'lost';
 }
 
 export interface BarRow {
   label: string;
   value: number | null;
-  ghost: number | null; // PY outline
+  ghost: number | null; // PY: a filled yellow bar under the actual one (2026-11-01; was an outline)
   tick: number | null; // target / SLA / average tick
   text: string;
 }
@@ -32,7 +33,6 @@ export type Chart =
   | {
       kind: 'line';
       x: string[];
-      months: number[] | null; // month index per x (mark click → month), null when x is not months
       unit: Unit;
       series: Series[];
       selected: number | null;
@@ -42,7 +42,6 @@ export type Chart =
   | {
       kind: 'columns';
       x: string[];
-      months: number[] | null;
       unit: Unit;
       stacks: Series[]; // bottom → top
       ghost: (number | null)[] | null; // PY total as an outline
@@ -58,7 +57,16 @@ export type Chart =
       segments: { name: string; role: SeriesRole }[];
       rows: { label: string; values: number[]; text: string }[];
     }
-  | { kind: 'funnel'; rows: { label: string; value: number; text: string; sub: string; lost: number | null }[] }
+  | {
+      kind: 'funnel';
+      rows: {
+        label: string;
+        value: number;
+        text: string;
+        sub: string;
+        lost: number | null; // did not reach the next stage: a yellow line over the bar's end
+      }[];
+    }
   | {
       kind: 'bullets';
       unit: Unit;
@@ -68,7 +76,10 @@ export type Chart =
   | {
       kind: 'heat';
       cols: string[];
-      rows: { label: string; cells: { text: string; bin: 0 | 1 | 2 | 3 | null }[] }[];
+      rows: {
+        label: string;
+        cells: { text: string; level: number | null }[]; // 0 … 1 over the whole grid; null = blank
+      }[];
       side: { title: string; unit: Unit; rows: BarRow[] } | null;
     }
   | {
@@ -94,6 +105,12 @@ export interface ChartCard {
   open: ViewId | null; // "Open <view> ↗" on Overview why panels
   legend: LegendItem[];
   chart: Chart;
+  /** A small filter on the card itself (P12 market, 2026-11-01): one chart per option, `value` first. */
+  variants?: {
+    label: string;
+    value: string;
+    options: { key: string; label: string; chart: Chart }[];
+  };
 }
 
 /** Status chip: glyph + word (design-tokens §2.3), never colour alone. */
@@ -118,9 +135,8 @@ export interface KpiCard {
   label: string;
   info: InfoVM;
   value: string;
-  row: CmpRow;
-  status: Chip | null;
-  alt: CmpRow | null; // the other comparator, shown on hover / focus (layout-spec §6)
+  rows: CmpRow[]; // "vs Budget" (when the metric has one) and "vs PY", or one fixed comparator
+  status: Chip | null; // follows the chosen comparator
 }
 
 export interface Cell {
@@ -129,6 +145,7 @@ export interface Cell {
   chip?: boolean; // status chip with glyph + word
   bar?: number | null; // 0 … 1 attainment bar (target at 1)
   tag?: string; // small tag after the text ("Ramp")
+  sort?: number | string | null; // raw value for column sorting (sortable tables); null sorts last
 }
 
 export type RowAction = { kind: 'market'; market: MarketCode } | { kind: 'drill'; drill: Drill };
@@ -150,6 +167,7 @@ export interface TableCard {
   empty: string | null; // shown in place of rows when there are none (or while the sample loads)
   action: { label: string; drill: Drill } | null; // "Show loans ↗"
   needsDetail: boolean; // rows come from the lazy detail sample
+  sortable?: boolean; // header click sorts by the cells' `sort` values (2026-11-01: the agent leaderboard)
 }
 
 export interface OverviewVM {
@@ -168,8 +186,10 @@ export interface BandVM {
 export interface HeaderVM {
   title: string;
   periodLine: string;
+  filterLine: string; // the applied filters beside the Filters button: "Q4 2025 - vs Budget - All markets"
   howToRead: HowToReadVM;
-  months: { value: string; label: string }[]; // closed months, newest first
+  first: number; // first month with data (calendar bound)
+  last: number; // last closed month (calendar bound)
 }
 
 export interface DetailLoanRow {
@@ -178,28 +198,23 @@ export interface DetailLoanRow {
   cells: string[];
 }
 
+/** A detail list (2026-11-01: every row of the data, paged in the window; rowAt formats one row, csv() writes all). */
+export interface DetailList {
+  title: string;
+  sub: string;
+  chips: string[];
+  columns: { label: string; align: 'left' | 'right' }[];
+  total: number;
+  rowAt: (i: number) => DetailLoanRow;
+  footer: string; // what a row does / the order, beside the pager
+  csv: () => string;
+  csvName: string;
+}
+
 export type SlideOverVM =
-  | {
-      kind: 'loans';
-      title: string;
-      sub: string;
-      chips: string[];
-      columns: { label: string; align: 'left' | 'right' }[];
-      rows: DetailLoanRow[];
-      footer: string;
-      csv: string;
-      csvName: string;
-    }
-  | {
+  | ({ kind: 'loans' | 'clients' } & DetailList) // a row opens the client card
+  | ({
       kind: 'client';
-      title: string;
-      sub: string;
-      chips: string[];
       facts: { label: string; value: string }[];
-      columns: { label: string; align: 'left' | 'right' }[];
-      rows: DetailLoanRow[];
-      footer: string;
-      csv: string;
-      csvName: string;
-    }
+    } & DetailList)
   | { kind: 'missing'; title: string; sub: string };

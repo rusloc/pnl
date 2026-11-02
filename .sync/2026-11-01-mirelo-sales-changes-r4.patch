@@ -1,0 +1,2239 @@
+diff --git a/data/mirelo/build_detail.py b/data/mirelo/build_detail.py
+new file mode 100644
+index 0000000..b6faf45
+--- /dev/null
++++ b/data/mirelo/build_detail.py
+@@ -0,0 +1,163 @@
++"""Full loan / client detail for the Mirelo JS report's detail window (2026-11-01).
++
++The pack shipped a capped sample (detail-loans / detail-clients). The owner wants every list complete, so this script
++cuts the generator's full output into small Parquet files the browser loads on demand:
++
++  detail/loans-YYYY-MM.parquet     every loan disbursed in that closed month (Show loans, agent lists)
++  detail/cohort-YYYY-MM.parquet    every client whose first loan is in that month, with its to-date summary (client lists)
++  detail/overdue.parquet           every loan 30+ DPD with a balance at the last close (overdue lists)
++  detail/client-NN.parquet         every loan of the clients with client_id % 64 == NN (client card)
++  detail/client-dim-NN.parquet     those clients' dim rows (client card)
++  detail/index.json                rows and bytes per file, the last close, the bucket count
++
++Input: the `parquet/` folder of `data-gen/mirelo-sales/generator/generate.py` (seed 20261026; the same data as the
++report's aggregates, checked by its control totals). Usage, with the generator's pinned venv:
++
++  python -I data/mirelo/build_detail.py <generator out>/parquet public/data/mirelo/detail
++
++Column names and types follow the pack's detail-loans / detail-clients (src/lib/mirelo/manifest.ts FILES).
++"""
++
++import json
++import sys
++from pathlib import Path
++
++import pandas as pd
++import pyarrow as pa
++import pyarrow.parquet as pq
++
++BUCKETS = 64
++LAST_CLOSE = "2026-09-30"
++
++LOAN_SCHEMA = pa.schema(
++    [
++        pa.field("loan_id", pa.int32(), nullable=False),
++        pa.field("client_id", pa.int32(), nullable=False),
++        pa.field("disbursed", pa.string(), nullable=False),
++        pa.field("market", pa.string(), nullable=False),
++        pa.field("product", pa.string(), nullable=False),
++        pa.field("channel", pa.string(), nullable=False),
++        pa.field("agent", pa.string()),
++        pa.field("repeat", pa.bool_(), nullable=False),
++        pa.field("principal_local", pa.float64(), nullable=False),
++        pa.field("hours_to_cash", pa.float64(), nullable=False),
++        pa.field("status", pa.string(), nullable=False),
++        pa.field("dpd_close", pa.int32(), nullable=False),
++        pa.field("outstanding_close_local", pa.float64(), nullable=False),
++    ]
++)
++DIM_SCHEMA = pa.schema(
++    [
++        pa.field("client_id", pa.int32(), nullable=False),
++        pa.field("market", pa.string(), nullable=False),
++        pa.field("segment", pa.string(), nullable=False),
++        pa.field("acquisition_channel", pa.string(), nullable=False),
++        pa.field("acquisition_agent", pa.string()),
++        pa.field("first_loan_date", pa.string(), nullable=False),
++        pa.field("first_product", pa.string(), nullable=False),
++        pa.field("cohort_month", pa.string(), nullable=False),
++        pa.field("birth_year_band", pa.string(), nullable=False),
++        pa.field("city_tier", pa.int32(), nullable=False),
++        pa.field("loans_before_2024", pa.int32(), nullable=False),
++    ]
++)
++COHORT_SCHEMA = pa.schema(
++    [
++        *DIM_SCHEMA,
++        pa.field("loans_to_date", pa.int32(), nullable=False),  # fact loans through the close + loans before 2024
++        pa.field("principal_eur_to_date", pa.float64(), nullable=False),  # since 2024, at each month's actual rate
++        pa.field("last_disbursed", pa.string(), nullable=False),
++        pa.field("last_status", pa.string(), nullable=False),
++    ]
++)
++
++
++def write(df: pd.DataFrame, schema: pa.Schema, path: Path, index: dict) -> None:
++    table = pa.Table.from_pandas(df[schema.names], schema=schema, preserve_index=False)
++    pq.write_table(table, path, compression="snappy", row_group_size=1 << 20)
++    index["files"][path.name] = {"rows": table.num_rows, "bytes": path.stat().st_size}
++
++
++def main(src: Path, out: Path) -> None:
++    out.mkdir(parents=True, exist_ok=True)
++    for old in out.glob("*.parquet"):
++        old.unlink()
++
++    fl = pq.read_table(src / "fact_loan.parquet").to_pandas()
++    fl["disbursed"] = fl["disbursed_date"].astype(str)
++    fl = fl[fl["disbursed"] <= LAST_CLOSE]  # October 2026 is open: no states at the close
++    loans = pd.DataFrame(
++        {
++            "loan_id": fl["loan_id"],
++            "client_id": fl["client_id"],
++            "disbursed": fl["disbursed"],
++            "market": fl["market_code"],
++            "product": fl["product_code"],
++            "channel": fl["channel_code"],
++            "agent": fl["agent_code"],
++            "repeat": fl["is_repeat"],
++            "principal_local": fl["principal_local"],
++            "hours_to_cash": fl["hours_to_cash"],
++            "status": fl["status_code"],
++            "dpd_close": fl["dpd_days_close"].astype("int32"),
++            "outstanding_close_local": fl["outstanding_local_close"],
++            "principal_eur": fl["principal_eur"],
++        }
++    ).sort_values(["client_id", "disbursed", "loan_id"], kind="stable")
++
++    dc = pq.read_table(src / "dim_client.parquet").to_pandas()
++    dims = pd.DataFrame(
++        {
++            "client_id": dc["client_id"],
++            "market": dc["market_code"],
++            "segment": dc["segment_code"],
++            "acquisition_channel": dc["acquisition_channel_code"],
++            "acquisition_agent": dc["acquisition_agent_code"],
++            "first_loan_date": dc["first_loan_date"].astype(str),
++            "first_product": dc["first_product_code"],
++            "cohort_month": dc["cohort_month"],
++            "birth_year_band": dc["birth_year_band"],
++            "city_tier": dc["city_tier"],
++            "loans_before_2024": dc["loans_before_2024"],
++        }
++    )
++
++    index = {"lastClose": LAST_CLOSE, "buckets": BUCKETS, "files": {}}
++
++    # every loan per disbursement month
++    loans["month"] = loans["disbursed"].str.slice(0, 7)
++    by_loan = loans.sort_values("loan_id", kind="stable")
++    for month, part in by_loan.groupby("month", sort=True):
++        write(part, LOAN_SCHEMA, out / f"loans-{month}.parquet", index)
++
++    # client summaries per cohort month (the cohort lists); last loan = file order client, disbursed, loan id
++    agg = loans.groupby("client_id", sort=False).agg(
++        n=("loan_id", "size"),
++        principal_eur_to_date=("principal_eur", "sum"),
++        last_disbursed=("disbursed", "last"),
++        last_status=("status", "last"),
++    )
++    cohort = dims.merge(agg, left_on="client_id", right_index=True, how="inner")
++    cohort["loans_to_date"] = (cohort["n"] + cohort["loans_before_2024"]).astype("int32")
++    cohort = cohort[(cohort["cohort_month"] >= "2024-01") & (cohort["cohort_month"] <= LAST_CLOSE[:7])]
++    for month, part in cohort.sort_values("client_id").groupby("cohort_month", sort=True):
++        write(part, COHORT_SCHEMA, out / f"cohort-{month}.parquet", index)
++
++    # every overdue loan at the last close
++    overdue = by_loan[(by_loan["dpd_close"] >= 30) & (by_loan["outstanding_close_local"] > 0)]
++    write(overdue, LOAN_SCHEMA, out / "overdue.parquet", index)
++
++    # client card buckets
++    loans["bucket"] = loans["client_id"] % BUCKETS
++    dims["bucket"] = dims["client_id"] % BUCKETS
++    for b in range(BUCKETS):
++        write(loans[loans["bucket"] == b], LOAN_SCHEMA, out / f"client-{b:02d}.parquet", index)
++        write(dims[dims["bucket"] == b].sort_values("client_id"), DIM_SCHEMA, out / f"client-dim-{b:02d}.parquet", index)
++
++    (out / "index.json").write_text(json.dumps(index, indent=1, sort_keys=True) + "\n", encoding="utf-8")
++    total = sum(f["bytes"] for f in index["files"].values())
++    print(f"{len(index['files'])} files, {total / 1e6:.1f} MB, loans {len(loans)}, cohort clients {len(cohort)}, overdue {len(overdue)}")
++
++
++if __name__ == "__main__":
++    main(Path(sys.argv[1]), Path(sys.argv[2]))
+diff --git a/src/components/mirelo/cards.tsx b/src/components/mirelo/cards.tsx
+index 63e82f2..c04a0f3 100644
+--- a/src/components/mirelo/cards.tsx
++++ b/src/components/mirelo/cards.tsx
+@@ -368,6 +368,29 @@ export function TableCardView({
+   onAction: (a: RowAction) => void;
+ }) {
+   const boardH = useBoardHeight();
++  // Column sort (2026-11-01, sortable tables): first click sorts numbers high → low and text A → Z, the next reverses;
++  // empty values go last either way. No sort = the engine's order.
++  const [sort, setSort] = useState<{ col: number; desc: boolean } | null>(null);
++  const rows = sort
++    ? [...card.rows].sort((a, b) => {
++        const x = a.cells[sort.col]?.sort ?? null;
++        const y = b.cells[sort.col]?.sort ?? null;
++        if (x === null || y === null) return x === y ? 0 : x === null ? 1 : -1;
++        const c =
++          typeof x === "number" && typeof y === "number"
++            ? x - y
++            : String(x).localeCompare(String(y));
++        return sort.desc ? -c : c;
++      })
++    : card.rows;
++  const sortBy = (col: number) => {
++    const numeric = card.rows.some(
++      (r) => typeof r.cells[col]?.sort === "number",
++    );
++    setSort(
++      sort?.col === col ? { col, desc: !sort.desc } : { col, desc: numeric },
++    );
++  };
+   return (
+     <section
+       className={styles.card}
+@@ -414,13 +437,33 @@ export function TableCardView({
+           </colgroup>
+           <thead>
+             <tr>
+-              {card.columns.map((c) => (
++              {card.columns.map((c, k) => (
+                 <th
+                   key={c.key}
+                   scope="col"
+                   className={c.align === "right" ? styles.r : undefined}
++                  aria-sort={
++                    sort?.col === k
++                      ? sort.desc
++                        ? "descending"
++                        : "ascending"
++                      : undefined
++                  }
+                 >
+-                  {c.label}
++                  {card.sortable ? (
++                    <button
++                      type="button"
++                      className={styles.sortBtn}
++                      onClick={() => sortBy(k)}
++                    >
++                      {c.label}
++                      <span aria-hidden="true">
++                        {sort?.col === k ? (sort.desc ? " ▼" : " ▲") : " ↕"}
++                      </span>
++                    </button>
++                  ) : (
++                    c.label
++                  )}
+                 </th>
+               ))}
+               <th aria-hidden="true" />
+@@ -434,7 +477,7 @@ export function TableCardView({
+                 </td>
+               </tr>
+             ) : null}
+-            {card.rows.map((r) => (
++            {rows.map((r) => (
+               <tr
+                 key={r.key}
+                 className={r.action ? styles.row : undefined}
+diff --git a/src/components/mirelo/charts.tsx b/src/components/mirelo/charts.tsx
+index 9997730..35f99f8 100644
+--- a/src/components/mirelo/charts.tsx
++++ b/src/components/mirelo/charts.tsx
+@@ -761,7 +761,22 @@ export function Waterfall({
+   );
+ }
+ 
+-const BIN_FILL = [C.panel2, C.g300, C.g400, C.ink] as const;
++/** Heat scale (2026-11-01, owner): grey → yellow → orange → red, interpolated on the cell's level over the whole grid. */
++const HEAT_STOPS = [
++  [0xde, 0xdd, 0xd8], // panel-2 grey
++  [0xff, 0xd5, 0x4a], // accent yellow
++  [0xf2, 0x8c, 0x28], // orange
++  [0xc0, 0x39, 0x2b], // red
++] as const;
++function heatFill(level: number): string {
++  const t = Math.min(Math.max(level, 0), 1) * (HEAT_STOPS.length - 1);
++  const k = Math.min(Math.floor(t), HEAT_STOPS.length - 2);
++  const a = HEAT_STOPS[k] ?? HEAT_STOPS[0];
++  const b = HEAT_STOPS[k + 1] ?? a;
++  const f = t - k;
++  return `rgb(${a.map((v, i) => Math.round(v + ((b[i] ?? v) - v) * f)).join(",")})`;
++}
++const HEAT_LIGHT_TEXT = 0.8; // from here the red is dark enough for white text
+ 
+ export function Heat({
+   chart,
+@@ -799,13 +814,17 @@ export function Heat({
+                 y={headH + i * rh}
+                 width={cw - 2}
+                 height={rh - 2}
+-                fill={cell.bin === null ? C.white : BIN_FILL[cell.bin]}
++                fill={cell.level === null ? C.white : heatFill(cell.level)}
+               />
+               <T
+                 x={labW + j * cw + cw / 2}
+                 y={headH + i * rh + rh / 2 + 3}
+                 anchor="middle"
+-                fill={cell.bin === 3 ? C.white : C.ink}
++                fill={
++                  cell.level !== null && cell.level >= HEAT_LIGHT_TEXT
++                    ? C.white
++                    : C.ink
++                }
+                 size={11}
+                 weight={600}
+               >
+diff --git a/src/components/mirelo/sales-app.tsx b/src/components/mirelo/sales-app.tsx
+index d0f39e0..360beef 100644
+--- a/src/components/mirelo/sales-app.tsx
++++ b/src/components/mirelo/sales-app.tsx
+@@ -7,8 +7,12 @@ import { ReportBoard, useBoardHeight } from "@/components/report-board";
+ import { useReportSearch } from "@/components/report-search";
+ import { createSalesLoader } from "@/lib/mirelo/data";
+ import { createSalesEngine } from "@/lib/mirelo";
+-import type { DetailIndex } from "@/lib/mirelo";
+-import type { Drill, SalesBase, SalesSelection } from "@/lib/mirelo/types";
++import type {
++  DetailParts,
++  Drill,
++  SalesBase,
++  SalesSelection,
++} from "@/lib/mirelo/types";
+ import type { BandVM, OverviewVM, RowAction } from "@/lib/mirelo/view-model";
+ import {
+   ChartCardView,
+@@ -126,7 +130,9 @@ function overviewBoxes(extra: number) {
+   };
+ }
+ 
+-type Detail = { ix: DetailIndex } | { error: string } | null;
++/** The detail files of the open drill, keyed by their names (one load per drill; the loader caches each file). */
++type Detail =
++  { key: string; parts: DetailParts } | { key: string; error: string } | null;
+ 
+ function Dashboard({ base }: { base: SalesBase }) {
+   const engine = useMemo(() => createSalesEngine(base), [base]);
+@@ -150,20 +156,25 @@ function Dashboard({ base }: { base: SalesBase }) {
+     if (canonical !== search) go(sel);
+   }, [canonical, search, go, sel]);
+ 
+-  // The capped loan / client sample loads on first need (Clients, Portfolio, any slide-over).
+-  const needs = engine.needsDetail(sel);
++  // The full detail loads per drill: only the months, cohorts or client bucket it reads (2026-11-01).
++  const files = useMemo(
++    () => (sel.drill ? engine.detailFiles(sel, sel.drill) : []),
++    [engine, sel],
++  );
++  const filesKey = files.join(",");
+   useEffect(() => {
+-    if (!needs || detail) return;
++    if (!filesKey) return;
+     let live = true;
+-    loader.detail().then(
+-      (d) => live && setDetail({ ix: engine.indexDetail(d) }),
+-      (e: unknown) => live && setDetail({ error: message(e) }),
++    loader.detail(filesKey.split(",")).then(
++      (parts) => live && setDetail({ key: filesKey, parts }),
++      (e: unknown) => live && setDetail({ key: filesKey, error: message(e) }),
+     );
+     return () => {
+       live = false;
+     };
+-  }, [needs, detail, engine]);
+-  const ix = detail && "ix" in detail ? detail.ix : null;
++  }, [filesKey]);
++  const current = detail?.key === filesKey ? detail : null;
++  const parts = current && "parts" in current ? current.parts : null;
+ 
+   const header = useMemo(() => engine.header(sel), [engine, sel]);
+   const overview = useMemo(
+@@ -175,8 +186,8 @@ function Dashboard({ base }: { base: SalesBase }) {
+     [engine, sel],
+   );
+   const slide = useMemo(
+-    () => (sel.drill ? engine.slideOver(sel, ix, sel.drill) : null),
+-    [engine, sel, ix],
++    () => (sel.drill ? engine.slideOver(sel, parts, sel.drill) : null),
++    [engine, sel, parts],
+   );
+ 
+   const update = (patch: Partial<SalesSelection>) => go({ ...sel, ...patch });
+@@ -223,11 +234,11 @@ function Dashboard({ base }: { base: SalesBase }) {
+           {slide ? (
+             <SlideOver
+               vm={
+-                detail && "error" in detail
++                current && "error" in current
+                   ? {
+                       kind: "missing",
+-                      title: "Could not load the loan sample",
+-                      sub: detail.error,
++                      title: "Could not load the loans",
++                      sub: current.error,
+                     }
+                   : slide
+               }
+diff --git a/src/components/mirelo/sales.module.css b/src/components/mirelo/sales.module.css
+index 4a073d1..3c41001 100644
+--- a/src/components/mirelo/sales.module.css
++++ b/src/components/mirelo/sales.module.css
+@@ -877,6 +877,50 @@
+   padding: 0 8px;
+   cursor: pointer;
+ }
++.soFoot button:disabled {
++  color: var(--g300);
++  cursor: default;
++}
++/* sortable table headers (2026-11-01: the agent leaderboard) */
++.sortBtn {
++  display: inline-flex;
++  align-items: center;
++  gap: 2px;
++  border: 0;
++  padding: 0;
++  background: transparent;
++  font: inherit;
++  letter-spacing: inherit;
++  text-transform: inherit;
++  color: inherit;
++  cursor: pointer;
++}
++.sortBtn:hover {
++  color: var(--ink);
++}
++.sortBtn span {
++  color: var(--g400);
++}
++th[aria-sort] .sortBtn,
++th[aria-sort] .sortBtn span {
++  color: var(--ink);
++}
++/* pager (2026-11-01): the full list in pages of 50, right of the footer */
++.pager {
++  display: flex;
++  align-items: center;
++  gap: 4px;
++  margin-left: auto;
++  color: var(--ink);
++  font-weight: 600;
++}
++.pager span {
++  padding: 0 6px;
++  white-space: nowrap;
++}
++.pager button {
++  min-width: 26px;
++}
+ .status {
+   position: absolute;
+   left: 32px;
+diff --git a/src/components/mirelo/slide-over.tsx b/src/components/mirelo/slide-over.tsx
+index de3c982..8549362 100644
+--- a/src/components/mirelo/slide-over.tsx
++++ b/src/components/mirelo/slide-over.tsx
+@@ -1,4 +1,5 @@
+-import { useEffect, useRef } from "react";
++import { useEffect, useRef, useState } from "react";
++import { fmtInt } from "@/lib/mirelo/format";
+ import type { SlideOverVM } from "@/lib/mirelo/view-model";
+ import glass from "./glass.module.css";
+ import styles from "./sales.module.css";
+@@ -9,6 +10,7 @@ import styles from "./sales.module.css";
+ // moves to the close button on open, Tab stays inside, Escape or the mask closes, and focus returns to the opener.
+ 
+ const FOCUSABLE = 'button, [href], [tabindex]:not([tabindex="-1"])';
++const PAGE = 50; // rows per page; every row of the list is reachable and in the CSV (2026-11-01)
+ 
+ export function SlideOver({
+   vm,
+@@ -22,6 +24,12 @@ export function SlideOver({
+   onClient: (client: number) => void;
+ }) {
+   const panel = useRef<HTMLElement>(null);
++  const [page, setPage] = useState(0);
++  const [listOf, setListOf] = useState(vm.title);
++  if (listOf !== vm.title) {
++    setListOf(vm.title); // another list (a drill, Back): start at its first page
++    setPage(0);
++  }
+   const closeBtn = useRef<HTMLButtonElement>(null);
+ 
+   useEffect(() => {
+@@ -74,10 +82,20 @@ export function SlideOver({
+ 
+   const list = vm.kind === "loans" || vm.kind === "clients"; // rows open the client card
+ 
++  const pages = vm.kind === "missing" ? 0 : Math.ceil(vm.total / PAGE);
++  const current = Math.min(page, Math.max(pages - 1, 0));
++  const first = current * PAGE;
++  const rows =
++    vm.kind === "missing"
++      ? []
++      : Array.from({ length: Math.min(PAGE, vm.total - first) }, (_, i) =>
++          vm.rowAt(first + i),
++        );
++
+   function exportCsv() {
+     if (vm.kind === "missing") return;
+     const url = URL.createObjectURL(
+-      new Blob([vm.csv], { type: "text/csv;charset=utf-8" }),
++      new Blob([vm.csv()], { type: "text/csv;charset=utf-8" }),
+     );
+     const a = document.createElement("a");
+     a.href = url;
+@@ -161,7 +179,7 @@ export function SlideOver({
+                   </tr>
+                 </thead>
+                 <tbody>
+-                  {vm.rows.map((r) => (
++                  {rows.map((r) => (
+                     <tr
+                       key={r.key}
+                       className={list ? styles.row : undefined}
+@@ -202,9 +220,53 @@ export function SlideOver({
+                 </button>
+               ) : null}
+               <button type="button" onClick={exportCsv}>
+-                Export CSV
++                Export CSV ({fmtInt(vm.total)} rows)
+               </button>
+-              <span>{vm.footer}</span>
++              <span>
++                {vm.total === 0
++                  ? "No rows"
++                  : `${fmtInt(first + 1)}–${fmtInt(first + rows.length)} of ${fmtInt(vm.total)}`}{" "}
++                - {vm.footer}
++              </span>
++              {pages > 1 ? (
++                <nav className={styles.pager} aria-label="Pages">
++                  <button
++                    type="button"
++                    disabled={current === 0}
++                    onClick={() => setPage(0)}
++                    aria-label="First page"
++                  >
++                    «
++                  </button>
++                  <button
++                    type="button"
++                    disabled={current === 0}
++                    onClick={() => setPage(current - 1)}
++                    aria-label="Previous page"
++                  >
++                    ‹
++                  </button>
++                  <span aria-live="polite">
++                    Page {fmtInt(current + 1)} of {fmtInt(pages)}
++                  </span>
++                  <button
++                    type="button"
++                    disabled={current >= pages - 1}
++                    onClick={() => setPage(current + 1)}
++                    aria-label="Next page"
++                  >
++                    ›
++                  </button>
++                  <button
++                    type="button"
++                    disabled={current >= pages - 1}
++                    onClick={() => setPage(pages - 1)}
++                    aria-label="Last page"
++                  >
++                    »
++                  </button>
++                </nav>
++              ) : null}
+             </div>
+           </>
+         )}
+diff --git a/src/lib/mirelo/clients.ts b/src/lib/mirelo/clients.ts
+index 55de58f..f973ef0 100644
+--- a/src/lib/mirelo/clients.ts
++++ b/src/lib/mirelo/clients.ts
+@@ -10,19 +10,18 @@ import { shift, periodWindow, windowLabel } from "./windows";
+ 
+ // View 3 — Clients (layout-spec §3): acquisition and return.
+ 
+-/** 4-step bins over the shown values (design-tokens §7 heat matrix). */
+-export function bins(
++/**
++ * Heat level 0 … 1 of each cell over every shown cell, all rows and columns together (2026-11-01, owner: one gradient
++ * for the whole grid, grey → yellow → orange → red; it was four grey steps). Blank cells stay null.
++ */
++export function heatLevels(
+   values: readonly (number | null)[],
+-): (0 | 1 | 2 | 3 | null)[] {
++): (number | null)[] {
+   const v = values.filter((x): x is number => x !== null);
+   const lo = Math.min(...v);
+   const hi = Math.max(...v);
+   return values.map((x) =>
+-    x === null
+-      ? null
+-      : hi > lo
+-        ? (Math.min(3, Math.floor(((x - lo) / (hi - lo)) * 4)) as 0 | 1 | 2 | 3)
+-        : 0,
++    x === null ? null : hi > lo ? (x - lo) / (hi - lo) : 0,
+   );
+ }
+ 
+@@ -218,7 +217,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection): BandVM {
+     k >= Math.max(from, 1) ? [{ d, k }] : [],
+   );
+   const grid = curves.map((curve) => days.map(({ k }) => curve[k] ?? null));
+-  const cohortBins = bins(grid.flat());
++  const cohortLevels = heatLevels(grid.flat());
+   const c9: ChartCard = {
+     id: "c9",
+     title: "Cohort repeat by quarter cohort",
+@@ -234,7 +233,7 @@ export function clientsView(ctx: Ctx, sel: SalesSelection): BandVM {
+           const v = grid[i]?.[j] ?? null;
+           return {
+             text: v === null ? "" : fmtPct(v, 0),
+-            bin: cohortBins[i * days.length + j] ?? null,
++            level: cohortLevels[i * days.length + j] ?? null,
+           };
+         }),
+       })),
+diff --git a/src/lib/mirelo/copy.ts b/src/lib/mirelo/copy.ts
+index d4ad73a..e53f315 100644
+--- a/src/lib/mirelo/copy.ts
++++ b/src/lib/mirelo/copy.ts
+@@ -200,7 +200,7 @@ const INFO: Readonly<Record<string, InfoCopy>> = {
+   l10: [
+     "Loans in the window per product × market.",
+     "Product mix drives ticket size and risk.",
+-    "Count of loans by product × market; darker = more loans (four steps over the cells shown).",
++    "Count of loans by product × market; grey → yellow → orange → red = few → many loans, graded over every cell of the grid.",
+   ],
+   l12: [
+     "Median hours of the two timed legs against the stage SLA.",
+@@ -255,7 +255,7 @@ const INFO: Readonly<Record<string, InfoCopy>> = {
+   c9: [
+     "Second-loan share by days since the first loan, last four quarter cohorts (oldest on top).",
+     "Compares how fast recent cohorts come back: read a column down.",
+-    "Clients with a second loan ≤ N days ÷ cohort clients, right-censored at the last close: a cohort not yet N days old is blank. Darker = higher (four steps over the cells shown).",
++    "Clients with a second loan ≤ N days ÷ cohort clients, right-censored at the last close: a cohort not yet N days old is blank. Grey → yellow → orange → red = low → high, graded over every cell of the grid.",
+   ],
+   c10: [
+     "Repeat share of loans per microloan product.",
+@@ -310,7 +310,7 @@ const INFO: Readonly<Record<string, InfoCopy>> = {
+   p9: [
+     "30+ DPD by balance per product × market.",
+     "Locates the risk.",
+-    "30+ DPD balance ÷ outstanding at the last month of the window.",
++    "30+ DPD balance ÷ outstanding at the last month of the window. Grey → yellow → orange → red = low → high risk, graded over every cell of the grid.",
+   ],
+   p10: [
+     "30+ DPD by balance per market, 13 months.",
+diff --git a/src/lib/mirelo/cube.ts b/src/lib/mirelo/cube.ts
+index 46eda32..7694755 100644
+--- a/src/lib/mirelo/cube.ts
++++ b/src/lib/mirelo/cube.ts
+@@ -374,7 +374,6 @@ export function createCube(base: SalesBase) {
+     first,
+     closed,
+     dims,
+-    caps: base.manifest.caps,
+     cohortDays: base.manifest.cohortDays,
+     currency,
+     available,
+diff --git a/src/lib/mirelo/data.ts b/src/lib/mirelo/data.ts
+index ba81025..f998b7d 100644
+--- a/src/lib/mirelo/data.ts
++++ b/src/lib/mirelo/data.ts
+@@ -1,9 +1,18 @@
+ import { readRows } from "./parquet-columns";
+-import { FILES, parseManifest } from "./manifest";
+-import type { FileKey, SalesManifest } from "./manifest";
+-import type { FileRows, SalesBase, SalesDetail } from "./types";
++import { DETAIL, FILES, detailIndexSchema, parseManifest } from "./manifest";
++import type { DetailIndexFile, FileKey, SalesManifest } from "./manifest";
++import type { ColumnSpec } from "./parquet-columns";
++import type {
++  ClientRow,
++  CohortRow,
++  DetailParts,
++  FileRows,
++  LoanRow,
++  SalesBase,
++} from "./types";
+ 
+-// Loader for public/data/sales (ADR-0011 (c)): manifest + base files on first paint, the detail sample on first need.
++// Loader for public/data/sales (ADR-0011 (c)): manifest + base files on first paint; the detail files a drill needs
++// on demand (2026-11-01: the full data in `detail/`, one file per month / cohort / client bucket).
+ // Per-session in-memory cache; a failed read is evicted so the next call retries (same contract as the P&L loader).
+ 
+ /** Reads one public/data/sales artifact by file name: `fetch` in the browser, `fs` in Node tests. */
+@@ -11,13 +20,15 @@ export type ReadArtifact = (name: string) => Promise<ArrayBuffer>;
+ 
+ export interface SalesLoader {
+   base(): Promise<SalesBase>;
+-  detail(): Promise<SalesDetail>;
++  /** The named `detail/` files (engine.detailFiles), merged by kind; each file is fetched once per session. */
++  detail(names: readonly string[]): Promise<DetailParts>;
+ }
+ 
+ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+   let manifest: Promise<SalesManifest> | undefined;
+   let base: Promise<SalesBase> | undefined;
+-  let detail: Promise<SalesDetail> | undefined;
++  let index: Promise<DetailIndexFile> | undefined;
++  const parts = new Map<string, Promise<unknown[]>>();
+ 
+   const cached = <T>(p: Promise<T>, evict: () => void): Promise<T> => {
+     p.catch(evict);
+@@ -85,17 +96,60 @@ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+     };
+   }
+ 
+-  async function loadDetail(): Promise<SalesDetail> {
+-    const m = await loadManifest();
+-    const [loans, clients] = await Promise.all([
+-      file("detailLoans", m),
+-      file("detailClients", m),
+-    ]);
+-    return { loans, clients };
++  const loadIndex = () =>
++    (index ??= cached(
++      read(`${DETAIL.dir}/index.json`).then((b) =>
++        detailIndexSchema.parse(JSON.parse(new TextDecoder().decode(b))),
++      ),
++      () => (index = undefined),
++    ));
++  const kindOf = (name: string): ColumnSpec =>
++    name.startsWith("cohort-")
++      ? DETAIL.cohort
++      : name.startsWith("client-dim-")
++        ? DETAIL.clients
++        : DETAIL.loans;
++  function part(name: string): Promise<unknown[]> {
++    let p = parts.get(name);
++    if (!p) {
++      p = cached(
++        (async () => {
++          const expected = (await loadIndex()).files[name]?.rows;
++          if (expected === undefined)
++            throw new Error(`${name}: not in ${DETAIL.dir}/index.json`);
++          const rows = await readRows(
++            await read(`${DETAIL.dir}/${name}`),
++            kindOf(name),
++            name,
++          );
++          if (rows.length !== expected)
++            throw new Error(
++              `${name}: ${rows.length} rows, index says ${expected}`,
++            );
++          return rows;
++        })(),
++        () => parts.delete(name),
++      );
++      parts.set(name, p);
++    }
++    return p;
++  }
++  async function loadDetail(names: readonly string[]): Promise<DetailParts> {
++    const out: DetailParts = { loans: [], cohort: [], clients: [] };
++    const loaded = await Promise.all(names.map(part));
++    names.forEach((name, k) => {
++      const rows = loaded[k] ?? [];
++      // the cast restores the name → spec pairing kindOf() chose
++      if (name.startsWith("cohort-")) out.cohort.push(...(rows as CohortRow[]));
++      else if (name.startsWith("client-dim-"))
++        out.clients.push(...(rows as ClientRow[]));
++      else out.loans.push(...(rows as LoanRow[]));
++    });
++    return out;
+   }
+ 
+   return {
+     base: () => (base ??= cached(loadBase(), () => (base = undefined))),
+-    detail: () => (detail ??= cached(loadDetail(), () => (detail = undefined))),
++    detail: loadDetail,
+   };
+ }
+diff --git a/src/lib/mirelo/detail.ts b/src/lib/mirelo/detail.ts
+index db4263b..48638e9 100644
+--- a/src/lib/mirelo/detail.ts
++++ b/src/lib/mirelo/detail.ts
+@@ -1,11 +1,13 @@
+ import { CHANNEL_SHORT, MARKET_NAMES, SEGMENT_NAMES } from "./copy";
+ import type { Cube } from "./cube";
+-import { fmtCount, fmtEur0, fmtInt } from "./format";
++import { fmtEur0, fmtInt } from "./format";
++import { DETAIL } from "./manifest";
+ import type {
++  CohortRow,
++  DetailParts,
+   Drill,
+-  FileRows,
++  LoanRow,
+   MarketSel,
+-  SalesDetail,
+   SalesSelection,
+ } from "./types";
+ import type { DetailLoanRow, SlideOverVM } from "./view-model";
+@@ -15,20 +17,18 @@ import {
+   dayNumber,
+   lastDayOf,
+   monthIndex,
++  monthKey,
+   monthLabel,
+-  windowLabel,
+   periodKind,
+   periodWindow,
++  windowLabel,
+ } from "./windows";
+-import type { Window } from "./windows";
+-
+-// Loan / client grain (layout-spec §6 Row click). The detail file is a capped sample built so that every list below is
+-// exact for its cap: the top N by principal of any window × market, the top N of an agent, the worst overdue loans
+-// and the top cohort clients by principal to date, each with the client's whole loan history. Counts in titles come
+-// from the aggregates, never from the sample. Loan states (status, DPD, outstanding) are the snapshot at the last close.
+ 
+-type LoanRow = FileRows<"detailLoans">[number];
+-type ClientRow = FileRows<"detailClients">[number];
++// Loan / client grain for the detail window (layout-spec §6 Row click; "Show loans"). Since 2026-11-01 the lists are
++// complete: `detail/` holds every loan and client of the data (manifest.ts DETAIL), split so a drill loads only the
++// months, cohorts or client bucket it needs (detailFiles). Every row of a list is kept; the window pages through them
++// (rowAt formats one row at a time) and the CSV export writes them all. Loan states (status, DPD, outstanding) are the
++// snapshot at the last close.
+ 
+ export const STATUS_SHORT: Readonly<Record<string, string>> = {
+   CURRENT: "Current",
+@@ -40,139 +40,40 @@ export const STATUS_SHORT: Readonly<Record<string, string>> = {
+   WRITTEN_OFF: "Written off",
+ };
+ 
+-export type DetailIndex = ReturnType<typeof indexDetail>;
+-
+-export function indexDetail(cube: Cube, detail: SalesDetail) {
+-  const byClient = new Map<number, LoanRow[]>(); // file order = client, disbursed, loan id
+-  for (const r of detail.loans) {
+-    const list = byClient.get(r.client_id);
+-    if (list) list.push(r);
+-    else byClient.set(r.client_id, [r]);
+-  }
+-  const clients = new Map<number, ClientRow>(
+-    detail.clients.map((c) => [c.client_id, c]),
+-  );
+-  const eur = (r: LoanRow) =>
+-    cube.fx.toEur(
+-      r.principal_local,
+-      cube.currency(r.market),
+-      monthIndex(r.disbursed.slice(0, 7)),
+-      "ACTUAL_AVG",
+-    );
+-  const outstandingEur = (r: LoanRow) =>
+-    cube.fx.toEur(
+-      r.outstanding_close_local,
+-      cube.currency(r.market),
+-      cube.closed,
+-      "ACTUAL_AVG",
+-    );
+-  return { loans: detail.loans, byClient, clients, eur, outstandingEur };
+-}
+-
+-const inWindow = (r: LoanRow, w: Window) => {
+-  const m = monthIndex(r.disbursed.slice(0, 7));
+-  return m >= w.start && m <= w.end;
+-};
+ const inMarket = (r: { market: string }, m: MarketSel) =>
+   m === "ALL" || r.market === m;
++const bucketOf = (client: number) =>
++  String(client % DETAIL.buckets).padStart(2, "0");
++/** The closed months of the selected period that have data. */
++const windowMonths = (cube: Cube, sel: SalesSelection) => {
++  const w = periodWindow(sel);
++  const out: number[] = [];
++  for (let m = Math.max(w.start, cube.first); m <= w.end; m++) out.push(m);
++  return out;
++};
+ 
+-export function topLoans(
+-  ix: DetailIndex,
+-  w: Window,
+-  market: MarketSel,
+-  cap: number,
+-  agent?: string,
+-): LoanRow[] {
+-  return ix.loans
+-    .filter(
+-      (r) =>
+-        inWindow(r, w) &&
+-        inMarket(r, market) &&
+-        (agent === undefined || r.agent === agent),
+-    )
+-    .map((r) => ({ r, v: ix.eur(r) }))
+-    .sort((a, b) => b.v - a.v || a.r.loan_id - b.r.loan_id)
+-    .slice(0, cap)
+-    .map((x) => x.r);
+-}
+-
+-export function overdueLoans(
+-  ix: DetailIndex,
+-  market: MarketSel,
+-  cap: number,
+-  product: string | null = null,
+-): LoanRow[] {
+-  return ix.loans
+-    .filter(
+-      (r) =>
+-        r.dpd_close >= 30 &&
+-        r.outstanding_close_local > 0 &&
+-        inMarket(r, market) &&
+-        (product === null || r.product === product),
+-    )
+-    .map((r) => ({ r, o: ix.outstandingEur(r) }))
+-    .sort(
+-      (a, b) =>
+-        b.r.dpd_close - a.r.dpd_close || b.o - a.o || a.r.loan_id - b.r.loan_id,
+-    )
+-    .slice(0, cap)
+-    .map((x) => x.r);
+-}
+-
+-export interface ClientSummary {
+-  client: ClientRow;
+-  loans: number; // fact_loan loans through the last close + loans before 2024
+-  principalToDate: number; // EUR, loans since 2024
+-  last: LoanRow;
+-  daysSince: number;
+-  status: string;
+-}
+-
+-export function clientSummary(
+-  ix: DetailIndex,
+-  cube: Cube,
+-  id: number,
+-): ClientSummary | null {
+-  const client = ix.clients.get(id);
+-  const loans = ix.byClient.get(id);
+-  const last = loans?.at(-1);
+-  if (!client || !loans || !last) return null;
+-  let principalToDate = 0;
+-  for (const r of loans) principalToDate += ix.eur(r);
+-  return {
+-    client,
+-    loans: loans.length + client.loans_before_2024,
+-    principalToDate,
+-    last,
+-    daysSince: lastDayOf(cube.closed) - dayNumber(last.disbursed),
+-    status: STATUS_SHORT[last.status] ?? last.status,
+-  };
+-}
+-
+-/** Clients whose first loan falls in the window (optionally one acquisition channel), top by principal to date. */
+-export function cohortClients(
+-  ix: DetailIndex,
++/** The `detail/` files a drill reads. */
++export function detailFiles(
+   cube: Cube,
+-  w: Window,
+-  market: MarketSel,
+-  cap: number,
+-  channel: string | null = null,
+-): ClientSummary[] {
+-  const out: ClientSummary[] = [];
+-  for (const c of ix.clients.values()) {
+-    const cm = monthIndex(c.cohort_month);
+-    if (cm < w.start || cm > w.end || !inMarket(c, market)) continue;
+-    if (channel !== null && c.acquisition_channel !== channel) continue;
+-    const s = clientSummary(ix, cube, c.client_id);
+-    if (s) out.push(s);
++  sel: SalesSelection,
++  drill: Drill,
++): string[] {
++  switch (drill.kind) {
++    case "loans":
++    case "agent":
++      return windowMonths(cube, sel).map((m) => `loans-${monthKey(m)}.parquet`);
++    case "clients":
++      return windowMonths(cube, sel).map(
++        (m) => `cohort-${monthKey(m)}.parquet`,
++      );
++    case "overdue":
++      return ["overdue.parquet"];
++    case "client":
++      return [
++        `client-${bucketOf(drill.client)}.parquet`,
++        `client-dim-${bucketOf(drill.client)}.parquet`,
++      ];
+   }
+-  return out
+-    .sort(
+-      (a, b) =>
+-        b.principalToDate - a.principalToDate ||
+-        a.client.client_id - b.client.client_id,
+-    )
+-    .slice(0, cap);
+ }
+ 
+ const LOAN_COLUMNS = [
+@@ -187,27 +88,6 @@ const LOAN_COLUMNS = [
+   { label: "Status", align: "left" },
+ ] as const;
+ 
+-function loanRow(ix: DetailIndex, cube: Cube, r: LoanRow): DetailLoanRow {
+-  const product =
+-    cube.dims.product.find((p) => p.product_code === r.product)?.product_name ??
+-    r.product;
+-  return {
+-    key: String(r.loan_id),
+-    client: r.client_id,
+-    cells: [
+-      `L-${r.loan_id}`,
+-      `C-${r.client_id}`,
+-      product,
+-      CHANNEL_SHORT[r.channel] ?? r.channel,
+-      dateLabel(r.disbursed),
+-      fmtEur0(ix.eur(r)),
+-      fmtEur0(ix.outstandingEur(r)),
+-      fmtInt(r.dpd_close),
+-      STATUS_SHORT[r.status] ?? r.status,
+-    ],
+-  };
+-}
+-
+ const CLIENT_COLUMNS = [
+   { label: "Client id", align: "left" },
+   { label: "Market", align: "left" },
+@@ -222,89 +102,115 @@ const CLIENT_COLUMNS = [
+   { label: "Status", align: "left" },
+ ] as const;
+ 
+-function clientRow(cube: Cube, s: ClientSummary): DetailLoanRow {
+-  const c = s.client;
+-  return {
+-    key: String(c.client_id),
+-    client: c.client_id,
+-    cells: [
+-      `C-${c.client_id}`,
+-      c.market,
+-      SEGMENT_NAMES[c.segment] ?? c.segment,
+-      dateLabel(c.first_loan_date),
+-      cube.dims.product.find((p) => p.product_code === c.first_product)
+-        ?.product_name ?? c.first_product,
+-      CHANNEL_SHORT[c.acquisition_channel] ?? c.acquisition_channel,
+-      fmtInt(s.loans),
+-      fmtEur0(s.principalToDate),
+-      dateLabel(s.last.disbursed),
+-      fmtInt(s.daysSince),
+-      s.status,
+-    ],
+-  };
+-}
+-
+-/** The client list shows up to as many rows as the loan list (caps.loansPerMonthMarket); the sample holds the top
+- * clients per cohort month × market, so a longer window or one channel lists a subset of the sample. */
+-const CLIENT_LIST_CAP = 50;
+-
+-const slug = (s: string) => s.replace(/[^\w]+/g, "-").toLowerCase();
+-
+-const csvCell = (s: string) =>
+-  /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+-const toCsv = (header: readonly string[], rows: readonly DetailLoanRow[]) =>
+-  [header, ...rows.map((r) => r.cells)]
+-    .map((r) => r.map(csvCell).join(","))
+-    .join("\n");
++const productName = (cube: Cube, code: string) =>
++  cube.dims.product.find((p) => p.product_code === code)?.product_name ?? code;
+ 
+ export function slideOver(
+   cube: Cube,
+-  ix: DetailIndex | null,
++  parts: DetailParts | null,
+   sel: SalesSelection,
+   drill: Drill,
+ ): SlideOverVM {
+-  const w = periodWindow(sel);
+-  const win = `${windowLabel(w)} - ${PERIOD_KIND_NAMES[periodKind(w, cube.closed)]}`;
+-  const snapshot = `states at ${monthLabel(cube.closed)}`;
+-  if (!ix)
++  if (!parts)
+     return {
+       kind: "missing",
+-      title: "Loading the loan sample…",
++      title: "Loading the loans…",
+       sub: "Loan grain - Actual only",
+     };
++  const w = periodWindow(sel);
++  const win = `${windowLabel(w)} - ${PERIOD_KIND_NAMES[periodKind(w, cube.closed)]}`;
++  const snapshot = `states at ${monthLabel(cube.closed)}`;
++  const eur = (r: LoanRow) =>
++    cube.fx.toEur(
++      r.principal_local,
++      cube.currency(r.market),
++      monthIndex(r.disbursed.slice(0, 7)),
++      "ACTUAL_AVG",
++    );
++  const outstandingEur = (r: LoanRow) =>
++    cube.fx.toEur(
++      r.outstanding_close_local,
++      cube.currency(r.market),
++      cube.closed,
++      "ACTUAL_AVG",
++    );
++  const loanRow = (r: LoanRow): DetailLoanRow => ({
++    key: String(r.loan_id),
++    client: r.client_id,
++    cells: [
++      `L-${r.loan_id}`,
++      `C-${r.client_id}`,
++      productName(cube, r.product),
++      CHANNEL_SHORT[r.channel] ?? r.channel,
++      dateLabel(r.disbursed),
++      fmtEur0(eur(r)),
++      fmtEur0(outstandingEur(r)),
++      fmtInt(r.dpd_close),
++      STATUS_SHORT[r.status] ?? r.status,
++    ],
++  });
++  const closeDay = lastDayOf(cube.closed);
++  const clientRow = (c: CohortRow): DetailLoanRow => ({
++    key: String(c.client_id),
++    client: c.client_id,
++    cells: [
++      `C-${c.client_id}`,
++      c.market,
++      SEGMENT_NAMES[c.segment] ?? c.segment,
++      dateLabel(c.first_loan_date),
++      productName(cube, c.first_product),
++      CHANNEL_SHORT[c.acquisition_channel] ?? c.acquisition_channel,
++      fmtInt(c.loans_to_date),
++      fmtEur0(c.principal_eur_to_date),
++      dateLabel(c.last_disbursed),
++      fmtInt(closeDay - dayNumber(c.last_disbursed)),
++      STATUS_SHORT[c.last_status] ?? c.last_status,
++    ],
++  });
++  const list = <T>(
++    items: readonly T[],
++    format: (t: T) => DetailLoanRow,
++    header: readonly { label: string }[],
++  ) => ({
++    total: items.length,
++    rowAt: (i: number) => {
++      const t = items[i];
++      if (t === undefined) throw new Error(`detail row ${i} out of range`);
++      return format(t);
++    },
++    csv: () => toCsv(header, items.map(format)),
++  });
++
+   if (drill.kind === "client") {
+-    const s = clientSummary(ix, cube, drill.client);
+-    if (!s)
++    const c = parts.clients.find((x) => x.client_id === drill.client);
++    if (!c)
+       return {
+         kind: "missing",
+         title: `Client C-${drill.client}`,
+-        sub: "Not in the draft sample (top clients and loans only)",
++        sub: "Not in the client file",
+       };
+-    const rows = [...(ix.byClient.get(drill.client) ?? [])]
+-      .reverse()
+-      .map((r) => loanRow(ix, cube, r));
+-    const c = s.client;
++    const loans = parts.loans
++      .filter((r) => r.client_id === drill.client)
++      .reverse(); // file order client, disbursed, loan id → newest first
++    const last = loans[0];
++    const principal = loans.reduce((s, r) => s + eur(r), 0);
+     const agent = c.acquisition_agent
+       ? cube.dims.agent.find((a) => a.agent_code === c.acquisition_agent)
+           ?.agent_name
+       : null;
++    const status = last ? (STATUS_SHORT[last.status] ?? last.status) : "n/a";
+     return {
+       kind: "client",
+       title: `Client C-${c.client_id} - ${MARKET_NAMES[c.market as MarketSel] ?? c.market} - ${SEGMENT_NAMES[c.segment] ?? c.segment}`,
+-      sub: `Client grain - ${fmtInt(s.loans)} loans to date - ${fmtEur0(s.principalToDate)} principal since 2024 - ${snapshot}`,
++      sub: `Client grain - ${fmtInt(loans.length + c.loans_before_2024)} loans to date - ${fmtEur0(principal)} principal since 2024 - ${snapshot}`,
+       chips: [
+         MARKET_NAMES[c.market as MarketSel] ?? c.market,
+         `Cohort ${monthLabel(monthIndex(c.cohort_month))}`,
+-        s.status,
++        status,
+       ],
+       facts: [
+         { label: "First loan", value: dateLabel(c.first_loan_date) },
+-        {
+-          label: "First product",
+-          value:
+-            cube.dims.product.find((p) => p.product_code === c.first_product)
+-              ?.product_name ?? c.first_product,
+-        },
++        { label: "First product", value: productName(cube, c.first_product) },
+         {
+           label: "Acquired via",
+           value: `${CHANNEL_SHORT[c.acquisition_channel] ?? c.acquisition_channel}${agent ? ` - ${agent}` : ""}`,
+@@ -314,124 +220,112 @@ export function slideOver(
+         { label: "City tier", value: fmtInt(c.city_tier) },
+         {
+           label: "Last loan",
+-          value: `${dateLabel(s.last.disbursed)} - ${fmtInt(s.daysSince)} days before close`,
++          value: last
++            ? `${dateLabel(last.disbursed)} - ${fmtInt(closeDay - dayNumber(last.disbursed))} days before close`
++            : "n/a",
+         },
+       ],
+       columns: [...LOAN_COLUMNS],
+-      rows,
+-      footer: `${fmtInt(rows.length)} loans since Jan 2024 - newest first`,
+-      csv: toCsv(
+-        LOAN_COLUMNS.map((c) => c.label),
+-        rows,
+-      ),
++      ...list(loans, loanRow, LOAN_COLUMNS),
++      footer: "loans since Jan 2024, newest first",
+       csvName: `mirelo-client-${c.client_id}.csv`,
+     };
+   }
++
+   if (drill.kind === "clients") {
+-    const span = { start: Math.max(w.start, cube.first), end: w.end };
+-    const total = cube.loans(span, drill.market, {
+-      repeat: false,
+-      ...(drill.channel === null ? {} : { channel: drill.channel }),
+-    }).first;
+     const channel =
+       drill.channel === null
+         ? "All channels"
+         : (CHANNEL_SHORT[drill.channel] ?? drill.channel);
+-    const rows = cohortClients(
+-      ix,
+-      cube,
+-      w,
+-      drill.market,
+-      CLIENT_LIST_CAP,
+-      drill.channel,
+-    ).map((c) => clientRow(cube, c));
++    const items = parts.cohort
++      .filter(
++        (c) =>
++          inMarket(c, drill.market) &&
++          (drill.channel === null || c.acquisition_channel === drill.channel),
++      )
++      .sort(
++        (a, b) =>
++          b.principal_eur_to_date - a.principal_eur_to_date ||
++          a.client_id - b.client_id,
++      );
+     return {
+       kind: "clients",
+-      title: `${fmtInt(total)} new clients - ${channel} - ${MARKET_NAMES[drill.market]} - ${windowLabel(w)}`,
+-      sub: `Client grain - first loan in the window - largest ${fmtCount(rows.length)} by principal to date (draft sample) - ${snapshot}`,
++      title: `${fmtInt(items.length)} new clients - ${channel} - ${MARKET_NAMES[drill.market]} - ${windowLabel(w)}`,
++      sub: `Client grain - first loan in the window - largest principal to date first - ${snapshot}`,
+       chips: [win, MARKET_NAMES[drill.market], channel],
+       columns: [...CLIENT_COLUMNS],
+-      rows,
+-      footer: `Showing ${fmtInt(rows.length)} of ${fmtInt(total)} clients - row click opens the client card`,
+-      csv: toCsv(
+-        CLIENT_COLUMNS.map((c) => c.label),
+-        rows,
+-      ),
++      ...list(items, clientRow, CLIENT_COLUMNS),
++      footer: "row click opens the client card",
+       csvName: `mirelo-clients-${slug(`${drill.market}-${drill.channel ?? "all"}-${windowLabel(w)}`)}.csv`,
+     };
+   }
++
+   if (drill.kind === "overdue") {
+-    const snap = cube.snapshotBy(cube.closed, drill.market, (r) =>
+-      drill.product === null || r.product === drill.product ? "" : r.product,
+-    );
+-    const total = snap?.get("")?.dpd30Count ?? 0;
+     const product =
+       drill.product === null
+         ? "All products"
+-        : (cube.dims.product.find((p) => p.product_code === drill.product)
+-            ?.product_name ?? drill.product);
+-    const rows = overdueLoans(
+-      ix,
+-      drill.market,
+-      cube.caps.overduePerMarket,
+-      drill.product,
+-    ).map((r) => loanRow(ix, cube, r));
++        : productName(cube, drill.product);
++    const items = parts.loans
++      .filter(
++        (r) =>
++          inMarket(r, drill.market) &&
++          (drill.product === null || r.product === drill.product),
++      )
++      .map((r) => ({ r, o: outstandingEur(r) }))
++      .sort(
++        (a, b) =>
++          b.r.dpd_close - a.r.dpd_close ||
++          b.o - a.o ||
++          a.r.loan_id - b.r.loan_id,
++      )
++      .map((x) => x.r);
+     return {
+       kind: "loans",
+-      title: `${fmtInt(total)} loans 30+ DPD - ${product} - ${MARKET_NAMES[drill.market]} - ${monthLabel(cube.closed)}`,
+-      sub: `Loan grain - worst ${fmtCount(rows.length)} by DPD (draft sample) - ${snapshot}`,
++      title: `${fmtInt(items.length)} loans 30+ DPD - ${product} - ${MARKET_NAMES[drill.market]} - ${monthLabel(cube.closed)}`,
++      sub: `Loan grain - worst DPD first - ${snapshot}`,
+       chips: [
+         `Month-end ${monthLabel(cube.closed)}`,
+         MARKET_NAMES[drill.market],
+         product,
+       ],
+       columns: [...LOAN_COLUMNS],
+-      rows,
+-      footer: `Showing ${fmtInt(rows.length)} of ${fmtInt(total)} loans - row click opens the client card`,
+-      csv: toCsv(
+-        LOAN_COLUMNS.map((c) => c.label),
+-        rows,
+-      ),
++      ...list(items, loanRow, LOAN_COLUMNS),
++      footer: "row click opens the client card",
+       csvName: `mirelo-overdue-${slug(`${drill.market}-${drill.product ?? "all"}-${monthLabel(cube.closed)}`)}.csv`,
+     };
+   }
++
++  // loans of the window: a market's, or an agent's
++  const agent =
++    drill.kind === "agent"
++      ? cube.dims.agent.find((a) => a.agent_code === drill.agent)
++      : undefined;
+   const market: MarketSel =
+     drill.kind === "loans"
+       ? drill.market
+-      : (cube.dims.agent.find((a) => a.agent_code === drill.agent)
+-          ?.market_code ?? "ALL");
++      : ((agent?.market_code as MarketSel | undefined) ?? "ALL");
+   const agentName =
+-    drill.kind === "agent"
+-      ? (cube.dims.agent.find((a) => a.agent_code === drill.agent)
+-          ?.agent_name ?? drill.agent)
+-      : null;
+-  const cap =
+-    drill.kind === "agent"
+-      ? cube.caps.loansPerAgentMonth
+-      : cube.caps.loansPerMonthMarket;
+-  const loans = topLoans(
+-    ix,
+-    w,
+-    market,
+-    cap,
+-    drill.kind === "agent" ? drill.agent : undefined,
+-  );
+-  const total =
+-    drill.kind === "agent"
+-      ? (cube.agents(w).get(drill.agent)?.loans ?? 0)
+-      : cube.loans({ start: Math.max(w.start, cube.first), end: w.end }, market)
+-          .loans;
+-  const rows = loans.map((r) => loanRow(ix, cube, r));
+-  const parts = [
+-    `${fmtInt(total)} loans`,
+-    agentName,
+-    MARKET_NAMES[market],
+-    windowLabel(w),
+-  ].filter(Boolean);
++    drill.kind === "agent" ? (agent?.agent_name ?? drill.agent) : null;
++  const items = parts.loans
++    .filter(
++      (r) =>
++        inMarket(r, market) &&
++        (drill.kind !== "agent" || r.agent === drill.agent),
++    )
++    .map((r) => ({ r, v: eur(r) }))
++    .sort((a, b) => b.v - a.v || a.r.loan_id - b.r.loan_id)
++    .map((x) => x.r);
+   return {
+     kind: "loans",
+-    title: parts.join(" - "),
+-    sub: `Loan grain - Actual only - largest ${fmtCount(rows.length)} by principal (draft sample) - ${snapshot}`,
++    title: [
++      `${fmtInt(items.length)} loans`,
++      agentName,
++      MARKET_NAMES[market],
++      windowLabel(w),
++    ]
++      .filter(Boolean)
++      .join(" - "),
++    sub: `Loan grain - Actual only - largest principal first - ${snapshot}`,
+     chips: [
+       win,
+       MARKET_NAMES[market],
+@@ -440,12 +334,19 @@ export function slideOver(
+       "All channels",
+     ],
+     columns: [...LOAN_COLUMNS],
+-    rows,
+-    footer: `Showing ${fmtInt(rows.length)} of ${fmtInt(total)} rows - row click opens the client card`,
+-    csv: toCsv(
+-      LOAN_COLUMNS.map((c) => c.label),
+-      rows,
+-    ),
++    ...list(items, loanRow, LOAN_COLUMNS),
++    footer: "row click opens the client card",
+     csvName: `mirelo-loans-${market.toLowerCase()}-${slug(windowLabel(w))}.csv`,
+   };
+ }
++
++const slug = (s: string) => s.replace(/[^\w]+/g, "-").toLowerCase();
++const csvCell = (s: string) =>
++  /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
++const toCsv = (
++  header: readonly { label: string }[],
++  rows: readonly DetailLoanRow[],
++) =>
++  [header.map((c) => c.label), ...rows.map((r) => r.cells)]
++    .map((r) => r.map(csvCell).join(","))
++    .join("\n");
+diff --git a/src/lib/mirelo/engine.test.ts b/src/lib/mirelo/engine.test.ts
+index 5d3d6ce..b2bb9b1 100644
+--- a/src/lib/mirelo/engine.test.ts
++++ b/src/lib/mirelo/engine.test.ts
+@@ -1,27 +1,25 @@
+-import { existsSync, readFileSync } from "node:fs";
+-import { join } from "node:path";
+-import { parquetRead } from "hyparquet";
+ import { beforeAll, describe, expect, it } from "vitest";
+-import {
+-  SALES_DATA_DIR,
+-  loadSalesBase,
+-  loadSalesDetail,
+-} from "./test-utils/sales-data";
++import { loadSalesBase, loadSalesDetail } from "./test-utils/sales-data";
+ import { createCube } from "./cube";
+ import type { Cube } from "./cube";
+-import { cohortClients, overdueLoans, topLoans } from "./detail";
+ import { createSalesEngine } from "./index";
+-import type { DetailIndex, SalesEngine } from "./index";
++import type { SalesEngine } from "./index";
+ import { bridge } from "./loans";
+-import type { MarketSel, SalesSelection, TimeView, ViewId } from "./types";
++import type {
++  DetailParts,
++  Drill,
++  MarketSel,
++  SalesSelection,
++  TimeView,
++  ViewId,
++} from "./types";
+ import { monthIndex, windowOf } from "./windows";
+ 
+-// View models end to end (default window + a sweep), the originations bridge, and the detail sample's exactness
+-// against the raw fact_loan of the generator.
++// View models end to end (default window + a sweep), the originations bridge, and the full detail files (2026-11-01)
++// reconciled to the aggregates.
+ 
+ let engine: SalesEngine;
+ let cube: Cube;
+-let ix: DetailIndex;
+ // `tv` builds the period the old way (Month / QTD / YTD / R12M on the anchor, clamped to the data start): the period
+ // is a range `from`…`anchor` since 2026-11-01, and these windows are the ones the window stats cover.
+ const sel = ({
+@@ -44,7 +42,6 @@ beforeAll(async () => {
+   const base = await loadSalesBase();
+   engine = createSalesEngine(base);
+   cube = createCube(base);
+-  ix = engine.indexDetail(await loadSalesDetail());
+ });
+ 
+ describe("Overview (default window: Month · Sep 2026 · All markets · vs Budget)", () => {
+@@ -192,151 +189,95 @@ describe("originations bridge", () => {
+   });
+ });
+ 
+-// The raw fact_loan.parquet stays in rusloc/pnl (19.6 MB, never shipped): this block runs there and skips here.
+-const FACT_LOAN = join(SALES_DATA_DIR, "parquet", "fact_loan.parquet");
+-const HAS_FACT_LOAN = existsSync(FACT_LOAN);
+-
+-describe.skipIf(!HAS_FACT_LOAN)(
+-  "detail sample is exact for its caps (checked against the raw fact_loan)",
+-  () => {
+-    type Raw = {
+-      id: number;
+-      client: number;
+-      market: string;
+-      day: string;
+-      principal: number;
+-      eur: number;
+-      dpd: number;
+-      out: number;
+-      agent: string | null;
+-    };
+-    let raw: Raw[];
+-    beforeAll(async () => {
+-      const b = readFileSync(FACT_LOAN);
+-      const cols: Record<string, unknown[]> = {};
+-      await parquetRead({
+-        file: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength),
+-        columns: [
+-          "loan_id",
+-          "client_id",
+-          "market_code",
+-          "disbursed_date",
+-          "principal_local",
+-          "principal_eur",
+-          "dpd_days_close",
+-          "outstanding_local_close",
+-          "agent_code",
+-        ],
+-        onChunk: ({ columnName, columnData, rowStart }) => {
+-          const c = (cols[columnName] ??= []);
+-          for (let i = 0; i < columnData.length; i++)
+-            c[rowStart + i] = columnData[i];
+-        },
+-      });
+-      const g = (name: string, i: number) => cols[name]?.[i];
+-      raw = (cols.loan_id ?? []).map((_, i) => ({
+-        id: Number(g("loan_id", i)),
+-        client: Number(g("client_id", i)),
+-        market: String(g("market_code", i)),
+-        day: (g("disbursed_date", i) as Date).toISOString().slice(0, 10),
+-        principal: Number(g("principal_local", i)),
+-        eur: Number(g("principal_eur", i)),
+-        dpd: Number(g("dpd_days_close", i) ?? 0),
+-        out: Number(g("outstanding_local_close", i) ?? 0),
+-        agent: (g("agent_code", i) as string | null) ?? null,
+-      }));
+-    });
++/** The detail window of a drill, after loading the files it names (as the app does). */
++async function drillVM(drill: Drill, at: SalesSelection = sel()) {
++  const parts: DetailParts = await loadSalesDetail(
++    engine.detailFiles(at, drill),
++  );
++  return engine.slideOver(at, parts, drill);
++}
++const list = async (drill: Drill, at?: SalesSelection) => {
++  const vm = await drillVM(drill, at);
++  if (vm.kind === "missing") throw new Error(`${vm.title}: ${vm.sub}`);
++  return vm;
++};
++const rowsOf = (vm: {
++  total: number;
++  rowAt: (i: number) => { cells: string[] };
++}) => Array.from({ length: vm.total }, (_, i) => vm.rowAt(i));
+ 
+-    it("top 50 by principal of a window × market", () => {
+-      for (const [mk, tv] of [
+-        ["RO", "M"],
+-        ["ALL", "Q"],
+-        ["PT", "Y"],
+-      ] as [MarketSel, TimeView][]) {
+-        const w = windowOf(tv, monthIndex("2026-09"));
+-        const inW = (r: Raw) => {
+-          const m = monthIndex(r.day.slice(0, 7));
+-          return (
+-            m >= w.start && m <= w.end && (mk === "ALL" || r.market === mk)
+-          );
+-        };
+-        const expected = raw
+-          .filter(inW)
+-          .sort((a, b) => b.eur - a.eur || a.id - b.id)
+-          .slice(0, 50)
+-          .map((r) => r.id);
+-        expect(
+-          topLoans(ix, w, mk, 50).map((r) => r.loan_id),
+-          `${mk} ${tv}`,
+-        ).toEqual(expected);
+-      }
+-    });
++describe("full detail (2026-11-01): every list is complete and reconciles to the aggregates", () => {
++  it("names only the files a drill needs", () => {
++    const q = sel({ tv: "Q" });
++    expect(engine.detailFiles(q, { kind: "loans", market: "RO" })).toEqual([
++      "loans-2026-07.parquet",
++      "loans-2026-08.parquet",
++      "loans-2026-09.parquet",
++    ]);
++    expect(
++      engine.detailFiles(q, { kind: "clients", market: "ALL", channel: null }),
++    ).toHaveLength(3);
++    expect(
++      engine.detailFiles(sel(), { kind: "client", client: 1234567 }),
++    ).toEqual(["client-07.parquet", "client-dim-07.parquet"]); // 1234567 % 64 = 7
++  });
+ 
+-    it("top 10 of an agent and the worst overdue loans", () => {
+-      const w = windowOf("Y", monthIndex("2026-09"));
+-      const agent = raw
+-        .filter(
+-          (r) =>
+-            r.agent === "A001" &&
+-            monthIndex(r.day.slice(0, 7)) >= w.start &&
+-            monthIndex(r.day.slice(0, 7)) <= w.end,
+-        )
+-        .sort((a, b) => b.eur - a.eur || a.id - b.id)
+-        .slice(0, 10)
+-        .map((r) => r.id);
+-      expect(topLoans(ix, w, "PL", 10, "A001").map((r) => r.loan_id)).toEqual(
+-        agent,
+-      );
+-      const overdue = raw
+-        .filter((r) => r.market === "RO" && r.dpd >= 30 && r.out > 0)
+-        .sort((a, b) => b.dpd - a.dpd || b.out - a.out || a.id - b.id)
+-        .slice(0, 100)
+-        .map((r) => r.id);
+-      expect(overdueLoans(ix, "RO", 100).map((r) => r.loan_id)).toEqual(
+-        overdue,
++  it("Show loans lists every loan of the window × market; the CSV holds them all", async () => {
++    for (const [mk, tv] of [
++      ["RO", "M"],
++      ["ALL", "Q"],
++    ] as [MarketSel, TimeView][]) {
++      const at = sel({ tv });
++      const vm = await list({ kind: "loans", market: mk }, at);
++      const n = cube.loans(windowOf(tv, monthIndex("2026-09")), mk).loans;
++      expect(vm.total, `${mk} ${tv}`).toBe(n);
++      expect(vm.title.startsWith(`${n.toLocaleString("en-US")} loans`)).toBe(
++        true,
+       );
+-    });
++      if (tv === "M") expect(vm.csv().split("\n")).toHaveLength(n + 1);
++    }
++  });
+ 
+-    it("cohort clients carry their whole loan history (principal to date)", () => {
+-      const list = cohortClients(
+-        ix,
+-        cube,
+-        windowOf("M", monthIndex("2025-03")),
+-        "PL",
+-        20,
+-      );
+-      expect(list).toHaveLength(20);
+-      for (const s of list) {
+-        const own = raw.filter(
+-          (r) => r.client === s.client.client_id && r.day <= "2026-09-30",
+-        );
+-        expect(s.loans).toBe(own.length + s.client.loans_before_2024);
+-        expect(
+-          Math.abs(s.principalToDate - own.reduce((t, r) => t + r.eur, 0)),
+-        ).toBeLessThan(0.01);
+-      }
+-    });
++  it("an agent's list matches its aggregate", async () => {
++    const vm = await list({ kind: "agent", agent: "A001" }, sel({ tv: "Y" }));
++    const w = windowOf("Y", monthIndex("2026-09"));
++    expect(vm.total).toBe(cube.agents(w).get("A001")?.loans);
++  });
+ 
+-    it("slide-over titles count from the aggregates, rows from the sample", () => {
+-      const vm = engine.slideOver(sel(), ix, { kind: "loans", market: "RO" });
+-      expect(vm.kind).toBe("loans");
+-      if (vm.kind !== "loans") return;
+-      const ro = raw.filter(
+-        (r) => r.market === "RO" && r.day.startsWith("2026-09"),
+-      ).length;
+-      expect(vm.title).toBe(
+-        `${ro.toLocaleString("en-US")} loans - Romania - Sep 2026`,
+-      );
+-      expect(vm.rows).toHaveLength(50);
+-      expect(vm.csv.split("\n")).toHaveLength(51);
+-      const client = engine.slideOver(sel(), ix, {
+-        kind: "client",
+-        client: vm.rows[0]?.client ?? 0,
+-      });
+-      expect(client.kind).toBe("client");
++  it("a channel's new clients = its first loans (C11), every one of them", async () => {
++    for (const ch of ["APP", "PAID", "PARTNER", "AGENT"]) {
++      const vm = await list({ kind: "clients", market: "ALL", channel: ch });
++      const n = cube.loans(windowOf("M", monthIndex("2026-09")), "ALL", {
++        repeat: false,
++        channel: ch,
++      }).first;
++      expect(vm.total, ch).toBe(n);
++    }
++  });
++
++  it("a product's overdue list = its 30+ DPD loans at the close (P13), worst first", async () => {
++    const snap = cube.snapshotBy(monthIndex("2026-09"), "RO", (r) => r.product);
++    const vm = await list({ kind: "overdue", market: "RO", product: "STEP6" });
++    expect(vm.total).toBe(snap?.get("STEP6")?.dpd30Count);
++    const dpd = rowsOf(vm).map((r) => Number(r.cells[7]));
++    expect(
++      dpd.every((d, k) => d >= 30 && (k === 0 || d <= (dpd[k - 1] ?? 0))),
++    ).toBe(true);
++  });
++
++  it("a list row opens the client card with the client's whole history", async () => {
++    const clients = await list({
++      kind: "clients",
++      market: "PL",
++      channel: null,
+     });
+-  },
+-);
++    const top = clients.rowAt(0);
++    const card = await list({ kind: "client", client: top.client });
++    expect(card.kind).toBe("client");
++    expect(card.sub).toContain(`${top.cells[6]} loans to date`); // the list's "Loans to date"
++    expect(card.total).toBeGreaterThan(0);
++  });
++});
+ 
+ describe("2026-11-01, third round: funnel scale, heatmaps, returning approval, subscriber flow", () => {
+   const card = (view: ViewId, id: string) => {
+@@ -375,7 +316,7 @@ describe("2026-11-01, third round: funnel scale, heatmaps, returning approval, s
+     ]);
+     expect(c9.cols[0]).toBe("45 d"); // nobody repeats within 30 days: those columns are dropped
+     expect(c9.cols.at(-1)).toBe("180 d");
+-    expect(c9.rows.at(-1)?.cells.at(-1)).toEqual({ text: "", bin: null });
++    expect(c9.rows.at(-1)?.cells.at(-1)).toEqual({ text: "", level: null });
+   });
+ 
+   it("C5 is the returning-client approval rate", () => {
+@@ -398,7 +339,7 @@ describe("2026-11-01, third round: funnel scale, heatmaps, returning approval, s
+   });
+ });
+ 
+-describe("2026-11-01: aggregate tables on Clients and Portfolio, their rows open sample lists", () => {
++describe("2026-11-01: aggregate tables on Clients and Portfolio, their rows open full lists", () => {
+   it("C11: one row per channel; new clients add up to the C1 card; rows open that channel's clients", () => {
+     const vm = engine.band(sel({ view: "clients" }));
+     if ("heroes" in vm) return;
+@@ -450,32 +391,59 @@ describe("2026-11-01: aggregate tables on Clients and Portfolio, their rows open
+     );
+   });
+ 
+-  it("the lists: one channel's clients, one product's overdue loans, each row opens a client card", () => {
+-    const clients = engine.slideOver(sel(), ix, {
++  it("the lists: one channel's clients, one product's overdue loans", async () => {
++    const clients = await list({
+       kind: "clients",
+       market: "ALL",
+       channel: "PARTNER",
+     });
+     expect(clients.kind).toBe("clients");
+-    if (clients.kind !== "clients") return;
+     expect(clients.title).toMatch(
+       /^[\d,]+ new clients - Partner - All markets - Sep 2026$/,
+     );
+-    expect(clients.rows.length).toBeGreaterThan(0);
+-    expect(clients.rows.every((r) => r.cells[5] === "Partner")).toBe(true);
++    expect(rowsOf(clients).every((r) => r.cells[5] === "Partner")).toBe(true);
+ 
+-    const overdue = engine.slideOver(sel(), ix, {
++    const overdue = await list({
+       kind: "overdue",
+       market: "RO",
+       product: "STEP6",
+     });
+     expect(overdue.kind).toBe("loans");
+-    if (overdue.kind !== "loans") return;
+     expect(overdue.title).toMatch(
+       /^[\d,]+ loans 30\+ DPD - Step 6 - Romania - Sep 2026$/,
+     );
+-    expect(overdue.rows.length).toBeGreaterThan(0);
+-    expect(overdue.rows.every((r) => r.cells[2] === "Step 6")).toBe(true);
+-    expect(overdue.rows.every((r) => Number(r.cells[7]) >= 30)).toBe(true);
++    expect(rowsOf(overdue).every((r) => r.cells[2] === "Step 6")).toBe(true);
++  });
++});
++
++describe("2026-11-01: heat scale over the whole grid, sortable leaderboard", () => {
++  it("each heatmap's levels run 0 … 1 over all its cells, not per column", () => {
++    for (const [view, id] of [
++      ["loans", "l10"],
++      ["clients", "c9"],
++      ["portfolio", "p9"],
++    ] as [ViewId, string][]) {
++      const vm = engine.band(sel({ view }));
++      if ("heroes" in vm) continue;
++      const ch = vm.charts.find((c) => c.id === id)?.chart;
++      if (ch?.kind !== "heat") throw new Error(`${id}: heat expected`);
++      const levels = ch.rows
++        .flatMap((r) => r.cells.map((c) => c.level))
++        .filter((l): l is number => l !== null);
++      expect(Math.min(...levels), id).toBe(0);
++      expect(Math.max(...levels), id).toBe(1);
++      // exactly one minimum and one maximum cell across the grid (a per-column scale would give one per column)
++      expect(levels.filter((l) => l === 1).length, id).toBeLessThan(
++        ch.cols.length,
++      );
++    }
++  });
++
++  it("the agent leaderboard is sortable and every cell carries a sort key", () => {
++    const vm = engine.band(sel({ view: "loans" }));
++    if ("heroes" in vm) return;
++    expect(vm.table.sortable).toBe(true);
++    for (const r of vm.table.rows)
++      expect(r.cells.every((c) => c.sort !== undefined)).toBe(true);
+   });
+ });
+diff --git a/src/lib/mirelo/index.ts b/src/lib/mirelo/index.ts
+index 1e2effe..5c88c33 100644
+--- a/src/lib/mirelo/index.ts
++++ b/src/lib/mirelo/index.ts
+@@ -1,14 +1,13 @@
+ import { clientsView } from "./clients";
+ import { TITLE, filterLine, howToRead, periodLine } from "./copy";
+ import { createCube } from "./cube";
+-import { indexDetail, slideOver } from "./detail";
+-import type { DetailIndex } from "./detail";
++import { detailFiles, slideOver } from "./detail";
+ import { loansView } from "./loans";
+ import { createMetrics } from "./metrics";
+ import { overview } from "./overview";
+ import { portfolioView } from "./portfolio";
+ import { revenueView } from "./revenue";
+-import type { Drill, SalesBase, SalesDetail, SalesSelection } from "./types";
++import type { DetailParts, Drill, SalesBase, SalesSelection } from "./types";
+ import { createUrlCodec } from "./url-state";
+ import type { BandVM, HeaderVM, OverviewVM, SlideOverVM } from "./view-model";
+ import { monthKey, monthLabel } from "./windows";
+@@ -16,7 +15,6 @@ import { monthKey, monthLabel } from "./windows";
+ // Mirelo sales engine (ADR-0011 (c)): framework-free, the single source of every number and string on /sales.
+ 
+ export type SalesEngine = ReturnType<typeof createSalesEngine>;
+-export type { DetailIndex };
+ 
+ export function createSalesEngine(base: SalesBase) {
+   const cube = createCube(base);
+@@ -53,18 +51,13 @@ export function createSalesEngine(base: SalesBase) {
+           );
+       }
+     },
+-    indexDetail: (detail: SalesDetail): DetailIndex =>
+-      indexDetail(cube, detail),
++    /** The `detail/` files a drill needs (the app loads them, then calls slideOver). */
++    detailFiles: (sel: SalesSelection, drill: Drill): string[] =>
++      detailFiles(cube, sel, drill),
+     slideOver: (
+       sel: SalesSelection,
+-      ix: DetailIndex | null,
++      parts: DetailParts | null,
+       drill: Drill,
+-    ): SlideOverVM => slideOver(cube, ix, sel, drill),
+-    /**
+-     * True when the lazy detail sample is read: by any drill, and fetched ahead on Clients and Portfolio, whose table
+-     * rows open sample lists (aggregate tables since 2026-11-01).
+-     */
+-    needsDetail: (sel: SalesSelection): boolean =>
+-      sel.drill !== null || sel.view === "clients" || sel.view === "portfolio",
++    ): SlideOverVM => slideOver(cube, parts, sel, drill),
+   };
+ }
+diff --git a/src/lib/mirelo/loans.ts b/src/lib/mirelo/loans.ts
+index 059f9b1..6fdbc7a 100644
+--- a/src/lib/mirelo/loans.ts
++++ b/src/lib/mirelo/loans.ts
+@@ -1,4 +1,4 @@
+-import { bins } from "./clients";
++import { heatLevels } from "./clients";
+ import { MARKET_NAMES, info } from "./copy";
+ import type { InfoValue } from "./copy";
+ import type { Cube } from "./cube";
+@@ -371,7 +371,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
+   const counts = products.map((p) =>
+     shownMarkets.map((c) => byCell.get(`${c}|${p.product_code}`)?.loans ?? 0),
+   );
+-  const countBins = bins(counts.flat());
++  const countLevels = heatLevels(counts.flat());
+   const l10: ChartCard = {
+     id: "l10",
+     title: "Loans by product × market",
+@@ -385,7 +385,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
+         label: p.product_name,
+         cells: shownMarkets.map((_, j) => ({
+           text: fmtCount(counts[i]?.[j] ?? null),
+-          bin: countBins[i * shownMarkets.length + j] ?? null,
++          level: countLevels[i * shownMarkets.length + j] ?? null,
+         })),
+       })),
+       side: null,
+@@ -445,6 +445,8 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
+   };
+ }
+ 
++const STATUS_RANK = { good: 3, watch: 2, off: 1, neutral: null } as const;
++
+ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
+   const { cube } = ctx;
+   const w = periodWindow(sel);
+@@ -498,14 +500,25 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
+         },
+         secondary: null,
+         cells: [
+-          { text: a.agent_name, tag: a.is_ramp_cohort ? "Ramp" : undefined },
+-          { text: a.agent_type === "AGENT" ? "Agent" : "Partner" },
+-          { text: a.market_code },
+-          { text: fmtCount(s.loans) },
+-          { text: fmtCount(s.target || null) },
+-          { text: fmtPct(att), bar: att },
+-          { text: fmtEur(s.principal) },
+-          { text: d.text, status: d.status },
++          {
++            text: a.agent_name,
++            tag: a.is_ramp_cohort ? "Ramp" : undefined,
++            sort: a.agent_name,
++          },
++          {
++            text: a.agent_type === "AGENT" ? "Agent" : "Partner",
++            sort: a.agent_type,
++          },
++          { text: a.market_code, sort: a.market_code },
++          { text: fmtCount(s.loans), sort: s.loans },
++          { text: fmtCount(s.target || null), sort: s.target || null },
++          { text: fmtPct(att), bar: att, sort: att },
++          { text: fmtEur(s.principal), sort: s.principal },
++          {
++            text: d.text,
++            status: d.status,
++            sort: ref ? s.loans / ref - 1 : null,
++          },
+           {
+             text:
+               status === "neutral"
+@@ -517,6 +530,7 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
+                     : "Behind",
+             status,
+             chip: true,
++            sort: STATUS_RANK[status],
+           },
+         ],
+       };
+@@ -525,5 +539,6 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
+       rows.length === 0 ? "No agent or partner loans in this window" : null,
+     action: null,
+     needsDetail: false,
++    sortable: true,
+   };
+ }
+diff --git a/src/lib/mirelo/manifest.ts b/src/lib/mirelo/manifest.ts
+index 04df1be..1516621 100644
+--- a/src/lib/mirelo/manifest.ts
++++ b/src/lib/mirelo/manifest.ts
+@@ -140,10 +140,7 @@ export const dimsSchema = z
+   .strict();
+ export { DIMS };
+ 
+-/**
+- * Shipped Parquet files. `base` files load with the page (the first paint needs them); `detail` files hold the capped
+- * loan / client sample for the slide-over and the two detail tables, and load on first need.
+- */
++/** Shipped Parquet files that load with the page (the first paint needs them). The detail window's files: DETAIL. */
+ export const FILES = {
+   loansMonth: {
+     file: "loans-month.parquet",
+@@ -283,56 +280,67 @@ export const FILES = {
+       value: "num",
+     },
+   },
+-  detailLoans: {
+-    file: "detail-loans.parquet",
+-    load: "detail",
+-    columns: {
+-      loan_id: "int",
+-      client_id: "int",
+-      disbursed: "str",
+-      market: "str",
+-      product: "str",
+-      channel: "str",
+-      agent: "str?",
+-      repeat: "bool",
+-      principal_local: "num",
+-      hours_to_cash: "num",
+-      status: "str",
+-      dpd_close: "int",
+-      outstanding_close_local: "num",
+-    },
+-  },
+-  detailClients: {
+-    file: "detail-clients.parquet",
+-    load: "detail",
+-    columns: {
+-      client_id: "int",
+-      market: "str",
+-      segment: "str",
+-      acquisition_channel: "str",
+-      acquisition_agent: "str?",
+-      first_loan_date: "str",
+-      first_product: "str",
+-      cohort_month: "str",
+-      birth_year_band: "str",
+-      city_tier: "int",
+-      loans_before_2024: "int",
+-    },
+-  },
+ } as const satisfies Record<
+   string,
+-  { file: string; load: "base" | "detail"; columns: ColumnSpec }
++  { file: string; load: "base"; columns: ColumnSpec }
+ >;
+ 
+ export type FileKey = keyof typeof FILES;
+ 
+-/** Caps of the detail sample (the slide-over shows the top rows; the counts in titles come from the aggregates). */
+-export const DETAIL_CAPS = {
+-  loansPerMonthMarket: 50, // top by principal per disbursement month × market
+-  loansPerAgentMonth: 10, // top by principal per agent × month
+-  overduePerMarket: 100, // top by DPD at the last closed month, per market
+-  clientsPerCohortMarket: 20, // top by principal to date per first-loan month × market
+-} as const;
++/**
++ * Full loan / client detail for the detail window (2026-11-01, owner: every list complete; it was a capped sample).
++ * `data/mirelo/build_detail.py` cuts the generator's output into `public/data/mirelo/detail/`: `loans-YYYY-MM` (every
++ * loan of a closed month), `cohort-YYYY-MM` (every client whose first loan is in that month, with its to-date summary),
++ * `overdue` (every loan 30+ DPD with a balance at the last close) and, per client_id % `buckets`, `client-NN` (loans)
++ * + `client-dim-NN` (dims). `index.json` lists rows and bytes per file; the loader checks every read against it.
++ */
++const LOAN_COLUMNS = {
++  loan_id: "int",
++  client_id: "int",
++  disbursed: "str",
++  market: "str",
++  product: "str",
++  channel: "str",
++  agent: "str?",
++  repeat: "bool",
++  principal_local: "num",
++  hours_to_cash: "num",
++  status: "str",
++  dpd_close: "int",
++  outstanding_close_local: "num",
++} as const satisfies ColumnSpec;
++const CLIENT_COLUMNS = {
++  client_id: "int",
++  market: "str",
++  segment: "str",
++  acquisition_channel: "str",
++  acquisition_agent: "str?",
++  first_loan_date: "str",
++  first_product: "str",
++  cohort_month: "str",
++  birth_year_band: "str",
++  city_tier: "int",
++  loans_before_2024: "int",
++} as const satisfies ColumnSpec;
++export const DETAIL = {
++  dir: "detail",
++  buckets: 64,
++  loans: LOAN_COLUMNS,
++  clients: CLIENT_COLUMNS,
++  cohort: {
++    ...CLIENT_COLUMNS,
++    loans_to_date: "int", // fact loans through the close + loans before 2024
++    principal_eur_to_date: "num", // since 2024, each loan at its month's actual rate
++    last_disbursed: "str",
++    last_status: "str",
++  },
++} as const satisfies {
++  dir: string;
++  buckets: number;
++  loans: ColumnSpec;
++  clients: ColumnSpec;
++  cohort: ColumnSpec;
++};
+ 
+ const fileInfo = z.object({ rows: int.min(0), bytes: int.min(0) }).strict();
+ 
+@@ -348,14 +356,6 @@ export const manifestSchema = z
+         actualsThrough: isoDate,
+       })
+       .strict(),
+-    caps: z
+-      .object({
+-        loansPerMonthMarket: int.min(1),
+-        loansPerAgentMonth: int.min(1),
+-        overduePerMarket: int.min(1),
+-        clientsPerCohortMarket: int.min(1),
+-      })
+-      .strict(),
+     cohortDays: z.array(int.min(0)).min(2),
+     files: z
+       .object(
+@@ -371,3 +371,12 @@ export type SalesManifest = z.infer<typeof manifestSchema>;
+ export function parseManifest(json: unknown): SalesManifest {
+   return manifestSchema.parse(json);
+ }
++
++export const detailIndexSchema = z
++  .object({
++    lastClose: isoDate,
++    buckets: z.literal(DETAIL.buckets),
++    files: z.record(z.string().regex(/^[a-z0-9-]+\.parquet$/), fileInfo),
++  })
++  .strict();
++export type DetailIndexFile = z.infer<typeof detailIndexSchema>;
+diff --git a/src/lib/mirelo/portfolio.ts b/src/lib/mirelo/portfolio.ts
+index e768d4a..131f133 100644
+--- a/src/lib/mirelo/portfolio.ts
++++ b/src/lib/mirelo/portfolio.ts
+@@ -1,4 +1,4 @@
+-import { bins } from "./clients";
++import { heatLevels } from "./clients";
+ import { MARKET_NAMES, info } from "./copy";
+ import { fmtCount, fmtEur, fmtPct } from "./format";
+ import { kpi } from "./loans";
+@@ -182,7 +182,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection): BandVM {
+       m.dpd30(cell?.get(`${p.product_code}|${c}`) ?? null),
+     ),
+   );
+-  const flat = bins(values.flat());
++  const flat = heatLevels(values.flat());
+   const p9: ChartCard = {
+     id: "p9",
+     title: "Bad rate by product × market",
+@@ -196,7 +196,7 @@ export function portfolioView(ctx: Ctx, sel: SalesSelection): BandVM {
+         label: p.product_name,
+         cells: shownMarkets.map((_, j) => ({
+           text: fmtPct(values[i]?.[j] ?? null),
+-          bin: flat[i * shownMarkets.length + j] ?? null,
++          level: flat[i * shownMarkets.length + j] ?? null,
+         })),
+       })),
+       side: null,
+diff --git a/src/lib/mirelo/test-utils/sales-data.ts b/src/lib/mirelo/test-utils/sales-data.ts
+index 409e160..e0ded52 100644
+--- a/src/lib/mirelo/test-utils/sales-data.ts
++++ b/src/lib/mirelo/test-utils/sales-data.ts
+@@ -1,7 +1,7 @@
+ import { readFile } from "node:fs/promises";
+ import { fileURLToPath } from "node:url";
+ import { createSalesLoader } from "../data";
+-import type { SalesBase, SalesDetail } from "../types";
++import type { DetailParts, SalesBase } from "../types";
+ 
+ // Node side of the sales loader for Vitest: reads the built public/data/sales artifacts through the same loader the
+ // browser uses (prebuilt in rusloc/pnl, js-report/).
+@@ -25,10 +25,12 @@ const loader = createSalesLoader(async (name) => {
+ });
+ 
+ export const loadSalesBase = (): Promise<SalesBase> => loader.base();
+-export const loadSalesDetail = (): Promise<SalesDetail> => loader.detail();
++export const loadSalesDetail = (
++  names: readonly string[],
++): Promise<DetailParts> => loader.detail(names);
+ 
+-// Test fixtures copied from rusloc/pnl data/mirelo_sales_dummy_data/ (checks/control_totals_eur.csv). The raw
+-// parquet/fact_loan.parquet (19.6 MB) is not shipped: the detail-sample test in lib/sales/engine.test.ts skips without it.
++// Test fixtures copied from rusloc/pnl data/mirelo_sales_dummy_data/ (checks/control_totals_eur.csv). The full detail
++// in public/data/mirelo/detail/ is built from the generator by data/mirelo/build_detail.py (2026-11-01).
+ export const SALES_DATA_DIR = fileURLToPath(
+   new URL("../../../../data/mirelo/", import.meta.url),
+ );
+diff --git a/src/lib/mirelo/types.ts b/src/lib/mirelo/types.ts
+index abf1634..5eb21b0 100644
+--- a/src/lib/mirelo/types.ts
++++ b/src/lib/mirelo/types.ts
+@@ -1,5 +1,11 @@
+ import type { RowOf } from "./parquet-columns";
+-import type { FILES, FileKey, MarketCode, SalesManifest } from "./manifest";
++import type {
++  DETAIL,
++  FILES,
++  FileKey,
++  MarketCode,
++  SalesManifest,
++} from "./manifest";
+ import type { TimeView } from "./windows";
+ 
+ export type FileRows<K extends FileKey> = RowOf<(typeof FILES)[K]["columns"]>[];
+@@ -19,10 +25,15 @@ export interface SalesBase {
+   targetMonth: FileRows<"targetMonth">;
+ }
+ 
+-/** Capped loan / client sample, loaded on first need (slide-over, Clients and Portfolio tables). */
+-export interface SalesDetail {
+-  loans: FileRows<"detailLoans">;
+-  clients: FileRows<"detailClients">;
++export type LoanRow = RowOf<typeof DETAIL.loans>;
++export type ClientRow = RowOf<typeof DETAIL.clients>;
++export type CohortRow = RowOf<typeof DETAIL.cohort>;
++
++/** The detail files one drill needs, loaded on demand (`detail/`, 2026-11-01: the full data, no sample). */
++export interface DetailParts {
++  loans: LoanRow[]; // loans-YYYY-MM, overdue, client-NN
++  cohort: CohortRow[]; // cohort-YYYY-MM
++  clients: ClientRow[]; // client-dim-NN
+ }
+ 
+ export type { MarketCode, TimeView };
+diff --git a/src/lib/mirelo/view-model.ts b/src/lib/mirelo/view-model.ts
+index 5ef05c7..f057af8 100644
+--- a/src/lib/mirelo/view-model.ts
++++ b/src/lib/mirelo/view-model.ts
+@@ -93,7 +93,7 @@ export type Chart =
+       cols: string[];
+       rows: {
+         label: string;
+-        cells: { text: string; bin: 0 | 1 | 2 | 3 | null }[];
++        cells: { text: string; level: number | null }[]; // 0 … 1 over the whole grid; null = blank
+       }[];
+       side: { title: string; unit: Unit; rows: BarRow[] } | null;
+     }
+@@ -160,6 +160,7 @@ export interface Cell {
+   chip?: boolean; // status chip with glyph + word
+   bar?: number | null; // 0 … 1 attainment bar (target at 1)
+   tag?: string; // small tag after the text ("Ramp")
++  sort?: number | string | null; // raw value for column sorting (sortable tables); null sorts last
+ }
+ 
+ export type RowAction =
+@@ -187,6 +188,7 @@ export interface TableCard {
+   empty: string | null; // shown in place of rows when there are none (or while the sample loads)
+   action: { label: string; drill: Drill } | null; // "Show loans ↗"
+   needsDetail: boolean; // rows come from the lazy detail sample
++  sortable?: boolean; // header click sorts by the cells' `sort` values (2026-11-01: the agent leaderboard)
+ }
+ 
+ export interface OverviewVM {
+@@ -218,28 +220,23 @@ export interface DetailLoanRow {
+   cells: string[];
+ }
+ 
++/** A detail list (2026-11-01: every row of the data, paged in the window; rowAt formats one row, csv() writes all). */
++export interface DetailList {
++  title: string;
++  sub: string;
++  chips: string[];
++  columns: { label: string; align: "left" | "right" }[];
++  total: number;
++  rowAt: (i: number) => DetailLoanRow;
++  footer: string; // what a row does / the order, beside the pager
++  csv: () => string;
++  csvName: string;
++}
++
+ export type SlideOverVM =
+-  | {
+-      kind: "loans" | "clients"; // a list; a row opens the client card
+-      title: string;
+-      sub: string;
+-      chips: string[];
+-      columns: { label: string; align: "left" | "right" }[];
+-      rows: DetailLoanRow[];
+-      footer: string;
+-      csv: string;
+-      csvName: string;
+-    }
+-  | {
++  | ({ kind: "loans" | "clients" } & DetailList) // a row opens the client card
++  | ({
+       kind: "client";
+-      title: string;
+-      sub: string;
+-      chips: string[];
+       facts: { label: string; value: string }[];
+-      columns: { label: string; align: "left" | "right" }[];
+-      rows: DetailLoanRow[];
+-      footer: string;
+-      csv: string;
+-      csvName: string;
+-    }
++    } & DetailList)
+   | { kind: "missing"; title: string; sub: string };

@@ -125,10 +125,7 @@ export const dimsSchema = z
   .strict();
 export { DIMS };
 
-/**
- * Shipped Parquet files. `base` files load with the page (the first paint needs them); `detail` files hold the capped
- * loan / client sample for the slide-over and the two detail tables, and load on first need.
- */
+/** Shipped Parquet files that load with the page (the first paint needs them). The detail window's files: DETAIL. */
 export const FILES = {
   loansMonth: {
     file: 'loans-month.parquet',
@@ -242,53 +239,64 @@ export const FILES = {
     load: 'base',
     columns: { month: 'str', market: 'str', product: 'str?', metric: 'str', value: 'num' },
   },
-  detailLoans: {
-    file: 'detail-loans.parquet',
-    load: 'detail',
-    columns: {
-      loan_id: 'int',
-      client_id: 'int',
-      disbursed: 'str',
-      market: 'str',
-      product: 'str',
-      channel: 'str',
-      agent: 'str?',
-      repeat: 'bool',
-      principal_local: 'num',
-      hours_to_cash: 'num',
-      status: 'str',
-      dpd_close: 'int',
-      outstanding_close_local: 'num',
-    },
-  },
-  detailClients: {
-    file: 'detail-clients.parquet',
-    load: 'detail',
-    columns: {
-      client_id: 'int',
-      market: 'str',
-      segment: 'str',
-      acquisition_channel: 'str',
-      acquisition_agent: 'str?',
-      first_loan_date: 'str',
-      first_product: 'str',
-      cohort_month: 'str',
-      birth_year_band: 'str',
-      city_tier: 'int',
-      loans_before_2024: 'int',
-    },
-  },
-} as const satisfies Record<string, { file: string; load: 'base' | 'detail'; columns: ColumnSpec }>;
+} as const satisfies Record<string, { file: string; load: 'base'; columns: ColumnSpec }>;
 
 export type FileKey = keyof typeof FILES;
 
-/** Caps of the detail sample (the slide-over shows the top rows; the counts in titles come from the aggregates). */
-export const DETAIL_CAPS = {
-  loansPerMonthMarket: 50, // top by principal per disbursement month × market
-  loansPerAgentMonth: 10, // top by principal per agent × month
-  overduePerMarket: 100, // top by DPD at the last closed month, per market
-  clientsPerCohortMarket: 20, // top by principal to date per first-loan month × market
-} as const;
+/**
+ * Full loan / client detail for the detail window (2026-11-01, owner: every list complete; it was a capped sample).
+ * `scripts/build-sales-data.ts` cuts the generator's output into `public/data/sales/detail/`: `loans-YYYY-MM` (every
+ * loan of a closed month), `cohort-YYYY-MM` (every client whose first loan is in that month, with its to-date summary),
+ * `overdue` (every loan 30+ DPD with a balance at the last close) and, per client_id % `buckets`, `client-NN` (loans)
+ * + `client-dim-NN` (dims). `index.json` lists rows and bytes per file; the loader checks every read against it.
+ */
+const LOAN_COLUMNS = {
+  loan_id: 'int',
+  client_id: 'int',
+  disbursed: 'str',
+  market: 'str',
+  product: 'str',
+  channel: 'str',
+  agent: 'str?',
+  repeat: 'bool',
+  principal_local: 'num',
+  hours_to_cash: 'num',
+  status: 'str',
+  dpd_close: 'int',
+  outstanding_close_local: 'num',
+} as const satisfies ColumnSpec;
+const CLIENT_COLUMNS = {
+  client_id: 'int',
+  market: 'str',
+  segment: 'str',
+  acquisition_channel: 'str',
+  acquisition_agent: 'str?',
+  first_loan_date: 'str',
+  first_product: 'str',
+  cohort_month: 'str',
+  birth_year_band: 'str',
+  city_tier: 'int',
+  loans_before_2024: 'int',
+} as const satisfies ColumnSpec;
+export const DETAIL = {
+  dir: 'detail',
+  buckets: 64,
+  loans: LOAN_COLUMNS,
+  clients: CLIENT_COLUMNS,
+  cohort: {
+    ...CLIENT_COLUMNS,
+    loans_to_date: 'int', // fact loans through the close + loans before 2024
+    principal_eur_to_date: 'num', // since 2024, each loan at its month's actual rate
+    last_disbursed: 'str',
+    last_status: 'str',
+  },
+} as const satisfies {
+  dir: string;
+  buckets: number;
+  loans: ColumnSpec;
+  clients: ColumnSpec;
+  cohort: ColumnSpec;
+};
 
 const fileInfo = z.object({ rows: int.min(0), bytes: int.min(0) }).strict();
 
@@ -304,14 +312,6 @@ export const manifestSchema = z
         actualsThrough: isoDate,
       })
       .strict(),
-    caps: z
-      .object({
-        loansPerMonthMarket: int.min(1),
-        loansPerAgentMonth: int.min(1),
-        overduePerMarket: int.min(1),
-        clientsPerCohortMarket: int.min(1),
-      })
-      .strict(),
     cohortDays: z.array(int.min(0)).min(2),
     files: z.object(Object.fromEntries(Object.values(FILES).map((f) => [f.file, fileInfo]))).strict(),
     dims: dimsSchema,
@@ -323,3 +323,12 @@ export type SalesManifest = z.infer<typeof manifestSchema>;
 export function parseManifest(json: unknown): SalesManifest {
   return manifestSchema.parse(json);
 }
+
+export const detailIndexSchema = z
+  .object({
+    lastClose: isoDate,
+    buckets: z.literal(DETAIL.buckets),
+    files: z.record(z.string().regex(/^[a-z0-9-]+\.parquet$/), fileInfo),
+  })
+  .strict();
+export type DetailIndexFile = z.infer<typeof detailIndexSchema>;

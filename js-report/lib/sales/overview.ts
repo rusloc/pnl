@@ -10,7 +10,16 @@ import { STATUS_WORD, cmpRow } from './status.ts';
 import type { DeltaKind } from './status.ts';
 import type { SalesSelection, ViewId } from './types.ts';
 import type { ChartCard, HeroCard, OverviewVM, TableCard } from './view-model.ts';
-import { axisLabel, monthIndex, monthKey, monthLabel, shift, trailing13, windowLabel, windowOf } from './windows.ts';
+import {
+  axisLabel,
+  monthIndex,
+  monthLabel,
+  shift,
+  trailing13,
+  periodWindow,
+  windowLabel,
+  windowOf,
+} from './windows.ts';
 
 // View 1 — Overview (layout-spec §1): four Tier-1 hero cards, the 2 × 2 "why" grid and the market table.
 
@@ -49,7 +58,7 @@ export const quarterLabel = (month: number) =>
 export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   const { cube, m } = ctx;
   const mk = sel.market;
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
   const py = shift(w, -12);
   const A = m.loans(w, mk);
   const P = m.refLoans(py, mk);
@@ -120,9 +129,9 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
   );
 
   // O3 Returning clients (client-weighted)
-  const ret = m.returning(sel.tv, sel.anchor, mk);
+  const ret = m.returning(w, mk);
   const r180 = m.repeat180(sel.anchor - 6, mk);
-  const stat = cube.windowStat(sel.tv, monthKey(sel.anchor), mk);
+  const stat = m.stat(w, mk);
   const o3 = hero(
     'o3',
     'Returning clients',
@@ -139,11 +148,14 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
         label: '90-day repeat',
         value: fmtPct(m.cohortCurve([sel.anchor - 6], mk)[cube.cohortDays.indexOf(90)] ?? null),
       },
-      { label: 'Prior year', value: fmtPct(m.refReturning(sel.tv, sel.anchor - 12, mk)) },
+      {
+        label: 'Prior year',
+        value: fmtPct(m.refReturning(py, mk)),
+      },
       { label: 'Budget', value: 'none for this ratio' },
     ],
     'ratioUp',
-    { actual: ret, py: m.refReturning(sel.tv, sel.anchor - 12, mk) },
+    { actual: ret, py: m.refReturning(py, mk) },
     'clients',
   );
 
@@ -188,7 +200,6 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
     chart: {
       kind: 'line',
       x: loansTrend.x,
-      months: loansTrend.months,
       unit: 'count',
       series: [
         { name: 'Actual', role: 'actual', values: loansTrend.actual },
@@ -216,7 +227,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
     open: 'clients',
     legend: [
       { label: windowLabel(w), role: 'actual' },
-      { label: 'Prior year', role: 'ghost' },
+      { label: 'Prior year', role: 'pyFill' },
     ],
     chart: {
       kind: 'bars',
@@ -249,7 +260,6 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
     chart: {
       kind: 'line',
       x: dayLabels,
-      months: null,
       unit: 'pct',
       series: cohorts.map((c, k) => ({
         name: quarterLabel(c[0] ?? sel.anchor),
@@ -273,7 +283,6 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
     chart: {
       kind: 'line',
       x: months13.map(axisLabel),
-      months: months13,
       unit: 'pct',
       series: MARKETS.map((c, k) => ({
         name: MARKET_NAMES[c],
@@ -291,7 +300,7 @@ export function overview(ctx: Ctx, sel: SalesSelection): OverviewVM {
 
 function marketTable(ctx: Ctx, sel: SalesSelection): TableCard {
   const { cube, m } = ctx;
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
   const cmpName = sel.cmp === 'BUD' ? 'vs Budget' : 'vs PY';
   return {
     id: 'o9',
@@ -322,7 +331,7 @@ function marketTable(ctx: Ctx, sel: SalesSelection): TableCard {
           { text: row.text, status: row.status },
           { text: fmtEur(a.principal) },
           { text: fmtCount(a.first) },
-          { text: fmtPct(m.returning(sel.tv, sel.anchor, c)) },
+          { text: fmtPct(m.returning(w, c)) },
           { text: fmtPct(m.dpd30At(sel.anchor, c)) },
           {
             text: row.status === 'neutral' ? STATUS_WORD.neutral : `${row.text.slice(0, 1)} ${STATUS_WORD[row.status]}`,

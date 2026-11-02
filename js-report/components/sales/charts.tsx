@@ -19,6 +19,7 @@ export const C = {
   accent: '#FFD54A',
   white: '#FFFFFF',
   marker: '#2F2F2D',
+  panel: '#E9E8E4',
 } as const;
 
 const STROKE: Record<SeriesRole, { color: string; width: number; dash?: string; dots: boolean }> = {
@@ -139,61 +140,36 @@ function XLabels({
   );
 }
 
-/** Story callout (design-tokens §5): placed in the empty half of the plot at the event's month. */
+/**
+ * Story callout (design-tokens §5): placed in the empty half of the plot at the event's month. Since 2026-11-01 plain
+ * annotation text beside the dashed marker, no yellow box: the box read as a button that did nothing. The text is also
+ * in the chart's aria-label, so it is not visual-only.
+ */
 function Callout({ x, text, width, top }: { x: number; text: string; width: number; top: number }) {
-  const w = text.length * 6.4 + 20;
-  const left = Math.min(Math.max(x + 8, 0), width - w);
+  const w = text.length * 5.9 + 8;
+  const right = x + 6 + w <= width;
   return (
-    <g pointerEvents="none">
+    <g pointerEvents="none" aria-hidden="true">
       <line x1={x} x2={x} y1={0} y2={1000} stroke={C.marker} strokeDasharray="2 2" />
-      <rect x={left} y={top} width={w} height={22} fill={C.accent} stroke={C.white} strokeWidth={2} />
-      <T x={left + 10} y={top + 15} fill={C.ink} size={12} weight={600}>
+      <text
+        x={right ? x + 6 : x - 6}
+        y={top + 15}
+        fontSize={11}
+        fontWeight={600}
+        fill={C.ink}
+        textAnchor={right ? 'start' : 'end'}
+        stroke={C.panel}
+        strokeWidth={3}
+        strokeLinejoin="round"
+        paintOrder="stroke"
+      >
         {text}
-      </T>
+      </text>
     </g>
   );
 }
 
-function MonthHits({
-  months,
-  X,
-  slot,
-  height,
-  onMonth,
-}: {
-  months: number[] | null;
-  X: (i: number) => number;
-  slot: number;
-  height: number;
-  onMonth?: (m: number) => void;
-}) {
-  if (!months || !onMonth) return null;
-  return (
-    <>
-      {months.map((m, i) => (
-        <rect
-          key={m}
-          x={X(i) - slot / 2}
-          y={0}
-          width={slot}
-          height={height}
-          fill="transparent"
-          style={{ cursor: 'pointer' }}
-          onClick={() => onMonth(m)}
-        >
-          <title>Select this month</title>
-        </rect>
-      ))}
-    </>
-  );
-}
-
-export function LineChart({
-  chart,
-  width,
-  height,
-  onMonth,
-}: Size & { chart: Extract<Chart, { kind: 'line' }>; onMonth?: (m: number) => void }) {
+export function LineChart({ chart, width, height }: Size & { chart: Extract<Chart, { kind: 'line' }> }) {
   const padL = 44;
   const padR = 10;
   const padT = 6;
@@ -211,7 +187,12 @@ export function LineChart({
     ? { ...chart.callout, low: atCallout.every((v) => v === null || Y(v) > (height - padB) / 2) }
     : null;
   return (
-    <svg width={width} height={height} role="img" aria-label={chart.series.map((s) => s.name).join(', ')}>
+    <svg
+      width={width}
+      height={height}
+      role="img"
+      aria-label={`${chart.series.map((s) => s.name).join(', ')}${chart.callout ? `. ${chart.callout.text}` : ''}`}
+    >
       <YAxis ticks={ticks} Y={Y} x={padL} unit={chart.unit} x2={width - padR} />
       <XLabels labels={chart.x} X={X} y={height - 3} sparse={step < 36} edges />
       {callout ? (
@@ -242,17 +223,11 @@ export function LineChart({
       {sel !== null && sel !== undefined && chart.selected !== null ? (
         <circle cx={X(chart.selected)} cy={Y(sel)} r={4.5} fill={C.accent} stroke={C.ink} strokeWidth={1} />
       ) : null}
-      <MonthHits months={chart.months} X={X} slot={step} height={height} onMonth={onMonth} />
     </svg>
   );
 }
 
-export function ColumnChart({
-  chart,
-  width,
-  height,
-  onMonth,
-}: Size & { chart: Extract<Chart, { kind: 'columns' }>; onMonth?: (m: number) => void }) {
+export function ColumnChart({ chart, width, height }: Size & { chart: Extract<Chart, { kind: 'columns' }> }) {
   const padL = 44;
   const padR = 6;
   const padT = chart.labels ? 14 : 6;
@@ -336,7 +311,6 @@ export function ColumnChart({
           )}
         </g>
       ) : null}
-      <MonthHits months={chart.months} X={X} slot={slot} height={height} onMonth={onMonth} />
     </svg>
   );
 }
@@ -353,24 +327,22 @@ export function Bars({ chart, width, height }: Size & { chart: Extract<Chart, { 
       {chart.rows.map((r, i) => {
         const cy = i * rowH + rowH / 2;
         const bh = Math.min(10, rowH - 6);
+        // with a prior year the row holds two bars: actual (ink) on top, prior year (filled yellow) under it
+        const py = r.ghost !== null;
+        const ah = py ? Math.max(Math.round(bh * 0.6), 4) : bh;
+        const ph = py ? Math.max(Math.round(bh * 0.5), 3) : 0;
+        const top = py ? cy - (ah + ph + 1) / 2 : cy - bh / 2;
         return (
           <g key={r.label}>
             <T x={0} y={cy + 4} fill={C.ink} size={12} weight={500}>
               {r.label}
             </T>
-            <rect x={labW} y={cy - bh / 2} width={pw} height={bh} fill={C.panel2} />
+            <rect x={labW} y={top} width={pw} height={py ? ah + ph + 1 : bh} fill={C.panel2} />
             {r.value !== null ? (
-              <rect x={labW} y={cy - bh / 2} width={Math.max(X(r.value), 0)} height={bh} fill={C.ink} />
+              <rect x={labW} y={top} width={Math.max(X(r.value), 0)} height={ah} fill={C.ink} />
             ) : null}
             {r.ghost !== null ? (
-              <rect
-                x={labW + 0.5}
-                y={cy - bh / 2 - 2.5}
-                width={Math.max(X(r.ghost), 0)}
-                height={bh + 5}
-                fill="none"
-                stroke={C.g400}
-              />
+              <rect x={labW} y={top + ah + 1} width={Math.max(X(r.ghost), 0)} height={ph} fill={C.accent} />
             ) : null}
             {r.tick !== null ? <rect x={labW + X(r.tick) - 1} y={cy - 7} width={2} height={14} fill={C.teal} /> : null}
             <T x={labW + pw + 8} y={cy + 4} fill={C.ink} size={12} weight={600}>
@@ -435,12 +407,13 @@ export function StackedBars({ chart, width, height }: Size & { chart: Extract<Ch
   );
 }
 
+/** Stage bars on the scale of the first stage; `lost` = a yellow line over the end of the bar (2026-11-01). */
 export function Funnel({ chart, width, height }: Size & { chart: Extract<Chart, { kind: 'funnel' }> }) {
   const labW = 112;
   const textW = Math.min(250, width * 0.5);
   const pw = width - labW - textW;
   const rowH = height / Math.max(chart.rows.length, 1);
-  const hi = Math.max(...chart.rows.map((r) => r.value + (r.lost ?? 0)), 1);
+  const hi = Math.max(...chart.rows.map((r) => r.value), 1); // the first stage fills the bar
   const X = linear(0, hi, 0, pw);
   return (
     <svg width={width} height={height} role="img" aria-label={chart.rows.map((r) => `${r.label} ${r.text}`).join(', ')}>
@@ -454,7 +427,9 @@ export function Funnel({ chart, width, height }: Size & { chart: Extract<Chart, 
             </T>
             <rect x={labW} y={cy - bh / 2} width={pw} height={bh} fill={C.panel2} />
             <rect x={labW} y={cy - bh / 2} width={X(r.value)} height={bh} fill={C.ink} />
-            {r.lost ? <rect x={labW + X(r.value)} y={cy - 2} width={X(r.lost)} height={4} fill={C.g400} /> : null}
+            {r.lost ? (
+              <rect x={labW + X(r.value - r.lost)} y={cy - 2} width={X(r.lost)} height={4} fill={C.accent} />
+            ) : null}
             <text x={labW + pw + 8} y={cy + 4} fontSize={12} fill={C.ink} fontWeight={600}>
               {r.text}
               <tspan fill={C.g600} fontWeight={400} fontSize={11}>
@@ -550,7 +525,22 @@ export function Waterfall({ chart, width, height }: Size & { chart: Extract<Char
   );
 }
 
-const BIN_FILL = [C.panel2, C.g300, C.g400, C.ink] as const;
+/** Heat scale (2026-11-01, owner): grey → yellow → orange → red, interpolated on the cell's level over the whole grid. */
+const HEAT_STOPS = [
+  [0xde, 0xdd, 0xd8], // panel-2 grey
+  [0xff, 0xd5, 0x4a], // accent yellow
+  [0xf2, 0x8c, 0x28], // orange
+  [0xc0, 0x39, 0x2b], // red
+] as const;
+function heatFill(level: number): string {
+  const t = Math.min(Math.max(level, 0), 1) * (HEAT_STOPS.length - 1);
+  const k = Math.min(Math.floor(t), HEAT_STOPS.length - 2);
+  const a = HEAT_STOPS[k] ?? HEAT_STOPS[0];
+  const b = HEAT_STOPS[k + 1] ?? a;
+  const f = t - k;
+  return `rgb(${a.map((v, i) => Math.round(v + ((b[i] ?? v) - v) * f)).join(',')})`;
+}
+const HEAT_LIGHT_TEXT = 0.8; // from here the red is dark enough for white text
 
 export function Heat({ chart, width, height }: Size & { chart: Extract<Chart, { kind: 'heat' }> }) {
   const heatW = chart.side ? Math.round(width * 0.56) : width;
@@ -578,13 +568,13 @@ export function Heat({ chart, width, height }: Size & { chart: Extract<Chart, { 
                 y={headH + i * rh}
                 width={cw - 2}
                 height={rh - 2}
-                fill={cell.bin === null ? C.white : BIN_FILL[cell.bin]}
+                fill={cell.level === null ? C.white : heatFill(cell.level)}
               />
               <T
                 x={labW + j * cw + cw / 2}
                 y={headH + i * rh + rh / 2 + 3}
                 anchor="middle"
-                fill={cell.bin === 3 ? C.white : C.ink}
+                fill={cell.level !== null && cell.level >= HEAT_LIGHT_TEXT ? C.white : C.ink}
                 size={11}
                 weight={600}
               >
@@ -624,6 +614,21 @@ export function Bubble({ chart, width, height }: Size & { chart: Extract<Chart, 
   const Y = linear(0, yt.at(-1) ?? 1, height - padB, padT);
   const sMax = Math.max(...chart.points.map((p) => p.size), 1);
   const fills = [C.g300, C.g400, C.ink] as const;
+  const radius = (size: number) => 3 + 11 * Math.sqrt(size / sMax);
+  // Label collision (2026-11-01): the worst bubble first, then by size; a label whose box overlaps one already placed
+  // is dropped (the name stays in the chart's aria-label and the ⓘ).
+  const placed: { x: number; y: number; w: number }[] = [];
+  const labelled = new Set<string>();
+  for (const p of [...chart.points]
+    .filter((q) => q.showLabel)
+    .sort((a, b) => Number(b.highlight) - Number(a.highlight) || b.size - a.size)) {
+    const x = X(p.x) + radius(p.size) + 3;
+    const y = Y(p.y);
+    const w = p.label.length * 5.6;
+    if (placed.some((o) => x < o.x + o.w && o.x < x + w && Math.abs(o.y - y) < 12)) continue;
+    placed.push({ x, y, w });
+    labelled.add(p.label);
+  }
   return (
     <svg width={width} height={height} role="img" aria-label={chart.points.map((p) => p.label).join(', ')}>
       <YAxis ticks={yt} Y={Y} x={padL} unit={chart.yUnit} x2={width - 8} />
@@ -636,7 +641,7 @@ export function Bubble({ chart, width, height }: Size & { chart: Extract<Chart, 
       {[...chart.points]
         .sort((a, b) => b.size - a.size)
         .map((p) => {
-          const r = 3 + 11 * Math.sqrt(p.size / sMax);
+          const r = radius(p.size);
           return (
             <g key={p.label}>
               <circle
@@ -647,7 +652,7 @@ export function Bubble({ chart, width, height }: Size & { chart: Extract<Chart, 
                 stroke={C.ink}
                 strokeOpacity={0.6}
               />
-              {p.showLabel ? (
+              {labelled.has(p.label) ? (
                 <T x={X(p.x) + r + 3} y={Y(p.y) + 4} fill={C.ink} size={10} weight={600}>
                   {p.label}
                 </T>

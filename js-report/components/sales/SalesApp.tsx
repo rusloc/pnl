@@ -4,18 +4,19 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createSalesLoader } from '@/lib/sales/data';
 import { createSalesEngine } from '@/lib/sales';
-import type { DetailIndex } from '@/lib/sales';
-import type { Drill, SalesBase, SalesSelection } from '@/lib/sales/types';
+import type { DetailParts, Drill, SalesBase, SalesSelection } from '@/lib/sales/types';
 import type { BandVM, OverviewVM, RowAction } from '@/lib/sales/view-model';
 import { ChartCardView, HeroCardView, KpiCardView, TableCardView } from './cards';
 import type { Box } from './cards';
+import { DESIGN_H, useBoardHeight } from './board';
 import { Header } from './Header';
 import { PopupProvider } from './popup';
 import { SlideOver } from './SlideOver';
 import styles from './sales.module.css';
 
 // Client root of /sales (ADR-0011 (c)): loads public/data/sales in the browser, owns Selection ↔ URL and passes engine
-// view models down. Orchestration only: every number and string comes from lib/sales.
+// view models down. Orchestration only: every number and string comes from lib/sales. Since 2026-11-01 the board is
+// as tall as the viewport (board.ts; no empty band under it) and the extra height goes to the chart rows and the tables.
 
 const loader = createSalesLoader(async (name) => {
   const res = await fetch(`/data/sales/${name}`);
@@ -66,14 +67,41 @@ export function SalesApp() {
   );
 }
 
-// Layout-spec §1–§5 boxes (board px).
+// Layout-spec §1–§5 boxes (board px) at the design height 810; `extra` = board height − 810 (2026-11-01).
+// Overview: both chart rows grow, the hero band and the 3-row market table keep their size and the table sits at the
+// bottom. Band views: the chart rows and the (scrolling) table share the extra.
 const HERO_X = [32, 380, 728, 1076] as const;
 const KPI_X = [32, 264, 496, 728, 960, 1192] as const;
-const THIRDS: readonly Box[] = [252, 430].flatMap((y) => [32, 496, 960].map((x) => ({ x, y, w: 448, h: 162 })));
-const HALVES: readonly Box[] = [252, 430].flatMap((y) => [32, 728].map((x) => ({ x, y, w: 680, h: 162 })));
-const WHY: readonly Box[] = [324, 500].flatMap((y) => [32, 728].map((x) => ({ x, y, w: 680, h: 160 })));
+const rows2 = (xs: readonly number[], w: number, y: number, h1: number, h2: number, gap: number): Box[] => [
+  ...xs.map((x) => ({ x, y, w, h: h1 })),
+  ...xs.map((x) => ({ x, y: y + h1 + gap, w, h: h2 })),
+];
+/** n boxes side by side across the frame (x 32 … 1408, 16 px gaps). */
+const spread = (n: number): { x: number; w: number }[] => {
+  const w = Math.floor((1376 - 16 * (n - 1)) / n);
+  return Array.from({ length: n }, (_, k) => ({ x: 32 + k * (w + 16), w }));
+};
+function bandBoxes(layout: BandVM['layout'], count: number, extra: number) {
+  const e = Math.floor(extra * 0.3);
+  const perRow = layout === 'thirds' ? 3 : 2;
+  const h = 162 + e;
+  // the second row spreads whatever is left (Loans has five charts since L11 went, 2026-11-01)
+  const rows = [spread(Math.min(perRow, count)), spread(Math.max(count - perRow, 1))];
+  return {
+    charts: rows.flatMap((r, k) => r.map((b) => ({ ...b, y: 252 + k * (h + 16), h }))),
+    table: { x: 32, y: 608 + 2 * e, w: 1376, h: 186 + extra - 2 * e },
+  };
+}
+function overviewBoxes(extra: number) {
+  const e = Math.floor(extra / 2);
+  return {
+    charts: rows2([32, 728], 680, 324, 160 + e, 160 + extra - e, 16),
+    table: { x: 32, y: 676 + extra, w: 1376, h: 118 },
+  };
+}
 
-type Detail = { ix: DetailIndex } | { error: string } | null;
+/** The detail files of the open drill, keyed by their names (one load per drill; the loader caches each file). */
+type Detail = { key: string; parts: DetailParts } | { key: string; error: string } | null;
 
 function Dashboard({ base }: { base: SalesBase }) {
   const engine = useMemo(() => createSalesEngine(base), [base]);
@@ -83,6 +111,7 @@ function Dashboard({ base }: { base: SalesBase }) {
   const search = params.toString();
   const sel = useMemo(() => engine.codec.parse(new URLSearchParams(search)), [engine, search]);
   const canonical = engine.codec.serialize(sel);
+  const defaults = useMemo(() => engine.codec.defaults(), [engine]);
   const [stack, setStack] = useState<Drill[]>([]);
   const [detail, setDetail] = useState<Detail>(null);
   const panelId = useId();
@@ -99,25 +128,27 @@ function Dashboard({ base }: { base: SalesBase }) {
     if (canonical !== search) go(sel);
   }, [canonical, search, go, sel]);
 
-  // The capped loan / client sample loads on first need (Clients, Portfolio, any slide-over).
-  const needs = engine.needsDetail(sel);
+  // The full detail loads per drill: only the months, cohorts or client bucket it reads (2026-11-01).
+  const filesKey = useMemo(() => (sel.drill ? engine.detailFiles(sel, sel.drill) : []).join(','), [engine, sel]);
   useEffect(() => {
-    if (!needs || detail) return;
+    if (!filesKey) return;
     let live = true;
-    loader.detail().then(
-      (d) => live && setDetail({ ix: engine.indexDetail(d) }),
-      (e: unknown) => live && setDetail({ error: message(e) }),
+    loader.detail(filesKey.split(',')).then(
+      (parts) => live && setDetail({ key: filesKey, parts }),
+      (e: unknown) => live && setDetail({ key: filesKey, error: message(e) }),
     );
     return () => {
       live = false;
     };
-  }, [needs, detail, engine]);
-  const ix = detail && 'ix' in detail ? detail.ix : null;
+  }, [filesKey]);
+  const current = detail?.key === filesKey ? detail : null;
+  const parts = current && 'parts' in current ? current.parts : null;
 
   const header = useMemo(() => engine.header(sel), [engine, sel]);
   const overview = useMemo(() => (sel.view === 'overview' ? engine.overview(sel) : null), [engine, sel]);
-  const band = useMemo(() => (sel.view === 'overview' ? null : engine.band(sel, ix)), [engine, sel, ix]);
-  const slide = useMemo(() => (sel.drill ? engine.slideOver(sel, ix, sel.drill) : null), [engine, sel, ix]);
+  const band = useMemo(() => (sel.view === 'overview' ? null : engine.band(sel)), [engine, sel]);
+  const slide = useMemo(() => (sel.drill ? engine.slideOver(sel, parts, sel.drill) : null), [engine, sel, parts]);
+  const height = useBoardHeight();
 
   const update = (patch: Partial<SalesSelection>) => go({ ...sel, ...patch });
   const onAction = (a: RowAction) => {
@@ -136,24 +167,24 @@ function Dashboard({ base }: { base: SalesBase }) {
     <div className={styles.page}>
       {/* one pop-up open at a time; a view change closes it (remount) */}
       <PopupProvider key={sel.view}>
-        <div className={styles.board}>
-          <Header vm={header} sel={sel} panelId={panelId} onChange={update} />
+        <div className={styles.board} style={{ height }}>
+          <Header vm={header} sel={sel} defaults={defaults} panelId={panelId} onChange={update} />
           <div id={panelId} role="tabpanel" aria-labelledby={`tab-${sel.view}`} className={styles.panel}>
             {overview ? (
               <OverviewView
                 vm={overview}
+                extra={height - DESIGN_H}
                 onOpen={(view) => update({ view })}
-                onMonth={(anchor) => update({ anchor })}
                 onAction={onAction}
               />
             ) : null}
-            {band ? <BandView vm={band} onMonth={(anchor) => update({ anchor })} onAction={onAction} /> : null}
+            {band ? <BandView vm={band} extra={height - DESIGN_H} onAction={onAction} /> : null}
           </div>
           {slide ? (
             <SlideOver
               vm={
-                detail && 'error' in detail
-                  ? { kind: 'missing', title: 'Could not load the loan sample', sub: detail.error }
+                current && 'error' in current
+                  ? { kind: 'missing', title: 'Could not load the loans', sub: current.error }
                   : slide
               }
               onClose={onClose}
@@ -180,44 +211,31 @@ function Dashboard({ base }: { base: SalesBase }) {
 
 function OverviewView({
   vm,
+  extra,
   onOpen,
-  onMonth,
   onAction,
 }: {
   vm: OverviewVM;
+  extra: number;
   onOpen: (v: SalesSelection['view']) => void;
-  onMonth: (m: number) => void;
   onAction: (a: RowAction) => void;
 }) {
+  const boxes = overviewBoxes(extra);
   return (
     <>
       {vm.heroes.map((h, i) => (
         <HeroCardView key={h.id} card={h} box={{ x: HERO_X[i] ?? 32, y: 116, w: 332, h: 192 }} onOpen={onOpen} />
       ))}
       {vm.charts.map((c, i) => (
-        <ChartCardView
-          key={c.id}
-          card={c}
-          box={WHY[i] ?? { x: 32, y: 324, w: 680, h: 160 }}
-          onOpen={onOpen}
-          onMonth={onMonth}
-        />
+        <ChartCardView key={c.id} card={c} box={boxes.charts[i] ?? { x: 32, y: 324, w: 680, h: 160 }} onOpen={onOpen} />
       ))}
-      <TableCardView card={vm.table} box={{ x: 32, y: 676, w: 1376, h: 118 }} tight onAction={onAction} />
+      <TableCardView card={vm.table} box={boxes.table} tight onAction={onAction} />
     </>
   );
 }
 
-function BandView({
-  vm,
-  onMonth,
-  onAction,
-}: {
-  vm: BandVM;
-  onMonth: (m: number) => void;
-  onAction: (a: RowAction) => void;
-}) {
-  const boxes = vm.layout === 'thirds' ? THIRDS : HALVES;
+function BandView({ vm, extra, onAction }: { vm: BandVM; extra: number; onAction: (a: RowAction) => void }) {
+  const boxes = bandBoxes(vm.layout, vm.charts.length, extra);
   return (
     <>
       {vm.kpis.map((k, i) => (
@@ -225,14 +243,13 @@ function BandView({
       ))}
       {vm.charts.map((c, i) => (
         <ChartCardView
-          key={c.id}
+          key={`${c.id}-${c.variants?.value ?? ''}`}
           card={c}
-          box={boxes[i] ?? { x: 32, y: 252, w: 448, h: 162 }}
+          box={boxes.charts[i] ?? { x: 32, y: 252, w: 448, h: 162 }}
           onOpen={() => undefined}
-          onMonth={onMonth}
         />
       ))}
-      <TableCardView card={vm.table} box={{ x: 32, y: 608, w: 1376, h: 186 }} tight={false} onAction={onAction} />
+      <TableCardView card={vm.table} box={boxes.table} tight={false} onAction={onAction} />
     </>
   );
 }

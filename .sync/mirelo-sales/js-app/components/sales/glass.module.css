@@ -1,0 +1,116 @@
+/* Forked from components/glass.module.css on 2026-11-01 for Mirelo; the P&L keeps the original. */
+/* Glass pop-ups (ADR-0012 §2.5; Mirelo design-tokens §5a). Redesigned here 2026-11-01 (owner): matte frosted glass,
+   a strong blur of what lies under it, a clear 1 px near-black border and a drop shadow; no glossy top highlight.
+   Solid fallback without backdrop-filter. This copy is Mirelo's own since then (the P&L keeps its glass).
+   `.surface` is the one look of every Mirelo pop-up: the small glass pop-ups compose it, the detail window
+   (SlideOver.tsx) takes it as a class (2026-11-01, owner: "one style"; opacity .62 → .42 → .32). */
+.surface {
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  background: rgba(244, 243, 240, 0.32);
+  -webkit-backdrop-filter: blur(28px) saturate(1.05);
+  backdrop-filter: blur(28px) saturate(1.05);
+  box-shadow:
+    0 18px 44px rgba(17, 17, 17, 0.26),
+    0 2px 6px rgba(17, 17, 17, 0.14);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .surface {
+    background: #f4f3f0;
+  }
+}
+.glass {
+  composes: surface;
+  position: absolute;
+  z-index: 60;
+  width: 360px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 14px 20px 16px;
+  color: #111827;
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 400;
+  text-align: left;
+  white-space: normal;
+  cursor: auto;
+}
+.hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.hd h4 {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 18px;
+  font-weight: 700;
+}
+.x {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin: -4px -10px 0 0;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  font-size: 18px;
+  line-height: 26px;
+  color: #4f5c6c;
+  cursor: pointer;
+}
+.x:hover {
+  background: rgba(16, 27, 43, 0.06);
+  color: #101b2b;
+}
+.body p {
+  margin: 0 0 8px;
+}
+.dl {
+  margin: 0;
+}
+.dl dt {
+  margin-top: 6px;
+  font-weight: 600;
+}
+.dl dd {
+  margin: 0;
+}
+.formula {
+  font-variant-numeric: tabular-nums;
+}
+.val {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(16, 27, 43, 0.08);
+}
+.val dt {
+  margin-top: 0;
+  font-weight: 500;
+  color: #4f5c6c;
+}
+.val dd {
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.infoBtn {
+  display: inline-flex;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #4f5c6c;
+  cursor: pointer;
+}
+.infoBtn:hover,
+.infoBtn[aria-expanded='true'] {
+  color: #101b2b;
+}

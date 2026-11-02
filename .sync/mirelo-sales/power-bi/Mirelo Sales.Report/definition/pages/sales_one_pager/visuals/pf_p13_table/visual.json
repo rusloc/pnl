@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "pf_p13_table",
   "position": {
-    "x": 44,
-    "y": 580,
-    "z": 2800,
-    "height": 146,
-    "width": 1352,
-    "tabOrder": 1860
+    "x": 184,
+    "y": 181,
+    "z": 3980,
+    "height": 528,
+    "width": 1072,
+    "tabOrder": 3980
   },
   "visual": {
     "visualType": "tableEx",
@@ -777,7 +777,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Overdue loans at the snapshot, most days past due first'"
+                  "Value": "'Loans 30+ DPD with a balance at the last close, worst first'"
                 }
               }
             }
@@ -821,7 +821,7 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_portfolio",
+  "parentGroupName": "grp_list_overdue",
   "filterConfig": {
     "filters": [
       {
@@ -866,13 +866,6 @@
                     [
                       {
                         "Literal": {
-                          "Value": "'DPD_1_29'"
-                        }
-                      }
-                    ],
-                    [
-                      {
-                        "Literal": {
                           "Value": "'DPD_30_59'"
                         }
                       }
@@ -892,6 +885,55 @@
                       }
                     ]
                   ]
+                }
+              }
+            }
+          ]
+        },
+        "isHiddenInViewMode": true
+      },
+      {
+        "name": "f_pf_p13_balance",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_measures"
+              }
+            },
+            "Property": "Overdue Outstanding EUR"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "m",
+              "Entity": "_measures",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Comparison": {
+                  "ComparisonKind": 1,
+                  "Left": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "m"
+                        }
+                      },
+                      "Property": "Overdue Outstanding EUR"
+                    }
+                  },
+                  "Right": {
+                    "Literal": {
+                      "Value": "0D"
+                    }
+                  }
                 }
               }
             }

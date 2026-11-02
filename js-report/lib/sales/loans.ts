@@ -1,8 +1,9 @@
+import { heatLevels } from './clients.ts';
 import { MARKET_NAMES, info } from './copy.ts';
 import type { InfoValue } from './copy.ts';
 import type { Cube } from './cube.ts';
 import { fmtCount, fmtDeltaPct, fmtEur, fmtEur0, fmtEurDelta, fmtHours, fmtPct, fmtPp } from './format.ts';
-import { chipOf, kpiRows } from './kpis.ts';
+import { kpiRows } from './kpis.ts';
 import type { Bundle } from './kpis.ts';
 import { MARKETS } from './manifest.ts';
 import type { Ctx } from './overview.ts';
@@ -11,7 +12,7 @@ import { attainmentStatus, cmpRow } from './status.ts';
 import type { DeltaKind } from './status.ts';
 import type { Comparator, MarketSel, SalesSelection } from './types.ts';
 import type { BandVM, ChartCard, KpiCard, SeriesRole, TableCard } from './view-model.ts';
-import { shift, windowLabel, windowOf } from './windows.ts';
+import { periodWindow, shift, windowLabel } from './windows.ts';
 import type { Window } from './windows.ts';
 
 // View 2 — Loans issued (layout-spec §2): volume, ticket, funnel, bridge, product mix, cycle time, agents.
@@ -25,8 +26,15 @@ export function kpi(
   b: Bundle,
   cmp: Comparator,
 ): KpiCard {
-  const { row, alt } = kpiRows(kind, b, cmp);
-  return { id, label, info: info(id, values), value, row, alt, status: chipOf(row) };
+  const { rows, chip } = kpiRows(kind, b, cmp);
+  return {
+    id,
+    label,
+    info: info(id, values),
+    value,
+    rows,
+    status: chip,
+  };
 }
 
 export const CATEGORY_ROLES: readonly SeriesRole[] = ['c1', 'c2', 'c3', 'c4', 'c5'];
@@ -86,7 +94,7 @@ export function bridge(cube: Cube, w: Window, market: MarketSel): Bridge | null 
 export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const { cube, m } = ctx;
   const mk = sel.market;
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
   const py = shift(w, -12);
   const A = m.loans(w, mk);
   const P = m.refLoans(py, mk);
@@ -95,9 +103,9 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
   const F = m.funnel(w, mk);
   const FP = m.refFunnel(py, mk);
   const step12 = m.loans(w, mk, { product: 'STEP12' }).loans;
-  const cash = m.median(sel.tv, sel.anchor, mk, 'median_hours_to_cash');
+  const cash = m.median(w, mk, 'median_hours_to_cash');
 
-  const cashPy = m.refMedian(sel.tv, sel.anchor - 12, mk, 'median_hours_to_cash');
+  const cashPy = m.refMedian(py, mk, 'median_hours_to_cash');
   const kpis: KpiCard[] = [
     kpi(
       'l1',
@@ -192,7 +200,6 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
     chart: {
       kind: 'columns',
       x: t.x,
-      months: t.months,
       unit: 'count',
       stacks: [{ name: 'Actual', role: 'actual', values: t.actual }],
       ghost: t.py,
@@ -209,7 +216,8 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
     },
   };
 
-  // L8 Application funnel
+  // L8 Application funnel (2026-11-01, owner: the grey "lost" bar ran to the leads and read as 100 % lost at step 1):
+  // bars on the scale of Started, and on each bar a yellow line for the applications that did not reach the next stage
   const stages = [
     ['Started', 'started'],
     ['Submitted', 'submitted'],
@@ -224,7 +232,7 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
     open: null,
     legend: [
       { label: 'Applications', role: 'actual' },
-      { label: 'Lost at the step', role: 'c3' },
+      { label: 'Did not reach the next stage', role: 'lost' },
     ],
     chart: {
       kind: 'funnel',
@@ -234,12 +242,13 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
         const prev = F[prevKey];
         const conv = prev > 0 ? v / prev : null;
         const convPy = FP && FP[prevKey] > 0 ? FP[key] / FP[prevKey] : null;
+        const next = stages[k + 1];
         return {
           label,
           value: v,
           text: fmtCount(v),
-          sub: `${fmtPct(conv, 0)} - ${conv !== null && convPy !== null ? fmtPp(conv - convPy) : 'n/a'} vs PY`,
-          lost: prev - v,
+          sub: `${fmtPct(conv, 0)}${k === 0 ? ' of leads' : ''} - ${conv !== null && convPy !== null ? fmtPp(conv - convPy) : 'n/a'} vs PY`,
+          lost: next ? v - F[next[1]] : null,
         };
       }),
     },
@@ -281,45 +290,37 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
       : { kind: 'placeholder', text: 'No Budget for this window' },
   };
 
-  // L10 Loans by product × market
+  // L10 Loans by product × market: a heatmap like P9 (2026-11-01, owner; it was stacked bars per market)
   const products = cube.dims.product.filter((p) => p.product_line === 'Microloan');
   const byCell = cube.loansBy(w, 'ALL', (r) => `${r.market}|${r.product}`);
   const shownMarkets = mk === 'ALL' ? MARKETS : [mk];
+  const counts = products.map((p) => shownMarkets.map((c) => byCell.get(`${c}|${p.product_code}`)?.loans ?? 0));
+  const countLevels = heatLevels(counts.flat());
   const l10: ChartCard = {
     id: 'l10',
     title: 'Loans by product × market',
     info: info('l10'),
     open: null,
-    legend: products.map((p, k) => ({ label: p.product_name, role: CATEGORY_ROLES[k] ?? 'c5' })),
-    chart: {
-      kind: 'stackedBars',
-      unit: 'count',
-      segments: products.map((p, k) => ({ name: p.product_name, role: CATEGORY_ROLES[k] ?? 'c5' })),
-      rows: shownMarkets.map((c) => {
-        const values = products.map((p) => byCell.get(`${c}|${p.product_code}`)?.loans ?? 0);
-        return { label: MARKET_NAMES[c], values, text: fmtCount(values.reduce((s, v) => s + v, 0)) };
-      }),
-    },
-  };
-
-  // L11 Attainment by channel: no channel targets in the dataset
-  const l11: ChartCard = {
-    id: 'l11',
-    title: 'Attainment by channel',
-    info: info('l11'),
-    open: null,
     legend: [],
     chart: {
-      kind: 'placeholder',
-      text: 'Not available - no channel targets', // the reason is in the ⓘ (ADR-0012, MS-13)
+      kind: 'heat',
+      cols: shownMarkets.map((c) => MARKET_NAMES[c]),
+      rows: products.map((p, i) => ({
+        label: p.product_name,
+        cells: shownMarkets.map((_, j) => ({
+          text: fmtCount(counts[i]?.[j] ?? null),
+          level: countLevels[i * shownMarkets.length + j] ?? null,
+        })),
+      })),
+      side: null,
     },
   };
 
   // L12 Stage cycle time vs SLA (the two timed legs; SLA = dim_funnel_stage.sla_hours)
   const sla = (code: string) => cube.dims.funnel_stage.find((s) => s.stage_code === code)?.sla_hours ?? null;
   const approveSla = (sla('KYC_PASSED') ?? 0) + (sla('APPROVED') ?? 0) || null;
-  const appr = m.median(sel.tv, sel.anchor, mk, 'median_hours_to_approve');
-  const payout = m.median(sel.tv, sel.anchor, mk, 'median_hours_payout');
+  const appr = m.median(w, mk, 'median_hours_to_approve');
+  const payout = m.median(w, mk, 'median_hours_payout');
   const l12: ChartCard = {
     id: 'l12',
     title: 'Stage cycle time vs SLA',
@@ -346,12 +347,19 @@ export function loansView(ctx: Ctx, sel: SalesSelection): BandVM {
     },
   };
 
-  return { kpis, charts: [l7, l8, l9, l10, l11, l12], layout: 'thirds', table: leaderboard(ctx, sel) };
+  return {
+    kpis,
+    charts: [l7, l8, l9, l10, l12],
+    layout: 'thirds',
+    table: leaderboard(ctx, sel),
+  };
 }
+
+const STATUS_RANK = { good: 3, watch: 2, off: 1, neutral: null } as const;
 
 function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
   const { cube } = ctx;
-  const w = windowOf(sel.tv, sel.anchor);
+  const w = periodWindow(sel);
   const now = cube.agents(w);
   const prior = cube.available(shift(w, -12)) ? cube.agents(shift(w, -12)) : null;
   const cmpName = sel.cmp === 'BUD' ? 'vs quota' : 'vs PY';
@@ -389,19 +397,31 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
         action: { kind: 'drill', drill: { kind: 'agent', agent: a.agent_code } },
         secondary: null,
         cells: [
-          { text: a.agent_name, tag: a.is_ramp_cohort ? 'Ramp' : undefined },
-          { text: a.agent_type === 'AGENT' ? 'Agent' : 'Partner' },
-          { text: a.market_code },
-          { text: fmtCount(s.loans) },
-          { text: fmtCount(s.target || null) },
-          { text: fmtPct(att), bar: att },
-          { text: fmtEur(s.principal) },
-          { text: d.text, status: d.status },
+          {
+            text: a.agent_name,
+            tag: a.is_ramp_cohort ? 'Ramp' : undefined,
+            sort: a.agent_name,
+          },
+          {
+            text: a.agent_type === 'AGENT' ? 'Agent' : 'Partner',
+            sort: a.agent_type,
+          },
+          { text: a.market_code, sort: a.market_code },
+          { text: fmtCount(s.loans), sort: s.loans },
+          { text: fmtCount(s.target || null), sort: s.target || null },
+          { text: fmtPct(att), bar: att, sort: att },
+          { text: fmtEur(s.principal), sort: s.principal },
+          {
+            text: d.text,
+            status: d.status,
+            sort: ref ? s.loans / ref - 1 : null,
+          },
           {
             text:
               status === 'neutral' ? 'n/a' : status === 'good' ? 'On target' : status === 'watch' ? 'Close' : 'Behind',
             status,
             chip: true,
+            sort: STATUS_RANK[status],
           },
         ],
       };
@@ -409,5 +429,6 @@ function leaderboard(ctx: Ctx, sel: SalesSelection): TableCard {
     empty: rows.length === 0 ? 'No agent or partner loans in this window' : null,
     action: null,
     needsDetail: false,
+    sortable: true,
   };
 }

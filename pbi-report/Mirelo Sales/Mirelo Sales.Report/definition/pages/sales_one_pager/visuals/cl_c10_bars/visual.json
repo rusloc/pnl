@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "cl_c10_bars",
   "position": {
-    "x": 1140,
+    "x": 740,
     "y": 378,
     "z": 2310,
     "height": 144,
-    "width": 256,
+    "width": 656,
     "tabOrder": 1380
   },
   "visual": {
@@ -43,12 +43,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Returning %"
+                  "Property": "Repeat Share"
                 }
               },
-              "queryRef": "_measures.Returning %",
-              "nativeQueryRef": "Returning %",
-              "displayName": "Returning %"
+              "queryRef": "_measures.Repeat Share",
+              "nativeQueryRef": "Repeat Share",
+              "displayName": "Repeat share"
             }
           ]
         }
@@ -277,6 +277,13 @@
                   }
                 }
               }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
             }
           }
         }
@@ -297,7 +304,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Returning %"
+            "metadata": "_measures.Repeat Share"
           }
         }
       ],
@@ -326,7 +333,7 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Returning %"
+                  "Property": "Repeat Share Avg"
                 }
               }
             },
@@ -436,7 +443,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'By product'"
+                  "Value": "'⠀ Repeat share by product'"
                 }
               }
             }
@@ -501,7 +508,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Returning share by product with the company average'"
+                  "Value": "'Repeat share of loans per microloan product, teal line = company average'"
                 }
               }
             }

@@ -14,21 +14,19 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 7972d23c-9ad5-5372-87dc-e94cd6c38c09
 
-	/// Anchor month of the window (month picker); defaults to the last closed month.
+	/// Last month of the selected period (the calendar slicer on param_anchor_month: a year, a quarter, a month or several months); the last closed month when nothing is picked (2026-11-02, change 11).
 	measure '_Sel Anchor Index' =
-			VAR _default      = [_Last Closed Index]
+			VAR _default     = [_Last Closed Index]
 			RETURN
-			    SELECTEDVALUE ( param_anchor_month[month_index], _default )
+			    IF (
+			        ISFILTERED ( param_anchor_month )
+			        ,MAX ( param_anchor_month[month_index] )
+			        ,_default
+			    )
 		formatString: 0
 		isHidden
 		displayFolder: 9 Engine
 		lineageTag: 213ab648-4309-5a67-9d2b-c222f4b9f566
-
-	/// Selected period code: MONTH, QTD, YTD or R12M (default MONTH).
-	measure '_Sel Period' = SELECTEDVALUE ( param_period[period_code], "MONTH" )
-		isHidden
-		displayFolder: 9 Engine
-		lineageTag: a9387834-a6e4-5d93-8031-bad6d324acdd
 
 	/// Selected comparator code: BUD or PY (default BUD).
 	measure '_Sel Comparator' = SELECTEDVALUE ( param_comparator[comparator_code], "BUD" )
@@ -49,20 +47,13 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 4ac2f585-305f-56f6-b4ca-5a0ca8ed1c73
 
-	/// First month_index of the window: anchor (Month), first month of its quarter (QTD), January (YTD), anchor - 11 (R12M). month_index 1 = Jan 2024.
+	/// First month_index of the window: the earliest picked closed month (a range runs from the first to the last pick, so it is always contiguous); the anchor when nothing is picked. month_index 1 = Jan 2024 (2026-11-02, change 11).
 	measure '_Win Start' =
-			VAR _anchor       = [_Sel Anchor Index]
-			VAR _period       = [_Sel Period]
-			VAR _month_num    = MOD ( _anchor - 1, 12 ) + 1
+			VAR _anchor      = [_Sel Anchor Index]
 			RETURN
-			    SWITCH (
-			        _period
-			        ,"QTD"
-			            ,_anchor - MOD ( _month_num - 1, 3 )
-			        ,"YTD"
-			            ,_anchor - _month_num + 1
-			        ,"R12M"
-			            ,_anchor - 11
+			    IF (
+			        ISFILTERED ( param_anchor_month )
+			        ,MIN ( param_anchor_month[month_index] )
 			        ,_anchor
 			    )
 		formatString: 0
@@ -3097,36 +3088,6 @@ table _measures
 		displayFolder: 2 Clients
 		lineageTag: 323d0097-43a1-5b29-b0a9-b32bf39e62a7
 
-	/// 180-day repeat of the same cohort a year earlier (anchor - 18), the C5 comparator (MS-05); n/a before the data.
-	measure '180-day Repeat % PY Cohort' =
-			VAR _cohort       = [_Sel Anchor Index] - 18
-			VAR _market       = [_Sel Market]
-			VAR _filter       =
-			    FILTER (
-			        ALL ( dim_client[market_code] )
-			        ,_market = "ALL"
-			            || dim_client[market_code] = _market
-			    )
-			VAR _clients      =
-			    CALCULATE (
-			        COUNTROWS ( dim_client )
-			        ,dim_client[cohort_month_index] = _cohort
-			        ,KEEPFILTERS ( _filter )
-			    )
-			VAR _repeat       =
-			    CALCULATE (
-			        COUNTROWS ( dim_client )
-			        ,dim_client[cohort_month_index] = _cohort
-			        ,NOT ISBLANK ( dim_client[days_to_second_loan] )
-			            && dim_client[days_to_second_loan] <= 180
-			        ,KEEPFILTERS ( _filter )
-			    )
-			RETURN
-			    IF ( _cohort >= 1, DIVIDE ( _repeat, _clients ) )
-		formatString: 0.0%
-		displayFolder: 2 Clients
-		lineageTag: 50080b3b-06fa-51c7-a44b-20857adc9ad2
-
 	/// Share of the cohort (anchor - 6) with a repeat loan within 90 days (C5 / O3 info).
 	measure '90-day Repeat %' =
 			VAR _cohort       = [_Sel Anchor Index] - 6
@@ -3157,24 +3118,48 @@ table _measures
 		displayFolder: 2 Clients
 		lineageTag: 47361fda-772a-5120-a0ad-ca7ff7f60e06
 
-	/// Loans, year to date of the anchor month (O1 info).
+	/// Loans, January to the last month of the window (O1 info).
 	measure 'Loans YTD' =
-			CALCULATE (
-			    [Loans]
-			    ,REMOVEFILTERS ( param_period )
-			    ,TREATAS ( { "YTD" }, param_period[period_code] )
-			)
+			VAR _end         = [_Win End]
+			VAR _start       = _end - MOD ( _end - 1, 12 )
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Loans]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
 		formatString: #,0
 		displayFolder: 1 Loans
 		lineageTag: 58c6d346-2cbd-5900-ac2f-963674340058
 
-	/// Principal EUR, year to date of the anchor month (O1 info).
+	/// Principal EUR, January to the last month of the window (O1 info).
 	measure 'Principal EUR YTD' =
-			CALCULATE (
-			    [Principal EUR]
-			    ,REMOVEFILTERS ( param_period )
-			    ,TREATAS ( { "YTD" }, param_period[period_code] )
-			)
+			VAR _end         = [_Win End]
+			VAR _start       = _end - MOD ( _end - 1, 12 )
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Principal EUR]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
 		formatString: #,0
 		displayFolder: 1 Loans
 		lineageTag: 9299e9a0-3a97-54fc-96e3-16c32f357d41
@@ -3305,7 +3290,7 @@ table _measures
 
 	/// Status code of loans vs the selected comparator (design-tokens §6 counts rule).
 	measure '_Loans Status' =
-			VAR _delta        = ROUND ( [Loans Δ Cmp %], 3 )
+			VAR _delta        = ROUND ( CALCULATE ( [Loans Δ Cmp %], REMOVEFILTERS ( param_market ) ), 3 )
 			RETURN
 			    IF (
 			        NOT ISBLANK ( _delta )
@@ -3323,8 +3308,12 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 9ab85d50-c965-5e68-8a12-cfa9e6e65297
 
-	/// Status word for loans vs the selected comparator: Good, Watch, Off or n/a.
-	measure 'Loans Status' = SWITCH ( [_Loans Status], "good", "Good", "watch", "Watch", "off", "Off", "n/a" )
+	/// O9 status chip as Track C: glyph of the delta + Good, Watch or Off; n/a without a comparator.
+	measure 'Loans Status' =
+			VAR _d           = ROUND ( CALCULATE ( [Loans Δ Cmp %], REMOVEFILTERS ( param_market ) ), 3 )
+			VAR _glyph       = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "◦ " ) )
+			RETURN
+			    SWITCH ( [_Loans Status], "good", _glyph & "Good", "watch", _glyph & "Watch", "off", _glyph & "Off", "n/a" )
 		displayFolder: Design
 		lineageTag: 1cb1d46c-538e-518f-bb2c-b0feac84862a
 
@@ -3338,11 +3327,9 @@ table _measures
 		displayFolder: Design
 		lineageTag: 6e423486-2349-5c12-b31f-fca7d69e14f5
 
-	/// Status code of revenue vs the selected comparator.
+	/// Status code of an R13 row (counts rule on the delta as shown).
 	measure '_Revenue Status' =
-			VAR _value        = [Revenue EUR]
-			VAR _cmp          = IF ( [_Sel Comparator] = "PY", [Revenue EUR PY], [Revenue Budget EUR] )
-			VAR _delta        = IF ( NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp ), ROUND ( DIVIDE ( _value - _cmp, _cmp ), 3 ) )
+			VAR _delta        = [_Revenue Status Delta]
 			RETURN
 			    IF (
 			        NOT ISBLANK ( _delta )
@@ -3360,8 +3347,12 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: d6e7f8a7-93c6-5724-b176-9aff4be7c655
 
-	/// Status word for revenue vs the selected comparator.
-	measure 'Revenue Status' = SWITCH ( [_Revenue Status], "good", "Good", "watch", "Watch", "off", "Off", "n/a" )
+	/// R13 status chip as Track C: glyph of the delta + Good, Watch or Off; n/a without a comparator.
+	measure 'Revenue Status' =
+			VAR _d           = [_Revenue Status Delta]
+			VAR _glyph       = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "◦ " ) )
+			RETURN
+			    SWITCH ( [_Revenue Status], "good", _glyph & "Good", "watch", _glyph & "Watch", "off", _glyph & "Off", "n/a" )
 		displayFolder: Design
 		lineageTag: bed4ff99-e04e-5b89-b649-987d809de0dd
 
@@ -3375,9 +3366,9 @@ table _measures
 		displayFolder: Design
 		lineageTag: 7db7dccf-afad-5a20-8f0c-44a89b7d8b69
 
-	/// Status code of agent attainment (param_thresholds attainment_pct: >= 100 % good, 95-100 % watch, < 95 % off).
+	/// Status code of agent attainment (param_thresholds attainment_pct: >= 100 % good, 95-100 % watch, < 95 % off), on the unrounded ratio as Track C attainmentStatus.
 	measure '_Agent Status' =
-			VAR _att          = ROUND ( [Agent Attainment], 3 )
+			VAR _att          = [Agent Attainment]
 			VAR _amber        =
 			    CALCULATE (
 			        MIN ( param_thresholds[min_value] )
@@ -3405,8 +3396,8 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: c75aea7a-1308-5c95-99e3-85893c397272
 
-	/// Status word for agent attainment.
-	measure 'Agent Status' = SWITCH ( [_Agent Status], "good", "Good", "watch", "Watch", "off", "Off", "n/a" )
+	/// Status word for agent attainment, as Track C leaderboard: On target, Close, Behind or n/a.
+	measure 'Agent Status' = SWITCH ( [_Agent Status], "good", "On target", "watch", "Close", "off", "Behind", "n/a" )
 		displayFolder: Design
 		lineageTag: c861d279-bcc8-5242-98e0-9c23d06937e6
 
@@ -3420,12 +3411,12 @@ table _measures
 		displayFolder: Design
 		lineageTag: 6994b7d2-f1fc-59cd-9816-f8f63dc394be
 
-	/// Tag for the 2026 ramp cohort (blank otherwise).
+	/// Tag for the 2026 ramp cohort, as Track C (Ramp); blank otherwise, so the row exists only through the leaderboard numbers.
 	measure 'Agent Tag' =
 			IF (
-			    SELECTEDVALUE ( dim_agent[is_ramp_cohort] ) = TRUE ()
-			    ,"Ramp cohort"
-			    ,""
+			    [_Agent Row]
+			        && SELECTEDVALUE ( dim_agent[is_ramp_cohort] ) = TRUE ()
+			    ,"Ramp"
 			)
 		displayFolder: 6 Agents
 		lineageTag: fec3acee-31a1-5d4e-8932-0bf02ac80526
@@ -3876,58 +3867,6 @@ table _measures
 		displayFolder: 7 Trend
 		lineageTag: 9ccca7b7-d14e-57a7-9418-9e6c88d75685
 
-	/// Paying-subscriber churn per month.
-	measure 'Churn % Trend' =
-			VAR _anchor       = [_Sel Anchor Index]
-			VAR _month        = SELECTEDVALUE ( dim_month[month_index] )
-			VAR _market       = [_Sel Market]
-			RETURN
-			    IF (
-			        _month > _anchor - 13
-			            && _month <= _anchor
-			        ,CALCULATE (
-			            [_Churn %]
-			            ,REMOVEFILTERS ( dim_month )
-			            ,dim_month[month_index] = _month
-			            ,KEEPFILTERS (
-			                FILTER (
-			                    ALL ( dim_market[market_code] )
-			                    ,_market = "ALL"
-			                        || dim_market[market_code] = _market
-			                )
-			            )
-			        )
-			    )
-		formatString: 0.0%
-		displayFolder: 7 Trend
-		lineageTag: c54b964e-d48a-5779-81bf-0ea9e7172beb
-
-	/// Paying-subscriber churn a year earlier.
-	measure 'Churn % Trend PY' =
-			VAR _anchor       = [_Sel Anchor Index]
-			VAR _month        = SELECTEDVALUE ( dim_month[month_index] )
-			VAR _market       = [_Sel Market]
-			RETURN
-			    IF (
-			        _month > _anchor - 13
-			            && _month <= _anchor
-			        ,CALCULATE (
-			            [_Churn %]
-			            ,REMOVEFILTERS ( dim_month )
-			            ,dim_month[month_index] = _month - 12
-			            ,KEEPFILTERS (
-			                FILTER (
-			                    ALL ( dim_market[market_code] )
-			                    ,_market = "ALL"
-			                        || dim_market[market_code] = _market
-			                )
-			            )
-			        )
-			    )
-		formatString: 0.0%
-		displayFolder: 7 Trend
-		lineageTag: 5d7ac1cc-6a60-5abd-a158-e820058a4deb
-
 	/// Funnel count of the stage on the axis (dim_funnel_stage), window.
 	measure 'Funnel Count' =
 			VAR _stage        = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
@@ -3961,48 +3900,6 @@ table _measures
 		displayFolder: 3 Funnel
 		lineageTag: b2b2c059-3497-5cff-9d6e-654fa29e42fd
 
-	/// Stage count / count of the previous shown stage.
-	measure 'Funnel % of Previous' =
-			VAR _order        = SELECTEDVALUE ( dim_funnel_stage[sort_order] )
-			VAR _prev_order   =
-			    CALCULATE (
-			        MAX ( dim_funnel_stage[sort_order] )
-			        ,ALLSELECTED ( dim_funnel_stage )
-			        ,dim_funnel_stage[sort_order] < _order
-			    )
-			VAR _prev         =
-			    CALCULATE (
-			        [Funnel Count]
-			        ,REMOVEFILTERS ( dim_funnel_stage )
-			        ,dim_funnel_stage[sort_order] = _prev_order
-			    )
-			RETURN
-			    IF ( NOT ISBLANK ( _prev_order ), DIVIDE ( [Funnel Count], _prev ) )
-		formatString: 0.0%
-		displayFolder: 3 Funnel
-		lineageTag: af80fb61-2009-53b7-901d-2d06cc341c4b
-
-	/// New-applicant stage count / previous shown stage.
-	measure 'Funnel New % of Previous' =
-			VAR _order        = SELECTEDVALUE ( dim_funnel_stage[sort_order] )
-			VAR _prev_order   =
-			    CALCULATE (
-			        MAX ( dim_funnel_stage[sort_order] )
-			        ,ALLSELECTED ( dim_funnel_stage )
-			        ,dim_funnel_stage[sort_order] < _order
-			    )
-			VAR _prev         =
-			    CALCULATE (
-			        [Funnel Count New]
-			        ,REMOVEFILTERS ( dim_funnel_stage )
-			        ,dim_funnel_stage[sort_order] = _prev_order
-			    )
-			RETURN
-			    IF ( NOT ISBLANK ( _prev_order ), DIVIDE ( [Funnel Count New], _prev ) )
-		formatString: 0.0%
-		displayFolder: 3 Funnel
-		lineageTag: 19bb96c8-9fd3-5bab-8f2a-baee53d1fffc
-
 	/// Median hours of the step ending at the stage on the axis: submitted -> approved, approved -> disbursed (the only timestamps in the data).
 	measure 'Stage Median Hours' =
 			VAR _stage        = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
@@ -4024,7 +3921,7 @@ table _measures
 		displayFolder: 3 Funnel
 		lineageTag: d23303c7-7a31-54f5-8892-f5ac146944bc
 
-	/// Outstanding of loans 1+ DPD at the snapshot (2026-09-30, the loan-level state on fact_loan), EUR at the Sep 2026 ACTUAL_AVG rate.
+	/// Outstanding of loans 30+ DPD at the snapshot (the P13 list, changes 29-30; was 1+ DPD) (2026-09-30, the loan-level state on fact_loan), EUR at the Sep 2026 ACTUAL_AVG rate.
 	measure 'Overdue Outstanding EUR' =
 			VAR _market       = [_Sel Market]
 			VAR _last_closed  = [_Last Closed Index]
@@ -4049,7 +3946,7 @@ table _measures
 			             RETURN
 			                 DIVIDE ( CALCULATE ( SUM ( fact_loan[outstanding_local_close] ) ), _rate )
 			        )
-			        ,KEEPFILTERS ( dim_loan_status[dpd_min] >= 1 )
+			        ,KEEPFILTERS ( dim_loan_status[dpd_min] >= 30 )
 			        ,KEEPFILTERS (
 			            FILTER (
 			                ALL ( dim_market[market_code] )
@@ -4133,25 +4030,30 @@ table _measures
 		displayFolder: 1 Loans
 		lineageTag: b1c32fa3-ea6c-5c4d-b6e8-fcc197e5c1e2
 
-	/// Window as text: Sep 2026, QTD Sep 2026, YTD Sep 2026, R12M to Sep 2026.
+	/// Window in words, as Track C windowLabel: Sep 2026, Jul–Sep 2026, Oct 2025–Sep 2026 (en dash).
 	measure '_Window Label' =
-			VAR _anchor       = [_Sel Anchor Index]
-			VAR _label        =
+			VAR _start       = [_Win Start]
+			VAR _end         = [_Win End]
+			VAR _label_end   =
 			    CALCULATE (
 			        MAX ( dim_month[month_label] )
 			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _anchor
+			        ,dim_month[month_index] = _end
+			    )
+			VAR _label_start =
+			    CALCULATE (
+			        MAX ( dim_month[month_label] )
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _start
 			    )
 			RETURN
 			    SWITCH (
-			        [_Sel Period]
-			        ,"QTD"
-			            ,"QTD " & _label
-			        ,"YTD"
-			            ,"YTD " & _label
-			        ,"R12M"
-			            ,"R12M to " & _label
-			        ,_label
+			        TRUE ()
+			        ,_start = _end
+			            ,_label_end
+			        ,INT ( ( _start - 1 ) / 12 ) = INT ( ( _end - 1 ) / 12 )
+			            ,LEFT ( _label_start, 3 ) & "–" & _label_end
+			        ,_label_start & "–" & _label_end
 			    )
 		isHidden
 		displayFolder: 9 Engine
@@ -4203,32 +4105,39 @@ table _measures
 		lineageTag: 3fde67dc-ccc9-5320-8863-3d12522d321d
 
 	/// Title of the leaderboard table.
-	measure 'Title Leaderboard' = "Agent & partner leaderboard - " & [_Window Label] & " - " & [_Market Name]
+	measure 'Title Leaderboard' = "Agent & partner leaderboard - " & [_Window Label]
 		displayFolder: Design
 		lineageTag: 2a474757-2f7d-5657-a42d-8302c36f5b59
 
-	/// Title of the clients table.
-	measure 'Title Clients Table' = "New clients - " & [_Window Label] & " - " & [_Market Name]
+	/// Title of the C11 acquisition-by-channel table (change 28), e.g. Acquisition by channel - Sep 2026 - All markets.
+	measure 'Title Clients Table' = "Acquisition by channel - " & [_Window Label] & " - " & [_Market Name]
 		displayFolder: Design
 		lineageTag: 38806ed5-b136-54f1-aa6b-aa3dc1799137
 
-	/// Title of the overdue loans table (loan-level state is the last closed month).
-	measure 'Title Overdue' = "Overdue loans - status at " & [_Closed Label] & " - " & [_Market Name]
+	/// Title of the P13 overdue-by-product table (change 29): the month-end book at the last month of the window, e.g. Overdue by product - Sep 2026 - All markets.
+	measure 'Title Overdue' = "Overdue by product - " & [_Anchor Label] & " - " & [_Market Name]
 		displayFolder: Design
 		lineageTag: 8ed5c4db-0e57-5f83-99ac-5d191714da35
 
-	/// Title of the stream x market matrix.
-	measure 'Title Stream Market' = "Stream x market - " & [_Window Label]
+	/// Title of the stream × market table, as Track C: Stream × market - Sep 2026.
+	measure 'Title Stream Market' = "Stream × market - " & [_Window Label]
 		displayFolder: Design
 		lineageTag: d100a0f3-aff0-5920-88f4-be9a4d6f8b9f
 
-	/// Loan detail title sentence from the carried filters, e.g. 1,296 loans - Romania - Step 12 - Sep 2026.
+	/// Loan detail title from the carried filters, in Track C order: 1,296 loans - Romania - Sep 2026; an agent first (Anna Wojcik - Poland); the selected market (All markets) when no market is carried.
 	measure 'Title Loan Detail' =
-			VAR _parts        =
-			    IF ( ISFILTERED ( dim_market[market_name] ), " - " & SELECTEDVALUE ( dim_market[market_name], "several markets" ) )
+			VAR _market      =
+			    IF (
+			        ISFILTERED ( dim_market[market_name] )
+			            || ISFILTERED ( dim_market[market_code] )
+			        ,SELECTEDVALUE ( dim_market[market_name], "several markets" )
+			        ,[_Market Name]
+			    )
+			VAR _parts       =
+			    IF ( ISFILTERED ( dim_agent[agent_name] ) || ISFILTERED ( dim_agent[agent_code] ), " - " & SELECTEDVALUE ( dim_agent[agent_name], "several agents" ) )
+			        & " - " & _market
 			        & IF ( ISFILTERED ( dim_product[product_name] ), " - " & SELECTEDVALUE ( dim_product[product_name], "several products" ) )
 			        & IF ( ISFILTERED ( dim_channel[channel_name] ), " - " & SELECTEDVALUE ( dim_channel[channel_name], "several channels" ) )
-			        & IF ( ISFILTERED ( dim_agent[agent_name] ), " - " & SELECTEDVALUE ( dim_agent[agent_name], "several agents" ) )
 			RETURN
 			    FORMAT ( [Loans], "#,0" ) & " loans" & _parts & " - " & [_Window Label]
 		displayFolder: Design
@@ -4310,16 +4219,16 @@ table _measures
 	/// Sub-values of card O1 (Loans issued), shown in its info tooltip (ADR-0012: not on the card face).
 	measure 'Card O1 Note' =
 			VAR _v1          = [Loans Budget]
-			VAR _v2          = IF ( ABS ( [Principal Budget EUR] ) >= 1000000, "€" & FORMAT ( [Principal Budget EUR] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [Principal Budget EUR] / 1000, "#,0" ) & "k" ) & " (" & FORMAT ( DIVIDE ( [Principal EUR], [Principal Budget EUR] ) - 1, "+0.0%;−0.0%;0.0%" ) & ")"
+			VAR _v2          = IF ( ABS ( [Principal Budget EUR] ) >= 1000000, "€" & FORMAT ( [Principal Budget EUR] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [Principal Budget EUR] / 1000, "#,0" ) & "k" ) & " (actual " & FORMAT ( DIVIDE ( [Principal EUR], [Principal Budget EUR] ) - 1, "+0.0%;−0.0%;0.0%" ) & ")"
 			VAR _v3          = "€" & FORMAT ( [Avg Ticket EUR], "#,0" ) & " (Budget " & "€" & FORMAT ( [Avg Ticket Budget EUR], "#,0" ) & ")"
 			VAR _v4          = IF ( ABS ( [Loans PY] ) >= 10000, FORMAT ( [Loans PY] / 1000, "#,0.0" ) & "k", FORMAT ( [Loans PY], "#,0" ) ) & " - " & IF ( ABS ( [Principal EUR PY] ) >= 1000000, "€" & FORMAT ( [Principal EUR PY] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [Principal EUR PY] / 1000, "#,0" ) & "k" )
 			VAR _v5          = IF ( ABS ( [Loans YTD] ) >= 10000, FORMAT ( [Loans YTD] / 1000, "#,0.0" ) & "k", FORMAT ( [Loans YTD], "#,0" ) ) & " - " & IF ( ABS ( [Principal EUR YTD] ) >= 1000000, "€" & FORMAT ( [Principal EUR YTD] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [Principal EUR YTD] / 1000, "#,0" ) & "k" )
 			RETURN
-			    "Budget loans " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Principal vs Budget " & _v2
-			        & " - " & "Avg ticket " & _v3
-			        & " - " & "Prior year " & _v4
-			        & " - " & FORMAT ( [_Anchor End Date], "yyyy" ) & " YTD" & " " & _v5
+			    "Budget loans: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Budget principal: " & _v2
+			        & "; " & "Avg ticket: " & _v3
+			        & "; " & "Prior year: " & _v4
+			        & "; " & FORMAT ( [_Anchor End Date], "yyyy" ) & " YTD: " & _v5
 		displayFolder: 8 Cards
 		lineageTag: e228fec0-8189-50cd-b7a7-0cbba3dec82b
 
@@ -4446,10 +4355,10 @@ table _measures
 			VAR _v3          = [New Clients Budget]
 			VAR _v4          = [New Clients PY]
 			RETURN
-			    "Share of loans " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
-			        & " - " & "By channel " & _v2
-			        & " - " & "Budget " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 10000, FORMAT ( _v4 / 1000, "#,0.0" ) & "k", FORMAT ( _v4, "#,0" ) ) )
+			    "Share of loans: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
+			        & "; " & _v2
+			        & "; " & "Budget: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 10000, FORMAT ( _v4 / 1000, "#,0.0" ) & "k", FORMAT ( _v4, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: fd00ae8c-6b35-591b-8cc1-255349a30d5c
 
@@ -4573,17 +4482,17 @@ table _measures
 	measure 'Card O3 Note' =
 			VAR _v1          = FORMAT ( [Returning Clients], "#,0" ) & " of " & FORMAT ( [Borrowers], "#,0" )
 			VAR _v2          = [Repeat Share]
-			VAR _v3          = [_Month Label Back] & ") " & FORMAT ( [180-day Repeat %], "0.0%" )
+			VAR _v3          = [_Month Label Back] & "): " & FORMAT ( [180-day Repeat %], "0.0%" )
 			VAR _v4          = [90-day Repeat %]
 			VAR _v5          = [Returning % PY]
 			VAR _v6          = "none for this ratio"
 			RETURN
-			    "Returning borrowers " & _v1
-			        & " - " & "Loan-weighted " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
-			        & " - " & "180-day repeat (cohort " & _v3
-			        & " - " & "90-day repeat " & IF ( ISBLANK ( _v4 ), "n/a", FORMAT ( _v4, "0.0%" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v5 ), "n/a", FORMAT ( _v5, "0.0%" ) )
-			        & " - " & "Budget " & _v6
+			    "Returning borrowers: " & _v1
+			        & "; " & "Loan-weighted: " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
+			        & "; " & "180-day repeat (cohort " & _v3
+			        & "; " & "90-day repeat: " & IF ( ISBLANK ( _v4 ), "n/a", FORMAT ( _v4, "0.0%" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v5 ), "n/a", FORMAT ( _v5, "0.0%" ) )
+			        & "; " & "Budget: " & _v6
 		displayFolder: 8 Cards
 		lineageTag: a42a597b-eff6-5b37-b953-4bfc1ddc87a2
 
@@ -4708,16 +4617,16 @@ table _measures
 			VAR _v1          = IF ( ABS ( [DPD30 Balance EUR] ) >= 1000000, "€" & FORMAT ( [DPD30 Balance EUR] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [DPD30 Balance EUR] / 1000, "#,0" ) & "k" ) & " of " & IF ( ABS ( [Outstanding EUR] ) >= 1000000, "€" & FORMAT ( [Outstanding EUR] / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( [Outstanding EUR] / 1000, "#,0" ) & "k" )
 			VAR _v2          = [DPD90 %]
 			VAR _v3          = [DPD30 Count %]
-			VAR _v4          = [_Month Label Back] & ") " & FORMAT ( [Vintage 6m Bad Rate], "0.0%" )
+			VAR _v4          = [_Month Label Back] & "): " & FORMAT ( [Vintage 6m Bad Rate], "0.0%" )
 			VAR _v5          = [DPD30 Budget %]
 			VAR _v6          = [DPD30 % PY]
 			RETURN
-			    "30+ DPD balance " & _v1
-			        & " - " & "90+ DPD by balance " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
-			        & " - " & "30+ by count " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "0.0%" ) )
-			        & " - " & "Vintage 6m bad rate ( " & _v4
-			        & " - " & "Budget appetite (outstanding-weighted) " & IF ( ISBLANK ( _v5 ), "n/a", FORMAT ( _v5, "0.0%" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v6 ), "n/a", FORMAT ( _v6, "0.0%" ) )
+			    "30+ DPD balance: " & _v1
+			        & "; " & "90+ DPD by balance: " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
+			        & "; " & "30+ by count: " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "0.0%" ) )
+			        & "; " & "Vintage 6m bad rate (" & _v4
+			        & "; " & "Budget 30+ appetite: " & IF ( ISBLANK ( _v5 ), "n/a", FORMAT ( _v5, "0.0%" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v6 ), "n/a", FORMAT ( _v6, "0.0%" ) )
 		displayFolder: 8 Cards
 		lineageTag: 0e978562-7220-5eef-8780-7a5d0c1122cc
 
@@ -4792,7 +4701,7 @@ table _measures
 		displayFolder: 9 Engine
 		lineageTag: 80b5b499-e0aa-58e3-b733-24aac0b0b72d
 
-	/// New clients of the window per acquisition channel with their share, largest first, e.g. App 3,620 (37%) - Partner 2,846 (29%) (O2 info, as Track C).
+	/// New clients of the window per acquisition channel with their share, largest first, e.g. App: 3,620 (37%); Partner: 2,846 (29%) (O2 info, as Track C).
 	measure 'New Clients Channels' =
 			VAR _total        = [New Clients]
 			VAR _channels     =
@@ -4804,9 +4713,9 @@ table _measures
 			    CONCATENATEX (
 			        FILTER ( _channels, NOT ISBLANK ( [@n] ) )
 			        ,SWITCH ( dim_channel[channel_code], "APP", "App", "PAID", "Paid", "PARTNER", "Partner", "Agent" )
-			            & " " & IF ( [@n] >= 9999.5, FORMAT ( [@n] / 1000, "#,0.0" ) & "k", FORMAT ( [@n], "#,0" ) )
+			            & ": " & IF ( [@n] >= 9999.5, FORMAT ( [@n] / 1000, "#,0.0" ) & "k", FORMAT ( [@n], "#,0" ) )
 			            & " (" & FORMAT ( DIVIDE ( [@n], _total ), "0%" ) & ")"
-			        ," - "
+			        ,"; "
 			        ,[@n], DESC
 			    )
 		displayFolder: 2 Clients
@@ -4876,8 +4785,8 @@ table _measures
 			VAR _v1          = [Loans Budget]
 			VAR _v2          = [Loans PY]
 			RETURN
-			    "Budget " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Budget: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: c35f1e92-d683-5db8-a2e3-6026545e80ee
 
@@ -4976,10 +4885,10 @@ table _measures
 			VAR _v3          = DIVIDE ( [Principal EUR at Budget FX], [Principal Budget EUR] ) - 1
 			VAR _v4          = [Principal EUR PY]
 			RETURN
-			    "Budget " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "At Budget FX " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Δ vs Budget at Budget FX " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "+0.0%;−0.0%;0.0%" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
+			    "Budget: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "At Budget FX: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Δ vs Budget at Budget FX: " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "+0.0%;−0.0%;0.0%" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: f0d8e1fa-ea3d-528f-aa7e-1ddbfdd1422d
 
@@ -5063,9 +4972,9 @@ table _measures
 			VAR _v2          = [Avg Ticket Budget EUR]
 			VAR _v3          = [Avg Ticket EUR PY]
 			RETURN
-			    "Step 12 share of loans " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
-			        & " - " & "Budget ticket " & IF ( ISBLANK ( _v2 ), "n/a", "€" & FORMAT ( _v2, "#,0" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v3 ), "n/a", "€" & FORMAT ( _v3, "#,0" ) )
+			    "Step 12 share of loans: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
+			        & "; " & "Budget ticket: " & IF ( ISBLANK ( _v2 ), "n/a", "€" & FORMAT ( _v2, "#,0" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v3 ), "n/a", "€" & FORMAT ( _v3, "#,0" ) )
 		displayFolder: 8 Cards
 		lineageTag: 7bcdffc6-b56a-5953-b01b-ed10809c598d
 
@@ -5131,9 +5040,9 @@ table _measures
 			VAR _v2          = [Apps Submitted]
 			VAR _v3          = [Approved]
 			RETURN
-			    "New clients " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
-			        & " - " & "Submitted " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
-			        & " - " & "Approved " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
+			    "New clients: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
+			        & "; " & "Submitted: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			        & "; " & "Approved: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 9427035a-aaaf-5805-9ef5-c63a4dba3c3d
 
@@ -5200,8 +5109,8 @@ table _measures
 			VAR _v1          = [Approved]
 			VAR _v2          = [Disbursed Apps]
 			RETURN
-			    "Approved " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Disbursed " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Approved: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Disbursed: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: fe449278-a57f-5fd9-afff-5b19969946cc
 
@@ -5267,7 +5176,7 @@ table _measures
 	measure 'Card L6 Note' =
 			VAR _v1          = [Time to Cash h PY]
 			RETURN
-			    "Prior year " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0" ) & " h" )
+			    "Prior year: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0" ) & " h" )
 		displayFolder: 8 Cards
 		lineageTag: 714aa184-a6ea-55ec-b730-1bb81732faae
 
@@ -5362,9 +5271,9 @@ table _measures
 			VAR _v2          = [New Clients Budget]
 			VAR _v3          = [New Clients PY]
 			RETURN
-			    "Share of loans " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
-			        & " - " & "Budget " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
+			    "Share of loans: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
+			        & "; " & "Budget: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 10000, FORMAT ( _v3 / 1000, "#,0.0" ) & "k", FORMAT ( _v3, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 47c226c3-bf5b-5de1-abea-bd7b074d4e51
 
@@ -5434,8 +5343,8 @@ table _measures
 			VAR _v1          = [Borrowers]
 			VAR _v2          = [Returning Clients]
 			RETURN
-			    "Borrowers " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Returning borrowers " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Borrowers: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Returning borrowers: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: bcd04a13-4996-5eee-b396-7872da7abc12
 
@@ -5502,8 +5411,8 @@ table _measures
 			VAR _v1          = [Repeat Loans]
 			VAR _v2          = [Loans]
 			RETURN
-			    "Repeat loans " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Loans " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Repeat loans: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Loans: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 4ef4b77f-c4c6-5173-a4c2-c702b88448f8
 
@@ -5570,8 +5479,8 @@ table _measures
 			VAR _v1          = [New Apps Submitted]
 			VAR _v2          = [New Apps Approved]
 			RETURN
-			    "First-time submitted " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "First-time approved " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "First-time submitted: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "First-time approved: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 3f55b02d-b2f4-55d8-ac17-2504c91a820f
 
@@ -5601,13 +5510,13 @@ table _measures
 		lineageTag: b8be4b5d-308d-5293-bedd-3be4c74ea3db
 		dataCategory: ImageUrl
 
-	/// KPI card C5 (180-day repeat) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. Fixed comparator. Read by the SVG and the parity tests.
+	/// KPI card C5 (Returning-client approval rate, change 25) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year. Read by the SVG and the parity tests.
 	measure '_Card C5 Parts' =
-			VAR _value        = [180-day Repeat %]
+			VAR _value        = [Returning-client Approval Rate]
 			VAR _value_text   = IF ( ISBLANK ( _value ), "n/a", FORMAT ( _value, "0.0%" ) )
-			VAR _cmp_code     = "PY cohort"
-			VAR _cmp_name     = "vs PY cohort"
-			VAR _cmp          = [180-day Repeat % PY Cohort]
+			VAR _cmp_code     = "PY"
+			VAR _cmp_name     = "vs PY"
+			VAR _cmp          = [Returning-client Approval Rate PY]
 			VAR _d            =
 			    IF (
 			        NOT ISBLANK ( _value ) && NOT ISBLANK ( _cmp )
@@ -5633,19 +5542,19 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: c7a2e773-6427-553b-abe9-046650f62e18
 
-	/// Sub-values of card C5 (180-day repeat), shown in its info tooltip (ADR-0012: not on the card face).
+	/// Sub-values of card C5 (Returning-client approval rate), shown in its info tooltip (ADR-0012: not on the card face), as Track C: returning submitted, returning approved, new-client approval rate.
 	measure 'Card C5 Note' =
-			VAR _v1          = [_Month Label Back]
-			VAR _v2          = [90-day Repeat %]
-			VAR _v3          = [180-day Repeat % PY Cohort]
+			VAR _v1          = [Returning Apps Submitted]
+			VAR _v2          = [Returning Apps Approved]
+			VAR _v3          = [New-client Approval Rate]
 			RETURN
-			    "Cohort " & _v1
-			        & " - " & "90-day repeat " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
-			        & " - " & "Same cohort a year earlier " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "0.0%" ) )
+			    "Returning submitted: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Returning approved: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			        & "; " & "New-client approval rate: " & IF ( ISBLANK ( _v3 ), "n/a", FORMAT ( _v3, "0.0%" ) )
 		displayFolder: 8 Cards
 		lineageTag: 90a0b627-e43c-52db-ba02-53c76cc9f7cd
 
-	/// KPI card C5 (180-day repeat), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C5 Parts.
+	/// KPI card C5 (Returning-client approval rate), 216 x 120 SVG: value, one comparator row (vs PY), status chip glyph + word; info button top-left, title at x 30 on two lines (2026-11-02, change 25). Text from _Card C5 Parts.
 	measure 'Card C5 SVG' =
 			VAR _p            = [_Card C5 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5659,7 +5568,7 @@ table _measures
 			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>180-day repeat</text>"
+			        & "<text x='30' y='30' font-size='10' font-weight='600' fill='#5C5C58'>Returning-client</text><text x='30' y='42' font-size='10' font-weight='600' fill='#5C5C58'>approval rate</text>"
 			        & _chip
 			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
 			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
@@ -5700,7 +5609,7 @@ table _measures
 	measure 'Card C6 Note' =
 			VAR _v1          = [Days Between Loans PY]
 			RETURN
-			    "Prior year " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0" ) & " d" )
+			    "Prior year: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0" ) & " d" )
 		displayFolder: 8 Cards
 		lineageTag: 82cc94c7-a4b9-57e1-b2f9-24b3d5a47620
 
@@ -5791,10 +5700,10 @@ table _measures
 			VAR _v3          = [Outstanding EUR]
 			VAR _v4          = [DPD30 Budget %]
 			RETURN
-			    "Month-end " & _v1
-			        & " - " & "30+ DPD balance " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Outstanding " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Planned (Budget) " & IF ( ISBLANK ( _v4 ), "n/a", FORMAT ( _v4, "0.0%" ) )
+			    "Month-end: " & _v1
+			        & "; " & "30+ DPD balance: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Outstanding: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Planned (Budget): " & IF ( ISBLANK ( _v4 ), "n/a", FORMAT ( _v4, "0.0%" ) )
 		displayFolder: 8 Cards
 		lineageTag: 171de618-062c-5c28-8bfe-4eebf835f632
 
@@ -5863,7 +5772,7 @@ table _measures
 	measure 'Card P2 Note' =
 			VAR _v1          = [Bal 90+ EUR]
 			RETURN
-			    "90+ DPD balance " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			    "90+ DPD balance: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: 66e6921a-f51c-5b23-b468-85e9387d430a
 
@@ -5930,8 +5839,8 @@ table _measures
 			VAR _v1          = [Loans DPD30 Count]
 			VAR _v2          = [Loans Active]
 			RETURN
-			    "Loans 30+ DPD " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Active loans " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Loans 30+ DPD: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Active loans: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 2360c8bf-ad55-54b5-9c14-4ef95a675902
 
@@ -5998,8 +5907,8 @@ table _measures
 			VAR _v1          = [_Month Label Back]
 			VAR _v2          = [Vintage 6m Bad Rate PY]
 			RETURN
-			    "Vintage " & _v1
-			        & " - " & "Same vintage a year earlier " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
+			    "Vintage: " & _v1
+			        & "; " & "Same vintage a year earlier: " & IF ( ISBLANK ( _v2 ), "n/a", FORMAT ( _v2, "0.0%" ) )
 		displayFolder: 8 Cards
 		lineageTag: fedcbf02-c6a7-52b5-9b81-7f7e23376b09
 
@@ -6065,7 +5974,7 @@ table _measures
 	measure 'Card P5 Note' =
 			VAR _v1          = [Roll 1-29 30]
 			RETURN
-			    "1–29 → 30+ " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
+			    "1–29 → 30+: " & IF ( ISBLANK ( _v1 ), "n/a", FORMAT ( _v1, "0.0%" ) )
 		displayFolder: 8 Cards
 		lineageTag: 1349e1ac-5c23-5335-92ef-65276d5f7cbf
 
@@ -6131,7 +6040,7 @@ table _measures
 	measure 'Card P6 Note' =
 			VAR _v1          = "annualised over the window"
 			RETURN
-			    "Basis " & _v1
+			    "Basis: " & _v1
 		displayFolder: 8 Cards
 		lineageTag: 253e898f-e1aa-5ee7-9cf4-e1624c4b531c
 
@@ -6228,11 +6137,11 @@ table _measures
 			VAR _v4          = [Subscription EUR]
 			VAR _v5          = [Revenue Budget EUR]
 			RETURN
-			    "Interest " & _v1
-			        & " - " & "Fees " & _v2
-			        & " - " & "Interchange " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Subscriptions " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Budget " & IF ( ISBLANK ( _v5 ), "n/a", IF ( ABS ( _v5 ) >= 1000000, "€" & FORMAT ( _v5 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v5 / 1000, "#,0" ) & "k" ) )
+			    "Interest: " & _v1
+			        & "; " & "Fees: " & _v2
+			        & "; " & "Interchange: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Subscriptions: " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Budget: " & IF ( ISBLANK ( _v5 ), "n/a", IF ( ABS ( _v5 ) >= 1000000, "€" & FORMAT ( _v5 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v5 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: 93d36f33-8d4d-53cf-98a6-54bacabeeb82
 
@@ -6285,8 +6194,8 @@ table _measures
 			VAR _v1          = [Revenue EUR]
 			VAR _v2          = [Revenue Budget EUR]
 			RETURN
-			    "Revenue " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Budget " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			    "Revenue: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Budget: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: 0342c039-a4b5-5d7d-916a-48dfa8cb6f65
 
@@ -6382,10 +6291,10 @@ table _measures
 			VAR _v3          = [Interest Fees Budget EUR]
 			VAR _v4          = [Interest Fees EUR PY]
 			RETURN
-			    "Interest " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Fees " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Budget " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
+			    "Interest: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Fees: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Budget: " & IF ( ISBLANK ( _v3 ), "n/a", IF ( ABS ( _v3 ) >= 1000000, "€" & FORMAT ( _v3 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v3 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v4 ), "n/a", IF ( ABS ( _v4 ) >= 1000000, "€" & FORMAT ( _v4 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v4 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: b258a69e-c0cd-5fd9-9270-f202df0f506c
 
@@ -6482,8 +6391,8 @@ table _measures
 			VAR _v1          = [Interchange Budget EUR]
 			VAR _v2          = [Interchange EUR PY]
 			RETURN
-			    "Budget " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Prior year " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			    "Budget: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Prior year: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: de850422-b1a9-5588-b4bd-21efa9b48cc2
 
@@ -6553,8 +6462,8 @@ table _measures
 			VAR _v1          = [Plus MRR EUR]
 			VAR _v2          = [Pro MRR EUR]
 			RETURN
-			    "Plus " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
-			        & " - " & "Pro " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
+			    "Plus: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 1000000, "€" & FORMAT ( _v1 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v1 / 1000, "#,0" ) & "k" ) )
+			        & "; " & "Pro: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 1000000, "€" & FORMAT ( _v2 / 1000000, "#,0.0" ) & "m", "€" & FORMAT ( _v2 / 1000, "#,0" ) & "k" ) )
 		displayFolder: 8 Cards
 		lineageTag: 198b41f9-80c8-55c8-8175-7c37d60a319d
 
@@ -6621,8 +6530,8 @@ table _measures
 			VAR _v1          = [Plus Subscribers]
 			VAR _v2          = [Pro Subscribers]
 			RETURN
-			    "Plus " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
-			        & " - " & "Pro " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
+			    "Plus: " & IF ( ISBLANK ( _v1 ), "n/a", IF ( ABS ( _v1 ) >= 10000, FORMAT ( _v1 / 1000, "#,0.0" ) & "k", FORMAT ( _v1, "#,0" ) ) )
+			        & "; " & "Pro: " & IF ( ISBLANK ( _v2 ), "n/a", IF ( ABS ( _v2 ) >= 10000, FORMAT ( _v2 / 1000, "#,0.0" ) & "k", FORMAT ( _v2, "#,0" ) ) )
 		displayFolder: 8 Cards
 		lineageTag: 2c27b1b1-e8da-5c1e-8e79-04a873c1bff4
 
@@ -6652,67 +6561,29 @@ table _measures
 		lineageTag: ce19b88c-3637-54a0-b5c7-6bdfc4ea87fb
 		dataCategory: ImageUrl
 
-	/// Returning % heat bins: < 45 % panel-2, 45-55 % grey-300, 55-65 % grey-400, >= 65 % ink.
-	measure 'Heat Fill Returning' =
-			VAR _v            = [Returning %]
-			RETURN
-			    SWITCH (
-			        TRUE ()
-			        ,ISBLANK ( _v )
-			            ,"#E9E8E4"
-			        ,_v < 0.45
-			            ,"#DEDDD8"
-			        ,_v < 0.55
-			            ,"#BDBBB5"
-			        ,_v < 0.65
-			            ,"#7F7E79"
-			        ,"#111111"
-			    )
-		displayFolder: Design
-		lineageTag: bbed81b4-f088-5387-8896-67dabcb87cfe
-
-	/// Cell text colour for the heat matrix (white on the two dark bins).
-	measure 'Heat Ink Returning' =
-			VAR _v            = [Returning %]
-			RETURN
-			    IF ( _v >= 0.55, "#FFFFFF", "#111111" )
-		displayFolder: Design
-		lineageTag: fd9c3f16-22c7-5b1a-8947-2f81c013421d
-
-	/// 30+ DPD heat bins: < 3 % panel-2, 3-4.5 % grey-300, 4.5-6 % grey-400, >= 6 % ink.
-	measure 'Heat Fill DPD30' =
-			VAR _v            = [DPD30 %]
-			RETURN
-			    SWITCH (
-			        TRUE ()
-			        ,ISBLANK ( _v )
-			            ,"#E9E8E4"
-			        ,_v < 0.03
-			            ,"#DEDDD8"
-			        ,_v < 0.045
-			            ,"#BDBBB5"
-			        ,_v < 0.06
-			            ,"#7F7E79"
-			        ,"#111111"
-			    )
-		displayFolder: Design
-		lineageTag: 11073a6a-d876-5ded-8a8f-ac98feae40ca
-
-	/// Cell text colour for the heat matrix (white on the two dark bins).
-	measure 'Heat Ink DPD30' =
-			VAR _v            = [DPD30 %]
-			RETURN
-			    IF ( _v >= 0.045, "#FFFFFF", "#111111" )
-		displayFolder: Design
-		lineageTag: 3db57f73-82b1-536d-b2da-23bf00d2d6ea
-
 	/// Text of the info button on every card and panel (the visual is filtered to its dim_card row; hover opens tt_card_info).
 	measure 'Info Glyph' = "i"
 		displayFolder: Design
 		lineageTag: caf11b5b-362a-5092-b895-de57da7807de
 
-	/// Info tooltip: card title.
-	measure 'Card Info Title' = SELECTEDVALUE ( dim_card[card_label] )
+	/// Info tooltip: the card title as Track C shows it (the table titles carry the window and market).
+	measure 'Card Info Title' =
+			VAR _code        = SELECTEDVALUE ( dim_card[card_code] )
+			RETURN
+			    SWITCH (
+			        _code
+			        ,"O9"
+			            ,[Title Markets]
+			        ,"L13"
+			            ,[Title Leaderboard]
+			        ,"C11"
+			            ,[Title Clients Table]
+			        ,"P13"
+			            ,[Title Overdue]
+			        ,"R13"
+			            ,[Title Stream Market]
+			        ,SELECTEDVALUE ( dim_card[card_label] )
+			    )
 		displayFolder: Design
 		lineageTag: 59dfc3f7-b2a8-55bf-962a-ccdbe77a8d3c
 
@@ -6725,11 +6596,6 @@ table _measures
 	measure 'Card Info Formula' = SELECTEDVALUE ( dim_card[formula] )
 		displayFolder: Design
 		lineageTag: 5b79e4fd-8fb8-5a83-b921-7ba68591c4c2
-
-	/// Info tooltip: source tables (Track C copy).
-	measure 'Card Info Source' = "Source: " & SELECTEDVALUE ( dim_card[source] )
-		displayFolder: Design
-		lineageTag: b28f8b98-930f-53e2-bc33-d846cff3c9b1
 
 	/// Info tooltip: the sub-values of the hovered card (Track C value lists); blank for panels.
 	measure 'Card Info Note' =
@@ -6793,81 +6659,2318 @@ table _measures
 			            ,[Card R5 Note]
 			        ,"R6"
 			            ,[Card R6 Note]
+			        ,"R11"
+			            ,[Card R11 Note]
 			    )
 		displayFolder: Design
 		lineageTag: f063b3b9-ca6a-5ec0-87dd-3e7cf28a2dd4
 
-	/// How to read: the selection in words, as Track C's periodLine (layout-spec §0.1: the sentence lives only in How to read), e.g. Showing Sep 2026 - Month - All markets - Actual vs Budget and Prior year - Closed through Sep 2026.
+	/// The selection in words, as Track C periodLine (2026-11-02, change 11), e.g. Showing Jul–Sep 2026 - Quarter - Romania - Actual vs Prior year and Budget - Closed through Sep 2026. Shown in the Filters panel and in How to read.
 	measure 'How To Read Showing' =
-			VAR _start        = [_Win Start]
-			VAR _end          = [_Win End]
-			VAR _from         = MAX ( _start, 1 )
-			VAR _label_end    =
-			    CALCULATE (
-			        MAX ( dim_month[month_label] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _end
-			    )
-			VAR _label_from   =
-			    CALCULATE (
-			        MAX ( dim_month[month_label] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _from
-			    )
-			VAR _range        =
-			    SWITCH (
-			        TRUE ()
-			        ,_from = _end
-			            ,_label_end
-			        ,INT ( ( _from - 1 ) / 12 ) = INT ( ( _end - 1 ) / 12 )
-			            ,LEFT ( _label_from, 3 ) & "–" & _label_end
-			        ,_label_from & "–" & _label_end
-			    )
-			VAR _first_label  =
-			    CALCULATE (
-			        MAX ( dim_month[month_label] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = 1
-			    )
-			VAR _shown        = IF ( _start >= 1, _range, _range & " (data from " & _first_label & ")" )
-			VAR _period       = SWITCH ( [_Sel Period], "QTD", "Quarter to date", "YTD", "Year to date", "R12M", "Last 12 months", "Month" )
-			VAR _versions     = IF ( [_Sel Comparator] = "PY", "Actual vs Prior year and Budget", "Actual vs Budget and Prior year" )
+			VAR _kind        = SWITCH ( [_Period Kind], "quarter", "Quarter", "year", "Year", "range", "Custom range", "Month" )
+			VAR _versions    = IF ( [_Sel Comparator] = "PY", "Actual vs Prior year and Budget", "Actual vs Budget and Prior year" )
 			RETURN
-			    "Showing " & _shown & " - " & _period & " - " & [_Market Name] & " - " & _versions & " - Closed through " & [_Closed Label]
+			    "Showing " & [_Window Label] & " - " & _kind & " - " & [_Market Name] & " - " & _versions & " - Closed through " & [_Closed Label]
 		displayFolder: Design
 		lineageTag: 4a599123-8b00-5dc1-9c0f-189662b9842e
 
-	/// The applied filters in one line beside the Filters button, as Track C's filterLine (2026-11-01): window - period - comparator - market, e.g. Sep 2026 - Month - vs Budget - All markets; Jul–Sep 2026 - Quarter to date - vs Prior year - Romania.
+	/// The applied filters in one line beside the Filters button, as Track C filterLine (2026-11-02, change 11): period - comparator - market, e.g. Sep 2026 - vs Budget - All markets; Q3 2026 - vs Prior year - Romania; Year 2026 (Jan–Sep) - vs Budget - Poland.
 	measure 'Header Filter Line' =
-			VAR _end          = [_Win End]
-			VAR _from         = MAX ( [_Win Start], 1 )
-			VAR _label_end    =
-			    CALCULATE (
-			        MAX ( dim_month[month_label] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _end
-			    )
-			VAR _label_from   =
-			    CALCULATE (
-			        MAX ( dim_month[month_label] )
-			        ,REMOVEFILTERS ( dim_month )
-			        ,dim_month[month_index] = _from
-			    )
-			VAR _range        =
-			    SWITCH (
-			        TRUE ()
-			        ,_from = _end
-			            ,_label_end
-			        ,INT ( ( _from - 1 ) / 12 ) = INT ( ( _end - 1 ) / 12 )
-			            ,LEFT ( _label_from, 3 ) & "–" & _label_end
-			        ,_label_from & "–" & _label_end
-			    )
-			VAR _period       = SWITCH ( [_Sel Period], "QTD", "Quarter to date", "YTD", "Year to date", "R12M", "Last 12 months", "Month" )
-			VAR _cmp          = IF ( [_Sel Comparator] = "PY", "Prior year", "Budget" )
+			VAR _cmp         = IF ( [_Sel Comparator] = "PY", "Prior year", "Budget" )
 			RETURN
-			    _range & " - " & _period & " - vs " & _cmp & " - " & [_Market Name]
+			    [_Period Label] & " - vs " & _cmp & " - " & [_Market Name]
 		displayFolder: Design
 		lineageTag: 1cb9e092-4ddb-5326-a239-44e034204604
+
+	/// Kind of the selected period, as Track C windows.ts periodKind: month, quarter (a calendar quarter), year (a calendar year, or the closed part of the current one) or range.
+	measure '_Period Kind' =
+			VAR _start       = [_Win Start]
+			VAR _end         = [_Win End]
+			VAR _closed      = [_Last Closed Index]
+			VAR _moy         = MOD ( _start - 1, 12 )
+			VAR _q_end       = _start + 2
+			VAR _y_end       = _start + 11
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,_start = _end
+			            ,"month"
+			        ,MOD ( _moy, 3 ) = 0
+			            && _end = MIN ( _q_end, _closed )
+			            ,IF ( _end = _q_end, "quarter", "range" )
+			        ,_moy = 0
+			            && _end = MIN ( _y_end, _closed )
+			            ,"year"
+			        ,"range"
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 729e081d-7f72-564c-a691-773085c092a8
+
+	/// The period in words, as Track C periodLabel: Sep 2026, Q4 2025, Year 2025, Year 2026 (Jan–Sep), Jun–Sep 2025.
+	measure '_Period Label' =
+			VAR _start       = [_Win Start]
+			VAR _end         = [_Win End]
+			VAR _kind        = [_Period Kind]
+			VAR _year        = FORMAT ( 2024 + INT ( ( _start - 1 ) / 12 ), "0" )
+			VAR _window      = [_Window Label]
+			RETURN
+			    SWITCH (
+			        _kind
+			        ,"quarter"
+			            ,"Q" & ( INT ( MOD ( _start - 1, 12 ) / 3 ) + 1 ) & " " & _year
+			        ,"year"
+			            ,IF (
+			                MOD ( _end - 1, 12 ) = 11
+			                ,"Year " & _year
+			                ,"Year " & _year & " (" & SUBSTITUTE ( _window, " " & _year, "" ) & ")"
+			            )
+			        ,_window
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 84d0d0f3-2f4e-5ca8-9c37-313a54e76ea5
+
+	/// 1 when the filters are at their defaults (the last closed month, Budget, All markets): the Reset button then looks disabled (change 12).
+	measure 'Filters At Default' =
+			VAR _closed      = [_Last Closed Index]
+			RETURN
+			    IF (
+			        [_Win Start] = _closed
+			            && [_Win End] = _closed
+			            && [_Sel Comparator] = "BUD"
+			            && [_Sel Market] = "ALL"
+			        ,1
+			        ,0
+			    )
+		formatString: 0
+		displayFolder: Design
+		lineageTag: 6f4ba336-a484-5fbe-bcf3-14577cac074f
+
+	/// Reset button text colour (fx): grey at the defaults, ink otherwise.
+	measure 'Filters Reset Ink' = IF ( [Filters At Default] = 1, "#9A9893", "#111111" )
+		displayFolder: Design
+		lineageTag: a0c9c32a-1eda-57b1-bac5-5e212d96c9db
+
+	/// Reset button outline colour (fx): light at the defaults, ink otherwise.
+	measure 'Filters Reset Outline' = IF ( [Filters At Default] = 1, "#DEDDD8", "#1A1A1A" )
+		displayFolder: Design
+		lineageTag: 64aae5ce-a9a4-5085-86ff-29a44b967ca4
+
+	/// Approval rate of returning applicants (approved / submitted, is_repeat).
+	measure '_Returning-client Approval Rate' =
+			CALCULATE (
+			    [_Approval Rate]
+			    ,fact_application[is_repeat] = TRUE ()
+			)
+		formatString: 0.0%
+		isHidden
+		displayFolder: 0 Base
+		lineageTag: 9dea26b6-dac7-5a5b-ade7-130a71ded2b4
+
+	/// Submitted applications of returning applicants in the window (C5 info).
+	measure 'Returning Apps Submitted' =
+			VAR _end         = [_Win End]
+			VAR _start       = [_Win Start]
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Apps Submitted]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,fact_application[is_repeat] = TRUE ()
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 3 Funnel
+		lineageTag: 30531acd-d9a6-5b8e-88ca-4f8bab610cb9
+
+	/// Approved applications of returning applicants in the window (C5 info).
+	measure 'Returning Apps Approved' =
+			VAR _end         = [_Win End]
+			VAR _start       = [_Win Start]
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Approved]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,fact_application[is_repeat] = TRUE ()
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 3 Funnel
+		lineageTag: 3b1b9bea-f835-51cf-aad7-89dd2c4cc8dc
+
+	/// Returning-client approval rate in the window: approved / submitted for applicants who borrowed before (C5, change 25).
+	measure 'Returning-client Approval Rate' =
+			VAR _end         = [_Win End]
+			VAR _start       = [_Win Start]
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Returning-client Approval Rate]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: 0.0%
+		displayFolder: 3 Funnel
+		lineageTag: 221a8d40-395c-5aed-a6ba-4d48921dc4e4
+
+	/// Returning-client approval rate, same months a year earlier (Actual).
+	measure 'Returning-client Approval Rate PY' =
+			VAR _end         = [_Win End] - 12
+			VAR _start       = [_Win Start] - 12
+			VAR _market      = [_Sel Market]
+			RETURN
+			    IF (
+			        _start >= 1
+			        ,CALCULATE (
+			            [_Returning-client Approval Rate]
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] >= _start
+			                && dim_month[month_index] <= _end
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: 0.0%
+		displayFolder: 3 Funnel
+		lineageTag: fb1afe1d-5ef8-5299-baab-ae906b3d97cb
+
+	/// New-applicant stage count / new-applicant leads (C8, change 15).
+	measure 'Funnel New % of Leads' =
+			VAR _leads       =
+			    CALCULATE (
+			        [Funnel Count New]
+			        ,REMOVEFILTERS ( dim_funnel_stage )
+			        ,dim_funnel_stage[stage_code] = "LEAD"
+			    )
+			RETURN
+			    DIVIDE ( [Funnel Count New], _leads )
+		formatString: 0.0%
+		displayFolder: 3 Funnel
+		lineageTag: 6a15e907-1983-5394-bae0-560166cda4c4
+
+	/// C8 bar label under the count: the window on Leads, x% of leads on every later step (Track C clients.ts C8).
+	measure 'Funnel New Label' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _pct         = [Funnel New % of Leads]
+			RETURN
+			    IF (
+			        _stage = "LEAD"
+			        ,[_Window Label]
+			        ,IF ( ISBLANK ( _pct ), "n/a", FORMAT ( _pct, "0.0%" ) ) & " of leads"
+			    )
+		displayFolder: 3 Funnel
+		lineageTag: c787081b-813c-5327-8a5c-1053702e2e46
+
+	/// Count of the next funnel stage (blank on Disbursed).
+	measure 'Funnel Next Count' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _next        =
+			    SWITCH (
+			        _stage
+			        ,"STARTED"
+			            ,"SUBMITTED"
+			        ,"SUBMITTED"
+			            ,"KYC_PASSED"
+			        ,"KYC_PASSED"
+			            ,"APPROVED"
+			        ,"APPROVED"
+			            ,"DISBURSED"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _next )
+			        ,CALCULATE (
+			            [Funnel Count]
+			            ,REMOVEFILTERS ( dim_funnel_stage )
+			            ,dim_funnel_stage[stage_code] = _next
+			        )
+			    )
+		formatString: #,0
+		isHidden
+		displayFolder: 3 Funnel
+		lineageTag: 86830b77-6be0-5056-bd59-7e62bc4ce07c
+
+	/// L8 ink segment: applications of the stage that reached the next stage (Disbursed: the whole stage). With Funnel Not Reached the stacked column equals the stage count (change 23).
+	measure 'Funnel Reached Next' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			RETURN
+			    IF ( _stage = "DISBURSED", [Funnel Count], [Funnel Next Count] )
+		formatString: #,0
+		displayFolder: 3 Funnel
+		lineageTag: e88d9448-2cf8-5130-9d82-50312eb0b779
+
+	/// L8 yellow segment: applications of the stage that did not reach the next stage (stage - next stage; none on Disbursed), Track C loans.ts L8 lost (change 23).
+	measure 'Funnel Not Reached' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _count       = [Funnel Count]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _stage ) && _stage <> "DISBURSED" && NOT ISBLANK ( _count )
+			        ,_count - [Funnel Next Count]
+			    )
+		formatString: #,0
+		displayFolder: 3 Funnel
+		lineageTag: 9709b792-f0a0-5bd7-ad3d-b94c36503154
+
+	/// Funnel stage count, same months a year earlier (Actual).
+	measure 'Funnel Count PY' =
+			VAR _end         = [_Win End] - 12
+			VAR _start       = [_Win Start] - 12
+			VAR _market      = [_Sel Market]
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			RETURN
+			    IF (
+			        _start >= 1
+			        ,CALCULATE (
+			            SWITCH (
+			                _stage
+			                ,"LEAD"
+			                    ,[_Leads]
+			                ,"STARTED"
+			                    ,[_Apps Started]
+			                ,"SUBMITTED"
+			                    ,[_Apps Submitted]
+			                ,"KYC_PASSED"
+			                    ,[_KYC Passed]
+			                ,"APPROVED"
+			                    ,[_Approved]
+			                ,"DISBURSED"
+			                    ,[_Disbursed Apps]
+			            )
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] >= _start
+			                && dim_month[month_index] <= _end
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: #,0
+		isHidden
+		displayFolder: 3 Funnel
+		lineageTag: 8d57fda6-2cb5-508b-9a3e-921b721abea1
+
+	/// Stage / previous stage (Started / leads), L8 (change 23).
+	measure 'Funnel Conv' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _prev_code   =
+			    SWITCH (
+			        _stage
+			        ,"STARTED"
+			            ,"LEAD"
+			        ,"SUBMITTED"
+			            ,"STARTED"
+			        ,"KYC_PASSED"
+			            ,"SUBMITTED"
+			        ,"APPROVED"
+			            ,"KYC_PASSED"
+			        ,"DISBURSED"
+			            ,"APPROVED"
+			    )
+			VAR _prev        =
+			    CALCULATE (
+			        [Funnel Count]
+			        ,REMOVEFILTERS ( dim_funnel_stage )
+			        ,dim_funnel_stage[stage_code] = _prev_code
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( _prev_code ), DIVIDE ( [Funnel Count], _prev ) )
+		formatString: 0.0%
+		displayFolder: 3 Funnel
+		lineageTag: 82415b72-578f-5d52-a020-5cfb3bd9b9b4
+
+	/// Stage / previous stage, same months a year earlier.
+	measure 'Funnel Conv PY' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _prev_code   =
+			    SWITCH (
+			        _stage
+			        ,"STARTED"
+			            ,"LEAD"
+			        ,"SUBMITTED"
+			            ,"STARTED"
+			        ,"KYC_PASSED"
+			            ,"SUBMITTED"
+			        ,"APPROVED"
+			            ,"KYC_PASSED"
+			        ,"DISBURSED"
+			            ,"APPROVED"
+			    )
+			VAR _prev        =
+			    CALCULATE (
+			        [Funnel Count PY]
+			        ,REMOVEFILTERS ( dim_funnel_stage )
+			        ,dim_funnel_stage[stage_code] = _prev_code
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( _prev_code ), DIVIDE ( [Funnel Count PY], _prev ) )
+		formatString: 0.0%
+		isHidden
+		displayFolder: 3 Funnel
+		lineageTag: a29be8b2-cff0-5cc7-b94d-b3da41cb0827
+
+	/// L8 bar label as Track C: 52% of leads - +1.1pp vs PY on Started, 83% - +0.4pp vs PY on later stages.
+	measure 'Funnel Label' =
+			VAR _stage       = SELECTEDVALUE ( dim_funnel_stage[stage_code] )
+			VAR _conv        = [Funnel Conv]
+			VAR _conv_py     = [Funnel Conv PY]
+			VAR _pp          = IF ( NOT ISBLANK ( _conv ) && NOT ISBLANK ( _conv_py ), ROUND ( ( _conv - _conv_py ) * 100, 1 ) )
+			VAR _pp_text     =
+			    IF (
+			        ISBLANK ( _pp )
+			        ,"n/a"
+			        ,IF ( _pp > 0, "+", IF ( _pp < 0, "−", "" ) ) & FORMAT ( ABS ( _pp ), "0.0" ) & "pp"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _conv )
+			        ,FORMAT ( _conv, "0%" ) & IF ( _stage = "STARTED", " of leads", "" ) & " - " & _pp_text & " vs PY"
+			    )
+		displayFolder: 3 Funnel
+		lineageTag: 202e94c8-558f-571d-9863-cf83ecca6c30
+
+	/// C9 cell (change 26): share of a quarter cohort (first-loan quarter, the four to the anchor's quarter) with a second loan within N days, as Track C cohortCurve: a cohort month counts at day N once its last day + N is on or before the last close (Sep 30, 2026); blank when no month of the cohort is that old (right-censored). A day column where no cohort has a second loan yet is dropped (blank).
+	measure 'Cohort Heat %' =
+			VAR _q           = SELECTEDVALUE ( param_cohort_quarter[quarter_index] )
+			VAR _days        = SELECTEDVALUE ( param_cohort_day[days] )
+			VAR _anchor_q    = INT ( ( [_Sel Anchor Index] - 1 ) / 3 )
+			VAR _cut         = DATE ( 2024, [_Last Closed Index] + 1, 1 ) - 1
+			VAR _market      = [_Sel Market]
+			VAR _filter      =
+			    FILTER (
+			        ALL ( dim_client[market_code] )
+			        ,_market = "ALL"
+			            || dim_client[market_code] = _market
+			    )
+			VAR _in_grid     = NOT ISBLANK ( _q ) && NOT ISBLANK ( _days ) && _q >= _anchor_q - 3 && _q <= _anchor_q
+			VAR _cell        =
+			    IF (
+			        _in_grid
+			        ,VAR _clients     =
+			            CALCULATE (
+			                COUNTROWS ( dim_client )
+			                ,dim_client[cohort_quarter_index] = _q
+			                ,DATE ( 2024, dim_client[cohort_month_index] + 1, 1 ) - 1 + _days <= _cut
+			                ,KEEPFILTERS ( _filter )
+			            )
+			         VAR _repeated    =
+			            CALCULATE (
+			                COUNTROWS ( dim_client )
+			                ,dim_client[cohort_quarter_index] = _q
+			                ,DATE ( 2024, dim_client[cohort_month_index] + 1, 1 ) - 1 + _days <= _cut
+			                ,dim_client[days_to_second_loan] <= _days
+			                ,NOT ISBLANK ( dim_client[days_to_second_loan] )
+			                ,KEEPFILTERS ( _filter )
+			            )
+			         RETURN
+			            DIVIDE ( _repeated + 0, _clients )
+			    )
+			VAR _column_max  =
+			    MAXX (
+			        GENERATESERIES ( _anchor_q - 3, _anchor_q )
+			        ,VAR _qq          = [Value]
+			         RETURN
+			            CALCULATE (
+			                COUNTROWS ( dim_client )
+			                ,dim_client[cohort_quarter_index] = _qq
+			                ,DATE ( 2024, dim_client[cohort_month_index] + 1, 1 ) - 1 + _days <= _cut
+			                ,dim_client[days_to_second_loan] <= _days
+			                ,NOT ISBLANK ( dim_client[days_to_second_loan] )
+			                ,KEEPFILTERS ( _filter )
+			            )
+			    )
+			RETURN
+			    IF ( _in_grid, IF ( _column_max > 0, _cell ) )
+		formatString: 0%
+		displayFolder: 2 Clients
+		lineageTag: 0efdf420-1b69-5dac-a2e1-9d1212bd0cdd
+
+	/// L10 cell (change 24): loans of the product x market in the window, 0 where the product has no loans in a shown market (Track C counts it as 0); blank for markets the region pick hides.
+	measure 'Loans Heat Cell' =
+			VAR _market      = [_Sel Market]
+			VAR _code        = SELECTEDVALUE ( dim_market[market_code] )
+			RETURN
+			    IF ( _market = "ALL" || _code = _market, [Loans] + 0 )
+		displayFolder: 1 Loans
+		lineageTag: ff97f77c-8a24-5f53-85c0-727bf3f7221f
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T Loans Heat Cell] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// L10 heat level 0-1 of the cell over every shown cell of the grid (all rows and columns together), as Track C heatLevels (change 32): (value - min) / (max - min); one value only = 0; blank cells stay blank. The grid is built explicitly (not ALLSELECTED): Power BI evaluates a field-value colour per cell with the cell as an outer filter.
+	measure 'Heat Level L10' =
+			VAR _v           = [Loans Heat Cell]
+			VAR _grid        =
+			    FILTER (
+			        ADDCOLUMNS (
+			            CROSSJOIN (
+			                CALCULATETABLE (
+			                    VALUES ( dim_product[product_name] )
+			                    ,REMOVEFILTERS ( dim_product )
+			                    ,dim_product[product_line] = "Microloan"
+			                )
+			                ,ALL ( dim_market[market_name] )
+			            )
+			            ,"@v",
+			                VAR _pp          = dim_product[product_name]
+			                VAR _mm          = dim_market[market_name]
+			                RETURN
+			                    CALCULATE (
+			                        [Loans Heat Cell]
+			                        ,REMOVEFILTERS ( dim_product )
+			                        ,REMOVEFILTERS ( dim_market )
+			                        ,dim_product[product_name] = _pp
+			                        ,dim_market[market_name] = _mm
+			                    )
+			        )
+			        ,NOT ISBLANK ( [@v] )
+			    )
+			VAR _lo          = MINX ( _grid, [@v] )
+			VAR _hi          = MAXX ( _grid, [@v] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v )
+			        ,IF ( _hi > _lo, DIVIDE ( _v - _lo, _hi - _lo ), 0 )
+			    )
+		formatString: 0.000
+		displayFolder: Design
+		lineageTag: 3d2aee0a-56d1-5208-82ab-6231e5da22ec
+
+	/// L10 cell fill (fx, Field value): grey #DEDDD8 -> yellow #FFD54A -> orange #F28C28 -> red #C0392B at levels 0, 1/3, 2/3, 1, linear in between (Track C heatFill); blank cells white.
+	measure 'Heat Fill L10' =
+			VAR _t           = [Heat Level L10]
+			VAR _x           = MIN ( MAX ( _t, 0 ), 1 ) * 3
+			VAR _k           = MIN ( INT ( _x ), 2 )
+			VAR _f           = _x - _k
+			VAR _r0          = SWITCH ( _k, 0, 222, 1, 255, 242 )
+			VAR _g0          = SWITCH ( _k, 0, 221, 1, 213, 140 )
+			VAR _b0          = SWITCH ( _k, 0, 216, 1, 74, 40 )
+			VAR _r1          = SWITCH ( _k, 0, 255, 1, 242, 192 )
+			VAR _g1          = SWITCH ( _k, 0, 213, 1, 140, 57 )
+			VAR _b1          = SWITCH ( _k, 0, 74, 1, 40, 43 )
+			VAR _r           = ROUND ( _r0 + ( _r1 - _r0 ) * _f, 0 )
+			VAR _g           = ROUND ( _g0 + ( _g1 - _g0 ) * _f, 0 )
+			VAR _b           = ROUND ( _b0 + ( _b1 - _b0 ) * _f, 0 )
+			VAR _hex         = "0123456789ABCDEF"
+			VAR _rgb         =
+			    "#"
+			        & MID ( _hex, INT ( _r / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _r, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _g / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _g, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _b / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _b, 16 ) + 1, 1 )
+			RETURN
+			    IF ( ISBLANK ( _t ), "#FFFFFF", _rgb )
+		displayFolder: Design
+		lineageTag: f7d8ab55-1345-501e-a81c-7a9068a21ef8
+
+	/// L10 cell text colour (fx): white from level 0.8, else ink.
+	measure 'Heat Ink L10' =
+			VAR _t           = [Heat Level L10]
+			RETURN
+			    IF ( NOT ISBLANK ( _t ) && _t >= 0.8, "#FFFFFF", "#111111" )
+		displayFolder: Design
+		lineageTag: bf61bd11-fa83-5f25-bb93-0b14ffa8058e
+
+	/// P9 heat level 0-1 of the cell over every shown cell of the grid (all rows and columns together), as Track C heatLevels (change 32): (value - min) / (max - min); one value only = 0; blank cells stay blank. The grid is built explicitly (not ALLSELECTED): Power BI evaluates a field-value colour per cell with the cell as an outer filter.
+	measure 'Heat Level P9' =
+			VAR _v           = [DPD30 %]
+			VAR _grid        =
+			    FILTER (
+			        ADDCOLUMNS (
+			            CROSSJOIN (
+			                CALCULATETABLE (
+			                    VALUES ( dim_product[product_name] )
+			                    ,REMOVEFILTERS ( dim_product )
+			                    ,dim_product[product_line] = "Microloan"
+			                )
+			                ,ALL ( dim_market[market_name] )
+			            )
+			            ,"@v",
+			                VAR _pp          = dim_product[product_name]
+			                VAR _mm          = dim_market[market_name]
+			                RETURN
+			                    CALCULATE (
+			                        [DPD30 %]
+			                        ,REMOVEFILTERS ( dim_product )
+			                        ,REMOVEFILTERS ( dim_market )
+			                        ,dim_product[product_name] = _pp
+			                        ,dim_market[market_name] = _mm
+			                    )
+			        )
+			        ,NOT ISBLANK ( [@v] )
+			    )
+			VAR _lo          = MINX ( _grid, [@v] )
+			VAR _hi          = MAXX ( _grid, [@v] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v )
+			        ,IF ( _hi > _lo, DIVIDE ( _v - _lo, _hi - _lo ), 0 )
+			    )
+		formatString: 0.000
+		displayFolder: Design
+		lineageTag: bcbd3193-af5e-574d-b658-d24403c826c9
+
+	/// P9 cell fill (fx, Field value): grey #DEDDD8 -> yellow #FFD54A -> orange #F28C28 -> red #C0392B at levels 0, 1/3, 2/3, 1, linear in between (Track C heatFill); blank cells white.
+	measure 'Heat Fill P9' =
+			VAR _t           = [Heat Level P9]
+			VAR _x           = MIN ( MAX ( _t, 0 ), 1 ) * 3
+			VAR _k           = MIN ( INT ( _x ), 2 )
+			VAR _f           = _x - _k
+			VAR _r0          = SWITCH ( _k, 0, 222, 1, 255, 242 )
+			VAR _g0          = SWITCH ( _k, 0, 221, 1, 213, 140 )
+			VAR _b0          = SWITCH ( _k, 0, 216, 1, 74, 40 )
+			VAR _r1          = SWITCH ( _k, 0, 255, 1, 242, 192 )
+			VAR _g1          = SWITCH ( _k, 0, 213, 1, 140, 57 )
+			VAR _b1          = SWITCH ( _k, 0, 74, 1, 40, 43 )
+			VAR _r           = ROUND ( _r0 + ( _r1 - _r0 ) * _f, 0 )
+			VAR _g           = ROUND ( _g0 + ( _g1 - _g0 ) * _f, 0 )
+			VAR _b           = ROUND ( _b0 + ( _b1 - _b0 ) * _f, 0 )
+			VAR _hex         = "0123456789ABCDEF"
+			VAR _rgb         =
+			    "#"
+			        & MID ( _hex, INT ( _r / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _r, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _g / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _g, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _b / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _b, 16 ) + 1, 1 )
+			RETURN
+			    IF ( ISBLANK ( _t ), "#FFFFFF", _rgb )
+		displayFolder: Design
+		lineageTag: 39a6714d-210f-58c2-92b2-6bcd55b11dfe
+
+	/// P9 cell text colour (fx): white from level 0.8, else ink.
+	measure 'Heat Ink P9' =
+			VAR _t           = [Heat Level P9]
+			RETURN
+			    IF ( NOT ISBLANK ( _t ) && _t >= 0.8, "#FFFFFF", "#111111" )
+		displayFolder: Design
+		lineageTag: 29815fa9-cf16-52c9-aa5c-c2438351bc3f
+
+	/// C9 heat level 0-1 of the cell over every shown cell of the grid (all rows and columns together), as Track C heatLevels (change 32): (value - min) / (max - min); one value only = 0; blank cells stay blank. The grid is built explicitly (not ALLSELECTED): Power BI evaluates a field-value colour per cell with the cell as an outer filter.
+	measure 'Heat Level C9' =
+			VAR _v           = [Cohort Heat %]
+			VAR _anchor_q    = INT ( ( [_Sel Anchor Index] - 1 ) / 3 )
+			VAR _grid        =
+			    FILTER (
+			        ADDCOLUMNS (
+			            CROSSJOIN (
+			                SELECTCOLUMNS ( GENERATESERIES ( _anchor_q - 3, _anchor_q ), "@q", [Value] )
+			                ,SELECTCOLUMNS ( GENERATESERIES ( 15, 180, 15 ), "@d", [Value] )
+			            )
+			            ,"@v",
+			                VAR _qq          = [@q]
+			                VAR _dd          = [@d]
+			                RETURN
+			                    CALCULATE (
+			                        [Cohort Heat %]
+			                        ,REMOVEFILTERS ( param_cohort_quarter )
+			                        ,REMOVEFILTERS ( param_cohort_day )
+			                        ,TREATAS ( { _qq }, param_cohort_quarter[quarter_index] )
+			                        ,TREATAS ( { _dd }, param_cohort_day[days] )
+			                    )
+			        )
+			        ,NOT ISBLANK ( [@v] )
+			    )
+			VAR _lo          = MINX ( _grid, [@v] )
+			VAR _hi          = MAXX ( _grid, [@v] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v )
+			        ,IF ( _hi > _lo, DIVIDE ( _v - _lo, _hi - _lo ), 0 )
+			    )
+		formatString: 0.000
+		displayFolder: Design
+		lineageTag: 0b3795d7-7d63-5548-a2b6-fe09a7646330
+
+	/// C9 cell fill (fx, Field value): grey #DEDDD8 -> yellow #FFD54A -> orange #F28C28 -> red #C0392B at levels 0, 1/3, 2/3, 1, linear in between (Track C heatFill); blank cells white.
+	measure 'Heat Fill C9' =
+			VAR _t           = [Heat Level C9]
+			VAR _x           = MIN ( MAX ( _t, 0 ), 1 ) * 3
+			VAR _k           = MIN ( INT ( _x ), 2 )
+			VAR _f           = _x - _k
+			VAR _r0          = SWITCH ( _k, 0, 222, 1, 255, 242 )
+			VAR _g0          = SWITCH ( _k, 0, 221, 1, 213, 140 )
+			VAR _b0          = SWITCH ( _k, 0, 216, 1, 74, 40 )
+			VAR _r1          = SWITCH ( _k, 0, 255, 1, 242, 192 )
+			VAR _g1          = SWITCH ( _k, 0, 213, 1, 140, 57 )
+			VAR _b1          = SWITCH ( _k, 0, 74, 1, 40, 43 )
+			VAR _r           = ROUND ( _r0 + ( _r1 - _r0 ) * _f, 0 )
+			VAR _g           = ROUND ( _g0 + ( _g1 - _g0 ) * _f, 0 )
+			VAR _b           = ROUND ( _b0 + ( _b1 - _b0 ) * _f, 0 )
+			VAR _hex         = "0123456789ABCDEF"
+			VAR _rgb         =
+			    "#"
+			        & MID ( _hex, INT ( _r / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _r, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _g / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _g, 16 ) + 1, 1 )
+			        & MID ( _hex, INT ( _b / 16 ) + 1, 1 ) & MID ( _hex, MOD ( _b, 16 ) + 1, 1 )
+			RETURN
+			    IF ( ISBLANK ( _t ), "#FFFFFF", _rgb )
+		displayFolder: Design
+		lineageTag: 987c2063-4389-57e4-bdf7-3edd826ec377
+
+	/// C9 cell text colour (fx): white from level 0.8, else ink.
+	measure 'Heat Ink C9' =
+			VAR _t           = [Heat Level C9]
+			RETURN
+			    IF ( NOT ISBLANK ( _t ) && _t >= 0.8, "#FFFFFF", "#111111" )
+		displayFolder: Design
+		lineageTag: 50455794-b0ec-5b8a-a8bc-520e40a48ec9
+
+	/// Repeat share of all loans in the window and market (company average, the C10 tick).
+	measure 'Repeat Share Avg' =
+			CALCULATE (
+			    [Repeat Share]
+			    ,REMOVEFILTERS ( dim_product )
+			)
+		formatString: 0.0%
+		displayFolder: 2 Clients
+		lineageTag: 5e2c6419-436e-53dc-9e38-2c0c55849b86
+
+	/// Market of the P12 bubbles: the card's own All / PL / RO / PT pick, else the page region (change 17).
+	measure '_P12 Market' =
+			VAR _page        = [_Sel Market]
+			RETURN
+			    IF (
+			        ISFILTERED ( param_p12_market )
+			        ,SELECTEDVALUE ( param_p12_market[market_code], _page )
+			        ,_page
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: bd7c1a4a-a5d9-5a11-962e-c2e434fe8bb4
+
+	/// P12 bubble size: outstanding at the last month of the window in the P12 market. Products without outstanding are left out (Track C).
+	measure 'P12 Outstanding EUR' =
+			VAR _mk          = [_P12 Market]
+			VAR _value       =
+			    CALCULATE (
+			        [Outstanding EUR]
+			        ,REMOVEFILTERS ( param_market )
+			        ,TREATAS ( { _mk }, param_market[market_code] )
+			    )
+			RETURN
+			    _value
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: 5f1f3108-30fa-5a73-86e8-023f2ceef834
+
+	/// P12 y: 30+ DPD by balance at the last month of the window in the P12 market. Products without outstanding are left out (Track C).
+	measure 'P12 DPD30 %' =
+			VAR _mk          = [_P12 Market]
+			VAR _value       =
+			    CALCULATE (
+			        [DPD30 %]
+			        ,REMOVEFILTERS ( param_market )
+			        ,TREATAS ( { _mk }, param_market[market_code] )
+			    )
+			VAR _size        =
+			    CALCULATE (
+			        [Outstanding EUR]
+			        ,REMOVEFILTERS ( param_market )
+			        ,TREATAS ( { _mk }, param_market[market_code] )
+			    )
+			RETURN
+			    IF ( _size > 0, _value )
+		formatString: 0.0%
+		displayFolder: 4 Portfolio
+		lineageTag: 94e8806d-7623-5344-b181-db80ee53ef09
+
+	/// P12 x: average ticket of the window's loans in the P12 market. Products without outstanding are left out (Track C).
+	measure 'P12 Avg Ticket EUR' =
+			VAR _mk          = [_P12 Market]
+			VAR _value       =
+			    CALCULATE (
+			        [Avg Ticket EUR]
+			        ,REMOVEFILTERS ( param_market )
+			        ,TREATAS ( { _mk }, param_market[market_code] )
+			    )
+			VAR _size        =
+			    CALCULATE (
+			        [Outstanding EUR]
+			        ,REMOVEFILTERS ( param_market )
+			        ,TREATAS ( { _mk }, param_market[market_code] )
+			    )
+			RETURN
+			    IF ( _size > 0, _value )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: ee5ae997-d7f1-58c8-958a-c29173e91b7b
+
+	/// P12 bubble fill (fx): the worst 30+ DPD product yellow, the others grey-300 (Track C role selected / c4).
+	measure 'P12 Bubble Fill' =
+			VAR _y          = [P12 DPD30 %]
+			VAR _worst       =
+			    MAXX (
+			        CALCULATETABLE (
+			            VALUES ( dim_product[product_name] )
+			            ,REMOVEFILTERS ( dim_product )
+			            ,dim_product[product_line] = "Microloan"
+			        )
+			        ,VAR _pp          = dim_product[product_name]
+			         RETURN
+			            CALCULATE (
+			                [P12 DPD30 %]
+			                ,REMOVEFILTERS ( dim_product )
+			                ,dim_product[product_name] = _pp
+			            )
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( _y ) && _y = _worst, "#FFD54A", "#BDBBB5" )
+		displayFolder: Design
+		lineageTag: dd62a562-9235-5351-b5f0-698122a41b64
+
+	/// Paying subscribers (Plus + Pro) who started a paid tier in the month, 13 months (R11, change 27).
+	measure 'Subscribers New Trend' =
+			VAR _anchor      = [_Sel Anchor Index]
+			VAR _month       = SELECTEDVALUE ( dim_month[month_index] )
+			VAR _market      = [_Sel Market]
+			RETURN
+			    IF (
+			        _month > _anchor - 13
+			            && _month <= _anchor
+			        ,CALCULATE (
+			            SUM ( fact_subscription_month[subscribers_new] )
+			            ,dim_product[product_code] IN { "PLUS", "PRO" }
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] = _month
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 7 Trend
+		lineageTag: f1d7f4d2-30e9-5f18-979c-063a55864622
+
+	/// Paying subscribers (Plus + Pro) who left a paid tier in the month, 13 months (R11, change 27).
+	measure 'Subscribers Churned Trend' =
+			VAR _anchor      = [_Sel Anchor Index]
+			VAR _month       = SELECTEDVALUE ( dim_month[month_index] )
+			VAR _market      = [_Sel Market]
+			RETURN
+			    IF (
+			        _month > _anchor - 13
+			            && _month <= _anchor
+			        ,CALCULATE (
+			            SUM ( fact_subscription_month[subscribers_churned] )
+			            ,dim_product[product_code] IN { "PLUS", "PRO" }
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] = _month
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 7 Trend
+		lineageTag: 0a5ab6e6-52fe-5683-b56f-8a5a10ee93ac
+
+	/// Sub-values of panel R11 in its info tooltip, as Track C: churn rate and net adds of the last month of the window.
+	measure 'Card R11 Note' =
+			VAR _anchor      = [_Sel Anchor Index]
+			VAR _market      = [_Sel Market]
+			VAR _label       = [_Anchor Label]
+			VAR _new         =
+			    CALCULATE (
+			        SUM ( fact_subscription_month[subscribers_new] )
+			        ,dim_product[product_code] IN { "PLUS", "PRO" }
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _anchor
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+			VAR _churned     =
+			    CALCULATE (
+			        SUM ( fact_subscription_month[subscribers_churned] )
+			        ,dim_product[product_code] IN { "PLUS", "PRO" }
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _anchor
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+			VAR _start       =
+			    CALCULATE (
+			        SUM ( fact_subscription_month[subscribers_start] )
+			        ,dim_product[product_code] IN { "PLUS", "PRO" }
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] = _anchor
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+			VAR _rate        = DIVIDE ( _churned, _start )
+			VAR _net         = _new - _churned
+			RETURN
+			    "Churn rate " & _label & ": " & IF ( ISBLANK ( _rate ), "n/a", FORMAT ( _rate, "0.0%" ) )
+			        & "; Net adds " & _label & ": " & IF ( ISBLANK ( _new ), "n/a", IF ( _net < 0, "−", "" ) & FORMAT ( ABS ( _net ), "#,0" ) )
+		displayFolder: 8 Cards
+		lineageTag: d3f74770-7db8-5b86-9122-7eb7062aed7a
+
+	/// New clients vs the same months a year earlier, % (C11: Budget has no channel split, so always vs PY).
+	measure 'New Clients Δ PY %' =
+			VAR _value       = [New Clients]
+			VAR _py          = [New Clients PY]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _value ) && NOT ISBLANK ( _py )
+			        ,DIVIDE ( _value - _py, _py )
+			    )
+		formatString: +0.0%;−0.0%;0.0%
+		displayFolder: 2 Clients
+		lineageTag: f04527f9-9337-588b-aa57-9f311bfebee9
+
+	/// C11 delta as shown (0.1 %), drives the status (MS-07 rule).
+	measure '_New Clients PY Status Delta' = ROUND ( [New Clients Δ PY %], 3 )
+		formatString: 0.000
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 994e2e9d-f46d-5680-823b-955bd65f7711
+
+	/// Status code of new clients vs PY (design-tokens §6 counts rule).
+	measure '_New Clients PY Status' =
+			VAR _d           = [_New Clients PY Status Delta]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _d )
+			        ,SWITCH (
+			            TRUE ()
+			            ,_d >= 0
+			                ,"good"
+			            ,_d >= -0.05
+			                ,"watch"
+			            ,"off"
+			        )
+			        ,"neutral"
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 554bbdbf-40a6-51a2-bb18-80548b63d5b1
+
+	/// C11 status chip: glyph + Good / Watch / Off vs PY, n/a without a prior year.
+	measure 'New Clients PY Status' =
+			VAR _s           = [_New Clients PY Status]
+			VAR _d           = [_New Clients PY Status Delta]
+			VAR _glyph       = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "◦ " ) )
+			RETURN
+			    SWITCH ( _s, "good", _glyph & "Good", "watch", _glyph & "Watch", "off", _glyph & "Off", "n/a" )
+		displayFolder: Design
+		lineageTag: 49cfc20d-5a59-5111-845b-08fc233edcf6
+
+	/// Status text colour (fx).
+	measure 'New Clients PY Status Ink' = SWITCH ( [_New Clients PY Status], "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
+		displayFolder: Design
+		lineageTag: e567bd2f-28a5-5ad4-8969-4b03c58188f6
+
+	/// Status chip fill (fx).
+	measure 'New Clients PY Status Fill' = SWITCH ( [_New Clients PY Status], "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" )
+		displayFolder: Design
+		lineageTag: 3dbdb01b-dd32-50a3-a4a0-9b1156ace901
+
+	/// Share of the window's new clients (C11 Share of new).
+	measure 'New Clients Share' =
+			DIVIDE (
+			    [New Clients]
+			    ,CALCULATE (
+			        [New Clients]
+			        ,REMOVEFILTERS ( dim_channel )
+			    )
+			)
+		formatString: 0.0%
+		displayFolder: 2 Clients
+		lineageTag: 827b0c68-f250-588b-bcc1-903267057aac
+
+	/// First loans / first-time leads in the window (C11 Lead → first loan: disbursed / leads of new applicants).
+	measure 'Lead to First Loan %' =
+			VAR _end         = [_Win End]
+			VAR _start       = [_Win Start]
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        DIVIDE ( [_Disbursed Apps], [_Leads] )
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,fact_application[is_repeat] = FALSE ()
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: 0.0%
+		displayFolder: 3 Funnel
+		lineageTag: 84c14366-afc5-5166-9ac7-619d2783a328
+
+	/// Principal of first loans / first loans in the window, EUR (C11 First ticket).
+	measure 'First Ticket EUR' =
+			DIVIDE (
+			    CALCULATE (
+			        [Principal EUR]
+			        ,fact_loan[is_first_loan] = TRUE ()
+			    )
+			    ,[New Clients]
+			)
+		formatString: €#,0
+		displayFolder: 2 Clients
+		lineageTag: 2f556fbf-1269-5d17-8033-38cfb78a194e
+
+	/// Title of the new-clients list window as Track C, e.g. 2,846 new clients - Partner - All markets - Sep 2026; All channels with no row selected (counts the list itself).
+	measure 'Title Clients List' =
+			VAR _code        = SELECTEDVALUE ( dim_channel[channel_code] )
+			VAR _channel     =
+			    IF (
+			        ISFILTERED ( dim_channel[channel_name] )
+			        ,SWITCH ( _code, "APP", "App", "PAID", "Paid", "PARTNER", "Partner", "AGENT", "Agent", "several channels" )
+			        ,"All channels"
+			    )
+			RETURN
+			    FORMAT ( [New Clients], "#,0" ) & " new clients - " & _channel & " - " & [_Market Name] & " - " & [_Window Label]
+		displayFolder: Design
+		lineageTag: 52e45183-94d9-5935-aa01-d7418d4096b1
+
+	/// Balance 1-29 DPD at the last month of the window, EUR (P13).
+	measure 'Bal 1-29 EUR' =
+			VAR _end         = [_Win End]
+			VAR _start       = _end
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Bal 1-29 EUR]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: cabc84e3-167b-5d50-a1a7-06e4ebb47100
+
+	/// Balance 30-59 DPD at the last month of the window, EUR (P13).
+	measure 'Bal 30-59 EUR' =
+			VAR _end         = [_Win End]
+			VAR _start       = _end
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Bal 30-59 EUR]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: 343d5544-03f9-544b-b1c5-681c22b5a4a4
+
+	/// Balance 60-89 DPD at the last month of the window, EUR (P13).
+	measure 'Bal 60-89 EUR' =
+			VAR _end         = [_Win End]
+			VAR _start       = _end
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Bal 60-89 EUR]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: 50772cb5-4b71-542b-81c6-dddb02010d70
+
+	/// Provision of the last month of the window, EUR (P13 Provision, Track C snapshot provision).
+	measure 'Provision Month-end EUR' =
+			VAR _end         = [_Win End]
+			VAR _start       = _end
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        [_Provision EUR]
+			        ,REMOVEFILTERS ( dim_month )
+			        ,dim_month[month_index] >= _start
+			            && dim_month[month_index] <= _end
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: d884f804-f64a-5fce-9ba4-7903236aaa3c
+
+	/// 30+ DPD % minus the same month a year earlier, in pp rounded to 0.1 (P13 vs PY: Budget 30+ DPD exists per market only).
+	measure 'DPD30 Δ PY pp' =
+			VAR _value       = [DPD30 %]
+			VAR _py          = [DPD30 % PY]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _value ) && NOT ISBLANK ( _py )
+			        ,ROUND ( ( _value - _py ) * 100, 1 )
+			    )
+		formatString: +0.0\p\p;−0.0\p\p;0.0\p\p
+		displayFolder: 4 Portfolio
+		lineageTag: 36ca4aea-80b8-53d8-ba8c-22a29567dff6
+
+	/// P13 delta as shown (pp).
+	measure '_DPD30 PY Status Delta' = [DPD30 Δ PY pp]
+		formatString: 0.0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 0efcf9d0-87ce-528c-a9ae-6dcbbe9f9f62
+
+	/// Status code of 30+ DPD vs PY (riskDown: down is good, up to +0.5 pp watch).
+	measure '_DPD30 PY Status' =
+			VAR _d           = [_DPD30 PY Status Delta]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _d )
+			        ,SWITCH (
+			            TRUE ()
+			            ,_d <= 0
+			                ,"good"
+			            ,_d <= 0.5
+			                ,"watch"
+			            ,"off"
+			        )
+			        ,"neutral"
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1115573f-d756-5bb5-9ded-8b1dd587ef1d
+
+	/// P13 status chip: glyph + Good / Watch / Off vs PY.
+	measure 'DPD30 PY Status' =
+			VAR _s           = [_DPD30 PY Status]
+			VAR _d           = [_DPD30 PY Status Delta]
+			VAR _glyph       = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "◦ " ) )
+			RETURN
+			    SWITCH ( _s, "good", _glyph & "Good", "watch", _glyph & "Watch", "off", _glyph & "Off", "n/a" )
+		displayFolder: Design
+		lineageTag: ec218998-24ee-5e5a-a21a-9d5df2f99f15
+
+	/// Status text colour (fx).
+	measure 'DPD30 PY Status Ink' = SWITCH ( [_DPD30 PY Status], "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
+		displayFolder: Design
+		lineageTag: a633563c-41a1-5669-bc64-d8537a1c36fc
+
+	/// Status chip fill (fx).
+	measure 'DPD30 PY Status Fill' = SWITCH ( [_DPD30 PY Status], "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" )
+		displayFolder: Design
+		lineageTag: 8d318a8c-83f6-500f-89c7-59d4705df0d0
+
+	/// Loans 30+ DPD with a balance at the last close (the loan-level state on fact_loan); the P13 list count (changes 29-30).
+	measure 'Overdue Loans 30+' =
+			VAR _market      = [_Sel Market]
+			RETURN
+			    CALCULATE (
+			        COUNTROWS ( fact_loan )
+			        ,KEEPFILTERS ( dim_loan_status[dpd_min] >= 30 )
+			        ,KEEPFILTERS ( fact_loan[outstanding_local_close] > 0 )
+			        ,KEEPFILTERS (
+			            FILTER (
+			                ALL ( dim_market[market_code] )
+			                ,_market = "ALL"
+			                    || dim_market[market_code] = _market
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Portfolio
+		lineageTag: ba581155-adb0-5829-a8cc-0a52884a9d0e
+
+	/// Title of the overdue-loans list window as Track C, e.g. 4,782 loans 30+ DPD - All products - All markets - Sep 2026 (the list holds the last close).
+	measure 'Title Overdue List' =
+			VAR _product     =
+			    IF (
+			        ISFILTERED ( dim_product[product_name] )
+			        ,SELECTEDVALUE ( dim_product[product_name], "several products" )
+			        ,"All products"
+			    )
+			RETURN
+			    FORMAT ( [Overdue Loans 30+], "#,0" ) & " loans 30+ DPD - " & _product & " - " & [_Market Name] & " - " & [_Closed Label]
+		displayFolder: Design
+		lineageTag: d2cb4883-96ef-58fe-907b-d9f9012ae21d
+
+	/// Leaderboard Status column: rank On target 3 / Close 2 / Behind 1 / n/a 0 (Track C STATUS_RANK), plus the attainment x 0.0001 so equal ranks keep the engine order; the format string shows the word, so a header click sorts by rank.
+	measure 'Agent Status Rank' =
+			VAR _rank        = SWITCH ( [_Agent Status], "good", 3, "watch", 2, "off", 1, 0 )
+			RETURN
+			    IF ( [_Agent Row], _rank + [Agent Attainment Shown] * 0.0001 )
+		displayFolder: Design
+		lineageTag: ecb0d83a-d706-5268-8ba9-e0ec56576cff
+
+		formatStringDefinition =
+				VAR _w           = SWITCH ( [_Agent Status], "good", "\O\n\ \t\a\r\g\e\t", "watch", "\C\l\o\s\e", "off", "\B\e\h\i\n\d", "\n\/\a" )
+				RETURN
+				    _w & ";" & _w
+
+	/// TRUE for an agent or partner with loans or a quota in the window (Track C leaderboard keeps only those rows).
+	measure '_Agent Row' =
+			[Agent Loans] > 0
+			    || [Agent Target] > 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 5b975a71-73d3-5123-b479-dac5390ee025
+
+	/// Loans sold by the agent or partner in the same window a year earlier (blank before Jan 2024).
+	measure 'Agent Loans PY' =
+			VAR _end          = [_Win End] - 12
+			VAR _start        = [_Win Start] - 12
+			VAR _market       = [_Sel Market]
+			RETURN
+			    IF (
+			        _start >= 1
+			        ,CALCULATE (
+			            [_Agent Loans]
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] >= _start
+			                && dim_month[month_index] <= _end
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 6 Agents
+		lineageTag: cc03b61e-3414-5813-812e-967e9107b647
+
+	/// Leaderboard Type column as Track C: Agent or Partner.
+	measure 'Agent Type' =
+			IF (
+			    [_Agent Row]
+			    ,SWITCH ( SELECTEDVALUE ( dim_agent[agent_type] ), "AGENT", "Agent", "PARTNER", "Partner" )
+			)
+		displayFolder: 6 Agents
+		lineageTag: 5954d89a-a475-58c2-8647-c01d77bf1bb4
+
+	/// Leaderboard Attainment % column: loans / quota; n/a without a quota (value just below 0, so it sorts last as in Track C); minus sort_order x 1e-9 so ties keep the engine order (attainment, then sort order).
+	measure 'Agent Attainment Shown' =
+			VAR _att         = [Agent Attainment]
+			VAR _order       = SELECTEDVALUE ( dim_agent[sort_order] ) * 0.000000001
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF ( ISBLANK ( _att ), -0.001, _att ) - _order
+			    )
+		displayFolder: Design
+		lineageTag: dc7aa200-c259-5164-b669-23c624b945d3
+
+		formatStringDefinition =
+				VAR _t           = IF ( ISBLANK ( [Agent Attainment] ), "\n\/\a", """" & FORMAT ( [Agent Attainment] * 100, "#,0.0" ) & "%""" )
+				RETURN
+				    _t & ";" & _t
+
+	/// Leaderboard tie-break added to the sortable number columns: equal values keep the engine order (attainment, then sort order), as Track C's stable sort.
+	measure '_Agent Tiebreak' = [Agent Attainment Shown] * 0.0000001
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e1491eca-1f98-5eec-ad3d-ce0f3a98546f
+
+	/// Track C text of Agent Loans Shown (tests read it).
+	measure '_T Agent Loans Shown' =
+			VAR _v           = COALESCE ( [Agent Loans], 0 )
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 9e139d62-ff12-5ee6-a1ac-ca1edfedb9fc
+
+	/// Leaderboard Loans column: loans in the window (0 when only a quota), Track C fmtCount text.
+	measure 'Agent Loans Shown' =
+			IF (
+			    [_Agent Row]
+			    ,COALESCE ( [Agent Loans], 0 )
+			) + [_Agent Tiebreak]
+		displayFolder: Design
+		lineageTag: 31eaa27f-bc12-5a60-ba0a-82db43b077da
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T Agent Loans Shown] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of Agent Quota Shown (tests read it).
+	measure '_T Agent Quota Shown' =
+			VAR _v           = IF ( [Agent Target] > 0, [Agent Target] )
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: c3521d82-a0d6-5b4d-901f-f508b6d14b65
+
+	/// Leaderboard Quota column: the AGENT_LOANS quota in the window; n/a without one (Track C target || null).
+	measure 'Agent Quota Shown' =
+			IF (
+			    [_Agent Row]
+			    ,COALESCE ( [Agent Target], 0 )
+			) + [_Agent Tiebreak]
+		displayFolder: Design
+		lineageTag: a04b7447-a7b6-507e-86d2-1d7e1505c8d5
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T Agent Quota Shown] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of Agent Principal Shown (tests read it).
+	measure '_T Agent Principal Shown' =
+			VAR _v           = COALESCE ( [Agent Principal EUR], 0 )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 6ac63517-c2f2-53b3-a926-c73d76381a6f
+
+	/// Leaderboard Principal column: principal sold in the window, EUR, Track C fmtEur text (€30k).
+	measure 'Agent Principal Shown' =
+			IF (
+			    [_Agent Row]
+			    ,COALESCE ( [Agent Principal EUR], 0 )
+			) + [_Agent Tiebreak]
+		displayFolder: Design
+		lineageTag: b27cfe18-07a5-55da-b192-834b6f41176b
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T Agent Principal Shown] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Reference of the leaderboard vs column: the quota under Budget, the agent's loans a year earlier under Prior year; blank when 0 (Track C deltaOf: no base).
+	measure '_Agent Δ Ref' = IF ( [_Sel Comparator] = "PY", IF ( [Agent Loans PY] > 0, [Agent Loans PY] ), IF ( [Agent Target] > 0, [Agent Target] ) )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e614e0ff-982d-50a4-a3a7-49712b4bd664
+
+	/// Leaderboard delta: loans / reference - 1 (blank without a reference).
+	measure '_Agent Δ' =
+			VAR _ref         = [_Agent Δ Ref]
+			RETURN
+			    IF ( NOT ISBLANK ( _ref ), DIVIDE ( COALESCE ( [Agent Loans], 0 ), _ref ) - 1 )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b147c61f-b8d1-5a44-8f3d-305e56d915e3
+
+	/// Track C text of Agent Δ Cmp % (tests read it).
+	measure '_T Agent Δ Cmp %' =
+			VAR _v           = [_Agent Δ]
+			VAR _d           = ROUND ( _v, 3 )
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _d > 0, "▲ +", IF ( _d < 0, "▼ −", "◦ " ) ) & FORMAT ( ABS ( _d ) * 100, "#,0.0" ) & "%"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 78beb39c-d5fc-5204-be43-38f965e861b0
+
+	/// Leaderboard vs quota / vs PY column (Track C cmpRow countUp): ▲ +85.3%; sorts by loans / reference - 1, n/a last.
+	measure 'Agent Δ Cmp %' =
+			VAR _d           = [_Agent Δ]
+			RETURN
+			    IF (
+			        [_Agent Row]
+			        ,IF ( ISBLANK ( _d ), -2, _d ) + [_Agent Tiebreak]
+			    )
+		displayFolder: Design
+		lineageTag: 2f7821c7-5991-5ceb-8ba9-fb03f7de6dd8
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T Agent Δ Cmp %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Leaderboard vs column text colour (fx): counts rule on the delta as shown.
+	measure 'Agent Δ Ink' =
+			VAR _d          = ROUND ( [_Agent Δ], 3 )
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _d )
+			            ,"#5C5C58"
+			        ,_d >= 0
+			            ,"#176B3D"
+			        ,_d >= -0.05
+			            ,"#8A5A00"
+			        ,"#B3261E"
+			    )
+		displayFolder: Design
+		lineageTag: faf60ff1-0901-5880-8b89-69ff1abd5c7f
+
+	/// Track C text of O9 Loans (tests read it).
+	measure '_T O9 Loans' =
+			VAR _v           = CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: d78c4500-fa84-5bfe-816e-174016d58928
+
+	/// O9 Loans column (every market, whatever the region pick), Track C fmtCount text (11.7k).
+	measure 'O9 Loans' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: a4a989a6-3b72-590a-aa1b-dad25ebc5261
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 Loans] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of O9 Δ (tests read it).
+	measure '_T O9 Δ' =
+			VAR _v           = CALCULATE ( [Loans Δ Cmp %], REMOVEFILTERS ( param_market ) )
+			VAR _d           = ROUND ( _v, 3 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _d > 0, "▲ +", IF ( _d < 0, "▼ −", "◦ " ) ) & FORMAT ( ABS ( _d ) * 100, "#,0.0" ) & "%"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: a2306153-6454-52af-81b6-20a119f064e0
+
+	/// O9 vs Budget / vs PY column, Track C cmpRow text (▲ +1.5%).
+	measure 'O9 Δ' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [Loans Δ Cmp %], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: ca5aba3d-92bd-55ac-9fb7-d0fea4c8d9fb
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 Δ] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of O9 Principal (tests read it).
+	measure '_T O9 Principal' =
+			VAR _v           = CALCULATE ( [Principal EUR], REMOVEFILTERS ( param_market ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 6d6ac3af-0288-58fa-bb3e-f70b2a34a279
+
+	/// O9 Principal column, Track C fmtEur text (€3.3m).
+	measure 'O9 Principal' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [Principal EUR], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: 4296dcb8-f087-50f7-b9b2-6f88d50c2045
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 Principal] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of O9 New Clients (tests read it).
+	measure '_T O9 New Clients' =
+			VAR _v           = COALESCE ( CALCULATE ( [New Clients], REMOVEFILTERS ( param_market ) ), 0 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 630845ce-8bce-5b69-a1aa-c39061788aef
+
+	/// O9 New clients column, Track C fmtCount text.
+	measure 'O9 New Clients' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [New Clients], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: c5a7a1fd-2ea5-5e68-bfe2-72ecb3a5b22c
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 New Clients] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of O9 Returning % (tests read it).
+	measure '_T O9 Returning %' =
+			VAR _v           = CALCULATE ( [Returning %], REMOVEFILTERS ( param_market ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF ( ISBLANK ( _v ), "n/a", FORMAT ( _v * 100, "#,0.0" ) & "%" )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 2d69f9ce-6d8d-5654-8401-458ef7615b5a
+
+	/// O9 Returning % column, Track C fmtPct text.
+	measure 'O9 Returning %' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [Returning %], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: 6ebf9eb9-af40-59b9-b309-93e3c613c2ad
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 Returning %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of O9 DPD30 % (tests read it).
+	measure '_T O9 DPD30 %' =
+			VAR _v           = CALCULATE ( [DPD30 %], REMOVEFILTERS ( param_market ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			        ,IF ( ISBLANK ( _v ), "n/a", FORMAT ( _v * 100, "#,0.0" ) & "%" )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 683513ed-7061-5478-9ff1-eaea73dd1591
+
+	/// O9 30+ DPD % column, Track C fmtPct text.
+	measure 'O9 DPD30 %' =
+			IF (
+			    NOT ISBLANK ( CALCULATE ( [Loans], REMOVEFILTERS ( param_market ) ) )
+			    ,COALESCE ( CALCULATE ( [DPD30 %], REMOVEFILTERS ( param_market ) ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: db476fa9-f87a-5bc3-8b72-a6ceae708baa
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T O9 DPD30 %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of C11 New Clients (tests read it).
+	measure '_T C11 New Clients' =
+			VAR _v           = COALESCE ( [New Clients], 0 )
+			RETURN
+			    IF (
+			        HASONEVALUE ( dim_channel[channel_code] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 857528f1-e195-52b7-8c81-205cc025c0b7
+
+	/// C11 New clients column, Track C fmtCount text.
+	measure 'C11 New Clients' =
+			IF (
+			    HASONEVALUE ( dim_channel[channel_code] )
+			    ,COALESCE ( [New Clients], 0 )
+			)
+		displayFolder: Design
+		lineageTag: c8c99c46-db96-5167-9a4e-c5cc627ea99a
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T C11 New Clients] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of C11 Δ (tests read it).
+	measure '_T C11 Δ' =
+			VAR _v           = [New Clients Δ PY %]
+			VAR _d           = ROUND ( _v, 3 )
+			RETURN
+			    IF (
+			        HASONEVALUE ( dim_channel[channel_code] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _d > 0, "▲ +", IF ( _d < 0, "▼ −", "◦ " ) ) & FORMAT ( ABS ( _d ) * 100, "#,0.0" ) & "%"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 9465e7f2-151b-5191-b98d-76661a23f312
+
+	/// C11 vs PY column, Track C cmpRow text (▲ +25.3%).
+	measure 'C11 Δ' =
+			IF (
+			    HASONEVALUE ( dim_channel[channel_code] )
+			    ,COALESCE ( [New Clients Δ PY %], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 83658540-99b6-548f-84e3-16653c29b123
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T C11 Δ] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Active (tests read it).
+	measure '_T P13 Active' =
+			VAR _v           = [Loans Active]
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: d84098af-ce01-59bd-a77a-c557ad10c089
+
+	/// P13 Active loans column, Track C fmtCount text (18.4k); n/a without a book.
+	measure 'P13 Active' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Loans Active], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 26e84afa-b3cc-57f2-b6fa-abe3c71707cd
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Active] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Outstanding (tests read it).
+	measure '_T P13 Outstanding' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Outstanding EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b7a40eee-a976-51d7-8d15-2da3240041c0
+
+	/// P13 Outstanding column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Outstanding' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Outstanding EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: f7cc6bf9-73e6-53dd-8d47-393d83ee9261
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Outstanding] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Bal 1-29 (tests read it).
+	measure '_T P13 Bal 1-29' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Bal 1-29 EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: edc93679-3ff0-5125-90d3-00fde5747e9d
+
+	/// P13 Bal 1-29 column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Bal 1-29' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Bal 1-29 EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: bbf7bf2a-00f3-5197-b63e-60714d0aa067
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Bal 1-29] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Bal 30-59 (tests read it).
+	measure '_T P13 Bal 30-59' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Bal 30-59 EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 19c4b219-890a-5190-b045-9d37efcde923
+
+	/// P13 Bal 30-59 column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Bal 30-59' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Bal 30-59 EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 949dea30-ca56-5a7b-98e7-5aea7bbd3a64
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Bal 30-59] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Bal 60-89 (tests read it).
+	measure '_T P13 Bal 60-89' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Bal 60-89 EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b9ac7e0e-0e6d-59be-949d-422f8a42e9f3
+
+	/// P13 Bal 60-89 column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Bal 60-89' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Bal 60-89 EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 052f2d4e-f37e-5766-86a4-7a7cb2b64c89
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Bal 60-89] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Bal 90+ (tests read it).
+	measure '_T P13 Bal 90+' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Bal 90+ EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1d5d2eed-1666-5c75-95af-e40301eacd8d
+
+	/// P13 Bal 90+ column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Bal 90+' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Bal 90+ EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 8b90569c-4bd5-5c7f-b313-c2d4f08e6a9a
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Bal 90+] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Provision (tests read it).
+	measure '_T P13 Provision' =
+			VAR _v           = IF ( NOT ISBLANK ( [Loans Active] ), COALESCE ( [Provision Month-end EUR], 0 ) )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: c7405816-3ea7-540b-811d-74cda4fbf1ac
+
+	/// P13 Provision column, Track C fmtEur text; n/a without a book.
+	measure 'P13 Provision' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [Provision Month-end EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: c9a0967f-7e3c-5e72-87c1-d956c991929d
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Provision] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 DPD30 % (tests read it).
+	measure '_T P13 DPD30 %' =
+			VAR _v           = [DPD30 %]
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF ( ISBLANK ( _v ), "n/a", FORMAT ( _v * 100, "#,0.0" ) & "%" )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 40411648-822b-5168-99dc-21854b41f50b
+
+	/// P13 30+ DPD % column, Track C fmtPct text.
+	measure 'P13 DPD30 %' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [DPD30 %], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 6e95f093-93be-54a1-90d1-62e213bb3c0a
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 DPD30 %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of P13 Δ (tests read it).
+	measure '_T P13 Δ' =
+			VAR _p           = [DPD30 Δ PY pp]
+			RETURN
+			    IF (
+			        SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			        ,IF (
+			            ISBLANK ( _p )
+			            ,"n/a"
+			            ,IF ( _p > 0, "▲ +", IF ( _p < 0, "▼ −", "◦ " ) ) & FORMAT ( ABS ( _p ), "#,0.0" ) & "pp"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 52c5b316-f4b5-53fb-915d-541aee3d9cf2
+
+	/// P13 vs PY column, Track C cmpRow riskDown text (▼ −1.5pp).
+	measure 'P13 Δ' =
+			IF (
+			    SELECTEDVALUE ( dim_product[product_line] ) = "Microloan"
+			    ,COALESCE ( [DPD30 Δ PY pp], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 79103857-0b68-5d3d-ac9e-907eaab248a9
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T P13 Δ] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// R13 Budget: interchange (CARD), subscriptions (Plus + Pro) and the total have one; interest and fees share the loan-product Budget, so n/a (Track C streamBudget).
+	measure '_R13 Budget' = IF ( SELECTEDVALUE ( dim_revenue_type[revenue_type_code], "ALL" ) IN { "INTERCHANGE", "SUBSCRIPTION", "ALL" }, [Revenue Budget EUR] )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: f344116d-fa03-55ab-ae07-e426ab8fa10e
+
+	/// R13 prior year: 0 when the stream had no revenue, blank when the window a year earlier is before the data.
+	measure '_R13 PY' = IF ( [_Win Start] - 12 >= 1, COALESCE ( [Revenue EUR PY], 0 ) )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 83a0033a-5539-5f5c-815a-b93e1893469c
+
+	/// Track C text of R13 Actual (tests read it).
+	measure '_T R13 Actual' =
+			VAR _v           = [Revenue EUR]
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 910d7d67-c8db-5f87-8efc-6967df72442d
+
+	/// R13 Actual column, Track C fmtEur text.
+	measure 'R13 Actual' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( [Revenue EUR], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 3e28468d-828d-50ff-bc6c-65d7cadc7993
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 Actual] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of R13 Budget (tests read it).
+	measure '_T R13 Budget' =
+			VAR _v           = [_R13 Budget]
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 3b153a9c-de86-5aa7-8560-5a1fec93d39c
+
+	/// R13 Budget column; n/a for interest and fees.
+	measure 'R13 Budget' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( [_R13 Budget], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 1c2bde0d-edcf-58c5-bf54-2615db34d62e
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 Budget] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of R13 Δ EUR (tests read it).
+	measure '_T R13 Δ EUR' =
+			VAR _v           = IF ( [_R13 Budget] <> 0, [Revenue EUR] - [_R13 Budget] )
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 38801020-4c02-5ec8-88ba-98b1dccf7e6b
+
+	/// R13 Δ € column: actual - Budget (fmtEur, no plus sign).
+	measure 'R13 Δ EUR' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( IF ( [_R13 Budget] <> 0, [Revenue EUR] - [_R13 Budget] ), 0 )
+			)
+		displayFolder: Design
+		lineageTag: 6ed9585b-1771-5dc9-ae64-653bc7c48f7f
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 Δ EUR] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of R13 Δ % (tests read it).
+	measure '_T R13 Δ %' =
+			VAR _v           = IF ( [_R13 Budget] <> 0, DIVIDE ( [Revenue EUR], [_R13 Budget] ) - 1 )
+			VAR _r           = ROUND ( _v * 100, 1 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _r > 0, "+", IF ( _r < 0, "−", "" ) ) & FORMAT ( ABS ( _r ), "#,0.0" ) & "%"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: afedd490-9653-5be6-b5ac-139863947f85
+
+	/// R13 Δ % column: actual / Budget - 1 (fmtDeltaPct).
+	measure 'R13 Δ %' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( DIVIDE ( [Revenue EUR], [_R13 Budget] ) - 1, 0 )
+			)
+		displayFolder: Design
+		lineageTag: 8fc40d87-1408-582f-8bda-8245b80c49a6
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 Δ %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of R13 PY (tests read it).
+	measure '_T R13 PY' =
+			VAR _v           = [_R13 PY]
+			VAR _a           = ABS ( _v )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _v < 0, "−", "" ) & "€"
+			                & SWITCH (
+			                    TRUE ()
+			                    ,_a >= 999950
+			                        ,FORMAT ( _a / 1000000, "#,0.0" ) & "m"
+			                    ,_a >= 999.5
+			                        ,FORMAT ( _a / 1000, "#,0" ) & "k"
+			                    ,FORMAT ( _a, "#,0" )
+			                )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 360744e0-fd74-5c0b-9699-3db3c07fb2fa
+
+	/// R13 PY € column.
+	measure 'R13 PY' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( [_R13 PY], 0 )
+			)
+		displayFolder: Design
+		lineageTag: 5d27a4c4-c999-5aa9-a245-d20e417aed6c
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 PY] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// Track C text of R13 Δ PY % (tests read it).
+	measure '_T R13 Δ PY %' =
+			VAR _v           = IF ( [_R13 PY] <> 0, DIVIDE ( [Revenue EUR], [_R13 PY] ) - 1 )
+			VAR _r           = ROUND ( _v * 100, 1 )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Revenue EUR] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( _r > 0, "+", IF ( _r < 0, "−", "" ) ) & FORMAT ( ABS ( _r ), "#,0.0" ) & "%"
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: fc9572be-109f-57ff-9639-f03069ca1355
+
+	/// R13 Δ vs PY % column.
+	measure 'R13 Δ PY %' =
+			IF (
+			    NOT ISBLANK ( [Revenue EUR] )
+			    ,COALESCE ( DIVIDE ( [Revenue EUR], [_R13 PY] ) - 1, 0 )
+			)
+		displayFolder: Design
+		lineageTag: 55f83ec8-3f41-5e61-86f5-f5f014fd2cf4
+
+		formatStringDefinition =
+				VAR _t           = """" & [_T R13 Δ PY %] & """"
+				RETURN
+				    _t & ";" & _t
+
+	/// R13 status delta as shown (0.1 %): vs the stream Budget (n/a for interest and fees) or the prior year (n/a when 0), as Track C streamTable.
+	measure '_Revenue Status Delta' =
+			VAR _value        = [Revenue EUR]
+			VAR _cmp          = IF ( [_Sel Comparator] = "PY", [_R13 PY], [_R13 Budget] )
+			RETURN
+			    IF ( NOT ISBLANK ( _value ) && _cmp <> 0, ROUND ( DIVIDE ( _value - _cmp, _cmp ), 3 ) )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 435b4ffb-d9b9-59e5-8dea-8a875f497acb
+
+	/// Track C text of the L10 cell (fmtCount: 2,447, 41.8k).
+	measure '_T Loans Heat Cell' =
+			VAR _v           = [Loans Heat Cell]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Loans Heat Cell] )
+			        ,IF (
+			            ISBLANK ( _v )
+			            ,"n/a"
+			            ,IF ( ABS ( _v ) >= 9999.5, FORMAT ( _v / 1000, "#,0.0" ) & "k", FORMAT ( _v, "#,0" ) )
+			        )
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 705eba4e-8811-5ee2-bc9e-35d6e8b71ccb
+
+	/// P9 cell: 30+ DPD % of the product x market; n/a where the product has no book in that market (Track C fmtPct(null)); blank for markets the region pick hides.
+	measure 'P9 Cell' =
+			VAR _market      = [_Sel Market]
+			VAR _code        = SELECTEDVALUE ( dim_market[market_code] )
+			RETURN
+			    IF ( _market = "ALL" || _code = _market, COALESCE ( [DPD30 %], 0 ) )
+		displayFolder: 4 Portfolio
+		lineageTag: d435706a-b90d-52a2-8f5b-06e59d29c5a4
+
+		formatStringDefinition =
+				IF ( ISBLANK ( [DPD30 %] ), "\n\/\a", "0.0%" )
+
+	/// Roll rate 1-29 to 30+ per month (P11 second line, Track C roll129; none in the first month of the data).
+	measure 'Roll 1-29 30 Trend' =
+			VAR _anchor       = [_Sel Anchor Index]
+			VAR _month        = SELECTEDVALUE ( dim_month[month_index] )
+			VAR _market       = [_Sel Market]
+			RETURN
+			    IF (
+			        _month > _anchor - 13
+			            && _month <= _anchor
+			            && _month > 1
+			        ,CALCULATE (
+			            [_Roll 1-29 30]
+			            ,REMOVEFILTERS ( dim_month )
+			            ,dim_month[month_index] = _month
+			            ,KEEPFILTERS (
+			                FILTER (
+			                    ALL ( dim_market[market_code] )
+			                    ,_market = "ALL"
+			                        || dim_market[market_code] = _market
+			                )
+			            )
+			        )
+			    )
+		formatString: 0.0%
+		displayFolder: 7 Trend
+		lineageTag: f032e60a-74be-567f-ae1e-d8b50b23b609
 
 	column measure_table
 		dataType: int64

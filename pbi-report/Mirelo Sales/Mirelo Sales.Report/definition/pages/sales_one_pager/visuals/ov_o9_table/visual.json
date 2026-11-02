@@ -38,11 +38,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Loans"
+                  "Property": "O9 Loans"
                 }
               },
-              "queryRef": "_measures.Loans",
-              "nativeQueryRef": "Loans",
+              "queryRef": "_measures.O9 Loans",
+              "nativeQueryRef": "O9 Loans",
               "displayName": "LOANS"
             },
             {
@@ -53,12 +53,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Loans Δ Cmp %"
+                  "Property": "O9 Δ"
                 }
               },
-              "queryRef": "_measures.Loans Δ Cmp %",
-              "nativeQueryRef": "Loans Δ Cmp %",
-              "displayName": "VS COMPARATOR"
+              "queryRef": "_measures.O9 Δ",
+              "nativeQueryRef": "O9 Δ",
+              "displayName": "VS BUDGET / PY"
             },
             {
               "field": {
@@ -68,12 +68,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Principal EUR m"
+                  "Property": "O9 Principal"
                 }
               },
-              "queryRef": "_measures.Principal EUR m",
-              "nativeQueryRef": "Principal EUR m",
-              "displayName": "PRINCIPAL"
+              "queryRef": "_measures.O9 Principal",
+              "nativeQueryRef": "O9 Principal",
+              "displayName": "PRINCIPAL €"
             },
             {
               "field": {
@@ -83,11 +83,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "New Clients"
+                  "Property": "O9 New Clients"
                 }
               },
-              "queryRef": "_measures.New Clients",
-              "nativeQueryRef": "New Clients",
+              "queryRef": "_measures.O9 New Clients",
+              "nativeQueryRef": "O9 New Clients",
               "displayName": "NEW CLIENTS"
             },
             {
@@ -98,12 +98,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Returning %"
+                  "Property": "O9 Returning %"
                 }
               },
-              "queryRef": "_measures.Returning %",
-              "nativeQueryRef": "Returning %",
-              "displayName": "RETURNING"
+              "queryRef": "_measures.O9 Returning %",
+              "nativeQueryRef": "O9 Returning %",
+              "displayName": "RETURNING %"
             },
             {
               "field": {
@@ -113,12 +113,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "DPD30 %"
+                  "Property": "O9 DPD30 %"
                 }
               },
-              "queryRef": "_measures.DPD30 %",
-              "nativeQueryRef": "DPD30 %",
-              "displayName": "30+ DPD"
+              "queryRef": "_measures.O9 DPD30 %",
+              "nativeQueryRef": "O9 DPD30 %",
+              "displayName": "30+ DPD %"
             },
             {
               "field": {
@@ -427,6 +427,43 @@
             ],
             "metadata": "_measures.Loans Status"
           }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "_measures"
+                        }
+                      },
+                      "Property": "Loans Status Ink"
+                    }
+                  }
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ],
+            "metadata": "_measures.O9 Δ"
+          }
         }
       ],
       "total": [
@@ -468,7 +505,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Loans"
+            "metadata": "_measures.O9 Loans"
           }
         },
         {
@@ -482,7 +519,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Loans Δ Cmp %"
+            "metadata": "_measures.O9 Δ"
           }
         },
         {
@@ -496,7 +533,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Principal EUR m"
+            "metadata": "_measures.O9 Principal"
           }
         },
         {
@@ -510,7 +547,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.New Clients"
+            "metadata": "_measures.O9 New Clients"
           }
         },
         {
@@ -524,7 +561,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Returning %"
+            "metadata": "_measures.O9 Returning %"
           }
         },
         {
@@ -538,7 +575,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.DPD30 %"
+            "metadata": "_measures.O9 DPD30 %"
           }
         },
         {
@@ -582,7 +619,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Loans"
+            "metadata": "_measures.O9 Loans"
           }
         },
         {
@@ -610,7 +647,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Loans Δ Cmp %"
+            "metadata": "_measures.O9 Δ"
           }
         },
         {
@@ -638,7 +675,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Principal EUR m"
+            "metadata": "_measures.O9 Principal"
           }
         },
         {
@@ -666,7 +703,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.New Clients"
+            "metadata": "_measures.O9 New Clients"
           }
         },
         {
@@ -694,7 +731,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Returning %"
+            "metadata": "_measures.O9 Returning %"
           }
         },
         {
@@ -722,7 +759,7 @@
             }
           },
           "selector": {
-            "metadata": "_measures.DPD30 %"
+            "metadata": "_measures.O9 DPD30 %"
           }
         }
       ]

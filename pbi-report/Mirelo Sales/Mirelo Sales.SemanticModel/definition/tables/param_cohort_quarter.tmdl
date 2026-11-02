@@ -1,0 +1,35 @@
+/// Rows of the C9 cohort heatmap (change 26): first-loan quarters Q1 2024 ... Q4 2026 (quarter_index 0 = Q1 2024, as dim_client cohort_quarter_index). Disconnected; the measure shows the four quarters to the anchor's quarter.
+table param_cohort_quarter
+	lineageTag: fd267c59-6080-5088-96d4-68ab93749b78
+
+	column quarter_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 048dad2a-26c5-50f7-8988-65fa57422285
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [quarter_index]
+
+		annotation SummarizationSetBy = User
+
+	column quarter_label
+		dataType: string
+		lineageTag: 5afd2cdd-b6d7-5b54-9cef-fb86a9fc88bf
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [quarter_label]
+		sortByColumn: quarter_index
+
+		annotation SummarizationSetBy = User
+
+	partition param_cohort_quarter = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    GENERATESERIES ( 0, 11, 1 )
+				    ,"quarter_index", [Value]
+				    ,"quarter_label", "Q" & ( MOD ( [Value], 4 ) + 1 ) & " " & ( 2024 + INT ( [Value] / 4 ) )
+				)
+
+	annotation PBI_ResultType = Table

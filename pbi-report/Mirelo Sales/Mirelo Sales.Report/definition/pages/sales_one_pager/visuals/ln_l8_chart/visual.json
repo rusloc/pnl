@@ -10,7 +10,7 @@
     "tabOrder": 880
   },
   "visual": {
-    "visualType": "clusteredColumnChart",
+    "visualType": "columnChart",
     "query": {
       "queryState": {
         "Category": {
@@ -43,12 +43,27 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Funnel Count"
+                  "Property": "Funnel Reached Next"
                 }
               },
-              "queryRef": "_measures.Funnel Count",
-              "nativeQueryRef": "Funnel Count",
+              "queryRef": "_measures.Funnel Reached Next",
+              "nativeQueryRef": "Funnel Reached Next",
               "displayName": "Applications"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel Not Reached"
+                }
+              },
+              "queryRef": "_measures.Funnel Not Reached",
+              "nativeQueryRef": "Funnel Not Reached",
+              "displayName": "Did not reach the next stage"
             }
           ]
         },
@@ -62,12 +77,42 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Funnel % of Previous"
+                  "Property": "Funnel Count"
                 }
               },
-              "queryRef": "_measures.Funnel % of Previous",
-              "nativeQueryRef": "Funnel % of Previous",
-              "displayName": "% of previous stage"
+              "queryRef": "_measures.Funnel Count",
+              "nativeQueryRef": "Funnel Count",
+              "displayName": "Stage"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel Conv"
+                }
+              },
+              "queryRef": "_measures.Funnel Conv",
+              "nativeQueryRef": "Funnel Conv",
+              "displayName": "% of previous"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel Label"
+                }
+              },
+              "queryRef": "_measures.Funnel Label",
+              "nativeQueryRef": "Funnel Label",
+              "displayName": "Label"
             }
           ]
         }
@@ -216,14 +261,14 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
             "position": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bottom'"
+                  "Value": "'Top'"
                 }
               }
             },
@@ -291,12 +336,76 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#5C5C58'"
+                      "Value": "'#FFFFFF'"
                     }
                   }
                 }
               }
+            },
+            "enableValueDataLabel": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "enableDetailDataLabel": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "dynamicLabelDetail": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Funnel Label"
+                }
+              }
+            },
+            "detailContentType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Custom'"
+                }
+              }
+            },
+            "detailFontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "7D"
+                }
+              }
+            },
+            "labelPosition": {
+              "expr": {
+                "Literal": {
+                  "Value": "'InsideBase'"
+                }
+              }
             }
+          },
+          "selector": {
+            "metadata": "_measures.Funnel Reached Next"
+          }
+        },
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Funnel Not Reached"
           }
         }
       ],
@@ -316,7 +425,77 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Funnel Count"
+            "metadata": "_measures.Funnel Reached Next"
+          }
+        },
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFD54A'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.Funnel Not Reached"
+          }
+        }
+      ],
+      "totals": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#111111'"
+                    }
+                  }
+                }
+              }
+            },
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
           }
         }
       ]
@@ -381,7 +560,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Application funnel'"
+                  "Value": "'⠀ Application funnel'"
                 }
               }
             }
@@ -446,7 +625,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Application funnel from started to disbursed'"
+                  "Value": "'Application funnel on the scale of Started: ink = reached the next stage, yellow = did not'"
                 }
               }
             }

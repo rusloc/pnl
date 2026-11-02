@@ -35,6 +35,11 @@
 .page select {
   font-family: inherit;
 }
+/* every button has round corners (owner, 2026-11-01); tabs round their top corners only (below) */
+.page button,
+.page select {
+  border-radius: 6px;
+}
 
 .page :focus-visible {
   outline: 2px solid var(--ink);
@@ -44,7 +49,7 @@
 .board {
   position: relative;
   width: 1440px;
-  height: 810px;
+  height: 810px; /* the design height; the board's real height comes inline (it fills the popup, 2026-11-01) */
   overflow: hidden;
   background: var(--ground);
 }
@@ -64,9 +69,10 @@
 }
 .brand {
   left: 32px;
-  top: 20px;
+  top: 18px; /* centre y 30, the title's centre (2026-11-01: they were 4 px apart) */
   width: 24px;
   height: 24px;
+  border-radius: 4px;
   background: var(--ink);
   color: var(--white);
   font-size: 14px;
@@ -76,7 +82,7 @@
 }
 .title {
   left: 64px;
-  top: 14px;
+  top: 16px;
   height: 28px;
   margin: 0;
   font-size: 22px;
@@ -85,42 +91,206 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
-.seg {
+/* filters (2026-11-01): the applied-filters line and one Filters button, top right on the wedge */
+.filters {
+  right: 32px;
+  top: 18px;
+  height: 30px;
   display: flex;
-  height: 28px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  align-items: center;
+  gap: 12px;
 }
-.seg button {
-  height: 26px;
-  border: 0;
-  border-right: 1px solid var(--line);
-  background: transparent;
-  padding: 0;
+.filterLine {
   font-size: 13px;
+  line-height: 16px;
   font-weight: 600;
-  line-height: 26px;
   color: var(--ink);
   white-space: nowrap;
+}
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
   cursor: pointer;
 }
-.seg button:last-child {
-  border-right: 0;
-}
-.seg button[aria-checked='true'] {
+.filterBtn:hover,
+.filterBtn[aria-expanded='true'] {
   background: var(--ink);
   color: var(--white);
 }
-.select {
+.fGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.fLabel {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--g600);
+}
+.radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.radios button {
   height: 28px;
+  padding: 0 12px;
   border: 1px solid var(--line);
-  border-radius: 0;
-  background: var(--panel);
-  padding: 0 6px 0 9px;
+  background: var(--white);
   font-size: 13px;
   font-weight: 600;
   color: var(--ink);
   cursor: pointer;
+}
+.radios button[aria-checked='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+.radios button[aria-disabled='true'] {
+  border-style: dashed;
+  background: transparent;
+  color: var(--g400);
+  cursor: not-allowed;
+}
+/* calendar (2026-11-01): mode row, year stepper, 4 × 3 month grid / quarter tiles / year tiles */
+.cal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.calYear {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.calYear button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+.calYear button:disabled {
+  color: var(--g300);
+  cursor: default;
+}
+/* one tile area for every mode: 3 month rows, or one row of quarters / years stretched to the same height */
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  height: 108px;
+}
+.calQ {
+  grid-template-columns: repeat(4, 1fr);
+}
+.calY {
+  grid-template-columns: repeat(3, 1fr);
+}
+.calTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 2px 0;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.calTile small {
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 13px;
+  color: var(--g600);
+}
+.calTile:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+.calTile:disabled {
+  border-style: dashed;
+  background: transparent;
+  color: var(--g300);
+  cursor: not-allowed;
+}
+.calIn {
+  border-color: var(--accent);
+  background: var(--accent2);
+}
+.calEdge {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+.calEdge small {
+  color: var(--g300);
+}
+.calHint {
+  height: 16px;
+  margin: 0;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fRule {
+  margin: 12px 0 0;
+  border: 0;
+  border-top: 1px solid #1a1a1a;
+  opacity: 0.25;
+}
+.fNote {
+  height: 32px; /* two lines kept for every period, so the pop-up never changes height */
+  margin: 10px 0 0;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--g600);
+}
+.fFoot {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+}
+.fFoot button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.fFoot button:disabled {
+  color: var(--g400);
+  cursor: default;
 }
 
 .tabs {
@@ -132,6 +302,7 @@
 .tabs button {
   height: 36px;
   border: 0;
+  border-radius: 6px 6px 0 0;
   background: transparent;
   padding: 0;
   font-size: 14px;
@@ -185,7 +356,7 @@
   left: 0;
   top: 116px;
   width: 1440px;
-  height: 694px;
+  bottom: 0;
 }
 
 /* ---------- cards ---------- */
@@ -212,6 +383,35 @@
   font: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* ⓘ before the title on chart and table cards (2026-11-01) */
+.ctT {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: -6px;
+}
+/* small filter on a card (P12 market, 2026-11-01) */
+.mini {
+  display: inline-flex;
+  gap: 2px;
+}
+.mini button {
+  height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.mini button[aria-checked='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
 }
 .acts {
   display: flex;
@@ -331,9 +531,6 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
-.kpi .cr {
-  top: 80px;
-}
 .kpi .crName {
   width: auto;
   min-width: 84px;
@@ -341,17 +538,6 @@
 }
 .kpi .crDelta {
   width: auto;
-}
-.alt {
-  visibility: hidden;
-}
-.kpi:hover .main,
-.kpi:focus-within .main {
-  visibility: hidden;
-}
-.kpi:hover .alt,
-.kpi:focus-within .alt {
-  visibility: visible;
 }
 
 .chart {
@@ -364,7 +550,7 @@
 }
 .legend {
   position: absolute;
-  left: 44px; /* right of the corner ⓘ */
+  left: 16px; /* the ⓘ moved before the title (2026-11-01) */
   bottom: 8px;
   display: flex;
   gap: 14px;
@@ -552,36 +738,38 @@
   text-decoration: underline;
 }
 
-/* ---------- slide-over ---------- */
+/* ---------- detail window (was the 720 px slide-over; 2026-11-01: a centred window in the pop-up glass over a
+   20 % dark-grey mask on the whole report, which also blurs the report under it) ---------- */
 .scrim {
   position: absolute;
-  left: 0;
-  top: 100px;
-  width: 720px;
-  height: 710px;
+  inset: 0;
+  z-index: 29;
   border: 0;
   padding: 0;
-  background: rgba(17, 17, 17, 0.4);
+  background: rgba(64, 64, 64, 0.2);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   cursor: default;
 }
 .so {
   position: absolute;
-  left: 720px;
-  top: 100px;
-  width: 720px;
-  height: 710px;
+  left: 50%;
+  top: 50%;
+  width: 1120px;
+  height: 640px;
+  max-height: calc(100% - 48px);
+  transform: translate(-50%, -50%);
   z-index: 30;
-  background: var(--ground);
-  border-left: 1px solid var(--line);
+  overflow: hidden; /* border, glass, shadow: glass.module.css .surface */
 }
 .soHd {
   position: absolute;
   left: 0;
   top: 0;
-  width: 719px;
+  right: 0;
   height: 64px;
   padding: 12px 64px 0 24px;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.3);
   border-bottom: 1px solid var(--line);
 }
 .soHd h2 {
@@ -662,7 +850,7 @@
   top: 196px;
 }
 .soTable .table {
-  table-layout: auto; /* 9 columns in 672 px: size to content, not equal shares */
+  table-layout: auto; /* 9 columns: size to content, not equal shares */
   font-size: 12px;
 }
 .soTable .table th,
@@ -689,6 +877,50 @@
   font-weight: 600;
   padding: 0 8px;
   cursor: pointer;
+}
+.soFoot button:disabled {
+  color: var(--g300);
+  cursor: default;
+}
+/* sortable table headers (2026-11-01: the agent leaderboard) */
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.sortBtn:hover {
+  color: var(--ink);
+}
+.sortBtn span {
+  color: var(--g400);
+}
+th[aria-sort] .sortBtn,
+th[aria-sort] .sortBtn span {
+  color: var(--ink);
+}
+/* pager (2026-11-01): the full list in pages of 50, right of the footer */
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--ink);
+  font-weight: 600;
+}
+.pager span {
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.pager button {
+  min-width: 26px;
 }
 .status {
   position: absolute;
@@ -733,18 +965,46 @@
   right: 16px;
   top: 16px;
 }
+/* the visible "Details →" on the stretched button (2026-11-01: the card gave no sign it opens the view) */
+.heroCta {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  background: var(--white);
+  font-size: 12px;
+  line-height: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.hero:hover .heroCta,
+.heroOpen:focus-visible .heroCta {
+  background: var(--ink);
+  color: var(--white);
+}
+/* ⓘ top-left beside the title on hero and KPI cards (2026-11-01); the title moves right of it */
+.infoTop {
+  position: absolute;
+  left: 8px;
+  top: 12px;
+  z-index: 2; /* above the hero's stretched button */
+}
+.labI {
+  left: 34px;
+}
 .kpiChip {
   position: absolute;
   right: 12px;
   top: 48px;
 }
-.infoCorner {
-  position: absolute;
-  left: 8px;
-  bottom: 2px;
-  z-index: 2; /* above the hero's stretched button */
-}
 .empty {
   color: var(--g600);
   font-style: italic;
+}
+/* the mask covers the board edge to edge: no round corners on it */
+.page .scrim {
+  border-radius: 0;
 }

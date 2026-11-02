@@ -66,6 +66,36 @@
         },
         "type": "Categorical",
         "howCreated": "Drillthrough"
+      },
+      {
+        "name": "f_loan_detail_4",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_agent"
+              }
+            },
+            "Property": "agent_code"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      },
+      {
+        "name": "f_loan_detail_5",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_market"
+              }
+            },
+            "Property": "market_code"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
       }
     ]
   },
@@ -126,6 +156,34 @@
               }
             },
             "Property": "agent_name"
+          }
+        }
+      },
+      {
+        "name": "p_loan_detail_4",
+        "boundFilter": "f_loan_detail_4",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_agent"
+              }
+            },
+            "Property": "agent_code"
+          }
+        }
+      },
+      {
+        "name": "p_loan_detail_5",
+        "boundFilter": "f_loan_detail_5",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_market"
+              }
+            },
+            "Property": "market_code"
           }
         }
       }
