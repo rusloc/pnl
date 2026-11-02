@@ -7,6 +7,7 @@
 - **Nordmark rounds 1–3:** shared scrim, ⓘ target line, Statement / Notes / Horizon removed, period model (Week / Month / Quarter / Year, Previous) in both flavours — [daily-2026-10-29](../daily/daily-2026-10-29.md)
 - **Nordmark finished + `.sync` hand-off:** category filter + stacked ⓘ in both flavours, PBI perf ≤ 0.65 s cards; 207 PBI blocks / 50,390 rows, 458 JS tests, parity 0 mismatches; Nordmark packs; hand-off note v2. Late reversal: model caches + data out of git, `.sync/data-gen/` instead — [daily-2026-10-30](../daily/daily-2026-10-30.md)
 - **`.sync` fresh-clone acceptance green** (0 blockers, 10 README warnings); hand-off note v3 (draft); the USER found the P&L JS slice filters unbuilt on the site → next goal: P&L fully functional in PBI + JS — [daily-2026-10-31](../daily/daily-2026-10-31.md)
+- **Mirelo identical in Power BI and JS:** the owner's 33 changes from vosk.dev (4 rounds) built in both flavours, JS pack ships the full detail data (21.7 MB), PBI 40 blocks / 4,361 rows TRUE checked against the JS engine output; P&L "fully functional" not started — [daily-2026-11-01](../daily/daily-2026-11-01.md)
 
 ## Comments
 - **Issues:**
@@ -26,3 +27,7 @@
   - parity capture v2 (ⓘ mini stats, BE / ONLINE, 3+ picks);
   - skip-if-absent Vitest parity test;
   - `.sync` pack script with a staleness test.
+- **Week close (2026-11-01):**
+  - **Planned vs done:** the plan's North Star (P&L fully functional) yielded to the USER's task #1 (Mirelo changes from vosk.dev), which grew from 10 to 33 changes across 4 rounds during the day. P&L steps 4–5 + PBI deferred controls carry to W45.
+  - **Findings:** a dimension with non-unique display names (`dim_agent`) merged leaderboard rows in Power BI silently (CAND-040). Power BI colour-by-measure sees one cell at a time, so a whole-grid scale needs an explicit grid (CAND-036). A JS engine view-model dump made a strong parity oracle for the PBI side.
+  - **Process:** a cross-repo note updated in place while it was being worked on (rounds 2–4 landed after round 1 was built); ⚠ markers in the note made the overtaken parts clear. A full day's work sits uncommitted at the close.

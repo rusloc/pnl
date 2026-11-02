@@ -39,6 +39,8 @@ TODO: lock North Star
 
 - **2026-10-31 — "Known gaps per report" in every hand-off entry note (CAND-034):** copy each pack README's "not built" list into the entry note, so the receiving agent and the USER see what a report can't do before they embed it. Also: a pip constraints file for `data-gen/` (CAND-007).
 
+- **2026-11-01 — Engine view-model dump as the parity oracle:** a read-only Node script dumps the Track C engine view-model for a set of selections, and the Power BI side is compared against it (bip used it for Mirelo: 60 + 244 + 58 checks). Candidate for hunter's harness. Also: a model-review check that display names are unique or that visuals group by key (CAND-040).
+
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
 - **2026-10-21** — This repo delivers assets only; vosk.dev embedding lives in a separate repo. (ADR-0001)
@@ -116,6 +118,8 @@ TODO: lock North Star
   - "PBI packs ship the loaded model" (C1) was built and committed, then **reversed the same day**: model caches + generated data are kept out of git, and `.sync/data-gen/` ships scripts + a README per report. JS prebuilt data stays; git history left as is (`git rm --cached`). ADR-0014 item 10 (item 7 superseded); the `data-gen/` build was still running at the close.
 - **2026-10-31** — **Hand-off note v3** is a new dated note (`.sync/2026-10-31-report-packs.md`), v2 superseded. Track A on the site stays a video (2026-10-22).
 - **2026-10-31** — **USER: the P&L must be fully functional in both Power BI and JS.** Track C build steps 4 (Group view) and 5 (slice filters) move from the vosk.dev repo to this repo; re-packed via `.sync`. ADR-0002 / ADR-0014 amendment pending (archi, 2026-11-01).
+- **2026-11-01** — **Mirelo identical in Power BI and JS (USER):** the owner's 33 changes from vosk.dev (`.sync/2026-11-01-mirelo-sales-changes.md`) are built in both flavours. Week, QTD, YTD and R12M leave both; the period is a range of closed months. Accepted differences: no blur, no pager / CSV, and real values on free ranges in Power BI (JS: n/a). ADR-0011 amendment pending (C11 / P13 lists as windows on the page).
+- **2026-11-01** — **USER: the Mirelo JS pack ships the full detail data** (21.7 MB, 195 Parquet + `index.json`, built by `js-report/scripts/build-sales-data.ts`), not the sample. ADR-0014 / ADR-0011 amendment pending; the detail-file layout becomes a contract shared with vosk.dev.
 - **2026-10-28** — Nordmark data rulings (pending USER review): E-22 table edge wins; dot + counts follow the region, N/A excluded; channel mix = last week; GMROI from front margin (€862m ÷ €319m = 2.7×); sell-through bars 12 → 63 %; net-sales bars W31–W39 lowered; period keys `PTD-` / `YTD-FY2026-43`; scoped EBITDA excludes central costs; LW for PTD / YTD = same window as of last week.
 
 ## Features
@@ -134,6 +138,8 @@ TODO: lock North Star
 - Nordmark exec dashboard — USER hover / click check of the PBI category filter + ⓘ, save; retire the 6 legacy PTD / YTD control rows; CI job; USER review of the data rulings; chip restyle (USER); parity capture v2
 - All three reports — hand-off note v3 → ready (hunter warnings + "Known gaps per report"); then the USER's other agent publishes Power BI (embed method open) and hosts / embeds the JS apps
 - **P&L fully functional (USER 2026-10-31)** — JS: Group view (step 4) + slice filters F-09…F-11 with C-31 allocation (step 5); PBI: deferred controls M-25, F-16, F-17, M-05, "n/a", M-27; B vs C parity; re-pack both (`plan-2026-11-01.md`)
+
+- **Mirelo (2026-11-01)** — ginee display-name columns (channel / stream / loan status) + bip rebind; hunter PBI vs JS parity run; USER click-checks; ADR amendments; vosk.dev hand-off for the re-issued packs
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -176,3 +182,6 @@ TODO: lock North Star
   - The PBI pack `DataFolder` descriptions now point to data-gen.
   - Fresh-clone acceptance (hunter): JS ×3 green, data-gen byte-identical, scans clean, 0 blockers.
   - Hand-off note v3 (draft).
+- **2026-11-01** — Mirelo Sales & Revenue, owner's changes 1–33 (4 rounds from vosk.dev) in both flavours:
+  - **PBI:** calendar range slicer, Filters panel with Reset / Showing, C5 / C8 / C10 / C11 / L8 / P12 / P13 / R11 reworked, shared 4-stop heat scale, list windows on the page, leaderboard On target / Close / Behind with one row per agent code (duplicate-name bug fixed), JS text in table cells; 40 blocks / 4,361 rows TRUE, validator 0 / 0; checked against the JS engine output.
+  - **JS:** all 33 in `js-report/` + pack; Mirelo glass; viewport-height board; full detail data 21.7 MB with paging and full CSV; `js-report/` 399 tests, pack 133, headless smoke green; reconciled 2,846 / 4,782 / 209,898.
