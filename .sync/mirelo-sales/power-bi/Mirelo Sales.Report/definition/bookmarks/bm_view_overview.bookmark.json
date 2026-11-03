@@ -260,6 +260,9 @@
       "s_range",
       "filters_hint",
       "filters_rule",
+      "filters_close",
+      "hdr_filters",
+      "hdr_filters_close",
       "cl_c11_channels",
       "pf_p13_products",
       "s_p12_market",
@@ -2090,6 +2093,27 @@
           "filters_rule": {
             "singleVisual": {
               "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "hdr_filters": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "hdr_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
               "display": {
                 "mode": "hidden"
               }

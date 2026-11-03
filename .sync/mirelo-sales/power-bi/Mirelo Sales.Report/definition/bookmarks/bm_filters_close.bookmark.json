@@ -17,7 +17,10 @@
       "filters_reset",
       "s_range",
       "filters_hint",
-      "filters_rule"
+      "filters_rule",
+      "filters_close",
+      "hdr_filters",
+      "hdr_filters_close"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -119,6 +122,27 @@
           "filters_rule": {
             "singleVisual": {
               "visualType": "shape",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "hdr_filters": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "hdr_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton",
               "display": {
                 "mode": "hidden"
               }
