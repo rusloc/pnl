@@ -1,0 +1,50 @@
+/// Trend granularity (A-10): Day (default), Week (Mon-Sun), Month. Disconnected; trend measures re-bucket on the dim_date axis.
+table param_granularity
+	lineageTag: 4d997540-64d3-5ce8-b858-93b96af95d0c
+
+	column granularity_code
+		dataType: string
+		isHidden
+		lineageTag: 0b77a333-f5ff-5f2e-8619-6432ed1cc3a2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [granularity_code]
+
+		annotation SummarizationSetBy = User
+
+	column granularity_name
+		dataType: string
+		lineageTag: 4ba0e1a1-aca5-55f2-b74f-631b4f3e1264
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [granularity_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 05f3c8d6-a0db-5959-a5ce-a545989d6ce9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_granularity = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "granularity_code", STRING
+				    ,"granularity_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "DAY", "Day", 1 }
+				        ,{ "WEEK", "Week", 2 }
+				        ,{ "MONTH", "Month", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

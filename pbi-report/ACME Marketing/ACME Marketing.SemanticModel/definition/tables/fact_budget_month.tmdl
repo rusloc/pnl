@@ -1,0 +1,51 @@
+/// Budget, month x campaign (daily plan = budget / days_in_month, A-31).
+table fact_budget_month
+	lineageTag: f7f18890-bb40-52ed-ab5c-b528d9d4790d
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 9d80d971-16b4-5d2c-803f-deac0fad6ca6
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: ed341b99-4bcd-5aad-b50c-9506c41f7868
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column budget_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 65362afe-51da-52ae-bc58-88172b38afd9
+		summarizeBy: none
+		sourceColumn: budget_usd
+
+		annotation SummarizationSetBy = User
+
+	partition fact_budget_month = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_budget_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"campaign_key", type text},
+				            {"budget_usd", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

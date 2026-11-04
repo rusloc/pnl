@@ -1,0 +1,75 @@
+/// Paid customers and New MRR credits, conversion day x campaign x attribution model (A-73).
+table fact_attribution_day
+	lineageTag: a4707613-ce72-5880-8db9-dd97a36f0734
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: ea621be7-6071-592b-8e2a-09ae7eb9475a
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: 5f053f94-1f54-54e0-9f0d-9b7ce339ea02
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column model_code
+		dataType: string
+		isHidden
+		lineageTag: 30d85da3-684e-52ea-a317-2559d93367da
+		summarizeBy: none
+		sourceColumn: model_code
+
+		annotation SummarizationSetBy = User
+
+	column paid_customers
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 16e7efde-4268-53aa-b0c9-bc4e270cccb4
+		summarizeBy: none
+		sourceColumn: paid_customers
+
+		annotation SummarizationSetBy = User
+
+	column new_mrr_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 25622ed1-3006-5542-83eb-825fe2d4ce45
+		summarizeBy: none
+		sourceColumn: new_mrr_usd
+
+		annotation SummarizationSetBy = User
+
+	partition fact_attribution_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_attribution_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"model_code", type text},
+				            {"paid_customers", type number},
+				            {"new_mrr_usd", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

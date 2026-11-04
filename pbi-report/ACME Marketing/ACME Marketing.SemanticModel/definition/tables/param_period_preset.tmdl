@@ -1,0 +1,52 @@
+/// Period preset picker (A-10): 7 d, 30 d (default when nothing is picked), MTD, QTD, Custom (from / to on param_date). Disconnected.
+table param_period_preset
+	lineageTag: d89df87e-5bb0-5cf8-9aec-879e0b70db1d
+
+	column preset_code
+		dataType: string
+		isHidden
+		lineageTag: 790c644f-fcbb-5ee1-9514-852ca8191706
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [preset_code]
+
+		annotation SummarizationSetBy = User
+
+	column preset_name
+		dataType: string
+		lineageTag: f1fad23b-e26f-57ed-b869-f7d61d929f2f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [preset_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 30903b64-5b2b-51de-af34-7e1d593bf159
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_period_preset = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "preset_code", STRING
+				    ,"preset_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "7D", "7 d", 1 }
+				        ,{ "30D", "30 d", 2 }
+				        ,{ "MTD", "MTD", 3 }
+				        ,{ "QTD", "QTD", 4 }
+				        ,{ "CUSTOM", "Custom", 5 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

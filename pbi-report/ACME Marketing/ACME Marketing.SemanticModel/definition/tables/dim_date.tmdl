@@ -1,0 +1,197 @@
+/// Calendar day 2025-01-01 .. 2026-12-31 (730 rows). Derived on load: month_index and month_start from dim_month (window and granularity helpers).
+table dim_date
+	lineageTag: 777cdfa3-bb1d-5942-b80d-913dbec99179
+
+	column 'date'
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: f6006b20-9987-58ef-83ec-231a97ac37e3
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 5d1e1ff7-ab9c-586d-be65-f646570d3e54
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c6aa436-3acd-5cf7-b0af-465500ca3455
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 25431579-d24f-5351-ae8a-202fb03df69f
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 33c7b065-9775-5f4d-98ca-c47e8ae82fc0
+		summarizeBy: none
+		sourceColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: e004ad20-a1cd-5c9a-8499-3487dda84e91
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	column day_of_month
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c6e73771-6e2a-5f74-bb7e-26bd34767ca7
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+		annotation SummarizationSetBy = User
+
+	column iso_week
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2351f29e-c088-50f9-ae09-c874e67aa178
+		summarizeBy: none
+		sourceColumn: iso_week
+
+		annotation SummarizationSetBy = User
+
+	column week_start
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: cf0b0b35-0dcb-5723-9474-658a4f774b7d
+		summarizeBy: none
+		sourceColumn: week_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column weekday_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7e7a65b3-d60e-5bf6-bc80-25b275a791fd
+		summarizeBy: none
+		sourceColumn: weekday_num
+
+		annotation SummarizationSetBy = User
+
+	column weekday_name
+		dataType: string
+		lineageTag: f5514842-284a-5fe6-85af-2fc897c43b76
+		summarizeBy: none
+		sourceColumn: weekday_name
+		sortByColumn: weekday_num
+
+		annotation SummarizationSetBy = User
+
+	column is_weekend
+		dataType: boolean
+		lineageTag: 0b6a02b3-9b52-565d-b87e-dbc59731e294
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = User
+
+	column is_actual
+		dataType: boolean
+		isHidden
+		lineageTag: f4756f08-ffc0-5ae2-8c7a-df87f64e4864
+		summarizeBy: none
+		sourceColumn: is_actual
+
+		annotation SummarizationSetBy = User
+
+	column ly_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 1821c0ad-c5b6-5852-8af1-dbccdaa1a9f5
+		summarizeBy: none
+		sourceColumn: ly_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	/// 0 = 2025-01 (from dim_month).
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f6c04e4a-6c9b-567d-89c7-5b41eb0b16ae
+		summarizeBy: none
+		sourceColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	/// First day of the month (Month granularity).
+	column month_start
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: ba80d74a-1e58-592d-84c3-ae8032de721e
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_date.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"month_key", type text},
+				            {"year", Int64.Type},
+				            {"quarter", Int64.Type},
+				            {"month_num", Int64.Type},
+				            {"month_name", type text},
+				            {"day_of_month", Int64.Type},
+				            {"iso_week", Int64.Type},
+				            {"week_start", type date},
+				            {"weekday_num", Int64.Type},
+				            {"weekday_name", type text},
+				            {"is_weekend", type logical},
+				            {"is_actual", type logical},
+				            {"ly_date", type date}
+				        }
+				    ),
+				    dm_src = Table.TransformColumnTypes(Table.SelectColumns(Parquet.Document(File.Contents(DataFolder & "\dim_month.parquet")), {"month_key", "month_index", "month_start"}), {{"month_key", type text}, {"month_index", Int64.Type}, {"month_start", type date}}),
+				    dm_joined = Table.NestedJoin(typed, {"month_key"}, dm_src, {"month_key"}, "j", JoinKind.LeftOuter),
+				    dm_expanded = Table.ExpandTableColumn(dm_joined, "j", {"month_index", "month_start"})
+				in
+				    dm_expanded
+
+	annotation PBI_ResultType = Table

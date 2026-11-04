@@ -1,0 +1,61 @@
+/// Platform x OS / device band (Journey J4, phase 3). platform_code is a label (no relationship).
+table dim_platform_segment
+	lineageTag: b441b31f-dfd7-5744-9b4e-4ece8237fe25
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: dda6be66-dbfd-5ade-b754-b6321177dbd3
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column segment_name
+		dataType: string
+		lineageTag: 51e92c1b-ac74-5ecb-a855-a98f35e724bf
+		summarizeBy: none
+		sourceColumn: segment_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column platform_code
+		dataType: string
+		isHidden
+		lineageTag: e20f01f4-0f33-5f9e-9769-18e761d251cc
+		summarizeBy: none
+		sourceColumn: platform_code
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 345758ca-75f5-5d5c-a2fe-2f34b572e321
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_platform_segment = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_platform_segment.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"segment_code", type text},
+				            {"segment_name", type text},
+				            {"platform_code", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

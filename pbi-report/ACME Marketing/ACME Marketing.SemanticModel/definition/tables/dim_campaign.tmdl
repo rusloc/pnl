@@ -1,0 +1,256 @@
+/// Campaign: one platform, channel, network, market and tier each (A-71). Derived on load: channel_name / network_name (the Filters tree), status / market / tier / objective names, campaign_label (the column the campaign table and movers use, so a table click is told apart from the Campaigns slicer).
+table dim_campaign
+	lineageTag: dd4928cc-32b1-579a-95a1-8ce2e1f56f82
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: 6d808021-4247-584d-ae4f-50dfcd880bff
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_name
+		dataType: string
+		lineageTag: c33010a6-c238-5ea3-8630-94b7fd66959d
+		summarizeBy: none
+		sourceColumn: campaign_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 8766715a-31cf-521d-914f-a46a5ff508e8
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column network_code
+		dataType: string
+		isHidden
+		lineageTag: 3d2f0be6-5024-52da-95b3-17167e5c7412
+		summarizeBy: none
+		sourceColumn: network_code
+
+		annotation SummarizationSetBy = User
+
+	column platform_code
+		dataType: string
+		isHidden
+		lineageTag: adf7c1fc-1eeb-5cdb-839d-03bc473325b3
+		summarizeBy: none
+		sourceColumn: platform_code
+
+		annotation SummarizationSetBy = User
+
+	column market_code
+		dataType: string
+		isHidden
+		lineageTag: 100193ef-2bcd-570c-8501-4c59a05fc3a8
+		summarizeBy: none
+		sourceColumn: market_code
+
+		annotation SummarizationSetBy = User
+
+	column tier_code
+		dataType: string
+		isHidden
+		lineageTag: a54fcdf6-e8a7-5f3d-b843-c091b544aa5d
+		summarizeBy: none
+		sourceColumn: tier_code
+
+		annotation SummarizationSetBy = User
+
+	column objective_code
+		dataType: string
+		isHidden
+		lineageTag: c18a257d-f966-5245-8e93-c69aa1a64be6
+		summarizeBy: none
+		sourceColumn: objective_code
+
+		annotation SummarizationSetBy = User
+
+	column status_code
+		dataType: string
+		isHidden
+		lineageTag: 141e0b81-ec15-590e-8f04-d70b5f90b67a
+		summarizeBy: none
+		sourceColumn: status_code
+
+		annotation SummarizationSetBy = User
+
+	column is_brand
+		dataType: boolean
+		isHidden
+		lineageTag: ce2f657a-4daf-5543-88ec-458c30928580
+		summarizeBy: none
+		sourceColumn: is_brand
+
+		annotation SummarizationSetBy = User
+
+	column start_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: f8fc5faa-b8a7-5c8e-9acd-b8303802a45a
+		summarizeBy: none
+		sourceColumn: start_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column end_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 8246ed38-6e58-557b-a8af-4b64d53e4ffb
+		summarizeBy: none
+		sourceColumn: end_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column learning_end_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 0354daa3-b902-51b5-9009-b6f0efbe7f1f
+		summarizeBy: none
+		sourceColumn: learning_end_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column cpa_target_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: bad5fde1-37d9-5014-a88f-458be7f16b70
+		summarizeBy: none
+		sourceColumn: cpa_target_usd
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6fc953cb-4d91-539f-9531-2922d9a2a53a
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	/// Channel name (Filters tree level 1).
+	column channel_name
+		dataType: string
+		lineageTag: 07ee6091-147d-59ff-ad0a-7d3257ea1b0d
+		summarizeBy: none
+		sourceColumn: channel_name
+
+		annotation SummarizationSetBy = User
+
+	/// Network name (Filters tree level 2).
+	column network_name
+		dataType: string
+		lineageTag: be37cc93-0e3f-5183-b6b0-a40147d8c329
+		summarizeBy: none
+		sourceColumn: network_name
+
+		annotation SummarizationSetBy = User
+
+	/// Live / Learning / Paused / Ended.
+	column status_name
+		dataType: string
+		lineageTag: 4cd9d814-87b1-551f-bcbc-4aa107ed7427
+		summarizeBy: none
+		sourceColumn: status_name
+
+		annotation SummarizationSetBy = User
+
+	/// Global / North America / EMEA.
+	column market_name
+		dataType: string
+		lineageTag: 6e2f6cc9-aff1-5cbf-bc96-9800e8f17a3a
+		summarizeBy: none
+		sourceColumn: market_name
+
+		annotation SummarizationSetBy = User
+
+	/// Self-serve / Sales-assisted.
+	column tier_name
+		dataType: string
+		lineageTag: 07677db9-b0f4-5361-bef5-7ae06227d673
+		summarizeBy: none
+		sourceColumn: tier_name
+
+		annotation SummarizationSetBy = User
+
+	/// Paid / Install / Pipeline / Lead / Retention.
+	column objective_name
+		dataType: string
+		lineageTag: 67f43c7c-b196-5037-b686-993c9484f483
+		summarizeBy: none
+		sourceColumn: objective_name
+
+		annotation SummarizationSetBy = User
+
+	/// Copy of campaign_name for the campaign table and movers (cross-filter source).
+	column campaign_label
+		dataType: string
+		lineageTag: 3fc818d5-8982-593d-b3b0-5758fce9ec3c
+		summarizeBy: none
+		sourceColumn: campaign_label
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_campaign = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_campaign.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"campaign_key", type text},
+				            {"campaign_name", type text},
+				            {"channel_code", type text},
+				            {"network_code", type text},
+				            {"platform_code", type text},
+				            {"market_code", type text},
+				            {"tier_code", type text},
+				            {"objective_code", type text},
+				            {"status_code", type text},
+				            {"is_brand", type logical},
+				            {"start_date", type date},
+				            {"end_date", type date},
+				            {"learning_end_date", type date},
+				            {"cpa_target_usd", type number},
+				            {"sort_order", Int64.Type}
+				        }
+				    ),
+				    ch_src = Table.TransformColumnTypes(Table.SelectColumns(Parquet.Document(File.Contents(DataFolder & "\dim_channel.parquet")), {"channel_code", "channel_name"}), {{"channel_code", type text}, {"channel_name", type text}}),
+				    ch_joined = Table.NestedJoin(typed, {"channel_code"}, ch_src, {"channel_code"}, "j", JoinKind.LeftOuter),
+				    ch_expanded = Table.ExpandTableColumn(ch_joined, "j", {"channel_name"}),
+				    nw_src = Table.TransformColumnTypes(Table.SelectColumns(Parquet.Document(File.Contents(DataFolder & "\dim_network.parquet")), {"network_code", "network_name"}), {{"network_code", type text}, {"network_name", type text}}),
+				    nw_joined = Table.NestedJoin(ch_expanded, {"network_code"}, nw_src, {"network_code"}, "j", JoinKind.LeftOuter),
+				    nw_expanded = Table.ExpandTableColumn(nw_joined, "j", {"network_name"}),
+				    add_status_name = Table.AddColumn(nw_expanded, "status_name", each Record.FieldOrDefault([LIVE = "Live", LEARNING = "Learning", PAUSED = "Paused", ENDED = "Ended"], [status_code], [status_code]), type text),
+				    add_market_name = Table.AddColumn(add_status_name, "market_name", each Record.FieldOrDefault([GLOBAL = "Global", NA = "North America", EMEA = "EMEA"], [market_code], [market_code]), type text),
+				    add_tier_name = Table.AddColumn(add_market_name, "tier_name", each Record.FieldOrDefault([SELF_SERVE = "Self-serve", SALES_ASSISTED = "Sales-assisted"], [tier_code], [tier_code]), type text),
+				    add_objective_name = Table.AddColumn(add_tier_name, "objective_name", each Record.FieldOrDefault([PAID = "Paid", INSTALL = "Install", PIPELINE = "Pipeline", LEAD = "Lead", RETENTION = "Retention"], [objective_code], [objective_code]), type text),
+				    add_label = Table.AddColumn(add_objective_name, "campaign_label", each [campaign_name], type text)
+				in
+				    add_label
+
+	annotation PBI_ResultType = Table

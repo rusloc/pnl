@@ -1,0 +1,103 @@
+/// Attribution model: the model-switch slicer table (A-16). Measures read DDA when nothing is selected.
+table dim_attribution_model
+	lineageTag: a40f5a0f-b16e-5f29-9104-8de3041133ec
+
+	column model_code
+		dataType: string
+		isHidden
+		lineageTag: 59b736bd-e695-5230-8729-300a17bc6f35
+		summarizeBy: none
+		sourceColumn: model_code
+
+		annotation SummarizationSetBy = User
+
+	column model_name
+		dataType: string
+		lineageTag: af361124-a62c-52c7-9f83-c93a2768acd8
+		summarizeBy: none
+		sourceColumn: model_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column lookback_click_days
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a9be8b2f-07e3-548e-9ddf-b5a5c516d74f
+		summarizeBy: none
+		sourceColumn: lookback_click_days
+
+		annotation SummarizationSetBy = User
+
+	column lookback_view_days
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e6811aa8-7801-5781-8032-54cbb4d1ea51
+		summarizeBy: none
+		sourceColumn: lookback_view_days
+
+		annotation SummarizationSetBy = User
+
+	column is_default
+		dataType: boolean
+		isHidden
+		lineageTag: 616663da-276e-5081-ab0a-a4b4e70a9f6c
+		summarizeBy: none
+		sourceColumn: is_default
+
+		annotation SummarizationSetBy = User
+
+	column is_first_party
+		dataType: boolean
+		isHidden
+		lineageTag: 6bb2fdfe-d295-5607-9a83-55c3dfe5127a
+		summarizeBy: none
+		sourceColumn: is_first_party
+
+		annotation SummarizationSetBy = User
+
+	column description
+		dataType: string
+		isHidden
+		lineageTag: 83d9abef-60ec-5ea7-a0ce-7f895a848fb2
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fe0d9615-7fbe-5452-b979-70b4138f349f
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_attribution_model = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_attribution_model.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"model_code", type text},
+				            {"model_name", type text},
+				            {"lookback_click_days", Int64.Type},
+				            {"lookback_view_days", Int64.Type},
+				            {"is_default", type logical},
+				            {"is_first_party", type logical},
+				            {"description", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

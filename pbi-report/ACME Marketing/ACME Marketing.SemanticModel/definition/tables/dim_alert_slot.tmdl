@@ -1,0 +1,152 @@
+/// Alert slots (O5, A-52 / A-64): every param_alert_rule row x the entities of its scope (campaigns, channels, ALL, sources). Disconnected; Alert measures evaluate one slot each and the list shows the slots that trip.
+table dim_alert_slot
+	lineageTag: 463956f0-b2d4-5f96-8148-2b17844a15fa
+
+	column slot_code
+		dataType: string
+		isHidden
+		lineageTag: f5063868-80d0-56bb-bfd7-62214a3bd306
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [slot_code]
+
+		annotation SummarizationSetBy = User
+
+	column rule_code
+		dataType: string
+		isHidden
+		lineageTag: ea55fea0-b944-5e50-99a7-96cdd4506759
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rule_code]
+
+		annotation SummarizationSetBy = User
+
+	column severity
+		dataType: string
+		isHidden
+		lineageTag: 06b4d314-7016-5f29-bfd1-206cf95b278b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [severity]
+
+		annotation SummarizationSetBy = User
+
+	column title
+		dataType: string
+		lineageTag: 8ad6a793-9dbc-5236-95d2-979cfae84188
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [title]
+		sortByColumn: rule_order
+
+		annotation SummarizationSetBy = User
+
+	column entity_type
+		dataType: string
+		isHidden
+		lineageTag: 86f777f8-ab49-5d59-aace-b43c1f05df27
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_type]
+
+		annotation SummarizationSetBy = User
+
+	column entity_code
+		dataType: string
+		isHidden
+		lineageTag: cb887689-a900-53ab-9076-8d3e0485daa4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_code]
+
+		annotation SummarizationSetBy = User
+
+	column entity_name
+		dataType: string
+		lineageTag: 3db45573-8139-565b-86d9-6bf8ceaef2e8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_name]
+
+		annotation SummarizationSetBy = User
+
+	column severity_rank
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5ff902f0-91c0-58f3-a46c-8f45f3ff8c00
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [severity_rank]
+
+		annotation SummarizationSetBy = User
+
+	column rule_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 547c02f2-60fa-50e2-a88a-fb1e2c6a126d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rule_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_alert_slot = calculated
+		mode: import
+		source =
+				VAR _rules        =
+				    SELECTCOLUMNS (
+				        param_alert_rule
+				        ,"rule_code", param_alert_rule[rule_code]
+				        ,"severity", param_alert_rule[severity]
+				        ,"title", param_alert_rule[title]
+				        ,"scope_type", param_alert_rule[scope_type]
+				        ,"rule_order", param_alert_rule[sort_order]
+				    )
+				VAR _entities     =
+				    UNION (
+				        SELECTCOLUMNS (
+				            dim_campaign
+				            ,"entity_type", "CAMPAIGN"
+				            ,"entity_code", dim_campaign[campaign_key]
+				            ,"entity_name", dim_campaign[campaign_name]
+				        )
+				        ,SELECTCOLUMNS (
+				            dim_channel
+				            ,"entity_type", "CHANNEL"
+				            ,"entity_code", dim_channel[channel_code]
+				            ,"entity_name", dim_channel[channel_name]
+				        )
+				        ,ROW ( "entity_type", "ALL", "entity_code", "ALL", "entity_name", "All paid" )
+				        ,ROW ( "entity_type", "SOURCE", "entity_code", "ALL", "entity_name", "Data sources" )
+				    )
+				RETURN
+				    SELECTCOLUMNS (
+				        FILTER (
+				            CROSSJOIN ( _rules, _entities )
+				            ,[scope_type] = [entity_type]
+				        )
+				        ,"slot_code", [rule_code] & "|" & [entity_code]
+				        ,"rule_code", [rule_code]
+				        ,"severity", [severity]
+				        ,"title", [title]
+				        ,"entity_type", [entity_type]
+				        ,"entity_code", [entity_code]
+				        ,"entity_name", [entity_name]
+				        ,"severity_rank",
+				            SWITCH (
+				                [severity]
+				                ,"CRIT"
+				                    ,1
+				                ,"WARN"
+				                    ,2
+				                ,"INFO"
+				                    ,3
+				                ,4
+				            )
+				        ,"rule_order", [rule_order]
+				    )
+
+	annotation PBI_ResultType = Table

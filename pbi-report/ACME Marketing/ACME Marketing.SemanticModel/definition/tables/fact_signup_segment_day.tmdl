@@ -1,0 +1,75 @@
+/// Sign-ups and 7-day activations, day x campaign x platform segment (Journey J4, phase 3).
+table fact_signup_segment_day
+	lineageTag: 35fd4934-0172-5008-8539-1a57375482c3
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: d4d5efb0-9eeb-5931-9af6-bbf0e6af1790
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: d0e24a2d-573f-56fd-a56e-b3793ae5f2c9
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column segment_code
+		dataType: string
+		isHidden
+		lineageTag: 86da5a8c-784d-54f8-8211-f3026c259185
+		summarizeBy: none
+		sourceColumn: segment_code
+
+		annotation SummarizationSetBy = User
+
+	column signups
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 839bf912-485e-5258-9f79-08750dadc742
+		summarizeBy: none
+		sourceColumn: signups
+
+		annotation SummarizationSetBy = User
+
+	column activated_7d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c5a2535a-827d-585f-802c-7e104ef84ce2
+		summarizeBy: none
+		sourceColumn: activated_7d
+
+		annotation SummarizationSetBy = User
+
+	partition fact_signup_segment_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_signup_segment_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"segment_code", type text},
+				            {"signups", Int64.Type},
+				            {"activated_7d", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

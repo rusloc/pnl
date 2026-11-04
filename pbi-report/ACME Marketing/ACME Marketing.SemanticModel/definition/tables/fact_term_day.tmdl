@@ -1,0 +1,97 @@
+/// Term delivery and sign-ups, day x campaign x term (top 8 terms; sum <= the campaign-day).
+table fact_term_day
+	lineageTag: 71b94f04-7d21-5eeb-a1e4-e36a870a6fd4
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 78a65940-e7fd-5beb-8098-c220c485310b
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: 4330ba6d-bf24-593d-b3f8-84341e681691
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column term_key
+		dataType: string
+		isHidden
+		lineageTag: ac66231f-9b76-5e3f-8381-909f36fa109f
+		summarizeBy: none
+		sourceColumn: term_key
+
+		annotation SummarizationSetBy = User
+
+	column impressions
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6113e620-734e-50de-88f4-d79b6cc23a70
+		summarizeBy: none
+		sourceColumn: impressions
+
+		annotation SummarizationSetBy = User
+
+	column clicks
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f9fee88f-0ba2-55f6-99c2-231b41f22a24
+		summarizeBy: none
+		sourceColumn: clicks
+
+		annotation SummarizationSetBy = User
+
+	column spend_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 117d7472-43e7-5d61-a635-988b8aa91f3b
+		summarizeBy: none
+		sourceColumn: spend_usd
+
+		annotation SummarizationSetBy = User
+
+	column signups
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 84e20fe8-ff67-579e-a672-bd2532bde8a0
+		summarizeBy: none
+		sourceColumn: signups
+
+		annotation SummarizationSetBy = User
+
+	partition fact_term_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_term_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"term_key", type text},
+				            {"impressions", Int64.Type},
+				            {"clicks", Int64.Type},
+				            {"spend_usd", type number},
+				            {"signups", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

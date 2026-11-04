@@ -1,0 +1,82 @@
+/// Channel with its fixed colour slot (SPEC visual system; never re-assigned when a filter drops a channel, A-58).
+table dim_channel
+	lineageTag: 2975e578-5747-5a33-a41d-bbd747af82a0
+
+	column channel_code
+		dataType: string
+		isHidden
+		lineageTag: 7ba51759-75d1-54a6-ad20-38b0479cf747
+		summarizeBy: none
+		sourceColumn: channel_code
+
+		annotation SummarizationSetBy = User
+
+	column channel_name
+		dataType: string
+		lineageTag: 09eff991-2e4b-56f7-ac18-23cc4c6537e7
+		summarizeBy: none
+		sourceColumn: channel_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column color_slot
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 43faa09e-e478-5828-a0cd-fe5abfecb084
+		summarizeBy: none
+		sourceColumn: color_slot
+
+		annotation SummarizationSetBy = User
+
+	column color_light
+		dataType: string
+		isHidden
+		lineageTag: febb2344-c508-5f3f-aff9-7e428c4ff7db
+		summarizeBy: none
+		sourceColumn: color_light
+
+		annotation SummarizationSetBy = User
+
+	column color_dark
+		dataType: string
+		isHidden
+		lineageTag: f81808a3-0f82-53b5-b9f4-9afb4dd47ac7
+		summarizeBy: none
+		sourceColumn: color_dark
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7850bf93-ea5c-514e-a6fa-d4b0ed56ec39
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_channel = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_channel.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"channel_code", type text},
+				            {"channel_name", type text},
+				            {"color_slot", Int64.Type},
+				            {"color_light", type text},
+				            {"color_dark", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

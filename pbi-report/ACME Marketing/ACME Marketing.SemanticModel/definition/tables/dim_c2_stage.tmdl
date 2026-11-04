@@ -1,0 +1,54 @@
+/// Shared stages of the web vs app funnel C2 (A-53): conversion from the previous stage. Disconnected.
+table dim_c2_stage
+	lineageTag: cba60ec6-9e65-5dee-8663-83846977924f
+
+	column stage_code
+		dataType: string
+		isHidden
+		lineageTag: 488f8255-1214-5131-bbea-c9fd6bc1da1f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [stage_code]
+
+		annotation SummarizationSetBy = User
+
+	column stage_name
+		dataType: string
+		lineageTag: 9785d502-d903-5751-ba95-c9205e3b6a93
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [stage_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6b37c321-223e-5588-a78f-47619ee79c65
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_c2_stage = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "stage_code", STRING
+				    ,"stage_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "CLICK", "Click", 1 }
+				        ,{ "LAND", "Visit / store", 2 }
+				        ,{ "INSTALL", "Install", 3 }
+				        ,{ "SIGNUP", "Sign-up", 4 }
+				        ,{ "ACT", "Activated", 5 }
+				        ,{ "TRIAL", "Trial", 6 }
+				        ,{ "PAID", "Paid", 7 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

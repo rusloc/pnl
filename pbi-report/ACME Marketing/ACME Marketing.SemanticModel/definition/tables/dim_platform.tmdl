@@ -1,0 +1,72 @@
+/// Platform: Web, iOS, Android (campaign attribute, A-71). platform_label (derived) is the column the channel matrix uses, so a matrix click is told apart from the Platform slicer.
+table dim_platform
+	lineageTag: 2c059801-1956-5593-8fda-f7df7620dfc5
+
+	column platform_code
+		dataType: string
+		isHidden
+		lineageTag: be7122aa-71ab-5279-8cc3-4a25bc124e4d
+		summarizeBy: none
+		sourceColumn: platform_code
+
+		annotation SummarizationSetBy = User
+
+	column platform_name
+		dataType: string
+		lineageTag: 29825cbf-6f2b-5a91-a3ac-51995a103ba9
+		summarizeBy: none
+		sourceColumn: platform_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column is_mobile
+		dataType: boolean
+		isHidden
+		lineageTag: 2f2a2f5a-e8aa-54f7-b850-cb2462033636
+		summarizeBy: none
+		sourceColumn: is_mobile
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5d5f7b5a-a514-52ec-bf6b-eb1e1ff9d570
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	/// Copy of platform_name for the C1 matrix level (cross-filter source).
+	column platform_label
+		dataType: string
+		lineageTag: 9d759818-917f-536f-99a2-6fe7009c397f
+		summarizeBy: none
+		sourceColumn: platform_label
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_platform = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_platform.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"platform_code", type text},
+				            {"platform_name", type text},
+				            {"is_mobile", type logical},
+				            {"sort_order", Int64.Type}
+				        }
+				    ),
+				    add_label = Table.AddColumn(typed, "platform_label", each [platform_name], type text)
+				in
+				    add_label
+
+	annotation PBI_ResultType = Table

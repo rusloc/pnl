@@ -1,0 +1,71 @@
+/// Onboarding step (Journey J2, phase 3). Joins no fact; fact_column names the fact_funnel_day column.
+table dim_onboarding_step
+	lineageTag: 939a5b8a-3091-5fd5-838b-325c071fb1cd
+
+	column step_code
+		dataType: string
+		isHidden
+		lineageTag: a19c113f-135f-52ee-93df-5df8539fd65b
+		summarizeBy: none
+		sourceColumn: step_code
+
+		annotation SummarizationSetBy = User
+
+	column step_name
+		dataType: string
+		lineageTag: a37d6bab-a96f-56aa-bd61-6f79cb161962
+		summarizeBy: none
+		sourceColumn: step_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column fact_column
+		dataType: string
+		isHidden
+		lineageTag: 9a9d78d4-52ce-5d8b-8208-37737ba81d19
+		summarizeBy: none
+		sourceColumn: fact_column
+
+		annotation SummarizationSetBy = User
+
+	column is_activation
+		dataType: boolean
+		isHidden
+		lineageTag: c796f7b5-1d8f-5f9f-b133-7976bc3664c3
+		summarizeBy: none
+		sourceColumn: is_activation
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7c13c48c-db21-533c-a170-2cf242e7f258
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_onboarding_step = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_onboarding_step.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"step_code", type text},
+				            {"step_name", type text},
+				            {"fact_column", type text},
+				            {"is_activation", type logical},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

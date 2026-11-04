@@ -1,0 +1,115 @@
+relationship 5571adb5-957e-570e-a833-3a9d05ba5de1
+	fromColumn: fact_ad_delivery_day.'date'
+	toColumn: dim_date.'date'
+
+relationship 81a4f9ac-5b79-5bfa-8e27-278f0d1ed269
+	fromColumn: fact_ad_delivery_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 77f5d765-4f0d-5583-9177-a7b21e862a7d
+	fromColumn: fact_ad_delivery_day.ad_set_key
+	toColumn: dim_ad_set.ad_set_key
+
+relationship cce62263-54cf-5f13-9c52-4d631b8d3c85
+	fromColumn: fact_ad_delivery_day.creative_key
+	toColumn: dim_creative.creative_key
+
+relationship d5ffdfe1-7bf7-5526-b450-bdf7dad2b46e
+	fromColumn: fact_term_day.'date'
+	toColumn: dim_date.'date'
+
+relationship d9f56781-f10d-53ce-ae71-670f23f2eb9e
+	fromColumn: fact_term_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 7064478b-9ae8-56fd-9dff-d32352c27531
+	fromColumn: fact_term_day.term_key
+	toColumn: dim_term.term_key
+
+relationship 8b7e5d26-5525-53e6-bdb9-568d96542d3d
+	fromColumn: fact_traffic_day.'date'
+	toColumn: dim_date.'date'
+
+relationship 41676d28-b369-5335-a506-556e7c630462
+	fromColumn: fact_traffic_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship b43d44eb-6270-57e6-9863-0a5e6cafa0f8
+	fromColumn: fact_traffic_day.page_key
+	toColumn: dim_landing_page.page_key
+
+relationship 76a120c2-1ba0-5f50-9a10-4345b634eef6
+	fromColumn: fact_funnel_day.'date'
+	toColumn: dim_date.'date'
+
+relationship d4bea48c-9d68-568b-bafa-4778e2f5c653
+	fromColumn: fact_funnel_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 5420d929-d987-5f7e-a252-2c41a8143ace
+	fromColumn: fact_signup_segment_day.'date'
+	toColumn: dim_date.'date'
+
+relationship 20dc009b-0412-5ee8-a2f5-6b27c25e3ee7
+	fromColumn: fact_signup_segment_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship ed6b76ee-c9f3-56ad-9a47-2eb5a4d504ff
+	fromColumn: fact_signup_segment_day.segment_code
+	toColumn: dim_platform_segment.segment_code
+
+relationship 2e098978-3605-5801-9a73-61fb2a50004e
+	fromColumn: fact_attribution_day.'date'
+	toColumn: dim_date.'date'
+
+relationship 6c482b1b-c6a0-54c3-8718-772dd16fde32
+	fromColumn: fact_attribution_day.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 67eea7a2-9409-5f13-827f-7d386748ebe1
+	fromColumn: fact_attribution_day.model_code
+	toColumn: dim_attribution_model.model_code
+
+relationship 34e46e18-1acb-52c6-afbe-e5d3578194bb
+	fromColumn: fact_cohort_revenue_month.cohort_month
+	toColumn: dim_month.month_key
+
+relationship 4be36617-5164-5113-8e34-58a6f8a7fdd1
+	fromColumn: fact_cohort_revenue_month.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 78ff8c3d-86c6-5733-a95a-769aea513373
+	fromColumn: fact_retention_cohort_month.cohort_month
+	toColumn: dim_month.month_key
+
+relationship 3902ee3b-3f58-5c0d-b6f0-675d0a5f14dd
+	fromColumn: fact_retention_cohort_month.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 408e19f6-8a3a-5b3d-92e4-9d2ad85dc1a6
+	fromColumn: fact_budget_month.month_key
+	toColumn: dim_month.month_key
+
+relationship 8773b4e9-8a4b-5677-bbb9-c9583da96469
+	fromColumn: fact_budget_month.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship bc916554-30c7-5d02-a2cc-f2a44766a7b9
+	fromColumn: fact_pipeline_month.month_key
+	toColumn: dim_month.month_key
+
+relationship a5b38dea-9632-5e80-a7e6-0b6862c74392
+	fromColumn: fact_pipeline_month.campaign_key
+	toColumn: dim_campaign.campaign_key
+
+relationship 896800a0-fc1c-522e-b3b9-b826733cc1c3
+	fromColumn: dim_campaign.channel_code
+	toColumn: dim_channel.channel_code
+
+relationship 9132fd98-2e35-5341-98fb-50aae5deb6f1
+	fromColumn: dim_campaign.network_code
+	toColumn: dim_network.network_code
+
+relationship 57d909cc-7ffb-5262-8ed6-e75e03f19488
+	fromColumn: dim_campaign.platform_code
+	toColumn: dim_platform.platform_code

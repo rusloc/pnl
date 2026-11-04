@@ -1,0 +1,54 @@
+/// The seven stages of the acquisition funnel O1 (A-52). Disconnected; Funnel measures switch on stage_code.
+table dim_funnel_stage
+	lineageTag: 99de8bbd-845c-5e6b-a9e8-3651a9939ca1
+
+	column stage_code
+		dataType: string
+		isHidden
+		lineageTag: d6cf1f58-0773-54c9-b3d5-0c239214a72b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [stage_code]
+
+		annotation SummarizationSetBy = User
+
+	column stage_name
+		dataType: string
+		lineageTag: 60d4ebd5-fd21-5a47-aa7b-cb57057b648b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [stage_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 66e5bfbe-b997-597f-834b-eae2a4d85119
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_funnel_stage = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "stage_code", STRING
+				    ,"stage_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "IMP", "Impressions", 1 }
+				        ,{ "CLK", "Clicks", 2 }
+				        ,{ "LAND", "Visits + installs", 3 }
+				        ,{ "SIGNUP", "Sign-ups", 4 }
+				        ,{ "ACT", "Activated", 5 }
+				        ,{ "TRIAL", "Trials", 6 }
+				        ,{ "PAID", "Paid", 7 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

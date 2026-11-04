@@ -1,0 +1,71 @@
+/// Web landing page or store page (Journey J1, phase 3).
+table dim_landing_page
+	lineageTag: 8eb90e12-5b4b-563f-8ee7-8a02625f7107
+
+	column page_key
+		dataType: string
+		isHidden
+		lineageTag: 5680fc3a-91c6-560e-8372-391b00ea460b
+		summarizeBy: none
+		sourceColumn: page_key
+
+		annotation SummarizationSetBy = User
+
+	column page_name
+		dataType: string
+		lineageTag: 2778f407-e9ae-53c0-956a-23bdbf2a3d27
+		summarizeBy: none
+		sourceColumn: page_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column page_type
+		dataType: string
+		isHidden
+		lineageTag: e367b0f4-2c37-5d55-9db8-b6156f4927fc
+		summarizeBy: none
+		sourceColumn: page_type
+
+		annotation SummarizationSetBy = User
+
+	column platform_code
+		dataType: string
+		isHidden
+		lineageTag: ad404f33-c01b-5f8b-a462-94f1358cd7cf
+		summarizeBy: none
+		sourceColumn: platform_code
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ec0070be-c55c-5ffa-b23a-164bf8538532
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_landing_page = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_landing_page.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"page_key", type text},
+				            {"page_name", type text},
+				            {"page_type", type text},
+				            {"platform_code", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

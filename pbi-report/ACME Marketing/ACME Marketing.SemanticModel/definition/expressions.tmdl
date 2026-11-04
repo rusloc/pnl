@@ -1,0 +1,6 @@
+/// Folder that holds the Parquet files + manifest.json of data/acme_marketing_dummy_data/parquet (absolute path; change it on another machine, A-80 / AT-19).
+expression DataFolder = "C:\__PBI\PNL\data\acme_marketing_dummy_data\parquet" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 940cc4a4-3185-5d04-8ded-0f3dccd4aa50
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
