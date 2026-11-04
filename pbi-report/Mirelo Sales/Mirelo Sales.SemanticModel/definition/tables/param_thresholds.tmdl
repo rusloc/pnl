@@ -1,7 +1,7 @@
 /// DPD buckets, write-off point and absolute KPI status bands (attainment bands feed the Attainment status).
 table param_thresholds
-	lineageTag: 93f24614-3539-511b-bede-5c51d39c69a5
 	isHidden
+	lineageTag: 93f24614-3539-511b-bede-5c51d39c69a5
 
 	column threshold_set
 		dataType: string
@@ -92,3 +92,4 @@ table param_thresholds
 				    typed
 
 	annotation PBI_ResultType = Table
+

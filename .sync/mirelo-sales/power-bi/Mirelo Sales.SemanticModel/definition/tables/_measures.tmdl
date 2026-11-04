@@ -4232,7 +4232,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: e228fec0-8189-50cd-b7a7-0cbba3dec82b
 
-	/// Hero card O1 (Loans issued), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O1 Parts. Info button top-left, title at x 30 (2026-11-01).
+	/// Hero card O1 (Loans issued), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O1 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04).
 	measure 'Card O1 SVG' =
 			VAR _p            = [_Card O1 Parts]
 			VAR _second       = PATHITEM ( _p, 2 )
@@ -4241,46 +4241,49 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _row3         =
 			    VAR _txt          = PATHITEM ( _p, 3 )
 			    VAR _st           = PATHITEM ( _p, 7 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 9 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='108' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			            & "<text x='164' y='108' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='120' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			            & "<text x='164' y='121' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='103' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='103' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='101' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='113' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='113' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='111' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _row4         =
 			    VAR _txt          = PATHITEM ( _p, 4 )
 			    VAR _st           = PATHITEM ( _p, 8 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 10 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='132' font-size='12' font-weight='600' fill='#5C5C58'>vs Prior year</text>"
-			            & "<text x='164' y='132' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='144' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			            & "<text x='164' y='145' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='127' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='127' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='125' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='137' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='137' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='135' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='332' height='192' viewBox='0 0 332 192' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans issued</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans issued</text>"
 			        & _chip
-			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
+			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' font-weight='700' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
 			        & _row3
 			        & _row4
 			        & "</svg>"
@@ -4362,7 +4365,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: fd00ae8c-6b35-591b-8cc1-255349a30d5c
 
-	/// Hero card O2 (New clients locked in), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O2 Parts. Info button top-left, title at x 30 (2026-11-01).
+	/// Hero card O2 (New clients locked in), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O2 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04).
 	measure 'Card O2 SVG' =
 			VAR _p            = [_Card O2 Parts]
 			VAR _second       = PATHITEM ( _p, 2 )
@@ -4371,46 +4374,49 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _row3         =
 			    VAR _txt          = PATHITEM ( _p, 3 )
 			    VAR _st           = PATHITEM ( _p, 7 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 9 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='108' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			            & "<text x='164' y='108' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='120' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			            & "<text x='164' y='121' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='103' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='103' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='101' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='113' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='113' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='111' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _row4         =
 			    VAR _txt          = PATHITEM ( _p, 4 )
 			    VAR _st           = PATHITEM ( _p, 8 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 10 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='132' font-size='12' font-weight='600' fill='#5C5C58'>vs Prior year</text>"
-			            & "<text x='164' y='132' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='144' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			            & "<text x='164' y='145' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='127' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='127' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='125' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='137' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='137' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='135' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='332' height='192' viewBox='0 0 332 192' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='28' font-size='12' font-weight='500' fill='#5C5C58'>New clients locked in</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>New clients locked in</text>"
 			        & _chip
-			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
+			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' font-weight='700' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
 			        & _row3
 			        & _row4
 			        & "</svg>"
@@ -4496,7 +4502,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: a42a597b-eff6-5b37-b953-4bfc1ddc87a2
 
-	/// Hero card O3 (Returning clients), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O3 Parts. Info button top-left, title at x 30 (2026-11-01).
+	/// Hero card O3 (Returning clients), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O3 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04).
 	measure 'Card O3 SVG' =
 			VAR _p            = [_Card O3 Parts]
 			VAR _second       = PATHITEM ( _p, 2 )
@@ -4505,46 +4511,49 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _row3         =
 			    VAR _txt          = PATHITEM ( _p, 3 )
 			    VAR _st           = PATHITEM ( _p, 7 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 9 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='108' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			            & "<text x='164' y='108' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='120' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			            & "<text x='164' y='121' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='103' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='103' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='101' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='113' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='113' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='111' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _row4         =
 			    VAR _txt          = PATHITEM ( _p, 4 )
 			    VAR _st           = PATHITEM ( _p, 8 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 10 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='132' font-size='12' font-weight='600' fill='#5C5C58'>vs Prior year</text>"
-			            & "<text x='164' y='132' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='144' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			            & "<text x='164' y='145' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='127' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='127' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='125' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='137' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='137' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='135' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='332' height='192' viewBox='0 0 332 192' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Returning clients</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Returning clients</text>"
 			        & _chip
-			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
+			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' font-weight='700' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
 			        & _row3
 			        & _row4
 			        & "</svg>"
@@ -4630,7 +4639,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 0e978562-7220-5eef-8780-7a5d0c1122cc
 
-	/// Hero card O4 (Bad / overdue loans), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O4 Parts. Info button top-left, title at x 30 (2026-11-01).
+	/// Hero card O4 (Bad / overdue loans), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O4 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04).
 	measure 'Card O4 SVG' =
 			VAR _p            = [_Card O4 Parts]
 			VAR _second       = PATHITEM ( _p, 2 )
@@ -4639,46 +4648,49 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _row3         =
 			    VAR _txt          = PATHITEM ( _p, 3 )
 			    VAR _st           = PATHITEM ( _p, 7 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 9 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='108' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			            & "<text x='164' y='108' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='120' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			            & "<text x='164' y='121' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='103' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='103' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='101' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='113' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='113' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='111' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _row4         =
 			    VAR _txt          = PATHITEM ( _p, 4 )
 			    VAR _st           = PATHITEM ( _p, 8 )
 			    VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
 			    VAR _bar          = PATHITEM ( _p, 10 )
-			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-			    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+			    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+			    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
 			    RETURN
-			        "<text x='16' y='132' font-size='12' font-weight='600' fill='#5C5C58'>vs Prior year</text>"
-			            & "<text x='164' y='132' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+			        "<text x='16' y='144' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			            & "<text x='164' y='145' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
 			            & IF (
 			                _bar <> ""
-			                ,"<rect x='172' y='127' width='160' height='6' fill='#DEDDD8'/>"
-			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='127' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-			                    & "<rect x='251.5' y='125' width='1' height='10' fill='#2F2F2D'/>"
+			                ,"<rect x='172' y='137' width='144' height='6' fill='#DEDDD8'/>"
+			                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='137' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+			                    & "<rect x='243' y='135' width='1' height='10' fill='#2F2F2D'/>"
 			            )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='332' height='192' viewBox='0 0 332 192' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Bad / overdue loans</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Bad / overdue loans</text>"
 			        & _chip
-			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
+			        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' font-weight='700' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
 			        & _row3
 			        & _row4
 			        & "</svg>"
@@ -4790,7 +4802,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: c35f1e92-d683-5db8-a2e3-6026545e80ee
 
-	/// KPI card L1 (Loans), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L1 Parts.
+	/// KPI card L1 (Loans), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L1 Parts.
 	measure 'Card L1 SVG' =
 			VAR _p            = [_Card L1 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -4800,18 +4812,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Loans</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -4892,7 +4907,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: f0d8e1fa-ea3d-528f-aa7e-1ddbfdd1422d
 
-	/// KPI card L2 (Principal), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L2 Parts.
+	/// KPI card L2 (Principal), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L2 Parts.
 	measure 'Card L2 SVG' =
 			VAR _p            = [_Card L2 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -4902,18 +4917,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Principal</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Principal</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -4978,7 +4996,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 7bcdffc6-b56a-5953-b01b-ed10809c598d
 
-	/// KPI card L3 (Avg ticket), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L3 Parts.
+	/// KPI card L3 (Avg ticket), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L3 Parts.
 	measure 'Card L3 SVG' =
 			VAR _p            = [_Card L3 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -4988,13 +5006,13 @@ table _measures
 			VAR _chip         = ""
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Avg ticket</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Avg ticket</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5046,7 +5064,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 9427035a-aaaf-5805-9ef5-c63a4dba3c3d
 
-	/// KPI card L4 (Approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L4 Parts.
+	/// KPI card L4 (Approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L4 Parts.
 	measure 'Card L4 SVG' =
 			VAR _p            = [_Card L4 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5055,16 +5073,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Approval rate</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Approval rate</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5114,7 +5135,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: fe449278-a57f-5fd9-afff-5b19969946cc
 
-	/// KPI card L5 (Take-up rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L5 Parts.
+	/// KPI card L5 (Take-up rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L5 Parts.
 	measure 'Card L5 SVG' =
 			VAR _p            = [_Card L5 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5123,16 +5144,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Take-up rate</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Take-up rate</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5180,7 +5204,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 714aa184-a6ea-55ec-b730-1bb81732faae
 
-	/// KPI card L6 (Time to cash), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L6 Parts.
+	/// KPI card L6 (Time to cash), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L6 Parts.
 	measure 'Card L6 SVG' =
 			VAR _p            = [_Card L6 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5189,16 +5213,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Time to cash</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Time to cash</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5277,7 +5304,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 47c226c3-bf5b-5de1-abea-bd7b074d4e51
 
-	/// KPI card C1 (New clients), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card C1 Parts.
+	/// KPI card C1 (New clients), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C1 Parts.
 	measure 'Card C1 SVG' =
 			VAR _p            = [_Card C1 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -5287,18 +5314,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>New clients</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>New clients</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5348,7 +5378,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: bcd04a13-4996-5eee-b396-7872da7abc12
 
-	/// KPI card C2 (Returning clients %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C2 Parts.
+	/// KPI card C2 (Returning clients %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C2 Parts.
 	measure 'Card C2 SVG' =
 			VAR _p            = [_Card C2 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5357,16 +5387,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Returning clients %</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Returning clients %</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5416,7 +5449,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 4ef4b77f-c4c6-5173-a4c2-c702b88448f8
 
-	/// KPI card C3 (Repeat share (loans)), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C3 Parts.
+	/// KPI card C3 (Repeat share (loans)), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C3 Parts.
 	measure 'Card C3 SVG' =
 			VAR _p            = [_Card C3 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5425,16 +5458,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Repeat share (loans)</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Repeat share (loans)</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5484,7 +5520,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 3f55b02d-b2f4-55d8-ac17-2504c91a820f
 
-	/// KPI card C4 (New-client approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C4 Parts.
+	/// KPI card C4 (New-client approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C4 Parts.
 	measure 'Card C4 SVG' =
 			VAR _p            = [_Card C4 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5493,16 +5529,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='10' font-weight='600' fill='#5C5C58'>New-client approval rate</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>New-client approval rate</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5554,7 +5593,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 90a0b627-e43c-52db-ba02-53c76cc9f7cd
 
-	/// KPI card C5 (Returning-client approval rate), 216 x 120 SVG: value, one comparator row (vs PY), status chip glyph + word; info button top-left, title at x 30 on two lines (2026-11-02, change 25). Text from _Card C5 Parts.
+	/// KPI card C5 (Returning-client approval rate), 216 x 120 SVG: value, one comparator row (vs PY), status chip glyph + word; info button top-left, title at x 34 on one line, chip beside the value (JS geometry 2026-11-04). Text from _Card C5 Parts.
 	measure 'Card C5 SVG' =
 			VAR _p            = [_Card C5 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5563,16 +5602,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='30' font-size='10' font-weight='600' fill='#5C5C58'>Returning-client</text><text x='30' y='42' font-size='10' font-weight='600' fill='#5C5C58'>approval rate</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Returning-client approval rate</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5613,7 +5655,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 82cc94c7-a4b9-57e1-b2f9-24b3d5a47620
 
-	/// KPI card C6 (Days between loans), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C6 Parts.
+	/// KPI card C6 (Days between loans), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C6 Parts.
 	measure 'Card C6 SVG' =
 			VAR _p            = [_Card C6 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5622,11 +5664,11 @@ table _measures
 			VAR _chip         = ""
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Days between loans</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Days between loans</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5707,7 +5749,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 171de618-062c-5c28-8bfe-4eebf835f632
 
-	/// KPI card P1 (30+ DPD %), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card P1 Parts.
+	/// KPI card P1 (30+ DPD %), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P1 Parts.
 	measure 'Card P1 SVG' =
 			VAR _p            = [_Card P1 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -5717,18 +5759,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>30+ DPD %</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>30+ DPD %</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5776,7 +5821,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 66e6921a-f51c-5b23-b468-85e9387d430a
 
-	/// KPI card P2 (90+ DPD %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P2 Parts.
+	/// KPI card P2 (90+ DPD %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P2 Parts.
 	measure 'Card P2 SVG' =
 			VAR _p            = [_Card P2 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5785,16 +5830,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>90+ DPD %</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>90+ DPD %</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5844,7 +5892,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 2360c8bf-ad55-54b5-9c14-4ef95a675902
 
-	/// KPI card P3 (30+ by count), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P3 Parts.
+	/// KPI card P3 (30+ by count), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P3 Parts.
 	measure 'Card P3 SVG' =
 			VAR _p            = [_Card P3 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5853,16 +5901,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>30+ by count</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>30+ by count</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5912,7 +5963,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: fedcbf02-c6a7-52b5-9b81-7f7e23376b09
 
-	/// KPI card P4 (Vintage 6m bad rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P4 Parts.
+	/// KPI card P4 (Vintage 6m bad rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P4 Parts.
 	measure 'Card P4 SVG' =
 			VAR _p            = [_Card P4 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5921,16 +5972,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Vintage 6m bad rate</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Vintage 6m bad rate</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -5978,7 +6032,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 1349e1ac-5c23-5335-92ef-65276d5f7cbf
 
-	/// KPI card P5 (Roll rate 30→60), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P5 Parts.
+	/// KPI card P5 (Roll rate 30→60), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P5 Parts.
 	measure 'Card P5 SVG' =
 			VAR _p            = [_Card P5 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -5987,16 +6041,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Roll rate 30→60</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Roll rate 30→60</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6044,7 +6101,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 253e898f-e1aa-5ee7-9cf4-e1624c4b531c
 
-	/// KPI card P6 (Cost of risk), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P6 Parts.
+	/// KPI card P6 (Cost of risk), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P6 Parts.
 	measure 'Card P6 SVG' =
 			VAR _p            = [_Card P6 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -6053,16 +6110,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Cost of risk</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Cost of risk</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6145,7 +6205,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 93d36f33-8d4d-53cf-98a6-54bacabeeb82
 
-	/// KPI card R1 (Revenue), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R1 Parts.
+	/// KPI card R1 (Revenue), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R1 Parts.
 	measure 'Card R1 SVG' =
 			VAR _p            = [_Card R1 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -6155,18 +6215,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Revenue</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Revenue</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6199,7 +6262,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 0342c039-a4b5-5d7d-916a-48dfa8cb6f65
 
-	/// KPI card R2 (Attainment), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R2 Parts.
+	/// KPI card R2 (Attainment), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R2 Parts.
 	measure 'Card R2 SVG' =
 			VAR _p            = [_Card R2 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -6208,16 +6271,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Attainment</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Attainment</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6298,7 +6364,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: b258a69e-c0cd-5fd9-9270-f202df0f506c
 
-	/// KPI card R3 (Interest + fees), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R3 Parts.
+	/// KPI card R3 (Interest + fees), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R3 Parts.
 	measure 'Card R3 SVG' =
 			VAR _p            = [_Card R3 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -6308,18 +6374,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Interest + fees</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Interest + fees</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6396,7 +6465,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: de850422-b1a9-5588-b4bd-21efa9b48cc2
 
-	/// KPI card R4 (Interchange), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R4 Parts.
+	/// KPI card R4 (Interchange), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R4 Parts.
 	measure 'Card R4 SVG' =
 			VAR _p            = [_Card R4 Parts]
 			VAR _s            = PATHITEM ( _p, 11 )
@@ -6406,18 +6475,21 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Interchange</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Interchange</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-			        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-			        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+			        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+			        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+			        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6467,7 +6539,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 198b41f9-80c8-55c8-8175-7c37d60a319d
 
-	/// KPI card R5 (MRR), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R5 Parts.
+	/// KPI card R5 (MRR), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R5 Parts.
 	measure 'Card R5 SVG' =
 			VAR _p            = [_Card R5 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -6476,16 +6548,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>MRR</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>MRR</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -6535,7 +6610,7 @@ table _measures
 		displayFolder: 8 Cards
 		lineageTag: 2c27b1b1-e8da-5c1e-8e79-04a873c1bff4
 
-	/// KPI card R6 (Paying subscribers), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R6 Parts.
+	/// KPI card R6 (Paying subscribers), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R6 Parts.
 	measure 'Card R6 SVG' =
 			VAR _p            = [_Card R6 Parts]
 			VAR _s            = PATHITEM ( _p, 5 )
@@ -6544,16 +6619,19 @@ table _measures
 			VAR _glyph        = IF ( LEFT ( _delta_text, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _delta_text, 1 ) & " " )
 			VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 			VAR _chip         =
-			    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-			        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-			        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    IF (
+			        _s <> "neutral"
+			        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+			            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+			            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+			    )
 			VAR _svg          =
 			    "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-			        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Paying subscribers</text>"
+			        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Paying subscribers</text>"
 			        & _chip
-			        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-			        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
-			        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _delta_text & "</text>"
+			        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+			        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>" & PATHITEM ( _p, 3 ) & "</text>"
+			        & "<text x='" & 16 + MAX ( 84, LEN ( PATHITEM ( _p, 3 ) ) * 5.2 + 6 ) & "' y='91' font-size='13' font-weight='700' fill='" & _ink & "'>" & _delta_text & "</text>"
 			        & "</svg>"
 			RETURN
 			    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
@@ -8942,8 +9020,7 @@ table _measures
 		displayFolder: 4 Portfolio
 		lineageTag: d435706a-b90d-52a2-8f5b-06e59d29c5a4
 
-		formatStringDefinition =
-				IF ( ISBLANK ( [DPD30 %] ), "\n\/\a", "0.0%" )
+		formatStringDefinition = IF ( ISBLANK ( [DPD30 %] ), "\n\/\a", "0.0%" )
 
 	/// Roll rate 1-29 to 30+ per month (P11 second line, Track C roll129; none in the first month of the data).
 	measure 'Roll 1-29 30 Trend' =
@@ -8988,3 +9065,4 @@ table _measures
 		source = ROW ( "measure_table", 0 )
 
 	annotation PBI_ResultType = Table
+

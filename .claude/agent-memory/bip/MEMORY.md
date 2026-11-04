@@ -9,6 +9,7 @@
 - [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; period model (k); generator in repo `tools/`; SVG frame perf pattern + timing traps
 
 ## Open threads
+- 2026-11-04 Mirelo parity pass vs vosk.dev JS: audit 40 rows (17/11/12), PBIR + 28 SVG measures, tests 40 / 4,361 TRUE, validator 0/0 repo + pack. Open: USER click/hover check (×s, How to read, Filters rhythm, table links); How to read 'Showing' label + detail header band need new visuals (not added)
 - 2026-11-03 Mirelo Filters close fix: filters_close (Close, list-window look) + hdr_filters_close (toggle twin, open-state ink look) via bm_filters_close; view bookmarks carry them; validator 0/0 repo + pack. Open: USER click-test; parity-rules row (main agent); filter line still only opens
 - 2026-11-02 Mirelo Power BI = JS fix-up applied (validator 0/0, 40 blocks / 4,361 rows TRUE, five views render-checked). Open: ginee display-name columns (App organic, Interest income, loan status names); USER clicks / header sort / hover
 - 2026-11-02 Mirelo owner rounds 2-4 (changes 11-33) built in PBIP + pack (validator 0/0, 30 blocks / 3,743 rows TRUE). Open: USER clicks calendar / Show clients / Show overdue loans / header sort, hovers ⓘ; ADR-0011 amendment candidate (list overlays, n/a); hunter re-seeds T-P c5

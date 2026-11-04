@@ -1,0 +1,199 @@
+import { z } from "zod";
+import type { SalesManifest } from "./manifest";
+import type {
+  Comparator,
+  Drill,
+  MarketSel,
+  SalesSelection,
+  TimeView,
+  ViewId,
+} from "./types";
+import { monthIndex, monthKey, windowOf } from "./windows";
+
+// URL state of the /sales route (layout-spec §6; F-37 analogue): ?view=&market=&from=&month=&cmp=&drill=. The query
+// string is the whole state and the boundary to the engine: each known key is validated with Zod, an invalid value
+// falls back to its default (and the caller rewrites the URL), unknown keys are dropped. Defaults are omitted, so the
+// bare URL is the spec default: Overview · All markets · the last closed month · vs Budget.
+// Since 2026-11-01 the period is a range of closed months, `from`…`month` (from omitted = one month). The old
+// `period=qtd|ytd|r12m` is still read (when `from` is absent) and rewritten to its range, so old links keep working.
+
+const VIEWS = [
+  "overview",
+  "loans",
+  "clients",
+  "portfolio",
+  "revenue",
+] as const satisfies readonly ViewId[];
+const MARKET_URL = {
+  all: "ALL",
+  pl: "PL",
+  ro: "RO",
+  pt: "PT",
+} as const satisfies Record<string, MarketSel>;
+const PERIOD_URL = {
+  month: "M",
+  qtd: "Q",
+  ytd: "Y",
+  r12m: "R",
+} as const satisfies Record<string, TimeView>;
+const CMP_URL = { budget: "BUD", py: "PY" } as const satisfies Record<
+  string,
+  Comparator
+>;
+
+const invert = <K extends string, V extends string>(o: Record<K, V>) =>
+  Object.fromEntries(Object.entries(o).map(([k, v]) => [v, k])) as Record<V, K>;
+const MARKET_KEY = invert(MARKET_URL);
+const CMP_KEY = invert(CMP_URL);
+
+/** The URL keys: a page URL carrying one of them is a shared report link. */
+export const URL_KEYS = [
+  "view",
+  "market",
+  "from",
+  "period", // legacy, read only
+  "month",
+  "cmp",
+  "drill",
+] as const;
+const KEYS = URL_KEYS;
+
+const enumOf = <T extends Record<string, string>>(o: T) =>
+  z.enum(Object.keys(o) as [keyof T & string, ...(keyof T & string)[]]);
+
+type Query = Pick<URLSearchParams, "get">;
+
+export interface UrlCodec {
+  defaults(): SalesSelection;
+  parse(query: Query): SalesSelection;
+  serialize(sel: SalesSelection): string;
+}
+
+export function createUrlCodec(manifest: SalesManifest): UrlCodec {
+  const first = monthIndex(manifest.source.firstMonth);
+  const last = monthIndex(manifest.source.lastClosedMonth);
+  const agents = new Set(manifest.dims.agent.map((a) => a.agent_code));
+  const channels = new Set(manifest.dims.channel.map((c) => c.channel_code));
+  const products = new Set(manifest.dims.product.map((p) => p.product_code));
+
+  const drill = z
+    .string()
+    .regex(
+      /^(loans(\.(all|pl|ro|pt))?|agent\.[A-Z]\d{3}|client\.\d{1,9}|(clients|overdue)(\.(all|pl|ro|pt)(\.[A-Z0-9]{1,12})?)?)$/,
+    )
+    .transform((s, ctx): Drill => {
+      const [kind, arg, code] = s.split(".") as [
+        string,
+        string | undefined,
+        string | undefined,
+      ];
+      const market = MARKET_URL[(arg ?? "all") as keyof typeof MARKET_URL];
+      if (kind === "clients" && (code === undefined || channels.has(code)))
+        return { kind: "clients", market, channel: code ?? null };
+      if (kind === "overdue" && (code === undefined || products.has(code)))
+        return { kind: "overdue", market, product: code ?? null };
+      if (kind === "loans") return { kind: "loans", market };
+      if (kind === "agent" && arg && agents.has(arg))
+        return { kind: "agent", agent: arg };
+      if (kind === "client" && arg)
+        return { kind: "client", client: Number(arg) };
+      ctx.addIssue({ code: "custom", message: `unknown drill ${s}` });
+      return z.NEVER;
+    });
+
+  const schema = z
+    .object({
+      view: z.enum(VIEWS).catch("overview"),
+      market: enumOf(MARKET_URL).catch("all"),
+      period: enumOf(PERIOD_URL).catch("month"),
+      month: z
+        .string()
+        .regex(/^\d{4}-\d{2}$/)
+        .refine((k) => {
+          const i = monthIndex(k);
+          return i >= first && i <= last;
+        })
+        .catch(monthKey(last)),
+      from: z
+        .string()
+        .regex(/^\d{4}-\d{2}$/)
+        .nullable()
+        .catch(null),
+      cmp: enumOf(CMP_URL).catch("budget"),
+      drill: drill.nullable().catch(null),
+    })
+    .strict();
+
+  const defaults = (): SalesSelection => ({
+    view: "overview",
+    market: "ALL",
+    from: last,
+    anchor: last,
+    cmp: "BUD",
+    drill: null,
+  });
+
+  function parse(query: Query): SalesSelection {
+    const d = defaults();
+    const raw = Object.fromEntries(
+      KEYS.map((k) => [k, query.get(k) ?? undefined]),
+    );
+    const q = schema.parse({
+      view: raw.view ?? d.view,
+      market: raw.market ?? "all",
+      period: raw.period ?? "month",
+      month: raw.month ?? monthKey(last),
+      from: raw.from ?? null,
+      cmp: raw.cmp ?? "budget",
+      drill: raw.drill ?? null,
+    });
+    const anchor = monthIndex(q.month);
+    // from: a closed month in [first data month, anchor]; else the legacy period's window; else one month
+    const fromKey = q.from === null ? null : monthIndex(q.from);
+    const from =
+      fromKey !== null && fromKey >= first && fromKey <= anchor
+        ? fromKey
+        : raw.from === undefined
+          ? Math.max(first, windowOf(PERIOD_URL[q.period], anchor).start)
+          : anchor;
+    return {
+      view: q.view,
+      market: MARKET_URL[q.market],
+      from,
+      anchor,
+      cmp: CMP_URL[q.cmp],
+      drill: q.drill,
+    };
+  }
+
+  function drillKey(dr: Drill): string {
+    switch (dr.kind) {
+      case "loans":
+        return dr.market === "ALL" ? "loans" : `loans.${MARKET_KEY[dr.market]}`;
+      case "agent":
+        return `agent.${dr.agent}`;
+      case "client":
+        return `client.${dr.client}`;
+      case "clients":
+      case "overdue": {
+        const code = dr.kind === "clients" ? dr.channel : dr.product;
+        if (dr.market === "ALL" && code === null) return dr.kind;
+        return `${dr.kind}.${MARKET_KEY[dr.market]}${code === null ? "" : `.${code}`}`;
+      }
+    }
+  }
+
+  function serialize(sel: SalesSelection): string {
+    const d = defaults();
+    const p = new URLSearchParams();
+    if (sel.view !== d.view) p.set("view", sel.view);
+    if (sel.market !== d.market) p.set("market", MARKET_KEY[sel.market]);
+    if (sel.from !== sel.anchor) p.set("from", monthKey(sel.from));
+    if (sel.anchor !== d.anchor) p.set("month", monthKey(sel.anchor));
+    if (sel.cmp !== d.cmp) p.set("cmp", CMP_KEY[sel.cmp]);
+    if (sel.drill) p.set("drill", drillKey(sel.drill));
+    return p.toString();
+  }
+
+  return { defaults, parse, serialize };
+}

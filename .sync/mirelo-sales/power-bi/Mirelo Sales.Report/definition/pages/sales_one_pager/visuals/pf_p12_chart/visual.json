@@ -28,8 +28,27 @@
               },
               "queryRef": "dim_product.product_name",
               "nativeQueryRef": "product_name",
-              "displayName": "Product",
-              "active": true
+              "active": true,
+              "displayName": "Product"
+            }
+          ]
+        },
+        "Size": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "P12 Outstanding EUR"
+                }
+              },
+              "queryRef": "_measures.P12 Outstanding EUR",
+              "nativeQueryRef": "P12 Outstanding EUR",
+              "displayName": "Outstanding"
             }
           ]
         },
@@ -48,6 +67,7 @@
               },
               "queryRef": "_measures.P12 Avg Ticket EUR",
               "nativeQueryRef": "P12 Avg Ticket EUR",
+              "active": true,
               "displayName": "Average ticket"
             }
           ]
@@ -68,25 +88,6 @@
               "queryRef": "_measures.P12 DPD30 %",
               "nativeQueryRef": "P12 DPD30 %",
               "displayName": "30+ DPD %"
-            }
-          ]
-        },
-        "Size": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_measures"
-                    }
-                  },
-                  "Property": "P12 Outstanding EUR"
-                }
-              },
-              "queryRef": "_measures.P12 Outstanding EUR",
-              "nativeQueryRef": "P12 Outstanding EUR",
-              "displayName": "Outstanding"
             }
           ]
         }

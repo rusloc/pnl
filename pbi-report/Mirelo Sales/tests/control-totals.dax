@@ -3434,7 +3434,7 @@ RETURN
                         || PATHITEM ( _p, 7 ) & "|" & PATHITEM ( _p, 9 ) & "|" & PATHITEM ( _p, 11 ) = _e
             RETURN
                 LEFT ( [svg], 26 ) = "data:image/svg+xml;utf8,<s"
-                    && ( CONTAINSSTRING ( [svg], "<text x='30' y='36'" ) || CONTAINSSTRING ( [svg], "<text x='30' y='30'" ) )
+                    && CONTAINSSTRING ( [svg], "<text x='34' y='28'" ) // title at the JS .lab position (2026-11-04)
                     && IF ( [rows] = 2, _two_rows, _one_row )
                     && _literal
     )

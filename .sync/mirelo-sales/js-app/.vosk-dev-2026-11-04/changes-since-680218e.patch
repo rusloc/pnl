@@ -1,0 +1,1033 @@
+diff --git a/data/mirelo/sql/001-schema-and-roles.sql b/data/mirelo/sql/001-schema-and-roles.sql
+new file mode 100644
+index 0000000..f42031d
+--- /dev/null
++++ b/data/mirelo/sql/001-schema-and-roles.sql
+@@ -0,0 +1,97 @@
++-- mirelo_demo — the Mirelo sales report's data (vosk.dev, Track C custom JS report), and its two roles.
++-- Pattern: data/sales/004-cube-role.sql and docs/08 §5. Applied via MCP execute_sql (NOT a migration:
++-- schema_migrations stays qbo's). Idempotent; safe to re-run.
++--
++--   * mirelo_loader — fills the tables from the owner's machine (COPY). Created NOLOGIN here; the owner
++--     enables login once, in the Supabase SQL editor:
++--         alter role mirelo_loader login password '<generated, 32+ chars>';
++--   * mirelo_reader — the ONLY credential the site holds (Vercel env MIRELO_DATABASE_URL, Session
++--     pooler, port 5432: the Transaction pooler stalls the site's concurrent reads, src/lib/mirelo/server.ts).
++--     Reads mirelo_demo and nothing else. Same owner step:
++--         alter role mirelo_reader login password '<generated, 32+ chars>';
++--
++-- Tables are created by `postgres` from 002-schema.sql; the default privileges below carry the grants to
++-- them. No RLS, like qbo: the schema is not on the Data API (anon / authenticated get no USAGE) and the
++-- grants are the boundary. Never grant either role anything in qbo, demo_sales or public.
++
++create schema if not exists mirelo_demo authorization postgres;
++revoke all on schema mirelo_demo from public;
++comment on schema mirelo_demo is
++    'Synthetic neobank / microlender sales data for the Mirelo custom JS report on vosk.dev. Read by mirelo_reader only; loaded by mirelo_loader; not on the Data API.';
++
++do $$
++begin
++    if not exists (select 1 from pg_roles r where 1=1 and r.rolname = 'mirelo_loader') then
++        create role mirelo_loader nologin nobypassrls noinherit;
++    end if;
++    if not exists (select 1 from pg_roles r where 1=1 and r.rolname = 'mirelo_reader') then
++        create role mirelo_reader nologin nobypassrls noinherit;
++    end if;
++end
++$$;
++
++comment on role mirelo_loader is
++    'Loads schema mirelo_demo from the owner machine (vosk.dev Mirelo report). NOLOGIN until the owner sets a password. Must never be granted anything outside mirelo_demo.';
++comment on role mirelo_reader is
++    'Read-only reader of schema mirelo_demo for the vosk.dev server routes. NOLOGIN until the owner sets a password. Must never be granted anything outside mirelo_demo.';
++
++-- Loader: few connections, long statements (COPY in batches).
++alter role mirelo_loader connection limit 4;
++alter role mirelo_loader set statement_timeout = '10min';
++alter role mirelo_loader set search_path = mirelo_demo;
++-- The server runs extra_float_digits = 0 (15 significant digits): a double like 3220153.1100000003 would come
++-- back as 3220153.11. 3 = shortest round-trip output, so the route's JSON carries exactly the loaded values.
++alter role mirelo_loader set extra_float_digits = 3;
++
++-- Reader: hardened like cube_reader. default_transaction_read_only is a guard rail, not a boundary
++-- (applies at LOGIN only; `set role` in the tests does not exercise it).
++alter role mirelo_reader connection limit 10;
++alter role mirelo_reader set statement_timeout = '15s';
++alter role mirelo_reader set search_path = mirelo_demo;
++alter role mirelo_reader set default_transaction_read_only = on;
++alter role mirelo_reader set extra_float_digits = 3;
++
++grant usage on schema mirelo_demo to mirelo_loader, mirelo_reader;
++
++-- Existing relations (none on first run; everything after a 002 rebuild).
++grant select, insert, update, delete, truncate on all tables    in schema mirelo_demo to mirelo_loader;
++grant usage, select                            on all sequences in schema mirelo_demo to mirelo_loader;
++grant select                                   on all tables    in schema mirelo_demo to mirelo_reader;
++
++-- Future relations created by postgres in this schema (002-schema.sql and its rebuilds).
++alter default privileges for role postgres in schema mirelo_demo
++    grant select, insert, update, delete, truncate on tables to mirelo_loader;
++alter default privileges for role postgres in schema mirelo_demo
++    grant usage, select on sequences to mirelo_loader;
++alter default privileges for role postgres in schema mirelo_demo
++    grant select on tables to mirelo_reader;
++
++-- Lets `postgres` run `set role …` for the acceptance tests. Both roles are NOINHERIT and hold nothing
++-- postgres lacks, so membership grants postgres nothing.
++grant mirelo_loader to postgres;
++grant mirelo_reader to postgres;
++
++-- ---------------------------------------------------------------------------
++-- Acceptance — run AS each role, against REAL rows, one block per MCP call.
++-- `set local` inside a transaction: the role resets on commit AND on the expected failure.
++-- ---------------------------------------------------------------------------
++-- A. Denials on real rows (expected: 42501 permission denied for schema, for BOTH roles):
++--      begin; set local role mirelo_reader; select count(*) from demo_sales.dim_channel; commit;
++--      begin; set local role mirelo_reader; select count(*) from qbo.dim_account;        commit;
++--      begin; set local role mirelo_loader; select count(*) from demo_sales.dim_channel; commit;
++--      begin; set local role mirelo_loader; select count(*) from qbo.dim_account;        commit;
++-- B. The sweep — every schema either role has USAGE on, with selectable / writable counts.
++--    Expected: mirelo_demo and public only; public 0/0 (it is empty).
++--      select n.nspname, r.rolname
++--           , count(*) filter (where has_table_privilege(r.rolname, c.oid, 'select')) _selectable
++--           , count(*) filter (where has_table_privilege(r.rolname, c.oid, 'insert')
++--                                 or has_table_privilege(r.rolname, c.oid, 'update')
++--                                 or has_table_privilege(r.rolname, c.oid, 'delete')) _writable
++--      from pg_roles r cross join pg_namespace n
++--      left join pg_class c on c.relnamespace = n.oid and c.relkind in ('r','v','m','p')
++--      where r.rolname in ('mirelo_loader','mirelo_reader')
++--        and n.nspname not in ('pg_catalog','information_schema') and n.nspname not like 'pg\_toast%'
++--        and has_schema_privilege(r.rolname, n.oid, 'usage')
++--      group by 1, 2 order by 1, 2;
++-- C. anon / authenticated have no USAGE on mirelo_demo (has_schema_privilege → false).
++-- D. MCP get_advisors(security) → zero lints.
+diff --git a/data/mirelo/sql/002-schema.sql b/data/mirelo/sql/002-schema.sql
+new file mode 100644
+index 0000000..a439a20
+--- /dev/null
++++ b/data/mirelo/sql/002-schema.sql
+@@ -0,0 +1,191 @@
++-- mirelo_demo tables — one per artifact the report reads (src/lib/mirelo/manifest.ts FILES and DETAIL), so the
++-- server route (src/lib/mirelo/artifacts.ts) can reproduce every Parquet file the browser used to fetch, in the
++-- same row order. Drop-and-rebuild seed, applied via MCP execute_sql by postgres (NOT a migration). The grants
++-- come from 001-schema-and-roles.sql's default privileges. Loaded by scripts/mirelo-load.ts as mirelo_loader.
++--
++-- Types: the manifest's column kinds map str → text, int → integer, num → double precision, bool → boolean,
++-- a trailing ? → nullable. Doubles (not numeric) so the JSON the route returns carries JS numbers, as Parquet did.
++-- Base tables keep the file's row order in `seq`; the detail tables reproduce the builder's sort keys
++-- (data/mirelo/build_detail.py): loans by loan_id per month, client cards by client_id, disbursed, loan_id.
++
++set search_path = mirelo_demo;
++
++drop table if exists document, loans_month, funnel_month, portfolio_month, vintage, window_stats, cohort_curve,
++    agent_month, revenue_month, subs_month, target_month, loan, client cascade;
++
++-- manifest.json and detail/index.json, verbatim: the browser validates them with the same Zod schemas as before.
++create table if not exists document (
++    name text primary key check (name in ('manifest.json', 'detail/index.json')),
++    doc  jsonb not null
++);
++
++create table if not exists loans_month (
++    seq             integer primary key,
++    month           text not null,
++    market          text not null,
++    product         text not null,
++    channel         text not null,
++    repeat          boolean not null,
++    loans           integer not null,
++    principal_local double precision not null
++);
++
++create table if not exists funnel_month (
++    seq        integer primary key,
++    month      text not null,
++    market     text not null,
++    product    text not null,
++    channel    text not null,
++    repeat     boolean not null,
++    leads      integer not null,
++    started    integer not null,
++    submitted  integer not null,
++    kyc_passed integer not null,
++    approved   integer not null,
++    disbursed  integer not null
++);
++
++create table if not exists portfolio_month (
++    seq           integer primary key,
++    month         text not null,
++    market        text not null,
++    product       text not null,
++    loans_active  integer not null,
++    loans_dpd_30p integer not null,
++    outstanding   double precision not null,
++    bal_current   double precision not null,
++    bal_1_29      double precision not null,
++    bal_30_59     double precision not null,
++    bal_60_89     double precision not null,
++    bal_90p       double precision not null,
++    written_off   double precision not null,
++    provision     double precision not null
++);
++
++create table if not exists vintage (
++    seq       integer primary key,
++    vintage   text not null,
++    market    text not null,
++    mob       integer not null,
++    disbursed integer not null,
++    first_30p integer not null,
++    first_90p integer not null
++);
++
++create table if not exists window_stats (
++    seq                     integer primary key,
++    tv                      text not null,
++    anchor                  text not null,
++    market                  text not null,
++    segment                 text not null,
++    borrowers               integer not null,
++    "returning"             integer not null, -- reserved word, quoted; the driver quotes it too
++    median_hours_to_cash    double precision,
++    median_hours_to_approve double precision,
++    median_hours_payout     double precision,
++    median_days_between     double precision
++);
++
++create table if not exists cohort_curve (
++    seq        integer primary key,
++    cohort     text not null,
++    market     text not null,
++    day        integer not null,
++    clients    integer not null,
++    repeated   integer not null,
++    observable boolean not null
++);
++
++create table if not exists agent_month (
++    seq                    integer primary key,
++    month                  text not null,
++    agent                  text not null,
++    loans                  integer not null,
++    principal_local        double precision not null,
++    target_loans           double precision not null,
++    target_principal_local double precision not null
++);
++
++create table if not exists revenue_month (
++    seq          integer primary key,
++    month        text not null,
++    market       text not null,
++    product      text not null,
++    stream       text not null,
++    amount_local double precision not null
++);
++
++create table if not exists subs_month (
++    seq                 integer primary key,
++    month               text not null,
++    market              text not null,
++    tier                text not null,
++    subscribers_start   integer not null,
++    subscribers_new     integer not null,
++    subscribers_churned integer not null,
++    subscribers_end     integer not null,
++    revenue_local       double precision not null,
++    mrr_local           double precision not null
++);
++
++create table if not exists target_month (
++    seq     integer primary key,
++    month   text not null,
++    market  text not null,
++    product text,
++    metric  text not null,
++    value   double precision not null
++);
++
++-- Every loan disbursed through the last close (613,738). detail/loans-YYYY-MM = month; detail/overdue =
++-- dpd_close >= 30 and outstanding > 0; detail/client-NN = bucket (client_id % 64), all in the builder's order.
++create table if not exists loan (
++    loan_id                 integer primary key,
++    client_id               integer not null,
++    disbursed               text not null,
++    market                  text not null,
++    product                 text not null,
++    channel                 text not null,
++    agent                   text,
++    repeat                  boolean not null,
++    principal_local         double precision not null,
++    hours_to_cash           double precision not null,
++    status                  text not null,
++    dpd_close               integer not null,
++    outstanding_close_local double precision not null,
++    month                   text     generated always as (left(disbursed, 7)) stored,
++    bucket                  smallint generated always as ((client_id % 64)::smallint) stored
++);
++create index if not exists loan_month_idx   on loan (month, loan_id);
++create index if not exists loan_bucket_idx  on loan (bucket, client_id, disbursed, loan_id);
++create index if not exists loan_overdue_idx on loan (loan_id) where dpd_close >= 30 and outstanding_close_local > 0;
++
++-- Every client (302,230): the dim columns (detail/client-dim-NN) plus the to-date summary the cohort lists carry
++-- (detail/cohort-YYYY-MM), null for clients outside the 2024-01 … last-close cohorts.
++create table if not exists client (
++    client_id             integer primary key,
++    market                text not null,
++    segment               text not null,
++    acquisition_channel   text not null,
++    acquisition_agent     text,
++    first_loan_date       text not null,
++    first_product         text not null,
++    cohort_month          text not null,
++    birth_year_band       text not null,
++    city_tier             integer not null,
++    loans_before_2024     integer not null,
++    loans_to_date         integer,
++    principal_eur_to_date double precision,
++    last_disbursed        text,
++    last_status           text,
++    bucket                smallint generated always as ((client_id % 64)::smallint) stored,
++    constraint client_cohort_summary_all_or_none check (
++        (loans_to_date is null) = (principal_eur_to_date is null)
++        and (loans_to_date is null) = (last_disbursed is null)
++        and (loans_to_date is null) = (last_status is null)
++    )
++);
++create index if not exists client_bucket_idx on client (bucket, client_id);
++create index if not exists client_cohort_idx on client (cohort_month, client_id) where loans_to_date is not null;
++
++reset search_path;
+diff --git a/scripts/mirelo-load.ts b/scripts/mirelo-load.ts
+new file mode 100644
+index 0000000..614c7b3
+--- /dev/null
++++ b/scripts/mirelo-load.ts
+@@ -0,0 +1,195 @@
++import { readFile } from "node:fs/promises";
++import { fileURLToPath } from "node:url";
++import { isDeepStrictEqual } from "node:util";
++import postgres from "postgres";
++import type { Sql } from "postgres";
++import {
++  allArtifactNames,
++  resolveArtifact,
++  runArtifact,
++} from "@/lib/mirelo/artifacts";
++import type { Db } from "@/lib/mirelo/artifacts";
++import {
++  DETAIL,
++  FILES,
++  detailIndexSchema,
++  parseManifest,
++} from "@/lib/mirelo/manifest";
++import { readRows } from "@/lib/mirelo/parquet-columns";
++import type { ColumnSpec, RowOf } from "@/lib/mirelo/parquet-columns";
++
++// Loads data/mirelo/parquet (the files the report used to fetch from public/data/mirelo) into Supabase schema
++// `mirelo_demo`, then verifies every artifact the server route serves against the Parquet it replaces: same rows,
++// same values, same order. Run from the owner's machine only, as mirelo_loader (Session pooler):
++//
++//     node --env-file=.env.local --import tsx scripts/mirelo-load.ts            # truncate, load, verify
++//     node --env-file=.env.local --import tsx scripts/mirelo-load.ts --verify   # verify only
++//
++// Node reads .env.local; this script never prints a value from it. Nothing here runs in the site.
++
++const DIR = new URL("../data/mirelo/parquet/", import.meta.url);
++const BATCH = 1000;
++const VERIFY_ONLY = process.argv.includes("--verify");
++
++const bytes = async (name: string): Promise<ArrayBuffer> => {
++  const b = await readFile(fileURLToPath(new URL(name, DIR)));
++  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
++};
++const json = async (name: string): Promise<unknown> =>
++  JSON.parse(await readFile(fileURLToPath(new URL(name, DIR)), "utf8"));
++const rows = async <S extends ColumnSpec>(
++  name: string,
++  spec: S,
++): Promise<RowOf<S>[]> => readRows(await bytes(name), spec, name);
++
++const tableOf = (file: string) =>
++  file.replace(/\.parquet$/, "").replace(/-/g, "_");
++const specOf = (file: string): ColumnSpec =>
++  file.startsWith("cohort-")
++    ? DETAIL.cohort
++    : file.startsWith("client-dim-")
++      ? DETAIL.clients
++      : DETAIL.loans;
++
++async function insert(
++  sql: Db,
++  table: string,
++  columns: string[],
++  data: readonly Record<string, unknown>[],
++): Promise<void> {
++  for (let i = 0; i < data.length; i += BATCH) {
++    const slice = data.slice(i, i + BATCH);
++    await sql`insert into ${sql(table)} ${sql(slice, ...columns)}`;
++  }
++}
++
++async function load(sql: Sql): Promise<void> {
++  const manifest = parseManifest(await json("manifest.json"));
++  const index = detailIndexSchema.parse(await json(`${DETAIL.dir}/index.json`));
++  const detailFiles = Object.keys(index.files).sort();
++
++  await sql.begin(async (tx) => {
++    await tx`truncate document, loan, client, ${tx(Object.values(FILES).map((f) => tableOf(f.file)))}`;
++    await tx`insert into document ${tx(
++      [
++        { name: "manifest.json", doc: manifest },
++        { name: `${DETAIL.dir}/index.json`, doc: index },
++      ],
++      "name",
++      "doc",
++    )}`;
++
++    for (const f of Object.values(FILES)) {
++      const data = await rows(f.file, f.columns);
++      await insert(
++        tx,
++        tableOf(f.file),
++        ["seq", ...Object.keys(f.columns)],
++        data.map((r, seq) => ({ seq, ...r })),
++      );
++      console.log(`${tableOf(f.file)}: ${data.length} rows`);
++    }
++
++    const loanColumns = Object.keys(DETAIL.loans);
++    let loans = 0;
++    for (const file of detailFiles.filter((f) => f.startsWith("loans-"))) {
++      const data = await rows(`${DETAIL.dir}/${file}`, DETAIL.loans);
++      await insert(tx, "loan", loanColumns, data);
++      loans += data.length;
++    }
++    console.log(`loan: ${loans} rows`);
++
++    const summary = new Map<number, RowOf<typeof DETAIL.cohort>>();
++    for (const file of detailFiles.filter((f) => f.startsWith("cohort-")))
++      for (const r of await rows(`${DETAIL.dir}/${file}`, DETAIL.cohort))
++        summary.set(r.client_id, r);
++    const clients: Record<string, unknown>[] = [];
++    for (const file of detailFiles.filter((f) => f.startsWith("client-dim-")))
++      for (const r of await rows(`${DETAIL.dir}/${file}`, DETAIL.clients)) {
++        const s = summary.get(r.client_id);
++        clients.push({
++          ...r,
++          loans_to_date: s?.loans_to_date ?? null,
++          principal_eur_to_date: s?.principal_eur_to_date ?? null,
++          last_disbursed: s?.last_disbursed ?? null,
++          last_status: s?.last_status ?? null,
++        });
++      }
++    const clientColumns = [
++      ...Object.keys(DETAIL.clients),
++      "loans_to_date",
++      "principal_eur_to_date",
++      "last_disbursed",
++      "last_status",
++    ];
++    await insert(tx, "client", clientColumns, clients);
++    console.log(
++      `client: ${clients.length} rows (${summary.size} with a cohort summary)`,
++    );
++  });
++}
++
++/** Every artifact the route can serve, compared with the Parquet file it replaces. Returns the names that differ. */
++async function verify(sql: Sql): Promise<string[]> {
++  const index = detailIndexSchema.parse(await json(`${DETAIL.dir}/index.json`));
++  const names = allArtifactNames(Object.keys(index.files).sort());
++  const failures: string[] = [];
++  let checked = 0;
++  for (const name of names) {
++    const query = resolveArtifact(name);
++    if (!query) {
++      failures.push(`${name}: no query`);
++      continue;
++    }
++    const expected =
++      query.kind === "document"
++        ? await json(name)
++        : name.startsWith(`${DETAIL.dir}/`)
++          ? await rows(name, specOf(name.slice(DETAIL.dir.length + 1)))
++          : await rows(
++              name,
++              Object.values(FILES).find((f) => f.file === name)?.columns ?? {},
++            );
++    const actual = await runArtifact(sql, query);
++    if (!isDeepStrictEqual(actual, expected)) {
++      const n = Array.isArray(actual) ? actual.length : "?";
++      const e = Array.isArray(expected) ? expected.length : "?";
++      failures.push(`${name}: differs (${n} rows vs ${e} in Parquet)`);
++    }
++    checked += 1;
++  }
++  console.log(`verified ${checked} artifacts, ${failures.length} differ`);
++  return failures;
++}
++
++async function main(): Promise<number> {
++  const url = process.env.MIRELO_LOAD_DATABASE_URL;
++  if (!url) {
++    console.error(
++      "MIRELO_LOAD_DATABASE_URL is not set: run with node --env-file=.env.local",
++    );
++    return 2;
++  }
++  const sql = postgres(url, { max: 1, ssl: "require" });
++  try {
++    if (!VERIFY_ONLY) await load(sql);
++    const failures = await verify(sql);
++    for (const f of failures) console.error(`  ${f}`);
++    const [size] = await sql<
++      { size: string }[]
++    >`select pg_size_pretty(pg_database_size(current_database())) as size`;
++    console.log(`database size: ${size?.size ?? "?"}`);
++    return failures.length === 0 ? 0 : 1;
++  } finally {
++    await sql.end();
++  }
++}
++
++main().then(
++  (code) => process.exit(code),
++  (error: unknown) => {
++    // A driver error can carry the host; never the password. Print the message only.
++    console.error(error instanceof Error ? error.message : String(error));
++    process.exit(1);
++  },
++);
+diff --git a/src/app/api/mirelo/[...path]/route.ts b/src/app/api/mirelo/[...path]/route.ts
+new file mode 100644
+index 0000000..6aa54ee
+--- /dev/null
++++ b/src/app/api/mirelo/[...path]/route.ts
+@@ -0,0 +1,63 @@
++import { NextResponse } from "next/server";
++import { readArtifact } from "@/lib/mirelo/server";
++
++/**
++ * Serves the Mirelo sales report's data from Supabase (schema `mirelo_demo`), one artifact per request, under the
++ * file names the browser used to fetch from public/data/mirelo (lib/mirelo/artifacts.ts). Public by necessity —
++ * visitors are anonymous — and narrow by design: only a known artifact name, read through a role that can see
++ * nothing but this synthetic data, at a modest rate.
++ *
++ * The data is a frozen snapshot, so the CDN keeps each answer a day and serves stale while it refreshes: the
++ * database sees a handful of reads per artifact, not one per visitor.
++ *
++ * Reachable only because proxy.ts excludes /api/* from locale rewriting (CAND-001).
++ */
++export const runtime = "nodejs";
++export const dynamic = "force-dynamic";
++
++const CACHE_CONTROL =
++  "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800";
++
++// A session reads ten base files and a few detail files per drill. Same best-effort in-memory shape as the other
++// routes: per-instance, resets on cold start; enough to blunt casual abuse on a low-traffic site.
++const MAX_PER_WINDOW = 600;
++const WINDOW_MS = 10 * 60 * 1000;
++const hits = new Map<string, number[]>();
++
++function isRateLimited(key: string, now: number): boolean {
++  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
++  recent.push(now);
++  hits.set(key, recent);
++  return recent.length > MAX_PER_WINDOW;
++}
++
++export async function GET(
++  req: Request,
++  ctx: { params: Promise<{ path: string[] }> },
++) {
++  const ip =
++    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
++  if (isRateLimited(ip, Date.now())) {
++    return new Response("Too many requests", { status: 429 });
++  }
++
++  const { path } = await ctx.params;
++  const name = path.join("/");
++  try {
++    const result = await readArtifact(name);
++    if (result.status !== 200)
++      return new Response(
++        result.status === 404 ? "Not found" : "Report data is not configured",
++        { status: result.status },
++      );
++    return NextResponse.json(result.body, {
++      headers: { "Cache-Control": CACHE_CONTROL },
++    });
++  } catch (error) {
++    // The message may name a host or a table, never a credential; the body stays generic.
++    console.error(
++      `mirelo artifact ${name}: ${error instanceof Error ? error.message : String(error)}`,
++    );
++    return new Response("Report data unavailable", { status: 502 });
++  }
++}
+diff --git a/src/components/mirelo/sales-app.tsx b/src/components/mirelo/sales-app.tsx
+index 360beef..3b2fe35 100644
+--- a/src/components/mirelo/sales-app.tsx
++++ b/src/components/mirelo/sales-app.tsx
+@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
+ import { interFontVariable } from "@/components/inter-font";
+ import { ReportBoard, useBoardHeight } from "@/components/report-board";
+ import { useReportSearch } from "@/components/report-search";
+-import { createSalesLoader } from "@/lib/mirelo/data";
++import { createSalesLoader, jsonSource } from "@/lib/mirelo/data";
+ import { createSalesEngine } from "@/lib/mirelo";
+ import type {
+   DetailParts,
+@@ -26,17 +26,19 @@ import { PopupProvider } from "./popup";
+ import { SlideOver } from "./slide-over";
+ import styles from "./sales.module.css";
+ 
+-// Client root (ADR-0011 (c)): loads public/data/mirelo in the browser, owns the Selection and passes engine view
++// Client root (ADR-0011 (c)): loads the report data from /api/mirelo (Supabase), owns the Selection and passes engine view
+ // models down. Orchestration only: every number and string comes from lib/mirelo. Embedded in the site's report
+ // popup, the Selection lives in React state as its query string (the standalone app's URL contract), on a
+ // 1440-wide board the popup scales to fit; since 2026-11-01 the board also grows taller than 810 px to fill the popup
+ // (no empty band under it) and the extra height goes to the chart rows and the band tables.
+ 
+-const loader = createSalesLoader(async (name) => {
+-  const res = await fetch(`/data/mirelo/${name}`);
+-  if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`);
+-  return res.arrayBuffer();
+-});
++const loader = createSalesLoader(
++  jsonSource(async (name) => {
++    const res = await fetch(`/api/mirelo/${name}`);
++    if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`);
++    return res.json() as Promise<unknown>;
++  }),
++);
+ 
+ const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
+ 
+diff --git a/src/components/mirelo/sales.module.css b/src/components/mirelo/sales.module.css
+index 3c41001..60a10ad 100644
+--- a/src/components/mirelo/sales.module.css
++++ b/src/components/mirelo/sales.module.css
+@@ -972,6 +972,7 @@ th[aria-sort] .sortBtn span {
+   height: 24px;
+   padding: 0 10px;
+   border: 1px solid var(--ink);
++  border-radius: 6px; /* a span inside the stretched button, so the 6 px button rule above does not reach it (owner, 11-03) */
+   background: var(--white);
+   font-size: 12px;
+   line-height: 22px;
+diff --git a/src/lib/mirelo/artifacts.ts b/src/lib/mirelo/artifacts.ts
+new file mode 100644
+index 0000000..af27bda
+--- /dev/null
++++ b/src/lib/mirelo/artifacts.ts
+@@ -0,0 +1,148 @@
++import type { Sql, TransactionSql } from "postgres";
++import { DETAIL, FILES } from "./manifest";
++
++// Artifact name → the query that reproduces that file from Supabase schema `mirelo_demo` (2026-11-03: the report's
++// data moved out of public/data/mirelo; the file names stayed the contract between the browser and its source, so
++// data.ts and the engine did not change shape). Pure, framework-free: the server route (server.ts) and the load
++// script's verification (scripts/mirelo-load.ts) both build on it. Every table, column and sort key here comes from
++// our own specs, never from the request; the request contributes only a validated month or bucket number.
++// Row order reproduces data/mirelo/build_detail.py: loans by loan_id per month, client cards by client_id,
++// disbursed, loan_id; base files keep their file order in `seq`.
++
++/** A connection or a transaction handle: both run the same tagged templates. */
++export type Db = Sql | TransactionSql;
++
++export type Where =
++  | { month: string }
++  | { cohortMonth: string }
++  | { bucket: number }
++  | { overdue: true }
++  | null;
++
++export type ArtifactQuery =
++  | { kind: "document"; name: string }
++  | {
++      kind: "rows";
++      table: string;
++      columns: readonly string[];
++      where: Where;
++      orderBy: readonly string[];
++    };
++
++/** `loans-month.parquet` → table `loans_month`, with the file's columns. */
++const BASE = new Map<string, { table: string; columns: string[] }>(
++  Object.values(FILES).map((f) => [
++    f.file,
++    {
++      table: f.file.replace(/\.parquet$/, "").replace(/-/g, "_"),
++      columns: Object.keys(f.columns),
++    },
++  ]),
++);
++const LOAN_COLUMNS = Object.keys(DETAIL.loans);
++const CLIENT_COLUMNS = Object.keys(DETAIL.clients);
++const COHORT_COLUMNS = Object.keys(DETAIL.cohort);
++const MONTH = /^\d{4}-(?:0[1-9]|1[0-2])$/;
++const INDEX_NAME = `${DETAIL.dir}/index.json`;
++
++const capture = (re: RegExp, s: string): string | undefined => re.exec(s)?.[1];
++const bucketOf = (s: string | undefined): number | undefined => {
++  if (s === undefined) return undefined;
++  const n = Number(s);
++  return n < DETAIL.buckets ? n : undefined;
++};
++
++/** The query for one artifact name, or null when the name is not one the report reads (the route answers 404). */
++export function resolveArtifact(name: string): ArtifactQuery | null {
++  if (name === "manifest.json" || name === INDEX_NAME)
++    return { kind: "document", name };
++  const base = BASE.get(name);
++  if (base) return { kind: "rows", ...base, where: null, orderBy: ["seq"] };
++  if (!name.startsWith(`${DETAIL.dir}/`)) return null;
++  const file = name.slice(DETAIL.dir.length + 1);
++
++  if (file === "overdue.parquet")
++    return {
++      kind: "rows",
++      table: "loan",
++      columns: LOAN_COLUMNS,
++      where: { overdue: true },
++      orderBy: ["loan_id"],
++    };
++  const loansMonth = capture(/^loans-(\d{4}-\d{2})\.parquet$/, file);
++  if (loansMonth !== undefined && MONTH.test(loansMonth))
++    return {
++      kind: "rows",
++      table: "loan",
++      columns: LOAN_COLUMNS,
++      where: { month: loansMonth },
++      orderBy: ["loan_id"],
++    };
++  const cohortMonth = capture(/^cohort-(\d{4}-\d{2})\.parquet$/, file);
++  if (cohortMonth !== undefined && MONTH.test(cohortMonth))
++    return {
++      kind: "rows",
++      table: "client",
++      columns: COHORT_COLUMNS,
++      where: { cohortMonth },
++      orderBy: ["client_id"],
++    };
++  const dimBucket = bucketOf(capture(/^client-dim-(\d{2})\.parquet$/, file));
++  if (dimBucket !== undefined)
++    return {
++      kind: "rows",
++      table: "client",
++      columns: CLIENT_COLUMNS,
++      where: { bucket: dimBucket },
++      orderBy: ["client_id"],
++    };
++  const loanBucket = bucketOf(capture(/^client-(\d{2})\.parquet$/, file));
++  if (loanBucket !== undefined)
++    return {
++      kind: "rows",
++      table: "loan",
++      columns: LOAN_COLUMNS,
++      where: { bucket: loanBucket },
++      orderBy: ["client_id", "disbursed", "loan_id"],
++    };
++  return null;
++}
++
++/** Every artifact name the report can ask for, given the detail index's file list (the load script verifies them all). */
++export function allArtifactNames(detailFiles: readonly string[]): string[] {
++  return [
++    "manifest.json",
++    INDEX_NAME,
++    ...Object.values(FILES).map((f) => f.file),
++    ...detailFiles.map((f) => `${DETAIL.dir}/${f}`),
++  ];
++}
++
++/**
++ * Runs one artifact query on a connection whose role has `search_path = mirelo_demo` (both roles do, at login).
++ * Documents come back as the stored JSON; row queries as an array of plain objects in spec column order.
++ */
++export async function runArtifact(sql: Db, q: ArtifactQuery): Promise<unknown> {
++  if (q.kind === "document") {
++    const rows = await sql<
++      { doc: unknown }[]
++    >`select doc from document where name = ${q.name}`;
++    const doc = rows[0]?.doc;
++    if (doc === undefined) throw new Error(`${q.name}: not loaded`);
++    return doc;
++  }
++  const w = q.where;
++  const where =
++    w === null
++      ? sql``
++      : "month" in w
++        ? sql`where month = ${w.month}`
++        : "cohortMonth" in w
++          ? sql`where cohort_month = ${w.cohortMonth} and loans_to_date is not null`
++          : "bucket" in w
++            ? sql`where bucket = ${w.bucket}`
++            : sql`where dpd_close >= 30 and outstanding_close_local > 0`;
++  const rows =
++    await sql`select ${sql([...q.columns])} from ${sql(q.table)} ${where} order by ${sql([...q.orderBy])}`;
++  return [...rows];
++}
+diff --git a/src/lib/mirelo/data.ts b/src/lib/mirelo/data.ts
+index f998b7d..8363fc4 100644
+--- a/src/lib/mirelo/data.ts
++++ b/src/lib/mirelo/data.ts
+@@ -1,7 +1,7 @@
+-import { readRows } from "./parquet-columns";
++import { checkRows, readRows } from "./parquet-columns";
+ import { DETAIL, FILES, detailIndexSchema, parseManifest } from "./manifest";
+ import type { DetailIndexFile, FileKey, SalesManifest } from "./manifest";
+-import type { ColumnSpec } from "./parquet-columns";
++import type { ColumnSpec, RowOf } from "./parquet-columns";
+ import type {
+   ClientRow,
+   CohortRow,
+@@ -11,20 +11,51 @@ import type {
+   SalesBase,
+ } from "./types";
+ 
+-// Loader for public/data/sales (ADR-0011 (c)): manifest + base files on first paint; the detail files a drill needs
+-// on demand (2026-11-01: the full data in `detail/`, one file per month / cohort / client bucket).
++// Loader for the Mirelo sales data (ADR-0011 (c)): manifest + base files on first paint; the detail files a drill
++// needs on demand (2026-11-01: the full data in `detail/`, one file per month / cohort / client bucket). Since
++// 2026-11-03 the browser reads the same artifacts as JSON from /api/mirelo (Supabase, schema mirelo_demo) while the
++// tests and the load script read the Parquet in data/mirelo/parquet; the ArtifactSource below is that seam.
+ // Per-session in-memory cache; a failed read is evicted so the next call retries (same contract as the P&L loader).
+ 
+-/** Reads one public/data/sales artifact by file name: `fetch` in the browser, `fs` in Node tests. */
++/** Reads one Parquet / JSON artifact by file name as bytes (`fs` in Node tests and the load script). */
+ export type ReadArtifact = (name: string) => Promise<ArrayBuffer>;
+ 
++/** Where the artifacts come from: Parquet bytes, or the server route's JSON. */
++export interface ArtifactSource {
++  json(name: string): Promise<unknown>;
++  rows<S extends ColumnSpec>(
++    name: string,
++    spec: S,
++    label: string,
++  ): Promise<RowOf<S>[]>;
++}
++
++export function parquetSource(read: ReadArtifact): ArtifactSource {
++  return {
++    json: async (name) =>
++      JSON.parse(new TextDecoder().decode(await read(name))) as unknown,
++    rows: async (name, spec, label) => readRows(await read(name), spec, label),
++  };
++}
++
++/** The browser's source: `/api/mirelo/<name>` answers with the file's rows (or document) as JSON. */
++export function jsonSource(
++  fetchJson: (name: string) => Promise<unknown>,
++): ArtifactSource {
++  return {
++    json: fetchJson,
++    rows: async (name, spec, label) =>
++      checkRows(await fetchJson(name), spec, label),
++  };
++}
++
+ export interface SalesLoader {
+   base(): Promise<SalesBase>;
+   /** The named `detail/` files (engine.detailFiles), merged by kind; each file is fetched once per session. */
+   detail(names: readonly string[]): Promise<DetailParts>;
+ }
+ 
+-export function createSalesLoader(read: ReadArtifact): SalesLoader {
++export function createSalesLoader(source: ArtifactSource): SalesLoader {
+   let manifest: Promise<SalesManifest> | undefined;
+   let base: Promise<SalesBase> | undefined;
+   let index: Promise<DetailIndexFile> | undefined;
+@@ -37,9 +68,7 @@ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+ 
+   const loadManifest = () =>
+     (manifest ??= cached(
+-      read("manifest.json").then((b) =>
+-        parseManifest(JSON.parse(new TextDecoder().decode(b))),
+-      ),
++      source.json("manifest.json").then(parseManifest),
+       () => (manifest = undefined),
+     ));
+ 
+@@ -48,7 +77,7 @@ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+     m: SalesManifest,
+   ): Promise<FileRows<K>> {
+     const { file: name, columns } = FILES[key];
+-    const rows = await readRows(await read(name), columns, name);
++    const rows = await source.rows(name, columns, name);
+     const expected = m.files[name]?.rows;
+     if (rows.length !== expected)
+       throw new Error(
+@@ -98,9 +127,9 @@ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+ 
+   const loadIndex = () =>
+     (index ??= cached(
+-      read(`${DETAIL.dir}/index.json`).then((b) =>
+-        detailIndexSchema.parse(JSON.parse(new TextDecoder().decode(b))),
+-      ),
++      source
++        .json(`${DETAIL.dir}/index.json`)
++        .then((j) => detailIndexSchema.parse(j)),
+       () => (index = undefined),
+     ));
+   const kindOf = (name: string): ColumnSpec =>
+@@ -117,8 +146,8 @@ export function createSalesLoader(read: ReadArtifact): SalesLoader {
+           const expected = (await loadIndex()).files[name]?.rows;
+           if (expected === undefined)
+             throw new Error(`${name}: not in ${DETAIL.dir}/index.json`);
+-          const rows = await readRows(
+-            await read(`${DETAIL.dir}/${name}`),
++          const rows = await source.rows(
++            `${DETAIL.dir}/${name}`,
+             kindOf(name),
+             name,
+           );
+diff --git a/src/lib/mirelo/parquet-columns.ts b/src/lib/mirelo/parquet-columns.ts
+index d2b93da..0c3d8e1 100644
+--- a/src/lib/mirelo/parquet-columns.ts
++++ b/src/lib/mirelo/parquet-columns.ts
+@@ -80,3 +80,26 @@ export async function readRows<S extends ColumnSpec>(
+   }
+   return rows;
+ }
++
++/** Validates rows already decoded from JSON (the server route's answer) against `spec`; same contract as readRows. */
++export function checkRows<S extends ColumnSpec>(
++  json: unknown,
++  spec: S,
++  label: string,
++): RowOf<S>[] {
++  if (!Array.isArray(json))
++    throw new Error(`${label}: expected an array of rows`);
++  const entries = Object.entries(spec);
++  json.forEach((row: unknown, i) => {
++    if (row === null || typeof row !== "object")
++      throw new Error(`${label}: row ${i} is not an object`);
++    for (const [name, kind] of entries) {
++      const v = (row as Record<string, unknown>)[name];
++      if (!check(kind, v))
++        throw new Error(
++          `${label}: column ${name} row ${i} is ${String(v)}, expected ${kind}`,
++        );
++    }
++  });
++  return json as RowOf<S>[]; // every value checked against its kind above
++}
+diff --git a/src/lib/mirelo/server.ts b/src/lib/mirelo/server.ts
+new file mode 100644
+index 0000000..255301a
+--- /dev/null
++++ b/src/lib/mirelo/server.ts
+@@ -0,0 +1,42 @@
++import "server-only";
++import postgres from "postgres";
++import type { Sql } from "postgres";
++import { resolveArtifact, runArtifact } from "./artifacts";
++
++// The site's one connection to the Mirelo data: role `mirelo_reader`, which can read schema `mirelo_demo` and
++// nothing else (data/mirelo/sql/001-schema-and-roles.sql). The URL lives only in the server env
++// (MIRELO_DATABASE_URL, **Session pooler, port 5432**); this module never leaves the server bundle.
++//
++// Why the Session pooler (2026-11-03): through the Transaction pooler (6543) this driver's concurrent reads stall,
++// even on one connection, and a reply can land on another request (the browser asks for seven files at once and
++// got the wrong columns for one). Session mode answered the same ten concurrent reads in ~1.2 s with no mismatch.
++// A small pool with a short idle timeout keeps the backend count low; the role's connection limit is the ceiling.
++
++let client: Sql | undefined;
++
++/** The reader connection, or null when MIRELO_DATABASE_URL is unset (the route answers 503 instead of failing the build). */
++function db(): Sql | null {
++  const url = process.env.MIRELO_DATABASE_URL;
++  if (!url) return null;
++  if (new URL(url).port === "6543")
++    throw new Error(
++      "MIRELO_DATABASE_URL must use the Session pooler (port 5432): through the Transaction pooler concurrent reads stall",
++    );
++  return (client ??= postgres(url, {
++    max: 2,
++    ssl: "require",
++    idle_timeout: 20,
++    connect_timeout: 10,
++  }));
++}
++
++export type ArtifactResult =
++  { status: 200; body: unknown } | { status: 404 | 503 };
++
++export async function readArtifact(name: string): Promise<ArtifactResult> {
++  const query = resolveArtifact(name);
++  if (!query) return { status: 404 };
++  const sql = db();
++  if (!sql) return { status: 503 };
++  return { status: 200, body: await runArtifact(sql, query) };
++}
+diff --git a/src/lib/mirelo/test-utils/sales-data.ts b/src/lib/mirelo/test-utils/sales-data.ts
+index e0ded52..9ccd9af 100644
+--- a/src/lib/mirelo/test-utils/sales-data.ts
++++ b/src/lib/mirelo/test-utils/sales-data.ts
+@@ -1,28 +1,31 @@
+ import { readFile } from "node:fs/promises";
+ import { fileURLToPath } from "node:url";
+-import { createSalesLoader } from "../data";
++import { createSalesLoader, parquetSource } from "../data";
+ import type { DetailParts, SalesBase } from "../types";
+ 
+-// Node side of the sales loader for Vitest: reads the built public/data/sales artifacts through the same loader the
+-// browser uses (prebuilt in rusloc/pnl, js-report/).
+-const DIR = new URL("../../../../public/data/mirelo/", import.meta.url);
++// Node side of the sales loader for Vitest: reads the Parquet artifacts in data/mirelo/parquet (prebuilt in
++// rusloc/pnl, js-report/; since 2026-11-03 the browser reads the same rows from Supabase through /api/mirelo)
++// through the same loader the browser uses.
++const DIR = new URL("../../../../data/mirelo/parquet/", import.meta.url);
+ 
+-const loader = createSalesLoader(async (name) => {
+-  try {
+-    const bytes = await readFile(fileURLToPath(new URL(name, DIR)));
+-    return bytes.buffer.slice(
+-      bytes.byteOffset,
+-      bytes.byteOffset + bytes.byteLength,
+-    );
+-  } catch (error) {
+-    throw new Error(
+-      `public/data/sales/${name} unreadable — copy it from the pack (rebuilt in rusloc/pnl)`,
+-      {
+-        cause: error,
+-      },
+-    );
+-  }
+-});
++const loader = createSalesLoader(
++  parquetSource(async (name) => {
++    try {
++      const bytes = await readFile(fileURLToPath(new URL(name, DIR)));
++      return bytes.buffer.slice(
++        bytes.byteOffset,
++        bytes.byteOffset + bytes.byteLength,
++      );
++    } catch (error) {
++      throw new Error(
++        `data/mirelo/parquet/${name} unreadable — copy it from the pack (rebuilt in rusloc/pnl)`,
++        {
++          cause: error,
++        },
++      );
++    }
++  }),
++);
+ 
+ export const loadSalesBase = (): Promise<SalesBase> => loader.base();
+ export const loadSalesDetail = (
+@@ -30,7 +33,7 @@ export const loadSalesDetail = (
+ ): Promise<DetailParts> => loader.detail(names);
+ 
+ // Test fixtures copied from rusloc/pnl data/mirelo_sales_dummy_data/ (checks/control_totals_eur.csv). The full detail
+-// in public/data/mirelo/detail/ is built from the generator by data/mirelo/build_detail.py (2026-11-01).
++// in data/mirelo/parquet/detail/ is built from the generator by data/mirelo/build_detail.py (2026-11-01).
+ export const SALES_DATA_DIR = fileURLToPath(
+   new URL("../../../../data/mirelo/", import.meta.url),
+ );

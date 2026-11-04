@@ -3929,88 +3929,88 @@ RETURN
 |---|---|---|---|---|
 | `_Card O1 Parts` | Tier 1 | Hero card O1 (Loans issued) face text, PATHITEM-separated: 1 value · 2 second value · 3 vs Budget row · 4 vs Prior year row · 5 chip status · 6 chip row · 7 / 8 row statuses · 9 / 10 signed bar length (px). Chip follows the header comparator and falls back to the other row when that one has no value (MS-02). Read by the SVG and the parity tests. |  | yes |
 | `Card O1 Note` | Tier 1 | Sub-values of card O1 (Loans issued), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card O1 SVG` | Tier 1 | Hero card O1 (Loans issued), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O1 Parts. Info button top-left, title at x 30 (2026-11-01). |  |  |
+| `Card O1 SVG` | Tier 1 | Hero card O1 (Loans issued), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O1 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04). |  |  |
 | `_Card O2 Parts` | Tier 1 | Hero card O2 (New clients locked in) face text, PATHITEM-separated: 1 value · 2 second value · 3 vs Budget row · 4 vs Prior year row · 5 chip status · 6 chip row · 7 / 8 row statuses · 9 / 10 signed bar length (px). Chip follows the header comparator and falls back to the other row when that one has no value (MS-02). Read by the SVG and the parity tests. |  | yes |
 | `Card O2 Note` | Tier 1 | Sub-values of card O2 (New clients locked in), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card O2 SVG` | Tier 1 | Hero card O2 (New clients locked in), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O2 Parts. Info button top-left, title at x 30 (2026-11-01). |  |  |
+| `Card O2 SVG` | Tier 1 | Hero card O2 (New clients locked in), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O2 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04). |  |  |
 | `_Card O3 Parts` | Tier 1 | Hero card O3 (Returning clients) face text, PATHITEM-separated: 1 value · 2 second value · 3 vs Budget row · 4 vs Prior year row · 5 chip status · 6 chip row · 7 / 8 row statuses · 9 / 10 signed bar length (px). Chip follows the header comparator and falls back to the other row when that one has no value (MS-02). Read by the SVG and the parity tests. |  | yes |
 | `Card O3 Note` | Tier 1 | Sub-values of card O3 (Returning clients), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card O3 SVG` | Tier 1 | Hero card O3 (Returning clients), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O3 Parts. Info button top-left, title at x 30 (2026-11-01). |  |  |
+| `Card O3 SVG` | Tier 1 | Hero card O3 (Returning clients), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O3 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04). |  |  |
 | `_Card O4 Parts` | Tier 1 | Hero card O4 (Bad / overdue loans) face text, PATHITEM-separated: 1 value · 2 second value · 3 vs Budget row · 4 vs Prior year row · 5 chip status · 6 chip row · 7 / 8 row statuses · 9 / 10 signed bar length (px). Chip follows the header comparator and falls back to the other row when that one has no value (MS-02). Read by the SVG and the parity tests. |  | yes |
 | `Card O4 Note` | Tier 1 | Sub-values of card O4 (Bad / overdue loans), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card O4 SVG` | Tier 1 | Hero card O4 (Bad / overdue loans), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs Prior year rows with 160 x 6 bars (4 px per 1 % / 16 px per pp), status chip glyph + word. Text from _Card O4 Parts. Info button top-left, title at x 30 (2026-11-01). |  |  |
+| `Card O4 SVG` | Tier 1 | Hero card O4 (Bad / overdue loans), 332 x 192 SVG (layout-spec v4 §1): value, vs Budget and vs PY rows with 144 x 6 bars on the favourable side (3.6 px per 1 % / 14.4 px per pp), status chip glyph + word. Text from _Card O4 Parts. Info button top-left, title at x 34 (JS geometry 2026-11-04). |  |  |
 | `_Card L1 Parts` | Tier 2 | KPI card L1 (Loans) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card L1 Note` | Tier 2 | Sub-values of card L1 (Loans), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L1 SVG` | Tier 2 | KPI card L1 (Loans), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L1 Parts. |  |  |
+| `Card L1 SVG` | Tier 2 | KPI card L1 (Loans), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L1 Parts. |  |  |
 | `_Card L2 Parts` | Tier 2 | KPI card L2 (Principal) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card L2 Note` | Tier 2 | Sub-values of card L2 (Principal), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L2 SVG` | Tier 2 | KPI card L2 (Principal), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L2 Parts. |  |  |
+| `Card L2 SVG` | Tier 2 | KPI card L2 (Principal), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L2 Parts. |  |  |
 | `_Card L3 Parts` | Tier 2 | KPI card L3 (Avg ticket) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card L3 Note` | Tier 2 | Sub-values of card L3 (Avg ticket), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L3 SVG` | Tier 2 | KPI card L3 (Avg ticket), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card L3 Parts. |  |  |
+| `Card L3 SVG` | Tier 2 | KPI card L3 (Avg ticket), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L3 Parts. |  |  |
 | `_Card L4 Parts` | Tier 2 | KPI card L4 (Approval rate) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card L4 Note` | Tier 2 | Sub-values of card L4 (Approval rate), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L4 SVG` | Tier 2 | KPI card L4 (Approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L4 Parts. |  |  |
+| `Card L4 SVG` | Tier 2 | KPI card L4 (Approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L4 Parts. |  |  |
 | `_Card L5 Parts` | Tier 2 | KPI card L5 (Take-up rate) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card L5 Note` | Tier 2 | Sub-values of card L5 (Take-up rate), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L5 SVG` | Tier 2 | KPI card L5 (Take-up rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L5 Parts. |  |  |
+| `Card L5 SVG` | Tier 2 | KPI card L5 (Take-up rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L5 Parts. |  |  |
 | `_Card L6 Parts` | Tier 2 | KPI card L6 (Time to cash) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card L6 Note` | Tier 2 | Sub-values of card L6 (Time to cash), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card L6 SVG` | Tier 2 | KPI card L6 (Time to cash), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card L6 Parts. |  |  |
+| `Card L6 SVG` | Tier 2 | KPI card L6 (Time to cash), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card L6 Parts. |  |  |
 | `_Card C1 Parts` | Tier 2 | KPI card C1 (New clients) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card C1 Note` | Tier 2 | Sub-values of card C1 (New clients), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card C1 SVG` | Tier 2 | KPI card C1 (New clients), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card C1 Parts. |  |  |
+| `Card C1 SVG` | Tier 2 | KPI card C1 (New clients), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C1 Parts. |  |  |
 | `_Card C2 Parts` | Tier 2 | KPI card C2 (Returning clients %) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card C2 Note` | Tier 2 | Sub-values of card C2 (Returning clients %), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card C2 SVG` | Tier 2 | KPI card C2 (Returning clients %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C2 Parts. |  |  |
+| `Card C2 SVG` | Tier 2 | KPI card C2 (Returning clients %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C2 Parts. |  |  |
 | `_Card C3 Parts` | Tier 2 | KPI card C3 (Repeat share (loans)) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card C3 Note` | Tier 2 | Sub-values of card C3 (Repeat share (loans)), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card C3 SVG` | Tier 2 | KPI card C3 (Repeat share (loans)), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C3 Parts. |  |  |
+| `Card C3 SVG` | Tier 2 | KPI card C3 (Repeat share (loans)), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C3 Parts. |  |  |
 | `_Card C4 Parts` | Tier 2 | KPI card C4 (New-client approval rate) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card C4 Note` | Tier 2 | Sub-values of card C4 (New-client approval rate), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card C4 SVG` | Tier 2 | KPI card C4 (New-client approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C4 Parts. |  |  |
+| `Card C4 SVG` | Tier 2 | KPI card C4 (New-client approval rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C4 Parts. |  |  |
 | `_Card C5 Parts` | Tier 2 | KPI card C5 (Returning-client approval rate, change 25) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year. Read by the SVG and the parity tests. |  | yes |
 | `Card C5 Note` | Tier 2 | Sub-values of card C5 (Returning-client approval rate), shown in its info tooltip (ADR-0012: not on the card face), as Track C: returning submitted, returning approved, new-client approval rate. |  |  |
-| `Card C5 SVG` | Tier 2 | KPI card C5 (Returning-client approval rate), 216 x 120 SVG: value, one comparator row (vs PY), status chip glyph + word; info button top-left, title at x 30 on two lines (2026-11-02, change 25). Text from _Card C5 Parts. |  |  |
+| `Card C5 SVG` | Tier 2 | KPI card C5 (Returning-client approval rate), 216 x 120 SVG: value, one comparator row (vs PY), status chip glyph + word; info button top-left, title at x 34 on one line, chip beside the value (JS geometry 2026-11-04). Text from _Card C5 Parts. |  |  |
 | `_Card C6 Parts` | Tier 2 | KPI card C6 (Days between loans) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card C6 Note` | Tier 2 | Sub-values of card C6 (Days between loans), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card C6 SVG` | Tier 2 | KPI card C6 (Days between loans), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card C6 Parts. |  |  |
+| `Card C6 SVG` | Tier 2 | KPI card C6 (Days between loans), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card C6 Parts. |  |  |
 | `_Card P1 Parts` | Tier 2 | KPI card P1 (30+ DPD %) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card P1 Note` | Tier 2 | Sub-values of card P1 (30+ DPD %), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P1 SVG` | Tier 2 | KPI card P1 (30+ DPD %), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card P1 Parts. |  |  |
+| `Card P1 SVG` | Tier 2 | KPI card P1 (30+ DPD %), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P1 Parts. |  |  |
 | `_Card P2 Parts` | Tier 2 | KPI card P2 (90+ DPD %) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card P2 Note` | Tier 2 | Sub-values of card P2 (90+ DPD %), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P2 SVG` | Tier 2 | KPI card P2 (90+ DPD %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P2 Parts. |  |  |
+| `Card P2 SVG` | Tier 2 | KPI card P2 (90+ DPD %), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P2 Parts. |  |  |
 | `_Card P3 Parts` | Tier 2 | KPI card P3 (30+ by count) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card P3 Note` | Tier 2 | Sub-values of card P3 (30+ by count), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P3 SVG` | Tier 2 | KPI card P3 (30+ by count), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P3 Parts. |  |  |
+| `Card P3 SVG` | Tier 2 | KPI card P3 (30+ by count), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P3 Parts. |  |  |
 | `_Card P4 Parts` | Tier 2 | KPI card P4 (Vintage 6m bad rate) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. Fixed comparator. Read by the SVG and the parity tests. |  | yes |
 | `Card P4 Note` | Tier 2 | Sub-values of card P4 (Vintage 6m bad rate), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P4 SVG` | Tier 2 | KPI card P4 (Vintage 6m bad rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P4 Parts. |  |  |
+| `Card P4 SVG` | Tier 2 | KPI card P4 (Vintage 6m bad rate), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P4 Parts. |  |  |
 | `_Card P5 Parts` | Tier 2 | KPI card P5 (Roll rate 30→60) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card P5 Note` | Tier 2 | Sub-values of card P5 (Roll rate 30→60), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P5 SVG` | Tier 2 | KPI card P5 (Roll rate 30→60), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P5 Parts. |  |  |
+| `Card P5 SVG` | Tier 2 | KPI card P5 (Roll rate 30→60), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P5 Parts. |  |  |
 | `_Card P6 Parts` | Tier 2 | KPI card P6 (Cost of risk) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card P6 Note` | Tier 2 | Sub-values of card P6 (Cost of risk), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card P6 SVG` | Tier 2 | KPI card P6 (Cost of risk), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card P6 Parts. |  |  |
+| `Card P6 SVG` | Tier 2 | KPI card P6 (Cost of risk), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card P6 Parts. |  |  |
 | `_Card R1 Parts` | Tier 2 | KPI card R1 (Revenue) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card R1 Note` | Tier 2 | Sub-values of card R1 (Revenue), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R1 SVG` | Tier 2 | KPI card R1 (Revenue), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R1 Parts. |  |  |
+| `Card R1 SVG` | Tier 2 | KPI card R1 (Revenue), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R1 Parts. |  |  |
 | `_Card R2 Parts` | Tier 2 | KPI card R2 (Attainment) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. Fixed comparator. Read by the SVG and the parity tests. |  | yes |
 | `Card R2 Note` | Tier 2 | Sub-values of card R2 (Attainment), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R2 SVG` | Tier 2 | KPI card R2 (Attainment), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R2 Parts. |  |  |
+| `Card R2 SVG` | Tier 2 | KPI card R2 (Attainment), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R2 Parts. |  |  |
 | `_Card R3 Parts` | Tier 2 | KPI card R3 (Interest + fees) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card R3 Note` | Tier 2 | Sub-values of card R3 (Interest + fees), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R3 SVG` | Tier 2 | KPI card R3 (Interest + fees), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R3 Parts. |  |  |
+| `Card R3 SVG` | Tier 2 | KPI card R3 (Interest + fees), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R3 Parts. |  |  |
 | `_Card R4 Parts` | Tier 2 | KPI card R4 (Interchange) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status of that row · 6 row count (2) · 7 / 8 vs Budget row and status · 9 / 10 vs PY row and status · 11 / 12 chip status and row. Items 3-5 follow the comparator picker; the card draws both rows, Budget first, and the chip follows the picker, falling back to the other row when that one has no value (2026-11-01, Track C kpiRows). Read by the SVG and the parity tests. |  | yes |
 | `Card R4 Note` | Tier 2 | Sub-values of card R4 (Interchange), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R4 SVG` | Tier 2 | KPI card R4 (Interchange), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 30 (2026-11-01). Text from _Card R4 Parts. |  |  |
+| `Card R4 SVG` | Tier 2 | KPI card R4 (Interchange), 216 x 120 SVG: value, vs Budget and vs PY rows (Budget first), status chip glyph + word following the comparator picker; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R4 Parts. |  |  |
 | `_Card R5 Parts` | Tier 2 | KPI card R5 (MRR) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card R5 Note` | Tier 2 | Sub-values of card R5 (MRR), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R5 SVG` | Tier 2 | KPI card R5 (MRR), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R5 Parts. |  |  |
+| `Card R5 SVG` | Tier 2 | KPI card R5 (MRR), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R5 Parts. |  |  |
 | `_Card R6 Parts` | Tier 2 | KPI card R6 (Paying subscribers) face text, PATHITEM-separated: 1 value · 2 comparator code · 3 comparator label · 4 delta text · 5 status. No Budget exists: always Prior year (MS-01). Read by the SVG and the parity tests. |  | yes |
 | `Card R6 Note` | Tier 2 | Sub-values of card R6 (Paying subscribers), shown in its info tooltip (ADR-0012: not on the card face). |  |  |
-| `Card R6 SVG` | Tier 2 | KPI card R6 (Paying subscribers), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 30 (2026-11-01). Text from _Card R6 Parts. |  |  |
+| `Card R6 SVG` | Tier 2 | KPI card R6 (Paying subscribers), 216 x 120 SVG: value, one comparator row, status chip glyph + word; info button top-left, title at x 34, chip beside the value (JS geometry 2026-11-04). Text from _Card R6 Parts. |  |  |
 | `Card R11 Note` | Tier 3 | Sub-values of panel R11 in its info tooltip, as Track C: churn rate and net adds of the last month of the window. |  |  |
 
 The 28 card measures share two templates (generator `measures2.py`: `hero()` and `kpi()`). Full DAX of one hero card
@@ -4029,46 +4029,49 @@ VAR _chip_row     = PATHITEM ( _p, 6 )
 VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 VAR _chip         =
-    "<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-        & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+    IF (
+        _s <> "neutral"
+        ,"<rect x='" & 316 - _chip_w & "' y='16' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+            & "<text x='" & 316 - _chip_w / 2 & "' y='28' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+    )
 VAR _row3         =
     VAR _txt          = PATHITEM ( _p, 3 )
     VAR _st           = PATHITEM ( _p, 7 )
     VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
     VAR _bar          = PATHITEM ( _p, 9 )
-    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
     RETURN
-        "<text x='16' y='108' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-            & "<text x='164' y='108' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+        "<text x='16' y='120' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+            & "<text x='164' y='121' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
             & IF (
                 _bar <> ""
-                ,"<rect x='172' y='103' width='160' height='6' fill='#DEDDD8'/>"
-                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='103' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-                    & "<rect x='251.5' y='101' width='1' height='10' fill='#2F2F2D'/>"
+                ,"<rect x='172' y='113' width='144' height='6' fill='#DEDDD8'/>"
+                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='113' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+                    & "<rect x='243' y='111' width='1' height='10' fill='#2F2F2D'/>"
             )
 VAR _row4         =
     VAR _txt          = PATHITEM ( _p, 4 )
     VAR _st           = PATHITEM ( _p, 8 )
     VAR _ink          = SWITCH ( _st, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" )
     VAR _bar          = PATHITEM ( _p, 10 )
-    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) )
-    VAR _bar_x        = IF ( _bar = "", 252, IF ( VALUE ( _bar ) < 0, 252 - _len, 252 ) )
+    VAR _len          = IF ( _bar = "", 0, ABS ( VALUE ( _bar ) ) * 0.9 )
+    VAR _bar_x        = IF ( _bar = "", 244, IF ( IF ( _st = "neutral", VALUE ( _bar ) >= 0, _st = "good" ), 244, 244 - _len ) )
     RETURN
-        "<text x='16' y='132' font-size='12' font-weight='600' fill='#5C5C58'>vs Prior year</text>"
-            & "<text x='164' y='132' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
+        "<text x='16' y='144' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+            & "<text x='164' y='145' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink & "'>" & _txt & "</text>"
             & IF (
                 _bar <> ""
-                ,"<rect x='172' y='127' width='160' height='6' fill='#DEDDD8'/>"
-                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='127' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
-                    & "<rect x='251.5' y='125' width='1' height='10' fill='#2F2F2D'/>"
+                ,"<rect x='172' y='137' width='144' height='6' fill='#DEDDD8'/>"
+                    & "<rect x='" & FORMAT ( _bar_x, "0.0" ) & "' y='137' width='" & FORMAT ( _len, "0.0" ) & "' height='6' fill='" & _ink & "'/>"
+                    & "<rect x='243' y='135' width='1' height='10' fill='#2F2F2D'/>"
             )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='332' height='192' viewBox='0 0 332 192' font-family='Segoe UI, sans-serif'>"
-        & "<text x='30' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans issued</text>"
+        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans issued</text>"
         & _chip
-        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
+        & "<text x='16' y='80' font-size='44' font-weight='800' fill='#111111' letter-spacing='-0.9'>" & PATHITEM ( _p, 1 ) & IF ( _second <> "", "<tspan dx='12' font-size='18' font-weight='700' letter-spacing='0'>" & _second & "</tspan>" ) & "</text>"
         & _row3
         & _row4
         & "</svg>"
@@ -4087,18 +4090,21 @@ VAR _ink_py       = SWITCH ( PATHITEM ( _p, 10 ), "good", "#176B3D", "watch", "#
 VAR _glyph        = IF ( LEFT ( _chip_row, 1 ) IN { "▲", "▼", "◦" }, LEFT ( _chip_row, 1 ) & " " )
 VAR _chip_w       = SWITCH ( _s, "good", 38, "watch", 44, "off", 28, 30 ) + IF ( _glyph <> "", 14, 0 )
 VAR _chip         =
-    "<rect x='" & 200 - _chip_w & "' y='24' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
-        & "<text x='" & 200 - _chip_w / 2 & "' y='36' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
-        & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+    IF (
+        _s <> "neutral"
+        ,"<rect x='" & 204 - _chip_w & "' y='48' width='" & _chip_w & "' height='16' rx='2' fill='" & SWITCH ( _s, "good", "#D6EBDC", "watch", "#FFEBA8", "off", "#F4D4D1", "#DEDDD8" ) & "'/>"
+            & "<text x='" & 204 - _chip_w / 2 & "' y='60' font-size='11' font-weight='600' text-anchor='middle' fill='" & SWITCH ( _s, "good", "#176B3D", "watch", "#8A5A00", "off", "#B3261E", "#5C5C58" ) & "'>"
+            & _glyph & SWITCH ( _s, "good", "Good", "watch", "Watch", "off", "Off", "n/a" ) & "</text>"
+    )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='120' viewBox='0 0 216 120' font-family='Segoe UI, sans-serif'>"
-        & "<text x='30' y='36' font-size='12' font-weight='600' fill='#5C5C58'>Loans</text>"
+        & "<text x='34' y='28' font-size='12' font-weight='500' fill='#5C5C58'>Loans</text>"
         & _chip
-        & "<text x='16' y='72' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
-        & "<text x='16' y='92' font-size='12' font-weight='600' fill='#5C5C58'>vs Budget</text>"
-        & "<text x='200' y='92' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
-        & "<text x='16' y='110' font-size='12' font-weight='600' fill='#5C5C58'>vs PY</text>"
-        & "<text x='200' y='110' font-size='13' font-weight='700' text-anchor='end' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
+        & "<text x='16' y='66' font-size='28' font-weight='700' fill='#111111'>" & PATHITEM ( _p, 1 ) & "</text>"
+        & "<text x='16' y='90' font-size='12' font-weight='500' fill='#5C5C58'>vs Budget</text>"
+        & "<text x='100' y='91' font-size='13' font-weight='700' fill='" & _ink_bud & "'>" & PATHITEM ( _p, 7 ) & "</text>"
+        & "<text x='16' y='110' font-size='12' font-weight='500' fill='#5C5C58'>vs PY</text>"
+        & "<text x='100' y='111' font-size='13' font-weight='700' fill='" & _ink_py & "'>" & PATHITEM ( _p, 9 ) & "</text>"
         & "</svg>"
 RETURN
     "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )

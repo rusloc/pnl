@@ -1,0 +1,1010 @@
+/* Flat Ledger tokens (docs/design/sales-revenue dashboard/design-tokens.md §2–§5), scoped to the /sales route so the
+   P&L's Ledger tokens in app/globals.css stay untouched. Geometry: layout-spec §0 (1440 × 810 board, px-exact). */
+.page {
+  --ground: #f3f2ef;
+  --panel: #e9e8e4;
+  --panel2: #deddd8;
+  --line: #cfcdc6;
+  --marker: #2f2f2d;
+  --ink: #111111;
+  --g600: #5c5c58;
+  --g400: #7f7e79;
+  --g300: #bdbbb5;
+  --white: #ffffff;
+  --accent: #ffd54a;
+  --accent2: #ffe58a;
+  --teal: #128c94;
+  --good: #176b3d;
+  --good-t: #d6ebdc;
+  --watch: #8a5a00;
+  --watch-t: #ffeba8;
+  --off: #b3261e;
+  --off-t: #f4d4d1;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+  font-feature-settings:
+    "tnum" 1,
+    "cv11" 1;
+}
+
+.page button,
+.page select {
+  font-family: inherit;
+}
+/* every button has round corners (owner, 2026-11-01); tabs round their top corners only (below) */
+.page button,
+.page select {
+  border-radius: 6px;
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.board {
+  position: relative;
+  width: 1440px;
+  height: 810px; /* the design height; the board's real height comes inline (it fills the popup, 2026-11-01) */
+  overflow: hidden;
+  background: var(--ground);
+}
+
+.abs {
+  position: absolute;
+}
+
+/* ---------- header ---------- */
+.wedge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 64px;
+  pointer-events: none;
+}
+.brand {
+  left: 32px;
+  top: 18px; /* centre y 30, the title's centre (2026-11-01: they were 4 px apart) */
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 24px;
+  text-align: center;
+}
+.title {
+  left: 64px;
+  top: 16px;
+  height: 28px;
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+/* filters (2026-11-01): the applied-filters line and one Filters button, top right on the wedge */
+.filters {
+  right: 32px;
+  top: 18px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.filterLine {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+.filterBtn:hover,
+.filterBtn[aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--white);
+}
+.fGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.fLabel {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--g600);
+}
+.radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.radios button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.radios button[aria-checked="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+.radios button[aria-disabled="true"] {
+  border-style: dashed;
+  background: transparent;
+  color: var(--g400);
+  cursor: not-allowed;
+}
+/* calendar (2026-11-01): mode row, year stepper, 4 × 3 month grid / quarter tiles / year tiles */
+.cal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.calYear {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.calYear button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+.calYear button:disabled {
+  color: var(--g300);
+  cursor: default;
+}
+/* one tile area for every mode: 3 month rows, or one row of quarters / years stretched to the same height */
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  height: 108px;
+}
+.calQ {
+  grid-template-columns: repeat(4, 1fr);
+}
+.calY {
+  grid-template-columns: repeat(3, 1fr);
+}
+.calTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 2px 0;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.calTile small {
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 13px;
+  color: var(--g600);
+}
+.calTile:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+.calTile:disabled {
+  border-style: dashed;
+  background: transparent;
+  color: var(--g300);
+  cursor: not-allowed;
+}
+.calIn {
+  border-color: var(--accent);
+  background: var(--accent2);
+}
+.calEdge {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+.calEdge small {
+  color: var(--g300);
+}
+.calHint {
+  height: 16px;
+  margin: 0;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fRule {
+  margin: 12px 0 0;
+  border: 0;
+  border-top: 1px solid #1a1a1a;
+  opacity: 0.25;
+}
+.fNote {
+  height: 32px; /* two lines kept for every period, so the pop-up never changes height */
+  margin: 10px 0 0;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--g600);
+}
+.fFoot {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+}
+.fFoot button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.fFoot button:disabled {
+  color: var(--g400);
+  cursor: default;
+}
+
+.tabs {
+  left: 32px;
+  top: 64px;
+  height: 36px;
+  display: flex;
+}
+.tabs button {
+  height: 36px;
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--g600);
+  cursor: pointer;
+}
+.tabs button:hover {
+  background: var(--accent2);
+  color: var(--ink);
+}
+.tabs button[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--ink);
+}
+.tabrule {
+  left: 0;
+  top: 100px;
+  width: 1440px;
+  height: 1px;
+  background: var(--line);
+}
+.tabright {
+  right: 32px;
+  top: 72px;
+  height: 20px;
+  display: flex;
+  gap: 16px;
+}
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--g600);
+  cursor: pointer;
+}
+.linkBtn:hover {
+  color: var(--ink);
+}
+
+/* ---------- view region ---------- */
+.panel {
+  position: absolute;
+  left: 0;
+  top: 116px;
+  width: 1440px;
+  bottom: 0;
+}
+
+/* ---------- cards ---------- */
+.card {
+  position: absolute;
+  background: var(--panel);
+}
+.ct {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  right: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ct h3 {
+  margin: 0;
+  font: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* ⓘ before the title on chart and table cards (2026-11-01) */
+.ctT {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: -6px;
+}
+/* small filter on a card (P12 market, 2026-11-01) */
+.mini {
+  display: inline-flex;
+  gap: 2px;
+}
+.mini button {
+  height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.mini button[aria-checked="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+.acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--g600);
+  font-size: 12px;
+  font-weight: 600;
+}
+.lab {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--g600);
+  white-space: nowrap;
+}
+
+/* hero (Overview, 332 × 192): the whole card is a button that opens the metric's view */
+.heroVal {
+  position: absolute;
+  left: 16px;
+  top: 40px;
+  height: 48px;
+  font-size: 44px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.heroVal small {
+  margin-left: 12px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.cr {
+  position: absolute;
+  left: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  line-height: 16px;
+}
+.crName {
+  width: 84px;
+  font-weight: 500;
+  color: var(--g600);
+  white-space: nowrap;
+}
+.crDelta {
+  width: 64px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.diff {
+  position: relative;
+  width: 144px;
+  height: 6px;
+  margin-left: 8px;
+  background: var(--panel2);
+}
+.diff i {
+  position: absolute;
+  left: 71px;
+  top: -2px;
+  width: 1px;
+  height: 10px;
+  background: var(--marker);
+}
+.diff b {
+  position: absolute;
+  top: 0;
+  height: 6px;
+}
+.good {
+  color: var(--good);
+}
+.watch {
+  color: var(--watch);
+}
+.off {
+  color: var(--off);
+}
+.neutral {
+  color: var(--g600);
+  font-weight: 500;
+}
+.bgGood {
+  background: var(--good);
+}
+.bgWatch {
+  background: var(--watch);
+}
+.bgOff {
+  background: var(--off);
+}
+.bgNeutral {
+  background: var(--g400);
+}
+
+/* KPI (views 2–5, 216 × 120): the other comparator shows on hover / focus */
+.kpiVal {
+  position: absolute;
+  left: 16px;
+  top: 40px;
+  height: 32px;
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.kpi .crName {
+  width: auto;
+  min-width: 84px;
+  padding-right: 6px;
+}
+.kpi .crDelta {
+  width: auto;
+}
+
+.chart {
+  position: absolute;
+  left: 16px;
+  top: 40px;
+}
+.chart text {
+  font-family: inherit;
+}
+.legend {
+  position: absolute;
+  left: 16px; /* the ⓘ moved before the title (2026-11-01) */
+  bottom: 8px;
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--g600);
+  white-space: nowrap;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.sw {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+}
+.swSq {
+  width: 10px;
+  height: 10px;
+}
+.callout {
+  position: absolute;
+  max-width: 240px;
+  background: var(--accent);
+  border: 2px solid var(--white);
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.placeholder {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 44px;
+  bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--g300);
+  padding: 0 24px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  text-align: center;
+}
+.chip {
+  display: inline-block;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip.good {
+  background: var(--good-t);
+}
+.chip.watch {
+  background: var(--watch-t);
+}
+.chip.off {
+  background: var(--off-t);
+}
+.chip.neutral {
+  background: var(--panel2);
+}
+.tag {
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--accent2);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+}
+
+/* ---------- tables ---------- */
+.tableWrap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 36px;
+  bottom: 8px;
+  overflow-y: auto;
+}
+.tableWrapTight {
+  top: 34px;
+  bottom: 0;
+  overflow: hidden;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  line-height: 20px;
+}
+.table th {
+  position: sticky;
+  top: 0;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--panel2);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--g600);
+  text-align: left;
+  white-space: nowrap;
+}
+.table td {
+  height: 21px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tight th {
+  height: 20px;
+}
+.tight td {
+  height: 21px;
+  line-height: 20px;
+}
+.table th.r,
+.table td.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.row {
+  cursor: pointer;
+}
+.row:hover td {
+  background: var(--accent2);
+}
+.row[aria-selected="true"] td {
+  background: var(--accent);
+}
+.attBar {
+  display: inline-block;
+  position: relative;
+  width: 100px;
+  height: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--panel2);
+}
+.attBar b {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 6px;
+  background: var(--ink);
+}
+.attBar i {
+  position: absolute;
+  left: 66px;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--teal);
+}
+
+/* ---------- pop-overs ---------- */
+.openBtn {
+  border: 0;
+  padding: 0 2px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g600);
+  cursor: pointer;
+}
+.openBtn:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* ---------- detail window (was the 720 px slide-over; 2026-11-01: a centred window in the pop-up glass over a
+   20 % dark-grey mask on the whole report, which also blurs the report under it) ---------- */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 29;
+  border: 0;
+  padding: 0;
+  background: rgba(64, 64, 64, 0.2);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: default;
+}
+.so {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1120px;
+  height: 640px;
+  max-height: calc(100% - 48px);
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  overflow: hidden; /* border, glass, shadow: glass.module.css .surface */
+}
+.soHd {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 64px;
+  padding: 12px 64px 0 24px;
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid var(--line);
+}
+.soHd h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.soHd p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--g600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.soX {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 16px;
+  cursor: pointer;
+}
+.soChips {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 76px;
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+}
+.soChips .chip {
+  background: var(--panel2);
+  color: var(--ink);
+}
+.facts {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 104px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 24px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.facts div {
+  display: flex;
+  gap: 8px;
+}
+.facts dt {
+  flex: none;
+  width: 104px;
+  color: var(--g600);
+}
+.facts dd {
+  margin: 0;
+}
+.soTable {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 108px;
+  bottom: 48px;
+  overflow-y: auto;
+}
+.soTableLow {
+  top: 196px;
+}
+.soTable .table {
+  table-layout: auto; /* 9 columns: size to content, not equal shares */
+  font-size: 12px;
+}
+.soTable .table th,
+.soTable .table td {
+  padding: 0 5px;
+}
+.soFoot {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 24px;
+  color: var(--g600);
+}
+.soFoot button {
+  height: 24px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.soFoot button:disabled {
+  color: var(--g300);
+  cursor: default;
+}
+/* sortable table headers (2026-11-01: the agent leaderboard) */
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.sortBtn:hover {
+  color: var(--ink);
+}
+.sortBtn span {
+  color: var(--g400);
+}
+th[aria-sort] .sortBtn,
+th[aria-sort] .sortBtn span {
+  color: var(--ink);
+}
+/* pager (2026-11-01): the full list in pages of 50, right of the footer */
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--ink);
+  font-weight: 600;
+}
+.pager span {
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.pager button {
+  min-width: 26px;
+}
+.status {
+  position: absolute;
+  left: 32px;
+  top: 140px;
+  font-size: 14px;
+  color: var(--g600);
+}
+.status button {
+  margin-left: 8px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- card face extras (ADR-0012: title · value · delta rows · status chip; ⓘ bottom-left) ---------- */
+.hero {
+  color: var(--ink);
+}
+.hero:hover {
+  background: #e4e3df;
+}
+.heroOpen {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.hero > span,
+.hero > div {
+  pointer-events: none; /* clicks fall through to the stretched open button */
+}
+.heroChip {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+/* the visible "Details →" on the stretched button (2026-11-01: the card gave no sign it opens the view) */
+.heroCta {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: 6px; /* a span inside the stretched button, so the 6 px button rule above does not reach it (owner, 11-03) */
+  background: var(--white);
+  font-size: 12px;
+  line-height: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.hero:hover .heroCta,
+.heroOpen:focus-visible .heroCta {
+  background: var(--ink);
+  color: var(--white);
+}
+/* ⓘ top-left beside the title on hero and KPI cards (2026-11-01); the title moves right of it */
+.infoTop {
+  position: absolute;
+  left: 8px;
+  top: 12px;
+  z-index: 2; /* above the hero's stretched button */
+}
+.labI {
+  left: 34px;
+}
+.kpiChip {
+  position: absolute;
+  right: 12px;
+  top: 48px;
+}
+.empty {
+  color: var(--g600);
+  font-style: italic;
+}
+/* the mask covers the board edge to edge: no round corners on it */
+.page .scrim {
+  border-radius: 0;
+}

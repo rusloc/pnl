@@ -1,7 +1,7 @@
 /// FX rates, local per 1 EUR: ACTUAL_AVG (Jan 2024 - Oct 2026) and BUDGET (one rate per year). Applied on load; kept for reference.
 table param_fx
-	lineageTag: e4a23fb2-732b-5a56-a877-dd39e7ea6db0
 	isHidden
+	lineageTag: e4a23fb2-732b-5a56-a877-dd39e7ea6db0
 
 	column currency_code
 		dataType: string
@@ -60,3 +60,4 @@ table param_fx
 				    typed
 
 	annotation PBI_ResultType = Table
+
