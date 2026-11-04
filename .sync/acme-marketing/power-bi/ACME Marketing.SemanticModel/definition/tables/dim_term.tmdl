@@ -1,0 +1,79 @@
+/// Keyword, placement or audience (top 8 per campaign); campaign_key is a label.
+table dim_term
+	lineageTag: f594b4ff-9415-5a9b-9499-097fce076a33
+
+	column term_key
+		dataType: string
+		isHidden
+		lineageTag: f5186a5e-5dff-53b5-bf45-8b798bec92a6
+		summarizeBy: none
+		sourceColumn: term_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: e36b33cf-3b56-50bd-8b07-42f9393ff601
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column term_text
+		dataType: string
+		lineageTag: b75fbe01-833e-5deb-bda4-c75130d9c2aa
+		summarizeBy: none
+		sourceColumn: term_text
+
+		annotation SummarizationSetBy = User
+
+	column term_type
+		dataType: string
+		lineageTag: a1be7e44-bae4-59c1-be1b-811266c5c815
+		summarizeBy: none
+		sourceColumn: term_type
+
+		annotation SummarizationSetBy = User
+
+	column match_type
+		dataType: string
+		isHidden
+		lineageTag: be5edf04-f896-5fc3-8565-b52d9eabf899
+		summarizeBy: none
+		sourceColumn: match_type
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bc788605-74ff-5b72-a40b-170ec0451431
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_term = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_term.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"term_key", type text},
+				            {"campaign_key", type text},
+				            {"term_text", type text},
+				            {"term_type", type text},
+				            {"match_type", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

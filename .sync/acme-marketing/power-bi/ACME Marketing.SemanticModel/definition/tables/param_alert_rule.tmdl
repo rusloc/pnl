@@ -1,0 +1,92 @@
+/// Alert rules (O5). Joins nothing; dim_alert_slot expands them per entity.
+table param_alert_rule
+	lineageTag: e2b06329-a282-5f59-bb67-1ed0584ce054
+	isHidden
+
+	column rule_code
+		dataType: string
+		isHidden
+		lineageTag: f4fcea18-2b5d-535d-9c8c-eef7ea6a3149
+		summarizeBy: none
+		sourceColumn: rule_code
+
+		annotation SummarizationSetBy = User
+
+	column severity
+		dataType: string
+		isHidden
+		lineageTag: a5ada96d-1c74-5b26-90bd-ed864a3dea21
+		summarizeBy: none
+		sourceColumn: severity
+
+		annotation SummarizationSetBy = User
+
+	column title
+		dataType: string
+		isHidden
+		lineageTag: ae04e1ea-e1a4-5526-a200-372e7e475f19
+		summarizeBy: none
+		sourceColumn: title
+
+		annotation SummarizationSetBy = User
+
+	column scope_type
+		dataType: string
+		isHidden
+		lineageTag: 8327db18-e957-5b7b-bec9-75404edbbca6
+		summarizeBy: none
+		sourceColumn: scope_type
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: 2a550930-f403-5743-b2f5-c87f34e7970d
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column condition
+		dataType: string
+		isHidden
+		lineageTag: 8f7871b8-0859-5cea-95ac-ab3f90b8ff16
+		summarizeBy: none
+		sourceColumn: condition
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2faf9ae7-f52c-5aa1-96eb-490ae9a340d0
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition param_alert_rule = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_alert_rule.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"rule_code", type text},
+				            {"severity", type text},
+				            {"title", type text},
+				            {"scope_type", type text},
+				            {"metric_code", type text},
+				            {"condition", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

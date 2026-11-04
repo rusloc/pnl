@@ -1,0 +1,129 @@
+/// Delivery, day x campaign x ad set x creative. reach_7d is point in time (never summed over days); paid_customers_dda = DDA credits split by clicks (data README D-4).
+table fact_ad_delivery_day
+	lineageTag: 2b685ae2-0e30-53c0-8411-de7a40a6f3db
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 904b0960-784a-50b6-a716-54e9500c7d6e
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: d891569e-d3ea-5b1f-907c-e6084f0ea041
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column ad_set_key
+		dataType: string
+		isHidden
+		lineageTag: 6456e4f3-840d-51c8-af48-08eb843fc3c8
+		summarizeBy: none
+		sourceColumn: ad_set_key
+
+		annotation SummarizationSetBy = User
+
+	column creative_key
+		dataType: string
+		isHidden
+		lineageTag: 17e82cca-513e-5109-b8e3-5e7244fcfb97
+		summarizeBy: none
+		sourceColumn: creative_key
+
+		annotation SummarizationSetBy = User
+
+	column impressions
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9ed30b0b-8aba-5821-8d3b-162bff77aa7d
+		summarizeBy: none
+		sourceColumn: impressions
+
+		annotation SummarizationSetBy = User
+
+	column clicks
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a50bf675-e848-5fcf-8e73-cabd0e7a3494
+		summarizeBy: none
+		sourceColumn: clicks
+
+		annotation SummarizationSetBy = User
+
+	column spend_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: d1f20747-fd8e-500e-a6a2-7562516d989b
+		summarizeBy: none
+		sourceColumn: spend_usd
+
+		annotation SummarizationSetBy = User
+
+	column reach_7d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 404220a1-739b-57a8-8042-cd2b94f73bd5
+		summarizeBy: none
+		sourceColumn: reach_7d
+
+		annotation SummarizationSetBy = User
+
+	column video_views
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8acdfd60-e1e4-5a9c-a9db-e182afcf3f7a
+		summarizeBy: none
+		sourceColumn: video_views
+
+		annotation SummarizationSetBy = User
+
+	column paid_customers_dda
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 997ef941-ee4d-5c34-a50e-7c148136ed57
+		summarizeBy: none
+		sourceColumn: paid_customers_dda
+
+		annotation SummarizationSetBy = User
+
+	partition fact_ad_delivery_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_ad_delivery_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"ad_set_key", type text},
+				            {"creative_key", type text},
+				            {"impressions", Int64.Type},
+				            {"clicks", Int64.Type},
+				            {"spend_usd", type number},
+				            {"reach_7d", Int64.Type},
+				            {"video_views", Int64.Type},
+				            {"paid_customers_dda", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

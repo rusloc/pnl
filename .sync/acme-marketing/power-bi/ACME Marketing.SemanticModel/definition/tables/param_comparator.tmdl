@@ -1,0 +1,51 @@
+/// Comparison mode (A-11): Previous period (default when nothing is picked), Same period last year, Plan, None. Disconnected; verdicts never follow it (A-24).
+table param_comparator
+	lineageTag: a82531ca-56be-5cd8-a0de-156823d1835f
+
+	column comparator_code
+		dataType: string
+		isHidden
+		lineageTag: 2feb99b0-62ca-50fd-a8b2-7af35d610b1c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_code]
+
+		annotation SummarizationSetBy = User
+
+	column comparator_name
+		dataType: string
+		lineageTag: 88393e7a-498b-5da8-a54f-80d153d7e58c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [comparator_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 52d1f4b7-a55d-5cbc-87d3-041a7796d635
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_comparator = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "comparator_code", STRING
+				    ,"comparator_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "PREV", "Previous period", 1 }
+				        ,{ "LY", "Same period last year", 2 }
+				        ,{ "PLAN", "Plan", 3 }
+				        ,{ "NONE", "None", 4 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

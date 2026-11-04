@@ -1,0 +1,43 @@
+/// Retention day N of the K3 grid: D1, D3, D7, D14, D30, D60, D90 (A-48). Disconnected.
+table dim_day_n
+	lineageTag: 0325d6ce-e627-53ce-937f-112c38f65b9e
+
+	column day_n
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3a55707a-5029-5961-8ede-6a166c9e211c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [day_n]
+
+		annotation SummarizationSetBy = User
+
+	column day_label
+		dataType: string
+		lineageTag: 16a1194a-8d2a-54e1-9370-009d1d780768
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [day_label]
+		sortByColumn: day_n
+
+		annotation SummarizationSetBy = User
+
+	partition dim_day_n = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "day_n", INTEGER
+				    ,"day_label", STRING
+				    ,{
+				        { 1, "D1" }
+				        ,{ 3, "D3" }
+				        ,{ 7, "D7" }
+				        ,{ 14, "D14" }
+				        ,{ 30, "D30" }
+				        ,{ 60, "D60" }
+				        ,{ 90, "D90" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

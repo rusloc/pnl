@@ -1,0 +1,28 @@
+/// Custom range picker (A-10): the actual days (<= as-of) for the From / To slicer. Disconnected; the window measures read MIN / MAX when the preset is Custom.
+table param_date
+	lineageTag: b2017286-d9dd-597a-821b-34ae756f25ef
+
+	column 'date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: a04f7103-1318-52d0-8a11-7ba7a90d6291
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [date]
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	partition param_date = calculated
+		mode: import
+		source =
+				CALCULATETABLE (
+				    SELECTCOLUMNS (
+				        dim_date
+				        ,"date", dim_date[date]
+				    )
+				    ,dim_date[is_actual] = TRUE ()
+				)
+
+	annotation PBI_ResultType = Table

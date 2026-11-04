@@ -1,0 +1,51 @@
+/// Ad network.
+table dim_network
+	lineageTag: baa8f29b-57c8-5464-8619-d7cb18133c80
+
+	column network_code
+		dataType: string
+		isHidden
+		lineageTag: 635e6878-2c65-57a0-9fc9-5c485c5187d9
+		summarizeBy: none
+		sourceColumn: network_code
+
+		annotation SummarizationSetBy = User
+
+	column network_name
+		dataType: string
+		lineageTag: 2953e32f-3ec0-5d64-8974-4c0c34074664
+		summarizeBy: none
+		sourceColumn: network_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f02dbf5d-a1fe-508b-8221-2a90ab0bc4a7
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_network = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_network.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"network_code", type text},
+				            {"network_name", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

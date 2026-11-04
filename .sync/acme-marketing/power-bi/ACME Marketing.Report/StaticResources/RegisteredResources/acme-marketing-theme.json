@@ -1,0 +1,95 @@
+{
+  "name": "acme-marketing-theme.json",
+  "dataColors": [
+    "#4A57E8",
+    "#C26A10",
+    "#0F9A8E",
+    "#8E52D9",
+    "#6E7A1E",
+    "#9B2A4E",
+    "#0F9A8E",
+    "#8A94A6"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#111827",
+  "tableAccent": "#E3E6EC",
+  "good": "#1E9E6A",
+  "bad": "#D93B4B",
+  "neutral": "#C47A0E",
+  "foregroundNeutralSecondary": "#4B5563",
+  "foregroundNeutralTertiary": "#8A94A6",
+  "backgroundLight": "#F5F7FA",
+  "backgroundNeutral": "#DCE0E8",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 9,
+      "color": "#4B5563"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 20,
+      "color": "#111827"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 10,
+      "color": "#111827"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 8,
+      "color": "#8A94A6"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "background": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#EEF1F6"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#EEF1F6"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,197 @@
+/// Funnel counts cohorted by sign-up day, day x campaign (as observed on the as-of day).
+table fact_funnel_day
+	lineageTag: 373b3a2c-b020-5afd-854a-5bcd0108e8f0
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 77602d23-a947-5da3-a28c-62c23bb6b3a6
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: d413cac0-697f-55bf-b95d-729cf4bd9ce1
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column signups
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9980ebce-4896-54b5-873b-870c32b8abf2
+		summarizeBy: none
+		sourceColumn: signups
+
+		annotation SummarizationSetBy = User
+
+	column step_verified
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 826198fe-3506-5b6e-b33e-584bfd216e96
+		summarizeBy: none
+		sourceColumn: step_verified
+
+		annotation SummarizationSetBy = User
+
+	column step_workspace
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d0d4e940-255f-5b15-ba48-36f79bc88fb7
+		summarizeBy: none
+		sourceColumn: step_workspace
+
+		annotation SummarizationSetBy = User
+
+	column step_connected
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 10190518-47aa-5ec5-93d5-34366b50a555
+		summarizeBy: none
+		sourceColumn: step_connected
+
+		annotation SummarizationSetBy = User
+
+	column step_first_dashboard
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 54925bb6-a7b8-54f2-8e84-cc6ae4137610
+		summarizeBy: none
+		sourceColumn: step_first_dashboard
+
+		annotation SummarizationSetBy = User
+
+	column step_invited
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d3b5736b-f49b-5a98-b08f-cbc91ca60b7f
+		summarizeBy: none
+		sourceColumn: step_invited
+
+		annotation SummarizationSetBy = User
+
+	column act_lt1h
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d5b32d4d-16c4-56dd-8efe-71a301ebad50
+		summarizeBy: none
+		sourceColumn: act_lt1h
+
+		annotation SummarizationSetBy = User
+
+	column act_1_6h
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e588f20c-8abe-5a74-a88c-c1154f4a0149
+		summarizeBy: none
+		sourceColumn: act_1_6h
+
+		annotation SummarizationSetBy = User
+
+	column act_6_24h
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f6702275-c483-5bab-9621-f18ecf330c79
+		summarizeBy: none
+		sourceColumn: act_6_24h
+
+		annotation SummarizationSetBy = User
+
+	column act_1_2d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d5dc174c-4199-55db-800f-cd301c92930c
+		summarizeBy: none
+		sourceColumn: act_1_2d
+
+		annotation SummarizationSetBy = User
+
+	column act_2_4d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6fa76314-0efe-52ca-bf5c-db8e2b2dc201
+		summarizeBy: none
+		sourceColumn: act_2_4d
+
+		annotation SummarizationSetBy = User
+
+	column act_4_7d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 30b61103-e8f1-5481-b306-333660561ee5
+		summarizeBy: none
+		sourceColumn: act_4_7d
+
+		annotation SummarizationSetBy = User
+
+	column act_7_30d
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b389805a-b2f3-5ef2-a606-73890a90b977
+		summarizeBy: none
+		sourceColumn: act_7_30d
+
+		annotation SummarizationSetBy = User
+
+	column trials
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1377a207-eb09-53f1-a88f-24cbc22453fd
+		summarizeBy: none
+		sourceColumn: trials
+
+		annotation SummarizationSetBy = User
+
+	partition fact_funnel_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_funnel_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"signups", Int64.Type},
+				            {"step_verified", Int64.Type},
+				            {"step_workspace", Int64.Type},
+				            {"step_connected", Int64.Type},
+				            {"step_first_dashboard", Int64.Type},
+				            {"step_invited", Int64.Type},
+				            {"act_lt1h", Int64.Type},
+				            {"act_1_6h", Int64.Type},
+				            {"act_6_24h", Int64.Type},
+				            {"act_1_2d", Int64.Type},
+				            {"act_2_4d", Int64.Type},
+				            {"act_4_7d", Int64.Type},
+				            {"act_7_30d", Int64.Type},
+				            {"trials", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

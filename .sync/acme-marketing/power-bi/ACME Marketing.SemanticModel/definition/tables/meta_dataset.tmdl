@@ -1,0 +1,84 @@
+/// Dataset metadata from parquet/manifest.json: as-of day (anchors every window, A-03 / A-81, never TODAY()), refresh stamp (freshness, A-17).
+table meta_dataset
+	lineageTag: 2a42f754-28f7-5798-8431-3ef17ff9b72b
+	isHidden
+
+	column as_of_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: eb6e5ed9-866b-5edf-b0d6-8802425ac8de
+		summarizeBy: none
+		sourceColumn: as_of_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column refreshed
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: d61b9bab-9c9a-5d87-92a4-c6aaadb349f0
+		summarizeBy: none
+		sourceColumn: refreshed
+
+		annotation SummarizationSetBy = User
+
+	column default_window_start
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: d14dd8cf-c253-5e57-b08c-9862ddbdf80b
+		summarizeBy: none
+		sourceColumn: default_window_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column default_window_end
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: fb87cc42-832e-50c6-bbf9-73d3d3969a4b
+		summarizeBy: none
+		sourceColumn: default_window_end
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column seed
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 76394768-229f-5e5c-b7fa-8c66e195fb25
+		summarizeBy: none
+		sourceColumn: seed
+
+		annotation SummarizationSetBy = User
+
+	column generator_version
+		dataType: string
+		isHidden
+		lineageTag: 430e2f5d-d385-574c-bd7b-d2a35d7db674
+		summarizeBy: none
+		sourceColumn: generator_version
+
+		annotation SummarizationSetBy = User
+
+	partition meta_dataset = m
+		mode: import
+		source =
+				let
+				    // manifest.json is written by the generator next to the Parquet files (data README Files).
+				    src = Json.Document(File.Contents(DataFolder & "\manifest.json")),
+				    tbl = #table(
+				        type table [as_of_date = date, refreshed = datetime, default_window_start = date, default_window_end = date, seed = Int64.Type, generator_version = text],
+				        {{Date.FromText(src[as_of_date]), DateTime.FromText(src[refreshed]), Date.FromText(src[default_window_start]), Date.FromText(src[default_window_end]), src[seed], src[generator_version]}}
+				    )
+				in
+				    tbl
+
+	annotation PBI_ResultType = Table

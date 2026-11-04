@@ -1,0 +1,55 @@
+/// Finance constants by valid-from date: gross margin, paid-team cost per month (data README D-2). Joins nothing.
+table param_finance
+	lineageTag: 55c38a62-6f03-5f23-bd9c-a1cfd76f43ff
+	isHidden
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: b1bde402-5e10-5d0a-99a5-cc88ffeb266c
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column valid_from
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: d8a1641e-d0b1-5ddc-a63e-f96398ab5fa4
+		summarizeBy: none
+		sourceColumn: valid_from
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: cbec0f89-a361-5a70-be70-272c7c908762
+		summarizeBy: none
+		sourceColumn: value
+
+		annotation SummarizationSetBy = User
+
+	partition param_finance = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_finance.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"metric_code", type text},
+				            {"valid_from", type date},
+				            {"value", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

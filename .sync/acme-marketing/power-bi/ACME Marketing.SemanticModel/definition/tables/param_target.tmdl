@@ -1,0 +1,83 @@
+/// Targets and thresholds, scope x metric (A-75). Joins nothing; read by measures only.
+table param_target
+	lineageTag: 29651eb2-fb1c-5567-890e-623f69db95ad
+	isHidden
+
+	column scope_type
+		dataType: string
+		isHidden
+		lineageTag: d45a95f9-27e6-54a7-84f4-48bcdf8af844
+		summarizeBy: none
+		sourceColumn: scope_type
+
+		annotation SummarizationSetBy = User
+
+	column scope_code
+		dataType: string
+		isHidden
+		lineageTag: 4ffeb56a-d984-5560-a814-8c6d4d6a8f28
+		summarizeBy: none
+		sourceColumn: scope_code
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: 1284894c-d8d6-56de-8ba6-32994748f3c2
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column target_value
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: e2ca0f6a-c960-522f-b78e-bb6ddefc2ee4
+		summarizeBy: none
+		sourceColumn: target_value
+
+		annotation SummarizationSetBy = User
+
+	column direction
+		dataType: string
+		isHidden
+		lineageTag: cef59b2e-f0c9-5eb6-bd80-afdbd122b939
+		summarizeBy: none
+		sourceColumn: direction
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c80ee192-e89c-5b06-a0e2-97e9a29f3c3c
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition param_target = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\param_target.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"scope_type", type text},
+				            {"scope_code", type text},
+				            {"metric_code", type text},
+				            {"target_value", type number},
+				            {"direction", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

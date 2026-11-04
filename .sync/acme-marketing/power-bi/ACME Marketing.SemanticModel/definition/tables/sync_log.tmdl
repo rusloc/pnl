@@ -1,0 +1,94 @@
+/// Last sync per data source (freshness dot, footer; A-17). Joins nothing.
+table sync_log
+	lineageTag: 326230b2-c198-57b0-99c4-6601079572af
+	isHidden
+
+	column source_code
+		dataType: string
+		isHidden
+		lineageTag: 09a94f08-a891-5f54-84c3-3a26accbe138
+		summarizeBy: none
+		sourceColumn: source_code
+
+		annotation SummarizationSetBy = User
+
+	column source_name
+		dataType: string
+		isHidden
+		lineageTag: c553da05-b632-52d2-a140-04fe71c0a3e2
+		summarizeBy: none
+		sourceColumn: source_name
+
+		annotation SummarizationSetBy = User
+
+	column cadence
+		dataType: string
+		isHidden
+		lineageTag: d78f6b98-5ad5-5712-bdd0-a49e704c15be
+		summarizeBy: none
+		sourceColumn: cadence
+
+		annotation SummarizationSetBy = User
+
+	column last_sync_ts
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: e6072818-5567-518a-bcef-528155536606
+		summarizeBy: none
+		sourceColumn: last_sync_ts
+
+		annotation SummarizationSetBy = User
+
+	column stale_after_h
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0b1ebc3f-81d8-5c93-954f-0d8ab94849ef
+		summarizeBy: none
+		sourceColumn: stale_after_h
+
+		annotation SummarizationSetBy = User
+
+	column red_after_h
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3e5eb831-e8a8-5b2e-8eba-2b1ad7bb06a1
+		summarizeBy: none
+		sourceColumn: red_after_h
+
+		annotation SummarizationSetBy = User
+
+	column status
+		dataType: string
+		isHidden
+		lineageTag: 4a39d18b-be46-5609-a8f6-2e4e2e144294
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = User
+
+	partition sync_log = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\sync_log.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"source_code", type text},
+				            {"source_name", type text},
+				            {"cadence", type text},
+				            {"last_sync_ts", type datetime},
+				            {"stale_after_h", Int64.Type},
+				            {"red_after_h", Int64.Type},
+				            {"status", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

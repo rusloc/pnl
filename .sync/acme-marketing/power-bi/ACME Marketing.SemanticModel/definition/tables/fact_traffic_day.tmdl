@@ -1,0 +1,130 @@
+/// Web sessions or store-page funnel, day x campaign x page (columns of the other kind are null).
+table fact_traffic_day
+	lineageTag: 677d5c35-1d8a-546b-b356-73f80624616c
+
+	column 'date'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 74135859-5b98-502d-b728-128e453f808e
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: 753e4100-0ede-5252-8673-7427716c9fba
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column page_key
+		dataType: string
+		isHidden
+		lineageTag: 27250bb6-fb25-52e2-a8de-16f76c750fba
+		summarizeBy: none
+		sourceColumn: page_key
+
+		annotation SummarizationSetBy = User
+
+	column sessions
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 280b7ace-9afb-5a72-9987-b351d36f3661
+		summarizeBy: none
+		sourceColumn: sessions
+
+		annotation SummarizationSetBy = User
+
+	column bounces
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: edbf5881-f8c9-5185-b396-d1cf8fb10cdd
+		summarizeBy: none
+		sourceColumn: bounces
+
+		annotation SummarizationSetBy = User
+
+	column lcp_ms_p75
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7a37d494-1275-5efd-aacd-519f7582f5e3
+		summarizeBy: none
+		sourceColumn: lcp_ms_p75
+
+		annotation SummarizationSetBy = User
+
+	column store_views
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6cc39f4e-0dff-594f-b5d1-623e7a51965b
+		summarizeBy: none
+		sourceColumn: store_views
+
+		annotation SummarizationSetBy = User
+
+	column installs
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7b5203dd-122b-507d-9709-5898347b8e22
+		summarizeBy: none
+		sourceColumn: installs
+
+		annotation SummarizationSetBy = User
+
+	column first_opens
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5c5df1d1-a47b-5d0e-8b87-c93ea33ac59d
+		summarizeBy: none
+		sourceColumn: first_opens
+
+		annotation SummarizationSetBy = User
+
+	column signups
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 601a0eb2-93f6-5030-ab1f-19b641cb734f
+		summarizeBy: none
+		sourceColumn: signups
+
+		annotation SummarizationSetBy = User
+
+	partition fact_traffic_day = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_traffic_day.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"campaign_key", type text},
+				            {"page_key", type text},
+				            {"sessions", Int64.Type},
+				            {"bounces", Int64.Type},
+				            {"lcp_ms_p75", Int64.Type},
+				            {"store_views", Int64.Type},
+				            {"installs", Int64.Type},
+				            {"first_opens", Int64.Type},
+				            {"signups", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

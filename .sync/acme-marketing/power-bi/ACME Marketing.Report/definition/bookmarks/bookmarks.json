@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "bmg_views",
+      "displayName": "Views",
+      "children": [
+        "bm_view_overview",
+        "bm_view_channels",
+        "bm_view_campaigns",
+        "bm_view_journey",
+        "bm_view_cohorts"
+      ]
+    },
+    {
+      "name": "bmg_filters",
+      "displayName": "Filters",
+      "children": [
+        "bm_fp_period",
+        "bm_fp_scope",
+        "bm_fp_channels",
+        "bm_fp_campaigns",
+        "bm_fp_audience",
+        "bm_fp_attribution",
+        "bm_fp_saved",
+        "bm_filters_close"
+      ]
+    },
+    {
+      "name": "bmg_howto",
+      "displayName": "How to read",
+      "children": [
+        "bm_howto_overview_open",
+        "bm_howto_channels_open",
+        "bm_howto_campaigns_open",
+        "bm_howto_journey_open",
+        "bm_howto_cohorts_open",
+        "bm_howto_close"
+      ]
+    },
+    {
+      "name": "bmg_saved",
+      "displayName": "Saved views",
+      "children": [
+        "bm_saved_exec_weekly",
+        "bm_saved_daily_pacing",
+        "bm_saved_mobile_only",
+        "bm_saved_brand_search",
+        "bm_saved_finance_month_end"
+      ]
+    }
+  ]
+}

@@ -27,6 +27,9 @@ shipped until 2026-10-30 byte for byte (P&L 23 Parquet + 28 CSV, Mirelo 18 Parqu
 | `nordmark-exec/generator/` | yes | `generate.py` (seed 20261028) + `requirements.txt` |
 | `nordmark-exec/checks/` | yes | `verify.py` (91 checks), `control_totals_eur.csv` (26,143 rows), `control_totals_category_eur.csv` (10,514 rows) |
 | `nordmark-exec/README.md` | yes | Data contract: tables, grain, columns, rules |
+| `acme-marketing/generator/` | yes | `generate.py` + `metrics.py` (seed 20261104) + `requirements.txt` (bip 2026-11-04, ADR-0015) |
+| `acme-marketing/checks/` | yes | `verify.py` (132 checks incl. a byte-identical rerun), `control_totals_usd.csv` (28,660 rows) |
+| `acme-marketing/README.md` | yes | Data contract: tables, grain, columns, rules, deviations D-1 … D-18 |
 | `<report>/parquet/` | no (generated) | The Parquet files the PBIP imports (= `DataFolder`) |
 | `pnl/facts/`, `dims/`, `params/`, `checks/_counts.json` · `mirelo-sales/dims/`, `facts/`, `params/` | no (generated) | CSV outputs |
 | `.venv/` | no | The Python environment |
@@ -55,6 +58,7 @@ py -3.12 -m venv .venv
 .venv\Scripts\python.exe pnl\generator\generate.py              # CSV + 23 Parquet into pnl\ (~10 s)
 .venv\Scripts\python.exe mirelo-sales\generator\generate.py     # CSV + 18 Parquet + manifest.json into mirelo-sales\ (~20 s)
 .venv\Scripts\python.exe nordmark-exec\generator\generate.py    # 18 Parquet + manifest.json + control totals into nordmark-exec\ (~5 s)
+.venv\Scripts\python.exe acme-marketing\generator\generate.py   # 27 Parquet + manifest.json + control totals into acme-marketing\ (~3 s)
 ```
 
 Check the data (optional before Power BI, required after any change):
@@ -62,6 +66,7 @@ Check the data (optional before Power BI, required after any change):
 ```powershell
 .venv\Scripts\python.exe mirelo-sales\checks\verify.py          # 47 checks; ALL CHECKS GREEN, exit 1 on any failure (~16 s)
 .venv\Scripts\python.exe nordmark-exec\checks\verify.py         # 91 checks incl. a byte-identical rerun; ALL CHECKS GREEN (~50 s)
+.venv\Scripts\python.exe acme-marketing\checks\verify.py        # 132 checks incl. a byte-identical rerun; exit 1 on any failure (~20 s)
 ```
 
 The P&L generate step checks itself: every CSV is parsed strictly (header, row count, unique keys, no nulls in not-null columns) and
@@ -73,6 +78,7 @@ and exits 1 on any failure.
 | ACME Unified P&L | `pnl\parquet` (23 files, 31.8 MB) | 1.25 M fact rows | `../pnl/power-bi/` |
 | Mirelo Sales | `mirelo-sales\parquet` (18 files + `manifest.json`, 22.8 MB) | 1.03 M | `../mirelo-sales/power-bi/` |
 | Nordmark Exec | `nordmark-exec\parquet` (18 files + `manifest.json`, 15.4 MB) | 0.88 M | `../nordmark-exec/power-bi/` |
+| ACME Marketing | `acme-marketing\parquet` (27 files + `manifest.json`, 2.2 MB) | 0.26 M | `../acme-marketing/power-bi/` |
 
 - Every generator writes into its own report folder by default (the folder above `generator\`). `--out <folder>` writes elsewhere;
   then `verify.py --data <folder>` checks that folder (Nordmark's ET-20 rerun needs `generator\` inside it, or pass `--no-rerun`).
@@ -103,5 +109,6 @@ The source of truth stays in rusloc/pnl; the scripts here are unchanged copies, 
 | `pnl/generator/generate.py` | written for this folder: runs `gen_data.js`, then `load_acme_pl.py --parquet-out` on the 23 tables the model imports |
 | `mirelo-sales/generator/`, `checks/`, `README.md` | `data/mirelo_sales_dummy_data/` (README with a pack preface) |
 | `nordmark-exec/generator/`, `checks/`, `README.md` | `data/nordmark_retail_dummy_data/` (README with a pack preface) |
+| `acme-marketing/generator/`, `checks/`, `README.md` | `data/acme_marketing_dummy_data/` (README with a pack preface; checked 2026-11-04 by bip: the pack generator reproduced the repo Parquet and control totals byte for byte) |
 
 Data, names and numbers are fictional.

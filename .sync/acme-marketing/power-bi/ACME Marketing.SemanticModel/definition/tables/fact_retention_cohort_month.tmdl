@@ -1,0 +1,100 @@
+/// Retention cells, acquisition month x campaign x day N (written only where reportable, A-74). Derived on load: cohort_month_index, cohort_month_start.
+table fact_retention_cohort_month
+	lineageTag: b184c5fb-df08-51d5-8f1d-280097335926
+
+	column cohort_month
+		dataType: string
+		isHidden
+		lineageTag: 01825ab9-cffa-58b1-ac46-7e335f1998df
+		summarizeBy: none
+		sourceColumn: cohort_month
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: e5eb2d0d-1449-5971-800a-ab2b1921778e
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column day_n
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9d44e807-3bd0-5a10-a5ce-d42ea1ad4d53
+		summarizeBy: none
+		sourceColumn: day_n
+
+		annotation SummarizationSetBy = User
+
+	column users_matured
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c6787418-1075-54eb-8056-595fefcfdf54
+		summarizeBy: none
+		sourceColumn: users_matured
+
+		annotation SummarizationSetBy = User
+
+	column users_active
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: acc4974c-6459-5457-b0d9-8c6ff833c053
+		summarizeBy: none
+		sourceColumn: users_active
+
+		annotation SummarizationSetBy = User
+
+	/// 0 = 2025-01.
+	column cohort_month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 657cb066-c97a-5de6-a03e-d713593a0d5a
+		summarizeBy: none
+		sourceColumn: cohort_month_index
+
+		annotation SummarizationSetBy = User
+
+	/// First day of the acquisition month.
+	column cohort_month_start
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 7924945c-7d49-5a25-9b13-bf47656edd42
+		summarizeBy: none
+		sourceColumn: cohort_month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	partition fact_retention_cohort_month = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_retention_cohort_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"cohort_month", type text},
+				            {"campaign_key", type text},
+				            {"day_n", Int64.Type},
+				            {"users_matured", Int64.Type},
+				            {"users_active", Int64.Type}
+				        }
+				    ),
+				    cm_src = Table.TransformColumnTypes(Table.SelectColumns(Parquet.Document(File.Contents(DataFolder & "\dim_month.parquet")), {"month_key", "month_index", "month_start"}), {{"month_key", type text}, {"month_index", Int64.Type}, {"month_start", type date}}),
+				    cm_joined = Table.NestedJoin(typed, {"cohort_month"}, cm_src, {"month_key"}, "j", JoinKind.LeftOuter),
+				    cm_expanded = Table.RenameColumns(Table.ExpandTableColumn(cm_joined, "j", {"month_index", "month_start"}), {{"month_index", "cohort_month_index"}, {"month_start", "cohort_month_start"}})
+				in
+				    cm_expanded
+
+	annotation PBI_ResultType = Table

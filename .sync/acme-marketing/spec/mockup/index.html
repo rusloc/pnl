@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Paid Acquisition Console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: fixed top bar + chip row + vitals ribbon; body swaps views under them; filters live in a modal window. */
+:root{
+  --bg:#EEF1F6; --bloom-a:rgba(91,108,255,.16); --bloom-b:rgba(40,199,183,.12); --bloom-c:rgba(255,170,90,.08);
+  --glass:rgba(255,255,255,.56); --glass-strong:rgba(255,255,255,.78); --glass-top:rgba(255,255,255,.85); --glass-line:rgba(17,24,39,.09);
+  --ink:#111827; --ink-2:#4B5563; --ink-3:#8A94A6; --grid:rgba(17,24,39,.08);
+  --accent:#4A57E8; --accent-2:#0F9A8E; --accent-soft:rgba(74,87,232,.12);
+  --good:#1E9E6A; --warn:#C47A0E; --crit:#D93B4B;
+  --c1:#4A57E8; --c2:#C26A10; --c3:#0F9A8E; --c4:#8E52D9; --c5:#6E7A1E; --c6:#9B2A4E;
+  --heat:74,87,232;
+  --f-display:"Manrope",ui-sans-serif,system-ui,sans-serif; --f-body:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --r:14px; --gutter-l:max(16px,env(safe-area-inset-left,0px)); --gutter-r:max(16px,env(safe-area-inset-right,0px));
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1117; --bloom-a:rgba(99,114,255,.24); --bloom-b:rgba(40,199,183,.16); --bloom-c:rgba(255,170,90,.08);
+  --glass:rgba(255,255,255,.045); --glass-strong:rgba(22,26,36,.82); --glass-top:rgba(255,255,255,.14); --glass-line:rgba(255,255,255,.07);
+  --ink:#F3F4F6; --ink-2:#A6AEBD; --ink-3:#6B7382; --grid:rgba(255,255,255,.08);
+  --accent:#8B93FF; --accent-2:#3FD4C4; --accent-soft:rgba(139,147,255,.16);
+  --good:#4CCB92; --warn:#F0A93A; --crit:#FF6B78;
+  --c1:#7F88F5; --c2:#C9822A; --c3:#259E90; --c4:#9B7FE0; --c5:#86983F; --c6:#D2688C;
+  --heat:139,147,255; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --bloom-a:rgba(99,114,255,.24); --bloom-b:rgba(40,199,183,.16); --bloom-c:rgba(255,170,90,.08);
+  --glass:rgba(255,255,255,.045); --glass-strong:rgba(22,26,36,.82); --glass-top:rgba(255,255,255,.14); --glass-line:rgba(255,255,255,.07);
+  --ink:#F3F4F6; --ink-2:#A6AEBD; --ink-3:#6B7382; --grid:rgba(255,255,255,.08);
+  --accent:#8B93FF; --accent-2:#3FD4C4; --accent-soft:rgba(139,147,255,.16);
+  --good:#4CCB92; --warn:#F0A93A; --crit:#FF6B78;
+  --c1:#7F88F5; --c2:#C9822A; --c3:#259E90; --c4:#9B7FE0; --c5:#86983F; --c6:#D2688C;
+  --heat:139,147,255; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:13px;line-height:1.45;min-height:100%;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
+.blooms{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blooms i{position:absolute;border-radius:50%;filter:blur(90px)}
+.blooms .a{width:56vw;height:56vw;left:-14vw;top:-18vw;background:var(--bloom-a)}
+.blooms .b{width:48vw;height:48vw;right:-12vw;top:22vh;background:var(--bloom-b)}
+.blooms .c{width:40vw;height:40vw;left:30vw;bottom:-20vw;background:var(--bloom-c)}
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(140%);backdrop-filter:blur(24px) saturate(140%);border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-top),0 1px 2px rgba(0,0,0,.04);border-radius:var(--r)}
+
+/* Top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--glass-strong);-webkit-backdrop-filter:blur(28px) saturate(140%);backdrop-filter:blur(28px) saturate(140%);border-bottom:1px solid var(--glass-line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:-.01em}
+.brand .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.tabs{display:flex;gap:2px;padding:3px;border-radius:11px;background:var(--glass);border:1px solid var(--glass-line)}
+.tabs a{padding:6px 12px;border-radius:8px;color:var(--ink-2);text-decoration:none;font-weight:500;white-space:nowrap}
+.tabs a[aria-current="page"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.tabs a:focus-visible,.btn:focus-visible,.chip:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;border:1px solid var(--glass-line);background:var(--glass);color:var(--ink);font:inherit;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn .badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center}
+.fresh{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-size:12px}
+.fresh .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 25%,transparent)}
+
+/* Chip row */
+.chips{padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:8px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative;z-index:1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line);font-size:12px;color:var(--ink-2);cursor:pointer}
+.chip b{color:var(--ink);font-weight:600}
+.chip.cross{border-style:dashed;border-color:var(--accent)}
+.chip .x{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3)}
+.chip .x:hover{background:var(--accent-soft);color:var(--ink)}
+.chips .clear{background:none;border:none;color:var(--ink-3);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* Vitals */
+.vitals{padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:12px 4px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;position:relative;z-index:1}
+.vital{padding:12px 14px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;gap:2px 10px;min-width:0}
+.vital .lbl{grid-column:1/3;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.vital .val{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.vital .delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;align-self:end;display:flex;align-items:center;gap:3px}
+.vital .sub{grid-column:1/3;font-size:11.5px;color:var(--ink-3);display:flex;justify-content:space-between;gap:8px;align-items:end}
+.vital svg{width:84px;height:26px;overflow:visible}
+.up{color:var(--good)} .down{color:var(--crit)} .flat{color:var(--ink-3)}
+
+/* View body */
+main{padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:10px 16px;position:relative;z-index:1}
+.view{display:none}
+.view.active{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.card{padding:14px 16px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.card header{display:flex;align-items:start;justify-content:space-between;gap:10px}
+.card h3{margin:0;font-family:var(--f-display);font-size:14px;font-weight:700;letter-spacing:-.01em}
+.card .q{color:var(--ink-3);font-size:12px;margin-top:1px}
+.card .menu{color:var(--ink-3);background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px 4px;border-radius:6px}
+.card .menu:hover{background:var(--accent-soft);color:var(--ink)}
+.card .cap{font-size:12px;color:var(--ink-2);display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:auto}
+.card .cap b{color:var(--ink);font-variant-numeric:tabular-nums}
+.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font-family:var(--f-body);font-size:11px;fill:var(--ink-3)}
+.chart .axis{stroke:var(--grid)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.legend .dash{width:14px;height:0;border-top:2px dashed var(--ink-3);border-radius:0;vertical-align:3px}
+
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+.tbl td.num,.tbl th.num{text-align:right}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.sel td{background:var(--accent-soft)}
+.tbl tr[data-row]{cursor:pointer}
+.tbl tr[data-row]:hover td{background:color-mix(in srgb,var(--accent-soft) 60%,transparent)}
+.wrap{overflow-x:auto;min-width:0}
+.swatch{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.bar{display:inline-block;height:8px;border-radius:4px;background:var(--accent);vertical-align:middle;margin-right:6px}
+.bar.b2{background:var(--accent-2)}
+.flag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid transparent}
+.flag.ok{color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
+.flag.warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.flag.crit{color:var(--crit);background:color-mix(in srgb,var(--crit) 12%,transparent)}
+.flag.info{color:var(--ink-2);background:var(--accent-soft)}
+.flag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* Lists */
+.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.list li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--glass-line)}
+.list .sev{width:4px;height:28px;border-radius:2px}
+.list .t{font-weight:600}
+.list .d{font-size:12px;color:var(--ink-3)}
+.list .v{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.guard{display:grid;grid-template-columns:1fr auto auto;gap:6px 12px;align-items:center}
+.guard .n{color:var(--ink-2)}
+.guard .v{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.guard .meter{width:90px;height:6px;border-radius:3px;background:var(--grid);position:relative;overflow:visible}
+.guard .meter i{position:absolute;left:0;top:0;height:100%;border-radius:3px;background:var(--accent)}
+.guard .meter em{position:absolute;top:-3px;width:2px;height:12px;background:var(--ink-3);border-radius:1px}
+
+/* Creatives */
+.creatives{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.creative{border-radius:10px;background:var(--glass);border:1px solid var(--glass-line);overflow:hidden}
+.creative .thumb{height:70px;background:linear-gradient(135deg,var(--accent-soft),transparent 70%),repeating-linear-gradient(45deg,transparent 0 8px,var(--grid) 8px 9px)}
+.creative .meta{padding:8px 10px;font-size:12px;display:grid;gap:2px}
+.creative .meta b{font-variant-numeric:tabular-nums}
+
+/* Heatmap */
+.heat{display:grid;gap:3px;font-size:11px;font-variant-numeric:tabular-nums}
+.heat .h{color:var(--ink-3);text-align:center}
+.heat .r{color:var(--ink-2);white-space:nowrap;padding-right:6px}
+.heat .c{height:26px;border-radius:5px;display:grid;place-items:center;color:var(--ink);background:rgba(var(--heat),calc(var(--v) * .9 + .05))}
+
+/* Footer */
+.foot{padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:8px 14px;color:var(--ink-3);font-size:11.5px;display:flex;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+
+/* Tooltip */
+.tip{position:fixed;z-index:50;pointer-events:none;padding:6px 9px;border-radius:8px;font-size:12px;background:var(--glass-strong);border:1px solid var(--glass-line);color:var(--ink);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tip[hidden]{display:none}
+
+/* Filter window */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(10,12,20,.32);display:grid;place-items:center;padding-left:var(--gutter-l);padding-right:var(--gutter-r);padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px))}
+.scrim[hidden]{display:none}
+.fw{width:min(900px,100%);max-height:100%;display:grid;grid-template-columns:200px 1fr 220px;grid-template-rows:auto 1fr auto;background:var(--glass-strong);border-radius:18px;overflow:hidden;animation:pop .22s cubic-bezier(.2,.8,.2,1);box-shadow:0 24px 60px rgba(0,0,0,.25)}
+@keyframes pop{from{transform:scale(.98);opacity:0}to{transform:none;opacity:1}}
+.fw .head{grid-column:1/4;display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--glass-line)}
+.fw .head h2{margin:0;font-family:var(--f-display);font-size:16px;font-weight:700;letter-spacing:-.01em}
+.fw .head .hint{color:var(--ink-3);font-size:12px}
+.fw .rail{border-right:1px solid var(--glass-line);padding:10px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.fw .rail button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:9px 11px;border-radius:9px;border:none;background:none;color:var(--ink-2);font:inherit;font-weight:500;cursor:pointer}
+.fw .rail button[aria-selected="true"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.fw .rail .cnt{min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+.fw .rail .cnt:empty{display:none}
+.fw .rail hr{border:none;border-top:1px solid var(--glass-line);margin:6px 4px}
+.fw .main{padding:16px 18px;overflow:auto;min-width:0}
+.fw .pane{display:none;flex-direction:column;gap:14px}
+.fw .pane.active{display:flex}
+.fw .pane h4{margin:0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--glass);border:1px solid var(--glass-line);gap:2px;flex-wrap:wrap}
+.seg button{padding:6px 11px;border-radius:7px;border:none;background:none;color:var(--ink-2);font:inherit;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:grid;gap:5px;font-size:12px;color:var(--ink-2)}
+.fld input,.fld select{font:inherit;color:var(--ink);padding:7px 10px;border-radius:9px;border:1px solid var(--glass-line);background:var(--glass);min-width:0;width:100%}
+.opts{display:grid;gap:6px}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--glass-line);background:var(--glass);cursor:pointer}
+.opt input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.opt .sub{color:var(--ink-3);font-size:12px;margin-left:auto;font-variant-numeric:tabular-nums}
+.tree .opt.child{margin-left:26px}
+.fw .preview{border-left:1px solid var(--glass-line);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--glass)}
+.fw .preview h4{margin:0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.pv{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--glass);border:1px solid var(--glass-line)}
+.pv .l{font-size:11.5px;color:var(--ink-3)}
+.pv .v{font-family:var(--f-display);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.pv .d{font-size:11.5px;color:var(--ink-2)}
+.fw .preview .n{margin-top:auto;font-size:12px;color:var(--ink-3)}
+.fw .footer{grid-column:1/4;display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--glass-line)}
+.fw .footer .link{background:none;border:none;color:var(--ink-2);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;padding:1px 5px;border-radius:5px;border:1px solid var(--glass-line);background:var(--glass);color:var(--ink-2)}
+
+/* Responsive */
+@media (max-width:1100px){.vitals{grid-template-columns:repeat(3,minmax(0,1fr))}.s3,.s4,.s5,.s6,.s7,.s8{grid-column:span 6}.creatives{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){.vitals{grid-template-columns:repeat(2,minmax(0,1fr))}.s3,.s4,.s5,.s6,.s7,.s8,.s12{grid-column:span 12}.fw{grid-template-columns:1fr;grid-template-rows:auto auto 1fr auto auto;border-radius:14px}.fw .rail{border-right:none;border-bottom:1px solid var(--glass-line);flex-direction:row;flex-wrap:wrap}.fw .rail hr{display:none}.fw .preview{border-left:none;border-top:1px solid var(--glass-line)}.fw .head,.fw .footer{grid-column:1}.row2{grid-template-columns:1fr}.tabs{order:5;width:100%;overflow-x:auto}}
+@media (max-width:480px){.vitals{grid-template-columns:1fr 1fr}.vital .val{font-size:22px}}
+@media (prefers-reduced-motion:reduce){.view.active,.fw{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="blooms" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+
+<header class="top">
+  <div class="brand"><span class="mark"></span>Paid Acquisition Console</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="#overview" data-view="overview">Overview</a>
+    <a href="#channels" data-view="channels">Channels</a>
+    <a href="#campaigns" data-view="campaigns">Campaigns</a>
+    <a href="#journey" data-view="journey">Journey</a>
+    <a href="#cohorts" data-view="cohorts">Cohorts</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="btn" id="periodBtn" type="button" aria-haspopup="dialog">Oct 5 – Nov 3 · vs prior 30 d</button>
+  <button class="btn" id="filterBtn" type="button" aria-haspopup="dialog">Filters <span class="badge" id="filterCount">3</span></button>
+  <span class="fresh" title="All sources synced within 6 h"><span class="dot"></span>Synced 2 h ago</span>
+</header>
+
+<div class="chips" id="chips" aria-label="Active filters">
+  <button class="chip" type="button" data-chip="platform">Platform: <b>Web + iOS + Android</b><span class="x" aria-label="Remove">×</span></button>
+  <button class="chip" type="button" data-chip="channel">Channel: <b>All paid</b><span class="x" aria-label="Remove">×</span></button>
+  <button class="chip" type="button" data-chip="attr">Attribution: <b>Data-driven · 30 d click</b><span class="x" aria-label="Remove">×</span></button>
+  <button class="chip cross" type="button" data-chip="cross" hidden>Selected: <b id="crossLbl"></b><span class="x" aria-label="Remove">×</span></button>
+  <button class="clear" type="button" id="clearAll">Clear all</button>
+</div>
+
+<section class="vitals" id="vitals" aria-label="Vitals"></section>
+
+<main>
+  <!-- OVERVIEW -->
+  <section class="view" id="view-overview">
+    <article class="card glass s7"><header><div><h3>Acquisition funnel</h3><div class="q">Where in the journey do we lose or win?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="funnelChart" viewBox="0 0 640 196" role="img" aria-label="Funnel from impressions to paid customers"></svg>
+      <div class="cap"><span>Trial → paid <b>14.2%</b> (−1.9 pt)</span><span>Click → sign-up <b>3.1%</b> (+0.2 pt)</span><span>Cost per paid <b>$412</b></span></div>
+    </article>
+    <article class="card glass s5"><header><div><h3>Guardrails</h3><div class="q">Can a good headline hide a bad quarter?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="guard" id="guards"></div>
+      <div class="cap"><span>Target markers from the campaign registry</span></div>
+    </article>
+    <article class="card glass s8"><header><div><h3>Spend vs plan and CAC, daily</h3><div class="q">When did it move?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend"><span><i style="background:var(--c1)"></i>Spend</span><span><i class="dash"></i>Plan</span><span><i style="background:var(--c3)"></i>Paid CAC (right chart, same days)</span></div>
+      <svg class="chart" id="spendChart" viewBox="0 0 700 150" role="img" aria-label="Daily spend against plan"></svg>
+      <svg class="chart" id="cacChart" viewBox="0 0 700 90" role="img" aria-label="Daily paid CAC"></svg>
+      <div class="cap"><span>Spend MTD <b>$188.4k</b> vs plan $176.0k (<b class="down">+7.0%</b>)</span><span>CAC stepped up on <b>Oct 18</b></span></div>
+    </article>
+    <article class="card glass s4"><header><div><h3>Spend share vs new-MRR share</h3><div class="q">Who earns more than they cost?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend"><span><i style="background:var(--c1)"></i>Share of spend</span><span><i style="background:var(--c3)"></i>Share of new MRR</span></div>
+      <svg class="chart" id="shareChart" viewBox="0 0 320 190" role="img" aria-label="Spend share versus revenue share by channel"></svg>
+      <div class="cap"><span>Paid social takes <b>34%</b> of spend for <b>21%</b> of new MRR</span></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Anomalies and alerts</h3><div class="q">What needs a decision today?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <ul class="list" id="alerts"></ul>
+    </article>
+    <article class="card glass s6"><header><div><h3>Top movers by Δ ROAS</h3><div class="q">Which campaigns changed most vs prior period?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="moversChart" viewBox="0 0 560 170" role="img" aria-label="Campaigns ranked by change in ROAS"></svg>
+      <div class="cap"><span>Bars about zero; click a bar to open the campaign</span></div>
+    </article>
+  </section>
+
+  <!-- CHANNELS -->
+  <section class="view" id="view-channels">
+    <article class="card glass s12"><header><div><h3>Channel matrix</h3><div class="q">Which channel earns the result, and on which platform?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="wrap"><table class="tbl" id="chTable"><thead><tr><th>Channel</th><th class="num">Spend</th><th class="num">Share</th><th class="num">Paid cust.</th><th class="num">CPA</th><th class="num">ROAS 90d</th><th class="num">Click→sign-up</th><th class="num">Pacing</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <div class="cap"><span>Click a row to scope every card below and the Campaigns view to that channel</span></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Web vs app funnel</h3><div class="q">Where does each platform leak?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend"><span><i style="background:var(--c1)"></i>Web</span><span><i style="background:var(--c3)"></i>App (iOS + Android)</span></div>
+      <svg class="chart" id="platformFunnel" viewBox="0 0 560 190" role="img" aria-label="Web and app funnel conversion by stage"></svg>
+      <div class="cap"><span>Store page → install <b>31%</b>; install → sign-up <b>58%</b>; web landing → sign-up <b>3.4%</b></span></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Platform-reported vs modelled CPA</h3><div class="q">How much do the networks over-claim?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend"><span><i style="background:var(--grid);border:1px solid var(--ink-3)"></i>Platform-reported</span><span><i style="background:var(--c1)"></i>Modelled (data-driven)</span></div>
+      <svg class="chart" id="gapChart" viewBox="0 0 560 190" role="img" aria-label="Reported versus modelled CPA by channel"></svg>
+      <div class="cap"><span>Average over-claim <b>38%</b>; paid social <b>71%</b></span></div>
+    </article>
+    <article class="card glass s12"><header><div><h3>Budget pacing by channel</h3><div class="q">Who is ahead or behind plan at day 30 of 30?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="pacingChart" viewBox="0 0 1100 150" role="img" aria-label="Spend to date against monthly budget by channel"></svg>
+    </article>
+  </section>
+
+  <!-- CAMPAIGNS -->
+  <section class="view" id="view-campaigns">
+    <article class="card glass s12"><header><div><h3>Campaigns</h3><div class="q">Which campaign is off, and how?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="wrap"><table class="tbl" id="cmpTable"><thead><tr><th>Campaign</th><th>Channel</th><th>Platform</th><th class="num">Spend</th><th class="num">Pacing</th><th class="num">CPA</th><th class="num">ROAS</th><th class="num">CTR 7d Δ</th><th class="num">Freq.</th><th>Flags</th></tr></thead><tbody></tbody></table></div>
+      <div class="cap"><span>Sorted by spend; flags come from the campaign's own targets</span></div>
+    </article>
+    <article class="card glass s8"><header><div><h3 id="selCmpTitle">Brand search · Global</h3><div class="q">Daily spend, CPA and paid conversions for the selected campaign</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend"><span><i style="background:var(--c1)"></i>Spend</span><span><i style="background:var(--c3)"></i>Paid conversions (lower chart)</span></div>
+      <svg class="chart" id="cmpSpend" viewBox="0 0 700 120" role="img" aria-label="Selected campaign daily spend"></svg>
+      <svg class="chart" id="cmpConv" viewBox="0 0 700 90" role="img" aria-label="Selected campaign daily paid conversions"></svg>
+      <div class="cap"><span>CPA <b>$318</b> (target $340)</span><span>Learning phase ended Oct 11</span></div>
+    </article>
+    <article class="card glass s4"><header><div><h3>Ad sets by CPA</h3><div class="q">Within the campaign, who spends well?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="adsetChart" viewBox="0 0 320 200" role="img" aria-label="Ad sets ranked by cost per acquisition"></svg>
+      <div class="cap"><span>Dashed line: campaign CPA target</span></div>
+    </article>
+    <article class="card glass s8"><header><div><h3>Creatives</h3><div class="q">Which ad is tired?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="creatives" id="creatives"></div>
+      <div class="cap"><span>Fatigue flag when CTR 7-day slope &lt; −20% and frequency &gt; 3</span></div>
+    </article>
+    <article class="card glass s4"><header><div><h3>Keywords / placements</h3><div class="q">Which terms buy conversions, which buy clicks?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="wrap"><table class="tbl" id="kwTable"><thead><tr><th>Term</th><th class="num">CPC</th><th class="num">CVR</th><th class="num">Conv.</th></tr></thead><tbody></tbody></table></div>
+    </article>
+  </section>
+
+  <!-- JOURNEY -->
+  <section class="view" id="view-journey">
+    <article class="card glass s6"><header><div><h3>Landing and store pages</h3><div class="q">Is the leak after the click?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="wrap"><table class="tbl" id="lpTable"><thead><tr><th>Page</th><th class="num">Sessions</th><th class="num">CVR</th><th class="num">Bounce</th><th class="num">LCP</th></tr></thead><tbody></tbody></table></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Onboarding steps, paid traffic</h3><div class="q">Which step loses new sign-ups?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="onbChart" viewBox="0 0 560 190" role="img" aria-label="Onboarding step completion for paid sign-ups"></svg>
+      <div class="cap"><span>Largest drop: <b>Connect data source</b> (−29%)</span></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Sign-up → activation time</h3><div class="q">How fast do paid users reach the aha moment?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="ttaChart" viewBox="0 0 560 170" role="img" aria-label="Distribution of hours from sign-up to activation"></svg>
+      <div class="cap"><span>Median <b>26 h</b>; 7-day activation <b>41%</b></span></div>
+    </article>
+    <article class="card glass s6"><header><div><h3>Activation rate by platform</h3><div class="q">Does the app convert sign-ups as well as web?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="actChart" viewBox="0 0 560 170" role="img" aria-label="Seven-day activation rate by platform and OS version"></svg>
+      <div class="cap"><span>Android 13 and below <b>29%</b> vs iOS 18 <b>47%</b></span></div>
+    </article>
+  </section>
+
+  <!-- COHORTS -->
+  <section class="view" id="view-cohorts">
+    <article class="card glass s8"><header><div><h3>Payback curves by acquisition month</h3><div class="q">Will it pay back, and when?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="legend" id="paybackLegend"></div>
+      <svg class="chart" id="paybackChart" viewBox="0 0 700 220" role="img" aria-label="Cumulative gross margin per customer as a share of CAC by month since acquisition"></svg>
+      <div class="cap"><span>Line crosses 100% = paid back. Jul cohort: <b>month 9</b>; Sep cohort on track for <b>month 11</b></span></div>
+    </article>
+    <article class="card glass s4"><header><div><h3>LTV:CAC by channel</h3><div class="q">Where does a dollar earn the most?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <svg class="chart" id="ltvChart" viewBox="0 0 320 200" role="img" aria-label="LTV to CAC ratio by channel"></svg>
+      <div class="cap"><span>Dashed line: 3:1 target</span></div>
+    </article>
+    <article class="card glass s8"><header><div><h3>Retention grid, paid cohorts</h3><div class="q">Do paid users stay?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="heat" id="heat"></div>
+      <div class="cap"><span>Share of cohort active on day N; one hue, darker = higher</span></div>
+    </article>
+    <article class="card glass s4"><header><div><h3>Cohort size and ARPA</h3><div class="q">Are newer cohorts bigger and worth as much?</div></div><button class="menu" type="button" aria-label="Card menu">⋯</button></header>
+      <div class="wrap"><table class="tbl" id="cohortTable"><thead><tr><th>Cohort</th><th class="num">Paid</th><th class="num">ARPA</th><th class="num">CAC</th><th class="num">Refunds</th></tr></thead><tbody></tbody></table></div>
+    </article>
+  </section>
+</main>
+
+<footer class="foot"><span>Attribution: data-driven, 30-day click / 1-day view</span><span>Currency: USD</span><span>Ad platforms synced 12:40 · Billing 06:00 · Product events 12:55</span><span>Figures are illustrative</span></footer>
+
+<div class="tip" id="tip" hidden></div>
+
+<!-- FILTER WINDOW -->
+<div class="scrim" id="scrim" hidden>
+  <div class="fw glass" role="dialog" aria-modal="true" aria-labelledby="fwTitle" id="fw">
+    <div class="head"><h2 id="fwTitle">Filters</h2><span class="hint">Nothing applies until you press Apply · <span class="kbd">Esc</span> closes</span><span class="spacer"></span><button class="btn" type="button" id="fwClose" aria-label="Close">×</button></div>
+    <div class="rail" role="tablist" aria-label="Filter groups">
+      <button role="tab" type="button" data-pane="period" aria-selected="true">Period <span class="cnt">1</span></button>
+      <button role="tab" type="button" data-pane="scope">Scope <span class="cnt">1</span></button>
+      <button role="tab" type="button" data-pane="channels">Channels <span class="cnt"></span></button>
+      <button role="tab" type="button" data-pane="campaigns">Campaigns <span class="cnt"></span></button>
+      <button role="tab" type="button" data-pane="audience">Audience <span class="cnt"></span></button>
+      <button role="tab" type="button" data-pane="attribution">Attribution <span class="cnt">1</span></button>
+      <hr>
+      <button role="tab" type="button" data-pane="saved">Saved views</button>
+    </div>
+    <div class="main">
+      <div class="pane active" data-pane="period">
+        <h4>Range</h4>
+        <div class="seg"><button type="button" aria-pressed="false">7 d</button><button type="button" aria-pressed="true">30 d</button><button type="button" aria-pressed="false">MTD</button><button type="button" aria-pressed="false">QTD</button><button type="button" aria-pressed="false">Custom</button></div>
+        <div class="row2"><label class="fld">From<input type="date" id="fFrom" value="2026-10-05"></label><label class="fld">To<input type="date" id="fTo" value="2026-11-03"></label></div>
+        <h4>Compare with</h4>
+        <div class="seg"><button type="button" aria-pressed="true">Previous period</button><button type="button" aria-pressed="false">Same period last year</button><button type="button" aria-pressed="false">Plan</button><button type="button" aria-pressed="false">None</button></div>
+        <h4>Granularity</h4>
+        <div class="seg"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button><button type="button" aria-pressed="false">Month</button></div>
+      </div>
+      <div class="pane" data-pane="scope">
+        <h4>Platform</h4>
+        <div class="opts"><label class="opt"><input type="checkbox" id="pWeb" checked> Web <span class="sub">$96.1k</span></label><label class="opt"><input type="checkbox" id="pIos" checked> iOS <span class="sub">$54.9k</span></label><label class="opt"><input type="checkbox" id="pAnd" checked> Android <span class="sub">$37.4k</span></label></div>
+        <h4>Market</h4>
+        <label class="fld"><select id="fMarket"><option>All markets</option><option>North America</option><option>EMEA</option><option>APAC</option><option>LATAM</option></select></label>
+        <h4>Product tier</h4>
+        <div class="seg"><button type="button" aria-pressed="true">All</button><button type="button" aria-pressed="false">Self-serve</button><button type="button" aria-pressed="false">Sales-assisted</button></div>
+      </div>
+      <div class="pane" data-pane="channels">
+        <h4>Channel and network</h4>
+        <div class="opts tree">
+          <label class="opt"><input type="checkbox" id="cSearch" checked> Paid search <span class="sub">$61.2k</span></label>
+          <label class="opt child"><input type="checkbox" id="cGoogle" checked> Google Ads <span class="sub">$52.0k</span></label>
+          <label class="opt child"><input type="checkbox" id="cBing" checked> Microsoft Ads <span class="sub">$9.2k</span></label>
+          <label class="opt"><input type="checkbox" id="cSocial" checked> Paid social <span class="sub">$64.1k</span></label>
+          <label class="opt child"><input type="checkbox" id="cMeta" checked> Meta <span class="sub">$38.7k</span></label>
+          <label class="opt child"><input type="checkbox" id="cLinkedin" checked> LinkedIn <span class="sub">$17.1k</span></label>
+          <label class="opt child"><input type="checkbox" id="cTiktok" checked> TikTok <span class="sub">$8.3k</span></label>
+          <label class="opt"><input type="checkbox" id="cAppInstall" checked> App install networks <span class="sub">$28.6k</span></label>
+          <label class="opt"><input type="checkbox" id="cDisplay" checked> Display and video <span class="sub">$19.9k</span></label>
+          <label class="opt"><input type="checkbox" id="cRetarget" checked> Retargeting <span class="sub">$9.4k</span></label>
+          <label class="opt"><input type="checkbox" id="cAffiliate" checked> Affiliates <span class="sub">$5.2k</span></label>
+        </div>
+      </div>
+      <div class="pane" data-pane="campaigns">
+        <h4>Campaigns</h4>
+        <label class="fld"><input type="search" id="fCmpSearch" placeholder="Search 17 campaigns"></label>
+        <h4>Status</h4>
+        <div class="seg"><button type="button" aria-pressed="true">Live</button><button type="button" aria-pressed="true">Learning</button><button type="button" aria-pressed="false">Paused</button><button type="button" aria-pressed="false">Ended</button></div>
+        <div class="opts" id="fCmpList"></div>
+      </div>
+      <div class="pane" data-pane="audience">
+        <h4>Visitor</h4>
+        <div class="seg"><button type="button" aria-pressed="true">All</button><button type="button" aria-pressed="false">New</button><button type="button" aria-pressed="false">Returning</button></div>
+        <h4>Device</h4>
+        <div class="opts"><label class="opt"><input type="checkbox" id="dDesk" checked> Desktop</label><label class="opt"><input type="checkbox" id="dMob" checked> Mobile web</label><label class="opt"><input type="checkbox" id="dApp" checked> App</label></div>
+        <h4>Country</h4>
+        <label class="fld"><input type="text" id="fCountry" placeholder="Any country"></label>
+      </div>
+      <div class="pane" data-pane="attribution">
+        <h4>Model</h4>
+        <div class="opts"><label class="opt"><input type="radio" name="attr" checked> Data-driven <span class="sub">default</span></label><label class="opt"><input type="radio" name="attr"> Last click</label><label class="opt"><input type="radio" name="attr"> First touch</label><label class="opt"><input type="radio" name="attr"> Platform-reported <span class="sub">shows network claims</span></label></div>
+        <h4>Lookback</h4>
+        <div class="row2"><label class="fld">Click window<select id="fClick"><option>7 days</option><option selected>30 days</option><option>90 days</option></select></label><label class="fld">View window<select id="fView"><option selected>1 day</option><option>7 days</option><option>None</option></select></label></div>
+        <h4>Conversion event</h4>
+        <div class="seg"><button type="button" aria-pressed="false">Sign-up</button><button type="button" aria-pressed="false">Activated</button><button type="button" aria-pressed="false">Trial</button><button type="button" aria-pressed="true">Paid</button></div>
+      </div>
+      <div class="pane" data-pane="saved">
+        <h4>Saved views</h4>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="sv"> Exec weekly <span class="sub">Overview · 30 d · all</span></label>
+          <label class="opt"><input type="radio" name="sv"> Daily pacing <span class="sub">Campaigns · MTD vs plan</span></label>
+          <label class="opt"><input type="radio" name="sv"> Mobile only <span class="sub">Channels · iOS + Android</span></label>
+          <label class="opt"><input type="radio" name="sv"> Brand vs non-brand <span class="sub">Campaigns · paid search</span></label>
+          <label class="opt"><input type="radio" name="sv"> Finance month-end <span class="sub">Cohorts · last-click</span></label>
+        </div>
+      </div>
+    </div>
+    <aside class="preview">
+      <h4>Preview under this selection</h4>
+      <div class="pv"><span class="l">Spend</span><span class="v" id="pvSpend">$188.4k</span><span class="d">of $188.4k in period</span></div>
+      <div class="pv"><span class="l">Paid customers</span><span class="v" id="pvCust">457</span><span class="d">of 457</span></div>
+      <div class="pv"><span class="l">Paid CAC</span><span class="v" id="pvCac">$412</span><span class="d">blended $531</span></div>
+      <div class="pv"><span class="l">Rows matched</span><span class="v" id="pvRows">17 campaigns</span><span class="d">6 channels · 3 platforms</span></div>
+      <div class="n">Preview recalculates as you change the selection, so you never apply an empty filter.</div>
+    </aside>
+    <div class="footer"><button class="link" type="button" id="resetGroup">Reset group</button><button class="link" type="button" id="resetAll">Reset all</button><span class="spacer"></span><button class="btn" type="button" id="saveView">Save as view</button><button class="btn primary" type="button" id="applyBtn">Apply</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const svgNS='http://www.w3.org/2000/svg';
+const el=(t,a,txt)=>{const n=document.createElementNS(svgNS,t);for(const k in a)n.setAttribute(k,a[k]);if(txt!=null)n.textContent=txt;return n};
+const fmt$=v=>v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'k':'$'+Math.round(v);
+const pct=v=>(v*100).toFixed(1)+'%';
+const tip=$('#tip');
+function hover(node,text){node.addEventListener('mousemove',e=>{tip.textContent=text;tip.hidden=false;tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY+12)+'px'});node.addEventListener('mouseleave',()=>tip.hidden=true)}
+
+/* ---------- data (illustrative) ---------- */
+const days=Array.from({length:30},(_,i)=>i);
+const dayLbl=i=>{const d=new Date(2026,9,5+i);return (d.getMonth()===9?'Oct ':'Nov ')+d.getDate()};
+const seedSeries=(base,amp,bump)=>days.map(i=>base+Math.sin(i*1.1)*amp*.4+Math.cos(i*.37)*amp*.6+(i>=13?bump:0)+((i%7===5||i%7===6)?-amp*.5:0));
+const spend=seedSeries(6200,600,350).map(v=>Math.max(4200,v));
+const plan=days.map(i=>5870);
+const cac=seedSeries(372,24,78).map(v=>Math.max(300,v));
+
+const vitals=[
+ {l:'Spend',v:'$188.4k',d:'+7.0%',dir:'down',s:spend,sub:'plan $176.0k',t:.93},
+ {l:'New paying customers',v:'457',d:'+2.9%',dir:'up',s:seedSeries(15,3,0),sub:'target 480',t:.95},
+ {l:'Blended CAC',v:'$531',d:'+6.4%',dir:'down',s:seedSeries(500,20,30),sub:'paid $412 · target $480',t:.9},
+ {l:'New MRR',v:'$61.9k',d:'+4.1%',dir:'up',s:seedSeries(2000,220,40),sub:'ARPA $135',t:.97},
+ {l:'CAC payback',v:'10.8 mo',d:'+0.6',dir:'down',s:seedSeries(10,.4,.4),sub:'target < 12',t:.9},
+ {l:'LTV : CAC',v:'3.4×',d:'−0.2',dir:'down',s:seedSeries(3.6,.15,-.15),sub:'floor 3.0×',t:.88},
+];
+const channels=[
+ {n:'Paid search',c:'--c1',spend:61200,share:.325,cust:188,cpa:326,roas:1.31,cvr:.049,pace:1.02,st:['ok','On plan']},
+ {n:'Paid social',c:'--c2',spend:64100,share:.340,cust:112,cpa:572,roas:.74,cvr:.021,pace:1.14,st:['crit','CPA 41% over']},
+ {n:'App install',c:'--c3',spend:28600,share:.152,cust:71,cpa:403,roas:.98,cvr:.034,pace:.97,st:['ok','On plan']},
+ {n:'Display & video',c:'--c4',spend:19900,share:.106,cust:33,cpa:603,roas:.62,cvr:.012,pace:1.06,st:['warn','View-through heavy']},
+ {n:'Retargeting',c:'--c5',spend:9400,share:.050,cust:38,cpa:247,roas:1.9,cvr:.071,pace:.88,st:['ok','Underspent']},
+ {n:'Affiliates',c:'--c6',spend:5200,share:.028,cust:15,cpa:347,roas:1.22,cvr:.055,pace:.71,st:['info','Learning']},
+];
+const mrrShare=[.41,.21,.15,.07,.11,.05];
+const campaigns=[
+ {n:'Brand search · Global',ch:'Paid search',pl:'Web',sp:24100,pace:1.01,cpa:318,roas:1.62,ctr:.02,fq:1.2,fl:[['ok','On target']]},
+ {n:'Non-brand · Analytics terms',ch:'Paid search',pl:'Web',sp:21300,pace:1.04,cpa:367,roas:1.18,ctr:-.03,fq:1.4,fl:[['ok','On target']]},
+ {n:'Meta prospecting · Lookalike 2%',ch:'Paid social',pl:'iOS',sp:19800,pace:1.22,cpa:641,roas:.58,ctr:-.46,fq:3.4,fl:[['crit','Fatigue'],['warn','Over-pacing']]},
+ {n:'Meta prospecting · Interests',ch:'Paid social',pl:'Android',sp:12400,pace:1.08,cpa:498,roas:.81,ctr:-.12,fq:2.6,fl:[['warn','CPA over']]},
+ {n:'LinkedIn · Data teams ABM',ch:'Paid social',pl:'Web',sp:17100,pace:1.00,cpa:712,roas:.91,ctr:.04,fq:2.1,fl:[['info','Pipeline-led']]},
+ {n:'Apple Search Ads · Core',ch:'App install',pl:'iOS',sp:16200,pace:.98,cpa:355,roas:1.05,ctr:.01,fq:1.0,fl:[['ok','On target']]},
+ {n:'Google UAC · Android growth',ch:'App install',pl:'Android',sp:12400,pace:.95,cpa:470,roas:.89,ctr:-.08,fq:1.7,fl:[['warn','Install quality']]},
+ {n:'YouTube · Product demo',ch:'Display & video',pl:'Web',sp:11600,pace:1.07,cpa:688,roas:.55,ctr:-.05,fq:2.9,fl:[['warn','View-through']]},
+ {n:'DV360 · Programmatic display',ch:'Display & video',pl:'Web',sp:8300,pace:1.05,cpa:512,roas:.72,ctr:-.02,fq:4.1,fl:[['crit','Frequency']]},
+ {n:'TikTok · Creator cuts',ch:'Paid social',pl:'Android',sp:8300,pace:1.15,cpa:433,roas:.86,ctr:.18,fq:1.9,fl:[['info','Learning']]},
+ {n:'Retarget · Trial abandon',ch:'Retargeting',pl:'Web',sp:6100,pace:.90,cpa:221,roas:2.1,ctr:.06,fq:2.4,fl:[['ok','Underspent']]},
+ {n:'Retarget · App re-engage',ch:'Retargeting',pl:'iOS',sp:3300,pace:.85,cpa:289,roas:1.6,ctr:.02,fq:2.2,fl:[['ok','On target']]},
+ {n:'Microsoft Ads · Non-brand',ch:'Paid search',pl:'Web',sp:9200,pace:.99,cpa:402,roas:1.02,ctr:-.01,fq:1.3,fl:[['ok','On target']]},
+ {n:'Affiliate · Review sites',ch:'Affiliates',pl:'Web',sp:5200,pace:.71,cpa:347,roas:1.22,ctr:0,fq:1,fl:[['info','Learning']]},
+ {n:'Meta retention · Churn-risk',ch:'Retargeting',pl:'Android',sp:2800,pace:.80,cpa:0,roas:0,ctr:.03,fq:1.8,fl:[['info','No CPA goal']]},
+ {n:'LinkedIn · Webinar Nov',ch:'Paid social',pl:'Web',sp:6500,pace:1.03,cpa:0,roas:0,ctr:.07,fq:1.6,fl:[['info','Lead goal']]},
+ {n:'Brand search · DE/FR',ch:'Paid search',pl:'Web',sp:6600,pace:1.02,cpa:338,roas:1.41,ctr:.01,fq:1.1,fl:[['ok','On target']]},
+];
+
+/* ---------- vitals ---------- */
+(function(){
+ const host=$('#vitals');
+ vitals.forEach(v=>{
+  const a=document.createElement('article');a.className='vital glass';a.tabIndex=0;
+  const s=v.s, mn=Math.min(...s), mx=Math.max(...s), w=84,h=22;
+  const pts=s.map((y,i)=>[i/(s.length-1)*w, h-(y-mn)/(mx-mn||1)*h]);
+  const d='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L');
+  const area=d+`L${w} ${h+2}L0 ${h+2}Z`;
+  const last=pts[pts.length-1];
+  a.innerHTML=`<span class="lbl">${v.l}</span><span class="val">${v.v}</span><span class="delta ${v.dir}">${v.dir==='up'?'▲':v.dir==='down'?'▼':'●'} ${v.d}</span><span class="sub"><span>${v.sub}</span><svg viewBox="0 0 ${w} ${h+4}" aria-hidden="true"><path d="${area}" fill="var(--accent)" fill-opacity=".12"/><line x1="${(w*v.t).toFixed(1)}" x2="${(w*v.t).toFixed(1)}" y1="0" y2="${h}" stroke="var(--ink-3)" stroke-dasharray="2 2"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="var(--accent)"/></svg></span>`;
+  hover(a,`${v.l}: ${v.v} · ${v.d} vs prior period`);
+  host.appendChild(a);
+ });
+})();
+
+/* ---------- chart helpers ---------- */
+function lineChart(svg,series,opts){
+ const W=+svg.getAttribute('viewBox').split(' ')[2], H=+svg.getAttribute('viewBox').split(' ')[3];
+ const m={l:44,r:12,t:10,b:opts.xLabels?20:8}; const iw=W-m.l-m.r, ih=H-m.t-m.b;
+ const all=series.flatMap(s=>s.v); let mn=opts.zero?0:Math.min(...all), mx=Math.max(...all); const pad=(mx-mn)*.08; mx+=pad; if(!opts.zero)mn-=pad;
+ const X=i=>m.l+i/(days.length-1)*iw, Y=v=>m.t+ih-(v-mn)/(mx-mn)*ih;
+ svg.innerHTML='';
+ const ticks=3;for(let t=0;t<=ticks;t++){const v=mn+(mx-mn)*t/ticks;svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),class:'axis'}));svg.appendChild(el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end'},opts.fmt(v)))}
+ if(opts.xLabels){[0,7,14,21,29].forEach(i=>svg.appendChild(el('text',{x:X(i),y:H-4,'text-anchor':'middle'},dayLbl(i))))}
+ if(opts.mark!=null){svg.appendChild(el('line',{x1:X(opts.mark),x2:X(opts.mark),y1:m.t,y2:m.t+ih,stroke:'var(--warn)','stroke-dasharray':'3 3'}));svg.appendChild(el('text',{x:X(opts.mark)+4,y:m.t+10,fill:'var(--warn)'},dayLbl(opts.mark)))}
+ series.forEach(s=>{
+  const d='M'+s.v.map((v,i)=>X(i).toFixed(1)+' '+Y(v).toFixed(1)).join('L');
+  if(s.area)svg.appendChild(el('path',{d:d+`L${X(days.length-1)} ${m.t+ih}L${X(0)} ${m.t+ih}Z`,fill:s.color,'fill-opacity':.08}));
+  const p=el('path',{d,fill:'none',stroke:s.color,'stroke-width':s.dash?1.5:2,'stroke-dasharray':s.dash?'4 4':'none','stroke-linejoin':'round'});svg.appendChild(p);
+  if(!s.dash){const l=s.v.length-1;svg.appendChild(el('circle',{cx:X(l),cy:Y(s.v[l]),r:3.5,fill:s.color,stroke:'var(--bg)','stroke-width':2}))}
+ });
+ // hover crosshair
+ const cross=el('line',{y1:m.t,y2:m.t+ih,stroke:'var(--ink-3)','stroke-width':1,visibility:'hidden'});svg.appendChild(cross);
+ const hit=el('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent'});svg.appendChild(hit);
+ hit.addEventListener('mousemove',e=>{const r=svg.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*W;const i=Math.max(0,Math.min(days.length-1,Math.round((x-m.l)/iw*(days.length-1))));cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('visibility','visible');tip.textContent=dayLbl(i)+' · '+series.map(s=>s.name+' '+opts.fmt(s.v[i])).join(' · ');tip.hidden=false;tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY+12)+'px'});
+ hit.addEventListener('mouseleave',()=>{cross.setAttribute('visibility','hidden');tip.hidden=true});
+}
+function hbars(svg,rows,opts){ // rows: {label,v,color,ref?,v2?,color2?,sub?}
+ const W=+svg.getAttribute('viewBox').split(' ')[2]; const lw=opts.lw||120, rw=opts.rw||56; const iw=W-lw-rw-8;
+ const mx=opts.max||Math.max(...rows.flatMap(r=>[r.v,r.v2||0,r.ref||0]))*1.05; const rh=opts.rh||22, gap=opts.gap||8;
+ svg.innerHTML='';svg.setAttribute('viewBox',`0 0 ${W} ${rows.length*(rh+gap)+4}`);
+ rows.forEach((r,i)=>{const y=2+i*(rh+gap);const g=el('g',{});
+  g.appendChild(el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end',fill:'var(--ink-2)'},r.label));
+  g.appendChild(el('rect',{x:lw,y,width:iw,height:rh,rx:4,fill:'var(--grid)','fill-opacity':.5}));
+  if(r.v2!=null){g.appendChild(el('rect',{x:lw,y:y+1,width:Math.max(2,r.v2/mx*iw),height:rh/2-2,rx:3,fill:r.color2||'var(--grid)',stroke:r.stroke2||'none','fill-opacity':r.fo2||1}));g.appendChild(el('rect',{x:lw,y:y+rh/2+1,width:Math.max(2,r.v/mx*iw),height:rh/2-2,rx:3,fill:r.color}))}
+  else g.appendChild(el('rect',{x:lw,y:y+2,width:Math.max(2,r.v/mx*iw),height:rh-4,rx:4,fill:r.color}));
+  if(r.ref!=null)g.appendChild(el('line',{x1:lw+r.ref/mx*iw,x2:lw+r.ref/mx*iw,y1:y-2,y2:y+rh+2,stroke:'var(--ink-3)','stroke-dasharray':'3 3'}));
+  g.appendChild(el('text',{x:lw+iw+8,y:y+rh/2+4,fill:'var(--ink)','font-weight':'600'},r.valLbl));
+  hover(g,r.tip||`${r.label}: ${r.valLbl}`);
+  if(r.onclick){g.style.cursor='pointer';g.addEventListener('click',r.onclick)}
+  svg.appendChild(g)});
+}
+
+/* ---------- overview ---------- */
+(function(){
+ const stages=[['Impressions',14.2e6,'$1.90 CPM'],['Clicks',223e3,'1.57% CTR · $0.84 CPC'],['Visits + installs',168e3,'75% land'],['Sign-ups',6980,'4.2% · $27 CPL'],['Activated',2860,'41% · $66'],['Trials',3220,'46% of sign-ups'],['Paid',457,'14.2% · $412 CPA']];
+ const svg=$('#funnelChart');const W=640;const lw=118,rw=150;const iw=W-lw-rw;const rh=20,gap=6;
+ svg.setAttribute('viewBox',`0 0 ${W} ${stages.length*(rh+gap)+20}`);
+ stages.forEach((s,i)=>{const y=3+i*(rh+gap);const w=Math.max(3,Math.log10(s[1])/Math.log10(stages[0][1])*iw); // log scale: a linear funnel from impressions hides every stage after clicks
+  const g=el('g',{});g.appendChild(el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end',fill:'var(--ink-2)'},s[0]));
+  g.appendChild(el('rect',{x:lw+(iw-w)/2,y,width:w,height:rh,rx:4,fill:i===6?'var(--accent)':'var(--c1)','fill-opacity':i===6?1:.35+i*.09}));
+  g.appendChild(el('text',{x:lw+iw+10,y:y+rh/2-2,fill:'var(--ink)','font-weight':'600'},s[1]>=1e6?(s[1]/1e6).toFixed(1)+'M':s[1]>=1e3?(s[1]/1e3).toFixed(1)+'k':s[1]));
+  g.appendChild(el('text',{x:lw+iw+10,y:y+rh/2+9,'font-size':'9.5'},s[2]));
+  hover(g,`${s[0]}: ${s[1].toLocaleString()} · ${s[2]}`);svg.appendChild(g)});
+ svg.appendChild(el('text',{x:lw,y:stages.length*(rh+gap)+14,'font-size':'9.5'},'Widths on a log scale so the late stages stay visible; read the numbers, not the areas'));
+
+ const guards=[['Trial → paid',.142,.16,'14.2%'],['D7 retention, paid',.27,.25,'27%'],['D30 retention, paid',.13,.12,'13%'],['Refund rate',.021,.03,'2.1%'],['Brand share of search spend',.42,.40,'42%'],['Attribution gap (platform vs modelled)',.38,.30,'+38%']];
+ const gh=$('#guards');guards.forEach(g=>{const mx=g[2]*1.6;gh.insertAdjacentHTML('beforeend',`<span class="n">${g[0]}</span><span class="meter"><i style="width:${Math.min(100,g[1]/mx*100)}%"></i><em style="left:${g[2]/mx*100}%"></em></span><span class="v">${g[3]}</span>`)});
+
+ lineChart($('#spendChart'),[{name:'Spend',v:spend,color:'var(--c1)',area:true},{name:'Plan',v:plan,color:'var(--ink-3)',dash:true}],{fmt:fmt$,zero:true,mark:13});
+ lineChart($('#cacChart'),[{name:'CAC',v:cac,color:'var(--c3)'}],{fmt:v=>'$'+Math.round(v),xLabels:true,mark:13});
+
+ hbars($('#shareChart'),channels.map((c,i)=>({label:c.n,v:mrrShare[i],v2:c.share,color:'var(--c3)',color2:'var(--c1)',valLbl:Math.round(mrrShare[i]*100)+'% rev',tip:`${c.n}: ${Math.round(c.share*100)}% of spend · ${Math.round(mrrShare[i]*100)}% of new MRR`})),{lw:100,rw:54,max:.45,rh:24});
+
+ const alerts=[['crit','Meta prospecting · Lookalike 2%','CTR −46% over 7 days at frequency 3.4; CPA $641 vs $420 target','$19.8k'],['warn','Paid social pacing','Channel at 114% of plan with 0 days left','+$7.9k'],['warn','Android install quality','Install → sign-up fell to 49% (was 58%) after UAC bid change Oct 22','−9 pt'],['info','Attribution gap widened','Platform-reported conversions exceed modelled by 38% (30-d avg 30%)','+8 pt'],['ok','Retargeting underspent','Trial-abandon campaign at 90% of plan with ROAS 2.1; room to scale','$0.6k']];
+ const ul=$('#alerts');alerts.forEach(a=>{ul.insertAdjacentHTML('beforeend',`<li><span class="sev" style="background:var(--${a[0]==='ok'?'good':a[0]==='info'?'ink-3':a[0]})"></span><span><span class="t">${a[1]}</span><br><span class="d">${a[2]}</span></span><span class="v">${a[3]}</span></li>`)});
+
+ const movers=[['Retarget · Trial abandon',.32],['Brand search · Global',.11],['Apple Search Ads · Core',.06],['TikTok · Creator cuts',-.09],['YouTube · Product demo',-.18],['Meta prospecting · Lookalike 2%',-.41]];
+ const ms=$('#moversChart');const mW=560,mlw=190,miw=mW-mlw-16,zero=mlw+miw/2,mmx=.5,mrh=20,mgap=6;ms.setAttribute('viewBox',`0 0 ${mW} ${movers.length*(mrh+mgap)+4}`);
+ ms.appendChild(el('line',{x1:zero,x2:zero,y1:0,y2:movers.length*(mrh+mgap),stroke:'var(--ink-3)'}));
+ movers.forEach((m,i)=>{const y=2+i*(mrh+mgap);const w=Math.abs(m[1])/mmx*(miw/2);const g=el('g',{});g.style.cursor='pointer';
+  g.appendChild(el('text',{x:mlw-8,y:y+mrh/2+4,'text-anchor':'end',fill:'var(--ink-2)'},m[0]));
+  g.appendChild(el('rect',{x:m[1]>=0?zero:zero-w,y:y+2,width:w,height:mrh-4,rx:4,fill:m[1]>=0?'var(--good)':'var(--crit)','fill-opacity':.85}));
+  g.appendChild(el('text',{x:m[1]>=0?zero+w+6:zero+6,y:y+mrh/2+4,'text-anchor':'start',fill:'var(--ink)','font-weight':'600'},(m[1]>0?'+':'')+m[1].toFixed(2)+'×'));
+  hover(g,`${m[0]}: ROAS ${m[1]>0?'+':''}${m[1].toFixed(2)}× vs prior period`);g.addEventListener('click',()=>{selectCampaign(m[0]);location.hash='campaigns'});ms.appendChild(g)});
+})();
+
+/* ---------- channels ---------- */
+(function(){
+ const tb=$('#chTable tbody');
+ channels.forEach((c,i)=>{const tr=document.createElement('tr');tr.dataset.row=c.n;tr.innerHTML=`<td><span class="swatch" style="background:var(${c.c})"></span>${c.n}</td><td class="num">${fmt$(c.spend)}</td><td class="num"><span class="bar" style="width:${c.share*120}px"></span>${Math.round(c.share*100)}%</td><td class="num">${c.cust}</td><td class="num">$${c.cpa}</td><td class="num">${c.roas.toFixed(2)}×</td><td class="num">${pct(c.cvr)}</td><td class="num ${c.pace>1.1?'down':c.pace<.85?'flat':''}">${Math.round(c.pace*100)}%</td><td><span class="flag ${c.st[0]}">${c.st[1]}</span></td>`;
+  tr.addEventListener('click',()=>{$$('#chTable tr.sel').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');setCross('Channel · '+c.n)});tb.appendChild(tr)});
+ const st=[['Impr.',1,1],['Click / store view',.0157,.021],['Visit / install',.75,.31],['Sign-up',.034,.58],['Activated',.44,.37],['Paid',.148,.131]];
+ const svg=$('#platformFunnel');const W=560,lw=120,iw=W-lw-70,rh=22,gap=6;svg.setAttribute('viewBox',`0 0 ${W} ${st.length*(rh+gap)+4}`);
+ st.forEach((s,i)=>{const y=2+i*(rh+gap);const g=el('g',{});g.appendChild(el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end',fill:'var(--ink-2)'},s[0]));
+  const sc=v=>Math.max(2,Math.sqrt(v)*iw);
+  g.appendChild(el('rect',{x:lw,y:y+1,width:sc(s[1]),height:rh/2-2,rx:3,fill:'var(--c1)'}));g.appendChild(el('rect',{x:lw,y:y+rh/2+1,width:sc(s[2]),height:rh/2-2,rx:3,fill:'var(--c3)'}));
+  g.appendChild(el('text',{x:lw+iw+8,y:y+rh/2+4,fill:'var(--ink)','font-weight':'600'},i===0?'100%':pct(s[1])+' · '+pct(s[2])));
+  hover(g,`${s[0]} conversion from previous stage · web ${pct(s[1])} · app ${pct(s[2])}`);svg.appendChild(g)});
+ hbars($('#gapChart'),[['Paid search',326,381],['Paid social',572,978],['App install',403,520],['Display & video',603,1140],['Retargeting',247,290],['Affiliates',347,347]].map(r=>({label:r[0],v:r[1],v2:r[2],color:'var(--c1)',color2:'var(--grid)',stroke2:'var(--ink-3)',valLbl:'+'+Math.round((r[2]/r[1]-1)*100)+'%',tip:`${r[0]}: reported CPA $${r[1]} · modelled $${r[2]} · network claims ${Math.round((r[2]/r[1]-1)*100)}% more conversions`})),{lw:120,rw:56,rh:24});
+ const pc=$('#pacingChart');const W2=1100,lw2=140,iw2=W2-lw2-120,rh2=18,gap2=6;pc.setAttribute('viewBox',`0 0 ${W2} ${channels.length*(rh2+gap2)+4}`);
+ const budgets=[60000,56000,29500,18800,10700,7300];
+ channels.forEach((c,i)=>{const y=2+i*(rh2+gap2);const b=budgets[i];const mx=Math.max(b,c.spend)*1.15;const g=el('g',{});
+  g.appendChild(el('text',{x:lw2-8,y:y+rh2/2+4,'text-anchor':'end',fill:'var(--ink-2)'},c.n));
+  g.appendChild(el('rect',{x:lw2,y,width:b/mx*iw2,height:rh2,rx:4,fill:'var(--grid)'}));
+  g.appendChild(el('rect',{x:lw2,y:y+2,width:c.spend/mx*iw2,height:rh2-4,rx:4,fill:c.spend>b*1.1?'var(--crit)':c.spend<b*.85?'var(--warn)':'var(--c1)'}));
+  g.appendChild(el('line',{x1:lw2+b/mx*iw2,x2:lw2+b/mx*iw2,y1:y-3,y2:y+rh2+3,stroke:'var(--ink)','stroke-width':1.5}));
+  g.appendChild(el('text',{x:lw2+iw2+8,y:y+rh2/2+4,fill:'var(--ink)','font-weight':'600'},`${fmt$(c.spend)} / ${fmt$(b)}`));
+  hover(g,`${c.n}: ${Math.round(c.spend/b*100)}% of budget`);pc.appendChild(g)});
+})();
+
+/* ---------- campaigns ---------- */
+let selected=campaigns[0].n;
+function selectCampaign(name){selected=name;$$('#cmpTable tr[data-row]').forEach(r=>r.classList.toggle('sel',r.dataset.row===name));$('#selCmpTitle').textContent=name;
+ const c=campaigns.find(x=>x.n===name)||campaigns[0];const base=c.sp/30;
+ lineChart($('#cmpSpend'),[{name:'Spend',v:seedSeries(base,base*.12,c.pace>1.1?base*.18:0),color:'var(--c1)',area:true}],{fmt:fmt$,zero:true});
+ lineChart($('#cmpConv'),[{name:'Paid',v:seedSeries(Math.max(1,c.sp/(c.cpa||400)/30),.6,c.ctr<-.3?-.8:0).map(v=>Math.max(0,v)),color:'var(--c3)'}],{fmt:v=>v.toFixed(1),xLabels:true});
+ $('#crossLbl').textContent='Campaign · '+name;
+}
+(function(){
+ const tb=$('#cmpTable tbody');
+ campaigns.forEach(c=>{const tr=document.createElement('tr');tr.dataset.row=c.n;
+  tr.innerHTML=`<td>${c.n}</td><td>${c.ch}</td><td>${c.pl}</td><td class="num">${fmt$(c.sp)}</td><td class="num ${c.pace>1.1?'down':c.pace<.85?'flat':''}">${Math.round(c.pace*100)}%</td><td class="num">${c.cpa?'$'+c.cpa:'—'}</td><td class="num">${c.roas?c.roas.toFixed(2)+'×':'—'}</td><td class="num ${c.ctr<-.2?'down':c.ctr>.1?'up':''}">${(c.ctr>0?'+':'')+Math.round(c.ctr*100)}%</td><td class="num">${c.fq.toFixed(1)}</td><td>${c.fl.map(f=>`<span class="flag ${f[0]}">${f[1]}</span>`).join(' ')}</td>`;
+  tr.addEventListener('click',()=>selectCampaign(c.n));tb.appendChild(tr)});
+ selectCampaign(campaigns[0].n);
+ hbars($('#adsetChart'),[['Exact · analytics',288],['Phrase · dashboards',317],['Exact · BI tools',342],['Broad · reporting',401],['Competitor terms',468]].map(r=>({label:r[0],v:r[1],ref:340,color:r[1]>340?'var(--c2)':'var(--c1)',valLbl:'$'+r[1]})),{lw:120,rw:44,rh:24});
+ const cr=[['Dashboard in 60s · v3',.0182,-.46,3.4,'crit'],['Spreadsheet pain · v2',.0121,-.12,2.6,'warn'],['Customer quote · Nova',.0231,.08,1.9,'ok'],['Founder talking head',.0097,-.31,3.1,'crit'],['Before / after chart',.0164,.02,2.2,'ok'],['Static · pricing',.0088,-.05,2.8,'warn'],['UGC · onboarding',.0205,.19,1.4,'ok'],['Carousel · integrations',.0142,-.09,2.5,'ok']];
+ const ch=$('#creatives');cr.forEach(c=>{ch.insertAdjacentHTML('beforeend',`<div class="creative"><div class="thumb"></div><div class="meta"><span>${c[0]}</span><span>CTR <b>${pct(c[1])}</b> · 7d <b class="${c[2]<-.2?'down':c[2]>.1?'up':''}">${c[2]>0?'+':''}${Math.round(c[2]*100)}%</b></span><span>Freq. <b>${c[3]}</b> <span class="flag ${c[4]}" style="margin-left:6px">${c[4]==='crit'?'Fatigued':c[4]==='warn'?'Watch':'Fresh'}</span></span></div></div>`)});
+ const kw=[['analytics dashboard',1.42,.061,38],['bi tool for startups',2.10,.048,21],['looker alternative',3.85,.072,19],['excel reports automate',.96,.019,9],['data visualization software',2.30,.011,4]];
+ const kb=$('#kwTable tbody');kw.forEach(k=>kb.insertAdjacentHTML('beforeend',`<tr><td>${k[0]}</td><td class="num">$${k[1].toFixed(2)}</td><td class="num ${k[2]<.02?'down':''}">${pct(k[2])}</td><td class="num">${k[3]}</td></tr>`));
+})();
+
+/* ---------- journey ---------- */
+(function(){
+ const lp=[['/pricing',38200,.052,.41,'1.9 s'],['/ (home)',51800,.028,.55,'2.4 s'],['/analytics-dashboard',21400,.047,.38,'1.7 s'],['/vs/looker',9600,.063,.33,'2.1 s'],['App Store page',44100,.31,'—','—'],['Google Play page',36900,.27,'—','—']];
+ const tb=$('#lpTable tbody');lp.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r[0]}</td><td class="num">${r[1].toLocaleString()}</td><td class="num">${pct(r[2])}</td><td class="num">${typeof r[3]==='number'?pct(r[3]):r[3]}</td><td class="num ${r[4]==='2.4 s'?'down':''}">${r[4]}</td></tr>`));
+ hbars($('#onbChart'),[['Sign-up',1],['Verify email',.88],['Create workspace',.81],['Connect data source',.52],['First dashboard (activated)',.41],['Invite teammate',.23]].map(r=>({label:r[0],v:r[1],color:r[0].includes('Connect')?'var(--c2)':'var(--c1)',valLbl:Math.round(r[1]*100)+'%'})),{lw:170,rw:40,max:1.05,rh:22});
+ const tta=$('#ttaChart');const bins=[['<1 h',14],['1–6 h',19],['6–24 h',17],['1–2 d',16],['2–4 d',12],['4–7 d',9],['>7 d',13]];const W=560,ml=40,iw=W-ml-10,ih=130,bw=iw/bins.length;tta.innerHTML='';
+ [0,10,20].forEach(t=>{const y=10+ih-t/22*ih;tta.appendChild(el('line',{x1:ml,x2:W-10,y1:y,y2:y,class:'axis'}));tta.appendChild(el('text',{x:ml-6,y:y+4,'text-anchor':'end'},t+'%'))});
+ bins.forEach((b,i)=>{const h=b[1]/22*ih;const g=el('g',{});g.appendChild(el('rect',{x:ml+i*bw+6,y:10+ih-h,width:bw-12,height:h,rx:4,fill:i===2?'var(--accent)':'var(--c1)','fill-opacity':i===2?1:.5}));g.appendChild(el('text',{x:ml+i*bw+bw/2,y:10+ih+16,'text-anchor':'middle'},b[0]));hover(g,`${b[0]}: ${b[1]}% of activations`);tta.appendChild(g)});
+ tta.appendChild(el('text',{x:ml+2*bw+bw/2,y:10+ih-17/22*ih-6,'text-anchor':'middle',fill:'var(--ink)','font-weight':'600'},'median'));
+ hbars($('#actChart'),[['Web · desktop',.46],['Web · mobile',.38],['iOS 18',.47],['iOS 17',.44],['Android 14–15',.39],['Android ≤13',.29]].map(r=>({label:r[0],v:r[1],ref:.40,color:r[1]<.35?'var(--c2)':r[0].startsWith('Web')?'var(--c1)':'var(--c3)',valLbl:Math.round(r[1]*100)+'%'})),{lw:120,rw:40,max:.55,rh:20,gap:6});
+})();
+
+/* ---------- cohorts ---------- */
+(function(){
+ const svg=$('#paybackChart');const W=700,H=220,m={l:44,r:60,t:12,b:24};const iw=W-m.l-m.r,ih=H-m.t-m.b;
+ const coh=[['May',12,[0,.12,.23,.34,.44,.54,.63,.72,.8,.88,.96,1.03,1.1],'--c4'],['Jun',11,[0,.11,.22,.33,.43,.52,.61,.7,.78,.86,.94,1.01],'--c3'],['Jul',10,[0,.13,.25,.37,.48,.58,.68,.78,.87,.95,1.03],'--c1'],['Aug',8,[0,.11,.21,.31,.4,.49,.57,.65,.73],'--c2'],['Sep',6,[0,.1,.19,.28,.36,.44,.51],'--c6']];
+ const X=i=>m.l+i/12*iw,Y=v=>m.t+ih-v/1.2*ih;
+ [0,.25,.5,.75,1].forEach(t=>{svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),class:'axis'}));svg.appendChild(el('text',{x:m.l-6,y:Y(t)+4,'text-anchor':'end'},Math.round(t*100)+'%'))});
+ svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:Y(1),y2:Y(1),stroke:'var(--ink-3)','stroke-dasharray':'4 4'}));svg.appendChild(el('text',{x:W-m.r+6,y:Y(1)+4,fill:'var(--ink-2)'},'paid back'));
+ for(let i=0;i<=12;i+=3)svg.appendChild(el('text',{x:X(i),y:H-6,'text-anchor':'middle'},'M'+i));
+ const lg=$('#paybackLegend');
+ coh.forEach(c=>{const d='M'+c[2].map((v,i)=>X(i).toFixed(1)+' '+Y(v).toFixed(1)).join('L');const p=el('path',{d,fill:'none',stroke:`var(${c[3]})`,'stroke-width':2,'stroke-linejoin':'round'});const l=c[2].length-1;svg.appendChild(p);svg.appendChild(el('circle',{cx:X(l),cy:Y(c[2][l]),r:3.5,fill:`var(${c[3]})`,stroke:'var(--bg)','stroke-width':2}));svg.appendChild(el('text',{x:X(l)+7,y:Y(c[2][l])+4,fill:'var(--ink-2)'},c[0]));hover(p,`${c[0]} cohort · M${l}: ${Math.round(c[2][l]*100)}% of CAC recovered`);lg.insertAdjacentHTML('beforeend',`<span><i style="background:var(${c[3]})"></i>${c[0]} 2026</span>`)});
+ hbars($('#ltvChart'),channels.map(c=>({label:c.n,v:[4.6,2.1,3.1,1.8,5.2,3.6][channels.indexOf(c)],ref:3,color:`var(${c.c})`,valLbl:[4.6,2.1,3.1,1.8,5.2,3.6][channels.indexOf(c)].toFixed(1)+'×'})),{lw:110,rw:40,max:6,rh:22});
+ const heat=$('#heat');const cols=['D1','D3','D7','D14','D30','D60','D90'];const rows=[['May',[.62,.44,.31,.24,.16,.11,.09]],['Jun',[.6,.43,.3,.23,.15,.1,.08]],['Jul',[.64,.47,.33,.25,.17,.12,.1]],['Aug',[.61,.42,.29,.21,.14,.1,null]],['Sep',[.58,.4,.27,.2,.13,null,null]],['Oct',[.57,.39,.26,.19,null,null,null]]];
+ heat.style.gridTemplateColumns=`auto repeat(${cols.length},1fr)`;heat.insertAdjacentHTML('beforeend','<span></span>'+cols.map(c=>`<span class="h">${c}</span>`).join(''));
+ rows.forEach(r=>{heat.insertAdjacentHTML('beforeend',`<span class="r">${r[0]} 2026</span>`+r[1].map(v=>v==null?'<span></span>':`<span class="c" style="--v:${(v/.65).toFixed(2)}" title="${r[0]}: ${Math.round(v*100)}%">${Math.round(v*100)}%</span>`).join(''))});
+ const ct=$('#cohortTable tbody');[['Oct',457,135,531,'2.1%'],['Sep',442,132,498,'1.8%'],['Aug',431,131,486,'2.4%'],['Jul',418,129,462,'1.9%'],['Jun',392,128,471,'2.2%']].forEach(r=>ct.insertAdjacentHTML('beforeend',`<tr><td>${r[0]} 2026</td><td class="num">${r[1]}</td><td class="num">$${r[2]}</td><td class="num">$${r[3]}</td><td class="num">${r[4]}</td></tr>`));
+})();
+
+/* ---------- views / hash routing ---------- */
+const VIEWS=['overview','channels','campaigns','journey','cohorts'];
+function showView(){const h=(location.hash||'#overview').slice(1);const v=VIEWS.includes(h)?h:'overview';VIEWS.forEach(x=>$('#view-'+x).classList.toggle('active',x===v));$$('.tabs a').forEach(a=>{if(a.dataset.view===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
+window.addEventListener('hashchange',showView);showView();
+
+/* ---------- chips ---------- */
+function setCross(label){$('#crossLbl').textContent=label;$('[data-chip=cross]').hidden=false}
+$$('.chip').forEach(ch=>{ch.querySelector('.x').addEventListener('click',e=>{e.stopPropagation();if(ch.dataset.chip==='cross'){ch.hidden=true;$$('.tbl tr.sel').forEach(r=>r.classList.remove('sel'))}else{ch.hidden=true;updateCount()}});ch.addEventListener('click',()=>{if(ch.dataset.chip==='cross')return;openFilters({platform:'scope',channel:'channels',attr:'attribution'}[ch.dataset.chip])})});
+$('#clearAll').addEventListener('click',()=>{$$('.chip').forEach(c=>c.hidden=true);$$('.tbl tr.sel').forEach(r=>r.classList.remove('sel'));updateCount()});
+function updateCount(){const n=$$('.chip:not([hidden]):not(.cross)').length;$('#filterCount').textContent=n;$('#filterCount').hidden=n===0}
+
+/* ---------- filter window ---------- */
+const scrim=$('#scrim');let lastFocus=null;
+function openFilters(pane){lastFocus=document.activeElement;scrim.hidden=false;showPane(pane||'period');$('#fwClose').focus()}
+function closeFilters(){scrim.hidden=true;if(lastFocus)lastFocus.focus()}
+function showPane(p){$$('.fw .rail [role=tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.pane===p));$$('.fw .pane').forEach(x=>x.classList.toggle('active',x.dataset.pane===p))}
+$('#filterBtn').addEventListener('click',()=>openFilters());
+$('#periodBtn').addEventListener('click',()=>openFilters('period'));
+$('#fwClose').addEventListener('click',closeFilters);
+scrim.addEventListener('click',e=>{if(e.target===scrim)closeFilters()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!scrim.hidden)closeFilters();if(e.key==='f'&&scrim.hidden&&!/input|select|textarea/i.test(document.activeElement.tagName)){e.preventDefault();openFilters()}});
+$$('.fw .rail [role=tab]').forEach(b=>b.addEventListener('click',()=>showPane(b.dataset.pane)));
+$$('.seg').forEach(seg=>{const multi=seg.closest('[data-pane=campaigns]');seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{if(multi)b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');else{seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true')}preview()}))});
+const list=$('#fCmpList');campaigns.forEach((c,i)=>list.insertAdjacentHTML('beforeend',`<label class="opt"><input type="checkbox" id="fc${i}" checked> ${c.n} <span class="sub">${c.ch} · ${fmt$(c.sp)}</span></label>`));
+$('#fCmpSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase();list.querySelectorAll('.opt').forEach(o=>o.hidden=!o.textContent.toLowerCase().includes(q))});
+function preview(){
+ const plat={Web:$('#pWeb').checked,iOS:$('#pIos').checked,Android:$('#pAnd').checked};
+ const chOn={'Paid search':$('#cSearch').checked,'Paid social':$('#cSocial').checked,'App install':$('#cAppInstall').checked,'Display & video':$('#cDisplay').checked,'Retargeting':$('#cRetarget').checked,'Affiliates':$('#cAffiliate').checked};
+ let sp=0,cu=0,n=0;campaigns.forEach((c,i)=>{if(plat[c.pl]&&chOn[c.ch]&&$('#fc'+i).checked){sp+=c.sp;cu+=c.cpa?c.sp/c.cpa:0;n++}});
+ $('#pvSpend').textContent=fmt$(sp);$('#pvCust').textContent=Math.round(cu);$('#pvCac').textContent=cu?'$'+Math.round(sp/cu):'—';$('#pvRows').textContent=n+' campaign'+(n===1?'':'s');
+ $('#applyBtn').disabled=n===0;$('#applyBtn').style.opacity=n===0?.5:1;
+ const cnt=(p,v)=>{$(`.fw .rail [data-pane=${p}] .cnt`).textContent=v||''};
+ cnt('scope',Object.values(plat).filter(x=>!x).length?'1':'1');cnt('channels',Object.values(chOn).filter(x=>!x).length||'');cnt('campaigns',campaigns.filter((c,i)=>!$('#fc'+i).checked).length||'');
+}
+$$('.fw input, .fw select').forEach(i=>i.addEventListener('change',preview));
+$('#applyBtn').addEventListener('click',()=>{
+ const plat=[['Web',$('#pWeb').checked],['iOS',$('#pIos').checked],['Android',$('#pAnd').checked]].filter(p=>p[1]).map(p=>p[0]);
+ const pc=$('[data-chip=platform]');pc.hidden=plat.length===3;pc.querySelector('b').textContent=plat.join(' + ')||'none';
+ const off=[['Paid search','#cSearch'],['Paid social','#cSocial'],['App install','#cAppInstall'],['Display & video','#cDisplay'],['Retargeting','#cRetarget'],['Affiliates','#cAffiliate']].filter(c=>!$(c[1]).checked);
+ const cc=$('[data-chip=channel]');cc.hidden=false;cc.querySelector('b').textContent=off.length===0?'All paid':off.length>3?(6-off.length)+' of 6':'All except '+off.map(c=>c[0]).join(', ');
+ const a=$('[data-chip=attr]');a.hidden=false;a.querySelector('b').textContent=$('input[name=attr]:checked').closest('.opt').textContent.trim().split('\n')[0].replace(/default|shows network claims/,'').trim()+' · '+$('#fClick').value.replace(' days',' d')+' click';
+ $('#periodBtn').textContent=($('#fFrom').value||'').replace(/^\d{4}-/,'')+' → '+($('#fTo').value||'').replace(/^\d{4}-/,'')+' · '+$$('[data-pane=period] .seg')[1].querySelector('[aria-pressed=true]').textContent.toLowerCase().replace('previous period','vs prior period');
+ updateCount();closeFilters()});
+$('#resetAll').addEventListener('click',()=>{$$('.fw input[type=checkbox]').forEach(i=>i.checked=true);$('input[name=attr]').checked=true;preview()});
+$('#resetGroup').addEventListener('click',()=>{$('.fw .pane.active').querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=true);preview()});
+$('#saveView').addEventListener('click',()=>{$('#saveView').textContent='Saved ✓';setTimeout(()=>$('#saveView').textContent='Save as view',1600)});
+preview();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+/// Ad set; campaign_key is a label (the fact carries the campaign key).
+table dim_ad_set
+	lineageTag: 7f8e6678-f475-527a-8cf1-69d9524f4754
+
+	column ad_set_key
+		dataType: string
+		isHidden
+		lineageTag: bb29652c-22cf-5b4b-a38b-9e941264a751
+		summarizeBy: none
+		sourceColumn: ad_set_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: aa16463b-adb0-56e7-9fc3-727b1fab0eda
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column ad_set_name
+		dataType: string
+		lineageTag: 5c4591c7-2dde-5777-a0eb-d18e44a0f3b2
+		summarizeBy: none
+		sourceColumn: ad_set_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column targeting_type
+		dataType: string
+		isHidden
+		lineageTag: a0ad26b0-3133-5722-b696-e47546225af7
+		summarizeBy: none
+		sourceColumn: targeting_type
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 317e66a3-e078-526d-9046-0741abd12390
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_ad_set = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_ad_set.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"ad_set_key", type text},
+				            {"campaign_key", type text},
+				            {"ad_set_name", type text},
+				            {"targeting_type", type text},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

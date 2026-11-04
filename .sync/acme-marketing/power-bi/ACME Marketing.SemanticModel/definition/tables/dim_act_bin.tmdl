@@ -1,0 +1,78 @@
+/// Sign-up -> activation time bins of J3 with their hour edges 0 / 1 / 6 / 24 / 48 / 96 / 168 / 720 (A-47). Disconnected.
+table dim_act_bin
+	lineageTag: c3753007-9abb-5b10-8121-1a4ab21ef666
+
+	column bin_code
+		dataType: string
+		isHidden
+		lineageTag: 10185a34-53aa-5829-902d-f52fbcde673d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [bin_code]
+
+		annotation SummarizationSetBy = User
+
+	column bin_label
+		dataType: string
+		lineageTag: fc5fd0d9-0882-5d1b-bf03-94a1b4850efe
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [bin_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column lo_hours
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b3fb1b22-3fcb-5772-acc3-a02d954f5d8b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [lo_hours]
+
+		annotation SummarizationSetBy = User
+
+	column hi_hours
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 200086be-8b79-5a73-9cd5-e2d9aa5e4803
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [hi_hours]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 28f3197d-7a9e-5242-a1b5-06ec8dd6e2a2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_act_bin = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "bin_code", STRING
+				    ,"bin_label", STRING
+				    ,"lo_hours", INTEGER
+				    ,"hi_hours", INTEGER
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "LT1H", "< 1 h", 0, 1, 1 }
+				        ,{ "H1_6", "1–6 h", 1, 6, 2 }
+				        ,{ "H6_24", "6–24 h", 6, 24, 3 }
+				        ,{ "D1_2", "1–2 d", 24, 48, 4 }
+				        ,{ "D2_4", "2–4 d", 48, 96, 5 }
+				        ,{ "D4_7", "4–7 d", 96, 168, 6 }
+				        ,{ "D7_30", "7–30 d", 168, 720, 7 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

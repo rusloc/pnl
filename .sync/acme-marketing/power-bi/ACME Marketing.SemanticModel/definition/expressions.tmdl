@@ -1,0 +1,6 @@
+/// Folder that holds the Parquet files and manifest.json of this pack (data-gen/acme-marketing/parquet): full local path, no trailing backslash. Set it before the first refresh.
+expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 940cc4a4-3185-5d04-8ded-0f3dccd4aa50
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text

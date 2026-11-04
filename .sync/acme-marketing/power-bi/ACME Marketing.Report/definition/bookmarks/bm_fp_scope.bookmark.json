@@ -1,0 +1,440 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Filters: Scope",
+  "name": "bm_fp_scope",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_filters",
+      "fw_scrim",
+      "fw_panel",
+      "fw_title",
+      "fw_hint",
+      "fw_close_x",
+      "fw_rule_top",
+      "fw_rule_left",
+      "fw_rule_right",
+      "fw_rule_bottom",
+      "fw_rail_bg",
+      "fw_rail_period",
+      "fw_rail_scope",
+      "fw_rail_channels",
+      "fw_rail_campaigns",
+      "fw_rail_audience",
+      "fw_rail_attribution",
+      "fw_rail_saved",
+      "fw_rail_sep",
+      "fw_applied_title",
+      "fw_applied_svg",
+      "fw_reset",
+      "fw_close",
+      "fw_hdr_filters_svg",
+      "fw_hdr_filters_close",
+      "grp_fp_scope",
+      "fp_scope_railsel",
+      "fp_scope_l1",
+      "fp_scope_platform",
+      "fp_scope_l2",
+      "fp_scope_tier",
+      "fp_scope_note",
+      "grp_fp_period",
+      "fp_period_railsel",
+      "fp_period_l1",
+      "fp_period_preset",
+      "fp_period_l2",
+      "fp_period_dates",
+      "fp_period_l3",
+      "fp_period_cmp",
+      "fp_period_l4",
+      "fp_period_grain",
+      "fp_period_note",
+      "grp_fp_channels",
+      "fp_channels_railsel",
+      "fp_channels_l1",
+      "fp_channels_tree",
+      "grp_fp_campaigns",
+      "fp_campaigns_railsel",
+      "fp_campaigns_l1",
+      "fp_campaigns_status",
+      "fp_campaigns_l2",
+      "fp_campaigns_list",
+      "grp_fp_audience",
+      "fp_audience_railsel",
+      "fp_audience_l1",
+      "fp_audience_market",
+      "fp_audience_note",
+      "grp_fp_attribution",
+      "fp_attribution_railsel",
+      "fp_attribution_l1",
+      "fp_attribution_model",
+      "fp_attribution_note",
+      "grp_fp_saved",
+      "fp_saved_railsel",
+      "fp_saved_l1",
+      "fp_saved_1",
+      "fp_saved_2",
+      "fp_saved_3",
+      "fp_saved_4",
+      "fp_saved_5",
+      "fp_saved_note"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "paid_acquisition",
+    "sections": {
+      "paid_acquisition": {
+        "visualContainers": {
+          "fw_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fw_hint": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fw_close_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rule_top": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_rule_left": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_rule_right": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_rule_bottom": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_rail_bg": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_rail_period": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_scope": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_channels": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_campaigns": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_audience": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_attribution": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_saved": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_rail_sep": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "fw_applied_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fw_applied_svg": {
+            "singleVisual": {
+              "visualType": "image"
+            }
+          },
+          "fw_reset": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fw_hdr_filters_svg": {
+            "singleVisual": {
+              "visualType": "image"
+            }
+          },
+          "fw_hdr_filters_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_scope_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_scope_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_scope_platform": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_scope_l2": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_scope_tier": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_scope_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_period_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_period_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_period_preset": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_period_l2": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_period_dates": {
+            "singleVisual": {
+              "visualType": "slicer"
+            }
+          },
+          "fp_period_l3": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_period_cmp": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_period_l4": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_period_grain": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_period_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_channels_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_channels_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_channels_tree": {
+            "singleVisual": {
+              "visualType": "slicer"
+            }
+          },
+          "fp_campaigns_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_campaigns_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_campaigns_status": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_campaigns_l2": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_campaigns_list": {
+            "singleVisual": {
+              "visualType": "slicer"
+            }
+          },
+          "fp_audience_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_audience_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_audience_market": {
+            "singleVisual": {
+              "visualType": "slicer"
+            }
+          },
+          "fp_audience_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_attribution_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_attribution_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_attribution_model": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "fp_attribution_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_saved_railsel": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "fp_saved_1": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_2": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_3": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_4": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_5": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "fp_saved_note": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_filters": {
+            "isHidden": false
+          },
+          "grp_fp_scope": {
+            "isHidden": false
+          },
+          "grp_fp_period": {
+            "isHidden": true
+          },
+          "grp_fp_channels": {
+            "isHidden": true
+          },
+          "grp_fp_campaigns": {
+            "isHidden": true
+          },
+          "grp_fp_audience": {
+            "isHidden": true
+          },
+          "grp_fp_attribution": {
+            "isHidden": true
+          },
+          "grp_fp_saved": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

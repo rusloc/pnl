@@ -1,0 +1,73 @@
+/// Pipeline, month x campaign (context only; no card in v1).
+table fact_pipeline_month
+	lineageTag: 0c203ec2-d7db-52b9-a1c5-41045214ec1e
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: d7e2b772-4b32-58e5-9314-63bc767187a3
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: d6632165-e722-5b21-a497-6b3b588972cc
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column opps_created
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b8fa4566-5819-5d36-8368-47bf7d20749d
+		summarizeBy: none
+		sourceColumn: opps_created
+
+		annotation SummarizationSetBy = User
+
+	column pipeline_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a07714f7-f551-5fca-a582-b449dbfb8121
+		summarizeBy: none
+		sourceColumn: pipeline_usd
+
+		annotation SummarizationSetBy = User
+
+	column won_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: fefac69a-6e00-5f6e-84a8-f5273f8fc3fd
+		summarizeBy: none
+		sourceColumn: won_usd
+
+		annotation SummarizationSetBy = User
+
+	partition fact_pipeline_month = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_pipeline_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"month_key", type text},
+				            {"campaign_key", type text},
+				            {"opps_created", Int64.Type},
+				            {"pipeline_usd", type number},
+				            {"won_usd", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

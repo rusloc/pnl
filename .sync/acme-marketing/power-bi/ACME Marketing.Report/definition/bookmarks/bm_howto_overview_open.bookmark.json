@@ -1,0 +1,164 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "How to read: overview",
+  "name": "bm_howto_overview_open",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_howto_overview",
+      "howto_overview_panel",
+      "howto_overview_title",
+      "howto_overview_close",
+      "howto_overview_text",
+      "grp_howto_channels",
+      "howto_channels_panel",
+      "howto_channels_title",
+      "howto_channels_close",
+      "howto_channels_text",
+      "grp_howto_campaigns",
+      "howto_campaigns_panel",
+      "howto_campaigns_title",
+      "howto_campaigns_close",
+      "howto_campaigns_text",
+      "grp_howto_journey",
+      "howto_journey_panel",
+      "howto_journey_title",
+      "howto_journey_close",
+      "howto_journey_text",
+      "grp_howto_cohorts",
+      "howto_cohorts_panel",
+      "howto_cohorts_title",
+      "howto_cohorts_close",
+      "howto_cohorts_text"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "paid_acquisition",
+    "sections": {
+      "paid_acquisition": {
+        "visualContainers": {
+          "howto_overview_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_overview_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_overview_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_overview_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_channels_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_channels_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_channels_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_channels_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_campaigns_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_campaigns_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_campaigns_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_campaigns_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_journey_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_journey_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_journey_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_journey_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_cohorts_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_cohorts_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_cohorts_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_cohorts_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_howto_overview": {
+            "isHidden": false
+          },
+          "grp_howto_channels": {
+            "isHidden": true
+          },
+          "grp_howto_campaigns": {
+            "isHidden": true
+          },
+          "grp_howto_journey": {
+            "isHidden": true
+          },
+          "grp_howto_cohorts": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

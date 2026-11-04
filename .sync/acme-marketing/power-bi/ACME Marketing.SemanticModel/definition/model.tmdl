@@ -1,0 +1,61 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder", "meta_dataset", "dim_date", "dim_month", "dim_platform", "dim_platform_segment", "dim_channel", "dim_network", "dim_campaign", "dim_ad_set", "dim_creative", "dim_term", "dim_landing_page", "dim_onboarding_step", "dim_attribution_model", "fact_ad_delivery_day", "fact_term_day", "fact_traffic_day", "fact_funnel_day", "fact_signup_segment_day", "fact_attribution_day", "fact_cohort_revenue_month", "fact_retention_cohort_month", "fact_budget_month", "fact_pipeline_month", "param_target", "param_finance", "param_alert_rule", "sync_log"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_date
+ref table dim_month
+ref table dim_platform
+ref table dim_platform_segment
+ref table dim_channel
+ref table dim_network
+ref table dim_campaign
+ref table dim_ad_set
+ref table dim_creative
+ref table dim_term
+ref table dim_landing_page
+ref table dim_onboarding_step
+ref table dim_attribution_model
+ref table fact_ad_delivery_day
+ref table fact_term_day
+ref table fact_traffic_day
+ref table fact_funnel_day
+ref table fact_signup_segment_day
+ref table fact_attribution_day
+ref table fact_cohort_revenue_month
+ref table fact_retention_cohort_month
+ref table fact_budget_month
+ref table fact_pipeline_month
+ref table param_target
+ref table param_finance
+ref table param_alert_rule
+ref table sync_log
+ref table meta_dataset
+ref table param_period_preset
+ref table param_comparator
+ref table param_granularity
+ref table dim_funnel_stage
+ref table dim_c2_stage
+ref table dim_offset
+ref table dim_day_n
+ref table dim_act_bin
+ref table dim_card
+ref table param_date
+ref table dim_alert_slot
+ref table _measures
+
+ref cultureInfo en-US

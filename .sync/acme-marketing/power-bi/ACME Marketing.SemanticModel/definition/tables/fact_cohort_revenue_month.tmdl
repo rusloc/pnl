@@ -1,0 +1,156 @@
+/// Cohort revenue, acquisition month x campaign x month offset (DDA only). Derived on load: cohort_month_index, cohort_month_start, calendar_month_index (= cohort + offset; churn window, A-41).
+table fact_cohort_revenue_month
+	lineageTag: 7f1c8e62-8aa2-5c73-8702-bd99483ca336
+
+	column cohort_month
+		dataType: string
+		isHidden
+		lineageTag: 41a60fec-4b6f-5fb2-bd4b-ebd4cdac012c
+		summarizeBy: none
+		sourceColumn: cohort_month
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: 55c00c11-eec2-5fb0-96b8-1937dc420073
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column month_offset
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a3ec24d3-d7af-5db2-918d-d7b9df595154
+		summarizeBy: none
+		sourceColumn: month_offset
+
+		annotation SummarizationSetBy = User
+
+	column customers_start
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: b2adc03d-7828-56a5-888b-8002129a2f2a
+		summarizeBy: none
+		sourceColumn: customers_start
+
+		annotation SummarizationSetBy = User
+
+	column churned
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a63372df-9c35-52dc-91a1-2f7c7fad29bf
+		summarizeBy: none
+		sourceColumn: churned
+
+		annotation SummarizationSetBy = User
+
+	column customers_end
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ed7d153f-0964-5b0a-b8a5-d437f3f2a926
+		summarizeBy: none
+		sourceColumn: customers_end
+
+		annotation SummarizationSetBy = User
+
+	column revenue_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 492ccc23-dc43-5b8d-9369-609e3b89651b
+		summarizeBy: none
+		sourceColumn: revenue_usd
+
+		annotation SummarizationSetBy = User
+
+	column refunds_usd
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ae35176d-e824-5e54-811c-d2edae73c5c0
+		summarizeBy: none
+		sourceColumn: refunds_usd
+
+		annotation SummarizationSetBy = User
+
+	column refund_count
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ae8527a4-f0bb-5c4f-871f-f77a7262fe5c
+		summarizeBy: none
+		sourceColumn: refund_count
+
+		annotation SummarizationSetBy = User
+
+	/// 0 = 2025-01.
+	column cohort_month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 76a4e017-d2e8-5287-b8ec-de8c9f56a030
+		summarizeBy: none
+		sourceColumn: cohort_month_index
+
+		annotation SummarizationSetBy = User
+
+	/// First day of the acquisition month.
+	column cohort_month_start
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 67e4b35f-0f79-5028-8be5-c1ca6a38867d
+		summarizeBy: none
+		sourceColumn: cohort_month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	/// cohort_month_index + month_offset.
+	column calendar_month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5c4cfe56-d2d2-5134-a3eb-a443e36c23fe
+		summarizeBy: none
+		sourceColumn: calendar_month_index
+
+		annotation SummarizationSetBy = User
+
+	partition fact_cohort_revenue_month = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_cohort_revenue_month.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"cohort_month", type text},
+				            {"campaign_key", type text},
+				            {"month_offset", Int64.Type},
+				            {"customers_start", type number},
+				            {"churned", type number},
+				            {"customers_end", type number},
+				            {"revenue_usd", type number},
+				            {"refunds_usd", type number},
+				            {"refund_count", type number}
+				        }
+				    ),
+				    cm_src = Table.TransformColumnTypes(Table.SelectColumns(Parquet.Document(File.Contents(DataFolder & "\dim_month.parquet")), {"month_key", "month_index", "month_start"}), {{"month_key", type text}, {"month_index", Int64.Type}, {"month_start", type date}}),
+				    cm_joined = Table.NestedJoin(typed, {"cohort_month"}, cm_src, {"month_key"}, "j", JoinKind.LeftOuter),
+				    cm_expanded = Table.RenameColumns(Table.ExpandTableColumn(cm_joined, "j", {"month_index", "month_start"}), {{"month_index", "cohort_month_index"}, {"month_start", "cohort_month_start"}}),
+				    add_cal = Table.AddColumn(cm_expanded, "calendar_month_index", each [cohort_month_index] + [month_offset], Int64.Type)
+				in
+				    add_cal
+
+	annotation PBI_ResultType = Table

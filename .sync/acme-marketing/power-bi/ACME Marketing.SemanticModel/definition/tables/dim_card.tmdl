@@ -1,0 +1,117 @@
+/// One row per card of the phase-2 views + the six vitals: title, question and the ⓘ copy (A-51, A-60; the shared copy source until copy.ts exists).
+table dim_card
+	lineageTag: 45f16d41-d427-50a2-8586-04e66610462a
+
+	column card_code
+		dataType: string
+		isHidden
+		lineageTag: f27f079c-89d5-5128-aa12-ce22dd702af1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_code]
+
+		annotation SummarizationSetBy = User
+
+	column card_title
+		dataType: string
+		lineageTag: c67f184e-4e7d-5e77-89a0-44afbacf5865
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_title]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column card_question
+		dataType: string
+		lineageTag: e0175b46-2bf6-534f-83a7-98b0e47573d1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_question]
+
+		annotation SummarizationSetBy = User
+
+	column card_what
+		dataType: string
+		lineageTag: afc79398-1298-5c5e-ac50-cb789678ca13
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_what]
+
+		annotation SummarizationSetBy = User
+
+	column card_formula
+		dataType: string
+		lineageTag: 90574c57-bc2c-5517-b51d-f0a31c80f2ad
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_formula]
+
+		annotation SummarizationSetBy = User
+
+	column card_note
+		dataType: string
+		lineageTag: ef2bf679-2086-50fe-a1df-75038edc7456
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [card_note]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c057a71f-3fee-588e-8656-7b25e5df62a6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_card = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "card_code", STRING
+				    ,"card_title", STRING
+				    ,"card_question", STRING
+				    ,"card_what", STRING
+				    ,"card_formula", STRING
+				    ,"card_note", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "V1", "Spend", "Media spend in the window", "Paid media cost of the window. Agency fee and paid-team cost are not in spend (they reach blended CAC only).", "Σ spend_usd (fact_ad_delivery_day). Δ vs the comparison mode; Plan = the window plan (Σ budget ÷ days in month per day). Colour: up is unfavourable.", "A-30, A-31. Verdict vs plan: OK within ±5 %, CRIT above 110 % or below 85 % of plan.", 1 }
+				        ,{ "V2", "New paying customers", "First paid subscriptions from paid media", "Paid customers credited to the campaigns in scope under the selected attribution model (Data-driven by default).", "Σ paid_customers (fact_attribution_day, selected model). Target = 480 per 30 days × window days ÷ 30.", "A-37. Fractional credits at campaign and channel scope; whole numbers at ALL for the first-party models.", 2 }
+				        ,{ "V3", "Blended CAC", "Cost of one new paying customer", "Spend plus the paid-team cost allocated to the scope, per new paying customer. The sub-line shows paid CAC (spend only).", "(Spend + team cost × scope spend share) ÷ paid customers. Team cost = Σ days × monthly team cost ÷ days in month (param_finance).", "A-38, data README D-2 (team cost steps to $55.73k a month on 2026-10-05). Colour: up is unfavourable.", 3 }
+				        ,{ "V4", "New MRR", "First-month recurring revenue won", "First-month recurring revenue of the new paying customers, under the selected attribution model.", "Σ new_mrr_usd (fact_attribution_day, selected model). ARPA = New MRR ÷ paid customers.", "A-39. No plan exists for New MRR: the Plan comparison shows no Δ.", 4 }
+				        ,{ "V5", "CAC payback", "Months of margin to earn CAC back", "Months of gross margin a new customer needs to repay the blended CAC.", "Blended CAC ÷ (ARPA × gross margin 36.3 %).", "A-40, ADR-0015 §5 q 3 (company-wide gross margin). Target < 12 months; up is unfavourable.", 5 }
+				        ,{ "V6", "LTV : CAC", "Lifetime margin per dollar of CAC", "Lifetime gross margin of a customer against the blended CAC.", "LTV = ARPA × gross margin ÷ monthly logo churn (trailing 3 complete months); LTV:CAC = LTV ÷ blended CAC.", "A-41. Floor 3.0×; down is unfavourable.", 6 }
+				        ,{ "O1", "Acquisition funnel", "Where in the journey do we lose or win?", "Seven stages from impressions to paid customers; bar widths on a log10 scale, true counts and the stage rate or cost beside each bar.", "Impressions, clicks, web sessions + installs, sign-ups, activated within 7 days, trials, paid (selected model). Rates from the previous stage; CPM, CPC, CPL, cost per activated, CPA.", "A-32 … A-37. Activated counts are cohorted by sign-up day, so the last 7 days of a window are partial by construction.", 7 }
+				        ,{ "O2", "Guardrails", "Can a good headline hide a bad quarter?", "Six checks beside the vitals: trial → paid, D7 and D30 retention of paid cohorts, refund rate, brand share of search spend, attribution gap.", "Meter = value against 2 × target, marker = target (param_target); colour = verdict (OK / WARN within 30 % / CRIT).", "A-22. D7 / D30 come from the latest cohort month with a reportable D30 cell (Sep 2026 for the default window).", 8 }
+				        ,{ "O3", "Spend vs plan and CAC, daily", "When did it move?", "Daily spend against plan (dashed) and the comparison period (dotted), with daily paid CAC below on the same days.", "Spend and plan per day (or week / month); paid CAC = spend ÷ paid customers per bucket. The marker is the CAC step day (Oct 18).", "A-52, ADR-0015 platform limit 7: two stacked charts, never a secondary axis.", 9 }
+				        ,{ "O4", "Spend share vs new-MRR share", "Who earns more than they cost?", "Each channel's share of spend next to its share of New MRR, in the channel's fixed colour.", "Channel spend ÷ spend of all channels in scope; channel New MRR ÷ New MRR of all channels in scope (selected model).", "A-52. A channel whose MRR bar is shorter than its spend bar earns less than it costs.", 10 }
+				        ,{ "O5", "Anomalies and alerts", "What needs a decision today?", "The alert rules that trip in the window and scope, most severe first.", "param_alert_rule evaluated per campaign, channel or ALL: fatigue, channel over plan, install quality, attribution gap widened, underspent with room to scale, stale source.", "A-64: exactly five trip in the default window. Thresholds from param_target only.", 11 }
+				        ,{ "O6", "Top movers by Δ ROAS", "Which campaigns changed most vs prior period?", "The three best and three worst campaigns by the change in 90-day ROAS against the previous period.", "ROAS 90 d = New MRR × R90 ÷ spend; Δ = window − previous period. Campaigns with a ROAS objective and spend in both periods.", "A-52 / A-42. R90 = 3-month revenue multiple of the newest complete cohort (campaign → channel → ALL fallback).", 12 }
+				        ,{ "C1", "Channel matrix", "Which channel earns the result, and where?", "One row per channel, expandable to platform: spend, share, paid customers, CPA, ROAS 90 d, click → sign-up, pacing and the flag.", "Flags (A-24): Fatigue, Frequency, View-through heavy, CPA over (only when no root cause trips), Over-pacing, Underspent; Learning when every spending campaign is learning.", "Click a row to scope every card below and the Campaigns view (Selected: in the chips line). The vitals never re-scope.", 13 }
+				        ,{ "C2", "Web vs app funnel", "Where does each platform leak?", "Conversion of each stage from the previous one, web and app (iOS + Android) side by side.", "Web: CTR, sessions ÷ clicks, sign-ups ÷ sessions; app: CTR, store views ÷ clicks, installs ÷ store views, sign-ups ÷ installs; then activated, trial and paid rates.", "A-53, data README D-3 (store → install 29.4 %, web landing rate 79.7 %).", 14 }
+				        ,{ "C3", "Platform-reported vs modelled CPA", "How much do the networks over-claim?", "CPA from the networks' own conversion claims next to CPA from first-party conversions under the selected model.", "Reported CPA = spend ÷ PLATFORM paid customers; modelled CPA = spend ÷ paid customers (selected first-party model). Gap = PLATFORM ÷ modelled − 1.", "A-43. The reported CPA is the lower bar because networks over-claim.", 15 }
+				        ,{ "C4", "Budget pacing by channel", "Who is ahead or behind plan?", "Spend against plan per channel; the bar colour is the pacing band.", "Pacing = spend ÷ plan. CRIT above 110 %, WARN below 85 %, neutral in between (param_target PACING_HI / PACING_LO).", "A-53, AT-11. The dashed line is 100 % of plan.", 16 }
+				        ,{ "P1", "Campaigns", "Which campaign is off, and how?", "Every campaign in scope, sorted by spend: pacing, CPA, ROAS 90 d, CTR 7-day change, frequency and its flags.", "Status Live + Learning by default (pick Paused or Ended in Filters › Campaigns to add them). CPA and ROAS show — for Lead and Retention objectives.", "A-54. Click a row to select the campaign for the cards below (default: the worst mover of the window).", 17 }
+				        ,{ "P2", "Selected campaign", "Daily spend and paid conversions", "Daily spend and daily paid conversions of the selected campaign (the worst mover until a row is clicked).", "Spend per day; paid conversions = DDA / selected-model credits per day. Caption: CPA vs the campaign's target and the learning-phase end.", "A-54, AT-09: the default selection is SOC_META_LAL2 in the default window.", 18 }
+				        ,{ "P3", "Ad sets by CPA", "Within the campaign, who spends well?", "The selected campaign's ad sets ranked by CPA, against the campaign's CPA target (dashed).", "CPA = ad-set spend ÷ ad-set DDA credits (paid_customers_dda, data README D-4).", "DDA only: the attribution switch does not reach ad-set credits.", 19 }
+				        ,{ "P4", "Creatives", "Which ad is tired?", "The selected campaign's creatives live on the window's last day: CTR of the last 7 days, its change against the 7 days before, frequency and status.", "Fatigued = slope < −20 % and frequency > 3; Watch = slope < 0 and frequency > 2.5; Fresh otherwise (param_target).", "A-44, ADR-0015 platform limit 10: a table instead of thumbnails.", 20 }
+				        ,{ "P5", "Keywords / placements", "Which terms buy conversions, which buy clicks?", "The selected campaign's top terms: keywords for search campaigns, placements or audiences for the others.", "CPC = spend ÷ clicks; CVR = sign-ups ÷ clicks; Conv. = sign-ups (fact_term_day).", "A-45. The eight terms carry 80–90 % of the campaign's delivery.", 21 }
+				        ,{ "J1", "Landing and store pages", "Is the leak after the click?", "Web landing pages and the two store pages: visits (sessions or store views), conversion, bounce and LCP.", "Web: sign-ups ÷ sessions, bounces ÷ sessions, sessions-weighted p75 LCP. Store pages: installs ÷ store views; bounce and LCP do not apply (—).", "A-46. A flat store CVR while trial → paid falls means the leak is before the click.", 22 }
+				        ,{ "J2", "Onboarding steps, paid traffic", "Which step loses new sign-ups?", "Share of paid sign-ups that reached each onboarding step within 7 days; the largest drop is highlighted.", "Σ step column ÷ Σ sign-ups (fact_funnel_day), in step order; drop = previous step share − share.", "A-47. Counts are cohorted by sign-up day, so the last 7 days of the window are partial.", 23 }
+				        ,{ "J3", "Sign-up → activation time", "How fast do paid users reach the aha moment?", "Activations within 30 days by hours from sign-up, as shares; the median bin is emphasised.", "Seven bins (< 1 h … 7–30 d) ÷ their sum; median hours by linear interpolation inside the median bin.", "A-47, data README D-10: the window is right-censored (recent sign-ups have not had 30 days).", 24 }
+				        ,{ "J4", "Activation rate by platform and OS", "Does the app convert sign-ups as well as web?", "7-day activation rate per platform segment (web desktop / mobile, iOS 18 / 17, Android 14–15 / ≤ 13) against the 40 % target.", "Σ activated_7d ÷ Σ sign-ups per segment (fact_signup_segment_day); the dashed line is ACTIVATION_7D.", "A-47. The dataset carries segments, not single OS versions.", 25 }
+				        ,{ "K1", "Payback curves by acquisition month", "Will it pay back, and when?", "Cumulative gross margin per cohort against its CAC, by month since acquisition, for six cohorts (every other month back from the window's end month − 3).", "Σ (revenue − refunds) to month m × gross margin ÷ (cohort-month spend + allocated team cost); paid back at the first month ≥ 100 %.", "A-48, A-56. DDA cohorts; scope filters apply, the window start does not. Scoped to Meta Lookalike 2 % the Oct 2025 – Jan 2026 cohorts cross at month 9.", 26 }
+				        ,{ "K2", "LTV:CAC by channel", "Where does a dollar earn the most?", "LTV:CAC of each channel in the window, in the channel colour, against the 3:1 floor.", "LTV = ARPA × gross margin ÷ monthly churn (trailing 3 complete months); ÷ blended CAC of the channel.", "A-41, A-56.", 27 }
+				        ,{ "K3", "Retention grid, paid cohorts", "Do paid users stay?", "Share of each acquisition month's users active on day N, for the latest six cohort months; one hue, darker = higher.", "users_active ÷ users_matured (fact_retention_cohort_month); a cell exists only once the 15th of the month + N has passed.", "A-48, A-74. Blank = not reportable yet.", 28 }
+				        ,{ "K4", "Refund and churn by channel", "Which channel's customers leave or refund?", "Refund rate and monthly logo churn per channel.", "Refunds ÷ cohort customers over the 12 acquisition months to the window end; churn = churned ÷ customers at start, trailing 3 complete months.", "A-41, A-48.", 29 }
+				        ,{ "K5", "Cohort size and ARPA", "Are newer cohorts bigger and worth as much?", "One row per acquisition month (the 12 months to the window's end month): paid customers, ARPA, cohort CAC, refund rate, payback month.", "Customers = offset-0 customers_start; ARPA = offset-0 revenue ÷ customers; CAC = cohort cost ÷ customers.", "A-48. DDA credits, so per-campaign counts are fractional; the table rounds.", 30 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

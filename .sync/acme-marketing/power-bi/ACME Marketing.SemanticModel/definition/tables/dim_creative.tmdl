@@ -1,0 +1,83 @@
+/// Creative; campaign_key is a label.
+table dim_creative
+	lineageTag: 2f4f30d1-fdd5-5146-875e-5aef658cda0c
+
+	column creative_key
+		dataType: string
+		isHidden
+		lineageTag: bddcb7f5-ceb1-5e09-84d1-58496adbd07c
+		summarizeBy: none
+		sourceColumn: creative_key
+
+		annotation SummarizationSetBy = User
+
+	column campaign_key
+		dataType: string
+		isHidden
+		lineageTag: af8eb5cd-1bbc-54bb-a62f-11df302fcb51
+		summarizeBy: none
+		sourceColumn: campaign_key
+
+		annotation SummarizationSetBy = User
+
+	column creative_name
+		dataType: string
+		lineageTag: 9bb890b8-0909-576b-8ec7-80a066c2430c
+		summarizeBy: none
+		sourceColumn: creative_name
+
+		annotation SummarizationSetBy = User
+
+	column format_code
+		dataType: string
+		isHidden
+		lineageTag: db30c14d-d678-5ae2-8469-e13e1fdc3fd3
+		summarizeBy: none
+		sourceColumn: format_code
+
+		annotation SummarizationSetBy = User
+
+	column launch_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 73be85b3-720d-5e15-8d09-a86a3109fa87
+		summarizeBy: none
+		sourceColumn: launch_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4b15ca59-78d6-5fb3-9c58-0f7c0696d7a4
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_creative = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0015 (b), A-80): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_creative.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"creative_key", type text},
+				            {"campaign_key", type text},
+				            {"creative_name", type text},
+				            {"format_code", type text},
+				            {"launch_date", type date},
+				            {"sort_order", Int64.Type}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
