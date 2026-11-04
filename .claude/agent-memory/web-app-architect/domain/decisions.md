@@ -1,4 +1,4 @@
-<!-- next-id: DEC-010 -->
+<!-- next-id: DEC-011 -->
 
 # Decisions (durable)
 
@@ -109,4 +109,16 @@
 **Confidence:** high
 **Last-verified:** 2026-10-30
 **Related:** DEC-008 (supersedes), DEC-003, DEC-005
+**Status:** active
+
+### DEC-010 · ACME paid-acquisition showcase: PBI flavour here, data + generator + spec packed for the JS flavour elsewhere; spec-mockup arithmetic reconciled into a binding table · 2026-11-04
+**Decision:** ADR-0015 (Proposed, USER away, defaults in force): (a) Power BI flavour built in `pbi-report/ACME Marketing/`, JS flavour by the vosk.dev agent from `.sync/acme-marketing/{power-bi,spec}` + `.sync/data-gen/acme-marketing/`; no Rayfin; (b) `data/acme_marketing_dummy_data/`, seed 20261104, Parquet only (no CSV copies — the Nordmark open point 1 became the norm), same pins; (c) 26 tables ≈ 0.26 M rows — spec grains collapsed to day × campaign × ad set × creative, daily cohorted stage counts, precomputed attribution credits per model (4 models, one lookback, one event), cohort-month revenue + retention cells, one platform/channel/network/market/tier per campaign (facts carry `campaign_key` only; outriggers through `dim_campaign` allowed as the Track B snowflake exception); (d) story-first; (e) one page 1440 × 810, five bookmark views, Filters = 880 × 560 pop-up with a rail of group bookmarks, applied-state rail instead of live preview, no Apply, light theme only, vitals without sparklines (ADR-0012 §2.4 overrides the spec's sparkline); (f) three phased builds; (g) `docs/Requirements-marketing.md` A-nn / AT-nn; (h) pack recorded, not created.
+**Why:** USER wording ("another agent"), spec folder under `pbi-report/`, ADR-0013 (b)–(c) precedent for the data home, ADR-0012 for the tile face. The mockup's numbers were mutually inconsistent (CPM, 75 % land vs 31 % store CVR, 58 % install → sign-up, Δ blended CAC vs spend/customers deltas, channel budgets vs plan, brand share, spend sum 191.2 vs 188.4 k, payback cohorts too young to cross), so the ADR fixes a binding table + a change list and the generator hits it by construction. Gross margin 36.3 % is the only value under which payback 10.8 / LTV:CAC 3.4 hold with ARPA $135 and CAC $531 — flagged §5 q3.
+**Reversal cost:** low before phase 2 (one constant for scale, one param for GM, folder add for a JS app); medium after the model is built (every control total regenerates).
+**Applied at:** `docs/ADR/0015-acme-paid-acquisition-dashboard.md`, `docs/Requirements-marketing.md`; dataset / PBIP not yet built.
+**Hits:** 1
+**Tags:** showcase, marketing, generator, parquet, pbi, filters-popup, attribution, cohorts, pack, adr-0015
+**Confidence:** high
+**Last-verified:** 2026-11-04
+**Related:** DEC-005, DEC-009, CNV-001, LSN-001
 **Status:** active
