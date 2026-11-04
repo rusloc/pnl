@@ -121,6 +121,8 @@ TODO: lock North Star
 - **2026-11-01** — **Mirelo identical in Power BI and JS (USER):** the owner's 33 changes from vosk.dev (`.sync/2026-11-01-mirelo-sales-changes.md`) are built in both flavours. Week, QTD, YTD and R12M leave both; the period is a range of closed months. Accepted differences: no blur, no pager / CSV, and real values on free ranges in Power BI (JS: n/a). ADR-0011 amendment pending (C11 / P13 lists as windows on the page).
 - **2026-11-01** — **USER: the Mirelo JS pack ships the full detail data** (21.7 MB, 195 Parquet + `index.json`, built by `js-report/scripts/build-sales-data.ts`), not the sample. ADR-0014 / ADR-0011 amendment pending; the detail-file layout becomes a contract shared with vosk.dev.
 - **2026-10-28** — Nordmark data rulings (pending USER review): E-22 table edge wins; dot + counts follow the region, N/A excluded; channel mix = last week; GMROI from front margin (€862m ÷ €319m = 2.7×); sell-through bars 12 → 63 %; net-sales bars W31–W39 lowered; period keys `PTD-` / `YTD-FY2026-43`; scoped EBITDA excludes central costs; LW for PTD / YTD = same window as of last week.
+- **2026-11-03** — Mirelo Sales **Power BI flavour publishes first**, from the USER's Desktop (refresh → publish), snapshot, no scheduled refresh (ADR-0014 C2 holds); target workspace open. #decision
+- **2026-11-04** — Two streams opened in parallel (USER): (1) a new showcase, the **ACME paid-acquisition dashboard** (Power BI flavour here, from the USER's spec bundle `pbi-report/ACME Marketing/paid-acquisition-dashboard/`; deterministic generator + Parquet for another agent to reproduce) → ADR-0015 drafted by archi; (2) **Mirelo PBI aligned to the vosk.dev JS copy of 2026-11-04** (JS is the reference). #decision
 
 ## Features
 ### Planned
@@ -140,6 +142,7 @@ TODO: lock North Star
 - **P&L fully functional (USER 2026-10-31)** — JS: Group view (step 4) + slice filters F-09…F-11 with C-31 allocation (step 5); PBI: deferred controls M-25, F-16, F-17, M-05, "n/a", M-27; B vs C parity; re-pack both (`plan-2026-11-01.md`)
 
 - **Mirelo (2026-11-01)** — ginee display-name columns (channel / stream / loan status) + bip rebind; hunter PBI vs JS parity run; USER click-checks; ADR amendments; vosk.dev hand-off for the re-issued packs
+- **ACME paid-acquisition dashboard** (ADR-0015, planned 2026-11-04): generator `data/acme_marketing_dummy_data/`, PBIP `pbi-report/ACME Marketing/`, five views, Filters glass pop-up; JS flavour at vosk.dev from the pack.
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -185,3 +188,4 @@ TODO: lock North Star
 - **2026-11-01** — Mirelo Sales & Revenue, owner's changes 1–33 (4 rounds from vosk.dev) in both flavours:
   - **PBI:** calendar range slicer, Filters panel with Reset / Showing, C5 / C8 / C10 / C11 / L8 / P12 / P13 / R11 reworked, shared 4-stop heat scale, list windows on the page, leaderboard On target / Close / Behind with one row per agent code (duplicate-name bug fixed), JS text in table cells; 40 blocks / 4,361 rows TRUE, validator 0 / 0; checked against the JS engine output.
   - **JS:** all 33 in `js-report/` + pack; Mirelo glass; viewport-height board; full detail data 21.7 MB with paging and full CSV; `js-report/` 399 tests, pack 133, headless smoke green; reconciled 2,846 / 4,782 / 209,898.
+- **2026-11-03** — Mirelo PBI: Filters panel closes again (Close button in `grp_filters` + Filters toggle twin), validator 0 / 0, `a6ecb30`; USER click-test done in Desktop the same night (own × button shape, uncommitted).
