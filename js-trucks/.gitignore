@@ -1,0 +1,8 @@
+# js-trucks local ignores (the repo root .gitignore also covers node_modules, .next, *.tsbuildinfo, .env*)
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+/coverage
+# build output of scripts/build-trucks-data.ts (same approach as js-exec/public/data): never committed here
+/public/data/

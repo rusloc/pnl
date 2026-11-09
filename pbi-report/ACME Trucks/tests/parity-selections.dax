@@ -1,0 +1,230 @@
+// ACME Trucks - Power BI side of the PBI = JS parity gate (bip, 2026-11-09).
+// Contract: docs/ADD/features/trucks-js-flavour.md §7.2 (selections PT-01 .. PT-08; the rest of PT-01 .. PT-06 comes from the
+// pinned blocks of §7.1). Captured values: tests/parity-expected.csv (columns of contract §7.2).
+// Each block = one selection; the slicer state is written as TREATAS filters. Every block carries the report's fixed filters:
+// report filter dim_loader[is_included] = "да", page filter dim_loader[contractor] = blank. Waterfall rows also carry the
+// visual filters of wf_table (is_shown = "1", is_included = "да", category_code not blank).
+// Every row: sel_id | element | kind | expected.
+// Elements: KPI.<tile>.plan / .fact / .delta with tile tl (Truck loading), ew (Effective work time), pf (Performance per truck),
+// rm (Mass loaded per truck); WF.<sort_order>.plan_pct / .fact_pct / .delta / .delta_text (the WF Δ Pill text) / .plan_base /
+// .plan_loss / .plan_subtotal / .fact_base / .fact_loss / .fact_subtotal. A blank result is written BLANK () in the CSV.
+// Selection columns in the CSV use the URL values of contract §6 (week 2023-05, office k3, work types trucks,onspot, plan type
+// month | week, calculation weighted | linear); empty week / offices / loaders = all.
+// How to run: split at '// ==== BLOCK', run each part in DAX query view or over ADOMD against a local refreshed copy of Trucks.pbip.
+
+// ==== BLOCK PT-01: Reset state, tiles 3-4
+// State: all weeks | Month | Weighted | Trucks + On spot | all offices | all loaders
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-01", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-01", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-01", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-01", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-01", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-01", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+)
+
+// ==== BLOCK PT-04: all weeks, Week plan, Linear
+// State: all weeks | Week | Linear | Trucks + On spot | all offices | all loaders
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-04", "element", "KPI.tl.plan", "kind", "number", "expected", [KPI Truck Loading Plan %] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.tl.fact", "kind", "number", "expected", [KPI Truck Loading Fact %] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.tl.delta", "kind", "number", "expected", [KPI Truck Loading Δ pp] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.ew.plan", "kind", "number", "expected", [KPI Effective Work Plan %] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.ew.fact", "kind", "number", "expected", [KPI Effective Work Fact %] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.ew.delta", "kind", "number", "expected", [KPI Effective Work Δ pp] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-04", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+)
+
+// ==== BLOCK PT-05: week 5, office K3, Linear, + Undefined
+// State: 5 (28.1-3.2) | Month | Linear | office K3 | Trucks + On spot + Undefined | all loaders
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-05", "element", "KPI.tl.plan", "kind", "number", "expected", [KPI Truck Loading Plan %] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.tl.fact", "kind", "number", "expected", [KPI Truck Loading Fact %] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.tl.delta", "kind", "number", "expected", [KPI Truck Loading Δ pp] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.ew.plan", "kind", "number", "expected", [KPI Effective Work Plan %] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.ew.fact", "kind", "number", "expected", [KPI Effective Work Fact %] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.ew.delta", "kind", "number", "expected", [KPI Effective Work Δ pp] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-05", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+    ,TREATAS ( { "K3" }, dim_loader[office_name] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+)
+
+// ==== BLOCK PT-05b: all weeks, offices K1 and T1, Linear, + Undefined (the contractor loaders are in K1 and T1)
+// State: all weeks | Month | Linear | offices K1, T1 | Trucks + On spot + Undefined | all loaders
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-05b", "element", "KPI.tl.plan", "kind", "number", "expected", [KPI Truck Loading Plan %] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.tl.fact", "kind", "number", "expected", [KPI Truck Loading Fact %] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.tl.delta", "kind", "number", "expected", [KPI Truck Loading Δ pp] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.ew.plan", "kind", "number", "expected", [KPI Effective Work Plan %] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.ew.fact", "kind", "number", "expected", [KPI Effective Work Fact %] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.ew.delta", "kind", "number", "expected", [KPI Effective Work Δ pp] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-05b", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "K1", "T1" }, dim_loader[office_name] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+)
+
+// ==== BLOCK PT-05b-sanity: the same state WITHOUT the page filter contractor = blank (not a parity selection, not in the CSV)
+// State: as PT-05b, dim_loader[contractor] unfiltered; compare with PT-05b to see what the filter moves
+// Captured 2026-11-09, plan / fact / delta, with the filter (PT-05b) -> without it: the filter moves all 12 values, because the two
+// contractor loaders (work type Undefined) sit in K1 and T1. Added to the selections of contract §7.2 at the coordinator's request.
+//   Truck loading: 0.366265 / 0.424270 / 5.800526 -> 0.371563 / 0.422697 / 5.113471
+//   Effective work: 0.551499 / 0.491314 / -6.018446 -> 0.554268 / 0.488433 / -6.583523
+//   Performance: 1139.4223 / 945.6351 / -193.7872 -> 1121.8447 / 948.2649 / -173.5798
+//   Mass loaded: 34806.8900 / 57051.3194 / 22244.4294 -> 35383.4200 / 58133.0572 / 22749.6372
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.tl.plan", "kind", "number", "expected", [KPI Truck Loading Plan %] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.tl.fact", "kind", "number", "expected", [KPI Truck Loading Fact %] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.tl.delta", "kind", "number", "expected", [KPI Truck Loading Δ pp] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.ew.plan", "kind", "number", "expected", [KPI Effective Work Plan %] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.ew.fact", "kind", "number", "expected", [KPI Effective Work Fact %] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.ew.delta", "kind", "number", "expected", [KPI Effective Work Δ pp] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-05b-sanity", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { "K1", "T1" }, dim_loader[office_name] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+)
+
+// ==== BLOCK PT-08: week 44 of 2022, Month plan before 2023 (contract §3.5 R7)
+// State: 44 (29.10-4.11) | Month | Weighted | Trucks + On spot | all offices | all loaders
+EVALUATE
+CALCULATETABLE (
+    UNION (
+         ROW ( "sel_id", "PT-08", "element", "KPI.tl.plan", "kind", "number", "expected", [KPI Truck Loading Plan %] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.tl.fact", "kind", "number", "expected", [KPI Truck Loading Fact %] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.tl.delta", "kind", "number", "expected", [KPI Truck Loading Δ pp] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.ew.plan", "kind", "number", "expected", [KPI Effective Work Plan %] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.ew.fact", "kind", "number", "expected", [KPI Effective Work Fact %] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.ew.delta", "kind", "number", "expected", [KPI Effective Work Δ pp] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.pf.plan", "kind", "number", "expected", [Performance per Truck Plan] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.pf.fact", "kind", "number", "expected", [Performance per Truck Fact] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.pf.delta", "kind", "number", "expected", [KPI Performance per Truck Δ] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.rm.plan", "kind", "number", "expected", [Rock Mass by Truck Plan] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.rm.fact", "kind", "number", "expected", [Rock Mass by Truck Fact] )
+        ,ROW ( "sel_id", "PT-08", "element", "KPI.rm.delta", "kind", "number", "expected", [KPI Rock Mass by Truck Δ] )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "44 (29.10-4.11)" }, dim_date[week_label] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+)
+
+EVALUATE
+VAR _wide         =
+    SUMMARIZECOLUMNS (
+        dim_time_category[sort_order]
+        ,TREATAS ( { "да" }, dim_loader[is_included] )
+        ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+        ,TREATAS ( { "44 (29.10-4.11)" }, dim_date[week_label] )
+        ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+        ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+        ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+        ,TREATAS ( { "1" }, dim_time_category[is_shown] )
+        ,TREATAS ( { "да" }, dim_time_category[is_included] )
+        ,FILTER ( ALL ( dim_time_category[category_code] ), NOT ISBLANK ( dim_time_category[category_code] ) )
+        ,"m0", [WF Plan %]
+        ,"m1", [WF Fact %]
+        ,"m2", [Time Share Δ]
+        ,"m3", [_WF Plan Base]
+        ,"m4", [_WF Plan Loss]
+        ,"m5", [_WF Plan Subtotal]
+        ,"m6", [_WF Fact Base]
+        ,"m7", [_WF Fact Loss]
+        ,"m8", [_WF Fact Subtotal]
+    )
+RETURN
+    UNION (
+         SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".plan_pct", "kind", "number", "expected", [m0] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".fact_pct", "kind", "number", "expected", [m1] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".delta", "kind", "number", "expected", [m2] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".plan_base", "kind", "number", "expected", [m3] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".plan_loss", "kind", "number", "expected", [m4] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".plan_subtotal", "kind", "number", "expected", [m5] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".fact_base", "kind", "number", "expected", [m6] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".fact_loss", "kind", "number", "expected", [m7] )
+        ,SELECTCOLUMNS ( _wide, "sel_id", "PT-08", "element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".fact_subtotal", "kind", "number", "expected", [m8] )
+    )
+
+EVALUATE
+CALCULATETABLE (
+    SELECTCOLUMNS (
+        VALUES ( dim_time_category[sort_order] )
+        ,"sel_id", "PT-08"
+        ,"element", "WF." & FORMAT ( dim_time_category[sort_order], "00" ) & ".delta_text"
+        ,"kind", "text"
+        ,"expected",
+            VAR _svg          = [WF Δ Pill]
+            VAR _open         = SEARCH ( "<text", _svg )
+            VAR _tag_end      = SEARCH ( ">", _svg, _open )
+            VAR _end          = SEARCH ( "</text>", _svg )
+            VAR _raw          = MID ( _svg, _tag_end + 1, _end - _tag_end - 1 )
+            RETURN
+                SUBSTITUTE ( _raw, "&%238722;", UNICHAR ( 8722 ) )
+    )
+    ,TREATAS ( { "да" }, dim_loader[is_included] )
+    ,TREATAS ( { BLANK () }, dim_loader[contractor] )
+    ,TREATAS ( { "44 (29.10-4.11)" }, dim_date[week_label] )
+    ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+    ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+    ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+    ,TREATAS ( { "1" }, dim_time_category[is_shown] )
+    ,TREATAS ( { "да" }, dim_time_category[is_included] )
+    ,FILTER ( ALL ( dim_time_category[category_code] ), NOT ISBLANK ( dim_time_category[category_code] ) )
+)

@@ -1,0 +1,7 @@
+# ACME Trucks pack local ignores (the rusloc/pnl root .gitignore also covers node_modules, .next, *.tsbuildinfo, .env*).
+# public/data/ is prebuilt and committed in the pack (ADR-0014 items 2 / 10).
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+/coverage
