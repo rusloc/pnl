@@ -1,0 +1,282 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Vitals dynamics: CAC",
+  "name": "bm_dyn_v5",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_dynamics",
+      "dyn_scrim",
+      "dyn_panel",
+      "dyn_close_x",
+      "grp_dyn_v5",
+      "dyn_l5",
+      "dyn_c5",
+      "grp_howto_overview",
+      "howto_overview_panel",
+      "howto_overview_title",
+      "howto_overview_close",
+      "howto_overview_text",
+      "grp_howto_channels",
+      "howto_channels_panel",
+      "howto_channels_title",
+      "howto_channels_close",
+      "howto_channels_text",
+      "grp_howto_campaigns",
+      "howto_campaigns_panel",
+      "howto_campaigns_title",
+      "howto_campaigns_close",
+      "howto_campaigns_text",
+      "grp_howto_journey",
+      "howto_journey_panel",
+      "howto_journey_title",
+      "howto_journey_close",
+      "howto_journey_text",
+      "grp_howto_cohorts",
+      "howto_cohorts_panel",
+      "howto_cohorts_title",
+      "howto_cohorts_close",
+      "howto_cohorts_text",
+      "grp_dyn_v1",
+      "dyn_l1",
+      "dyn_c1",
+      "grp_dyn_v2",
+      "dyn_l2",
+      "dyn_c2",
+      "grp_dyn_v3",
+      "dyn_l3",
+      "dyn_c3",
+      "grp_dyn_v4",
+      "dyn_l4",
+      "dyn_c4",
+      "grp_dyn_v6",
+      "dyn_l6",
+      "dyn_c6"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "paid_acquisition",
+    "sections": {
+      "paid_acquisition": {
+        "visualContainers": {
+          "dyn_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "dyn_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "dyn_close_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "dyn_l5": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c5": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "howto_overview_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_overview_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_overview_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_overview_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_channels_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_channels_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_channels_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_channels_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_campaigns_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_campaigns_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_campaigns_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_campaigns_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_journey_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_journey_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_journey_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_journey_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_cohorts_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "howto_cohorts_title": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "howto_cohorts_close": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "howto_cohorts_text": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c1": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l2": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c2": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l3": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c3": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l4": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c4": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l6": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c6": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_dynamics": {
+            "isHidden": false
+          },
+          "grp_dyn_v5": {
+            "isHidden": false
+          },
+          "grp_howto_overview": {
+            "isHidden": true
+          },
+          "grp_howto_channels": {
+            "isHidden": true
+          },
+          "grp_howto_campaigns": {
+            "isHidden": true
+          },
+          "grp_howto_journey": {
+            "isHidden": true
+          },
+          "grp_howto_cohorts": {
+            "isHidden": true
+          },
+          "grp_dyn_v1": {
+            "isHidden": true
+          },
+          "grp_dyn_v2": {
+            "isHidden": true
+          },
+          "grp_dyn_v3": {
+            "isHidden": true
+          },
+          "grp_dyn_v4": {
+            "isHidden": true
+          },
+          "grp_dyn_v6": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

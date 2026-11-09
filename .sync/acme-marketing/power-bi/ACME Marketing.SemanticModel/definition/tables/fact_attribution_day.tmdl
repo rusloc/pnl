@@ -2,7 +2,7 @@
 table fact_attribution_day
 	lineageTag: a4707613-ce72-5880-8db9-dd97a36f0734
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -73,3 +73,4 @@ table fact_attribution_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

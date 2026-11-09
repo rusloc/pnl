@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "jr_j1_table",
   "position": {
-    "x": 26.0,
-    "y": 244,
-    "z": 2290,
-    "height": 213.0,
-    "width": 677.0,
-    "tabOrder": 2290
+    "x": 26,
+    "y": 230,
+    "z": 2100,
+    "height": 243,
+    "width": 677,
+    "tabOrder": 2100
   },
   "visual": {
     "visualType": "tableEx",
@@ -97,19 +97,18 @@
         "sort": [
           {
             "field": {
-              "Column": {
+              "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "dim_landing_page"
+                    "Entity": "_measures"
                   }
                 },
-                "Property": "page_name"
+                "Property": "Page Visits"
               }
             },
-            "direction": "Ascending"
+            "direction": "Descending"
           }
-        ],
-        "isDefaultSort": true
+        ]
       }
     },
     "objects": {
@@ -228,7 +227,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -647,6 +646,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_journey",
-  "isHidden": true
+  "parentGroupName": "grp_journey"
 }

@@ -1,7 +1,7 @@
 /// Dataset metadata from parquet/manifest.json: as-of day (anchors every window, A-03 / A-81, never TODAY()), refresh stamp (freshness, A-17).
 table meta_dataset
-	lineageTag: 2a42f754-28f7-5798-8431-3ef17ff9b72b
 	isHidden
+	lineageTag: 2a42f754-28f7-5798-8431-3ef17ff9b72b
 
 	column as_of_date
 		dataType: dateTime
@@ -82,3 +82,4 @@ table meta_dataset
 				    tbl
 
 	annotation PBI_ResultType = Table
+

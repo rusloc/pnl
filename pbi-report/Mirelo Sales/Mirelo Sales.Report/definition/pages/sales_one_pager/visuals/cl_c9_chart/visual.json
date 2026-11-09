@@ -13,26 +13,6 @@
     "visualType": "pivotTable",
     "query": {
       "queryState": {
-        "Rows": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "param_cohort_quarter"
-                    }
-                  },
-                  "Property": "quarter_label"
-                }
-              },
-              "queryRef": "param_cohort_quarter.quarter_label",
-              "nativeQueryRef": "quarter_label",
-              "displayName": "Cohort",
-              "active": true
-            }
-          ]
-        },
         "Columns": {
           "projections": [
             {
@@ -48,8 +28,28 @@
               },
               "queryRef": "param_cohort_day.day_label",
               "nativeQueryRef": "day_label",
-              "displayName": "Days since the first loan",
-              "active": true
+              "active": true,
+              "displayName": "Days since the first loan"
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "param_cohort_quarter"
+                    }
+                  },
+                  "Property": "quarter_label"
+                }
+              },
+              "queryRef": "param_cohort_quarter.quarter_label",
+              "nativeQueryRef": "quarter_label",
+              "active": true,
+              "displayName": "Cohort"
             }
           ]
         },
@@ -208,7 +208,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },

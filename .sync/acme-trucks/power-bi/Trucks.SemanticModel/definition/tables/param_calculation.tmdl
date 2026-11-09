@@ -1,0 +1,45 @@
+table param_calculation
+	lineageTag: fee4861c-936b-4f78-a225-731a4157a096
+
+	column calculation_code
+		dataType: string
+		lineageTag: 4e931298-9f23-4da5-98c9-d5146837bc84
+		summarizeBy: none
+		sourceColumn: metric
+
+		annotation SummarizationSetBy = Automatic
+
+	column calculation_name =
+			
+			
+			SWITCH(TRUE()
+			    ,[calculation_code] = "Линейно"
+			        ,"Linear"
+			    ,[calculation_code] = "Взвешенно"
+			        ,"Weighted"
+			    ,BLANK())
+		lineageTag: 5c19160d-8bd3-4f1c-933b-f35a2813679c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition param_calculation-907de356-dace-494e-8489-d1760959a5a1 = m
+		mode: import
+		source =
+				let
+				    src = #table(
+				        {"metric"},
+				        {
+				            {"Линейно"},
+				            {"Взвешенно"}
+				        }
+				    ),
+				
+				    cht = Table.TransformColumnTypes(src,
+				                {"metric", type text}
+				        )
+				in
+				    cht
+
+	annotation PBI_ResultType = Table
+

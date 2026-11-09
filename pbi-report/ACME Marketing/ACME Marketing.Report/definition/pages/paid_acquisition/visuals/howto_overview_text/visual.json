@@ -4,10 +4,10 @@
   "position": {
     "x": 1058,
     "y": 136,
-    "z": 2780,
+    "z": 2500,
     "height": 280,
     "width": 348,
-    "tabOrder": 2780
+    "tabOrder": 2500
   },
   "visual": {
     "visualType": "textbox",
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Top band: the six vitals for the window, with the change against the comparison mode (arrow + colour: green = favourable) and the target sub-line. Vitals follow the Filters only; a click in a card never re-scopes them.",
+                    "value": "Top band: the six vitals for the window, each with its change against the same period last year (arrow + colour: green = favourable) and last year's value below. The binoculars before each vital's label open that one metric's daily dynamics. Vitals follow the Filters only; a click in a card never re-scopes them.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Read down: the funnel shows which stage moved, Guardrails whether a good headline hides a bad quarter, the daily charts when it moved (dotted line = Oct 18), shares and movers who earned it, Alerts what needs a decision.",
+                    "value": "Read down: the funnel shows the absolute count of each stage, Guardrails whether a good headline hides a bad quarter, and the channel card where the money goes against where the customers come from; Anomalies lists the campaigns whose paid customers moved most and Top movers the largest changes in 90-day ROAS (switch Worst 5 | Top 5 on each); the bottom chart shows when it moved: spend and plan (pale) as bars, paid CAC as a line on the right axis (dotted line = Oct 18).",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -185,6 +185,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_howto_overview",
-  "isHidden": true
+  "parentGroupName": "grp_howto_overview"
 }

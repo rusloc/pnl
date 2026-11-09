@@ -2,7 +2,7 @@
 - [PBIR authoring notes](pbir-authoring-notes.md) — validator rules, Desktop render findings (show flags, card padding, button slicer states), DAX query tips
 - [Track B engine](project_track_b_engine.md) — engine chain, bottlenecks, ADR-0008 baseline per view + physical prototype gains, DAX tests
 - [Desktop open rule](feedback_desktop_open.md) — no PBIP edits while Desktop has it open; prove plans with DEFINE MEASURE
-- [ACME Trucks report](project_trucks_report.md) — 2nd showcase report: Time util redesign + original page; 2026-11-04 KPI mismatch fixed (noise off, slicers synced, contractor filter)
+- [ACME Trucks report](project_trucks_report.md) — 2nd showcase report: redesign + original page; 2026-11-04 KPI fix (noise off, synced slicers) + `.sync/acme-trucks/` pack
 - [Track B Copilot](project_track_b_copilot.md) — no anonymous Copilot chat; param-table window breaks naive Copilot DAX; prep limits (2026-10-23)
 - [P&L redesign v4](project_pl_redesign_v4.md) — Vitals / Analysis 2p / Profitability 2p built 2026-10-27, 241 measures, tests 257 TRUE, timings
 - [Mirelo Sales report](project_mirelo_report.md) — ADR-0011 Track B PBIP draft: model shape, generator in scratch, 2,560 tests TRUE, placeholders
@@ -10,6 +10,12 @@
 - [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; period model (k); generator in repo `tools/`; SVG frame perf pattern + timing traps
 
 ## Open threads
+- 2026-11-09 Trucks JS parity capture: tests/parity-selections.dax + parity-expected.csv (232 rows, PT-01/04/05/08). Open: archi amends §3.3 bar wording (BLANK vs 0), S3 does not exercise the contractor filter, kpi_total / model_total need a no-calculation state in JS
+- 2026-11-05 11:40 ACME Marketing parity gate PBI side: tests/parity-selections.dax + parity-expected.csv (1,416 rows; repo + pack). Open: PA-09 19 vs 16 rows, U+2212 vs '-', C1 platform share, chips ' - ' separator -> archi/USER decide; hunter asserts JS
+- 2026-11-05 11:00 ACME Marketing How-to-read binoculars sentence fixed (repo + pack + generator). Open: USER Desktop save ~10:46 not in the pack or generator (pack refresh + generator merge needed); nerd mirrors copy.ts
+- 2026-11-05 ACME Marketing per-vital binoculars + single-metric dynamics (bm_dyn_v1..v6) and O5/O6 movers window (_Mv Start, T-K12) on the USER's 01:10 save. Open: USER clicks all six binoculars; scratch Desktop PIDs to close
+- 2026-11-04 ACME Marketing redesign round 1 passes 1 + 2 applied (repo + pack, validator 0/0, tests 28 blocks). Open: USER first open + switch / binoculars clicks; time-to-paid not in the data (time to activation used); saved slicer state Custom/Month kept
+- 2026-11-04 ACME Marketing USER first-open 'cyclic reference' (dim_campaign, dim_attribution_model): not reproducible in 4 fresh opens, no file fix; ⓘ glyph centred (Info Glyph "i" + VCO padding bottom 3D, repo + pack). Open: USER re-open + Refresh; tab-view render check of the ⓘ on Channels..Cohorts
 - 2026-11-04 ACME Marketing phases 2 + 3 built, pack issued (see project file). Open: USER first open + click / hover checklist (README), saved-view clicks, JS flavour in vosk.dev
 - 2026-11-04 Mirelo parity pass vs vosk.dev JS: audit 40 rows (17/11/12), PBIR + 28 SVG measures, tests 40 / 4,361 TRUE, validator 0/0 repo + pack. Open: USER click/hover check (×s, How to read, Filters rhythm, table links); How to read 'Showing' label + detail header band need new visuals (not added)
 - 2026-11-03 Mirelo Filters close fix: filters_close (Close, list-window look) + hdr_filters_close (toggle twin, open-state ink look) via bm_filters_close; view bookmarks carry them; validator 0/0 repo + pack. Open: USER click-test; parity-rules row (main agent); filter line still only opens

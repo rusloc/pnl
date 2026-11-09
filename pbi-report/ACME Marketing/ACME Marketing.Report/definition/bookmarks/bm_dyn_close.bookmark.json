@@ -1,0 +1,142 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Vitals dynamics: close",
+  "name": "bm_dyn_close",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_dynamics",
+      "dyn_scrim",
+      "dyn_panel",
+      "dyn_close_x",
+      "grp_dyn_v1",
+      "dyn_l1",
+      "dyn_c1",
+      "grp_dyn_v2",
+      "dyn_l2",
+      "dyn_c2",
+      "grp_dyn_v3",
+      "dyn_l3",
+      "dyn_c3",
+      "grp_dyn_v4",
+      "dyn_l4",
+      "dyn_c4",
+      "grp_dyn_v5",
+      "dyn_l5",
+      "dyn_c5",
+      "grp_dyn_v6",
+      "dyn_l6",
+      "dyn_c6"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "paid_acquisition",
+    "sections": {
+      "paid_acquisition": {
+        "visualContainers": {
+          "dyn_scrim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "dyn_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "dyn_close_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "dyn_l1": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c1": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l2": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c2": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l3": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c3": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l4": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c4": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l5": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c5": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          },
+          "dyn_l6": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "dyn_c6": {
+            "singleVisual": {
+              "visualType": "lineChart"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_dynamics": {
+            "isHidden": true
+          },
+          "grp_dyn_v1": {
+            "isHidden": true
+          },
+          "grp_dyn_v2": {
+            "isHidden": true
+          },
+          "grp_dyn_v3": {
+            "isHidden": true
+          },
+          "grp_dyn_v4": {
+            "isHidden": true
+          },
+          "grp_dyn_v5": {
+            "isHidden": true
+          },
+          "grp_dyn_v6": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

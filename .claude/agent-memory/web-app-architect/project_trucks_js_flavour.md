@@ -1,0 +1,13 @@
+---
+name: project-trucks-js-flavour
+description: ACME Trucks JS flavour `js-trucks/` — ADR-0016 Proposed + contract written 2026-11-09 (archi); nerd builds, hunter converts the DAX tests into the pinned fixture and runs PT-01…PT-08; pack after 0 gaps; what to re-confirm
+type: project
+---
+
+ADR-0016 (`docs/ADR/0016-acme-trucks-js-flavour.md`, Proposed) and the contract `docs/ADD/features/trucks-js-flavour.md` were written 2026-11-09 on the USER's decisions of 2026-11-08: **data = the live extract `pbi-report/ACME Trucks/data/` as is** (no synthetic twin, no renaming; readable on the public page — accepted, do not re-raise), **scope = the "Time utilization" page only** (the original page is hidden and shows the same numbers), PBIP as built = reference for numbers and behaviour, mockup `Design guide/Main.dc.html` = look where the PBIR deviated for a Power BI limit, js-marketing toolchain and pack pattern, board 1440 × 810, no Vercel here.
+
+**Why:** the vosk.dev showcase wants each report as PBI + JS (DEC-005 / DEC-011 pattern); the four DAX test files pin the live extract, so the parity gate needs no new Desktop capture — the twin would have needed the tests re-based first.
+
+**How to apply:** nerd builds from the contract (steps 0–5), hunter extracts `tests/time-util.dax` + `page-parity.dax` + `baseline-live.csv` into `js-trucks/fixtures/checks/trucks-pinned.csv` and runs PT-01…PT-08, bip confirms the block mapping and (if in Desktop) adds the two Reset-state volume-tile rows to `page-parity.dax` tab 2 and captures PT-08 (week 44 under the Month plan). Open defaults (§10): A opening state = Reset state (not the saved week 9); B board fixed 810; C popovers apply on Done; D no ⓘ / How to read added; E pack with a hand-off note update only; F resolved 2026-11-09 (bip captured `tests/parity-expected.csv`, 232 rows = the recompute; PT-05b green). **Gate passed 2026-11-09:** 1,649 rows, 0 gap, 2 accepted — pack may issue. Still open: PBI print of a share that rounds to 0.00% (`?wt=onspot`); nerd's Loader URL cap fix. Pack `.sync/acme-trucks/js-app/` only after hunter's 0-gap run; then `.sync/README.md` and `2026-11-04-acme-trucks-handoff.md` gain the `js-app/` rows. Expect a first-open round after step 4 (LSN-002) — faces in `view.ts`, engine untouched. The three rules most likely to drift: weighted shares over the **active** set with DAX blank arithmetic (R5), KPI 3's Linear total hours × unfiltered weighted share (R6), the case-folded bridges incl. `Основная работа` going to Truck loading (fact) vs Auxiliary (plan).
+
+**Expires:** 2027-01-09 (re-confirm; the build and parity should be done well before)

@@ -1,4 +1,4 @@
-<!-- next-id: CAND-008 -->
+<!-- next-id: CAND-011 -->
 
 # Candidates
 
@@ -58,3 +58,27 @@
 **Tags:** determinism, python, pins, data-gen, sync
 **Promote-to:** defect-patterns.md (or flaky-roots.md) on second sighting
 **Expires:** 2027-01-29
+
+### CAND-008 · Contract example window does not actually exercise the case it cites · first seen 2026-11-05
+**Where:** docs/ADD/features/marketing-js-flavour.md §7.2 PA-09: "with a window that covers them (e.g. the LY window) they appear" — the LY window 2025-10-05..2025-11-03 covers 2 of the 3 dropped campaigns (SRCH_SUMMER_PROMO ran 2026-06-01..08-31); the full range gives 19
+**Why interesting:** a builder or test writer who takes the example literally asserts 19 in the LY window and either "fixes" a correct engine or concludes the rule is broken
+**Watch for:** spec examples naming a window / filter "e.g." without a captured expected value; check the data dates before trusting them
+**Tags:** spec, example, window, contract, parity
+**Promote-to:** defect-patterns.md on second sighting (near DEF-002)
+**Expires:** 2027-02-03
+
+### CAND-009 · Contract calls a live-vs-live DAX check "pinned" · first seen 2026-11-09
+**Where:** docs/ADD/features/trucks-js-flavour.md §7.1 / §7.2 vs pbi-report/ACME Trucks/tests/page-parity.dax tab 1: 36 "KPI values" are two CALCULATEs compared with each other, no literal; S2 and S3 (PT-04, PT-05) have no expected value in any test file, yet the contract says "already pinned there"
+**Why interesting:** a `_pass = TRUE` tab reads like an oracle, but it proves two measures agree, not what the number is; a JS parity gate built on it has nothing to compare against
+**Watch for:** before accepting "pinned", grep the block for a numeric literal; a DAX tab with only `ABS ( a - b )` over two live expressions pins nothing
+**Tags:** spec, oracle, dax, parity, pinned, contract
+**Promote-to:** defect-patterns.md on second sighting (near CAND-008)
+**Expires:** 2027-02-07
+
+### CAND-010 · Nonzero value that rounds to zero under a 3-section format string · first seen 2026-11-09
+**Where:** js-trucks/lib/engine/format.ts tablePct vs TMDL `WF Plan %` format `0.00%;-0.00%;"–"`; repro `?wt=onspot` fact row 10 = 0.0017 %
+**Why interesting:** the JS prints `0.00%`; whether Power BI's table prints that or the zero section is not captured anywhere, and contract §3.5 only says "exactly 0"
+**Watch for:** three-section format strings with a literal zero section; capture one near-zero cell before asserting either way
+**Tags:** format-string, rounding, dax, parity, blank
+**Promote-to:** defect-patterns.md on second sighting (near DEF-007)
+**Expires:** 2027-02-07

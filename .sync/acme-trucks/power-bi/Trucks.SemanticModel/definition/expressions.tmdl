@@ -1,0 +1,6 @@
+/// Folder that holds the 14 Parquet files of this pack (acme-trucks/data, or pbi-report/ACME Trucks/data in rusloc/pnl): full local path, no trailing backslash. Set it before the first refresh.
+expression DataFolder = "<folder holding the Parquet files>" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: f5e525a9-16a0-4622-8c8f-240c2fc39813
+
+	annotation PBI_ResultType = Text
+

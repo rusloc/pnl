@@ -1,7 +1,7 @@
 /// Targets and thresholds, scope x metric (A-75). Joins nothing; read by measures only.
 table param_target
-	lineageTag: 29651eb2-fb1c-5567-890e-623f69db95ad
 	isHidden
+	lineageTag: 29651eb2-fb1c-5567-890e-623f69db95ad
 
 	column scope_type
 		dataType: string
@@ -81,3 +81,4 @@ table param_target
 				    typed
 
 	annotation PBI_ResultType = Table
+

@@ -37,8 +37,9 @@ The Δ pill colour on each KPI tile comes from rules on its Δ measure (blue = f
 - **Where SVG comes in**: `WF Plan Bar`, `WF Fact Bar` and `WF Δ Pill` build a small SVG picture as text
   (`data:image/svg+xml;utf8,<svg …>`). Their data category is Image URL, so the table draws the picture instead of the text. All
   three are 594 × 24 px, the table's image box, so Power BI does not centre or shrink them.
-- **KPI noise**: the two volume tiles multiply by `_KPI Noise` (`RANDBETWEEN ( 10, 100 )`), a placeholder kept on USER request. The
-  numbers change on every refresh of a visual; change the body to `1` to remove it.
+- **KPI noise (off since 2026-11-04)**: the two volume tiles multiply by `_KPI Noise`, now `1`. Until 2026-11-04 it was
+  `RANDBETWEEN ( 10, 100 )`, a placeholder from the live model, which gave every card its own random factor, so the
+  two pages and the Δ pills could not agree. Now the tiles are deterministic and Δ = Fact − Plan.
 
 ## 4. Slicers and filters
 
@@ -134,7 +135,8 @@ load); the tooltip page stays hidden. There is no page navigator: switch with th
   `PLAN_SWITCHER` / `METRIC_SWITCH` → `param_plan_type` / `param_calculation`, `Таблица мер` → `_measures`. The page uses
   14 measures that still exist under their new names (dictionary, "Was" column). No measure was re-added. The saved Plan type
   selection follows the caption change `MONTH` → `Month`.
-- **Page filter:** `dim_loader[contractor]` = blank, page level only, so the redesign's numbers do not change. The original
+- **Page filter:** `dim_loader[contractor]` = blank. Since 2026-11-04 the redesign page carries the same page filter, so both
+  pages agree also with work type "Undefined" ticked (the only work type with contractor loaders). The original
   page was a drillthrough target on that field. The binding was removed and the filter kept as a plain page filter: nothing in
   the report drills to it, and the validator asks a drillthrough page for a Back button.
 - **Theme:** the report theme is the redesign's `acme-trucks-theme.json`. The original page ran on the base theme (its custom
@@ -148,6 +150,10 @@ load); the tooltip page stays hidden. There is no page navigator: switch with th
 - **What looks different from the live original:** the category captions come from the model, so the page shows "Capital
   repairs", "Awaiting trucks", "Conservation / reserve" (live: "Conservation", "Awaiting", "Reserved"). The longer
   "Conservation / reserve" widens the bar charts' label area, so the thin dark divider line now crosses the right edge of the
-  category labels. The KPI cards change on every refresh (`_KPI Noise`).
+  category labels.
+- **Same numbers as the redesign (2026-11-04):** both pages read the same measures under the same filters. The pages' slicers
+  share the sync groups `Date`, `Филиал`, `type`, `_schema` and `Название ЭКС в ГД`, so a selection carries across pages.
+  Calculation is in no group on either page (the original page keeps its slicer ungrouped), so set it on each page.
+  Test: `tests/page-parity.dax`. Record: [trucks-kpi-mismatch-2026-11-04.md](trucks-kpi-mismatch-2026-11-04.md).
 - **Test:** `tests/time-util-original.dax` checks the page's bar, label and KPI measures in its saved context against the live
   baseline `tests/baseline-live.csv` (scopes `waterfall_saved`, `kpi_saved`): 194/194 TRUE.

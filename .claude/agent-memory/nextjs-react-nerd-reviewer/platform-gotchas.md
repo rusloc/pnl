@@ -48,6 +48,6 @@
 **Fix:** put patch scripts / Playwright checks in the scratchpad with the Write tool and run them (`py -3.12 -I script.py`; add `sys.stdout.reconfigure(encoding='utf-8')`, since `-I` ignores PYTHONIOENCODING); open files with `newline='\n'`, or run `npx prettier --write <changed files>` before the gate.
 **Seen:** js-exec 2026-10-28 (CAND-013, test files, checks.py); js-exec 2026-10-29 (README patch heredoc; 17 files CRLF after python patches); .sync/nordmark-exec pack check 2026-10-30 (UnicodeEncodeError on "ⓘ" until stdout reconfigure)
 **Confidence:** high — reproduced
-**Last-verified:** 2026-10-30
+**Last-verified:** 2026-11-05 — also: a multi-line python heredoc in Bash was refused as "could not be checked for dangerous rm operations"; scripts in the scratchpad + `py -3.12 <file>` work
 **Related:** PG-004
 **Status:** active

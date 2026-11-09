@@ -1,0 +1,206 @@
+table fact_time_actual
+	lineageTag: e292ccbd-7dfc-4ad6-b829-758e878811a9
+
+	column vehicle_export_code
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f49f517-afa0-43e2-bf1c-55872ccfc0d8
+		summarizeBy: none
+		sourceColumn: vehicle_export_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_name
+		dataType: string
+		lineageTag: 82ebb1f4-91e2-4c9d-8e18-82eb0bd7d4a0
+		summarizeBy: none
+		sourceColumn: vehicle_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column dat
+		dataType: dateTime
+		formatString: dd-mm-yyyy
+		lineageTag: f9239f55-de56-4521-ba2c-466c2a9442ec
+		summarizeBy: none
+		sourceColumn: dat
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column idle_name_for_op
+		dataType: string
+		lineageTag: 68111b41-bc8e-4be1-9fde-f9c0b61b64da
+		summarizeBy: none
+		sourceColumn: idle_name_for_op
+
+		annotation SummarizationSetBy = Automatic
+
+	column duration
+		dataType: double
+		formatString: #,0
+		lineageTag: 68977599-0a6e-441e-ac8f-b4ead54b49b0
+		summarizeBy: sum
+		sourceColumn: duration
+
+		annotation SummarizationSetBy = Automatic
+
+	column ent_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 53cf2215-ae5f-44eb-8d51-c7124f387fd8
+		summarizeBy: sum
+		sourceColumn: ent_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_type_reason = "Карьерный экскаватор_" & [idle_name_for_op_2]
+		lineageTag: b3689adb-0c8f-4b5e-a726-068c74a57fd3
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_sort = RELATED(dim_time_category[sort_order])
+		formatString: 0
+		lineageTag: a8653631-4a80-4cdd-a376-d548e8f0f373
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column duration_share = ```
+			// blank line
+			
+			IF(
+			    fact_time_actual[idle_name_for_op]= "ktg" || fact_time_actual[idle_name_for_op]= "kio",
+			    [duration] / 86400, 
+			    [duration] / 86400)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 264ef096-f603-4abb-9580-415590ac5edc
+		summarizeBy: sum
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column blank_share = ```
+			if([idle_name_for_op] = "ТО, ППР", 1 - [duration_share], if([idle_name_for_op] = "ktg" || [idle_name_for_op] = "kio" || [idle_name_for_op] = "kfv" , 0, 1- CALCULATE(SUM([duration_share]),FILTER(ALL(fact_time_actual),[dat]=EARLIER([dat]) && [category_sort]<=EARLIER([category_sort]) && [vehicle_name]=EARLIER([vehicle_name]) && [idle_name_for_op] <> "ktg" && [idle_name_for_op] <> "kio" && [idle_name_for_op] <> "kfv")))) 
+			```
+		lineageTag: fe8d727e-9040-4c17-ba96-09fa11b687b7
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remainder_share = if([idle_name_for_op] = "ktg" || [idle_name_for_op] = "kio", 0, CALCULATE(SUM([duration_share]),FILTER(ALL(fact_time_actual),[dat]=EARLIER([dat]) && [category_sort]<=EARLIER([category_sort]) && [vehicle_name]=EARLIER([vehicle_name])))-[duration_share])
+		lineageTag: da806d62-c671-4281-bac5-1fb5b6380e12
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_share = if([idle_name_for_op] = "ktg" || [idle_name_for_op] = "kio" || [idle_name_for_op] = "kfv", [duration_share])
+		lineageTag: c7009743-91a3-42d3-82f5-5eb8ce46f2a0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column duration_hours =
+			// blank line
+			
+			    [duration_share] * 24
+		lineageTag: faa0bc04-a736-48ca-8181-b0d430a9846f
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column idle_name_for_op_2 = ```
+			// blank line
+			
+			SWITCH(TRUE(),
+			    [idle_name_for_op] = "ktg", 
+			        "КТГ", 
+			    [idle_name_for_op] = "kio", 
+			        "КИО", 
+			    [idle_name_for_op] = "Авар. Прост.", 
+			        "Авар. Прост.", 
+			    [idle_name_for_op] = "Пересменка", 
+			        "Пересменок", 
+			    [idle_name_for_op] = "Ожидание а/с", 
+			        "Ожидание АС", 
+			    [idle_name_for_op] = "kfv", 
+			        "КФВ",
+			    [idle_name_for_op])
+			```
+		lineageTag: ed1699f0-1691-4aba-8fb5-5c37b52329cd
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column _active
+		dataType: int64
+		formatString: 0
+		lineageTag: 3c0f9415-3cac-45db-abb0-d72d10438658
+		summarizeBy: sum
+		sourceColumn: _active
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: 4705341f-800e-49ba-a287-895c20527791
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column block
+		dataType: string
+		lineageTag: a283a0fb-8ef1-490a-9b18-0413221d861b
+		summarizeBy: none
+		sourceColumn: block
+
+		annotation SummarizationSetBy = Automatic
+
+	column _id
+		dataType: string
+		lineageTag: f527ff5c-9461-412b-96b3-fb106f4296e3
+		summarizeBy: none
+		sourceColumn: _id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_time_actual-e48ff520-d890-4b57-9fa6-9e2d2002fbdf = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\ПФ КРВ.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"vehicle_export_code", Int64.Type},
+				            {"vehicle_name", type text},
+				            {"dat", type datetime},
+				            {"idle_name_for_op", type text},
+				            {"duration", type number},
+				            {"ent_id", Int64.Type},
+				            {"_active", Int64.Type},
+				            {"area", type text},
+				            {"block", type text},
+				            {"_id", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

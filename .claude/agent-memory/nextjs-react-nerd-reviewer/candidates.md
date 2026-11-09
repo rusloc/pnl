@@ -1,4 +1,4 @@
-<!-- next-id: CAND-022 -->
+<!-- next-id: CAND-028 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -84,8 +84,34 @@ Seen: .sync/nordmark-exec/js-app copy + this memory write (2026-10-30)
 ### CAND-020 · UI copy that names the data shape outlives a data change · 2026-11-02 · expires 2027-01-31
 vosk.dev round 4 replaced the capped detail sample with full data but kept "(draft sample)" in the C11 / P13 ⓘ formulas (copy.ts). When a data contract changes (sample → full, cap removed, grain change), grep copy.ts / ⓘ texts for words describing the old shape ("sample", "top N", "cap") in the same change.
 Seen: js-report/lib/sales/copy.ts c11 + p13 (fixed 2026-11-02; vosk.dev still has it)
+Promoted-to: AP-002 on 2026-11-05
 
 ### CAND-021 · Porting a patch written under another Prettier config: 3-way merge on a round-tripped base · 2026-11-02 · expires 2027-01-31
 vosk.dev patches (double quotes, width 80, no `.ts` imports) do not apply to the repo (single quotes, width 120, `.ts` imports). Worked: copy the repo files, rewrite imports to the patch's style, prettier with the patch's config, `git apply --reject` (rejects shrank from 29 to 9 hunks once imports matched); convert back + prettier 120 = THEIRS; run the same pipeline on the unpatched files = BASE; `git merge-file ours base theirs` keeps the repo's formatting outside the patched regions. Remaining conflicts were real (imports, rewritten blocks). Prettier keeps width-80-expanded objects expanded at 120 inside patched regions (cosmetic only).
 Seen: Mirelo rounds 1–4 port into js-report/ (2026-11-02)
 
+
+### CAND-022 · parquet-columns readRows cannot read raw source tables (int64 → bigint, date32 → Date) · 2026-11-05 · expires 2027-02-03
+The vendored reader checks `typeof v === 'number'` / `'string'`: hyparquet returns bigint for INT64 and Date for DATE columns, so a source table of data/acme_marketing_dummy_data (int64 counts, date32 dates) fails the kind check. Fine for shipped artifacts (the build writes int32 / double / string); the build script must convert (js-exec's `plain()`) before any readRows-shaped check. js-marketing's loader is keyed by source table names in the scaffold phase — swap to the public/data file set with the contract.
+Seen: js-marketing/lib/data/loader.ts (scaffold, 2026-11-05)
+
+### CAND-023 · PBI "share" measures that REMOVEFILTERS one dimension keep every other filter · 2026-11-05 · expires 2027-02-03
+`Spend Share = DIVIDE([Spend], CALCULATE([Spend], REMOVEFILTERS(dim_channel), REMOVEFILTERS(dim_platform[platform_label])))` at a matrix platform row (filtered by dim_platform[platform_code] via the hierarchy, not platform_label) divides by the platform's spend across channels (Paid social · iOS 50.4 %, Retargeting · iOS 8.4 %), not by the channel's total. Port such measures by asking which filters survive, then confirm against a PBI capture; the contract's prose said "within the channel's platform rows".
+Seen: js-marketing/lib/engine/view.ts channels() C1 (2026-11-05, parity-expected.csv PA-06)
+
+### CAND-024 · First-load JS of a hyparquet + Zod 4 client app ≈ 852 kB raw / 262 kB gzip · 2026-11-05 · expires 2027-02-03
+js-marketing's static `/` ships 852 kB of JS (7 chunks, largest 282 kB) because the client imports the full `zod` (url-state + manifest) and hyparquet. Watch: `zod/mini` for the client-side schemas, or validate the manifest in the build only. Measure with the chunk list of the served HTML (curl the page, sum the /_next/static/chunks/*.js).
+Seen: js-marketing next build 2026-11-05
+
+
+### CAND-025 · DAX BLANK ÷ number is BLANK, not 0 · 2026-11-09 · expires 2027-02-07
+Contract §3.3 said `h null & T number → 0`; the pinned rows of sort 22 (`Time Share Plan %` BLANK with active loaders) settle it: BLANK. Only visible where every per-loader term is blank (0 vs BLANK of the weighted mean). Next DAX-mirroring engine: start from BLANK.
+Seen: js-trucks/lib/engine/shares.ts ratio() (2026-11-09, trucks-pinned.csv)
+
+### CAND-026 · URL `max(256)` per value vs a multi-pick list · 2026-11-09 · expires 2027-02-07
+A comma list of ≈ 20+ loader names exceeds the 256-character cap, so parse falls to the default and the canonical rewrite silently drops the pick. js-marketing's `cp` list has the same shape. Fix when ruled: cap derived from the catalog's full list length.
+Seen: js-trucks/lib/engine/url-state.ts `l` (2026-11-09, contract §6 followed as written)
+
+### CAND-027 · Source Parquet in ZSTD: hyparquet needs a codec; Node's zlib has one · 2026-11-09 · expires 2027-02-07
+hyparquet 1.31.5 throws on ZSTD without `compressors`; `zstdDecompressSync` from node:zlib (Node ≥ 24) covers build scripts with no new dependency. Browser files stay Snappy from hyparquet-writer.
+Seen: js-trucks/scripts/build-trucks-data.ts (2026-11-09)

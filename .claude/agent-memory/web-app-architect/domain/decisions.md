@@ -1,4 +1,4 @@
-<!-- next-id: DEC-011 -->
+<!-- next-id: DEC-013 -->
 
 # Decisions (durable)
 
@@ -115,10 +115,35 @@
 **Decision:** ADR-0015 (Proposed, USER away, defaults in force): (a) Power BI flavour built in `pbi-report/ACME Marketing/`, JS flavour by the vosk.dev agent from `.sync/acme-marketing/{power-bi,spec}` + `.sync/data-gen/acme-marketing/`; no Rayfin; (b) `data/acme_marketing_dummy_data/`, seed 20261104, Parquet only (no CSV copies — the Nordmark open point 1 became the norm), same pins; (c) 26 tables ≈ 0.26 M rows — spec grains collapsed to day × campaign × ad set × creative, daily cohorted stage counts, precomputed attribution credits per model (4 models, one lookback, one event), cohort-month revenue + retention cells, one platform/channel/network/market/tier per campaign (facts carry `campaign_key` only; outriggers through `dim_campaign` allowed as the Track B snowflake exception); (d) story-first; (e) one page 1440 × 810, five bookmark views, Filters = 880 × 560 pop-up with a rail of group bookmarks, applied-state rail instead of live preview, no Apply, light theme only, vitals without sparklines (ADR-0012 §2.4 overrides the spec's sparkline); (f) three phased builds; (g) `docs/Requirements-marketing.md` A-nn / AT-nn; (h) pack recorded, not created.
 **Why:** USER wording ("another agent"), spec folder under `pbi-report/`, ADR-0013 (b)–(c) precedent for the data home, ADR-0012 for the tile face. The mockup's numbers were mutually inconsistent (CPM, 75 % land vs 31 % store CVR, 58 % install → sign-up, Δ blended CAC vs spend/customers deltas, channel budgets vs plan, brand share, spend sum 191.2 vs 188.4 k, payback cohorts too young to cross), so the ADR fixes a binding table + a change list and the generator hits it by construction. Gross margin 36.3 % is the only value under which payback 10.8 / LTV:CAC 3.4 hold with ARPA $135 and CAC $531 — flagged §5 q3.
 **Reversal cost:** low before phase 2 (one constant for scale, one param for GM, folder add for a JS app); medium after the model is built (every control total regenerates).
-**Applied at:** `docs/ADR/0015-acme-paid-acquisition-dashboard.md`, `docs/Requirements-marketing.md`; dataset / PBIP not yet built.
+**Applied at:** `docs/ADR/0015-acme-paid-acquisition-dashboard.md`, `docs/Requirements-marketing.md`; phase 1 built 2026-11-04 by ginee (`data/acme_marketing_dummy_data/`, 27 tables, 257,188 rows, verify 132/0) — README "Deviations from ADR-0015" D-1…D-18 authoritative; ADR (b)(c)(d) + 16 A/AT IDs amended inline the same day. PBIP not yet built.
+**Last-refined:** 2026-11-04
 **Hits:** 1
 **Tags:** showcase, marketing, generator, parquet, pbi, filters-popup, attribution, cohorts, pack, adr-0015
 **Confidence:** high
 **Last-verified:** 2026-11-04
-**Related:** DEC-005, DEC-009, CNV-001, LSN-001
+**Related:** DEC-005, DEC-009, DEC-011, CNV-001, LSN-001
+**Status:** active — part (a) superseded by DEC-011 on 2026-11-05 (JS flavour built here, not via the pack); (b)–(h) unchanged. Phases 2–3 built by bip 2026-11-04 (PBIP, 469 measures, 29 DAX blocks), redesign round 1 the same day (O4/C3/C4/P2–P4/K4/K5 dropped, vitals v2 vs LY, O5/O6 Worst/Top 5), 2026-11-05 per-vital dynamics + O5/O6 movers window.
+
+### DEC-011 · ACME Marketing JS flavour built here (`js-marketing/`), PBI report = the reference, parity gate before the pack; data plan = one day × campaign cube + per-view lazy files · 2026-11-05
+**Decision:** ADR-0015 (a) → alternative 1 (USER 2026-11-05): standalone `js-marketing/` (DEC-005 pattern, js-exec pins), built from `docs/ADD/features/marketing-js-flavour.md`; the PBIP as built (after redesign round 1 and the 11-05 changes) wins over the spec and over Requirements-marketing for layout, copy (`dim_card` + `howto_<view>_text` text boxes → `copy.ts`) and behaviour; the JS builds the spec's version only where Power BI could not (Apply + live preview, keys, removable chips, light + dark, blur, fonts, URL state, mover click → Campaigns). Data plan: `campaign-day.parquet` (10,198 rows × 27 cols incl. 4 models × 2 — spend / credits as source DOUBLE, never fixed-point) + cohort / retention at first paint (≤ 750 kB), `journey-day` / `traffic-page-day` / `segment-day` / `term-day` lazy per view (≈ 2.1 MB total, caps 2.5 / 3 MB); calendar derived in the engine and asserted against `dim_date` at build; the 32 `CR:` creative control rows asserted by the build script (no creatives card since round 1); team-cost allocation stays an engine ratio (window-dependent). Pack `.sync/acme-marketing/js-app/` with prebuilt `public/data/` per ADR-0014 (the brief said without — flagged, ADR §5 q 17), issued after hunter's parity (14 selections incl. the Custom-from-2025-01-01 saved state that exposed the movers bug).
+**Why:** the USER saw the page (the original (a) condition fell), wants the PBI = JS gate as for Nordmark, and the PBI build already settled every rule the JS must mirror — mirroring measures is cheaper than re-deriving from the spec. Cube at day × campaign because every scope attribute lives on the campaign (ADR-0015 (c)) and no built card reads below it.
+**Reversal cost:** low — folder is self-contained; the pack already carries everything the vosk.dev agent would need; splitting the cube is a build-script change behind `FILES`.
+**Applied at:** `docs/ADR/0015-acme-paid-acquisition-dashboard.md` status line, (a), (e) notes (i)(ii), (f) phase 4, (h), §3, §4, §5 q 1 + q 15–19; `docs/Requirements-marketing.md` A-02, A-62, A-84, A-85, §9 intro; `docs/design/parity-rules.md` "ACME Marketing" block (draft) + Check line; `.sync/2026-11-04-acme-marketing-handoff.md` status line; `.sync/README.md` row
+**Hits:** 1
+**Tags:** showcase, marketing, js-flavour, standalone-app, parity, data-plan, cube, lazy-load, copy-source, movers-window, adr-0015
+**Confidence:** high (USER decision on (a); the data plan and the open questions A–F / q 15–19 are archi defaults)
+**Last-verified:** 2026-11-05
+**Related:** DEC-010 (supersedes its part (a)), DEC-005, DEC-001, LSN-002, CNV-001
+**Status:** active
+
+### DEC-012 · ACME Trucks JS flavour: live extract as is, pre-aggregated to loader × business week × category (wide), fixed filters applied in the build, DAX test files as the oracle · 2026-11-09
+**Decision:** ADR-0016 (Proposed): `js-trucks/` (js-marketing pins) rebuilds only the "Time utilization" page from `pbi-report/ACME Trucks/data/` (USER 2026-11-08: data as is, no twin, public exposure accepted). Build = loader × week × time-category wide cube per fact (`time-week`, `plan-month`, `plan-week` lazy, `rock-week`; ≈ 1 MB, 19 category columns named by `sort_order`, null = no row, `n_rows` per loader-week), bridges / calculated columns rebuilt verbatim from the TMDL with case-folded joins, the report + page fixed filters (`is_included = "да"`, contractor blank) applied in the build with a `--keep-excluded` fixture set so the unfiltered `baseline-live.csv` scopes stay replayable. Parity oracle = the three DAX test files converted to one pinned CSV (no new Desktop capture except two Reset-state volume tiles). Mockup wins over the PBIR on every row that was a Power BI limit (chips/popovers, bold subtotals, `%` headers, fonts); board fixed 1440 × 810 = PBIR × 0.75; opening state = Reset state, not the saved week.
+**Why:** every shown number is a sum, a ratio of sums or a bucket-volume-weighted mean of per-loader window ratios, and the Week filter is single-or-all, so week grain is lossless; shipping raw rows (850 k) or day grain (×7) buys nothing. Rules were **verified by recomputing the pinned S1 tiles and default waterfall rows from the raw Parquet before the contract was issued** (exact match) — the DAX hides four non-obvious semantics: VertiPaq case-insensitive joins (`Авар. Прост.`, `Консервация/резерв`), `active` = any source row incl. unmapped indicators (dilutes weighted plan shares on 28 month-plan loader-weeks via `1 − BLANK = 1`), KPI 3 uses Linear total hours × a weighted share without the active filter, Month plan has no rows before 2023 (defaults compare Nov–Mar fact with Jan–Mar plan).
+**Reversal cost:** low — input folder swap for the twin; a build flag for day grain; the engine reads `FILES` only.
+**Applied at:** `docs/ADR/0016-acme-trucks-js-flavour.md`; `docs/ADD/features/trucks-js-flavour.md` (§2 data plan, §3 rules R1–R8, §5.4 deviation table, §7 pinned-block → parity mapping PT-01…PT-08, §10 q A–F)
+**Hits:** 1
+**Tags:** trucks, js-flavour, live-extract, pre-aggregation, week-grain, case-fold, dax-blank, parity-oracle, standalone-app, adr-0016
+**Confidence:** high (USER decisions on data/scope/pattern; archi defaults listed in §10)
+**Last-verified:** 2026-11-09
+**Related:** DEC-011, DEC-005, DEC-001, LSN-002, CNV-001
 **Status:** active

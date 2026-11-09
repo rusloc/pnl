@@ -4,10 +4,10 @@
   "position": {
     "x": 1058,
     "y": 136,
-    "z": 2980,
+    "z": 2700,
     "height": 280,
     "width": 348,
-    "tabOrder": 2980
+    "tabOrder": 2700
   },
   "visual": {
     "visualType": "textbox",
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Payback curves: cumulative gross margin per cohort against its CAC; a line crossing 100 % has paid back. Pick Meta prospecting · Lookalike 2% under Filters › Campaigns (or click it in the Campaigns table) to see its Oct 2025 and Dec 2025 cohorts cross at month 9.",
+                    "value": "Payback heatmap: one row per acquisition month (the 12 before the window's end month), one column per month since acquisition; the cell is the cumulative payback of the cohort's CAC, darker = closer, green = paid back. Pick Meta prospecting · Lookalike 2% under Filters › Campaigns (or click it in the Campaigns table) to see its Nov 2025 – Jan 2026 rows turn green at month 9.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -43,7 +43,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Retention grid: share of the cohort active on day N; blank where the day has not been reached yet. The table lists the 12 acquisition months to the window end.",
+                    "value": "Retention grid: share of the cohort active on day N; blank where the day has not been reached yet. Right: LTV:CAC and payback months by channel against their lines (3:1, 12 months), and the size of each of the last 12 acquisition months.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -173,6 +173,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_howto_cohorts",
-  "isHidden": true
+  "parentGroupName": "grp_howto_cohorts"
 }

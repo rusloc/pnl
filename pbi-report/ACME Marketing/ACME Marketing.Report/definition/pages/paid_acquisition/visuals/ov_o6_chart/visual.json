@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ov_o6_chart",
   "position": {
-    "x": 737.0,
-    "y": 640,
-    "z": 1680,
-    "height": 112,
-    "width": 677.0,
-    "tabOrder": 1680
+    "x": 737,
+    "y": 428,
+    "z": 1610,
+    "height": 142,
+    "width": 677,
+    "tabOrder": 1610
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -43,11 +43,11 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "ROAS Delta Shown"
+                  "Property": "O6 Bar"
                 }
               },
-              "queryRef": "_measures.ROAS Delta Shown",
-              "nativeQueryRef": "ROAS Delta Shown",
+              "queryRef": "_measures.O6 Bar",
+              "nativeQueryRef": "O6 Bar",
               "displayName": "Δ ROAS"
             }
           ]
@@ -63,7 +63,7 @@
                     "Entity": "_measures"
                   }
                 },
-                "Property": "ROAS Delta Shown"
+                "Property": "O6 Bar"
               }
             },
             "direction": "Descending"
@@ -301,7 +301,7 @@
                           "Entity": "_measures"
                         }
                       },
-                      "Property": "Movers Colour"
+                      "Property": "O6 Colour"
                     }
                   }
                 }
@@ -461,7 +461,7 @@
                 "Entity": "_measures"
               }
             },
-            "Property": "Mover Visible"
+            "Property": "O6 Visible"
           }
         },
         "type": "Advanced",
@@ -486,7 +486,7 @@
                           "Source": "m"
                         }
                       },
-                      "Property": "Mover Visible"
+                      "Property": "O6 Visible"
                     }
                   },
                   "Right": {

@@ -2,7 +2,7 @@
 table fact_funnel_day
 	lineageTag: 373b3a2c-b020-5afd-854a-5bcd0108e8f0
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -195,3 +195,4 @@ table fact_funnel_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

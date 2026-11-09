@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ca_p1_head",
   "position": {
-    "x": 30.0,
+    "x": 30,
     "y": 204,
-    "z": 1970,
-    "height": 40,
-    "width": 1348.0,
-    "tabOrder": 1970
+    "z": 1890,
+    "height": 24,
+    "width": 1348,
+    "tabOrder": 1890
   },
   "visual": {
     "visualType": "textbox",
@@ -24,18 +24,6 @@
                       "fontFamily": "Segoe UI Bold",
                       "fontSize": "10.5pt",
                       "color": "#111827"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Which campaign is off, and how?",
-                    "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "8.5pt",
-                      "color": "#8A94A6"
                     }
                   }
                 ]
@@ -161,6 +149,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_campaigns",
-  "isHidden": true
+  "parentGroupName": "grp_campaigns"
 }

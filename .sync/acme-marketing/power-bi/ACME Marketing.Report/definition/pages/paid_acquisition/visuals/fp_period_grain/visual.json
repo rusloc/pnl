@@ -4,10 +4,10 @@
   "position": {
     "x": 500,
     "y": 439,
-    "z": 7340,
+    "z": 7320,
     "height": 32,
     "width": 270,
-    "tabOrder": 7340
+    "tabOrder": 7320
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -521,6 +521,53 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "p",
+                    "Entity": "param_granularity",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "p"
+                                }
+                              },
+                              "Property": "granularity_name"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'Month'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -639,6 +686,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_fp_period",
-  "isHidden": true
+  "parentGroupName": "grp_fp_period"
 }

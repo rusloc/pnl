@@ -4,10 +4,10 @@
   "position": {
     "x": 500,
     "y": 217,
-    "z": 7280,
+    "z": 7260,
     "height": 32,
     "width": 440,
-    "tabOrder": 7280
+    "tabOrder": 7260
   },
   "visual": {
     "visualType": "advancedSlicerVisual",
@@ -48,7 +48,7 @@
             "strictSingleSelect": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -521,6 +521,53 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "p",
+                    "Entity": "param_period_preset",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "p"
+                                }
+                              },
+                              "Property": "preset_name"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'Custom'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -639,6 +686,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_fp_period",
-  "isHidden": true
+  "parentGroupName": "grp_fp_period"
 }

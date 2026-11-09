@@ -4,10 +4,10 @@
   "position": {
     "x": 1058,
     "y": 136,
-    "z": 2830,
+    "z": 2550,
     "height": 280,
     "width": 348,
-    "tabOrder": 2830
+    "tabOrder": 2550
   },
   "visual": {
     "visualType": "textbox",
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "One row per channel; + opens the platforms. Click a row (or a bar) to scope the cards below and the Campaigns view: the chips line then shows Selected:. Click again to clear.",
+                    "value": "One row per channel; + opens the platforms. Click a row (or a bar) to scope the other cards and the Campaigns view: the chips line then shows Selected:. Click again to clear.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Web vs app shows each stage's conversion from the previous one; Platform-reported vs modelled shows how much the networks over-claim; Pacing compares spend with plan (dashed line = 100 %).",
+                    "value": "CAC = spend ÷ paid customers under the selected model. Web vs app shows each stage's conversion from the previous one; the two cards below count paid customers per channel on web and on mobile, with the channel's CAC beside the count.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -173,6 +173,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_howto_channels",
-  "isHidden": true
+  "parentGroupName": "grp_howto_channels"
 }

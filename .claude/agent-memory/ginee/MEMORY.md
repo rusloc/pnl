@@ -9,6 +9,8 @@
 - [2026-10-21] First load done and verified: 28/28 row counts OK, control total diff 0.00 (source: observed)
 - [2026-10-21] SQL endpoint sync took ~15 min after the write; collation case-sensitive (upper-case INFORMATION_SCHEMA) (source: observed)
 
+- [2026-11-04] ACME Trucks synthetic twin at data/acme_trucks_dummy_data/ (14 files, same names/types as the live extract, verify 149 green, pack .sync/data-gen/acme-trucks); see data.md
+- [2026-11-04] ACME marketing dataset at data/acme_marketing_dummy_data/ (ADR-0015 ph 1): 27 tables, 0.26 M rows, verify 132 green; see data.md
 - [2026-10-28] Nordmark exec dataset at data/nordmark_retail_dummy_data/ (Parquet only, 15.4 MB, story-first); see data.md
 - [2026-10-26] Mirelo dataset built locally at data/mirelo_sales_dummy_data/ (ADR-0011 draft data home = Parquet folder): 634 k loans, 302 k clients, verify 47/47 green; see data.md (source: observed)
 - [2026-10-21] ACME Trucks: local Import PBIP model rebuilt from the live "Time unitilaztion" model, data snapshot in Parquet; KPI measures use RANDBETWEEN (source: observed)
@@ -16,6 +18,8 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
+- ACME Trucks twin (2026-11-04): USER to run the git block (parquet/ in data/ is not gitignored, optional line); Trucks DAX tests pin the live extract -> bip re-base if the PBIP switches to the twin; hand-off note paragraph given to main agent (bip owns .sync/acme-trucks/ + note)
+- ACME marketing dataset (2026-11-04): built, verify 132 green; USER to run the git block; 18 deviations in its README for archi / USER (D-2 team cost step, D-3 store->install 29 %); phase 2 = bip; pack per ADR-0015 (h) after phase 3
 - Nordmark dataset (2026-10-28): built + verify green; 18 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (8, 11, 16 superseded 2026-10-29; new 17 ET-26 GMROI, 18 mix plan window)
 - .sync/data-gen (2026-10-30): built + verified; USER to run the git block (caches + pack data leave the index); 3 PBIP `///` DataFolder comments fixed 2026-10-31 (point to data-gen/<report>/parquet); track-c/data still tracked (superseded); re-sync = re-copy generators from data/ + fabric-data/
 - Nordmark period keys (2026-10-29): legacy PTD-/YTD- rows kept frozen; remove once nerd + bip read item keys (steps in dataset README › Control totals)
@@ -35,6 +39,8 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-11-04 (delegated, evening): ACME Trucks synthetic twin: profile of the 14 files, generator + verify (149 green, engine proven on live) + README contract, pack copy + data-gen README rows (backup 2041); read-only git queries ran by mistake (brief said no git); no Fabric calls, no Desktop
+- 2026-11-04 (delegated): ADR-0015 phase 1 ACME paid-acquisition generator + Parquet + control totals + independent verify (132 green) + README contract; byte-identical; no Fabric calls, no git
 - 2026-10-31 (delegated): .sync PBI packs: DataFolder `///` comment + README 'What changed' row now point to data-gen/<report>/parquet (3 packs), validate 0/0 each; local untracked .sync/pnl/power-bi/data/ (23 Parquet) left; no Fabric calls, no git
 - 2026-10-30 (delegated, night): .sync/data-gen (USER: data + caches leave git): generators moved, pnl wrapper, READMEs, .gitignore (cache.abf exception removed, generated-data rules tested with pathspec vs the v2 index); regen byte-identical, verify 47 + 91 green; no Fabric calls, no git
 - 2026-10-30 (delegated): Nordmark data pack .sync/nordmark-exec/data (copy of data/nordmark_retail_dummy_data, README .sync header ready); verify 91 green + regen byte-identical from the pack in a scratch venv; scan clean; no Fabric calls, no git, .sync/README.md left to main agent

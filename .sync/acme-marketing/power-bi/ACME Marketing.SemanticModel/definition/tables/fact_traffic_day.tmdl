@@ -2,7 +2,7 @@
 table fact_traffic_day
 	lineageTag: 677d5c35-1d8a-546b-b356-73f80624616c
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -128,3 +128,4 @@ table fact_traffic_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

@@ -130,6 +130,72 @@ cultureInfo ru-RU
 			          }
 			        }
 			      ]
+			    },
+			    "dim_time_category.category_code": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_time_category",
+			          "ConceptualProperty": "category_code"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.column_zero": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "_Zero"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.time_share_fact_": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Time Share Fact %"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.time_share_δ": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Time Share Δ"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.time_share_plan_": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Time Share Plan %"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.performance_per_truck_plan": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Performance per Truck Plan"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Произв-сть": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
 			    }
 			  }
 			}

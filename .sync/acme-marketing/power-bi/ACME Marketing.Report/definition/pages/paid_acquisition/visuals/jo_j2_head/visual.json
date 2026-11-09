@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "jo_j2_head",
   "position": {
-    "x": 741.0,
+    "x": 741,
     "y": 204,
-    "z": 2320,
-    "height": 40,
-    "width": 637.0,
-    "tabOrder": 2320
+    "z": 2120,
+    "height": 24,
+    "width": 637,
+    "tabOrder": 2120
   },
   "visual": {
     "visualType": "textbox",
@@ -24,18 +24,6 @@
                       "fontFamily": "Segoe UI Bold",
                       "fontSize": "10.5pt",
                       "color": "#111827"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Which step loses new sign-ups?",
-                    "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "8.5pt",
-                      "color": "#8A94A6"
                     }
                   }
                 ]
@@ -161,6 +149,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_journey",
-  "isHidden": true
+  "parentGroupName": "grp_journey"
 }

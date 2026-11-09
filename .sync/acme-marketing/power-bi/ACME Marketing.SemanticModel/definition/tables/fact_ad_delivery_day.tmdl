@@ -2,7 +2,7 @@
 table fact_ad_delivery_day
 	lineageTag: 2b685ae2-0e30-53c0-8411-de7a40a6f3db
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -127,3 +127,4 @@ table fact_ad_delivery_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

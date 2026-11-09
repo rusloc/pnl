@@ -1,7 +1,7 @@
 /// Alert rules (O5). Joins nothing; dim_alert_slot expands them per entity.
 table param_alert_rule
-	lineageTag: e2b06329-a282-5f59-bb67-1ed0584ce054
 	isHidden
+	lineageTag: e2b06329-a282-5f59-bb67-1ed0584ce054
 
 	column rule_code
 		dataType: string
@@ -90,3 +90,4 @@ table param_alert_rule
 				    typed
 
 	annotation PBI_ResultType = Table
+

@@ -1,9 +1,9 @@
 # ACME Marketing — measure dictionary
 
-> Generated 2026-11-04 by `pbi-report/ACME Marketing/tools/gen/build_docs.py` from the measure list of the model (bip, ADR-0015 phase 2).
+> Generated 2026-11-05 by `pbi-report/ACME Marketing/tools/gen/build_docs.py` from the measure list of the model (bip, ADR-0015 phase 2).
 > Regenerate it with the model; do not edit by hand. Owner of every measure: bip. Spec IDs: `docs/Requirements-marketing.md` (A-nn).
 
-`_measures` holds **411 measures**: 275 visible in folders 1–8, 136 hidden engine helpers in folder 9.
+`_measures` holds **469 measures**: 327 visible in folders 1–8, 142 hidden engine helpers in folder 9.
 
 ## How the layers fit
 
@@ -38,7 +38,7 @@
 | `Trial Shortfall` | Trials × the scope's previous-period trial → paid − paid customers (DDA; data README Trial → paid shortfall). | A-63 | `#,0.0` |
 | `Loss Share` | Share of the ALL trial → paid shortfall carried by the scope (story: SOC_META_LAL2 ≈ 70 %). | A-63 | `0%` |
 | `ROAS 90d Basis` | ROAS 90 d of the comparison period for the movers: same period last year in LY mode, else the previous period (A-52). | A-52 | `0.00` |
-| `ROAS Delta` | ROAS 90 d − the comparison period's, for one campaign with a ROAS objective and spend in both periods (data README Movers). | A-52 | `+0.00;-0.00;0.00` |
+| `ROAS Delta` | ROAS 90 d − the comparison period's, for one campaign with a ROAS objective and spend in both periods, over the movers window (_Mv Start .. window end) and its comparison, as explicit date windows (data README Movers). | A-52 | `+0.00;-0.00;0.00` |
 | `Mover Rank` | 1 … 3 = the three best, −1 … −3 = the three worst campaigns by Δ ROAS in the scope; blank otherwise (O6). Also clears dim_campaign[sort_order]: a visual grouping by campaign_label groups by its sort-by column too. | A-52 | `0` |
 | `ROAS Delta Shown` | Δ ROAS of the six movers only (O6 bars; blank for every other campaign). | A-52 | `+0.00;-0.00;0.00` |
 | `Mover Visible` | 1 for the six movers of O6 (visual filter). | A-52 | `0` |
@@ -60,6 +60,16 @@
 | `Synced Hours Ago` | Age in hours of the oldest hourly source (header 'Synced n h ago', A-17). | A-17 | `0.00` |
 | `Story Step Date` | The story's event day (ADR-0015 (d), A-52 / A-63: paid CAC steps up and mobile paid-social trial → paid breaks on Oct 18). An annotation of the dataset, like the O3 / P2 constant line: the noisy daily CAC makes the largest 7-day step fall on Oct 17, so the day is not detected. | A-63 | `yyyy-mm-dd` |
 | `Story CAC Step` | 7-day mean of daily paid CAC from the step day ÷ the 7 days before − 1 (story +20 %, AT-08). | A-63 | `+0.0%;-0.0%` |
+| `Paid Customers Basis` | Paid customers of the anomalies' comparison window: the same period last year in LY mode, else the previous period (O5). | A-52 | `#,0` |
+| `Anomaly Delta` | Paid customers (selected model) − the comparison window's, for one campaign with spend in both periods, over the movers window (_Mv Start .. window end) and its comparison, as explicit date windows (O5). | A-52 | `+#,0.0;-#,0.0;0.0` |
+| `O5 Rank` | 1 .. 5: the campaign's place among the five largest losses (Worst 5) or gains (Top 5) of paid customers in the scope; blank otherwise (O5). | A-52 | `0` |
+| `O5 Visible` | 1 for the five campaigns O5 lists (visual filter). | A-52 | `0` |
+| `O6 Rank` | 1 .. 5: the campaign's place among the five largest falls (Worst 5) or rises (Top 5) of 90-day ROAS in the scope; blank otherwise (O6). | A-52 | `0` |
+| `O6 Visible` | 1 for the five campaigns O6 draws (visual filter). | A-52 | `0` |
+| `P6 Rank` | 1 .. 5: the channel's place among the five with the most churned customers in the scope; blank otherwise (P6). |  | `0` |
+| `P6 Visible` | 1 for the five channels P6 draws (visual filter). |  | `0` |
+| `P7 Rank` | 1 .. 5: the channel's place among the five with the most refunds in the scope; blank otherwise (P7). |  | `0` |
+| `P7 Visible` | 1 for the five channels P7 draws (visual filter). |  | `0` |
 
 ### 1 Spend & delivery
 
@@ -140,6 +150,10 @@
 | `Verdict Refund Rate` | Refund Rate vs its target: 1 OK, 2 WARN within WARN_BAND_REL, 3 CRIT (down is good; never follows the comparison mode, A-24). | A-24 | `0` |
 | `Verdict Brand Share` | Brand Share vs its target: 1 OK, 2 WARN within WARN_BAND_REL, 3 CRIT (down is good; never follows the comparison mode, A-24). | A-24 | `0` |
 | `Verdict Attribution Gap` | Attribution Gap vs its target: 1 OK, 2 WARN within WARN_BAND_REL, 3 CRIT (down is good; never follows the comparison mode, A-24). | A-24 | `0` |
+| `Signups LY` | Signups of the same dates one year back (A-11; vitals V2). | A-20 | `#,0` |
+| `Signup to Paid LY` | Conversion into paid of the same dates one year back. | A-20 | `0.0%` |
+| `Act Median Hours LY` | Median hours from sign-up to activation, same dates one year back. | A-20 | `0` |
+| `Time to Activation Days LY` | Time to activation of the same dates one year back. | A-20 | `0.0` |
 | `Page CVR Prev` | Page CVR of the previous period (J1 caption). | A-55 | `0.0%` |
 
 ### 2 Funnel
@@ -164,6 +178,8 @@
 | `Trials` | Σ trials. | A-36 | `#,0` |
 | `Trial Rate` | Trials ÷ sign-ups. | A-36 | `0.0%` |
 | `Trial to Paid` | Paid customers (selected model) ÷ trials. | A-36 | `0.0%` |
+| `Signup to Paid` | Conversion into paid (vitals V3): paid customers of the window (selected model, conversion day) ÷ sign-ups of the window (sign-up day); a period rate, not a cohort. | A-20 | `0.0%` |
+| `Time to Activation Days` | Vitals V4: median days from sign-up to activation (first dashboard) of the window's sign-ups that activated within 30 days; stands in for time to paid (the data has no sign-up → payment timing). | A-20 | `0.0` |
 
 ### 3 Customers & revenue
 
@@ -192,6 +208,7 @@
 | `LTV CAC` | LTV ÷ blended CAC. | A-41 | `0.0` |
 | `R90` | 3-month revenue multiple of the newest complete cohort (campaign → channel → ALL). | A-42 | `0.00` |
 | `ROAS 90d` | New MRR × R90 ÷ spend. | A-42 | `0.00` |
+| `Churned Customers` | Customers lost in the trailing 3 complete months to the window end (DDA credits; P6). | A-41 | `#,0` |
 
 ### 5 Guardrails
 
@@ -203,6 +220,7 @@
 | `Retention Cohort Month` | Cohort month (yyyymm) behind the D7 / D30 guardrails. | A-22 | `0` |
 | `D7 Retention` | D7 retention of the guardrail cohort month. | A-22 | `0.0%` |
 | `D30 Retention` | D30 retention of the guardrail cohort month. | A-22 | `0.0%` |
+| `Refunds` | Refunds of the cohorts acquired in the 12 months to the window end (DDA credits; P7). | A-22 | `#,0` |
 
 ### 8 Report
 
@@ -259,7 +277,7 @@
 | `P4 Caption` | P4 caption: the fatigue rule from param_target (A-54). |  | `text` |
 | `P5 Caption` | P5 caption: keywords for search campaigns, placements for the others (AT-09). |  | `text` |
 | `P4 Row Visible` | 1 for the selected campaign's creatives live on the window's last day (P4 rows). |  | `0` |
-| `Chips Line` | Chips line: one segment per active non-default filter + 'Selected:' for a cross-filter, ' - ' as separator; blank with the defaults (A-14). | A-14 | `text` |
+| `Chips Line` | Chips line: one segment per active non-default filter + 'Selected:' for a cross-filter, ' | ' as separator; blank with the defaults (A-14). | A-14 | `text` |
 | `Period Pill Text` | Period pill: window dates and the comparison basis (A-50). | A-50 | `text` |
 | `Synced Text` | Header freshness text: age of the oldest hourly source, whole hours (A-17). | A-17 | `text` |
 | `Freshness Colour` | Freshness dot colour. |  | `text` |
@@ -270,6 +288,21 @@
 | `Card Info What` | ⓘ pop-up: what the card shows. |  | `text` |
 | `Card Info Formula` | ⓘ pop-up: formula. |  | `text` |
 | `Card Info Note` | ⓘ pop-up: note + the window and model in use (A-16: every ⓘ of an affected card names the model). |  | `text` |
+| `O5 Channel` | O5 cell: channel of the listed campaign. |  | `text` |
+| `O5 Paid Now` | O5 cell: paid customers in the movers window (selected model). |  | `#,0` |
+| `O5 Paid Before` | O5 cell: paid customers in the comparison window of the movers window. |  | `#,0` |
+| `O5 Delta` | O5 cell: Δ paid customers, absolute (one decimal: DDA credits are fractional). |  | `+#,0.0;-#,0.0;0.0` |
+| `O5 Colour` | O5 Δ colour: good for a gain, crit for a loss. |  | `text` |
+| `O5 Alert` | O5 cell: title of the most severe campaign alert that trips on the listed campaign over the movers window (_Mv Start .. window end; param_alert_rule; blank when none). | A-64 | `text` |
+| `O6 Bar` | O6 bar: size of the Δ ROAS (absolute ROAS points); the format string puts the sign back (+ for Top 5, − for Worst 5). | A-52 | `dynamic` |
+| `O6 Colour` | O6 bar colour: good for Top 5, crit for Worst 5. |  | `text` |
+| `P6 Churned` | P6 bar: churned customers of the top-5 channels (absolute). |  | `#,0` |
+| `P7 Refunds` | P7 bar: refunds of the top-5 channels (absolute). |  | `#,0` |
+| `K1 Heat` | K1 heatmap cell: cumulative payback of the acquisition month (row) at the month since acquisition (column), months 0 .. 11 (A-56). | A-56 | `0%` |
+| `K1 Heat Colour` | K1 cell fill: one hue (accent), darker = closer to payback; good green once paid back (≥ 100 %). |  | `text` |
+| `K1 Heat Ink` | K1 cell text colour on the fill. |  | `text` |
+| `Payback Target` | The 12-month payback line of K6 (param_target PAYBACK_MONTHS). |  | `0` |
+| `Paid Customers CAC Bar` | C5 / C6 bar: paid customers of the channel; the format string prints the label 'count / $CAC'. | A-53 | `dynamic` |
 | `J1 Bounce` | J1 bounce cell; — on store pages (A-55). |  | `dynamic` |
 | `J1 LCP` | J1 LCP cell in ms; — on store pages (A-55). |  | `dynamic` |
 | `J1 Caption` | J1 caption: store-page CVR now and in the previous period (the story: flat, so the leak is pre-click). | A-55 | `text` |
@@ -295,6 +328,29 @@
 | `K2 Target` | The 3:1 LTV:CAC floor (param_target LTV_CAC). |  | `0.0` |
 | `K2 Caption` | K2 caption (A-56). |  | `text` |
 | `K4 Caption` | K4 caption (A-56). |  | `text` |
+
+### 8 Report\Dynamics
+
+| Measure | Definition | Spec | Format |
+|---|---|---|---|
+| `Dyn Spend` | Spend per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `$#,0` |
+| `Dyn Spend LY` | Spend of the same day one year back (dashed line). | A-20 | `$#,0` |
+| `Dyn Spend Last` | Spend on the last day only (marker + value label). | A-20 | `$#,0` |
+| `Dyn New Clients` | Sign-ups per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `#,0` |
+| `Dyn New Clients LY` | Sign-ups of the same day one year back (dashed line). | A-20 | `#,0` |
+| `Dyn New Clients Last` | Sign-ups on the last day only (marker + value label). | A-20 | `#,0` |
+| `Dyn Conversion` | Paid customers ÷ sign-ups per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `0.0%` |
+| `Dyn Conversion LY` | Paid customers ÷ sign-ups of the same day one year back (dashed line). | A-20 | `0.0%` |
+| `Dyn Conversion Last` | Paid customers ÷ sign-ups on the last day only (marker + value label). | A-20 | `0.0%` |
+| `Dyn Time to Activation` | Median days from sign-up to activation per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `0.0` |
+| `Dyn Time to Activation LY` | Median days from sign-up to activation of the same day one year back (dashed line). | A-20 | `0.0` |
+| `Dyn Time to Activation Last` | Median days from sign-up to activation on the last day only (marker + value label). | A-20 | `0.0` |
+| `Dyn CAC` | Paid CAC per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `$#,0` |
+| `Dyn CAC LY` | Paid CAC of the same day one year back (dashed line). | A-20 | `$#,0` |
+| `Dyn CAC Last` | Paid CAC on the last day only (marker + value label). | A-20 | `$#,0` |
+| `Dyn ROAS` | ROAS 90 d per day of the dynamics window (the selected period, or its last 30 days when longer than 90). | A-20 | `0.00` |
+| `Dyn ROAS LY` | ROAS 90 d of the same day one year back (dashed line). | A-20 | `0.00` |
+| `Dyn ROAS Last` | ROAS 90 d on the last day only (marker + value label). | A-20 | `0.00` |
 
 ### 6 Diagnostics\Journey
 
@@ -332,13 +388,14 @@
 | Measure | Definition | Spec | Format |
 |---|---|---|---|
 | `O4 Shares SVG` | O4: per channel, share of spend (solid bar, channel colour) and share of New MRR (tinted bar), both on one scale (A-52; field-value colours do not reach multi-series bars, so the card is drawn). | A-52 | `image URL` |
-| `O1 Funnel SVG` | O1 acquisition funnel: seven stages, bar width = log10 of the count ([Funnel Log]), the true count and the stage rate or cost beside the bar (ADR-0015 platform limit 8, A-52). | A-52 | `image URL` |
-| `Vital V1 SVG` | Vitals tile V1 (Spend): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
-| `Vital V2 SVG` | Vitals tile V2 (New Paying Customers): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
-| `Vital V3 SVG` | Vitals tile V3 (Blended Cac): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
-| `Vital V4 SVG` | Vitals tile V4 (New Mrr): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
-| `Vital V5 SVG` | Vitals tile V5 (Cac Payback): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
-| `Vital V6 SVG` | Vitals tile V6 (Ltv : Cac): value, Δ vs the comparison mode (arrow + direction-aware colour), target sub-line with the verdict dot, comparison value (A-20, A-21; no sparkline, ADR-0012 §2.4). | A-20 | `image URL` |
+| `O7 Spend Customers SVG` | O7: per channel, spend and paid customers (selected model) on two aligned bar columns, each on its own scale, channel colours, absolute labels (A-52; redesign round 1 pass 2 replaces O4). | A-52 | `image URL` |
+| `O1 Funnel SVG` | O1 acquisition funnel: seven stages, bar width = log10 of the count ([Funnel Log]), the absolute count at the right edge (ADR-0015 platform limit 8, A-52; redesign round 1: no rate / cost labels). | A-52 | `image URL` |
+| `Vital V1 SVG` | Vitals tile V1 (Spend): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
+| `Vital V2 SVG` | Vitals tile V2 (New Clients): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
+| `Vital V3 SVG` | Vitals tile V3 (Conversion Into Paid): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
+| `Vital V4 SVG` | Vitals tile V4 (Time To Activation): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
+| `Vital V5 SVG` | Vitals tile V5 (Cac): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
+| `Vital V6 SVG` | Vitals tile V6 (Roas 90 D): value, Δ vs the same period last year (arrow + direction-aware colour), last year's value as the sub-line (A-20 amended 2026-11-04; no target, no sparkline). | A-20 | `image URL` |
 | `O2 Guardrails SVG` | O2 guardrails: name, meter (value against 2 × target, marker = target), target and value coloured by the verdict (A-22). | A-22 | `image URL` |
 | `Header Period SVG` | Period pill: window dates and comparison basis (opens the Filters window on Period; A-50). | A-50 | `image URL` |
 | `Header Filters SVG` | Filters button face with the active-count badge (A-50). | A-50 | `image URL` |
@@ -459,6 +516,7 @@
 | `_x Frequency 7d` | Frequency (7-day) at the window end; windows of 14 days or more (A-44). |
 | `_x CTR Slope 7d` | CTR 7-day slope at the window end; windows of 14 days or more (A-44). |
 | `_x Install Quality Delta` | Install → sign-up of the window's last 7 days − the previous period's (data README D-6). |
+| `_Mv Start` | Movers window start (O5 / O6, 2026-11-05): the window's start, or its last 30 days when the comparison window would start before the first day of data (e.g. Custom from Jan 1 2025: no previous period, a partial last year). |
 | `_Worst Mover Key` | Campaign with the lowest Δ ROAS in the scope. |
 | `_Top Spender Key` | Campaign with the most spend in the scope (fallback selection). |
 | `_Selected Campaign` | Selected campaign of the Campaigns view: the one clicked (or filtered to), else the worst mover of the window (A-54, AT-09). |
@@ -466,7 +524,12 @@
 | `_Source Age H` | Hours between the refresh stamp and the source's last sync (one source in context). |
 | `P1 No Goal` | TRUE for Lead and Retention objectives (CPA / ROAS shown as —). |
 | `_Filter Count` | Active non-period filter groups (Filters badge). |
-| `Applied State` | Applied state of the Filters window as '/'-separated lines (A-57: shown instead of a live preview). |
+| `Applied State` | Applied state of the Filters window as '/'-separated lines (PATHITEM); a divider inside a line is written '¦' and drawn as '/' by the SVG (A-57: shown instead of a live preview). |
+| `_O5 Rank Mode` | O5 switch: WORST (default, nothing picked) or TOP. |
+| `_O6 Rank Mode` | O6 switch: WORST (default, nothing picked) or TOP. |
+| `_x Churned` | Σ churned, months since acquisition ≥ 1 whose calendar month is in the trailing 3 complete months (numerator of monthly churn, A-41). |
+| `_x Refunds` | Σ refund_count of the cohorts acquired in the 12 months ending with the window's end month (numerator of the refund rate). |
+| `_K1 Heat Month` | TRUE for the 12 acquisition months before the window's end month (K1 heatmap rows). |
 | `_b Traffic Signups` | Σ fact_traffic_day sign-ups (page-level sign-ups, J1). |
 | `_b Bounces` | Σ bounces (web pages). |
 | `_b LCP Weighted` | Σ lcp_ms_p75 × sessions (sessions-weighted LCP numerator, A-46). |
@@ -3960,7 +4023,7 @@ VAR _words        =
         ,"ON_TARGET", "On target"
     )
 RETURN
-    SUBSTITUTE ( _words, ",", " · " )
+    SUBSTITUTE ( _words, ",", " | " )
 ```
 
 ### `Flags Colour`
@@ -4009,6 +4072,19 @@ RETURN
     DIVIDE ( [Trial Shortfall], _all )
 ```
 
+### `_Mv Start`
+
+```dax
+_Mv Start =
+VAR _start        = [_Win Start]
+VAR _end          = [_Win End]
+VAR _days         = INT ( _end - _start ) + 1
+VAR _basis_start  = IF ( [_Cmp] = "LY", EDATE ( _start, -12 ), _start - _days )
+VAR _first        = CALCULATE ( MIN ( param_date[date] ), REMOVEFILTERS ( param_date ) )
+RETURN
+    IF ( _basis_start < _first && _days > 30, _end - 29, _start )
+```
+
 ### `ROAS 90d Basis`
 
 ```dax
@@ -4025,15 +4101,58 @@ SWITCH (
 
 ```dax
 ROAS Delta =
+VAR _start        = [_Mv Start]
+VAR _end          = [_Win End]
+VAR _days         = INT ( _end - _start ) + 1
+VAR _is_ly        = [_Cmp] = "LY"
+VAR _b_start      = IF ( _is_ly, EDATE ( _start, -12 ), _start - _days )
+VAR _b_end        = IF ( _is_ly, EDATE ( _end, -12 ), _start - 1 )
 VAR _objective    = SELECTEDVALUE ( dim_campaign[objective_code] )
-VAR _now          = [ROAS 90d]
-VAR _before       = [ROAS 90d Basis]
-VAR _spend_basis  = IF ( [_Cmp] = "LY", [Spend LY], [Spend Prev] )
+VAR _now          =
+    CALCULATE (
+        [_x ROAS 90d]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+VAR _before       =
+    CALCULATE (
+        [_x ROAS 90d]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _b_start
+                && dim_date[date] <= _b_end
+        )
+    )
+VAR _spend        =
+    CALCULATE (
+        [_b Spend]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+VAR _spend_basis  =
+    CALCULATE (
+        [_b Spend]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _b_start
+                && dim_date[date] <= _b_end
+        )
+    )
 RETURN
     IF (
         HASONEVALUE ( dim_campaign[campaign_key] )
             && _objective IN { "PAID", "INSTALL", "PIPELINE" }
-            && [Spend] > 0
+            && _spend > 0
             && _spend_basis > 0
             && NOT ISBLANK ( _now )
             && NOT ISBLANK ( _before )
@@ -4423,12 +4542,12 @@ RETURN
             ,"FATIGUE"
                 ,CALCULATE (
                     "CTR " & _sign & FORMAT ( ABS ( _value ), "0%" ) & " in 7 d at frequency " & FORMAT ( [Frequency 7d], "0.0" )
-                        & " · CPA $" & FORMAT ( [CPA], "#,0" ) & " vs $" & FORMAT ( [CPA Target], "#,0" )
+                        & " | CPA $" & FORMAT ( [CPA], "#,0" ) & " vs $" & FORMAT ( [CPA Target], "#,0" )
                     ,KEEPFILTERS ( TREATAS ( { _code }, dim_campaign[campaign_key] ) )
                 )
             ,"PACING_OVER"
                 ,CALCULATE (
-                    FORMAT ( [Pacing], "0%" ) & " of plan · $" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k vs $" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k"
+                    FORMAT ( [Pacing], "0%" ) & " of plan | $" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k vs $" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k"
                     ,KEEPFILTERS ( TREATAS ( { _code }, dim_channel[channel_code] ) )
                 )
             ,"INSTALL_QUALITY"
@@ -4437,7 +4556,7 @@ RETURN
                 ,"Gap " & FORMAT ( [Attribution Gap], "+0%;-0%" ) & " vs " & FORMAT ( [Attribution Gap Prev], "+0%;-0%" ) & " in the previous period"
             ,"UNDERSPENT_SCALE"
                 ,CALCULATE (
-                    FORMAT ( [Pacing], "0%" ) & " of plan with ROAS " & FORMAT ( [ROAS 90d], "0.00" ) & " · room to scale"
+                    FORMAT ( [Pacing], "0%" ) & " of plan with ROAS " & FORMAT ( [ROAS 90d], "0.00" ) & " | room to scale"
                     ,KEEPFILTERS ( TREATAS ( { _code }, dim_channel[channel_code] ) )
                 )
             ,"DATA_STALE"
@@ -4849,19 +4968,19 @@ RETURN
     SWITCH (
         SELECTEDVALUE ( dim_funnel_stage[stage_code] )
         ,"IMP"
-            ,_txt & "  ·  CPM $" & FORMAT ( [CPM], "0.0" )
+            ,_txt & "  |  CPM $" & FORMAT ( [CPM], "0.0" )
         ,"CLK"
-            ,_txt & "  ·  CTR " & FORMAT ( [CTR], "0.00%" ) & " · CPC $" & FORMAT ( [CPC], "0.00" )
+            ,_txt & "  |  CTR " & FORMAT ( [CTR], "0.00%" ) & " | CPC $" & FORMAT ( [CPC], "0.00" )
         ,"LAND"
-            ,_txt & "  ·  " & IF ( [Sessions] >= 1000000, FORMAT ( [Sessions] / 1000000, "0.0" ) & "M", IF ( [Sessions] >= 10000, FORMAT ( [Sessions] / 1000, "#,0.0" ) & "k", FORMAT ( [Sessions], "#,0" ) ) ) & " web + " & IF ( [Installs] >= 1000000, FORMAT ( [Installs] / 1000000, "0.0" ) & "M", IF ( [Installs] >= 10000, FORMAT ( [Installs] / 1000, "#,0.0" ) & "k", FORMAT ( [Installs], "#,0" ) ) ) & " installs"
+            ,_txt & "  |  " & IF ( [Sessions] >= 1000000, FORMAT ( [Sessions] / 1000000, "0.0" ) & "M", IF ( [Sessions] >= 10000, FORMAT ( [Sessions] / 1000, "#,0.0" ) & "k", FORMAT ( [Sessions], "#,0" ) ) ) & " web + " & IF ( [Installs] >= 1000000, FORMAT ( [Installs] / 1000000, "0.0" ) & "M", IF ( [Installs] >= 10000, FORMAT ( [Installs] / 1000, "#,0.0" ) & "k", FORMAT ( [Installs], "#,0" ) ) ) & " installs"
         ,"SIGNUP"
-            ,_txt & "  ·  " & FORMAT ( [Click Signup Rate], "0.0%" ) & " of clicks · CPL $" & FORMAT ( [CPL], "#,0" )
+            ,_txt & "  |  " & FORMAT ( [Click Signup Rate], "0.0%" ) & " of clicks | CPL $" & FORMAT ( [CPL], "#,0" )
         ,"ACT"
-            ,_txt & "  ·  " & FORMAT ( [Activation Rate], "0%" ) & " · $" & FORMAT ( [Cost per Activated], "#,0" )
+            ,_txt & "  |  " & FORMAT ( [Activation Rate], "0%" ) & " | $" & FORMAT ( [Cost per Activated], "#,0" )
         ,"TRIAL"
-            ,_txt & "  ·  " & FORMAT ( [Trial Rate], "0%" ) & " of sign-ups"
+            ,_txt & "  |  " & FORMAT ( [Trial Rate], "0%" ) & " of sign-ups"
         ,"PAID"
-            ,FORMAT ( _v, "#,0" ) & "  ·  " & FORMAT ( [Trial to Paid], "0.0%" ) & " of trials · CPA $" & FORMAT ( [CPA], "#,0" )
+            ,FORMAT ( _v, "#,0" ) & "  |  " & FORMAT ( [Trial to Paid], "0.0%" ) & " of trials | CPA $" & FORMAT ( [CPA], "#,0" )
     )
 ```
 
@@ -4895,8 +5014,8 @@ VAR _tp_d         = [Trial to Paid Δ]
 VAR _cs_d         = [Click Signup Rate Δ]
 RETURN
     "Trial → paid " & FORMAT ( [Trial to Paid], "0.0%" ) & IF ( NOT ISBLANK ( _tp_d ), " (" & IF ( _tp_d < 0, "−", "+" ) & FORMAT ( ABS ( _tp_d ) * 100, "0.0" ) & " pt" & ")" )
-        & "   ·   Click → sign-up " & FORMAT ( [Click Signup Rate], "0.0%" ) & IF ( NOT ISBLANK ( _cs_d ), " (" & IF ( _cs_d < 0, "−", "+" ) & FORMAT ( ABS ( _cs_d ) * 100, "0.0" ) & " pt" & ")" )
-        & "   ·   Cost per paid $" & FORMAT ( [CPA], "#,0" )
+        & "   |   Click → sign-up " & FORMAT ( [Click Signup Rate], "0.0%" ) & IF ( NOT ISBLANK ( _cs_d ), " (" & IF ( _cs_d < 0, "−", "+" ) & FORMAT ( ABS ( _cs_d ) * 100, "0.0" ) & " pt" & ")" )
+        & "   |   Cost per paid $" & FORMAT ( [CPA], "#,0" )
 ```
 
 ### `C2 Web Rate`
@@ -4957,8 +5076,8 @@ RETURN
 
 ```dax
 C2 Caption =
-"Store → install " & FORMAT ( [Store CVR], "0.0%" ) & "   ·   install → sign-up " & FORMAT ( [Install Signup Rate], "0.0%" )
-    & "   ·   web landing → sign-up " & FORMAT ( [Landing Signup Rate], "0.0%" )
+"Store → install " & FORMAT ( [Store CVR], "0.0%" ) & "   |   install → sign-up " & FORMAT ( [Install Signup Rate], "0.0%" )
+    & "   |   web landing → sign-up " & FORMAT ( [Landing Signup Rate], "0.0%" )
 ```
 
 ### `C3 Caption`
@@ -4973,7 +5092,7 @@ VAR _by_channel   =
 VAR _top          = TOPN ( 1, _by_channel, [@gap], DESC, dim_channel[channel_name], ASC )
 RETURN
     "Average over-claim " & FORMAT ( CALCULATE ( [Attribution Gap], REMOVEFILTERS ( dim_channel ) ), "+0%;-0%" )
-        & "   ·   highest: " & LOWER ( MAXX ( _top, dim_channel[channel_name] ) ) & " " & FORMAT ( MAXX ( _top, [@gap] ), "+0%;-0%" )
+        & "   |   highest: " & LOWER ( MAXX ( _top, dim_channel[channel_name] ) ) & " " & FORMAT ( MAXX ( _top, [@gap] ), "+0%;-0%" )
 ```
 
 ### `Pacing Colour`
@@ -4996,7 +5115,7 @@ RETURN
 
 ```dax
 C4 Label =
-FORMAT ( [Pacing], "0%" ) & "  ·  " & "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k" & " of " & "$" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k"
+FORMAT ( [Pacing], "0%" ) & "  |  " & "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k" & " of " & "$" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k"
 ```
 
 ### `C4 Pacing Bar`
@@ -5038,7 +5157,7 @@ RETURN
 
 ```dax
 C4 Caption =
-"Plan " & "$" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k" & "   ·   spend " & "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k" & " (" & FORMAT ( [Pacing], "0%" ) & " of plan)"
+"Plan " & "$" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k" & "   |   spend " & "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k" & " (" & FORMAT ( [Pacing], "0%" ) & " of plan)"
 ```
 
 ### `Spend Share`
@@ -5111,7 +5230,7 @@ VAR _step         = [Story Step Date]
 VAR _delta        = DIVIDE ( [Spend] - [Plan], [Plan] )
 RETURN
     "Spend " & "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k" & " vs plan " & "$" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k" & " (" & IF ( _delta < 0, "−", "+" ) & FORMAT ( ABS ( _delta ), "0.0%" ) & ")"
-        & IF ( NOT ISBLANK ( _step ), "   ·   CAC stepped up on " & FORMAT ( _step, "mmm d" ) & " (" & FORMAT ( [Story CAC Step], "+0%;-0%" ) & ")" )
+        & IF ( NOT ISBLANK ( _step ), "   |   CAC stepped up on " & FORMAT ( _step, "mmm d" ) & " (" & FORMAT ( [Story CAC Step], "+0%;-0%" ) & ")" )
 ```
 
 ### `O5 Caption`
@@ -5121,28 +5240,28 @@ O5 Caption =
 VAR _n            = [Alerts Tripped]
 VAR _crit         = SUMX ( FILTER ( dim_alert_slot, dim_alert_slot[severity] = "CRIT" ), [Alert Tripped] )
 RETURN
-    _n & IF ( _n = 1, " alert", " alerts" ) & " in the window   ·   " & _crit & " critical"
+    _n & IF ( _n = 1, " alert", " alerts" ) & " in the window   |   " & _crit & " critical"
 ```
 
 ### `O6 Caption`
 
 ```dax
 O6 Caption =
-"Δ ROAS 90 d vs " & IF ( [_Cmp] = "LY", "the same period last year", "the previous period" ) & "   ·   three best, three worst"
+"Δ ROAS 90 d vs " & IF ( [_Cmp] = "LY", "the same period last year", "the previous period" ) & "   |   three best, three worst"
 ```
 
 ### `O2 Caption`
 
 ```dax
 O2 Caption =
-"Markers = targets (param_target)   ·   model " & LOWER ( [_Model Name] )
+"Markers = targets (param_target)   |   model " & LOWER ( [_Model Name] )
 ```
 
 ### `C1 Caption`
 
 ```dax
 C1 Caption =
-"Click a row to scope the cards below and the Campaigns view   ·   flags from each channel's targets"
+"Click a row to scope the cards below and the Campaigns view   |   flags from each channel's targets"
 ```
 
 ### `P1 Row Visible`
@@ -5228,14 +5347,14 @@ IF ( [P1 Row Visible] = 1, [Flags Text] )
 P1 Caption =
 VAR _n            = COUNTROWS ( FILTER ( VALUES ( dim_campaign[campaign_key] ), [P1 Row Visible] = 1 && [Spend] > 0 ) )
 RETURN
-    _n & " campaigns with spend   ·   sorted by spend   ·   flags from each campaign's own targets"
+    _n & " campaigns with spend   |   sorted by spend   |   flags from each campaign's own targets"
 ```
 
 ### `P2 Title`
 
 ```dax
 P2 Title =
-"Selected · " & [Selected Campaign Name]
+"Selected | " & [Selected Campaign Name]
 ```
 
 ### `P2 Caption`
@@ -5259,14 +5378,14 @@ VAR _status       = MAXX ( _row, [@status] )
 VAR _learn        = MAXX ( _row, [@learn] )
 RETURN
     IF ( NOT ISBLANK ( _cpa ), "CPA $" & FORMAT ( _cpa, "#,0" ) & IF ( NOT ISBLANK ( _target ), " (target $" & FORMAT ( _target, "#,0" ) & ")" ), "No paid conversions" )
-        & "   ·   " & IF ( _status = "LEARNING", "Learning phase ends ", "Learning phase ended " ) & FORMAT ( _learn, "mmm d" )
+        & "   |   " & IF ( _status = "LEARNING", "Learning phase ends ", "Learning phase ended " ) & FORMAT ( _learn, "mmm d" )
 ```
 
 ### `P3 Caption`
 
 ```dax
 P3 Caption =
-"Dashed line: campaign CPA target $" & FORMAT ( [P3 CPA Target], "#,0" ) & "   ·   DDA credits"
+"Dashed line: campaign CPA target $" & FORMAT ( [P3 CPA Target], "#,0" ) & "   |   DDA credits"
 ```
 
 ### `P4 Caption`
@@ -5274,7 +5393,7 @@ P3 Caption =
 ```dax
 P4 Caption =
 "Fatigued when the CTR 7-day slope is below " & FORMAT ( [_T FATIGUE_SLOPE], "0%" ) & " and frequency above " & FORMAT ( [_T FATIGUE_FREQ], "0" )
-    & "   ·   Watch: slope below 0 at frequency above " & FORMAT ( [_T WATCH_FREQ], "0.0" )
+    & "   |   Watch: slope below 0 at frequency above " & FORMAT ( [_T WATCH_FREQ], "0.0" )
 ```
 
 ### `P5 Caption`
@@ -5313,42 +5432,42 @@ INT ( ISFILTERED ( dim_platform[platform_name] ) )
 
 ```dax
 Chips Line =
-VAR _platform     = IF ( ISFILTERED ( dim_platform[platform_name] ), "Platform: " & CONCATENATEX ( VALUES ( dim_platform ), dim_platform[platform_name], " + ", dim_platform[sort_order], ASC ) & "   -   " )
+VAR _platform     = IF ( ISFILTERED ( dim_platform[platform_name] ), "Platform: " & CONCATENATEX ( VALUES ( dim_platform ), dim_platform[platform_name], " + ", dim_platform[sort_order], ASC ) & " | " )
 VAR _market       = IF (
         ISFILTERED ( dim_campaign[market_name] )
-        ,"Market: " & CONCATENATEX ( VALUES ( dim_campaign[market_name] ), dim_campaign[market_name], " + ", dim_campaign[market_name], ASC ) & "   -   "
+        ,"Market: " & CONCATENATEX ( VALUES ( dim_campaign[market_name] ), dim_campaign[market_name], " + ", dim_campaign[market_name], ASC ) & " | "
     )
 VAR _tier         = IF (
         ISFILTERED ( dim_campaign[tier_name] )
-        ,"Tier: " & CONCATENATEX ( VALUES ( dim_campaign[tier_name] ), dim_campaign[tier_name], " + ", dim_campaign[tier_name], ASC ) & "   -   "
+        ,"Tier: " & CONCATENATEX ( VALUES ( dim_campaign[tier_name] ), dim_campaign[tier_name], " + ", dim_campaign[tier_name], ASC ) & " | "
     )
 VAR _channel      = IF (
         ISFILTERED ( dim_campaign[channel_name] )
-        ,"Channel: " & CONCATENATEX ( VALUES ( dim_campaign[channel_name] ), dim_campaign[channel_name], " + ", dim_campaign[channel_name], ASC ) & "   -   "
+        ,"Channel: " & CONCATENATEX ( VALUES ( dim_campaign[channel_name] ), dim_campaign[channel_name], " + ", dim_campaign[channel_name], ASC ) & " | "
     )
 VAR _network      = IF (
         ISFILTERED ( dim_campaign[network_name] )
-        ,"Network: " & CONCATENATEX ( VALUES ( dim_campaign[network_name] ), dim_campaign[network_name], " + ", dim_campaign[network_name], ASC ) & "   -   "
+        ,"Network: " & CONCATENATEX ( VALUES ( dim_campaign[network_name] ), dim_campaign[network_name], " + ", dim_campaign[network_name], ASC ) & " | "
     )
-VAR _campaigns    = IF ( ISFILTERED ( dim_campaign[campaign_name] ), "Campaign: " & IF ( COUNTROWS ( VALUES ( dim_campaign[campaign_name] ) ) = 1, VALUES ( dim_campaign[campaign_name] ), COUNTROWS ( VALUES ( dim_campaign[campaign_name] ) ) & " picked" ) & "   -   " )
+VAR _campaigns    = IF ( ISFILTERED ( dim_campaign[campaign_name] ), "Campaign: " & IF ( COUNTROWS ( VALUES ( dim_campaign[campaign_name] ) ) = 1, VALUES ( dim_campaign[campaign_name] ), COUNTROWS ( VALUES ( dim_campaign[campaign_name] ) ) & " picked" ) & " | " )
 VAR _status       = IF (
         ISFILTERED ( dim_campaign[status_name] )
-        ,"Status: " & CONCATENATEX ( VALUES ( dim_campaign[status_name] ), dim_campaign[status_name], " + ", dim_campaign[status_name], ASC ) & "   -   "
+        ,"Status: " & CONCATENATEX ( VALUES ( dim_campaign[status_name] ), dim_campaign[status_name], " + ", dim_campaign[status_name], ASC ) & " | "
     )
-VAR _model        = IF ( [_Model] <> "DDA", "Attribution: " & [_Model Name] & "   -   " )
+VAR _model        = IF ( [_Model] <> "DDA", "Attribution: " & [_Model Name] & " | " )
 VAR _selected     =
     SWITCH (
         TRUE ()
         ,ISFILTERED ( dim_campaign[campaign_label] )
-            ,"Selected: " & CONCATENATEX ( VALUES ( dim_campaign[campaign_label] ), dim_campaign[campaign_label], " + " ) & "   -   "
+            ,"Selected: " & CONCATENATEX ( VALUES ( dim_campaign[campaign_label] ), dim_campaign[campaign_label], " + " ) & " | "
         ,ISFILTERED ( dim_channel[channel_name] )
             ,"Selected: " & CONCATENATEX ( VALUES ( dim_channel[channel_name] ), dim_channel[channel_name], " + " )
-                & IF ( ISFILTERED ( dim_platform[platform_label] ), " · " & CONCATENATEX ( VALUES ( dim_platform[platform_label] ), dim_platform[platform_label], " + " ) )
-                & "   -   "
+                & IF ( ISFILTERED ( dim_platform[platform_label] ), " | " & CONCATENATEX ( VALUES ( dim_platform[platform_label] ), dim_platform[platform_label], " + " ) )
+                & " | "
     )
 VAR _line         = _platform & _market & _tier & _channel & _network & _campaigns & _status & _model & _selected
 RETURN
-    IF ( LEN ( _line ) > 0, LEFT ( _line, LEN ( _line ) - 7 ), " " )
+    IF ( LEN ( _line ) > 0, LEFT ( _line, LEN ( _line ) - 3 ), " " )
 ```
 
 ### `Period Pill Text`
@@ -5371,7 +5490,7 @@ VAR _basis        =
         ,"no comparison"
     )
 RETURN
-    FORMAT ( _start, "mmm d" ) & " – " & FORMAT ( _end, "mmm d" ) & IF ( YEAR ( _end ) <> YEAR ( [_As Of] ), " " & YEAR ( _end ) ) & "  ·  " & _basis
+    FORMAT ( _start, "mmm d" ) & " – " & FORMAT ( _end, "mmm d" ) & IF ( YEAR ( _end ) <> YEAR ( [_As Of] ), " " & YEAR ( _end ) ) & "  |  " & _basis
 ```
 
 ### `Synced Text`
@@ -5400,11 +5519,11 @@ VAR _sources      =
         ALL ( sync_log )
         ,SWITCH ( sync_log[source_code], "AD_PLATFORMS", "Ad platforms", "WEB_ANALYTICS", "Web analytics", "PRODUCT_EVENTS", "Product events", "ATTRIBUTION", "Attribution", sync_log[source_name] )
             & " " & FORMAT ( sync_log[last_sync_ts], "hh:nn" )
-        ," · "
+        ," | "
         ,sync_log[last_sync_ts], DESC
     )
 RETURN
-    "Attribution: " & _model & ", 30-day click / 1-day view   ·   Currency: USD   ·   " & _sources & "   ·   Figures are illustrative"
+    "Attribution: " & _model & ", 30-day click / 1-day view   |   Currency: USD   |   " & _sources & "   |   Figures are illustrative"
 ```
 
 ### `Filters Button Text`
@@ -5420,7 +5539,7 @@ RETURN
 
 ```dax
 Applied State =
-VAR _period       = [Period Pill Text]
+VAR _period       = SUBSTITUTE ( [Period Pill Text], "|", "¦" )
 VAR _platform     = IF ( ISFILTERED ( dim_platform[platform_name] ), CONCATENATEX ( VALUES ( dim_platform ), dim_platform[platform_name], " + ", dim_platform[sort_order], ASC ), "all platforms" )
 VAR _channel      = IF ( ISFILTERED ( dim_campaign[channel_name] ) || ISFILTERED ( dim_campaign[network_name] ), CONCATENATEX ( VALUES ( dim_campaign[channel_name] ), dim_campaign[channel_name], " + ", dim_campaign[channel_name], ASC ), "all channels" )
 VAR _market       = IF ( ISFILTERED ( dim_campaign[market_name] ), CONCATENATEX ( VALUES ( dim_campaign[market_name] ), dim_campaign[market_name], " + " ), "all markets" )
@@ -5435,15 +5554,15 @@ VAR _n_campaigns  = COUNTROWS ( _active )
 VAR _n_channels   = COUNTROWS ( SUMMARIZE ( FILTER ( dim_campaign, dim_campaign[campaign_key] IN _active ), dim_campaign[channel_code] ) )
 VAR _n_platforms  = COUNTROWS ( SUMMARIZE ( FILTER ( dim_campaign, dim_campaign[campaign_key] IN _active ), dim_campaign[platform_code] ) )
 RETURN
-    _period & "|" & _platform & "|" & _market & " · " & _tier & "|" & _channel & "|" & _status & "|" & _model & "|"
-        & _n_campaigns + 0 & " campaigns · " & _n_channels + 0 & " channels|" & _n_platforms + 0 & " platforms"
+    _period & "|" & _platform & "|" & _market & " ¦ " & _tier & "|" & _channel & "|" & _status & "|" & _model & "|"
+        & _n_campaigns + 0 & " campaigns ¦ " & _n_channels + 0 & " channels|" & _n_platforms + 0 & " platforms"
 ```
 
 ### `Info Glyph`
 
 ```dax
 Info Glyph =
-"ⓘ"
+"i"
 ```
 
 ### `Card Info Title`
@@ -5473,7 +5592,909 @@ SELECTEDVALUE ( dim_card[card_formula] )
 Card Info Note =
 VAR _model        = [_Model Name]
 RETURN
-    SELECTEDVALUE ( dim_card[card_note] ) & "   Window " & [Period Pill Text] & " · model " & _model & "."
+    SELECTEDVALUE ( dim_card[card_note] ) & "   Window " & [Period Pill Text] & " | model " & _model & "."
+```
+
+### `_O5 Rank Mode`
+
+```dax
+_O5 Rank Mode =
+SELECTEDVALUE ( param_o5_rank[rank_code], "WORST" )
+```
+
+### `_O6 Rank Mode`
+
+```dax
+_O6 Rank Mode =
+SELECTEDVALUE ( param_o6_rank[rank_code], "WORST" )
+```
+
+### `Paid Customers Basis`
+
+```dax
+Paid Customers Basis =
+SWITCH (
+    [_Cmp]
+    ,"LY"
+        ,[Paid Customers LY]
+    ,[Paid Customers Prev]
+)
+```
+
+### `Anomaly Delta`
+
+```dax
+Anomaly Delta =
+VAR _start        = [_Mv Start]
+VAR _end          = [_Win End]
+VAR _days         = INT ( _end - _start ) + 1
+VAR _is_ly        = [_Cmp] = "LY"
+VAR _b_start      = IF ( _is_ly, EDATE ( _start, -12 ), _start - _days )
+VAR _b_end        = IF ( _is_ly, EDATE ( _end, -12 ), _start - 1 )
+VAR _spend        =
+    CALCULATE (
+        [_b Spend]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+VAR _spend_basis  =
+    CALCULATE (
+        [_b Spend]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _b_start
+                && dim_date[date] <= _b_end
+        )
+    )
+VAR _paid         =
+    CALCULATE (
+        [_b Paid]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+VAR _paid_basis   =
+    CALCULATE (
+        [_b Paid]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _b_start
+                && dim_date[date] <= _b_end
+        )
+    )
+RETURN
+    IF (
+        HASONEVALUE ( dim_campaign[campaign_key] )
+            && _spend > 0
+            && _spend_basis > 0
+        ,_paid - _paid_basis
+    )
+```
+
+### `O5 Rank`
+
+```dax
+O5 Rank =
+VAR _mode         = [_O5 Rank Mode]
+VAR _me           = SELECTEDVALUE ( dim_campaign[campaign_key] )
+VAR _deltas       =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS (
+                VALUES ( dim_campaign[campaign_key] )
+                ,"@d", [Anomaly Delta]
+            )
+            ,IF ( _mode = "TOP", [@d] > 0, [@d] < 0 )
+        )
+        ,REMOVEFILTERS ( dim_campaign[campaign_key] )
+        ,REMOVEFILTERS ( dim_campaign[campaign_label] )
+        ,REMOVEFILTERS ( dim_campaign[sort_order] )
+    )
+VAR _mine         = MAXX ( FILTER ( _deltas, dim_campaign[campaign_key] = _me ), [@d] )
+VAR _ahead        =
+    COUNTROWS (
+        FILTER (
+            _deltas
+            ,IF ( _mode = "TOP", [@d] > _mine, [@d] < _mine )
+        )
+    ) + 0
+RETURN
+    IF ( NOT ISBLANK ( _mine ) && _ahead < 5, _ahead + 1 )
+```
+
+### `O5 Visible`
+
+```dax
+O5 Visible =
+IF ( NOT ISBLANK ( [O5 Rank] ), 1, 0 )
+```
+
+### `O5 Channel`
+
+```dax
+O5 Channel =
+IF ( [O5 Visible] = 1, SELECTEDVALUE ( dim_campaign[channel_name] ) )
+```
+
+### `O5 Paid Now`
+
+```dax
+O5 Paid Now =
+VAR _start        = [_Mv Start]
+VAR _end          = [_Win End]
+RETURN
+    IF (
+        [O5 Visible] = 1
+        ,CALCULATE (
+            [_b Paid] + 0
+            ,REMOVEFILTERS ( dim_date )
+            ,FILTER (
+                ALL ( dim_date[date] )
+                ,dim_date[date] >= _start
+                    && dim_date[date] <= _end
+            )
+        )
+    )
+```
+
+### `O5 Paid Before`
+
+```dax
+O5 Paid Before =
+VAR _start        = [_Mv Start]
+VAR _end          = [_Win End]
+VAR _days         = INT ( _end - _start ) + 1
+VAR _is_ly        = [_Cmp] = "LY"
+VAR _b_start      = IF ( _is_ly, EDATE ( _start, -12 ), _start - _days )
+VAR _b_end        = IF ( _is_ly, EDATE ( _end, -12 ), _start - 1 )
+RETURN
+    IF (
+        [O5 Visible] = 1
+        ,CALCULATE (
+            [_b Paid] + 0
+            ,REMOVEFILTERS ( dim_date )
+            ,FILTER (
+                ALL ( dim_date[date] )
+                ,dim_date[date] >= _b_start
+                    && dim_date[date] <= _b_end
+            )
+        )
+    )
+```
+
+### `O5 Delta`
+
+```dax
+O5 Delta =
+IF ( [O5 Visible] = 1, [Anomaly Delta] )
+```
+
+### `O5 Colour`
+
+```dax
+O5 Colour =
+VAR _d = [O5 Delta] RETURN IF ( NOT ISBLANK ( _d ), IF ( _d >= 0, "#1E9E6A", "#D93B4B" ) )
+```
+
+### `O5 Alert`
+
+```dax
+O5 Alert =
+VAR _start        = [_Mv Start]
+VAR _end          = [_Win End]
+VAR _key          = SELECTEDVALUE ( dim_campaign[campaign_key] )
+RETURN
+    IF (
+        [O5 Visible] = 1
+        ,CALCULATE (
+            VAR _slots        =
+                FILTER (
+                    ADDCOLUMNS (
+                        FILTER (
+                            ALL ( dim_alert_slot )
+                            ,dim_alert_slot[entity_type] = "CAMPAIGN"
+                                && dim_alert_slot[entity_code] = _key
+                        )
+                        ,"@t", [Alert Tripped]
+                    )
+                    ,[@t] = 1
+                )
+            VAR _top          = TOPN ( 1, _slots, dim_alert_slot[severity_rank], ASC, dim_alert_slot[rule_order], ASC )
+            RETURN
+                MAXX ( _top, dim_alert_slot[title] )
+            ,REMOVEFILTERS ( param_period_preset )
+            ,TREATAS ( { "CUSTOM" }, param_period_preset[preset_code] )
+            ,REMOVEFILTERS ( param_date )
+            ,param_date[date] >= _start
+            ,param_date[date] <= _end
+        )
+    )
+```
+
+### `O6 Rank`
+
+```dax
+O6 Rank =
+VAR _mode         = [_O6 Rank Mode]
+VAR _me           = SELECTEDVALUE ( dim_campaign[campaign_key] )
+VAR _deltas       =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS (
+                VALUES ( dim_campaign[campaign_key] )
+                ,"@d", [ROAS Delta]
+            )
+            ,IF ( _mode = "TOP", [@d] > 0, [@d] < 0 )
+        )
+        ,REMOVEFILTERS ( dim_campaign[campaign_key] )
+        ,REMOVEFILTERS ( dim_campaign[campaign_label] )
+        ,REMOVEFILTERS ( dim_campaign[sort_order] )
+    )
+VAR _mine         = MAXX ( FILTER ( _deltas, dim_campaign[campaign_key] = _me ), [@d] )
+VAR _ahead        =
+    COUNTROWS (
+        FILTER (
+            _deltas
+            ,IF ( _mode = "TOP", [@d] > _mine, [@d] < _mine )
+        )
+    ) + 0
+RETURN
+    IF ( NOT ISBLANK ( _mine ) && _ahead < 5, _ahead + 1 )
+```
+
+### `O6 Visible`
+
+```dax
+O6 Visible =
+IF ( NOT ISBLANK ( [O6 Rank] ), 1, 0 )
+```
+
+### `O6 Bar`
+
+```dax
+O6 Bar =
+IF ( [O6 Visible] = 1, ABS ( [ROAS Delta] ) )
+```
+
+Format string expression:
+
+```dax
+IF ( [_O6 Rank Mode] = "TOP", """+""0.00", """−""0.00" )
+```
+
+### `O6 Colour`
+
+```dax
+O6 Colour =
+IF ( [O6 Visible] = 1, IF ( [_O6 Rank Mode] = "TOP", "#1E9E6A", "#D93B4B" ) )
+```
+
+### `_x Churned`
+
+```dax
+_x Churned =
+VAR _last         = [_x Last Complete Month]
+RETURN
+    CALCULATE (
+        SUM ( fact_cohort_revenue_month[churned] )
+        ,fact_cohort_revenue_month[month_offset] >= 1
+        ,fact_cohort_revenue_month[calendar_month_index] >= _last - 2
+        ,fact_cohort_revenue_month[calendar_month_index] <= _last
+    )
+```
+
+### `_x Refunds`
+
+```dax
+_x Refunds =
+VAR _month        = [_x Month Index End]
+RETURN
+    CALCULATE (
+        SUM ( fact_cohort_revenue_month[refund_count] )
+        ,fact_cohort_revenue_month[cohort_month_index] >= _month - 11
+        ,fact_cohort_revenue_month[cohort_month_index] <= _month
+    )
+```
+
+### `Churned Customers`
+
+```dax
+Churned Customers =
+VAR _start        = [_Win Start]
+VAR _end          = [_Win End]
+RETURN
+    CALCULATE (
+        [_x Churned]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+```
+
+### `Refunds`
+
+```dax
+Refunds =
+VAR _start        = [_Win Start]
+VAR _end          = [_Win End]
+RETURN
+    CALCULATE (
+        [_x Refunds]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+```
+
+### `P6 Rank`
+
+```dax
+P6 Rank =
+VAR _me           = SELECTEDVALUE ( dim_channel[channel_code] )
+VAR _by           =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS (
+                VALUES ( dim_channel[channel_code] )
+                ,"@v", [Churned Customers]
+            )
+            ,[@v] > 0
+        )
+        ,REMOVEFILTERS ( dim_channel[channel_code] )
+        ,REMOVEFILTERS ( dim_channel[channel_name] )
+        ,REMOVEFILTERS ( dim_channel[sort_order] )
+    )
+VAR _mine         = MAXX ( FILTER ( _by, dim_channel[channel_code] = _me ), [@v] )
+VAR _ahead        = COUNTROWS ( FILTER ( _by, [@v] > _mine ) ) + 0
+RETURN
+    IF ( NOT ISBLANK ( _mine ) && _ahead < 5, _ahead + 1 )
+```
+
+### `P6 Visible`
+
+```dax
+P6 Visible =
+IF ( NOT ISBLANK ( [P6 Rank] ), 1, 0 )
+```
+
+### `P6 Churned`
+
+```dax
+P6 Churned =
+IF ( [P6 Visible] = 1, [Churned Customers] )
+```
+
+### `P7 Rank`
+
+```dax
+P7 Rank =
+VAR _me           = SELECTEDVALUE ( dim_channel[channel_code] )
+VAR _by           =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS (
+                VALUES ( dim_channel[channel_code] )
+                ,"@v", [Refunds]
+            )
+            ,[@v] > 0
+        )
+        ,REMOVEFILTERS ( dim_channel[channel_code] )
+        ,REMOVEFILTERS ( dim_channel[channel_name] )
+        ,REMOVEFILTERS ( dim_channel[sort_order] )
+    )
+VAR _mine         = MAXX ( FILTER ( _by, dim_channel[channel_code] = _me ), [@v] )
+VAR _ahead        = COUNTROWS ( FILTER ( _by, [@v] > _mine ) ) + 0
+RETURN
+    IF ( NOT ISBLANK ( _mine ) && _ahead < 5, _ahead + 1 )
+```
+
+### `P7 Visible`
+
+```dax
+P7 Visible =
+IF ( NOT ISBLANK ( [P7 Rank] ), 1, 0 )
+```
+
+### `P7 Refunds`
+
+```dax
+P7 Refunds =
+IF ( [P7 Visible] = 1, [Refunds] )
+```
+
+### `_K1 Heat Month`
+
+```dax
+_K1 Heat Month =
+VAR _end          = [_Cohort End Index]
+VAR _m            = SELECTEDVALUE ( dim_month[month_index] )
+RETURN
+    NOT ISBLANK ( _m ) && _m < _end && _m >= _end - 12
+```
+
+### `K1 Heat`
+
+```dax
+K1 Heat =
+VAR _k            = SELECTEDVALUE ( dim_offset[month_offset] )
+RETURN
+    IF ( [_K1 Heat Month] && _k <= 11, [Cohort Payback At] )
+```
+
+### `K1 Heat Colour`
+
+```dax
+K1 Heat Colour =
+VAR _v            = [K1 Heat]
+VAR _t            = MIN ( MAX ( _v, 0 ), 1 ) * 0.80 + 0.06
+VAR _digits       = "0123456789ABCDEF"
+VAR _r            = ROUND ( 255 - ( 255 - 74 ) * _t, 0 )
+VAR _g            = ROUND ( 255 - ( 255 - 87 ) * _t, 0 )
+VAR _b            = ROUND ( 255 - ( 255 - 232 ) * _t, 0 )
+VAR _hex          =
+    "#"
+        & MID ( _digits, INT ( _r / 16 ) + 1, 1 ) & MID ( _digits, MOD ( _r, 16 ) + 1, 1 )
+        & MID ( _digits, INT ( _g / 16 ) + 1, 1 ) & MID ( _digits, MOD ( _g, 16 ) + 1, 1 )
+        & MID ( _digits, INT ( _b / 16 ) + 1, 1 ) & MID ( _digits, MOD ( _b, 16 ) + 1, 1 )
+RETURN
+    SWITCH (
+        TRUE ()
+        ,ISBLANK ( _v )
+            ,"#FFFFFF"
+        ,_v >= 1
+            ,"#1E9E6A"
+        ,_hex
+    )
+```
+
+### `K1 Heat Ink`
+
+```dax
+K1 Heat Ink =
+IF ( [K1 Heat] >= 0.55, "#FFFFFF", "#111827" )
+```
+
+### `Signups LY`
+
+```dax
+Signups LY =
+VAR _start        = EDATE ( [_Win Start], -12 )
+VAR _end          = EDATE ( [_Win End], -12 )
+RETURN
+    CALCULATE (
+        [_b Signups]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+```
+
+### `Signup to Paid`
+
+```dax
+Signup to Paid =
+DIVIDE ( [Paid Customers], [Signups] )
+```
+
+### `Signup to Paid LY`
+
+```dax
+Signup to Paid LY =
+DIVIDE ( [Paid Customers LY], [Signups LY] )
+```
+
+### `Act Median Hours LY`
+
+```dax
+Act Median Hours LY =
+VAR _start        = EDATE ( [_Win Start], -12 )
+VAR _end          = EDATE ( [_Win End], -12 )
+RETURN
+    CALCULATE (
+        [_x Act Median Hours]
+        ,REMOVEFILTERS ( dim_date )
+        ,FILTER (
+            ALL ( dim_date[date] )
+            ,dim_date[date] >= _start
+                && dim_date[date] <= _end
+        )
+    )
+```
+
+### `Time to Activation Days`
+
+```dax
+Time to Activation Days =
+DIVIDE ( [Act Median Hours], 24 )
+```
+
+### `Time to Activation Days LY`
+
+```dax
+Time to Activation Days LY =
+DIVIDE ( [Act Median Hours LY], 24 )
+```
+
+### `Payback Target`
+
+```dax
+Payback Target =
+[_T PAYBACK_MONTHS]
+```
+
+### `Paid Customers CAC Bar`
+
+```dax
+Paid Customers CAC Bar =
+[Paid Customers]
+```
+
+Format string expression:
+
+```dax
+VAR _cac          = [Paid CAC]
+RETURN
+    IF ( ISBLANK ( _cac ), "#,0", "#,0""  |  $" & FORMAT ( _cac, "#,0" ) & """" )
+```
+
+### `Dyn Spend`
+
+```dax
+Dyn Spend =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_b Spend]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Spend LY`
+
+```dax
+Dyn Spend LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_b Spend]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Spend Last`
+
+```dax
+Dyn Spend Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            [_b Spend]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn New Clients`
+
+```dax
+Dyn New Clients =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_b Signups]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn New Clients LY`
+
+```dax
+Dyn New Clients LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_b Signups]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn New Clients Last`
+
+```dax
+Dyn New Clients Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            [_b Signups]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Conversion`
+
+```dax
+Dyn Conversion =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            DIVIDE ( [_b Paid], [_b Signups] )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Conversion LY`
+
+```dax
+Dyn Conversion LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            DIVIDE ( [_b Paid], [_b Signups] )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Conversion Last`
+
+```dax
+Dyn Conversion Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            DIVIDE ( [_b Paid], [_b Signups] )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Time to Activation`
+
+```dax
+Dyn Time to Activation =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            DIVIDE ( [_x Act Median Hours], 24 )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Time to Activation LY`
+
+```dax
+Dyn Time to Activation LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            DIVIDE ( [_x Act Median Hours], 24 )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn Time to Activation Last`
+
+```dax
+Dyn Time to Activation Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            DIVIDE ( [_x Act Median Hours], 24 )
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn CAC`
+
+```dax
+Dyn CAC =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_x CPA]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn CAC LY`
+
+```dax
+Dyn CAC LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_x CPA]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn CAC Last`
+
+```dax
+Dyn CAC Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            [_x CPA]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn ROAS`
+
+```dax
+Dyn ROAS =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_x ROAS 90d]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn ROAS LY`
+
+```dax
+Dyn ROAS LY =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on
+        ,CALCULATE (
+            [_x ROAS 90d]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { EDATE ( _day, -12 ) }, dim_date[date] )
+        )
+    )
+```
+
+### `Dyn ROAS Last`
+
+```dax
+Dyn ROAS Last =
+VAR _end          = [_Win End]
+VAR _start        = IF ( [_Win Days] > 90, _end - 29, [_Win Start] )
+VAR _day          = MAX ( dim_date[date] )
+VAR _on           = HASONEVALUE ( dim_date[date] ) && _day >= _start && _day <= _end
+RETURN
+    IF (
+        _on && _day = _end
+        ,CALCULATE (
+            [_x ROAS 90d]
+            ,REMOVEFILTERS ( dim_date )
+            ,TREATAS ( { _day }, dim_date[date] )
+        )
+    )
 ```
 
 ### `_b Traffic Signups`
@@ -5864,8 +6885,8 @@ VAR _as_p         = CALCULATE ( [Page CVR Prev], dim_landing_page[page_key] = "L
 VAR _gp           = CALCULATE ( [Page CVR], dim_landing_page[page_key] = "LP_PLAY_STORE" )
 VAR _gp_p         = CALCULATE ( [Page CVR Prev], dim_landing_page[page_key] = "LP_PLAY_STORE" )
 RETURN
-    "App Store CVR " & FORMAT ( _as, "0%" ) & " (prev " & FORMAT ( _as_p, "0%" ) & ")   ·   Google Play " & FORMAT ( _gp, "0%" )
-        & " (prev " & FORMAT ( _gp_p, "0%" ) & ")   ·   web landing → sign-up " & FORMAT ( [Landing Signup Rate], "0.0%" )
+    "App Store CVR " & FORMAT ( _as, "0%" ) & " (prev " & FORMAT ( _as_p, "0%" ) & ")   |   Google Play " & FORMAT ( _gp, "0%" )
+        & " (prev " & FORMAT ( _gp_p, "0%" ) & ")   |   web landing → sign-up " & FORMAT ( [Landing Signup Rate], "0.0%" )
 ```
 
 ### `J2 Largest Drop Step`
@@ -5911,7 +6932,7 @@ VAR _drops        =
 VAR _top          = TOPN ( 1, FILTER ( _drops, NOT ISBLANK ( [@prev] ) ), [@prev] - [@share], DESC, dim_onboarding_step[sort_order], ASC )
 VAR _drop         = MAXX ( _top, [@share] - [@prev] )
 RETURN
-    "Largest drop: " & MAXX ( _top, dim_onboarding_step[step_name] ) & " (−" & FORMAT ( ABS ( _drop ) * 100, "0" ) & " pt)   ·   "
+    "Largest drop: " & MAXX ( _top, dim_onboarding_step[step_name] ) & " (−" & FORMAT ( ABS ( _drop ) * 100, "0" ) & " pt)   |   "
         & FORMAT ( [Signups], "#,0" ) & " paid sign-ups"
 ```
 
@@ -5935,7 +6956,7 @@ IF ( SELECTEDVALUE ( dim_act_bin[bin_code] ) = [J3 Median Bin], "#4A57E8", "#B7B
 
 ```dax
 J3 Caption =
-"Median " & FORMAT ( [Act Median Hours], "0" ) & " h   ·   7-day activation " & FORMAT ( [Activation Rate], "0%" ) & "   ·   recent sign-ups have not had 30 days"
+"Median " & FORMAT ( [Act Median Hours], "0" ) & " h   |   7-day activation " & FORMAT ( [Activation Rate], "0%" ) & "   |   recent sign-ups have not had 30 days"
 ```
 
 ### `J4 Target`
@@ -5965,7 +6986,7 @@ VAR _low          = TOPN ( 1, _seg, [@r], ASC, dim_platform_segment[sort_order],
 VAR _high         = TOPN ( 1, _seg, [@r], DESC, dim_platform_segment[sort_order], ASC )
 RETURN
     MAXX ( _low, dim_platform_segment[segment_name] ) & " " & FORMAT ( MAXX ( _low, [@r] ), "0%" ) & " vs "
-        & MAXX ( _high, dim_platform_segment[segment_name] ) & " " & FORMAT ( MAXX ( _high, [@r] ), "0%" ) & "   ·   dashed line: 40 % target"
+        & MAXX ( _high, dim_platform_segment[segment_name] ) & " " & FORMAT ( MAXX ( _high, [@r] ), "0%" ) & "   |   dashed line: 40 % target"
 ```
 
 ### `_Cohort End Index`
@@ -6117,7 +7138,7 @@ VAR _shown        =
     )
 VAR _latest       = TOPN ( 1, _shown, dim_month[month_index], DESC )
 RETURN
-    "Line crosses 100 % = paid back   ·   "
+    "Line crosses 100 % = paid back   |   "
         & IF (
             ISEMPTY ( _shown )
             ,"no shown cohort has paid back yet"
@@ -6174,7 +7195,7 @@ IF ( [_K12 Month], [Cohort Payback Month] )
 
 ```dax
 K5 Caption =
-"12 acquisition months to " & FORMAT ( [_Win End], "mmm yyyy" ) & "   ·   DDA credits (cohorts never switch model)   ·   payback month blank = not paid back yet"
+"12 acquisition months to " & FORMAT ( [_Win End], "mmm yyyy" ) & "   |   DDA credits (cohorts never switch model)   |   payback month blank = not paid back yet"
 ```
 
 ### `_K3 Last Cohort`
@@ -6239,7 +7260,7 @@ K3 Caption =
 VAR _ym           = [Retention Cohort Month]
 RETURN
 "D7 / D30 of " & FORMAT ( DATE ( INT ( _ym / 100 ), MOD ( _ym, 100 ), 1 ), "mmm yyyy" )
-    & ": " & FORMAT ( [D7 Retention], "0%" ) & " / " & FORMAT ( [D30 Retention], "0%" ) & "   ·   blank = not reportable yet   ·   darker = higher"
+    & ": " & FORMAT ( [D7 Retention], "0%" ) & " / " & FORMAT ( [D30 Retention], "0%" ) & "   |   blank = not reportable yet   |   darker = higher"
 ```
 
 ### `K2 Target`
@@ -6261,7 +7282,7 @@ VAR _by           =
 VAR _best         = TOPN ( 1, _by, [@l], DESC, dim_channel[channel_name], ASC )
 VAR _under        = COUNTROWS ( FILTER ( _by, [@l] < [_T LTV_CAC] ) ) + 0
 RETURN
-    "Dashed line: 3:1 floor   ·   best: " & LOWER ( MAXX ( _best, dim_channel[channel_name] ) ) & " " & FORMAT ( MAXX ( _best, [@l] ), "0.0" ) & "×   ·   "
+    "Dashed line: 3:1 floor   |   best: " & LOWER ( MAXX ( _best, dim_channel[channel_name] ) ) & " " & FORMAT ( MAXX ( _best, [@l] ), "0.0" ) & "×   |   "
         & _under & IF ( _under = 1, " channel", " channels" ) & " under the floor"
 ```
 
@@ -6269,7 +7290,7 @@ RETURN
 
 ```dax
 K4 Caption =
-"Refund rate " & FORMAT ( [Refund Rate], "0.0%" ) & " (target < " & FORMAT ( [_T REFUND_RATE], "0%" ) & ")   ·   monthly churn " & FORMAT ( [Churn Monthly], "0.00%" ) & "   ·   all channels in scope"
+"Refund rate " & FORMAT ( [Refund Rate], "0.0%" ) & " (target < " & FORMAT ( [_T REFUND_RATE], "0%" ) & ")   |   monthly churn " & FORMAT ( [Churn Monthly], "0.00%" ) & "   |   all channels in scope"
 ```
 
 ### `O4 Shares SVG`
@@ -6476,6 +7497,231 @@ RETURN
     "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
 ```
 
+### `O7 Spend Customers SVG`
+
+```dax
+O7 Spend Customers SVG =
+VAR _c0           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "PAID_SEARCH" )
+    )
+VAR _s0           = MAXX ( _c0, [@s] )
+VAR _p0           = MAXX ( _c0, [@p] )
+VAR _c1           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "PAID_SOCIAL" )
+    )
+VAR _s1           = MAXX ( _c1, [@s] )
+VAR _p1           = MAXX ( _c1, [@p] )
+VAR _c2           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "APP_INSTALL" )
+    )
+VAR _s2           = MAXX ( _c2, [@s] )
+VAR _p2           = MAXX ( _c2, [@p] )
+VAR _c3           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "DISPLAY_VIDEO" )
+    )
+VAR _s3           = MAXX ( _c3, [@s] )
+VAR _p3           = MAXX ( _c3, [@p] )
+VAR _c4           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "RETARGETING" )
+    )
+VAR _s4           = MAXX ( _c4, [@s] )
+VAR _p4           = MAXX ( _c4, [@p] )
+VAR _c5           =
+    CALCULATETABLE (
+        ROW (
+            "@s", [Spend]
+            ,"@p", [Paid Customers]
+            ,"@c", [Channel Colour]
+        )
+        ,KEEPFILTERS ( dim_channel[channel_code] = "AFFILIATES" )
+    )
+VAR _s5           = MAXX ( _c5, [@s] )
+VAR _p5           = MAXX ( _c5, [@p] )
+VAR _smax         = MAX ( MAX ( MAX ( _s0, _s1 ), MAX ( _s2, _s3 ) ), MAX ( _s4, _s5 ) )
+VAR _pmax         = MAX ( MAX ( MAX ( _p0, _p1 ), MAX ( _p2, _p3 ) ), MAX ( _p4, _p5 ) )
+VAR _svg          =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='440' height='136' viewBox='0 0 440 136'>"
+        & "<text x='96' y='10' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='9.5' letter-spacing='0.5' fill='#8A94A6'>SPEND</text>"
+        & "<text x='280' y='10' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='9.5' letter-spacing='0.5' fill='#8A94A6'>PAID CUSTOMERS</text>"
+        & IF (
+            NOT ISBLANK ( _s0 )
+            ,"<text x='88' y='30.0' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>Paid search</text>"
+            & "<rect x='96' y='22.0' height='10' rx='2' fill='"
+            & MAXX ( _c0, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s0, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s0, _smax ) * 112, "0.0" )
+            & "' y='30.0' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s0 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='22.0' height='10' rx='2' fill='"
+            & MAXX ( _c0, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p0, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p0, _pmax ) * 112, "0.0" )
+            & "' y='30.0' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p0, "#,0" )
+            & "</text>"
+        )
+        & IF (
+            NOT ISBLANK ( _s1 )
+            ,"<text x='88' y='49.7' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>Paid social</text>"
+            & "<rect x='96' y='41.7' height='10' rx='2' fill='"
+            & MAXX ( _c1, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s1, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s1, _smax ) * 112, "0.0" )
+            & "' y='49.7' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s1 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='41.7' height='10' rx='2' fill='"
+            & MAXX ( _c1, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p1, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p1, _pmax ) * 112, "0.0" )
+            & "' y='49.7' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p1, "#,0" )
+            & "</text>"
+        )
+        & IF (
+            NOT ISBLANK ( _s2 )
+            ,"<text x='88' y='69.3' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>App install</text>"
+            & "<rect x='96' y='61.3' height='10' rx='2' fill='"
+            & MAXX ( _c2, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s2, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s2, _smax ) * 112, "0.0" )
+            & "' y='69.3' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s2 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='61.3' height='10' rx='2' fill='"
+            & MAXX ( _c2, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p2, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p2, _pmax ) * 112, "0.0" )
+            & "' y='69.3' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p2, "#,0" )
+            & "</text>"
+        )
+        & IF (
+            NOT ISBLANK ( _s3 )
+            ,"<text x='88' y='89.0' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>Display &amp; video</text>"
+            & "<rect x='96' y='81.0' height='10' rx='2' fill='"
+            & MAXX ( _c3, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s3, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s3, _smax ) * 112, "0.0" )
+            & "' y='89.0' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s3 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='81.0' height='10' rx='2' fill='"
+            & MAXX ( _c3, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p3, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p3, _pmax ) * 112, "0.0" )
+            & "' y='89.0' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p3, "#,0" )
+            & "</text>"
+        )
+        & IF (
+            NOT ISBLANK ( _s4 )
+            ,"<text x='88' y='108.7' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>Retargeting</text>"
+            & "<rect x='96' y='100.7' height='10' rx='2' fill='"
+            & MAXX ( _c4, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s4, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s4, _smax ) * 112, "0.0" )
+            & "' y='108.7' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s4 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='100.7' height='10' rx='2' fill='"
+            & MAXX ( _c4, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p4, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p4, _pmax ) * 112, "0.0" )
+            & "' y='108.7' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p4, "#,0" )
+            & "</text>"
+        )
+        & IF (
+            NOT ISBLANK ( _s5 )
+            ,"<text x='88' y='128.3' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#4B5563'>Affiliates</text>"
+            & "<rect x='96' y='120.3' height='10' rx='2' fill='"
+            & MAXX ( _c5, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _s5, _smax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 102 + DIVIDE ( _s5, _smax ) * 112, "0.0" )
+            & "' y='128.3' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & "$" & FORMAT ( _s5 / 1000, "#,0.0" ) & "k"
+            & "</text>"
+            & "<rect x='280' y='120.3' height='10' rx='2' fill='"
+            & MAXX ( _c5, [@c] )
+            & "' width='"
+            & FORMAT ( DIVIDE ( _p5, _pmax ) * 112, "0.0" )
+            & "'/>"
+            & "<text x='"
+            & FORMAT ( 286 + DIVIDE ( _p5, _pmax ) * 112, "0.0" )
+            & "' y='128.3' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' fill='#111827'>"
+            & FORMAT ( _p5, "#,0" )
+            & "</text>"
+        )
+        & "</svg>"
+RETURN
+    "data:image/svg+xml;utf8," & SUBSTITUTE ( SUBSTITUTE ( _svg, "%", "%25" ), "#", "%23" )
+```
+
 ### `O1 Funnel SVG`
 
 ```dax
@@ -6483,104 +7729,90 @@ O1 Funnel SVG =
 VAR _max          = MAXX ( ALL ( dim_funnel_stage ), [Funnel Log] )
 VAR _f0           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "IMP" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "IMP" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "IMP" )
     RETURN
-        "<text x='108' y='13.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Impressions</text>"
-        & "<rect x='118' y='4.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='1.00' width='"
+        "<text x='104' y='15.214285714285714' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Impressions</text>"
+        & "<rect x='112' y='4.0' height='13.4' rx='3' fill='#4A57E8' fill-opacity='1.00' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='13.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='15.214285714285714' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f1           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "CLK" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "CLK" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "CLK" )
     RETURN
-        "<text x='108' y='29.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Clicks</text>"
-        & "<rect x='118' y='20.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.93' width='"
+        "<text x='104' y='34.614285714285714' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Clicks</text>"
+        & "<rect x='112' y='23.4' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.93' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='29.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='34.614285714285714' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f2           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "LAND" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "LAND" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "LAND" )
     RETURN
-        "<text x='108' y='45.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Visits + installs</text>"
-        & "<rect x='118' y='36.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.86' width='"
+        "<text x='104' y='54.114285714285714' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Visits + installs</text>"
+        & "<rect x='112' y='42.9' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.86' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='45.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='54.114285714285714' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f3           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "SIGNUP" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "SIGNUP" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "SIGNUP" )
     RETURN
-        "<text x='108' y='61.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Sign-ups</text>"
-        & "<rect x='118' y='52.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.79' width='"
+        "<text x='104' y='73.5142857142857' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Sign-ups</text>"
+        & "<rect x='112' y='62.3' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.79' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='61.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='73.5142857142857' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f4           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "ACT" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "ACT" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "ACT" )
     RETURN
-        "<text x='108' y='77.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Activated</text>"
-        & "<rect x='118' y='68.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.72' width='"
+        "<text x='104' y='92.91428571428571' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Activated</text>"
+        & "<rect x='112' y='81.7' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.72' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='77.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='92.91428571428571' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f5           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "TRIAL" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "TRIAL" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "TRIAL" )
     RETURN
-        "<text x='108' y='93.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Trials</text>"
-        & "<rect x='118' y='84.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.65' width='"
+        "<text x='104' y='112.3142857142857' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Trials</text>"
+        & "<rect x='112' y='101.1' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.65' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='93.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='112.3142857142857' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _f6           =
     VAR _log      = CALCULATE ( [Funnel Log], dim_funnel_stage[stage_code] = "PAID" )
-    VAR _w        = DIVIDE ( _log, _max ) * 400
-    VAR _label    = CALCULATE ( [Funnel Label], dim_funnel_stage[stage_code] = "PAID" )
+    VAR _w        = DIVIDE ( _log, _max ) * 252
+    VAR _count    = CALCULATE ( [Funnel Value], dim_funnel_stage[stage_code] = "PAID" )
     RETURN
-        "<text x='108' y='109.5' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Paid</text>"
-        & "<rect x='118' y='100.0' height='11.0' rx='3' fill='#4A57E8' fill-opacity='0.58' width='"
+        "<text x='104' y='131.81428571428572' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>Paid</text>"
+        & "<rect x='112' y='120.6' height='13.4' rx='3' fill='#4A57E8' fill-opacity='0.58' width='"
         & FORMAT ( _w, "0.0" )
         & "'/>"
-        & "<text x='"
-        & FORMAT ( 126 + _w, "0.0" )
-        & "' y='109.5' font-family='Segoe UI, sans-serif' font-size='10.5' fill='#111827'>"
-        & SUBSTITUTE ( SUBSTITUTE ( _label, "&", "&amp;" ), "<", "&lt;" )
+        & "<text x='440' y='131.81428571428572' text-anchor='end' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='11' fill='#111827'>"
+        & FORMAT ( _count, "#,0" )
         & "</text>"
 VAR _svg          =
-    "<svg xmlns='http://www.w3.org/2000/svg' width='790' height='112' viewBox='0 0 790 112'>"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='440' height='136' viewBox='0 0 440 136'>"
         & _f0
         & _f1
         & _f2
@@ -6597,29 +7829,18 @@ RETURN
 
 ```dax
 Vital V1 SVG =
-VAR _value        = "$" & FORMAT ( [Spend] / 1000, "#,0.0" ) & "k"
-VAR _d            = [Spend Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [Spend]
+VAR _ly           = [Spend LY]
+VAR _d            = DIVIDE ( _now - _ly, _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
 VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0%" ), "" )
 VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d < 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = [Verdict Pacing]
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & "$" & FORMAT ( [Spend Cmp] / 1000, "#,0.0" ) & "k"
-        ,"LY"
-            ,"LY " & "$" & FORMAT ( [Spend Cmp] / 1000, "#,0.0" ) & "k"
-        ,"PLAN"
-            ,"vs plan"
-        ,""
-    )
+VAR _value        = IF ( ISBLANK ( _now ), "—", "$" & FORMAT ( _now / 1000, "#,0.0" ) & "k" )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & "$" & FORMAT ( _ly / 1000, "#,0.0" ) & "k" )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>SPEND</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>SPEND</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6628,14 +7849,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "plan $" & FORMAT ( [Plan] / 1000, "#,0.0" ) & "k", "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -6646,29 +7861,18 @@ RETURN
 
 ```dax
 Vital V2 SVG =
-VAR _value        = FORMAT ( [Paid Customers], "#,0" )
-VAR _d            = [Paid Customers Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [Signups]
+VAR _ly           = [Signups LY]
+VAR _d            = DIVIDE ( _now - _ly, _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
 VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0%" ), "" )
 VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d > 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = [Verdict Paid Customers]
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & FORMAT ( [Paid Customers Cmp], "#,0" )
-        ,"LY"
-            ,"LY " & FORMAT ( [Paid Customers Cmp], "#,0" )
-        ,"PLAN"
-            ,"vs target"
-        ,""
-    )
+VAR _value        = IF ( ISBLANK ( _now ), "—", FORMAT ( _now, "#,0" ) )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & FORMAT ( _ly, "#,0" ) )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>NEW PAYING CUSTOMERS</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>NEW CLIENTS</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6677,14 +7881,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "target " & FORMAT ( [Customers Target], "#,0" ), "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -6695,29 +7893,18 @@ RETURN
 
 ```dax
 Vital V3 SVG =
-VAR _value        = "$" & FORMAT ( [Blended CAC], "#,0" )
-VAR _d            = [Blended CAC Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [Signup to Paid]
+VAR _ly           = [Signup to Paid LY]
+VAR _d            = IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _ly ), _now - _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
-VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0%" ), "" )
-VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d < 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = [Verdict Blended CAC]
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & "$" & FORMAT ( [Blended CAC Cmp], "#,0" )
-        ,"LY"
-            ,"LY " & "$" & FORMAT ( [Blended CAC Cmp], "#,0" )
-        ,"PLAN"
-            ,"vs target"
-        ,""
-    )
+VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ) * 100, "0.0" ) & " pt", "" )
+VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d > 0, "#1E9E6A", "#D93B4B" ) )
+VAR _value        = IF ( ISBLANK ( _now ), "—", FORMAT ( _now, "0.0%" ) )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & FORMAT ( _ly, "0.0%" ) )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>BLENDED CAC</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>CONVERSION INTO PAID</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6726,14 +7913,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "paid $" & FORMAT ( [Paid CAC], "#,0" ) & " · target $" & FORMAT ( [_T BLENDED_CAC], "#,0" ), "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -6744,29 +7925,18 @@ RETURN
 
 ```dax
 Vital V4 SVG =
-VAR _value        = "$" & FORMAT ( [New MRR] / 1000, "#,0.0" ) & "k"
-VAR _d            = [New MRR Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [Time to Activation Days]
+VAR _ly           = [Time to Activation Days LY]
+VAR _d            = IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _ly ), _now - _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
-VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0%" ), "" )
-VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d > 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = BLANK ()
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & "$" & FORMAT ( [New MRR Cmp] / 1000, "#,0.0" ) & "k"
-        ,"LY"
-            ,"LY " & "$" & FORMAT ( [New MRR Cmp] / 1000, "#,0.0" ) & "k"
-        ,"PLAN"
-            ,"vs no plan"
-        ,""
-    )
+VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0" ) & " d", "" )
+VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d < 0, "#1E9E6A", "#D93B4B" ) )
+VAR _value        = IF ( ISBLANK ( _now ), "—", FORMAT ( _now, "0.0" ) & " d" )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & FORMAT ( _ly, "0.0" ) & " d" )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>NEW MRR</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>TIME TO ACTIVATION</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6775,14 +7945,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "ARPA $" & FORMAT ( [ARPA], "#,0" ), "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -6793,29 +7957,18 @@ RETURN
 
 ```dax
 Vital V5 SVG =
-VAR _value        = FORMAT ( [Payback Months], "0.0" ) & " mo"
-VAR _d            = [Payback Months Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [Paid CAC]
+VAR _ly           = [Paid CAC LY]
+VAR _d            = DIVIDE ( _now - _ly, _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
-VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0" ), "" )
+VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0%" ), "" )
 VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d < 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = [Verdict Payback Months]
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & FORMAT ( [Payback Months Cmp], "0.0" ) & " mo"
-        ,"LY"
-            ,"LY " & FORMAT ( [Payback Months Cmp], "0.0" ) & " mo"
-        ,"PLAN"
-            ,"vs target"
-        ,""
-    )
+VAR _value        = IF ( ISBLANK ( _now ), "—", "$" & FORMAT ( _now, "#,0" ) )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & "$" & FORMAT ( _ly, "#,0" ) )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>CAC PAYBACK</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>CAC</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6824,14 +7977,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "target < " & FORMAT ( [_T PAYBACK_MONTHS], "0" ), "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -6842,29 +7989,18 @@ RETURN
 
 ```dax
 Vital V6 SVG =
-VAR _value        = FORMAT ( [LTV CAC], "0.0" ) & "×"
-VAR _d            = [LTV CAC Δ]
-VAR _mode         = [_Cmp]
+VAR _now          = [ROAS 90d]
+VAR _ly           = [ROAS 90d LY]
+VAR _d            = IF ( NOT ISBLANK ( _now ) && NOT ISBLANK ( _ly ), _now - _ly )
 VAR _has_d        = NOT ISBLANK ( _d )
 VAR _arrow        = IF ( _d > 0, "▲ ", IF ( _d < 0, "▼ ", "■ " ) )
-VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.0" ), "" )
+VAR _d_text       = IF ( _has_d, _arrow & IF ( _d < 0, "−", "+" ) & FORMAT ( ABS ( _d ), "0.00" ), "" )
 VAR _d_colour     = IF ( ROUND ( _d, 4 ) = 0, "#8A94A6", IF ( _d > 0, "#1E9E6A", "#D93B4B" ) )
-VAR _verdict      = [Verdict LTV CAC]
-VAR _v_colour     = SWITCH ( _verdict, 1, "#1E9E6A", 2, "#C47A0E", 3, "#D93B4B", "#8A94A6" )
-VAR _basis        =
-    SWITCH (
-        _mode
-        ,"PREV"
-            ,"prior " & FORMAT ( [LTV CAC Cmp], "0.0" ) & "×"
-        ,"LY"
-            ,"LY " & FORMAT ( [LTV CAC Cmp], "0.0" ) & "×"
-        ,"PLAN"
-            ,"vs floor"
-        ,""
-    )
+VAR _value        = IF ( ISBLANK ( _now ), "—", FORMAT ( _now, "0.00" ) & "×" )
+VAR _ly_text      = IF ( ISBLANK ( _ly ), "LY —", "LY " & FORMAT ( _ly, "0.00" ) & "×" )
 VAR _svg          =
     "<svg xmlns='http://www.w3.org/2000/svg' width='224' height='96' viewBox='0 0 224 96'>"
-        & "<text x='14' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>LTV : CAC</text>"
+        & "<text x='34' y='22' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10.5' letter-spacing='0.6' fill='#8A94A6'>ROAS 90 D</text>"
         & "<text x='14' y='58' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='26' fill='#111827'>"
         & _value
         & "</text>"
@@ -6873,14 +8009,8 @@ VAR _svg          =
         & "'>"
         & _d_text
         & "</text>"
-        & "<circle cx='18' cy='80' r='3.5' fill='"
-        & _v_colour
-        & "'/>"
-        & "<text x='27' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#4B5563'>"
-        & SUBSTITUTE ( SUBSTITUTE ( "floor " & FORMAT ( [_T LTV_CAC], "0.0" ) & "×", "&", "&amp;" ), "<", "&lt;" )
-        & "</text>"
-        & "<text x='212' y='84' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
-        & _basis
+        & "<text x='14' y='84' font-family='Segoe UI, sans-serif' font-size='11' fill='#8A94A6'>"
+        & _ly_text
         & "</text>"
         & "</svg>"
 RETURN
@@ -7089,35 +8219,35 @@ Filters Applied SVG =
 VAR _raw          = [Applied State]
 VAR _cut          = 31
 VAR _l1           =
-    VAR _p        = PATHITEM ( _raw, 1 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 1 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l2           =
-    VAR _p        = PATHITEM ( _raw, 2 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 2 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l3           =
-    VAR _p        = PATHITEM ( _raw, 3 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 3 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l4           =
-    VAR _p        = PATHITEM ( _raw, 4 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 4 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l5           =
-    VAR _p        = PATHITEM ( _raw, 5 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 5 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l6           =
-    VAR _p        = PATHITEM ( _raw, 6 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 6 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l7           =
-    VAR _p        = PATHITEM ( _raw, 7 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 7 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _l8           =
-    VAR _p        = PATHITEM ( _raw, 8 )
+    VAR _p        = SUBSTITUTE ( PATHITEM ( _raw, 8 ), "¦", "|" )
     RETURN
         IF ( LEN ( _p ) > _cut, LEFT ( _p, _cut - 1 ) & "…", _p )
 VAR _svg          =
@@ -7130,7 +8260,7 @@ VAR _svg          =
         & "<text x='0' y='85' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='12' fill='#111827'>"
         & SUBSTITUTE ( SUBSTITUTE ( _l2, "&", "&amp;" ), "<", "&lt;" )
         & "</text>"
-        & "<text x='0' y='116' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' letter-spacing='0.6' fill='#8A94A6'>MARKET · TIER</text>"
+        & "<text x='0' y='116' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='10' letter-spacing='0.6' fill='#8A94A6'>MARKET | TIER</text>"
         & "<text x='0' y='135' font-family='Segoe UI Semibold, Segoe UI, sans-serif' font-size='12' fill='#111827'>"
         & SUBSTITUTE ( SUBSTITUTE ( _l3, "&", "&amp;" ), "<", "&lt;" )
         & "</text>"

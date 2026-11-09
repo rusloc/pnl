@@ -22,8 +22,6 @@
       "fw_rail_campaigns",
       "fw_rail_audience",
       "fw_rail_attribution",
-      "fw_rail_saved",
-      "fw_rail_sep",
       "fw_applied_title",
       "fw_applied_svg",
       "fw_reset",
@@ -67,16 +65,7 @@
       "fp_attribution_railsel",
       "fp_attribution_l1",
       "fp_attribution_model",
-      "fp_attribution_note",
-      "grp_fp_saved",
-      "fp_saved_railsel",
-      "fp_saved_l1",
-      "fp_saved_1",
-      "fp_saved_2",
-      "fp_saved_3",
-      "fp_saved_4",
-      "fp_saved_5",
-      "fp_saved_note"
+      "fp_attribution_note"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -165,16 +154,6 @@
           "fw_rail_attribution": {
             "singleVisual": {
               "visualType": "actionButton"
-            }
-          },
-          "fw_rail_saved": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fw_rail_sep": {
-            "singleVisual": {
-              "visualType": "shape"
             }
           },
           "fw_applied_title": {
@@ -366,46 +345,6 @@
             "singleVisual": {
               "visualType": "textbox"
             }
-          },
-          "fp_saved_railsel": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_l1": {
-            "singleVisual": {
-              "visualType": "textbox"
-            }
-          },
-          "fp_saved_1": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_2": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_3": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_4": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_5": {
-            "singleVisual": {
-              "visualType": "actionButton"
-            }
-          },
-          "fp_saved_note": {
-            "singleVisual": {
-              "visualType": "textbox"
-            }
           }
         },
         "visualContainerGroups": {
@@ -428,9 +367,6 @@
             "isHidden": true
           },
           "grp_fp_attribution": {
-            "isHidden": true
-          },
-          "grp_fp_saved": {
             "isHidden": true
           }
         }

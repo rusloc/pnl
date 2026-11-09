@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "co_k1_info",
   "position": {
-    "x": 920.0,
+    "x": 920,
     "y": 208,
-    "z": 2510,
+    "z": 2280,
     "height": 16,
     "width": 16,
-    "tabOrder": 2510
+    "tabOrder": 2280
   },
   "visual": {
     "visualType": "cardVisual",
@@ -397,7 +397,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Definition of Payback curves by acquisition month'"
+                  "Value": "'Definition of Payback by acquisition month'"
                 }
               }
             }
@@ -417,7 +417,7 @@
             "bottom": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "3D"
                 }
               }
             },
@@ -526,6 +526,5 @@
         "isHiddenInViewMode": true
       }
     ]
-  },
-  "isHidden": true
+  }
 }

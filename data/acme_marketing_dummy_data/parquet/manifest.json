@@ -1,0 +1,390 @@
+{
+ "dataset": "acme_marketing_dummy_data",
+ "generator_version": "1.0.0",
+ "seed": 20261104,
+ "as_of_date": "2026-11-03",
+ "refreshed": "2026-11-04T14:55:00",
+ "default_window_start": "2026-10-05",
+ "default_window_end": "2026-11-03",
+ "previous_window_start": "2026-09-05",
+ "previous_window_end": "2026-10-04",
+ "currency": "USD",
+ "tables": [
+  {
+   "table": "dim_date",
+   "rows": 730,
+   "parquet_bytes": 13754,
+   "columns": {
+    "date": "date32[day]",
+    "month_key": "string",
+    "year": "int32",
+    "quarter": "int32",
+    "month_num": "int32",
+    "month_name": "string",
+    "day_of_month": "int32",
+    "iso_week": "int32",
+    "week_start": "date32[day]",
+    "weekday_num": "int32",
+    "weekday_name": "string",
+    "is_weekend": "bool",
+    "is_actual": "bool",
+    "ly_date": "date32[day]"
+   }
+  },
+  {
+   "table": "dim_month",
+   "rows": 24,
+   "parquet_bytes": 2726,
+   "columns": {
+    "month_key": "string",
+    "month_start": "date32[day]",
+    "month_index": "int32",
+    "year": "int32",
+    "month_name": "string",
+    "days_in_month": "int32",
+    "is_actual": "bool",
+    "is_complete": "bool"
+   }
+  },
+  {
+   "table": "dim_platform",
+   "rows": 3,
+   "parquet_bytes": 1247,
+   "columns": {
+    "platform_code": "string",
+    "platform_name": "string",
+    "is_mobile": "bool",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_platform_segment",
+   "rows": 6,
+   "parquet_bytes": 1490,
+   "columns": {
+    "segment_code": "string",
+    "segment_name": "string",
+    "platform_code": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_channel",
+   "rows": 6,
+   "parquet_bytes": 2144,
+   "columns": {
+    "channel_code": "string",
+    "channel_name": "string",
+    "color_slot": "int32",
+    "color_light": "string",
+    "color_dark": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_network",
+   "rows": 8,
+   "parquet_bytes": 1297,
+   "columns": {
+    "network_code": "string",
+    "network_name": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_campaign",
+   "rows": 19,
+   "parquet_bytes": 5748,
+   "columns": {
+    "campaign_key": "string",
+    "campaign_name": "string",
+    "channel_code": "string",
+    "network_code": "string",
+    "platform_code": "string",
+    "market_code": "string",
+    "tier_code": "string",
+    "objective_code": "string",
+    "status_code": "string",
+    "is_brand": "bool",
+    "start_date": "date32[day]",
+    "end_date": "date32[day]",
+    "learning_end_date": "date32[day]",
+    "cpa_target_usd": "double",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_ad_set",
+   "rows": 78,
+   "parquet_bytes": 4315,
+   "columns": {
+    "ad_set_key": "string",
+    "campaign_key": "string",
+    "ad_set_name": "string",
+    "targeting_type": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_creative",
+   "rows": 205,
+   "parquet_bytes": 6950,
+   "columns": {
+    "creative_key": "string",
+    "campaign_key": "string",
+    "creative_name": "string",
+    "format_code": "string",
+    "launch_date": "date32[day]",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_term",
+   "rows": 152,
+   "parquet_bytes": 5859,
+   "columns": {
+    "term_key": "string",
+    "campaign_key": "string",
+    "term_text": "string",
+    "term_type": "string",
+    "match_type": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_landing_page",
+   "rows": 8,
+   "parquet_bytes": 1813,
+   "columns": {
+    "page_key": "string",
+    "page_name": "string",
+    "page_type": "string",
+    "platform_code": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_onboarding_step",
+   "rows": 6,
+   "parquet_bytes": 1845,
+   "columns": {
+    "step_code": "string",
+    "step_name": "string",
+    "fact_column": "string",
+    "is_activation": "bool",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "dim_attribution_model",
+   "rows": 4,
+   "parquet_bytes": 2816,
+   "columns": {
+    "model_code": "string",
+    "model_name": "string",
+    "lookback_click_days": "int32",
+    "lookback_view_days": "int32",
+    "is_default": "bool",
+    "is_first_party": "bool",
+    "description": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "fact_ad_delivery_day",
+   "rows": 83483,
+   "parquet_bytes": 958339,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "ad_set_key": "string",
+    "creative_key": "string",
+    "impressions": "int64",
+    "clicks": "int64",
+    "spend_usd": "double",
+    "reach_7d": "int64",
+    "video_views": "int64",
+    "paid_customers_dda": "double"
+   }
+  },
+  {
+   "table": "fact_term_day",
+   "rows": 81584,
+   "parquet_bytes": 515204,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "term_key": "string",
+    "impressions": "int64",
+    "clicks": "int64",
+    "spend_usd": "double",
+    "signups": "int64"
+   }
+  },
+  {
+   "table": "fact_traffic_day",
+   "rows": 18880,
+   "parquet_bytes": 110133,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "page_key": "string",
+    "sessions": "int64",
+    "bounces": "int64",
+    "lcp_ms_p75": "int32",
+    "store_views": "int64",
+    "installs": "int64",
+    "first_opens": "int64",
+    "signups": "int64"
+   }
+  },
+  {
+   "table": "fact_funnel_day",
+   "rows": 10198,
+   "parquet_bytes": 75415,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "signups": "int64",
+    "step_verified": "int64",
+    "step_workspace": "int64",
+    "step_connected": "int64",
+    "step_first_dashboard": "int64",
+    "step_invited": "int64",
+    "act_lt1h": "int64",
+    "act_1_6h": "int64",
+    "act_6_24h": "int64",
+    "act_1_2d": "int64",
+    "act_2_4d": "int64",
+    "act_4_7d": "int64",
+    "act_7_30d": "int64",
+    "trials": "int64"
+   }
+  },
+  {
+   "table": "fact_signup_segment_day",
+   "rows": 20319,
+   "parquet_bytes": 33093,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "segment_code": "string",
+    "signups": "int64",
+    "activated_7d": "int64"
+   }
+  },
+  {
+   "table": "fact_attribution_day",
+   "rows": 35237,
+   "parquet_bytes": 311846,
+   "columns": {
+    "date": "date32[day]",
+    "campaign_key": "string",
+    "model_code": "string",
+    "paid_customers": "double",
+    "new_mrr_usd": "double"
+   }
+  },
+  {
+   "table": "fact_cohort_revenue_month",
+   "rows": 3457,
+   "parquet_bytes": 109723,
+   "columns": {
+    "cohort_month": "string",
+    "campaign_key": "string",
+    "month_offset": "int32",
+    "customers_start": "double",
+    "churned": "double",
+    "customers_end": "double",
+    "revenue_usd": "double",
+    "refunds_usd": "double",
+    "refund_count": "double"
+   }
+  },
+  {
+   "table": "fact_retention_cohort_month",
+   "rows": 2241,
+   "parquet_bytes": 10003,
+   "columns": {
+    "cohort_month": "string",
+    "campaign_key": "string",
+    "day_n": "int32",
+    "users_matured": "int64",
+    "users_active": "int64"
+   }
+  },
+  {
+   "table": "fact_budget_month",
+   "rows": 456,
+   "parquet_bytes": 3700,
+   "columns": {
+    "month_key": "string",
+    "campaign_key": "string",
+    "budget_usd": "double"
+   }
+  },
+  {
+   "table": "fact_pipeline_month",
+   "rows": 25,
+   "parquet_bytes": 2347,
+   "columns": {
+    "month_key": "string",
+    "campaign_key": "string",
+    "opps_created": "int64",
+    "pipeline_usd": "double",
+    "won_usd": "double"
+   }
+  },
+  {
+   "table": "param_target",
+   "rows": 43,
+   "parquet_bytes": 2765,
+   "columns": {
+    "scope_type": "string",
+    "scope_code": "string",
+    "metric_code": "string",
+    "target_value": "double",
+    "direction": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "param_finance",
+   "rows": 3,
+   "parquet_bytes": 1141,
+   "columns": {
+    "metric_code": "string",
+    "valid_from": "date32[day]",
+    "value": "double"
+   }
+  },
+  {
+   "table": "param_alert_rule",
+   "rows": 6,
+   "parquet_bytes": 2916,
+   "columns": {
+    "rule_code": "string",
+    "severity": "string",
+    "title": "string",
+    "scope_type": "string",
+    "metric_code": "string",
+    "condition": "string",
+    "sort_order": "int32"
+   }
+  },
+  {
+   "table": "sync_log",
+   "rows": 7,
+   "parquet_bytes": 2570,
+   "columns": {
+    "source_code": "string",
+    "source_name": "string",
+    "cadence": "string",
+    "last_sync_ts": "timestamp[ms]",
+    "stale_after_h": "int32",
+    "red_after_h": "int32",
+    "status": "string"
+   }
+  }
+ ]
+}

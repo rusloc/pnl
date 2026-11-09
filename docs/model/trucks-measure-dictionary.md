@@ -7,10 +7,12 @@
 
 Notes
 
-- The KPI noise: `_KPI Noise = RANDBETWEEN ( 10, 100 )` multiplies the four tile measures `Rock Mass by Truck Plan/Fact` and
-  `Performance per Truck Plan/Fact` (the live model had `RANDBETWEEN(10,100)` inline). The USER kept it for now. Removing it is one
-  line: change the body of `_KPI Noise` to `1`; then update tab 6 of `tests/time-util.dax` and the KPI tabs of `baseline-live-en.dax`.
-- While the noise is on, each card draws its own number, so the Δ pill on tiles 3–4 is not the difference of the two cards shown.
+- The KPI noise is **off since 2026-11-04** (USER): `_KPI Noise = 1`. It multiplies the four tile measures `Rock Mass by Truck
+  Plan/Fact` and `Performance per Truck Plan/Fact`; until then it was `RANDBETWEEN ( 10, 100 )` (the live model had it inline), so
+  every card drew its own random factor and the two pages could not agree. The measure and its references stay, so the old
+  behaviour is one line away. Tests: tab 6 of `tests/time-util.dax`, tab 2 of `tests/time-util-original.dax`, the `kpi_*` tabs of
+  `baseline-live-en.dax` (multiplier = 1) and `tests/page-parity.dax`. Record: `docs/ADD/features/trucks-kpi-mismatch-2026-11-04.md`.
+- With the noise off, the Δ pill on tiles 3–4 equals Fact − Plan of the two cards shown.
 - The engine measures compare against data codes as DAX string literals (`"КФВ"`, `"Погрузка самосвалов"`, `"Неделя"`,
   `"Месяц"`, `"Линейно"`, `"Взвешенно"`, `"Проверка"`). These are data values and stay as they are (USER decision 1); the
   slicers show the English captions from the calculated columns `plan_type_name` / `calculation_name` / `category_name`.
@@ -24,19 +26,19 @@ Notes
 
 | Measure | Definition | Format | Hidden | Was (live model) |
 |---|---|---|---|---|
-| `Rock Mass by Truck Fact` | Rock mass loaded into trucks, fact, times _KPI Noise. | `#,0` |  | `ГМ на авто факт` |
-| `Rock Mass by Truck Plan` | Rock mass loaded into trucks, plan (week or month plan by plan type), times _KPI Noise. | `#,0` |  | `ГМ на авто план` |
-| `Performance per Truck Plan` | Rock Mass by Truck Plan per truck-loading hour, times 1,000 and _KPI Noise. | `#,0` |  | `_производительность_авто_ПЛАН` |
-| `Performance per Truck Fact` | Rock Mass by Truck Fact per truck-loading hour, times 1,000 and _KPI Noise. | `#,0` |  | `_производительность_авто_ФАКТ` |
-| `_KPI Noise` | Placeholder noise in the four KPI tile measures, kept on USER request (2026-10-21). To remove it, change the body to 1. | `0` | yes | new |
+| `Rock Mass by Truck Fact` | Rock mass loaded into trucks, fact, times _KPI Noise (1). | `#,0` |  | `ГМ на авто факт` |
+| `Rock Mass by Truck Plan` | Rock mass loaded into trucks, plan (week or month plan by plan type), times _KPI Noise (1). | `#,0` |  | `ГМ на авто план` |
+| `Performance per Truck Plan` | Rock Mass by Truck Plan per truck-loading hour, times 1,000 and _KPI Noise (1). | `#,0` |  | `_производительность_авто_ПЛАН` |
+| `Performance per Truck Fact` | Rock Mass by Truck Fact per truck-loading hour, times 1,000 and _KPI Noise (1). | `#,0` |  | `_производительность_авто_ФАКТ` |
+| `_KPI Noise` | Multiplier of the four volume KPI measures. Switched off (1) on 2026-11-04 by the USER, so both pages show the same numbers; it was RANDBETWEEN ( 10, 100 ), a placeholder from the live model. | `0` | yes | new |
 | `KPI Truck Loading Plan %` | Truck loading share of total time, plan (waterfall row "Truck loading", sort_order 27). | `0.0%` |  | new |
 | `KPI Truck Loading Fact %` | Truck loading share of total time, fact (waterfall row "Truck loading", sort_order 27). | `0.0%` |  | new |
 | `KPI Truck Loading Δ pp` | Fact minus plan of the truck loading share, in percentage points. | `+0.00 "pp";"−"0.00 "pp";0.00 "pp"` |  | new |
 | `KPI Effective Work Plan %` | Effective work time share of total time, plan (waterfall row "Effective work time", sort_order 24). | `0.0%` |  | new |
 | `KPI Effective Work Fact %` | Effective work time share of total time, fact (waterfall row "Effective work time", sort_order 24). | `0.0%` |  | new |
 | `KPI Effective Work Δ pp` | Fact minus plan of the effective work time share, in percentage points. | `+0.00 "pp";"−"0.00 "pp";0.00 "pp"` |  | new |
-| `KPI Performance per Truck Δ` | Fact minus plan, performance per truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown. | `+#,0;"−"#,0;0` |  | new |
-| `KPI Rock Mass by Truck Δ` | Fact minus plan, rock mass by truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown. | `+#,0;"−"#,0;0` |  | new |
+| `KPI Performance per Truck Δ` | Fact minus plan, performance per truck. | `+#,0;"−"#,0;0` |  | new |
+| `KPI Rock Mass by Truck Δ` | Fact minus plan, rock mass by truck. | `+#,0;"−"#,0;0` |  | new |
 
 ## 2 Time Structure
 
@@ -169,7 +171,7 @@ DIVIDE(
 
 ```dax
 _KPI Noise =
-RANDBETWEEN ( 10, 100 )
+1
 ```
 
 ### `KPI Truck Loading Plan %`

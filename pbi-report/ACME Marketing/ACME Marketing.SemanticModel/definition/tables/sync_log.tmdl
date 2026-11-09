@@ -1,7 +1,7 @@
 /// Last sync per data source (freshness dot, footer; A-17). Joins nothing.
 table sync_log
-	lineageTag: 326230b2-c198-57b0-99c4-6601079572af
 	isHidden
+	lineageTag: 326230b2-c198-57b0-99c4-6601079572af
 
 	column source_code
 		dataType: string
@@ -92,3 +92,4 @@ table sync_log
 				    typed
 
 	annotation PBI_ResultType = Table
+

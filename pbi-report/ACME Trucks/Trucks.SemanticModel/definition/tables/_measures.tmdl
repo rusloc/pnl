@@ -2984,8 +2984,8 @@ table _measures
 		displayFolder: 2 Time Structure
 		lineageTag: 16260f73-a5aa-4a9c-b2fa-baa2ba68e2c1
 
-	/// Placeholder noise in the four KPI tile measures, kept on USER request (2026-10-21). To remove it, change the body to 1.
-	measure '_KPI Noise' = RANDBETWEEN ( 10, 100 )
+	/// Multiplier of the four volume KPI measures. Switched off (1) on 2026-11-04 by the USER, so both pages show the same numbers; it was RANDBETWEEN ( 10, 100 ), a placeholder from the live model.
+	measure '_KPI Noise' = 1
 		formatString: 0
 		isHidden
 		displayFolder: 1 KPI
@@ -3051,7 +3051,7 @@ table _measures
 		displayFolder: 1 KPI
 		lineageTag: 4148107a-c79e-4166-aea1-e0b33c06241d
 
-	/// Fact minus plan, performance per truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown.
+	/// Fact minus plan, performance per truck.
 	measure 'KPI Performance per Truck Δ' =
 			VAR _plan         = [Performance per Truck Plan]
 			VAR _fact         = [Performance per Truck Fact]
@@ -3061,7 +3061,7 @@ table _measures
 		displayFolder: 1 KPI
 		lineageTag: 308fc7b4-eb58-4d59-b88c-2f0e86fcd734
 
-	/// Fact minus plan, rock mass by truck. While _KPI Noise is on, each card draws its own noise, so this is not the difference of the two cards shown.
+	/// Fact minus plan, rock mass by truck.
 	measure 'KPI Rock Mass by Truck Δ' =
 			VAR _plan         = [Rock Mass by Truck Plan]
 			VAR _fact         = [Rock Mass by Truck Fact]

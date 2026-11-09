@@ -21,6 +21,8 @@
 //                        deterministic unit (same DAX without RANDBETWEEN, defined below as _test measures) exactly,
 //                        and checks KPI / unit is a whole number in [10, 100] (ГМ на авто *: one RANDBETWEEN) or
 //                        [100, 10000] (_производительность_авто_*: two nested RANDBETWEEN).
+//                        2026-11-04 (USER): the local model switched the noise off (_KPI Noise = 1), so the kpi_* tabs
+//                        now require multiplier = 1 (bounds _lo = _hi = 1); the expected units are unchanged.
 // Measures: waterfall bars (_plan_/_fact_ *_SWITCH), % / delta labels (*_LABEL*), tooltip hours (_planHours,
 // _factHours, _factHours_LIN, _factHours_%%), helper _zero, KPI cards (_производительность_авто_*, ГМ на авто *).
 
@@ -781,7 +783,7 @@ RETURN
 ORDER BY [_pass], [_category_sort], [_measure]
 
 EVALUATE
-// ---------------------------------------------------------------- kpi_saved (RANDBETWEEN rule)
+// ---------------------------------------------------------------- kpi_saved (noise off: multiplier 1)
 VAR _actual_wide =
     SUMMARIZECOLUMNS (
         _f_included, _f_contractor, _f_week, _f_plan_type, _f_calculation, _f_work_type
@@ -796,10 +798,10 @@ VAR _actual_wide =
     )
 VAR _actual =
         UNION (
-            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 1, "_hi", 1 )
         )
 VAR _expected =
         DATATABLE (
@@ -838,7 +840,7 @@ RETURN
 ORDER BY [_pass], [_measure]
 
 EVALUATE
-// ---------------------------------------------------------------- kpi_switches (RANDBETWEEN rule)
+// ---------------------------------------------------------------- kpi_switches (noise off: multiplier 1)
 VAR _actual_wide =
     SUMMARIZECOLUMNS (
         _s_plan_type, _s_calculation
@@ -853,10 +855,10 @@ VAR _actual_wide =
     )
 VAR _actual =
         UNION (
-            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 1, "_hi", 1 )
         )
 VAR _expected =
         DATATABLE (
@@ -895,7 +897,7 @@ RETURN
 ORDER BY [_pass], [_measure]
 
 EVALUATE
-// ---------------------------------------------------------------- kpi_total (RANDBETWEEN rule)
+// ---------------------------------------------------------------- kpi_total (noise off: multiplier 1)
 VAR _actual_wide =
     ROW (
         "k0", [Performance per Truck Plan]
@@ -909,10 +911,10 @@ VAR _actual_wide =
     )
 VAR _actual =
         UNION (
-            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+            SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 1, "_hi", 1 )
         )
 VAR _expected =
         DATATABLE (

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ov_o5_table",
   "position": {
-    "x": 26.0,
-    "y": 636,
-    "z": 1630,
-    "height": 118,
-    "width": 677.0,
-    "tabOrder": 1630
+    "x": 26,
+    "y": 428,
+    "z": 1560,
+    "height": 142,
+    "width": 677,
+    "tabOrder": 1560
   },
   "visual": {
     "visualType": "tableEx",
@@ -23,72 +23,102 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "Alert Glyph"
+                  "Property": "O5 Rank"
                 }
               },
-              "queryRef": "_measures.Alert Glyph",
-              "nativeQueryRef": "Alert Glyph",
-              "displayName": " "
+              "queryRef": "_measures.O5 Rank",
+              "nativeQueryRef": "O5 Rank",
+              "displayName": "#"
             },
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dim_alert_slot"
+                      "Entity": "dim_campaign"
                     }
                   },
-                  "Property": "title"
+                  "Property": "campaign_label"
                 }
               },
-              "queryRef": "dim_alert_slot.title",
-              "nativeQueryRef": "title",
+              "queryRef": "dim_campaign.campaign_label",
+              "nativeQueryRef": "campaign_label",
+              "displayName": "CAMPAIGN"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "O5 Channel"
+                }
+              },
+              "queryRef": "_measures.O5 Channel",
+              "nativeQueryRef": "O5 Channel",
+              "displayName": "CHANNEL"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "O5 Paid Now"
+                }
+              },
+              "queryRef": "_measures.O5 Paid Now",
+              "nativeQueryRef": "O5 Paid Now",
+              "displayName": "PAID"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "O5 Paid Before"
+                }
+              },
+              "queryRef": "_measures.O5 Paid Before",
+              "nativeQueryRef": "O5 Paid Before",
+              "displayName": "BEFORE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "O5 Delta"
+                }
+              },
+              "queryRef": "_measures.O5 Delta",
+              "nativeQueryRef": "O5 Delta",
+              "displayName": "Δ PAID"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "O5 Alert"
+                }
+              },
+              "queryRef": "_measures.O5 Alert",
+              "nativeQueryRef": "O5 Alert",
               "displayName": "ALERT"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dim_alert_slot"
-                    }
-                  },
-                  "Property": "entity_name"
-                }
-              },
-              "queryRef": "dim_alert_slot.entity_name",
-              "nativeQueryRef": "entity_name",
-              "displayName": "WHERE"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_measures"
-                    }
-                  },
-                  "Property": "Alert Detail"
-                }
-              },
-              "queryRef": "_measures.Alert Detail",
-              "nativeQueryRef": "Alert Detail",
-              "displayName": "DETAIL"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_measures"
-                    }
-                  },
-                  "Property": "Alert Value Text"
-                }
-              },
-              "queryRef": "_measures.Alert Value Text",
-              "nativeQueryRef": "Alert Value Text",
-              "displayName": "VALUE"
             }
           ]
         }
@@ -97,13 +127,13 @@
         "sort": [
           {
             "field": {
-              "Column": {
+              "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "dim_alert_slot"
+                    "Entity": "_measures"
                   }
                 },
-                "Property": "title"
+                "Property": "O5 Rank"
               }
             },
             "direction": "Ascending"
@@ -228,7 +258,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -342,7 +372,7 @@
                           "Entity": "_measures"
                         }
                       },
-                      "Property": "Alert Colour"
+                      "Property": "O5 Colour"
                     }
                   }
                 }
@@ -364,7 +394,7 @@
                 }
               }
             ],
-            "metadata": "_measures.Alert Glyph"
+            "metadata": "_measures.O5 Delta"
           }
         }
       ],
@@ -387,13 +417,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "16D"
+                  "Value": "22D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "_measures.Alert Glyph"
+            "metadata": "_measures.O5 Rank"
           }
         },
         {
@@ -401,13 +431,69 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "128D"
+                  "Value": "196D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "dim_alert_slot.title"
+            "metadata": "dim_campaign.campaign_label"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "100D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Channel"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "56D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Paid Now"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "60D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Paid Before"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "60D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Delta"
           }
         },
         {
@@ -421,35 +507,7 @@
             }
           },
           "selector": {
-            "metadata": "dim_alert_slot.entity_name"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "270D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "_measures.Alert Detail"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "58D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "_measures.Alert Value Text"
+            "metadata": "_measures.O5 Alert"
           }
         }
       ],
@@ -479,7 +537,63 @@
             }
           },
           "selector": {
-            "metadata": "_measures.Alert Value Text"
+            "metadata": "_measures.O5 Paid Now"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Right'"
+                }
+              }
+            },
+            "styleHeader": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Paid Before"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Right'"
+                }
+              }
+            },
+            "styleHeader": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_measures.O5 Delta"
           }
         }
       ]
@@ -556,7 +670,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Anomalies and alerts that trip in the window'"
+                  "Value": "'Campaigns with the largest change in paid customers'"
                 }
               }
             }
@@ -604,7 +718,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "f_ov_o5_tripped",
+        "name": "f_ov_o5_rank",
         "field": {
           "Measure": {
             "Expression": {
@@ -612,7 +726,7 @@
                 "Entity": "_measures"
               }
             },
-            "Property": "Alert Tripped"
+            "Property": "O5 Visible"
           }
         },
         "type": "Advanced",
@@ -637,7 +751,7 @@
                           "Source": "m"
                         }
                       },
-                      "Property": "Alert Tripped"
+                      "Property": "O5 Visible"
                     }
                   },
                   "Right": {

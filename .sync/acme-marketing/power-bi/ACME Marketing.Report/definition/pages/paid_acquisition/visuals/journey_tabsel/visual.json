@@ -4,10 +4,10 @@
   "position": {
     "x": 592,
     "y": 14,
-    "z": 2240,
+    "z": 2050,
     "height": 28,
     "width": 96,
-    "tabOrder": 2240
+    "tabOrder": 2050
   },
   "visual": {
     "visualType": "actionButton",
@@ -33,8 +33,9 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#111827'"
+                    "ThemeDataColor": {
+                      "ColorId": 1,
+                      "Percent": 0
                     }
                   }
                 }
@@ -331,6 +332,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_journey",
-  "isHidden": true
+  "parentGroupName": "grp_journey"
 }

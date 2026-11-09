@@ -1,6 +1,11 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-11-09 · js-trucks/ steps 0–5 built (ADR-0016): 343 kB data, 959 / 959 pinned rows; CAND-025 BLANK ÷ number = BLANK, CAND-026 URL 256 cap vs multi-pick, CAND-027 ZSTD via node:zlib
+- 2026-11-05 · .sync/acme-marketing/js-app issued (60 files, 3.85 MB; standalone npm ci + gate green, 88 + 3 skipped); DEF-007 fixed: DAX bare SUM over no rows = BLANK, JS tracks campaign-day row presence (ds.cdRow / hasRows)
+- 2026-11-05 · js-marketing contract steps 1–6 built: 7 Parquet + manifest (717 kB first paint), engine = port of generator/metrics.py (AT-01 28,628 rows both ways), 1,416 / 1,416 PBI parity captures matched in a scratch self-check; CAND-023 (share measures), CAND-024 (bundle)
+- 2026-11-05 · js-marketing/ scaffolded (ADR-0015 Track C): js-exec toolchain, source-manifest Zod + loader, copy.ts generated from PBI dim_card / howto textboxes (161 strings byte-identical), tokens.ts from SPEC; engine pending archi's contract
+- 2026-11-05 · AP-002: copy describing data shape / layout outlives the change (CAND-020 promoted); CAND-022 readRows vs int64 / date32 source tables
 - 2026-11-02 · Mirelo owner changes 1–33 ported to js-report + pack: period = range `from`…`anchor` (old `period=` parses), full detail/ (195 Parquet, 21.7 MB, built in build-sales-data.ts), Mirelo glass forked to components/sales/glass.*, board.ts viewport-height board; CAND-020/021
 - 2026-10-30 · Nordmark JS pack .sync/nordmark-exec/js-app issued (52 files, 2.45 MB, 458 tests, headless 28/28); CAND-018 (pack copy hazards), CAND-019 (harness Remove-Item false positive)
 - 2026-10-30 · js-exec category filter (ADR-0013 (l)): computeMetrics(d, scope, win, cats) + cube.categoryMask; URL `cat`; 10,514 category control rows reconcile; CAND-017 (Esc under App Router)
@@ -24,10 +29,10 @@
 - 2026-10-22 · PG-002: Zod 4 union of number literals breaks kind-driven CSV coercion; use bounded z.number()
 
 ## Topic files
-- anti-patterns.md     — 1 entry   · stalest 2026-10-30 · AP-NNN
+- anti-patterns.md     — 2 entries · stalest 2026-10-30 · AP-NNN
 - platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN (PG-005 verified 2026-10-30)
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 19 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001)
+- candidates.md        — 24 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001, CAND-020 → AP-002)
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).
@@ -52,6 +57,10 @@
 - 2026-10-27 ADR-0012 applied: card face title · value · Δ rows · status chip; sub-lines → ⓘ values (copy.ts info(id, values)); How to read per view.
 - 2026-10-27 USER review: no period banner (text → period tooltip + How-to-read), no card corner markers, no in-card sparklines (design-requirements §1 "Visual first, minimum text" applies to Mirelo too, overriding design-tokens card anatomy).
 - Control totals (control_totals_eur.csv) reconcile for ALL/PL/RO/PT × Sep 2026, FY2024, FY2025, FY2026 YTD + every closed month.
+
+## ACME Marketing JS facts (verify before citing)
+- js-marketing/: engine mirrors data/acme_marketing_dummy_data/generator/metrics.py rule for rule (the CSV's generator); lib/test-utils/control-engine.ts enumerates the CSV's scope × period × metric set, values from lib/engine.
+- PBI parity captures: pbi-report/ACME Marketing/tests/parity-expected.csv (1,416 rows; hunter's input). Formats there won over my guesses: C1 / P1 spend "$#,0", shares 1 dp, P5 sorted by conv, J1 by visits, P1 blank cells "" (CPA / ROAS "—" only for LEAD / RETENTION), signed zero "0%".
 
 ## Nordmark exec facts (verify before citing)
 - js-exec/: engine in lib/engine (brief + CLAUDE.md, not ADR-0013's lib/exec); cube week × site group (NL, BE, ONLINE, WHOLESALE, DC, CENTRAL) × category; metrics.ts mirrors data/nordmark_retail_dummy_data/checks/verify.py metrics().

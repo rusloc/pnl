@@ -4,10 +4,10 @@
   "position": {
     "x": 1058,
     "y": 136,
-    "z": 2880,
+    "z": 2600,
     "height": 280,
     "width": 348,
-    "tabOrder": 2880
+    "tabOrder": 2600
   },
   "visual": {
     "visualType": "textbox",
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The table lists Live and Learning campaigns by spend (pick Paused or Ended under Filters › Campaigns to add them). Click a row to select it for the cards below.",
+                    "value": "The table lists Live and Learning campaigns by spend (pick Paused or Ended under Filters › Campaigns to add them). Click a row to select it: Keywords / placements follows the selection, Churn and Refund by channel scope to its channel.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Without a click the cards show the worst mover of the window (largest drop in 90-day ROAS).",
+                    "value": "Without a click Keywords / placements shows the worst mover of the window (largest drop in 90-day ROAS): keywords for search, placements for the others.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -43,7 +43,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Selected campaign: daily spend and paid conversions; Ad sets by CPA against the campaign target; Creatives with the fatigue rule; Keywords for search, placements for the others.",
+                    "value": "Churn by channel: customers lost in the trailing 3 complete months; Refund by channel: refunds of the 12 acquisition months to the window end. Top 5 channels each, absolute counts (DDA credits).",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "9pt",
@@ -173,6 +173,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_howto_campaigns",
-  "isHidden": true
+  "parentGroupName": "grp_howto_campaigns"
 }

@@ -1,0 +1,229 @@
+table dim_date
+	lineageTag: 89ba1c91-1cbb-40a6-ae2a-3dc1c011a7a2
+	dataCategory: Time
+
+	column _weekStartBiz
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: c7931946-835e-42d2-995e-60fae6494d39
+		summarizeBy: none
+		sourceColumn: _weekStartBiz
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column _weekEndBiz
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 08ca3ee6-9dd4-4ca0-a8eb-a973676cf97a
+		summarizeBy: none
+		sourceColumn: _weekEndBiz
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column _weekNumBiz
+		dataType: int64
+		formatString: 0
+		lineageTag: 955a60c5-f983-41cf-a922-d31d2cd8b96a
+		summarizeBy: sum
+		sourceColumn: _weekNumBiz
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: dd/mm/yyyy
+		lineageTag: eefb51be-6548-4490-ad2d-680432d9c949
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f02ee0e-d2e7-4c42-84d3-487f67ba5a30
+		summarizeBy: sum
+		sourceColumn: Год
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 8573f304-4def-40aa-a7f3-0109f90ef398
+		summarizeBy: sum
+		sourceColumn: Месяц
+
+		annotation SummarizationSetBy = Automatic
+
+	column day
+		dataType: int64
+		formatString: 0
+		lineageTag: 90ed43c0-7b40-4494-96ac-f09cdfe7d993
+		summarizeBy: sum
+		sourceColumn: Число
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_name
+		dataType: string
+		lineageTag: 9104ba2b-a13f-4a99-9188-a9925723fa3c
+		summarizeBy: none
+		sourceColumn: День недели
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 6184c661-3fde-47dd-a3f0-db6fe1157070
+		summarizeBy: sum
+		sourceColumn: Номер дня недели
+
+		annotation SummarizationSetBy = Automatic
+
+	column week_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 73c893ec-61c1-44eb-a672-3bf9dd976074
+		summarizeBy: sum
+		sourceColumn: Номер недели
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_month_label
+		dataType: string
+		lineageTag: 6d1fcc6d-de04-4c03-a495-7d6d601fe039
+		summarizeBy: none
+		sourceColumn: День_Месяц
+		sortByColumn: date
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column week_start_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5e07a5e1-3061-4864-a7cd-c4e118ba7741
+		summarizeBy: none
+		sourceColumn: Начало_недели
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column week_end_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 726061c8-5811-4618-b8ea-767a00c7d6e1
+		summarizeBy: none
+		sourceColumn: Конец_недели
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column week_range_label
+		dataType: string
+		lineageTag: a4464bc7-7ff5-4e9f-bdce-d37237d2e576
+		summarizeBy: none
+		sourceColumn: Номер_диапазон
+
+		annotation SummarizationSetBy = Automatic
+
+	column curPeriod
+		dataType: string
+		lineageTag: c0302f03-50dd-4ad7-ae55-519425ba1845
+		summarizeBy: none
+		sourceColumn: curPeriod
+
+		annotation SummarizationSetBy = Automatic
+
+	column _weekDayNum
+		dataType: int64
+		formatString: 0
+		lineageTag: e96337c1-2181-44f1-a5fe-1aa634654add
+		summarizeBy: sum
+		sourceColumn: _weekDayNum
+
+		annotation SummarizationSetBy = Automatic
+
+	column week_label
+		dataType: string
+		lineageTag: 8ec9fe28-62a9-4463-af75-a4a398410fea
+		summarizeBy: none
+		sourceColumn: _dateSpanBiz
+		sortByColumn: _sortSpan
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column _sortSpan
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a310b37-de1f-4145-8954-6855d047dd1c
+		summarizeBy: sum
+		sourceColumn: _sortSpan
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_date_label
+		dataType: string
+		lineageTag: 6fb981c0-9fca-4402-bdc5-ff10d2e6f5e2
+		summarizeBy: none
+		sourceColumn: _dateBiz
+		sortByColumn: date
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date-df8f1a5d-2601-430b-8e0f-805ae9a31a5e = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\Calendar.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"_weekStartBiz", type date},
+				            {"_weekEndBiz", type date},
+				            {"_weekNumBiz", Int64.Type},
+				            {"Date", type date},
+				            {"Год", Int64.Type},
+				            {"Месяц", Int64.Type},
+				            {"Число", Int64.Type},
+				            {"День недели", type text},
+				            {"Номер дня недели", Int64.Type},
+				            {"Номер недели", Int64.Type},
+				            {"День_Месяц", type text},
+				            {"Начало_недели", type date},
+				            {"Конец_недели", type date},
+				            {"Номер_диапазон", type text},
+				            {"curPeriod", type text},
+				            {"_weekDayNum", Int64.Type},
+				            {"_dateSpanBiz", type text},
+				            {"_sortSpan", Int64.Type},
+				            {"_dateBiz", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "co_k1_panel",
   "position": {
-    "x": 16.0,
+    "x": 16,
     "y": 196,
-    "z": 2490,
-    "height": 186,
-    "width": 934.0,
-    "tabOrder": 2490
+    "z": 2260,
+    "height": 285,
+    "width": 934,
+    "tabOrder": 2260
   },
   "visual": {
     "visualType": "shape",
@@ -265,7 +265,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Payback curves by acquisition month card'"
+                  "Value": "'Payback by acquisition month card'"
                 }
               }
             }
@@ -309,6 +309,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_cohorts",
-  "isHidden": true
+  "parentGroupName": "grp_cohorts"
 }

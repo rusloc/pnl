@@ -8,7 +8,7 @@
 // visuals' own filters (category code not blank, is_shown = "1", dim_time_category[is_included] = "да").
 // Measures = what the page's visuals bind to, by their current names (old name -> new name in
 // docs/model/trucks-measure-dictionary.md). The page re-uses existing measures only: nothing was re-added.
-// Tabs: 1 bars and labels per category row | 2 KPI cards (RANDBETWEEN rule, same as baseline-live-en.dax)
+// Tabs: 1 bars and labels per category row | 2 KPI cards (noise off since 2026-11-04: card = unit, multiplier 1)
 
 DEFINE
     // Deterministic units of the noisy KPI measures (same DAX with _KPI Noise = 1)
@@ -287,7 +287,7 @@ RETURN
 ORDER BY [_pass], [_category_sort], [_measure]
 
 EVALUATE
-// ---------------------------------------------------------------- 2 KPI cards (RANDBETWEEN rule)
+// ---------------------------------------------------------------- 2 KPI cards (noise off since 2026-11-04: multiplier 1, was [10, 100] / [100, 10000])
 VAR _actual_wide =
     SUMMARIZECOLUMNS (
         _r_included, _p_contractor, _s_week, _s_plan_type, _s_calculation, _s_work_type
@@ -302,10 +302,10 @@ VAR _actual_wide =
     )
 VAR _actual =
         UNION (
-             SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 100, "_hi", 10000 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 10, "_hi", 100 )
-            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 10, "_hi", 100 )
+             SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Plan", "_actual", [k0], "_actual_unit", [u0], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Performance per Truck Fact", "_actual", [k1], "_actual_unit", [u1], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Plan", "_actual", [k2], "_actual_unit", [u2], "_lo", 1, "_hi", 1 )
+            ,SELECTCOLUMNS ( _actual_wide, "_measure", "Rock Mass by Truck Fact", "_actual", [k3], "_actual_unit", [u3], "_lo", 1, "_hi", 1 )
         )
 VAR _expected =
         DATATABLE (

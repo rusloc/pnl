@@ -1,0 +1,66 @@
+table dim_loader_work_type
+	lineageTag: eb7c7ca7-2b6a-4d68-82c5-1a03c03b38bb
+
+	column ID
+		dataType: string
+		lineageTag: f2189b65-fe0a-4f57-9ec8-9ebb590af605
+		summarizeBy: none
+		sourceColumn: ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column work_type_code =
+			// blank line
+			
+			SWITCH(TRUE(),
+			    ISBLANK(
+			        MAXX(RELATEDTABLE(fact_interval),[vehicle_group_code])),
+			        "не определено",
+			    FORMAT(
+			        MAXX(RELATEDTABLE(fact_interval),[vehicle_group_code]),
+			        "###") = "1",
+			            "Б/Т",
+			    FORMAT(
+			        MAXX(RELATEDTABLE(fact_interval),[vehicle_group_code]),
+			        "###") = "2",
+			            "автосхема",
+			    BLANK())
+		lineageTag: a8691174-ecde-4ef9-9877-d8e761d940c1
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column work_type_name = ```
+			
+			
+			    SWITCH(TRUE()
+			        ,[work_type_code] = "автосхема"
+			            ,"Trucks"
+			        ,[work_type_code] = "Б/Т"
+			            ,"On spot"
+			        ,[work_type_code] = "не определено"
+			            ,"Undefined"
+			        ,BLANK())
+			```
+		lineageTag: f5cecf9e-aac0-4556-976d-120520a72594
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_loader_work_type-d2a1fd42-db8d-4dfd-9d1f-2152a883585a = m
+		mode: import
+		source =
+				let
+				    src = Table.Distinct(
+				                Table.TransformColumnTypes(
+				                    Table.RenameColumns(
+				                        Table.FromList(
+				                            dim_loader[objrem_id],Splitter.SplitByNothing()),
+				                        {"Column1", "ID"}),
+				                    {"ID", Text.Type}),
+				                {"ID"})
+				in
+				    src
+
+	annotation PBI_ResultType = Table
+

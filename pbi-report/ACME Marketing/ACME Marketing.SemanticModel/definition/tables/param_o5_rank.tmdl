@@ -1,0 +1,50 @@
+/// Worst 5 / Top 5 switch of O5 Anomalies and alerts (redesign round 1, 2026-11-04). Disconnected, one table per card so the two switches stay independent; nothing picked = Worst 5.
+table param_o5_rank
+	lineageTag: 7889e726-f4f0-58a3-879a-95305d21181a
+
+	column rank_code
+		dataType: string
+		isHidden
+		lineageTag: 061114af-9250-5c42-897f-bb1aeb257f71
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rank_code]
+
+		annotation SummarizationSetBy = User
+
+	column rank_name
+		dataType: string
+		lineageTag: 3e0a3fa0-0e32-57c7-8645-15d46fc1bdee
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rank_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5210f5b9-d183-5596-bc97-6d5f70a1be35
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_o5_rank = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "rank_code", STRING
+				    ,"rank_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "WORST", "Worst 5", 1 }
+				        ,{ "TOP", "Top 5", 2 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

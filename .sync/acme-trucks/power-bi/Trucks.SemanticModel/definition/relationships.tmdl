@@ -1,0 +1,74 @@
+relationship ef81b2c8-8229-4d71-898a-b4d67314df14
+	fromColumn: fact_time_actual.vehicle_export_code
+	toColumn: dim_loader.objrem_id
+
+relationship 1006e311-c724-41f4-bcc4-137a34401155
+	fromColumn: fact_time_actual.idle_name_for_op_2
+	toColumn: bridge_fact_time_category.fact_category
+
+relationship 0959f467-e072-45e4-b108-452d352d08fa
+	fromColumn: fact_time_plan_week.indicatior_name_2
+	toColumn: bridge_plan_time_category.plan_category
+
+relationship 3439fd6d-4406-4816-805e-2e0f1061e402
+	fromColumn: bridge_plan_time_category.chart_category
+	toColumn: dim_time_category.category_code
+
+relationship 0e4cd034-bd19-4a71-b6bc-2038ff85c3ea
+	fromColumn: bridge_fact_time_category.chart_category
+	toColumn: dim_time_category.category_code
+
+relationship 3b21775d-d521-493a-982c-a311dc090f68
+	fromColumn: fact_time_plan_week.dat
+	toColumn: dim_date.date
+
+relationship 36c9c23b-d987-4811-a30f-757f27f8bcbd
+	fromColumn: fact_time_actual.dat
+	toColumn: dim_date.date
+
+relationship 0514dfbd-2886-4df9-8a03-6ee831bcd6b7
+	fromColumn: fact_rock_mass.date
+	toColumn: dim_date.date
+
+relationship e198c523-cc42-4a29-a1e5-aab186b9b2db
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_interval.start_dat
+	toColumn: LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487.Date
+
+relationship 4bf020c9-7fcb-42ad-89c2-b0da6e773723
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_interval.end_dat
+	toColumn: LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324.Date
+
+relationship 1e77eaab-2987-45ad-a32e-ae6c63723d3d
+	fromColumn: fact_time_plan_month.enterprise_id
+	toColumn: dim_mine.enterprise_id
+
+relationship 7652320f-965d-48d0-88f8-c6347bb3062b
+	fromColumn: fact_interval.vehicle_export_code
+	toColumn: dim_loader_work_type.ID
+
+relationship 4a499932-4833-4cfb-8bf3-5b6d5fd26aaa
+	fromColumn: dim_loader.objrem_id
+	toColumn: dim_loader_work_type.ID
+
+relationship 1023de20-9489-48b3-a468-d1ea2a948e3d
+	fromColumn: fact_time_plan_month.dat
+	toColumn: dim_date.date
+
+relationship 380f9ea2-2dad-4b8a-a47d-916cdcef1fd1
+	fromColumn: fact_time_plan_month.indicator_name_2
+	toColumn: bridge_plan_time_category.plan_category
+
+relationship 59b343fd-1822-4252-a656-3c81a1ed7099
+	fromColumn: fact_time_plan_week.vehicle_export_code
+	toColumn: dim_loader.objrem_id
+
+relationship 9960d5ac-b152-4ef6-a249-77788c148e48
+	fromColumn: fact_rock_mass.export_code
+	toColumn: dim_loader.objrem_id
+
+relationship c8dd6ee4-6513-4323-b429-8c7fefc286e0
+	fromColumn: fact_time_plan_month.vehicle_export_code
+	toColumn: dim_loader.objrem_id
+

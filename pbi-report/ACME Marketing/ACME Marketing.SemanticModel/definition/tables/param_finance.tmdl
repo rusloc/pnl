@@ -1,7 +1,7 @@
 /// Finance constants by valid-from date: gross margin, paid-team cost per month (data README D-2). Joins nothing.
 table param_finance
-	lineageTag: 55c38a62-6f03-5f23-bd9c-a1cfd76f43ff
 	isHidden
+	lineageTag: 55c38a62-6f03-5f23-bd9c-a1cfd76f43ff
 
 	column metric_code
 		dataType: string
@@ -53,3 +53,4 @@ table param_finance
 				    typed
 
 	annotation PBI_ResultType = Table
+

@@ -47,6 +47,13 @@
                   "Value": "'Dropdown'"
                 }
               }
+            },
+            "isInvertedSelectionMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
             }
           }
         }
@@ -335,6 +342,11 @@
           }
         }
       ]
+    },
+    "syncGroup": {
+      "groupName": "Название ЭКС в ГД",
+      "fieldChanges": true,
+      "filterChanges": true
     },
     "drillFilterOtherVisuals": true
   }

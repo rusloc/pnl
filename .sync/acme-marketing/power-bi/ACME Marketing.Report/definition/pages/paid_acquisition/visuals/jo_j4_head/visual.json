@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "jo_j4_head",
   "position": {
-    "x": 741.0,
-    "y": 503.0,
-    "z": 2420,
-    "height": 40,
-    "width": 637.0,
-    "tabOrder": 2420
+    "x": 741,
+    "y": 503,
+    "z": 2200,
+    "height": 24,
+    "width": 637,
+    "tabOrder": 2200
   },
   "visual": {
     "visualType": "textbox",
@@ -24,18 +24,6 @@
                       "fontFamily": "Segoe UI Bold",
                       "fontSize": "10.5pt",
                       "color": "#111827"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Does the app convert sign-ups as well as web?",
-                    "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "8.5pt",
-                      "color": "#8A94A6"
                     }
                   }
                 ]
@@ -161,6 +149,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_journey",
-  "isHidden": true
+  "parentGroupName": "grp_journey"
 }

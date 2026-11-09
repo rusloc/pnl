@@ -5,10 +5,10 @@ _(none yet)_
 
 ## Domain
 <!-- format: <file> — N entries · <fresh>/<verified>/<aging> · hot: <top-3 IDs by score> · <PREFIX>-NNN -->
-- [defect-patterns.md](domain/defect-patterns.md) — 6 entries · 6/0/0 · hot: DEF-003, DEF-001, DEF-004 · DEF-NNN (DEF-006 .sync hand-off staleness)
+- [defect-patterns.md](domain/defect-patterns.md) — 7 entries · 7/0/0 · hot: DEF-003, DEF-001, DEF-004 · DEF-NNN (DEF-007 JS 0 vs DAX BLANK on empty slices)
 - [test-infra-quirks.md](domain/test-infra-quirks.md) — 1 entry · 1/0/0 · hot: INFRA-001 (it.fails parity ratchet) · INFRA-NNN
-- [candidates.md](domain/candidates.md) — 6 awaiting second hit (stale fixture, per-view FX basis, one-track placeholder, stale DAX parity rows, CSS-hidden view-model field, unpinned transitive deps vs byte-identity); CAND-002 → DEF-006
-- [coverage-map.md](domain/coverage-map.md) — last pass 2026-10-31 (.sync receiver acceptance: 0 blocking); earlier 2026-10-30 Nordmark B vs C faces
+- [candidates.md](domain/candidates.md) — 9 awaiting second hit (… spec example window that misses its case, live-vs-live DAX tab called "pinned", near-zero under a 3-section format); CAND-002 → DEF-006
+- [coverage-map.md](domain/coverage-map.md) — last pass 2026-11-09 (ACME Trucks PBI = JS gate: 0 gap / 2 accepted); earlier 2026-11-05 ACME Marketing gate
 
 ## Open questions
 - 2026-10-23: F-21 default breakdown — spec says Channel/Entity, ADR-0007 §3a + Track B say Region; USER to decide

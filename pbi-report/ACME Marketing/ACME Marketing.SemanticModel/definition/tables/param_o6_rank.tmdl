@@ -1,0 +1,50 @@
+/// Worst 5 / Top 5 switch of O6 Top movers by Δ ROAS (redesign round 1, 2026-11-04). Disconnected, one table per card so the two switches stay independent; nothing picked = Worst 5.
+table param_o6_rank
+	lineageTag: 930f6378-9a10-5bdc-9d28-a861314c3b0e
+
+	column rank_code
+		dataType: string
+		isHidden
+		lineageTag: 250fce9f-1110-505b-ad04-5dc9ebf50b9f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rank_code]
+
+		annotation SummarizationSetBy = User
+
+	column rank_name
+		dataType: string
+		lineageTag: 3636eb3e-c3bb-5e2b-bf97-849e3aa88121
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [rank_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8a087926-fec9-5574-8f34-48e9dfbe3f83
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_o6_rank = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "rank_code", STRING
+				    ,"rank_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "WORST", "Worst 5", 1 }
+				        ,{ "TOP", "Top 5", 2 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

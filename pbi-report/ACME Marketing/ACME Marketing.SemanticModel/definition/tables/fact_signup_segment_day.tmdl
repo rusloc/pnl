@@ -2,7 +2,7 @@
 table fact_signup_segment_day
 	lineageTag: 35fd4934-0172-5008-8539-1a57375482c3
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -73,3 +73,4 @@ table fact_signup_segment_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

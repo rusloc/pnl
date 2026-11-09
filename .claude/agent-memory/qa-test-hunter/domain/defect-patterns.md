@@ -1,4 +1,4 @@
-<!-- next-id: DEF-007 -->
+<!-- next-id: DEF-008 -->
 
 # Defect Patterns
 
@@ -47,7 +47,7 @@
 **Tags:** comparator, status, fallback, parity, track-b, track-c, budget, prior-year
 **Confidence:** medium
 **Last-verified:** 2026-10-27
-**Related:** DEF-001
+**Related:** DEF-001, DEF-007
 **Status:** active
 
 ### DEF-005 · Shared copy file promised by a brief never written → per-track copy drift · 2026-10-27
@@ -72,4 +72,16 @@
 **Confidence:** medium
 **Last-verified:** 2026-10-31
 **Related:** DEF-002
+**Status:** active
+
+### DEF-007 · JS sums an empty slice to 0 where the DAX SUM returns BLANK (0 shown vs "—" / hidden) · 2026-11-05
+**Symptom:** outside the captured selections the JS prints `LY $0.0k` / `LY 0` (and draws `0` columns) where Power BI prints `LY —` or omits the category; inside the 14 parity selections everything matches, because every captured state has data in every slice
+**Cause:** the engine's `s()` / `sum()` return 0 for no rows; the DAX bases are bare `SUM`s (BLANK on no rows) and the faces test `ISBLANK` (`Vital V1 SVG` `_ly_text`), the visuals drop blank categories (K7 / `K5 Customers`)
+**Fix / test:** a stress state per surface whose slice is entirely empty (a 2025 window vs LY; a single campaign with sparse cohorts), asserting the "—" / the row count; ask bip for a capture row for the same state so it becomes a gated row
+**Seen:** js-marketing lib/engine/view.ts `vitals()` V1 / V2 `ly` vs pbi-report/ACME Marketing _measures.tmdl `Vital V1 SVG` / `Spend LY` (= `_b Spend` SUM); js-marketing `cohorts()` k7 `num(k?.customers ?? 0)` vs `K5 Customers` + capture filter `NOT ISBLANK` (both 2026-11-05, uncommitted on top of 650b2ca)
+**Hits:** 2
+**Tags:** blank-vs-zero, dax, sum, parity, empty-slice, vitals, cohorts
+**Confidence:** medium
+**Last-verified:** 2026-11-05
+**Related:** DEF-004
 **Status:** active

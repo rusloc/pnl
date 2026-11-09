@@ -4,10 +4,10 @@
   "position": {
     "x": 500,
     "y": 217,
-    "z": 7460,
+    "z": 7440,
     "height": 330,
     "width": 440,
-    "tabOrder": 7460
+    "tabOrder": 7440
   },
   "visual": {
     "visualType": "slicer",
@@ -52,6 +52,42 @@
         "isDefaultSort": true
       }
     },
+    "expansionStates": [
+      {
+        "roles": [
+          "Values"
+        ],
+        "levels": [
+          {
+            "queryRefs": [
+              "dim_campaign.channel_name"
+            ],
+            "isCollapsed": true,
+            "identityKeys": [
+              {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_campaign"
+                    }
+                  },
+                  "Property": "channel_name"
+                }
+              }
+            ],
+            "isPinned": true
+          },
+          {
+            "queryRefs": [
+              "dim_campaign.network_name"
+            ],
+            "isCollapsed": true,
+            "isPinned": true
+          }
+        ],
+        "root": {}
+      }
+    ],
     "objects": {
       "data": [
         {
@@ -320,44 +356,7 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true,
-    "expansionStates": [
-      {
-        "roles": [
-          "Values"
-        ],
-        "levels": [
-          {
-            "queryRefs": [
-              "dim_campaign.channel_name"
-            ],
-            "isCollapsed": true,
-            "isPinned": true,
-            "identityKeys": [
-              {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dim_campaign"
-                    }
-                  },
-                  "Property": "channel_name"
-                }
-              }
-            ]
-          },
-          {
-            "queryRefs": [
-              "dim_campaign.network_name"
-            ],
-            "isCollapsed": true,
-            "isPinned": true
-          }
-        ],
-        "root": {}
-      }
-    ]
+    "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_fp_channels",
-  "isHidden": true
+  "parentGroupName": "grp_fp_channels"
 }

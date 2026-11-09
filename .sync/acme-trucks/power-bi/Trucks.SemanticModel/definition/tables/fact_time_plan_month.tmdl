@@ -1,0 +1,150 @@
+table fact_time_plan_month
+	lineageTag: 4c4f5554-6379-402e-98fc-eabe392d384f
+
+	column enterprise_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 7fd4f93b-5fd2-4131-b235-2e1fce079fc0
+		summarizeBy: none
+		sourceColumn: enterprise_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column dat
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 05c4336b-b36e-4c6d-9f70-5f09881e0883
+		summarizeBy: none
+		sourceColumn: dat
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_export_code
+		dataType: int64
+		formatString: 0
+		lineageTag: 04bfbc32-25af-4ed8-b2d5-cd7c025cdf5f
+		summarizeBy: none
+		sourceColumn: vehicle_export_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehicle_name
+		dataType: string
+		lineageTag: 145c5247-c1ae-430a-885e-e20651c33d0a
+		summarizeBy: none
+		sourceColumn: vehicle_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicator_name
+		dataType: string
+		lineageTag: 56ec0b11-ff2b-4024-91bb-96606f0966b4
+		summarizeBy: none
+		sourceColumn: indicator_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column measure_name
+		dataType: string
+		lineageTag: 52202048-3f97-4bf8-90be-4137d190dcfa
+		summarizeBy: none
+		sourceColumn: measure_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicator_amount
+		dataType: double
+		lineageTag: 4935fded-13a8-4383-99c6-03cd9bcf9309
+		summarizeBy: sum
+		sourceColumn: indicator_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column period_id
+		dataType: int64
+		formatString: 0
+		lineageTag: c34c040a-e01f-4908-ba7b-9520303f6981
+		summarizeBy: sum
+		sourceColumn: period_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column indicator_name_2 = ```
+			// blank line
+			
+			SWITCH(TRUE(),
+			    fact_time_plan_month[indicator_name] = "КТГ план", 
+			        "КТГ", 
+			    fact_time_plan_month[indicator_name] = "Проверка",
+			        "КФВ",
+			    fact_time_plan_month[indicator_name])
+			```
+		lineageTag: 3017b39d-c3c5-417a-ba10-89ed9a435ae0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column _active
+		dataType: int64
+		formatString: 0
+		lineageTag: 4610e91d-0946-4664-8c73-dc59f64d94ff
+		summarizeBy: sum
+		sourceColumn: _active
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: 6f06a400-1b74-4140-b245-41ea9291593a
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column block
+		dataType: string
+		lineageTag: d46c43fe-b052-420b-b92d-c6a75ec5187f
+		summarizeBy: none
+		sourceColumn: block
+
+		annotation SummarizationSetBy = Automatic
+
+	column _id
+		dataType: string
+		lineageTag: 5fedf7e3-0f53-4ebf-bdb0-0d006228fe05
+		summarizeBy: none
+		sourceColumn: _id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_time_plan_month-75361c70-91a8-45eb-a75d-168e26557ba6 = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\План_2_МЕС.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"enterprise_id", Int64.Type},
+				            {"dat", type datetime},
+				            {"vehicle_export_code", Int64.Type},
+				            {"vehicle_name", type text},
+				            {"indicator_name", type text},
+				            {"measure_name", type text},
+				            {"indicator_amount", type number},
+				            {"period_id", Int64.Type},
+				            {"_active", Int64.Type},
+				            {"area", type text},
+				            {"block", type text},
+				            {"_id", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

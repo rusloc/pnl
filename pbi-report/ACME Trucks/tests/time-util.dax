@@ -8,8 +8,11 @@
 //              plus the table's visual filters (is_shown = "1", is_included = "да").
 //   week 9   = the same with week "9 (25.2-3.3)" (the week the old page had saved), for comparison with the baseline.
 // Tabs: 1 waterfall default | 2 waterfall week 9 | 3 waterfall chain (bars meet) | 4 KPI tiles vs table rows |
-//       5 Δ colour rule | 6 KPI noise rule (_KPI Noise) | 7 header context and the dropped contractor filter |
+//       5 Δ colour rule | 6 KPI noise off (_KPI Noise = 1, 2026-11-04) | 7 header context and the contractor filter |
 //       8 tooltip page tt_time_structure (2026-10-23): _TT Category and WF Δ pp per table row.
+// 2026-11-04 (USER): the contractor = blank page filter is back on this page (parity with "Time util (original)"). The
+// contexts below leave it out: under work type Trucks + On spot it changes no number (tab 7 checks this), and
+// tests/page-parity.dax covers the case with work type "Undefined".
 
 DEFINE
     // Deterministic units of the four noisy KPI measures (same DAX with _KPI Noise = 1)
@@ -581,25 +584,30 @@ RETURN
 ORDER BY [_pass], [_category_sort]
 
 EVALUATE
-// ---------------------------------------------------------------- 6 KPI noise rule: while _KPI Noise is RANDBETWEEN ( 10, 100 ), the rock mass
-// tiles are unit x a whole number in [10, 100]. When the noise is removed (body = 1) this tab must be updated.
+// ---------------------------------------------------------------- 6 KPI noise off: _KPI Noise = 1 since 2026-11-04 (was RANDBETWEEN ( 10, 100 )),
+// so the rock mass tiles equal their unit and the volume Δ pills equal Fact - Plan.
 VAR _w =
     SUMMARIZECOLUMNS (
         _f_included, _f_plan_type, _f_calculation, _f_work_type
         ,"k0", [Rock Mass by Truck Plan], "u0", [_test Rock Mass by Truck Plan unit]
         ,"k1", [Rock Mass by Truck Fact], "u1", [_test Rock Mass by Truck Fact unit]
         ,"n", [_KPI Noise]
+        ,"d0", [KPI Rock Mass by Truck Δ]
+        ,"p0", [Performance per Truck Plan], "p1", [Performance per Truck Fact], "d1", [KPI Performance per Truck Δ]
     )
 RETURN
     UNION (
-        ROW ( "_check", "rock mass plan = unit x noise", "_pass", VAR _m = DIVIDE ( MAXX ( _w, [k0] ), MAXX ( _w, [u0] ) ) RETURN _m >= 10 && _m <= 100 && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6 )
-        ,ROW ( "_check", "rock mass fact = unit x noise", "_pass", VAR _m = DIVIDE ( MAXX ( _w, [k1] ), MAXX ( _w, [u1] ) ) RETURN _m >= 10 && _m <= 100 && ABS ( _m - ROUND ( _m, 0 ) ) <= 1e-6 )
-        ,ROW ( "_check", "_KPI Noise in [10, 100]", "_pass", VAR _n = MAXX ( _w, [n] ) RETURN _n >= 10 && _n <= 100 )
+        ROW ( "_check", "rock mass plan = unit", "_pass", ABS ( MAXX ( _w, [k0] ) - MAXX ( _w, [u0] ) ) <= _tol * MAXX ( _w, ABS ( [u0] ) ) )
+        ,ROW ( "_check", "rock mass fact = unit", "_pass", ABS ( MAXX ( _w, [k1] ) - MAXX ( _w, [u1] ) ) <= _tol * MAXX ( _w, ABS ( [u1] ) ) )
+        ,ROW ( "_check", "_KPI Noise = 1", "_pass", MAXX ( _w, [n] ) = 1 )
+        ,ROW ( "_check", "rock mass delta = fact - plan", "_pass", ABS ( MAXX ( _w, [d0] ) - ( MAXX ( _w, [k1] ) - MAXX ( _w, [k0] ) ) ) <= 1e-6 )
+        ,ROW ( "_check", "performance delta = fact - plan", "_pass", ABS ( MAXX ( _w, [d1] ) - ( MAXX ( _w, [p1] ) - MAXX ( _w, [p0] ) ) ) <= 1e-6 )
     )
 ORDER BY [_pass], [_check]
 
 EVALUATE
-// ---------------------------------------------------------------- 7 header context; the page no longer filters contractor (both groups count)
+// ---------------------------------------------------------------- 7 header context; the contractor = blank page filter (restored 2026-11-04)
+// changes no KPI under the default work types, and both contractor groups are still in the fact data
 VAR _h =
     CALCULATE (
         [_Header Context]
@@ -611,10 +619,16 @@ VAR _contractors =
         ,_f_included
         ,fact_time_actual
     )
+VAR _tl              = CALCULATE ( [KPI Truck Loading Fact %], _f_included, _f_plan_type, _f_calculation, _f_work_type )
+VAR _tl_page         = CALCULATE ( [KPI Truck Loading Fact %], _f_included, _f_plan_type, _f_calculation, _f_work_type, TREATAS ( { BLANK () }, dim_loader[contractor] ) )
+VAR _rm              = CALCULATE ( [Rock Mass by Truck Fact], _f_included, _f_plan_type, _f_calculation, _f_work_type )
+VAR _rm_page         = CALCULATE ( [Rock Mass by Truck Fact], _f_included, _f_plan_type, _f_calculation, _f_work_type, TREATAS ( { BLANK () }, dim_loader[contractor] ) )
 RETURN
     UNION (
         ROW ( "_check", "header text", "_pass", _h = "Weeks 44 (2022) – 14 (2023)  ·  Weighted calculation  ·  Month plan" )
         ,ROW ( "_check", "loaders with and without contractor both in the fact data", "_pass", _contractors = 2 )
+        ,ROW ( "_check", "contractor page filter: truck loading fact unchanged", "_pass", _tl = _tl_page )
+        ,ROW ( "_check", "contractor page filter: rock mass fact unchanged", "_pass", _rm = _rm_page )
     )
 ORDER BY [_pass], [_check]
 

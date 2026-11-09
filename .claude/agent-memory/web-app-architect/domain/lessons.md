@@ -1,4 +1,4 @@
-<!-- next-id: LSN-002 -->
+<!-- next-id: LSN-003 -->
 
 # Lessons (durable)
 
@@ -12,4 +12,16 @@
 **Confidence:** high
 **Last-verified:** 2026-11-04
 **Related:** DEC-010, DEC-006
+**Status:** active
+
+### LSN-002 · The USER's first-open round rewrites the vitals and the view map within a day; sequence the second flavour after it and keep its engine behind `view.ts` · 2026-11-05
+**Lesson:** two showcases in a row changed shape right after the USER's first open of the Power BI flavour — Nordmark (ADR-0013 (k), 2026-10-29: the whole period model, Week/PTD/YTD → granularity + item) and ACME Marketing (redesign round 1, 2026-11-04: eight cards dropped or moved, the six vitals replaced and their Δ basis switched to LY, question lines / captions / footer removed, saved views removed; 2026-11-05: per-vital dynamics, O5/O6 movers window). A JS flavour built in parallel from the spec would have been rebuilt twice; built after the round, it mirrors a settled PBIP (DEC-011). The round also surfaces data-coverage bugs only a real user state finds (Custom from the first day of data → previous period before the data → blank movers).
+**Why:** the USER reviews by clicking, not by reading the spec; the spec's card catalogue survives, its layout and wording do not. Pattern that worked: PBI first → first-open round(s) → freeze → second flavour with the PBIP as the reference, copy extracted verbatim, engine faces isolated in `view.ts` so the next round touches no metric code.
+**Reversal cost:** low — it is a sequencing choice; parallel builds remain right when the USER has already approved a prototype (Nordmark v5 was approved before build, yet (k) still happened).
+**Applied at:** ADR-0015 (a) as amended 2026-11-05 (phase 4 after the rounds); `docs/ADD/features/marketing-js-flavour.md` §8 note "expect a redesign pass … keep the engine untouched"; ADR-0013 (k) and the PBIP README change log as the evidence.
+**Hits:** 2
+**Tags:** sequencing, first-open, redesign, two-flavours, parity, view-layer, pbi-reference
+**Confidence:** high
+**Last-verified:** 2026-11-05
+**Related:** DEC-011, DEC-006, LSN-001
 **Status:** active

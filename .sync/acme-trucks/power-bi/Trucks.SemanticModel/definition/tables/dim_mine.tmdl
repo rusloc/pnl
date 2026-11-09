@@ -1,0 +1,39 @@
+table dim_mine
+	lineageTag: 7ce34d9b-9b42-4c32-a915-abb6e552bfc9
+
+	column enterprise_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 230cbe98-21ca-486b-b46c-431b120be7cb
+		summarizeBy: none
+		sourceColumn: enterprise_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column enterprise_name_short
+		dataType: string
+		lineageTag: 4e8fb82d-fa17-4304-ab2e-8e18a2e46c8c
+		summarizeBy: none
+		sourceColumn: enterprise_name_short
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_mine-ea7922c7-b595-4fdf-8c3c-2e605fc8b7f7 = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\Справочник разрезов.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"enterprise_id", Int64.Type},
+				            {"enterprise_name_short", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table
+

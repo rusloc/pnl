@@ -1,0 +1,801 @@
+// ACME Trucks - page parity (bip, 2026-11-04): the new page "Time utilization" (ReportSectionbdcfb2b87f3167b0ec4f) must show
+// the same KPI numbers as "Time util (original)" (time_util_original) under the same filters. Background and diagnosis:
+// docs/ADD/features/trucks-kpi-mismatch-2026-11-04.md. Run in Power BI Desktop > DAX query view against the local Import
+// model after a refresh; every row of every result tab must show _pass = TRUE. Tolerance: relative 1e-9.
+// Both pages carry the report filter dim_loader[is_included] = "да" and the page filter dim_loader[contractor] = blank
+// (restored on the new page 2026-11-04); their slicers share the sync groups Date, Филиал, type, _schema and
+// Название ЭКС в ГД (Calculation is in no group on either page).
+// New page side   = the KPI tile measures (the cards have no visual filters).
+// Original side   = what that page shows for the same number: waterfall label rows 27 (Truck loading) and 24 (Effective
+//                   work time) under its label tables' visual filters, its Plan / Fact cards, and for the volume Δ the
+//                   difference of its two cards (the page has no Δ card), so the tab also proves Δ = Fact - Plan.
+// Filter sets     = S1 the USER's context, S2 all weeks with the other switch values, S3 one week and office with work
+//                   type "Undefined" added (the case where the contractor filter changes the numbers).
+// Tabs: 1 new page = original page, 12 KPI values x 3 filter sets | 2 the four tiles in S1, pinned (noise off since
+//       2026-11-04, so the values are deterministic); Δ = Fact - Plan (x 100 for the pp tiles)
+
+DEFINE
+    VAR _tol             = 1e-9
+    VAR _r_included      = TREATAS ( { "да" }, dim_loader[is_included] )
+    VAR _p_contractor    = TREATAS ( { BLANK () }, dim_loader[contractor] )
+    VAR _v_category      = FILTER ( ALL ( dim_time_category[category_code] ), NOT ISBLANK ( dim_time_category[category_code] ) )
+    VAR _v_shown         = TREATAS ( { "1" }, dim_time_category[is_shown] )
+    VAR _v_included      = TREATAS ( { "да" }, dim_time_category[is_included] )
+
+EVALUATE
+// ---------------------------------------------------------------- 1 new page = original page, 12 KPI values x 3 filter sets
+VAR _rows =
+    {
+        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "1 Truck loading Plan %"
+            ,CALCULATE (
+                [KPI Truck Loading Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "1 Truck loading Fact %"
+            ,CALCULATE (
+                [KPI Truck Loading Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "1 Truck loading Δ pp"
+            ,CALCULATE (
+                [KPI Truck Loading Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "2 Effective work Plan %"
+            ,CALCULATE (
+                [KPI Effective Work Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "2 Effective work Fact %"
+            ,CALCULATE (
+                [KPI Effective Work Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "2 Effective work Δ pp"
+            ,CALCULATE (
+                [KPI Effective Work Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "3 Performance Plan"
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "3 Performance Fact"
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "3 Performance Δ"
+            ,CALCULATE (
+                [KPI Performance per Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact] - [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "4 Mass loaded Plan"
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "4 Mass loaded Fact"
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S1 week 10 / Month / Weighted / Trucks + On spot", "4 Mass loaded Δ"
+            ,CALCULATE (
+                [KPI Rock Mass by Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact] - [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "1 Truck loading Plan %"
+            ,CALCULATE (
+                [KPI Truck Loading Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "1 Truck loading Fact %"
+            ,CALCULATE (
+                [KPI Truck Loading Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "1 Truck loading Δ pp"
+            ,CALCULATE (
+                [KPI Truck Loading Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "2 Effective work Plan %"
+            ,CALCULATE (
+                [KPI Effective Work Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "2 Effective work Fact %"
+            ,CALCULATE (
+                [KPI Effective Work Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "2 Effective work Δ pp"
+            ,CALCULATE (
+                [KPI Effective Work Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "3 Performance Plan"
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "3 Performance Fact"
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "3 Performance Δ"
+            ,CALCULATE (
+                [KPI Performance per Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact] - [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "4 Mass loaded Plan"
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "4 Mass loaded Fact"
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S2 all weeks / Week / Linear / Trucks + On spot", "4 Mass loaded Δ"
+            ,CALCULATE (
+                [KPI Rock Mass by Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact] - [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "Week" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "1 Truck loading Plan %"
+            ,CALCULATE (
+                [KPI Truck Loading Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "1 Truck loading Fact %"
+            ,CALCULATE (
+                [KPI Truck Loading Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "1 Truck loading Δ pp"
+            ,CALCULATE (
+                [KPI Truck Loading Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 27, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "2 Effective work Plan %"
+            ,CALCULATE (
+                [KPI Effective Work Plan %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Plan %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "2 Effective work Fact %"
+            ,CALCULATE (
+                [KPI Effective Work Fact %]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Fact %], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included )
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "2 Effective work Δ pp"
+            ,CALCULATE (
+                [KPI Effective Work Δ pp]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                CALCULATE ( [Time Share Δ], dim_time_category[sort_order] = 24, _v_category, _v_shown, _v_included ) * 100
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "3 Performance Plan"
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "3 Performance Fact"
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "3 Performance Δ"
+            ,CALCULATE (
+                [KPI Performance per Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Performance per Truck Fact] - [Performance per Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "4 Mass loaded Plan"
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "4 Mass loaded Fact"
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+        ,        ( "S3 week 5 / Month / Linear / K3 / + Undefined", "4 Mass loaded Δ"
+            ,CALCULATE (
+                [KPI Rock Mass by Truck Δ]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+            ,CALCULATE (
+                [Rock Mass by Truck Fact] - [Rock Mass by Truck Plan]
+                ,_r_included
+                ,_p_contractor
+                ,TREATAS ( { "5 (28.1-3.2)" }, dim_date[week_label] )
+                ,TREATAS ( { "K3" }, dim_loader[office_name] )
+                ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+                ,TREATAS ( { "Linear" }, param_calculation[calculation_name] )
+                ,TREATAS ( { "Trucks", "On spot", "Undefined" }, dim_loader_work_type[work_type_name] )
+            )
+        )
+    }
+RETURN
+    ADDCOLUMNS (
+        SELECTCOLUMNS ( _rows, "_set", [Value1], "_kpi", [Value2], "_new_page", [Value3], "_original_page", [Value4] )
+        ,"_pass",
+            NOT ISBLANK ( [_new_page] )
+                && ABS ( [_new_page] - [_original_page] ) <= _tol * MAX ( 1, ABS ( [_original_page] ) )
+    )
+ORDER BY [_set], [_kpi]
+
+EVALUATE
+// ---------------------------------------------------------------- 2 the four tiles in S1 (USER context), pinned; Δ = Fact - Plan
+VAR _k =
+    SUMMARIZECOLUMNS (
+        _r_included
+        ,_p_contractor
+        ,TREATAS ( { "10 (4.3-10.3)" }, dim_date[week_label] )
+        ,TREATAS ( { "Month" }, param_plan_type[plan_type_name] )
+        ,TREATAS ( { "Weighted" }, param_calculation[calculation_name] )
+        ,TREATAS ( { "Trucks", "On spot" }, dim_loader_work_type[work_type_name] )
+        ,"tl_p", [KPI Truck Loading Plan %], "tl_f", [KPI Truck Loading Fact %], "tl_d", [KPI Truck Loading Δ pp]
+        ,"ew_p", [KPI Effective Work Plan %], "ew_f", [KPI Effective Work Fact %], "ew_d", [KPI Effective Work Δ pp]
+        ,"pf_p", [Performance per Truck Plan], "pf_f", [Performance per Truck Fact], "pf_d", [KPI Performance per Truck Δ]
+        ,"rm_p", [Rock Mass by Truck Plan], "rm_f", [Rock Mass by Truck Fact], "rm_d", [KPI Rock Mass by Truck Δ]
+    )
+VAR _actual =
+    UNION (
+         SELECTCOLUMNS ( _k, "_tile", "1 Truck loading", "_plan", [tl_p], "_fact", [tl_f], "_delta", [tl_d], "_scale", 100 )
+        ,SELECTCOLUMNS ( _k, "_tile", "2 Effective work", "_plan", [ew_p], "_fact", [ew_f], "_delta", [ew_d], "_scale", 100 )
+        ,SELECTCOLUMNS ( _k, "_tile", "3 Performance per truck", "_plan", [pf_p], "_fact", [pf_f], "_delta", [pf_d], "_scale", 1 )
+        ,SELECTCOLUMNS ( _k, "_tile", "4 Mass loaded per truck", "_plan", [rm_p], "_fact", [rm_f], "_delta", [rm_d], "_scale", 1 )
+    )
+VAR _expected =
+    DATATABLE (
+        "_tile", STRING,
+        "_expected_plan", DOUBLE,
+        "_expected_fact", DOUBLE,
+        {
+            { "1 Truck loading", 0.429248752833687, 0.453487368220992 },
+            { "2 Effective work", 0.536860594674322, 0.515606142529147 },
+            { "3 Performance per truck", 847.046822201518, 762.466995789402 },
+            { "4 Mass loaded per truck", 7155.96, 7028.802957 }
+        }
+    )
+RETURN
+    ADDCOLUMNS (
+        NATURALLEFTOUTERJOIN ( _expected, _actual )
+        ,"_pass",
+            ABS ( [_plan] - [_expected_plan] ) <= _tol * MAX ( 1, ABS ( [_expected_plan] ) )
+                && ABS ( [_fact] - [_expected_fact] ) <= _tol * MAX ( 1, ABS ( [_expected_fact] ) )
+                && ABS ( [_delta] - ( [_fact] - [_plan] ) * [_scale] ) <= _tol * MAX ( 1, ABS ( [_delta] ) )
+    )
+ORDER BY [_tile]

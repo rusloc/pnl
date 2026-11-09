@@ -1,0 +1,46 @@
+model Model
+	culture: ru-RU
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: ru-RU
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+extendedProperty TabularEditor_DeploymentMetadata =
+		{
+		  "User": "FETISHMATE\\pimpm",
+		  "Time": "2023-08-13T18:35:29.9672684+03:00",
+		  "ClientMachine": "FETISHMATE",
+		  "DeploymentMode": "SaveUI",
+		  "TabularEditorBuild": "2.18.8529.27318"
+		}
+
+annotation PBI_QueryOrder = ["DataFolder","_measures","fact_rock_mass","fact_time_actual","dim_mine","dim_loader","fact_time_plan_week","dim_time_category","bridge_plan_time_category","bridge_fact_time_category","param_calculation","dim_date","fact_time_plan_month","fact_interval","dim_loader_work_type","param_plan_type"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation __TEdtr = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DateTableTemplate_432d62ed-472e-468a-b164-32515fcfb4b8
+ref table _measures
+ref table fact_rock_mass
+ref table fact_time_actual
+ref table dim_mine
+ref table dim_loader
+ref table fact_time_plan_week
+ref table dim_time_category
+ref table bridge_plan_time_category
+ref table bridge_fact_time_category
+ref table param_calculation
+ref table dim_date
+ref table fact_time_plan_month
+ref table fact_interval
+ref table LocalDateTable_d5a01e7b-d51d-432e-8997-36d70b4d8487
+ref table LocalDateTable_44362d6a-6ef9-4703-92e9-e78399579324
+ref table dim_loader_work_type
+ref table param_plan_type
+
+ref cultureInfo ru-RU
+

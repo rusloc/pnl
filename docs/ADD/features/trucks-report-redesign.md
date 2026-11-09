@@ -17,8 +17,8 @@
 | 2 | Only "Time util" remains | 11 pages, 2 bookmarks and the tooltip-page bindings deleted |
 | 3 | All English | Tables, columns, measures, folders, page, captions. Captions fixed in the calculated columns: sort 3 `КР` "Capital repairs" (was "Сonservation" with a Cyrillic С), 14 "Awaiting trucks" (was "Awating"), 15 "Conservation / reserve" (was "Reserved"), 16 "Awaiting operator", plan type "Month" / "Week" (was MONTH / WEEK). M `#table` codes and DAX literals untouched (main agent default) |
 | 4 | 1920 × 1080 | Horizontal mockup px × 4/3; vertical compressed (header 72, filter bar 90, KPI tiles 132, waterfall card 706, footnote). Font pt = mockup px, except KPI Plan 18 pt Semibold and Fact 22 pt Bold (mockup 22 / 28), so the 8-digit noisy numbers fit beside the Δ pill |
-| 5 | Contractor = blank filter dropped | Page drillthrough binding and its filter removed. New expected values in `tests/time-util.dax` |
-| 6 | KPI `RANDBETWEEN` kept | Isolated in `_KPI Noise`; removing it is a one-line change (body → `1`) |
+| 5 | Contractor = blank filter dropped | Page drillthrough binding and its filter removed. New expected values in `tests/time-util.dax`. **Restored 2026-11-04 (USER):** the contractor = blank page filter is back on the redesign page, as a plain page filter, so it matches "Time util (original)" (see `trucks-kpi-mismatch-2026-11-04.md`) |
+| 6 | KPI `RANDBETWEEN` kept | Isolated in `_KPI Noise`; removing it is a one-line change (body → `1`). **Reversed 2026-11-04 (USER):** `_KPI Noise = 1`, so both pages show the same, deterministic numbers |
 
 ### 0.2 Model (rename map)
 

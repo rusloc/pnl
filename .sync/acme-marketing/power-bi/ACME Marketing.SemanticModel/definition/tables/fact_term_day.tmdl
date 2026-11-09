@@ -2,7 +2,7 @@
 table fact_term_day
 	lineageTag: 71b94f04-7d21-5eeb-a1e4-e36a870a6fd4
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isHidden
 		formatString: yyyy-mm-dd
@@ -95,3 +95,4 @@ table fact_term_day
 				    typed
 
 	annotation PBI_ResultType = Table
+

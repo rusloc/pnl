@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ov_o3_head",
   "position": {
-    "x": 30.0,
-    "y": 402,
-    "z": 1500,
-    "height": 40,
-    "width": 874.0,
-    "tabOrder": 1500
+    "x": 30,
+    "y": 600,
+    "z": 1630,
+    "height": 24,
+    "width": 1348,
+    "tabOrder": 1630
   },
   "visual": {
     "visualType": "textbox",
@@ -19,23 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Spend vs plan and CAC, daily",
+                    "value": "Spend vs plan and CAC",
                     "textStyle": {
                       "fontFamily": "Segoe UI Bold",
                       "fontSize": "10.5pt",
                       "color": "#111827"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "When did it move?",
-                    "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "8.5pt",
-                      "color": "#8A94A6"
                     }
                   }
                 ]
@@ -117,7 +105,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Spend vs plan and CAC, daily'"
+                  "Value": "'Spend vs plan and CAC'"
                 }
               }
             }

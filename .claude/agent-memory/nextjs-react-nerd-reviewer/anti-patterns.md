@@ -1,4 +1,4 @@
-<!-- next-id: AP-002 -->
+<!-- next-id: AP-003 -->
 
 # Anti-Patterns
 
@@ -10,4 +10,14 @@
 **Confidence:** high
 **Last-verified:** 2026-10-30
 **Related:** CAND-015
+**Status:** active
+
+### AP-002 · Copy that describes the data shape or layout outlives the change · 2026-11-05
+**Symptom:** ⓘ / How to read text names a structure that a later change removed: "(draft sample)" after the full data landed; "The binoculars at the right end open their daily dynamics" after the binoculars moved before each vital's label.
+**Cause:** the data or layout change is made in code / visuals, the prose that describes it lives elsewhere (copy.ts, dim_card, a textbox) and no test reads it.
+**Fix:** in the same change, grep the copy sources for words naming the old shape or position ("sample", "top N", "right end", the old control name). When seeding copy verbatim from another flavour, keep it byte-identical and flag the stale line to the owner instead of fixing it silently.
+**Seen:** js-report/lib/sales/copy.ts c11 + p13 (2026-11-02); pbi-report/ACME Marketing howto_overview_text, seeded into js-marketing/lib/engine/copy.ts HOW_TO_READ.text.overview[0] (2026-11-05)
+**Confidence:** high
+**Last-verified:** 2026-11-05
+**Related:** CAND-020
 **Status:** active

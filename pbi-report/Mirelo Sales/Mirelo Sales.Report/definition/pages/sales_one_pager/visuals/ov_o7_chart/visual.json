@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ov_o7_chart",
   "position": {
-    "x": 44,
+    "x": 12,
     "y": 448,
     "z": 1420,
     "height": 142,
@@ -28,8 +28,8 @@
               },
               "queryRef": "param_days.days_since_first",
               "nativeQueryRef": "days_since_first",
-              "displayName": "Days since first loan",
-              "active": true
+              "active": true,
+              "displayName": "Days since first loan"
             }
           ]
         },
@@ -48,8 +48,8 @@
               },
               "queryRef": "param_cohort_slot.slot_name",
               "nativeQueryRef": "slot_name",
-              "displayName": "Cohort",
-              "active": true
+              "active": true,
+              "displayName": "Cohort"
             }
           ]
         },

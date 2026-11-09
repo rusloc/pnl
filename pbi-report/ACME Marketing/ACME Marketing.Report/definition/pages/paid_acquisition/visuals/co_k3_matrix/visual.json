@@ -2,37 +2,17 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "co_k3_matrix",
   "position": {
-    "x": 26.0,
-    "y": 442,
-    "z": 2620,
-    "height": 112,
-    "width": 914.0,
-    "tabOrder": 2620
+    "x": 26,
+    "y": 527,
+    "z": 2330,
+    "height": 241,
+    "width": 914,
+    "tabOrder": 2330
   },
   "visual": {
     "visualType": "pivotTable",
     "query": {
       "queryState": {
-        "Rows": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dim_month"
-                    }
-                  },
-                  "Property": "month_name"
-                }
-              },
-              "queryRef": "dim_month.month_name",
-              "nativeQueryRef": "month_name",
-              "active": true,
-              "displayName": "COHORT"
-            }
-          ]
-        },
         "Columns": {
           "projections": [
             {
@@ -50,6 +30,26 @@
               "nativeQueryRef": "day_label",
               "active": true,
               "displayName": "DAY"
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_month"
+                    }
+                  },
+                  "Property": "month_name"
+                }
+              },
+              "queryRef": "dim_month.month_name",
+              "nativeQueryRef": "month_name",
+              "active": true,
+              "displayName": "COHORT"
             }
           ]
         },
@@ -559,6 +559,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_cohorts",
-  "isHidden": true
+  "parentGroupName": "grp_cohorts"
 }

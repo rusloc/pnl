@@ -1,0 +1,346 @@
+table dim_loader
+	lineageTag: 23104951-1534-4139-a860-88b8683c7332
+
+	column branch_name
+		dataType: string
+		lineageTag: 90f3c3c9-bf47-4dfb-ac22-5bcbae7138c0
+		summarizeBy: none
+		sourceColumn: Филиал
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column loader_name_time_system
+		dataType: string
+		lineageTag: f9dc281b-a749-4ed6-b1bb-ce01deb24b29
+		summarizeBy: none
+		sourceColumn: Название ЭКС в АСД КРВ
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column loader_name_dispatch
+		dataType: string
+		lineageTag: b14f0d25-7b9a-4d72-8101-61c87c1b7b85
+		summarizeBy: none
+		sourceColumn: Название ЭКС в ГД
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column objrem_id
+		dataType: int64
+		formatString: 0
+		lineageTag: fe5b37ee-f19a-4446-9ca5-98504afa312f
+		summarizeBy: none
+		sourceColumn: objrem_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: fe90d6e1-1ef2-459e-9b21-e9f115eda815
+		summarizeBy: none
+		sourceColumn: name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column loader_number
+		dataType: string
+		lineageTag: 69c043a3-b23e-434d-b4f4-a356cba1da20
+		summarizeBy: none
+		sourceColumn: номер
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column comment
+		dataType: string
+		lineageTag: 60171344-2c36-4b5b-8728-a3e9f40e2459
+		summarizeBy: none
+		sourceColumn: Комментарий
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column bucket_volume_m3
+		dataType: int64
+		formatString: 0
+		lineageTag: 33319ede-da3c-47d8-a362-af0680b361cd
+		summarizeBy: sum
+		sourceColumn: Объем ковша
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_included
+		dataType: string
+		lineageTag: 47013369-0755-4135-b9e3-001968cdef25
+		summarizeBy: none
+		sourceColumn: Учитывать
+
+		annotation SummarizationSetBy = Automatic
+
+	column loader_name_trip_system
+		dataType: string
+		lineageTag: 6199cacc-900d-46c6-8111-920cfd6738ed
+		summarizeBy: none
+		sourceColumn: Название ЭКС в АСД Рейсы
+
+		annotation SummarizationSetBy = Automatic
+
+	column field_name
+		dataType: string
+		lineageTag: a7f46883-624f-4ba0-931c-1c6240e4eedc
+		summarizeBy: none
+		sourceColumn: Поле
+
+		annotation SummarizationSetBy = Automatic
+
+	column contractor
+		dataType: string
+		lineageTag: 1f207503-884b-4746-b8b6-966d7e05ba41
+		summarizeBy: none
+		sourceColumn: Подрядчик
+
+		annotation SummarizationSetBy = Automatic
+
+	column office_name =
+			
+			
+			SWITCH(TRUE()
+			    ,[branch_name] = "Кедровский"
+			        ,"K1"
+			    ,[branch_name] = "Моховский"
+			        ,"M2"
+			    ,[branch_name] = "Бачатский"
+			        ,"B1"
+			    ,[branch_name] = "Калтанский"
+			        ,"K2"
+			    ,[branch_name] = "Талдинский"
+			        ,"T1"
+			    ,[branch_name] = "Краснобродский"
+			        ,"K3"
+			    ,BLANK())
+		lineageTag: 4963381b-f762-48f6-9811-d19924a757bb
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column loader_name =
+			
+			
+			SWITCH(TRUE()
+			,[loader_name_dispatch] = "ЭКГ-12 №09","LDR-12-09"
+			,[loader_name_dispatch] = "ЭКГ-12 №12","LDR-12-12"
+			,[loader_name_dispatch] = "ЭКГ-15 №49","LDR-15-49"
+			,[loader_name_dispatch] = "ЭКГ-18М №02","LDR-18M-02"
+			,[loader_name_dispatch] = "ЭКГ-18 №21","LDR-18-21"
+			,[loader_name_dispatch] = "ЭКГ-35 №02","LDR-35-02"
+			,[loader_name_dispatch] = "Р&Н-2800 №28152","LDR-2800-2851"
+			,[loader_name_dispatch] = "Р&Н-2800 №ES 28195","LDR-2800-ES-2895"
+			,[loader_name_dispatch] = "LIEBHERR R9200 №40044","LDR-9200-4044"
+			,[loader_name_dispatch] = "КОМАТSU РС 1250SР-7 №30688","LDR-1250-SP-3068"
+			,[loader_name_dispatch] = "EX 3600 №001393","LDR-3600-1393"
+			,[loader_name_dispatch] = "ЭШ-10/70 №62","LDR-10-7062"
+			,[loader_name_dispatch] = "R-984С №18281","LDR-984-1881"
+			,[loader_name_dispatch] = "ЭШ-10/70 №449","LDR-10-70-449"
+			,[loader_name_dispatch] = "ЭКГ-8у№7","LDR-8-7"
+			,[loader_name_dispatch] = "ЭКГ-10№9","LDR-10-9"
+			,[loader_name_dispatch] = "ЭКГ-18 №29","LDR-18-29"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7265","LDR-1200-7-7265"
+			,[loader_name_dispatch] = "ЭШ-10/70 №28","LDR-10-70-28"
+			,[loader_name_dispatch] = "ЭШ-10/70 №381","LDR-10-70-381"
+			,[loader_name_dispatch] = "ЭШ-11/70 №7","LDR-11-70-7"
+			,[loader_name_dispatch] = "ЭКГ-10№90","LDR-10-90-M"
+			,[loader_name_dispatch] = "ЭКГ-10№140","LDR-10-140"
+			,[loader_name_dispatch] = "ЭКГ-11№14","LDR-11-14"
+			,[loader_name_dispatch] = "КОМАТSU РС 1250SР-7 №20761","LDR-1250-20761"
+			,[loader_name_dispatch] = "Hitachi EX-1200 №7268","LDR-1200-7268-X"
+			,[loader_name_dispatch] = "САТ-390 №10057","LDR-390-1057"
+			,[loader_name_dispatch] = "ЭКГ-15 №401","LDR-15-401"
+			,[loader_name_dispatch] = "Р&Н-2800 №28149","LDR-2800-28149"
+			,[loader_name_dispatch] = "Р&Н-2800 №28155","LDR-2800-28155"
+			,[loader_name_dispatch] = "CAT-395 №00293","LDR-395-00293"
+			,[loader_name_dispatch] = "Р&Н-4100ХРС №41214","LDR-4100-41214"
+			,[loader_name_dispatch] = "ЭКГ-18М №03","LDR-18-03"
+			,[loader_name_dispatch] = "ЭКГ-18М №04","LDR-18-04-X"
+			,[loader_name_dispatch] = "НIТАСНI ЕХ-1200-6 (ВЕ) №1249","LDR-1200-1249"
+			,[loader_name_dispatch] = "LIEBHERR R9100 №36098","LDR-9100-36098"
+			,[loader_name_dispatch] = "ЭШ-11/70 №15","LDR-11-70-15"
+			,[loader_name_dispatch] = "ЭШ13/50 №37","LDR-13-50-37"
+			,[loader_name_dispatch] = "WК-35  №08010802","LDR-35-0801-X"
+			,[loader_name_dispatch] = "ЭКГ-15 №55","LDR-15-55"
+			,[loader_name_dispatch] = "WК-35  №08018908","LDR-35-0801"
+			,[loader_name_dispatch] = "WК-35  №08011802А","LDR-35-08011-S"
+			,[loader_name_dispatch] = "ЭКГ-18 №05","LDR-18-05"
+			,[loader_name_dispatch] = "ЭКГ-18М №01","LDR-18-M-01"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №HCM18K00A00001281","LDR-1900-6"
+			,[loader_name_dispatch] = "LIEBHERR R9250 №192","LDR-9250-192"
+			,[loader_name_dispatch] = "ЭКГ-35 №01","LDR-35-01"
+			,[loader_name_dispatch] = "ЭКГ-32Р №01","LDR-32-01-P"
+			,[loader_name_dispatch] = "ЭШ-11/70 №53","LDR-11-70-53"
+			,[loader_name_dispatch] = "ЭШ13/50 №21/56","LDR-13-50-21-56"
+			,[loader_name_dispatch] = "ЭШ13/50 №12/28","LDR-13-50-21-28"
+			,[loader_name_dispatch] = "САТ-390 №GAY10082","LDR-390-1082-G"
+			,[loader_name_dispatch] = "Р&Н-2800 №28190","LDR-2800-28190"
+			,[loader_name_dispatch] = "ЭКГ-35 №03","LDR-35-03"
+			,[loader_name_dispatch] = "WК-35  №08011801","LDR-35-08011"
+			,[loader_name_dispatch] = "ЭКГ-32Р №02","LDR-32-02"
+			,[loader_name_dispatch] = "WK-20 №08017902","LDR-20-08017"
+			,[loader_name_dispatch] = "ЭКГ-15 №03","LDR-15-03"
+			,[loader_name_dispatch] = "ЭКГ-18 №01","LDR-18-01"
+			,[loader_name_dispatch] = "ЭКГ-12 №10","LDR-12-10"
+			,[loader_name_dispatch] = "ЭШ13/50 №55","LDR-50-55"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7152","LDR-1200-7152"
+			,[loader_name_dispatch] = "САТ-390 №GAY20145","LDR-390-20145"
+			,[loader_name_dispatch] = "CAT-395 №САТ00395JSGD00295","LDR-395-295"
+			,[loader_name_dispatch] = "ЭКГ-18Р №04","LDR-18-04"
+			,[loader_name_dispatch] = "ЭКГ-10 №4","LDR-10-4-G"
+			,[loader_name_dispatch] = "ЭКГ-10 №139","LDR-10-139"
+			,[loader_name_dispatch] = "ЭШ-11/70 №46","LDR-11-70-46"
+			,[loader_name_dispatch] = "ЭКГ-10 №132","LDR-10-132"
+			,[loader_name_dispatch] = "LIEBHERR R9100 №36092","LDR-9100-36092"
+			,[loader_name_dispatch] = "WК-35  №08011800","LDR-35-08011-G"
+			,[loader_name_dispatch] = "R-9350 №17250","LDR-19350-17250"
+			,[loader_name_dispatch] = "EX 3600 №1307","LDR-3600-1307"
+			,[loader_name_dispatch] = "ЭКГ-18Р №02","LDR-18-P-02"
+			,[loader_name_dispatch] = "WК-35  №08018904","LDR-35-8904"
+			,[loader_name_dispatch] = "Р&Н-2800 №194","LDR-2800-194"
+			,[loader_name_dispatch] = "EX 3600 №1323","LDR-3600-1323"
+			,[loader_name_dispatch] = "ЭКГ-18 №27","LDR-18-27"
+			,[loader_name_dispatch] = "WК-35  №08011802В","LDR-35-802-B"
+			,[loader_name_dispatch] = "Р&Н-4100ХРС №184","LDR-4100-XPC-184"
+			,[loader_name_dispatch] = "EX 3600 №1343","LDR-3600-1343"
+			,[loader_name_dispatch] = "ЭКГ-18Р №01","LDR-18-P-01-P"
+			,[loader_name_dispatch] = "ЭКГ-18 №23","LDR-18-23"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №1320","LDR-1900-6-1320"
+			,[loader_name_dispatch] = "ЭШ13/50 №04","LDR-13-50-04"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №1289","LDR-1900-6-1289"
+			,[loader_name_dispatch] = "ЭКГ-18 №00014","LDR-18-0014"
+			,[loader_name_dispatch] = "R-984С №15534","LDR-984-1534"
+			,[loader_name_dispatch] = "ЭКГ-10 №111","LDR-10-111"
+			,[loader_name_dispatch] = "ЭКГ-18Р №5_","LDR-10-555"
+			,[loader_name_dispatch] = "ЭКГ-10 №294","LDR-10-294"
+			,[loader_name_dispatch] = "ЭКГ-10 №353","LDR-10-353"
+			,[loader_name_dispatch] = "ЭКГ-12 №11","LDR-12-11-G"
+			,[loader_name_dispatch] = "ЭКГ-18 №№7","LDR-18-078"
+			,[loader_name_dispatch] = "ЭКГ-18 №20","LDR-18-20-P"
+			,[loader_name_dispatch] = "ЭКГ-18 №32","LDR-18-32"
+			,[loader_name_dispatch] = "LIEBHERR R9100 №WLHZ1132PZE036050","LDR-9100-36050"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №HCMKAA9060007156","LDR-1200-7156-G"
+			,[loader_name_dispatch] = "ЭКГ-10 №5","LDR-10-05"
+			,[loader_name_dispatch] = "ЭКГ-10 №72","LDR-10-72"
+			,[loader_name_dispatch] = "ЭКГ-10 №293","LDR-10-293"
+			,[loader_name_dispatch] = "ЭКГ-10 №300","LDR-10-300-L"
+			,[loader_name_dispatch] = "ЭКГ-18Р №№3","LDR-18-P-3"
+			,[loader_name_dispatch] = "ЭКГ-18М №___5","LDR-18-M-5"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-6ВН №HCM18J00L00001826","LDR-1200-1826"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №HCM18K00J00001342","LDR-1900-1342"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-6ВН №25","LDR-1200-6-25"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7262","LDR-1200-7-7262"
+			,[loader_name_dispatch] = "LIEBHERR R9250 №WLHZ0437LZE041192","LDR-9250-W-1192"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №001343","LDR-1900-6-1343"
+			,[loader_name_dispatch] = "HITACHI EX 1200-7 №7261","LDR-1200-7-7261"
+			,[loader_name_dispatch] = "EX 2600-7 BE №7058","LDR-2600-7-BE"
+			,[loader_name_dispatch] = "KOMATSU PС 2000-8 №20535","LDR-PC-2000-8"
+			,[loader_name_dispatch] = "CAT-395 №00259","LDR-395-259"
+			,[loader_name_dispatch] = "ЭШ-10/70 №24","LDR-10-70-24-D"
+			,[loader_name_dispatch] = "ЭШ-10/70 №419","LDR-10-70-419"
+			,[loader_name_dispatch] = "ЭШ-10/70 №23","LDR-10-70-23"
+			,[loader_name_dispatch] = "ЭШ-10/70 №332","LDR-10-70-332-O"
+			,[loader_name_dispatch] = "ЭШ-11/70 №48","LDR-11-70-48-E"
+			,[loader_name_dispatch] = "ЭШ-11/70 №16","LDR-11-70-16-G"
+			,[loader_name_dispatch] = "R-984С №18280","LDR-984-C-18280"
+			,[loader_name_dispatch] = "ЭКГ-10 №303","LDR-10-303-X"
+			,[loader_name_dispatch] = "HITACHI EX-1200-5DBH №HCM18F00A00003121","LDR-1200-5-D-3121"
+			,[loader_name_dispatch] = "CAT-395 №00395TSGD00342","LDR-395-342"
+			,[loader_name_dispatch] = "ЭШ-10/70 №299","LDR-10-70-299"
+			,[loader_name_dispatch] = "ЭШ 15/90 №139","LDR-15-90-139"
+			,[loader_name_dispatch] = "ЭШ-20/90 №20","LDR-15-90-20"
+			,[loader_name_dispatch] = "ЭШ-20/90 №14","LDR-20-90-14"
+			,[loader_name_dispatch] = "ЭКГ-12 №13","LDR-12-13"
+			,[loader_name_dispatch] = "ЭШ-10/70 №430","LDR-10-70-430"
+			,[loader_name_dispatch] = "ЭШ-11/70 №13\13","LDR-11-70-13-13"
+			,[loader_name_dispatch] = "ЭШ-11/70 №17","LDR-11-70-17"
+			,[loader_name_dispatch] = "ЭКГ-15 №38","LDR-15-38"
+			,[loader_name_dispatch] = "ЭКГ-10 №159","LDR-10-159"
+			,[loader_name_dispatch] = "CAT-395 №00395TSGD0042","LDR-395-G-D-42"
+			,[loader_name_dispatch] = "CAT-395 №10090","LDR-395-10090"
+			,[loader_name_dispatch] = "CAT-395 №САТ00395НSGD10090","LDR-395-HSG-1090"
+			,[loader_name_dispatch] = "CAT-395 №САТ042","LDR-395-C-042"
+			,[loader_name_dispatch] = "EX 3600 №1391","LDR-3600-1391-X"
+			,[loader_name_dispatch] = "EX 3600 №HCM18M00L00001391","LDR-3600-1391-M"
+			,[loader_name_dispatch] = "Hitachi EX 1200 №2781","LDR-1200-2781"
+			,[loader_name_dispatch] = "Hitachi EX-1200 №7265","LDR-1200-7265"
+			,[loader_name_dispatch] = "Hitachi EX-1200 №7282","LDR-1200-7282-R"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7268","LDR-1200-7268-S"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7281","LDR-1200-7281"
+			,[loader_name_dispatch] = "HITACHI ЕХ1200-7 №7282","LDR-1200-7282"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №1339","LDR-1900-1339"
+			,[loader_name_dispatch] = "HITACHI ЕХ1900-6ВН №1346","LDR-1900-1346"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК CAT 992 №3","LDR-992-3"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК CAT 992К №200170","LDR-992-K-2017"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК CAT 992К №CAT0992KCRM500184","LDR-992-K-184"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК WА-700-3 №51084","LDR-700-3-5184"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК WА-900-3 №50098","LDR-900-3-5098"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК WА-900-3 №50115","LDR-900-3-5015"
+			,[loader_name_dispatch] = "ПОГРУЗЧИК САТ-992 №200170","LDR-992-2-170"
+			,[loader_name_dispatch] = "ЭКГ-10 №09","LDR-10-09"
+			,[loader_name_dispatch] = "ЭКГ-10 №10","LDR-10-010"
+			,[loader_name_dispatch] = "ЭКГ-10 №140","LDR-10-140-D"
+			,[loader_name_dispatch] = "ЭКГ-10 №90","LDR-10-90"
+			,[loader_name_dispatch] = "ЭКГ-12 №14","LDR-12-14"
+			,[loader_name_dispatch] = "ЭКГ-8У №100","LDR-18-100"
+			,[loader_name_dispatch] = "ЭКГ-8У №2","LDR-8-2"
+			,[loader_name_dispatch] = "ЭШ 10/70 № 175","LDR-10-70-175"
+			,[loader_name_dispatch] = "ЭШ-11/70 №16/16","LDR-11-70-16-16"
+			,[loader_name_dispatch] = "ЭШ-11/70 №7/7","LDR-11-70-7-7"
+			,[loader_name_dispatch] = "ЭКГ-10 №67","LDR-10-67"
+			,[loader_name_dispatch] = "ЭКГ-10 №328","LDR-10-328"
+			,[loader_name_dispatch] = "ЭКГ-15 №43","LDR-15-43"
+			,BLANK())
+		lineageTag: 94a86d55-a6db-4228-ac6f-29b60e96086a
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_loader-5b7f0ee1-a207-465a-b9ec-dc2c989ec90b = m
+		mode: import
+		source =
+				let
+				    // Snapshot of the live model "Time unitilaztion" (DAX executeQueries, 2026-10-21), stored as Parquet.
+				    // The original on-prem source is not reachable. A file source does not fold: Parquet is read whole.
+				    src = Parquet.Document(File.Contents(DataFolder & "\Справочник ЭКС.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"Филиал", type text},
+				            {"Название ЭКС в АСД КРВ", type text},
+				            {"Название ЭКС в ГД", type text},
+				            {"objrem_id", Int64.Type},
+				            {"name", type text},
+				            {"номер", type text},
+				            {"Комментарий", type text},
+				            {"Объем ковша", Int64.Type},
+				            {"Учитывать", type text},
+				            {"Название ЭКС в АСД Рейсы", type text},
+				            {"Поле", type text},
+				            {"Подрядчик", type text}
+				        }
+				    )
+				in
+				    typed
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Table
+

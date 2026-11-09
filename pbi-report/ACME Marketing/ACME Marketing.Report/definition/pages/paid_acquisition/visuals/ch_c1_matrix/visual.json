@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "ch_c1_matrix",
   "position": {
-    "x": 26.0,
-    "y": 242,
-    "z": 1760,
-    "height": 134,
-    "width": 1388.0,
-    "tabOrder": 1760
+    "x": 26,
+    "y": 230,
+    "z": 1720,
+    "height": 538,
+    "width": 677,
+    "tabOrder": 1720
   },
   "visual": {
     "visualType": "pivotTable",
@@ -44,7 +44,7 @@
               },
               "queryRef": "dim_platform.platform_label",
               "nativeQueryRef": "platform_label",
-              "active": false,
+              "active": true,
               "displayName": "PLATFORM"
             }
           ]
@@ -104,12 +104,12 @@
                       "Entity": "_measures"
                     }
                   },
-                  "Property": "CPA"
+                  "Property": "Paid CAC"
                 }
               },
-              "queryRef": "_measures.CPA",
-              "nativeQueryRef": "CPA",
-              "displayName": "CPA"
+              "queryRef": "_measures.Paid CAC",
+              "nativeQueryRef": "Paid CAC",
+              "displayName": "CAC"
             },
             {
               "field": {
@@ -193,6 +193,105 @@
         "isDefaultSort": true
       }
     },
+    "expansionStates": [
+      {
+        "roles": [
+          "Rows"
+        ],
+        "levels": [
+          {
+            "queryRefs": [
+              "dim_channel.channel_name"
+            ],
+            "isCollapsed": true,
+            "identityKeys": [
+              {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_channel"
+                    }
+                  },
+                  "Property": "channel_name"
+                }
+              }
+            ],
+            "isPinned": true
+          },
+          {
+            "queryRefs": [
+              "dim_platform.platform_label"
+            ],
+            "isCollapsed": true,
+            "isPinned": true
+          }
+        ],
+        "root": {
+          "children": [
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'Paid social'"
+                  }
+                }
+              ],
+              "isToggled": true
+            },
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'App install'"
+                  }
+                }
+              ],
+              "isToggled": true
+            },
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'Display & video'"
+                  }
+                }
+              ],
+              "isToggled": true
+            },
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'Retargeting'"
+                  }
+                }
+              ],
+              "isToggled": true
+            },
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'Affiliates'"
+                  }
+                }
+              ],
+              "isToggled": true
+            },
+            {
+              "identityValues": [
+                {
+                  "Literal": {
+                    "Value": "'Paid search'"
+                  }
+                }
+              ],
+              "isToggled": true
+            }
+          ]
+        }
+      }
+    ],
     "objects": {
       "grid": [
         {
@@ -232,7 +331,7 @@
             "rowPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "3D"
                 }
               }
             },
@@ -302,14 +401,14 @@
             "wordWrap": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
@@ -378,7 +477,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8.5D"
                 }
               }
             },
@@ -506,7 +605,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "110D"
+                  "Value": "63.106890973512435D"
                 }
               }
             }
@@ -520,7 +619,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "80D"
+                  "Value": "46D"
                 }
               }
             }
@@ -534,7 +633,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "96D"
+                  "Value": "50D"
                 }
               }
             }
@@ -548,13 +647,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "80D"
+                  "Value": "48D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "_measures.CPA"
+            "metadata": "_measures.Paid CAC"
           }
         },
         {
@@ -562,7 +661,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "86D"
+                  "Value": "48D"
                 }
               }
             }
@@ -576,7 +675,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "120D"
+                  "Value": "58D"
                 }
               }
             }
@@ -590,7 +689,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "80D"
+                  "Value": "50D"
                 }
               }
             }
@@ -604,7 +703,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "260D"
+                  "Value": "189.34020717629204D"
                 }
               }
             }
@@ -729,44 +828,7 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true,
-    "expansionStates": [
-      {
-        "roles": [
-          "Rows"
-        ],
-        "levels": [
-          {
-            "queryRefs": [
-              "dim_channel.channel_name"
-            ],
-            "isCollapsed": true,
-            "identityKeys": [
-              {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dim_channel"
-                    }
-                  },
-                  "Property": "channel_name"
-                }
-              }
-            ],
-            "isPinned": true
-          },
-          {
-            "queryRefs": [
-              "dim_platform.platform_label"
-            ],
-            "isCollapsed": true,
-            "isPinned": true
-          }
-        ],
-        "root": {}
-      }
-    ]
+    "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "grp_channels",
-  "isHidden": true
+  "parentGroupName": "grp_channels"
 }

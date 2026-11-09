@@ -318,7 +318,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -1052,7 +1052,6 @@
     "drillFilterOtherVisuals": true
   },
   "parentGroupName": "grp_portfolio",
-  "isHidden": true,
   "filterConfig": {
     "filters": [
       {
@@ -1110,5 +1109,6 @@
         "isHiddenInViewMode": true
       }
     ]
-  }
+  },
+  "isHidden": true
 }
