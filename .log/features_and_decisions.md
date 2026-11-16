@@ -130,6 +130,9 @@ TODO: lock North Star
 - **2026-11-05** — **USER: Track C for ACME Marketing built in this repo** (ADR-0015 (a) alternative 1), the PBI report is the reference, bundle to `.sync/` for the site-repo agent. #decision
 - **2026-11-05** — ACME Marketing routine calls (main agent, USER may overturn): P1 lists 16 campaigns at R30 (all-blank rows dropped); minus glyph accepted difference (14); C1 platform-row share = within platform; chips joined with " | "; header "ACME Marketing"; pack ships prebuilt `public/data`; 31-day fallback edge as built (item H). #decision
 - **2026-11-05** — O5 / O6 fall back to the window's last 30 d when the comparison window precedes the data; the USER's saved slicer state stays the default. #decision
+- **2026-11-08** — **USER: the ACME Trucks JS bundle ships the report's data as is** (live extract, the model's own aliases for mines and loaders; no twin). #decision
+- **2026-11-08** — ACME Trucks JS routine calls (main agent, USER may overturn, contract § 10 A–E): scope = redesign page + tooltip; opens at the Reset state; board fixed 1440 × 810; popovers apply on Done; no ⓘ / How-to-read; pack with a note update only. #decision
+- **2026-11-09** — **ADR-0016 Accepted** (ACME Trucks web app flavour); the report and its pack accepted as a draft (USER). #adr #decision
 
 ## Features
 ### Planned
@@ -151,6 +154,7 @@ TODO: lock North Star
 - **Mirelo (2026-11-01)** — ginee display-name columns (channel / stream / loan status) + bip rebind; hunter PBI vs JS parity run; USER click-checks; ADR amendments; vosk.dev hand-off for the re-issued packs
 - **ACME paid-acquisition dashboard — follow-ups (2026-11-05):** USER first look at round 1 + save 30 d / Day; ADR-0015 amendment (round 1); decide time to paid (data change: sign-up → first-payment link, ginee) vs time to activation; the three ADR § 5 decisions; 10:46 Desktop save (combo vs line dynamics charts, then pack refresh); Custom pill wording; bip's four extra parity capture rows. JS flavour built 2026-11-05 (see Implemented).
 - **ACME Trucks — follow-ups:** USER decisions (commit the twin's Parquet or not; switch the showcase to the twin → bip re-bases 4 test files; Tabular Editor deployment metadata in `model.tmdl`; `.gitignore` exception for `.sync/acme-trucks/data/`); delete the stray `pbi-report/ACME Trucks/.claude/`.
+- **ACME Trucks JS — follow-ups (2026-11-09):** USER rules on contract § 10 A–E; USER first look at `js-trucks/`; optional bip capture of `?wt=onspot` Refueling `0.00%`; delete the stray `js-trucks/.claude/`.
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -206,3 +210,4 @@ TODO: lock North Star
 - **2026-11-04** — **ACME Trucks:** redesign page = original page (`_KPI Noise` = 1, synced slicers, contractor filter; `tests/page-parity.dax` 40 rows + 3 older files TRUE); hand-off pack `.sync/acme-trucks/{power-bi,data (local),docs}` + note; synthetic-twin generator `data/acme_trucks_dummy_data/` + `.sync/data-gen/acme-trucks/` (149 checks, byte-identical). Uncommitted at close.
 - **2026-11-05** — **ACME Marketing JS flavour (Track C)** `js-marketing/`: 91 tests, control totals 28,628 rows both ways, PBI = JS parity 1,416 rows / 0 gap; pack `.sync/acme-marketing/js-app/` (60 files, 3.85 MB, standalone build proven). Uncommitted at close.
 - **2026-11-05** — **ACME Marketing PBI:** per-vital binoculars → single-metric dynamics pop-up; O5 / O6 last-30-day fallback; validator 0 / 0, tests 29 blocks / 29,387 rows TRUE. Uncommitted at close.
+- **2026-11-08** — **ACME Trucks JS flavour (ADR-0016)** `js-trucks/`: data 264,724 B first paint / 343,096 B total, pure-TS engine, page "Time utilization" + tooltip, URL state; PBI = JS parity 1,649 rows / 0 gaps / 2 accepted, independent recomputation 551,040 values / 0 differences; 68 tests; pack `.sync/acme-trucks/js-app/` (48 files, 1.14 MB, standalone build proven, status draft). Committed `83be565` (2026-11-09).

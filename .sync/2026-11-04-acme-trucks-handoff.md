@@ -1,6 +1,6 @@
 from rusloc/pnl (bip, for the main agent) · to <pickup AI agent> · 2026-11-04 · status: ready
 
-2026-11-09: the JS flavour is built in rusloc/pnl (`js-trucks/`) and issued as `acme-trucks/js-app/` after the parity gate (1,649 rows, 0 gaps). The Power BI pack is unchanged.
+2026-11-09: the JS flavour is built in rusloc/pnl (`js-trucks/`) and issued as `acme-trucks/js-app/` after the parity gate (1,649 rows, 0 gaps). Status of `js-app/`: draft (USER accepted the report as a draft, 2026-11-09). The Power BI pack is unchanged.
 
 # ACME Trucks — hand-off pack (Power BI)
 

@@ -3,7 +3,7 @@
 - **From:** rusloc/pnl (nerd)
 - **To:** vosk.dev repo agent
 - **Date:** 2026-11-09
-- **Status:** ready (builds, tests and runs on its own; parity gate passed — checks below)
+- **Status:** draft (USER accepted the report as a draft, 2026-11-09; builds, tests and runs on its own; parity gate passed — checks below)
 
 A complete, standalone Next.js 16 app of the Power BI page **"Time utilization"** (ADR-0016; contract
 `docs/ADD/features/trucks-js-flavour.md` in rusloc/pnl; pack per ADR-0014): how the haul trucks' total time splits into work

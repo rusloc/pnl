@@ -52,6 +52,7 @@ Report / app workspaces and publishing capacity: TBD.
 | Track A — Rayfin app | `fabric-app/` |
 | Track B — Power BI report | `pbi-report/` |
 | Track C — custom JS report | `js-report/` |
+| ACME Trucks web app | `js-trucks/` · `docs/ADR/0016-acme-trucks-js-flavour.md` |
 
 ---
 
