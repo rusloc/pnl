@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
-  "displayName": "Statement: expand all",
+  "displayName": "Rows - Expanded",
   "name": "bm_pl_expand",
   "options": {
     "applyOnlyToTargetVisuals": true,
@@ -12,9 +12,9 @@
   },
   "explorationState": {
     "version": "1.0",
-    "activeSection": "pnl_one_pager",
+    "activeSection": "pnl_statement",
     "sections": {
-      "pnl_one_pager": {
+      "pnl_statement": {
         "visualContainers": {
           "pl_matrix": {
             "singleVisual": {
@@ -53,6 +53,7 @@
                     }
                   ],
                   "root": {
+                    "identityValues": null,
                     "children": [
                       {
                         "identityValues": [

@@ -1,0 +1,176 @@
+/// Metric catalogue (web sync 2026-11-16, spec Metric): one row per engine figure; basis_code = the status basis of a card metric, flash = 1 for the EBITDA family (month to date at Week). Disconnected; [Actual] / [Basis] / [Last Year] / [Previous] read it.
+table param_metric
+	lineageTag: ea95e9f9-b822-5c73-99b3-6d3b711cf0d5
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: d9e9a977-dfa0-5999-8542-1fdfa8a49645
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [metric_code]
+
+		annotation SummarizationSetBy = User
+
+	column metric_name
+		dataType: string
+		lineageTag: c6e05490-334a-50ef-a0e6-25d85b792b03
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [metric_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column unit
+		dataType: string
+		isHidden
+		lineageTag: 8a6f3626-65bd-52ca-a23a-877f9b2e4ad9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [unit]
+
+		annotation SummarizationSetBy = User
+
+	column basis_code
+		dataType: string
+		isHidden
+		lineageTag: c6cb9438-f1f8-5b78-88a7-3b5522a7d7ec
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [basis_code]
+
+		annotation SummarizationSetBy = User
+
+	column flash
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 92ca0640-1ab4-52d7-b6ba-2689ecb0c11a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [flash]
+
+		annotation SummarizationSetBy = User
+
+	column is_catalogue
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 90432ad3-a738-59cd-8f3a-1b32f6047beb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_catalogue]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 93a406ee-194b-56b6-8dd8-115e5901712a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_metric = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "metric_code", STRING
+				    ,"metric_name", STRING
+				    ,"unit", STRING
+				    ,"basis_code", STRING
+				    ,"flash", INTEGER
+				    ,"is_catalogue", INTEGER
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "gross_sales", "Gross sales", "eur", "", 0, 1, 1 }
+				        ,{ "markdown", "Markdown value", "eur", "", 0, 1, 2 }
+				        ,{ "returns", "Returns", "eur", "", 0, 1, 3 }
+				        ,{ "net_sales", "Net sales", "eur", "net_sales_bud", 0, 1, 4 }
+				        ,{ "cogs", "Cost of goods", "eur", "", 0, 1, 5 }
+				        ,{ "back_margin", "Back margin", "eur", "", 0, 1, 6 }
+				        ,{ "front_margin", "Front margin", "eur", "", 0, 1, 7 }
+				        ,{ "total_margin", "Total margin", "eur", "", 0, 1, 8 }
+				        ,{ "front_gm_pct", "Front gross margin %", "pct", "front_gm_pct_bud", 0, 1, 9 }
+				        ,{ "back_margin_pct", "Back margin %", "pct", "", 0, 1, 10 }
+				        ,{ "total_margin_pct", "Total margin %", "pct", "total_margin_pct_bud", 0, 1, 11 }
+				        ,{ "markdown_pct", "Markdown %", "pct", "markdown_pct_bud", 0, 1, 12 }
+				        ,{ "opex_shrink", "Shrink", "eur", "opex_shrink_bud", 1, 1, 13 }
+				        ,{ "opex_store", "Store costs", "eur", "opex_store_bud", 1, 1, 14 }
+				        ,{ "opex_central", "Central costs", "eur", "opex_central_bud", 1, 1, 15 }
+				        ,{ "opex_fulfilment", "Fulfilment costs", "eur", "opex_fulfilment_bud", 1, 1, 16 }
+				        ,{ "ebitda", "EBITDA", "eur", "ebitda_bud", 1, 1, 17 }
+				        ,{ "ebitda_margin_pct", "EBITDA margin", "pct", "ebitda_margin_pct_bud", 1, 1, 18 }
+				        ,{ "po_lines_due", "PO lines due", "int", "", 0, 1, 19 }
+				        ,{ "po_lines_otif", "PO lines on time and in full", "int", "", 0, 1, 20 }
+				        ,{ "otif_pct", "Supplier OTIF", "pct", "otif_target", 0, 1, 21 }
+				        ,{ "otif_target", "OTIF Target", "pct", "", 0, 0, 22 }
+				        ,{ "store_net_sales", "Store Net Sales", "eur", "", 0, 0, 23 }
+				        ,{ "store_net_sales_ly", "Store Net Sales LY", "eur", "", 0, 0, 24 }
+				        ,{ "lfl_net_sales", "LFL net sales", "eur", "", 0, 1, 25 }
+				        ,{ "lfl_net_sales_ly", "LFL net sales last year", "eur", "", 0, 1, 26 }
+				        ,{ "lfl_store_count", "LFL stores", "int", "", 0, 1, 27 }
+				        ,{ "lfl_growth_pct", "Like-for-like growth", "spct", "lfl_growth_pct_bud", 0, 1, 28 }
+				        ,{ "nonlfl_effect_pp", "Non-LFL effect", "pp", "", 0, 1, 29 }
+				        ,{ "on_hand_cost", "Stock on hand at cost", "eur", "", 0, 1, 30 }
+				        ,{ "on_order_cost", "Stock on order", "eur", "", 0, 1, 31 }
+				        ,{ "forecast_cogs", "Forecast weekly cost of goods", "eur", "", 0, 1, 32 }
+				        ,{ "stock_incl_on_order", "Stock incl. on-order", "eur", "", 0, 1, 33 }
+				        ,{ "weeks_of_cover", "Weeks of cover", "wks", "cover_target_wks", 0, 1, 34 }
+				        ,{ "cover_target_wks", "Cover Target Wks", "wks", "", 0, 0, 35 }
+				        ,{ "ranged_sku_days", "Ranged SKU Days", "int", "", 0, 0, 36 }
+				        ,{ "in_stock_sku_days", "In Stock SKU Days", "int", "", 0, 0, 37 }
+				        ,{ "availability_pct", "Availability", "pct", "availability_target", 0, 1, 38 }
+				        ,{ "availability_target", "Availability Target", "pct", "", 0, 0, 39 }
+				        ,{ "season_opening_units", "Season Opening Units", "units", "", 0, 0, 40 }
+				        ,{ "season_receipt_units", "Season Receipt Units", "units", "", 0, 0, 41 }
+				        ,{ "season_units_sold", "Season units sold", "units", "", 0, 1, 42 }
+				        ,{ "sell_through_pct", "Sell-through", "pct", "sell_through_target", 0, 1, 43 }
+				        ,{ "sell_through_target", "Sell-through Target", "pct", "", 0, 0, 44 }
+				        ,{ "gmroi_front_margin_r52w", "R52W front margin", "eur", "", 0, 1, 45 }
+				        ,{ "gmroi_avg_on_hand_cost", "Average stock at cost", "eur", "", 0, 1, 46 }
+				        ,{ "gmroi", "GMROI", "x", "gmroi_target", 0, 1, 47 }
+				        ,{ "gmroi_target", "GMROI Target", "x", "", 0, 0, 48 }
+				        ,{ "mix_store_net_sales", "Store net sales", "eur", "", 0, 1, 49 }
+				        ,{ "mix_online_net_sales", "Online net sales", "eur", "", 0, 1, 50 }
+				        ,{ "mix_wholesale_net_sales", "Wholesale net sales", "eur", "", 0, 1, 51 }
+				        ,{ "mix_store_pct", "Channel mix: store share", "pct", "mix_store_pct_bud", 0, 1, 52 }
+				        ,{ "mix_online_pct", "Channel mix: online share", "pct", "mix_online_pct_bud", 0, 1, 53 }
+				        ,{ "mix_wholesale_pct", "Channel mix: wholesale share", "pct", "mix_wholesale_pct_bud", 0, 1, 54 }
+				        ,{ "net_sales_bud", "Net Sales Budget", "eur", "", 0, 0, 55 }
+				        ,{ "gross_sales_bud", "Gross Sales Budget", "eur", "", 0, 0, 56 }
+				        ,{ "markdown_bud", "Markdown Budget", "eur", "", 0, 0, 57 }
+				        ,{ "cogs_bud", "COGS Budget", "eur", "", 0, 0, 58 }
+				        ,{ "back_margin_bud", "Back Margin Budget", "eur", "", 0, 0, 59 }
+				        ,{ "markdown_pct_bud", "Markdown % Budget", "pct", "", 0, 0, 60 }
+				        ,{ "front_gm_pct_bud", "Front GM % Budget", "pct", "", 0, 0, 61 }
+				        ,{ "total_margin_pct_bud", "Total Margin % Budget", "pct", "", 0, 0, 62 }
+				        ,{ "opex_shrink_bud", "Opex Shrink Budget", "eur", "", 1, 0, 63 }
+				        ,{ "opex_store_bud", "Opex Store Budget", "eur", "", 1, 0, 64 }
+				        ,{ "opex_central_bud", "Opex Central Budget", "eur", "", 1, 0, 65 }
+				        ,{ "opex_fulfilment_bud", "Opex Fulfilment Budget", "eur", "", 1, 0, 66 }
+				        ,{ "ebitda_bud", "EBITDA Budget", "eur", "", 1, 0, 67 }
+				        ,{ "ebitda_margin_pct_bud", "EBITDA Margin % Budget", "pct", "", 1, 0, 68 }
+				        ,{ "lfl_net_sales_bud", "LFL Net Sales Budget", "eur", "", 0, 0, 69 }
+				        ,{ "lfl_growth_pct_bud", "LFL Growth % Budget", "spct", "", 0, 0, 70 }
+				        ,{ "mix_store_pct_bud", "Mix Store % Budget", "pct", "", 0, 0, 71 }
+				        ,{ "mix_online_pct_bud", "Mix Online % Budget", "pct", "", 0, 0, 72 }
+				        ,{ "mix_wholesale_pct_bud", "Mix Wholesale % Budget", "pct", "", 0, 0, 73 }
+				        ,{ "mix_max_dev_pp", "Mix Max Dev pp", "pp", "", 0, 0, 74 }
+				        ,{ "mix_max_dev_channel", "Mix Max Dev Channel", "int", "", 0, 0, 75 }
+				        ,{ "ebitda_ptd", "EBITDA", "eur", "", 1, 0, 76 }
+				        ,{ "ebitda_bud_ptd", "EBITDA Budget", "eur", "", 1, 0, 77 }
+				        ,{ "flash.net_sales", "Net Sales", "eur", "", 1, 0, 78 }
+				        ,{ "flash.net_sales_bud", "Net Sales Budget", "eur", "", 1, 0, 79 }
+				        ,{ "flash.total_margin", "Total Margin", "eur", "", 1, 0, 80 }
+				        ,{ "trading_stores", "Trading Stores", "int", "", 0, 0, 81 }
+				        ,{ "suppliers_below_85", "Suppliers Below 85", "int", "", 0, 0, 82 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

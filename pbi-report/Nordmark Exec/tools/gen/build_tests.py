@@ -494,7 +494,7 @@ parts.append(sblock([ALL], [srow("T-N6 none", "summary", "[Filter Picks Text]", 
 blocks.append(sevaluate("T-N6", parts, "conceal in place: B3 shows 4 of 12, counts and dot unchanged; OR within, AND across; three attribute groups (ET-13, E-53)"))
 
 # ---- T-N7 i pop-up (E-57, ET-30, ET-32; stacked block, USER 2026-10-30): Actual label -> value -> swatch + basis label -> target
-#      value -> delta, whatever the comparator; no basis = label + muted dash; no footer target, no owner note, tags Group · Lever · Owner
+#      value -> delta, whatever the comparator; no basis = label + muted dash (the web's NO_BASIS_VALUE; phase 1 of the web sync showed n/a, phase 2 back to the dash per hunter's oracle); no footer target, no owner note, tags Group · Lever · Owner
 import measures_svg as MS  # noqa: E402
 
 TGT = {"NET_SALES": ("Budget", "€62.9"), "TOTAL_MARGIN": ("Budget", "36.2"), "WEEKS_OF_COVER": ("Target", "9.5"), "MARKDOWN": ("Budget", "8.5"),
@@ -531,7 +531,7 @@ def order_chk(k, val, lab, tval, delta=None):
     d = f'SEARCH ( "{enc(">" + delta + "</text>")}", _v, 1, 0 )' if delta else "_pb + 1"
     extra = (f'&& CONTAINSSTRING ( _v, ">Owner <tspan" ) && NOT CONTAINSSTRING ( _v, "Horizon" ) && NOT CONTAINSSTRING ( _v, "Statement" ) '
              f'&& NOT CONTAINSSTRING ( _v, "OWNER NOTE" ) && NOT CONTAINSSTRING ( _v, "Target budget" ) '
-             f'&& CONTAINSSTRING ( _v, "height=\'{MS.INFO_H}\' viewBox=\'0 0 {MS.IW} {MS.INFO_H}\'" )')
+             f'&& CONTAINSSTRING ( _v, "height=\'{MS.INFO_E}\' viewBox=\'0 0 {MS.IW} {MS.INFO_E}\'" )')
     return (f'( VAR _v = [Info SVG {k}] VAR _pa = {a} VAR _pb = {b} VAR _pd = {d} '
             f'RETURN IF ( _pa > 0 && _pb > _pa && _pd > _pb {extra}, "ok", "missing" ) )')
 
@@ -556,7 +556,7 @@ parts.append(sblock([ALL, BUD] + pick("P", "FY2025", "P10"), rs))
 for i, prt in enumerate(parts, 1):
     blocks.append(sevaluate(f"T-N7-{i}", [prt], "i pop-up, " + ["Budget", "Last year", "Previous", "FY2025 P10 (no budget)"][i - 1] + ": see the T-N7 note"))
 T7_NOTE = ("i pop-up stacked block (USER 2026-10-30): Actual label, value, swatch + basis label, target value, delta, in this order, whatever the "
-           "comparator; no basis = label + muted dash; no footer target, owner note, Horizon or Statement (E-57, ET-30, ET-32)")
+           "comparator; no basis = label + muted dash (the web's NO_BASIS_VALUE; phase 1 of the web sync showed n/a, phase 2 back to the dash per hunter's oracle); no footer target, owner note, Horizon or Statement (E-57, ET-30, ET-32)")
 
 # ---- T-N9 frame parity (perf pass 2026-10-30): the card faces and i pop-ups, built in one frame, show the same texts as the card-layer
 #      measures (value, delta, chip / glyph, basis, status word) in 7 picker states
@@ -591,7 +591,7 @@ def info_chk(k):
 
 STATUS_CHK = ('( VAR _pk = [Window Status Pack] VAR _v = [Status Line SVG] VAR _w = [Dot SVG] '
               'VAR _on = INT ( _pk / 1000 ) VAR _wa = INT ( MOD ( _pk, 1000 ) / 100 ) VAR _of = INT ( MOD ( _pk, 100 ) / 10 ) '
-              'VAR _dc = SWITCH ( MOD ( _pk, 10 ), 1, "%232E9E5B", 2, "%23E3A52A", 3, "%23B3261E", "%23D1D5DB" ) '
+              'VAR _dc = SWITCH ( MOD ( _pk, 10 ), 1, "%232E9E5B", 2, "%23E3A52A", 3, "%23B3261E", "%239AA1AD" ) '
               'RETURN IF ( CONTAINSSTRING ( _v, ">▲ " & _on & " on track<" ) && CONTAINSSTRING ( _v, ">● " & _wa & " watch<" ) '
               '&& CONTAINSSTRING ( _v, ">▼ " & _of & " off track<" ) && CONTAINSSTRING ( _v, "' + "r='7' fill='" + '" & _dc ) '
               '&& CONTAINSSTRING ( _w, SWITCH ( MOD ( _pk, 10 ), 1, "green", 2, "orange", 3, "red", "grey" ) ), "ok", "missing" ) )')

@@ -2,6 +2,9 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
   "items": [
     {
+      "name": "bm_default"
+    },
+    {
       "name": "bmg_layers",
       "displayName": "Side bar layers",
       "children": [
@@ -9,6 +12,38 @@
         "bm_how",
         "bm_more",
         "bm_close"
+      ]
+    },
+    {
+      "name": "bmg_explain",
+      "displayName": "Explain and drill",
+      "children": [
+        "bm_explain_net_sales",
+        "bm_drill_net_sales",
+        "bm_explain_total_margin",
+        "bm_drill_total_margin",
+        "bm_explain_weeks_of_cover",
+        "bm_drill_weeks_of_cover",
+        "bm_explain_markdown",
+        "bm_drill_markdown",
+        "bm_explain_availability",
+        "bm_drill_availability",
+        "bm_explain_ebitda",
+        "bm_drill_ebitda",
+        "bm_explain_lfl_growth",
+        "bm_drill_lfl_growth",
+        "bm_explain_front_gm",
+        "bm_drill_front_gm",
+        "bm_explain_sell_through",
+        "bm_drill_sell_through",
+        "bm_explain_gmroi",
+        "bm_drill_gmroi",
+        "bm_explain_supplier_otif",
+        "bm_drill_supplier_otif",
+        "bm_explain_channel_mix",
+        "bm_drill_channel_mix",
+        "bm_ex_drill",
+        "bm_ex_explain"
       ]
     }
   ]

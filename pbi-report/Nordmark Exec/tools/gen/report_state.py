@@ -37,17 +37,19 @@ def info_h():
     return measures_svg.INFO_H
 
 
-# 1. tt_info: page and visual = pop-up + 18, image = pop-up height
+# 1. tt_info: page and visual = pop-up + 18, image = pop-up height (tt_info retired by the web sync phase 2, 2026-11-16: the ⓘ opens
+#    the Explain page, report_web_sync.py; the step runs only on an older report that still has the page)
 H = info_h()
 p = os.path.join(D, "pages", "tt_info", "page.json")
-d, f = read(p)
-d["height"] = H + 18
-write(p, d, f)
-p = os.path.join(D, "pages", "tt_info", "visuals", "tt_info_svg", "visual.json")
-d, f = read(p)
-d["position"]["height"] = H + 18
-d["visual"]["objects"]["grid"][0]["properties"]["imageHeight"] = lit(f"{H}D")
-write(p, d, f)
+if os.path.exists(p):
+    d, f = read(p)
+    d["height"] = H + 18
+    write(p, d, f)
+    p = os.path.join(D, "pages", "tt_info", "visuals", "tt_info_svg", "visual.json")
+    d, f = read(p)
+    d["position"]["height"] = H + 18
+    d["visual"]["objects"]["grid"][0]["properties"]["imageHeight"] = lit(f"{H}D")
+    write(p, d, f)
 
 # 2. saved slicer state = the documented default
 DEFAULT = {"menu_param_granularity": "'Week'", "menu_item_fy": "'FY2026'", "menu_item": "'W43'", "menu_param_comparator": "'Budget'",
@@ -65,4 +67,4 @@ for a in ["group", "lever", "owner"]:
     if g and "filter" in g[0].get("properties", {}):
         g[0]["properties"].pop("filter")
         write(p, d, f)
-print(f"tt_info {548} x {H + 18} (image {H}); saved state Week / FY2026 / W43 / Budget / All, no attribute picks")
+print(f"tt_info (if present) {548} x {H + 18} (image {H}); saved state Week / FY2026 / W43 / Budget / All, no attribute picks")

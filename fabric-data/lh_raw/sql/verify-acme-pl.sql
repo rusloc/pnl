@@ -2,7 +2,7 @@
 -- Run against the SQL analytics endpoint of Lakehouse lh_raw (workspace RAW), database lh_raw.
 -- If a table is missing right after the load, wait for the endpoint's metadata sync and re-run.
 
--- 1. Row counts vs data/acme_pl_dummy_data/README.md (params: counts of the CSVs)
+-- 1. Row counts vs data/acme_pl_dummy_data/README.md (params: counts of the CSVs; param_time_view = 5 + RANGE added on load)
 with expected as (
     select
          v._table_name                 _table_name
@@ -31,7 +31,7 @@ with expected as (
         ,('param_fx_basis'           ,      2)
         ,('param_layout'             ,      3)
         ,('param_reporting_currency' ,      3)
-        ,('param_time_view'          ,      5)
+        ,('param_time_view'          ,      6)
         ,('param_units'              ,      2)
         ,('param_variance_format'    ,      3)
         ,('param_version_choice'     ,      5)

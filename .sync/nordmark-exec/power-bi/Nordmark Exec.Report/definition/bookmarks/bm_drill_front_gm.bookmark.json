@@ -1,0 +1,120 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Drill · FRONT_GM",
+  "name": "bm_drill_front_gm",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "ex_picker",
+      "ex_grp_explain",
+      "ex_panel_info",
+      "ex_pill_drill",
+      "ex_grp_drill",
+      "ex_panel_drill",
+      "ex_pill_back"
+    ]
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "explain",
+    "sections": {
+      "explain": {
+        "visualContainers": {
+          "ex_picker": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "general": [
+                    {
+                      "properties": {
+                        "filter": {
+                          "filter": {
+                            "Version": 2,
+                            "From": [
+                              {
+                                "Name": "d",
+                                "Entity": "dim_kpi",
+                                "Type": 0
+                              }
+                            ],
+                            "Where": [
+                              {
+                                "Condition": {
+                                  "In": {
+                                    "Expressions": [
+                                      {
+                                        "Column": {
+                                          "Expression": {
+                                            "SourceRef": {
+                                              "Source": "d"
+                                            }
+                                          },
+                                          "Property": "kpi_code"
+                                        }
+                                      }
+                                    ],
+                                    "Values": [
+                                      [
+                                        {
+                                          "Literal": {
+                                            "Value": "'FRONT_GM'"
+                                          }
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ex_panel_info": {
+            "singleVisual": {
+              "visualType": "image",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ex_pill_drill": {
+            "singleVisual": {
+              "visualType": "actionButton",
+              "display": {
+                "mode": "hidden"
+              }
+            }
+          },
+          "ex_panel_drill": {
+            "singleVisual": {
+              "visualType": "image"
+            }
+          },
+          "ex_pill_back": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "ex_grp_explain": {
+            "isHidden": true
+          },
+          "ex_grp_drill": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

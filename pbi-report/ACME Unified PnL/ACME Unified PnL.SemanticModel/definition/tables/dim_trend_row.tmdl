@@ -1,0 +1,50 @@
+/// Profitability trends (web 2026-11-15): one small-multiple row per region in net-revenue order, then the company (TOTAL).
+table dim_trend_row
+	lineageTag: 23732539-dea9-5e38-a0eb-346e52b7185e
+
+	column trend_row_code
+		dataType: string
+		isHidden
+		lineageTag: 8a056994-183f-5afe-b554-7d7aca18d3d4
+		summarizeBy: none
+		sourceColumn: [trend_row_code]
+
+		annotation SummarizationSetBy = User
+
+	column trend_row_label
+		dataType: string
+		lineageTag: 96a25b25-4496-51bf-b282-8465e66740e6
+		summarizeBy: none
+		sourceColumn: [trend_row_label]
+		sortByColumn: trend_row_sort
+
+		annotation SummarizationSetBy = User
+
+	column trend_row_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ada636e0-784f-5ce4-88e4-e5391c6218c3
+		summarizeBy: none
+		sourceColumn: [trend_row_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_trend_row = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "trend_row_code", STRING,
+				    "trend_row_label", STRING,
+				    "trend_row_sort", INTEGER,
+				    {
+				        { "NA", "North America", 10 },
+				        { "EU", "Continental Europe", 20 },
+				        { "AP", "Asia-Pacific", 30 },
+				        { "UK", "UK & Ireland", 40 },
+				        { "TOTAL", "Company", 50 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -18,6 +18,8 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
+- ADR-0017 P&L PBI performance (2026-11-16): drafted, Proposed; rec = E frills then B (bip logical, then small agg + volume driver + CC long form, M prototype before loader); target 5 s showcase; awaits USER decision
+- C-31 unrounded allocation (2026-11-16, D6): loader + pack loader copy changed, offline green; USER yes for lh_raw load, then model refresh + verify SQL; regen pack fact_pl_allocated.parquet; amount_local -> double applied in both models (validator 0/0); + RANGE row in param_time_view on load; same single reload; see data.md
 - ACME Trucks twin (2026-11-04): USER to run the git block (parquet/ in data/ is not gitignored, optional line); Trucks DAX tests pin the live extract -> bip re-base if the PBIP switches to the twin; hand-off note paragraph given to main agent (bip owns .sync/acme-trucks/ + note)
 - ACME marketing dataset (2026-11-04): built, verify 132 green; USER to run the git block; 18 deviations in its README for archi / USER (D-2 team cost step, D-3 store->install 29 %); phase 2 = bip; pack per ADR-0015 (h) after phase 3
 - Nordmark dataset (2026-10-28): built + verify green; 18 open points in data/nordmark_retail_dummy_data/README.md for USER / archi (8, 11, 16 superseded 2026-10-29; new 17 ET-26 GMROI, 18 mix plan window)
@@ -39,6 +41,8 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-11-16 (delegated, later): ADR-0017 draft docs/ADR/0017-pnl-pbi-performance.md; grains read from pack Parquet (fact_pl 458k -> 6k entity x acct x month x ver, 24k +region; alloc 758k -> 3.4k / 13.6k; slice x month x ver ~35k); no Fabric calls, no git, no model edits
+- 2026-11-16 (delegated): D6 unrounded C-31 allocation in load_acme_pl.py (+ .sync copy), backups 1244; dry-run + parquet-out + pack regen in scratch, goldens 4/4, T-06 552/552; no Fabric calls, no git
 - 2026-11-04 (delegated, evening): ACME Trucks synthetic twin: profile of the 14 files, generator + verify (149 green, engine proven on live) + README contract, pack copy + data-gen README rows (backup 2041); read-only git queries ran by mistake (brief said no git); no Fabric calls, no Desktop
 - 2026-11-04 (delegated): ADR-0015 phase 1 ACME paid-acquisition generator + Parquet + control totals + independent verify (132 green) + README contract; byte-identical; no Fabric calls, no git
 - 2026-10-31 (delegated): .sync PBI packs: DataFolder `///` comment + README 'What changed' row now point to data-gen/<report>/parquet (3 packs), validate 0/0 each; local untracked .sync/pnl/power-bi/data/ (23 Parquet) left; no Fabric calls, no git

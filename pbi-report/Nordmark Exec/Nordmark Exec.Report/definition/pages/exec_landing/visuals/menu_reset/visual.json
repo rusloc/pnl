@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "menu_reset",
   "position": {
-    "x": 302,
-    "y": 26,
+    "x": 232.0,
+    "y": 24.0,
     "z": 1000,
-    "height": 30,
-    "width": 64,
+    "height": 25.0,
+    "width": 64.0,
     "tabOrder": 1000
   },
   "visual": {
@@ -43,7 +43,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8D"
                 }
               }
             },
@@ -318,14 +318,21 @@
             "type": {
               "expr": {
                 "Literal": {
-                  "Value": "'ClearAllSlicers'"
+                  "Value": "'Bookmark'"
+                }
+              }
+            },
+            "bookmark": {
+              "expr": {
+                "Literal": {
+                  "Value": "'bm_default'"
                 }
               }
             },
             "tooltip": {
               "expr": {
                 "Literal": {
-                  "Value": "'Reset'"
+                  "Value": "'Reset to the default view'"
                 }
               }
             }

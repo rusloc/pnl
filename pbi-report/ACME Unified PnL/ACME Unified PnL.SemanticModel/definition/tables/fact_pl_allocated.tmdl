@@ -103,7 +103,7 @@ table fact_pl_allocated
 		annotation SummarizationSetBy = User
 
 	column amount_local
-		dataType: decimal
+		dataType: double
 		isHidden
 		formatString: #,0.00
 		lineageTag: 991e90f0-b157-58b4-a3a0-fc07da9dc65a
@@ -150,7 +150,7 @@ table fact_pl_allocated
 				    Data = Source{[Schema = "acme_pl", Item = "fact_pl_allocated"]}[Data],
 				    // ADR-0008: read only the declared columns; pre-translated amounts as Decimal Number (double), never Fixed Decimal
 				    Selected = Table.SelectColumns(Data, {"entity_code", "month_key", "version_key", "region_code", "channel_code", "line_code", "segment_code", "account_code", "counterparty_entity_code", "currency_code", "cost_centre_code", "amount_local", "amount_usd", "amount_eur", "amount_gbp"}),
-				    Typed = Table.TransformColumnTypes(Selected, {{"amount_local", Currency.Type}, {"amount_usd", type number}, {"amount_eur", type number}, {"amount_gbp", type number}})
+				    Typed = Table.TransformColumnTypes(Selected, {{"amount_local", type number}, {"amount_usd", type number}, {"amount_eur", type number}, {"amount_gbp", type number}})
 				in
 				    Typed
 

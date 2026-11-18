@@ -2,6 +2,7 @@
     [Parameter(Mandatory)] [string] $DaxFile,
     [Parameter(Mandatory)] [int] $Port,
     [string] $OutCsv,
+    [int] $Timeout = 1800,
     [string] $PbiBin = "$env:ProgramFiles\Microsoft Power BI Desktop\bin"
 )
 $ErrorActionPreference = "Stop"
@@ -10,7 +11,7 @@ Add-Type -Path (Join-Path $PbiBin "Microsoft.PowerBI.AdomdClient.dll")
 $query = [System.IO.File]::ReadAllText($DaxFile, [System.Text.Encoding]::UTF8)
 $conn = New-Object Microsoft.AnalysisServices.AdomdClient.AdomdConnection("Data Source=localhost:$Port")
 $conn.Open()
-$cmd = $conn.CreateCommand(); $cmd.CommandText = $query; $cmd.CommandTimeout = 1800
+$cmd = $conn.CreateCommand(); $cmd.CommandText = $query; $cmd.CommandTimeout = $Timeout
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 $reader = $cmd.ExecuteReader()
 $set = 0; $last = 0.0

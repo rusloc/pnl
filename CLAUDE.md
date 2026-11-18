@@ -72,6 +72,7 @@ Main agent (Claude Opus 5.5) routes work to sub-agents. Auto-route obvious cases
 | qa-test-hunter | Test strategy and tests across tracks: JS unit / integration, reconciliation harness for spec §10 (T-01 … T-18) | "test", "coverage", "QA", "acceptance test", "flaky" | owning agent for fixes | hunter |
 | db-chef | Postgres / Supabase schema, if any track moves data to Supabase; SQL schema review | "schema", "Supabase", "RLS policy", "migration" | ginee (Fabric SQL items) | chef |
 | svg-designer | Icons, logos, thumbnails and showcase graphics for the three flavors | "icon", "SVG", "logo", "illustration", "thumbnail" | — | svg |
+| aid | Fabric data agents and AI-ready data: agent setup and sources, Prep data for AI on the semantic model (AI data schema, AI instructions, verified answers), agent / data-source instructions and example queries, code evaluation (`fabric-data-agent-sdk`), tuning from the emitted SQL / DAX, security, publishing, lifecycle. Read-only toward Fabric unless asked; keeps `.aid/memory.md` + `.aid/optima.md` | "data agent", "Prep data for AI", "AI instructions", "verified answers", "Copilot", "NL2SQL", "NL2DAX", "chat with my data" | bip (measures, model logical changes), ginee (data items, permissions, deploys) | aid |
 
 ### Skills per agent
 - **bip:** pbip-editor, dax-sql-formatter, sql-style-formatter
@@ -82,6 +83,7 @@ Main agent (Claude Opus 5.5) routes work to sub-agents. Auto-route obvious cases
 - **hunter:** qa-testing-engineer
 - **chef:** sql-style-formatter (repo copies of db-schema-architect / pg-sql-dev were dropped at init; plugin versions remain available)
 - **svg:** design-styles, svg-app-graphics, svg-art-designer
+- **aid:** fabric-data-agent, optima
 
 ### MCP access
 - **supabase (Postgres project, registered in `.mcp.json`):** archi, chef, hunter
@@ -91,7 +93,7 @@ Main agent (Claude Opus 5.5) routes work to sub-agents. Auto-route obvious cases
 - Do not add MCPs to agents outside this matrix without an ADR.
 
 ### Roster discipline
-8 sub-agents is the target. Cross-cutting concerns (security, perf, i18n, accessibility) live as checklists inside the relevant agent — not as new agents.
+9 sub-agents is the target (aid added by the USER 2026-11-17). Cross-cutting concerns (security, perf, i18n, accessibility) live as checklists inside the relevant agent — not as new agents.
 
 ---
 

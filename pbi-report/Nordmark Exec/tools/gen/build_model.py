@@ -10,6 +10,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from common import MODEL, NAME, DATA_FOLDER, tag, write_text, write_json  # noqa: E402
 import measures  # noqa: E402
 import measures_svg  # noqa: E402,F401
+import web_sync  # noqa: E402
+import web_explain  # noqa: E402,F401
 from copy_v5 import ATTRS  # noqa: E402
 
 M = measures.M
@@ -184,6 +186,7 @@ for a, lab, vals in ATTRS:
                                     cols=[("attr_code", "string", True), ("attr_label", "string", False), ("sort_order", "int64", True)],
                                     sort={"attr_label": "sort_order"},
                                     rows=[(c, l, i + 1) for i, (c, l) in enumerate(vals)])
+CALC["param_metric"] = web_sync.CALC_SPEC
 
 
 import dim_item  # noqa: E402

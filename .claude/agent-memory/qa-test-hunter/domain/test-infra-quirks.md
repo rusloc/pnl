@@ -1,4 +1,4 @@
-<!-- next-id: INFRA-002 -->
+<!-- next-id: INFRA-003 -->
 
 # Test infra quirks
 
@@ -11,5 +11,18 @@
 **Tags:** vitest, it.fails, ratchet, parity, fixture, known-gap
 **Confidence:** low
 **Last-verified:** 2026-10-27
+**Related:** —
+**Status:** active
+
+### INFRA-002 · Running another repo's engine read-only (extensionless imports) · 2026-11-16
+**Symptom:** the vosk.dev engine (`C:\__VOSK__`, read-only) uses extensionless imports and `@/` aliases; plain `node` type stripping (used for js-exec on 2026-10-30) cannot resolve them, and running inside the other repo would write caches there
+**Cause:** different module conventions per repo (vosk: bundler resolution, double quotes; ours: `.ts` imports)
+**Fix / test:** copy `src/lib/<x>` + `data/<x>` into the scratchpad as `w/src/lib/<x>` / `w/data/<x>` (keeps the `../../../../data` URLs valid), `w/package.json` `{"type":"module"}`, junction `w/node_modules` → `js-report/node_modules` (PowerShell `New-Item -ItemType Junction`; `cmd mklink /J` fails from Git Bash quoting), run `node C:\__VOSK__
+ode_modules	sx\dist\cli.mjs script.ts`. Skip test-utils that import `@/lib/...`; write your own loader. For "same code?" questions use a TypeScript-scanner token diff or prettier (default width) on both copies + `diff -w`. Scripts: tools/parity-oracle-2026-11-16/
+**Seen:** P&L + Nordmark oracle 2026-11-16 (tsx 4.23.15, Node 24.19)
+**Hits:** 1
+**Tags:** tsx, cross-repo, read-only, oracle, junction, engine-dump
+**Confidence:** low
+**Last-verified:** 2026-11-16
 **Related:** —
 **Status:** active

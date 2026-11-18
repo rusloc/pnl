@@ -1,0 +1,58 @@
+/// F-15 Costs shown: as negatives (default, x 1) or as positives (x -1 on cost rows of the statement). Display only; Δ never flips.
+table param_cost_sign
+	lineageTag: f3038650-d729-5d08-bd19-6eb78303982c
+
+	column cost_sign_code
+		dataType: string
+		isHidden
+		lineageTag: 683c98e2-f85a-59c9-bd37-80ab7979ea69
+		summarizeBy: none
+		sourceColumn: [cost_sign_code]
+
+		annotation SummarizationSetBy = User
+
+	column cost_sign_label
+		dataType: string
+		lineageTag: 85fb335b-bd24-5965-876b-15d55dad3c4b
+		summarizeBy: none
+		sourceColumn: [cost_sign_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column cost_multiplier
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a21357d8-f083-56bd-8f95-5e612aa697a1
+		summarizeBy: none
+		sourceColumn: [cost_multiplier]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 40d89f5c-c6d8-5634-8f64-3a434362622c
+		summarizeBy: none
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_cost_sign = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "cost_sign_code", STRING,
+				    "cost_sign_label", STRING,
+				    "cost_multiplier", INTEGER,
+				    "sort_order", INTEGER,
+				    {
+				        { "NEG", "−", 1, 10 },
+				        { "POS", "+", -1, 20 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

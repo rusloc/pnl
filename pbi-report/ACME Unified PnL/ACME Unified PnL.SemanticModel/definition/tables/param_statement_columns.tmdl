@@ -1,0 +1,65 @@
+/// Statement columns (F-16 variance format, % of NR column, F-17 full-year columns): field parameter on the statement matrix and the Display panel checklist. All 13 selected by default; names = the matrix column headers (Actual, Budget, Latest est. as the spec).
+table param_statement_columns
+	lineageTag: abf42243-b051-58e3-8871-97f00e5b7edb
+
+	column 'Statement Columns'
+		dataType: string
+		lineageTag: 381e626b-f24a-56f3-9dc2-b78cf183e137
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Statement Columns Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Statement Columns Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Statement Columns Fields'
+		dataType: string
+		isHidden
+		lineageTag: a4a8a8c1-71be-503f-9509-8299a585a750
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Statement Columns Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Statement Columns Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 50c0c746-f769-56fe-8d42-c2c18316b790
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition param_statement_columns = calculated
+		mode: import
+		source =
+				{
+				    ( "Line note", NAMEOF ( [PL Notes] ), 0 ),
+				    ( "Actual", NAMEOF ( [PL Base] ), 1 ),
+				    ( "% NR", NAMEOF ( [PL % NR] ), 2 ),
+				    ( "Compare A", NAMEOF ( [PL Compare A] ), 3 ),
+				    ( "Δ A", NAMEOF ( [PL Δ A] ), 4 ),
+				    ( "Δ % A", NAMEOF ( [PL Δ A %] ), 5 ),
+				    ( "±15% A", NAMEOF ( [PL Bar A] ), 6 ),
+				    ( "Compare B", NAMEOF ( [PL Compare B] ), 7 ),
+				    ( "Δ B", NAMEOF ( [PL Δ B] ), 8 ),
+				    ( "Δ % B", NAMEOF ( [PL Δ B %] ), 9 ),
+				    ( "Budget", NAMEOF ( [PL FY Budget] ), 10 ),
+				    ( "Latest est.", NAMEOF ( [PL FY LE] ), 11 ),
+				    ( "Δ LE vs Budget", NAMEOF ( [PL Δ LE vs Budget] ), 12 )
+				}
+
+	annotation PBI_Id = 31d3c75724055536b2b45f2286531cfc
+
+	annotation PBI_ResultType = Table
+

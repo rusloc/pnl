@@ -1,0 +1,29 @@
+/// Engine helper (no slicer): fiscal year of the constant-currency budget rates when a measure moves the window to another year (Profitability trends month by month). Empty = the selected fiscal year.
+table param_cc_year
+	lineageTag: 2c04d84d-5dbe-50d4-963e-86e45f2c2638
+
+	column cc_fiscal_year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: eeba0b73-af63-5c5e-a37c-b09e9e59d908
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [cc_fiscal_year]
+
+		annotation SummarizationSetBy = User
+
+	partition param_cc_year = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "cc_fiscal_year", INTEGER,
+				    {
+				        { 2024 },
+				        { 2025 },
+				        { 2026 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "pnl_vitals",
+  "displayName": "Vitals",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F2F4F7'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F2F4F7'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "info_filters_table",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c01_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c02_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c03_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c04_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c05_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c06_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c07_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c08_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c09_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "kv_c10_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    }
+  ]
+}

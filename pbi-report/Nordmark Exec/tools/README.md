@@ -25,8 +25,11 @@ stored here.
 | `gen/build_model.py` | Whole model TMDL into `NORDMARK_ROOT` (use a scratch folder; the repo model is updated through `splice.py`) |
 | `gen/splice.py` | Puts generated measures into the Desktop-saved `_measures.tmdl`: repo order and lineageTags kept |
 | `gen/build_tests.py`, `gen/build_docs.py` | Tests and dictionary |
+| `gen/web_sync.py` | Web sync 2026-11-16 (vosk.dev build spec, Option B): `param_metric` catalogue table, `Actual` / `Basis` / `Last Year` / `Previous` / `Comparison`, per-card `Card Sub` / `Card Basis Label` / `Card Basis Unit` / `Card Bar Target`, `Status Summary Text` |
+| `gen/web_spec.py`, `gen/build_tests_web.py` | Web oracle: extracts the spec's card strings (08 section 4) and default-view bars to `../tests/web/*.csv`, copies `chat-golden.csv` there; writes `../tests/web-sync.dax` (T-N11 answer key, T-N12 card strings of 17 views + bars) |
 | `gen/export_sync.py` | Measure catalogue as JSON for `run/tom_sync.ps1` |
 | `gen/report_state.py` | `tt_info` size from the pop-up height; saved slicer state = documented default (Week / FY2026 / W43 / Budget / All, no attribute picks) |
+| `gen/report_web_sync.py` | Web sync phase 2 (2026-11-16): the report laid out to the vosk.dev build spec 05-07 at 1280 x 720 (Executive, Explain, TT Dot, TT Chip; 31 bookmarks; sync groups; theme keys). Reads a pristine copy of the 1440 x 810 report (`__backup__/Nordmark Exec.Report.2026-11-16-1920.bak`) and writes the repo report; idempotent: `python report_web_sync.py '..\..\__backup__\Nordmark Exec.Report.2026-11-16-1920.bak'` |
 | `gen/report_category.py` | Category round (ADR-0013 (l)): the `menu_param_category` dropdown slicer, the Filters menu re-stacked, panel SVG labels, the 4 layer bookmarks; idempotent |
 | `run/run-dax.ps1`, `run/run-tests.ps1`, `run/split_blocks.py` | Read-only DAX runner; block-by-block test runner |
 | `run/time.ps1` | Cold timings: XMLA ClearCache before every query, one query per visual measure, 4 picker states |
@@ -46,6 +49,7 @@ $env:NORDMARK_ROOT = $scratch; python build_model.py; python build_tests.py; Rem
 python splice.py "..\..\Nordmark Exec.SemanticModel\definition\tables\_measures.tmdl" "$scratch\Nordmark Exec.SemanticModel\definition\tables\_measures.tmdl" "$scratch\_measures.spliced.tmdl"
 Copy-Item "$scratch\_measures.spliced.tmdl" "..\..\Nordmark Exec.SemanticModel\definition\tables\_measures.tmdl"
 Copy-Item "$scratch\tests\control-totals.dax" "..\..\tests\control-totals.dax"
+python build_tests_web.py
 python build_docs.py
 python report_state.py
 powerbi-report-author validate "..\..\Nordmark Exec.pbip"

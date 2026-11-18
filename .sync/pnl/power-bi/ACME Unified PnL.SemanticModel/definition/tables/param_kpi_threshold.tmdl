@@ -1,7 +1,7 @@
 /// Spec KPI §6 status thresholds (a parameter, not data): on track within on_track, watch up to watch, off beyond; PCT = relative Δ (amounts, counts), PP = percentage points (ratios).
 table param_kpi_threshold
-	lineageTag: 146ec322-7171-5280-89d6-6e20ce20f6f3
 	isHidden
+	lineageTag: 146ec322-7171-5280-89d6-6e20ce20f6f3
 
 	column delta_kind
 		dataType: string
@@ -46,3 +46,4 @@ table param_kpi_threshold
 				)
 
 	annotation PBI_ResultType = Table
+

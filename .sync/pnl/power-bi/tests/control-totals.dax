@@ -12,6 +12,8 @@
 // Views redesign v4 (2026-10-27, bip): T-R1 Vitals (Opex % NR from the statement lines, FY outlook = FY LE, every card renders), T-R2 NR bridge
 // constant-currency subtotal, T-R3 profit bridge reconciles to Adj. EBITDA and operating profit, T-R4 variances leaf Δ sum = operating profit Δ
 // and coverage in [0, 1], T-R5 concentration shares sum to 100 %.
+// ADR-0017 P1 (2026-11-17): the selection measures fall back to literal defaults; the block "ADR-0017 defaults" checks each literal
+// against the is_default row of its table.
 // Parity check B vs C (2026-10-27, docs/ADD/features/parity-check-2026-10-27.md): T-P, 6 selections / 601 rows of
 // js-report/lib/test-utils/parity/parity_selections.csv at the end of this file (about 6-7 min on a clean instance; run them last).
 
@@ -1458,6 +1460,30 @@ RETURN
         _rows
         ,"_test", "T-R5 concentration shares"
         ,"_pass", ABS ( [_share_sum] - 1 ) < 0.000001
+    )
+
+EVALUATE
+// ---------------------------------------------------------------- ADR-0017 defaults: since P1 the selection measures fall back to literals (nothing selected); each literal must equal the is_default row of its table, so a change of a default in the data fails here
+VAR _rows =
+    {
+        ( "_Sel Entity", CALCULATE ( [_Sel Entity], REMOVEFILTERS ( param_entity_view ) ), CALCULATE ( MAX ( param_entity_view[entity_view_code] ), REMOVEFILTERS ( param_entity_view ), param_entity_view[is_default] = TRUE () ) )
+        ,( "_Sel Base Version", CALCULATE ( [_Sel Base Version], REMOVEFILTERS ( param_base_version ) ), CALCULATE ( MAX ( param_base_version[choice_code] ), REMOVEFILTERS ( param_base_version ), param_base_version[is_default] = TRUE () ) )
+        ,( "_Sel Compare A", CALCULATE ( [_Sel Compare A], REMOVEFILTERS ( param_compare_a ) ), CALCULATE ( MAX ( param_compare_a[choice_code] ), REMOVEFILTERS ( param_compare_a ), param_compare_a[is_default] = TRUE () ) )
+        ,( "_Sel Compare B", CALCULATE ( [_Sel Compare B], REMOVEFILTERS ( param_compare_b ) ), CALCULATE ( MAX ( param_compare_b[choice_code] ), REMOVEFILTERS ( param_compare_b ), param_compare_b[is_default] = TRUE () ) )
+        ,( "_Sel Time View", CALCULATE ( [_Sel Time View], REMOVEFILTERS ( param_time_view ) ), CALCULATE ( MAX ( param_time_view[time_view_code] ), REMOVEFILTERS ( param_time_view ), param_time_view[is_default] = TRUE () ) )
+        ,( "_Sel Currency", CALCULATE ( [_Sel Currency], REMOVEFILTERS ( param_reporting_currency ) ), CALCULATE ( MAX ( param_reporting_currency[currency_code] ), REMOVEFILTERS ( param_reporting_currency ), param_reporting_currency[is_default] = TRUE () ) )
+        ,( "_Sel FX Basis", CALCULATE ( [_Sel FX Basis], REMOVEFILTERS ( param_fx_basis ) ), CALCULATE ( MAX ( param_fx_basis[fx_basis_code] ), REMOVEFILTERS ( param_fx_basis ), param_fx_basis[is_default] = TRUE () ) )
+        ,( "_Sel Units", CALCULATE ( [_Sel Units], REMOVEFILTERS ( param_units ) ), CALCULATE ( MAX ( param_units[units_code] ), REMOVEFILTERS ( param_units ), param_units[is_default] = TRUE () ) )
+        ,( "_Units Divisor", FORMAT ( CALCULATE ( [_Units Divisor], REMOVEFILTERS ( param_units ) ), "0" ), FORMAT ( CALCULATE ( MAX ( param_units[divisor] ), REMOVEFILTERS ( param_units ), param_units[is_default] = TRUE () ), "0" ) )
+    }
+RETURN
+    SELECTCOLUMNS (
+        _rows
+        ,"_measure", [Value1]
+        ,"_value", [Value2]
+        ,"_expected", [Value3]
+        ,"_test", "ADR-0017 defaults"
+        ,"_pass", [Value2] = [Value3]
     )
 
 // ---------------------------------------------------------------------------------------------

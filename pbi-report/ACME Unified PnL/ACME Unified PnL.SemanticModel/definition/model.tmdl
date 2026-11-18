@@ -20,7 +20,6 @@ annotation PBI_ProTooling = ["DevMode"]
 ref table fact_pl
 ref table fact_pl_allocated
 ref table fact_operational
-ref table fact_pl_elim
 ref table fact_fx_rate
 ref table dim_account
 ref table dim_report_line
@@ -53,14 +52,26 @@ ref table dim_kpi
 ref table dim_bridge_step
 ref table param_breakdown_field
 ref table _meta_refresh
-ref table dim_filter_row
 ref table _measures
+ref table fact_pl_elim
+ref table dim_filter_row
 ref table param_kpi_threshold
 ref table dim_profit_step
 ref table dim_conc_level
 ref table var_cut_total
 ref table dim_pl_info
 ref table param_var_cut
+ref table param_cost_sign
+ref table param_show_tags
+ref table param_hide_empty
+ref table param_range_start
+ref table dim_trend_row
+ref table param_statement_columns
+ref table param_cc_year
+ref table dim_heat_row
+ref table dim_profit_axis
+ref table dim_bridge_axis
+ref table dim_combo_period
 
 ref cultureInfo en-US
 

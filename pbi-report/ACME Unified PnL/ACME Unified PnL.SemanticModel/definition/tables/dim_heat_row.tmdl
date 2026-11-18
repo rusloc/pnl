@@ -1,0 +1,54 @@
+/// Row axis of the Profitability heatmap (spec 2026-11-17 §7): the four regions in net-revenue order (NA, EU, AP, UK in every company and year of the data), a Total row, then a GM % row ("GM 51.6%" per line; a matrix column header cannot show a measure).
+table dim_heat_row
+	lineageTag: 06cbf7ef-d98f-55d6-9e01-082921647a63
+
+	column heat_row_code
+		dataType: string
+		isHidden
+		lineageTag: 4628652b-177a-51dd-bfb9-4c5887cdbaa6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [heat_row_code]
+
+		annotation SummarizationSetBy = User
+
+	column heat_row_label
+		dataType: string
+		lineageTag: 021c2a9c-0c54-596f-ad84-2a5c77b0328c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [heat_row_label]
+		sortByColumn: heat_row_sort
+
+		annotation SummarizationSetBy = User
+
+	column heat_row_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d46cd0a3-f601-583c-bc26-3901953b2e26
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [heat_row_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_heat_row = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "heat_row_code", STRING,
+				    "heat_row_label", STRING,
+				    "heat_row_sort", INTEGER,
+				    {
+				        { "NA", "North America", 10 },
+				        { "EU", "Continental Europe", 20 },
+				        { "AP", "Asia-Pacific", 30 },
+				        { "UK", "UK & Ireland", 40 },
+				        { "TOTAL", "Total", 50 },
+				        { "GM", "GM %", 60 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

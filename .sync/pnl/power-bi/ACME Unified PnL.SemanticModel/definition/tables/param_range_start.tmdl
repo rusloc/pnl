@@ -1,0 +1,34 @@
+/// Custom range "From" month (web 2026-11-15): every month of the data history, newest last; the To month is the Year + Month selection. Default = January of the selected year (_Sel Range Start).
+table param_range_start
+	lineageTag: 0351ddce-610b-56fb-a6fd-16f39a15f480
+
+	column range_start_label
+		dataType: string
+		lineageTag: b8cb46a1-52d7-5899-88fa-0ba6645aaccb
+		summarizeBy: none
+		sourceColumn: [range_start_label]
+		sortByColumn: range_start_index
+
+		annotation SummarizationSetBy = User
+
+	column range_start_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1c75c009-4cf5-534e-820c-ccd6f3ed3de8
+		summarizeBy: none
+		sourceColumn: [range_start_index]
+
+		annotation SummarizationSetBy = User
+
+	partition param_range_start = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    dim_month
+				    ,"range_start_label", dim_month[month_name] & " " & dim_month[fiscal_year]
+				    ,"range_start_index", dim_month[month_index]
+				)
+
+	annotation PBI_ResultType = Table
+

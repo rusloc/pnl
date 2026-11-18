@@ -383,6 +383,33 @@ def info_bottom(k):
 
 
 INFO_H = int(max(info_bottom(c["k"]) for c in CARDS) + EX_LINES * 19 + 7)
+# Explain page (web sync phase 2, 2026-11-16): the pop-up is a fixed panel; the web's pill (.pill: 40 px, cobalt 10 % fill,
+# 45 % border, 22 px cobalt disc + 14 px icon, 13.5 px / 600) sits at the bottom, the close circle (.x 32 px) top right
+PILL_Y = INFO_H
+INFO_E = INFO_H + 40 + 18
+CLOSE = f"<circle cx='{IW - 40}' cy='40' r='15.5' fill='#FFFFFF' stroke='{C['line']}'/>"
+WORD_X = IW - 24 - 32 - 12
+
+
+def pill(label, icon):
+    """Bottom pill of the Explain panel (drawn; a transparent button lies on top of it)."""
+    tw = text_width(label, 13.5, True)
+    x0 = round(IW / 2 - (22 + 10 + tw) / 2, 1)
+    return (f"<rect x='24.5' y='{PILL_Y + 0.5}' width='{IW - 49}' height='39' rx='19.5' fill='{C['acc']}' fill-opacity='0.1' "
+            f"stroke='{C['acc']}' stroke-opacity='0.45'/>"
+            f"<circle cx='{x0 + 11}' cy='{PILL_Y + 20}' r='11' fill='{C['acc']}'/>"
+            f"<g transform='translate({round(x0 + 4, 1)} {PILL_Y + 13}) scale(0.7)'>{icon.replace(C['muted'], '#FFFFFF')}</g>"
+            f"<text x='{round(x0 + 32, 1)}' y='{PILL_Y + 25}' font-size='13.5' font-weight='600' fill='{C['acc']}'>{xml(label)}</text>")
+
+
+def foot_expr(k):
+    """Note closing the tags row: provisional note, 'Updated weekly' or 'Updated <refresh>' (web explain.updated)."""
+    c = COPY[k]
+    if c["prov"] is not None:
+        return f'IF ( LOOKUPVALUE ( dim_kpi[is_provisional], dim_kpi[kpi_code], "{k}" ), {dq(c["prov"])}, [Updated Text] )'
+    if c["cadence"] == "weekly":
+        return '"Updated weekly"'
+    return "[Updated Text]"
 
 
 def info_svg(k):
@@ -398,7 +425,6 @@ def info_svg(k):
         f"<text x='{round(x + 9, 1)}' y='{ty + 14}' font-size='11' fill='{C['muted']}'>{alab} "
         f"<tspan font-weight='600' fill='{C['ink']}'>{xml(vlab)}</tspan></text>" for x, w, alab, vlab in parts)
     note_y = ty + 14 + (26 if wraps else 0)
-    bottom = info_bottom(k)
     eyebrow_pre = "Tier 1 · " if SIZE.get(k) == "hero" else "Explains Tier 1 · "
     stat_vars, stat_svg = [], []
     for i, (lab, val) in enumerate(stats):
@@ -407,12 +433,7 @@ def info_svg(k):
         stat_vars.append(f"VAR _sv{i}        = SUBSTITUTE ( IF ( _cna && _sl{i} <> \"\", \"n/a\", {val} ), \"&\", \"&amp;\" )")
         stat_svg.append(f"\"<text x='{x}' y='{IB['st_l']}' font-size='12' fill='{C['muted']}'>\" & _sl{i} & \"</text>"
                         f"<text x='{x}' y='{IB['st_v']}' font-size='15' font-weight='600' fill='{C['ink']}'>\" & _sv{i} & \"</text>\"")
-    if c["prov"] is not None:
-        foot_r = f'IF ( LOOKUPVALUE ( dim_kpi[is_provisional], dim_kpi[kpi_code], "{k}" ), {dq(c["prov"])}, [Updated Text] )'
-    elif c["cadence"] == "weekly":
-        foot_r = '"Updated weekly"'
-    else:
-        foot_r = "[Updated Text]"
+    foot_r = foot_expr(k)
     wblock, acc = wrap_dax("_ex", EX_CHARS, EX_WORDS, "_x")
     ex_lines = "\n        & ".join(
         f"IF ( PATHLENGTH ( {acc} ) >= {j}, \"<text x='{DD_X}' y='{y_ex + 13 + (j - 1) * 19}' font-size='13' fill='{C['ink']}'>\" & "
@@ -424,6 +445,7 @@ def info_svg(k):
     unit = UNIT_TXT[UNIT[k]]
     tval = (f"\"<text x='24' y='{IB['val_b']}' font-size='40' font-weight='700' fill='{C['ink']}' letter-spacing='-1'>\" & _bt"
             f" & \"<tspan dx='4' font-size='16' font-weight='600' fill='{TGT_INK}' letter-spacing='0'>{unit}</tspan></text>\"")
+    # no basis: the web prints NO_BASIS_VALUE "–" in muted ink (copy.ts; hunter's oracle 2026-11-16 'i basis value')
     tnone = f"<text x='24' y='{IB['val_b']}' font-size='40' font-weight='700' fill='{C['muted']}'>–</text>"
     body = f"""{hs.block()}
 {chr(10).join(cl)}
@@ -437,14 +459,14 @@ VAR _ex         = {f'IF ( _cna, {dq(CAT_NOTE[k])}, {ex} )' if k in CAT_NOTE else
 {wblock}
 VAR _n          = MIN ( PATHLENGTH ( {acc} ), {EX_LINES} )
 VAR _dy         = _n * 19 + 7
-VAR _h          = {bottom} + _dy
 VAR _footr      = {foot_r}
 VAR _head       =
-    "<svg xmlns='http://www.w3.org/2000/svg' width='{IW}' height='{INFO_H}' viewBox='0 0 {IW} {INFO_H}' {FONT}>"
-        & "<rect x='0.5' y='0.5' width='{IW - 1}' height='" & FORMAT ( _h - 1, "0" ) & "' rx='15.5' fill='#FFFFFF' stroke='{C['line']}'/>"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='{IW}' height='{INFO_E}' viewBox='0 0 {IW} {INFO_E}' {FONT}>"
+        & "<rect x='0.5' y='0.5' width='{IW - 1}' height='{INFO_E - 1}' rx='15.5' fill='#FFFFFF' stroke='{C['line']}'/>"
         & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='{C['muted']}' letter-spacing='0.6'>" & UPPER ( "{eyebrow_pre}" & _sub ) & "</text>"
         & "<text x='24' y='58' font-size='18' font-weight='600' fill='{C['ink']}'>{xml(c['title'])}</text>"
-        & "<text x='{IW - 24}' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
+        & "<text x='{WORD_X}' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
+        & "{CLOSE}"
         & "<text x='24' y='{IB['lab_a']}' font-size='16' font-weight='600' fill='{TGT_INK}'>Actual</text>"
         & "<text x='24' y='{IB['val_a']}' font-size='48' font-weight='700' fill='{C['ink']}' letter-spacing='-1.4'>" & _val
         & "<tspan font-size='16' font-weight='500' fill='{C['muted']}' letter-spacing='0' dx='6'>" & _unit & "</tspan></text>"
@@ -462,6 +484,7 @@ VAR _body       =
         & {concat_static(after + [tags])}
         & "<text x='{IW - 24}' y='{note_y}' text-anchor='end' font-size='12.5' font-weight='500' fill='{C['ink']}'>" & _footr & "</text>"
         & "</g>"
+        & {dq(pill("Drill path · " + PAGE[c["page"]], DRILL_ICON))}
 VAR _svg        = _head & _bars & _body & "</svg>\"""".split("\n")
     expr = "\n" + wrap_body(f"Info SVG {k}", frame(k, info=True), body, ENC.split("RETURN\n    ", 1)[1])
     add(f"Info SVG {k}", expr, None, "8 Cards SVG", True, desc=f"{k} i pop-up (tooltip page tt_info, E-57, ET-30, ET-32): stacked block Actual / value / basis / target (USER 2026-10-30), "
@@ -489,11 +512,12 @@ RETURN
 
 for k in KPIS:
     info_svg(k)
-dispatch("KPI Info SVG", "Info SVG {k}", "i pop-up of the KPI in context (tt_info).", cat="ImageUrl")
+dispatch("KPI Info SVG", "Info SVG {k}", "Explanation panel of the KPI picked on the Explain page (state A).", cat="ImageUrl")
 
-# drill path pop-up (E-58)
-DW = 440
+# drill path (E-58): state B of the Explain page panel (web DrillPop): same frame as the explanation, steps, footer, back pill
+DW = IW
 drill_h = {}
+BACK_ICON = INFO_ICON
 
 
 def drill_layout(c):
@@ -514,7 +538,8 @@ def drill_layout(c):
 
 for c in CARDS:
     drill_h[c["k"]] = drill_layout(c)[1]
-DRILL_H = max(drill_h.values())
+DRILL_H = INFO_E
+assert max(drill_h.values()) <= PILL_Y, drill_h
 for c in CARDS:
     k = c["k"]
     frags, _h = drill_layout(c)
@@ -527,11 +552,13 @@ VAR _svg        =
         & "<rect x='0.5' y='0.5' width='{DW - 1}' height='{DRILL_H - 1}' rx='15.5' fill='#FFFFFF' stroke='{C['line']}'/>"
         & "<text x='24' y='34' font-size='10.5' font-weight='600' fill='{C['muted']}' letter-spacing='0.6'>{xml(eb)}</text>"
         & "<text x='24' y='58' font-size='18' font-weight='600' fill='{C['ink']}'>{xml(c['title'])}</text>"
-        & "<text x='{DW - 24}' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
+        & "<text x='{WORD_X}' y='58' text-anchor='end' font-size='14' font-weight='600' fill='" & _ink & "'>" & _word & "</text>"
+        & "{CLOSE}"
         & {concat_static(frags)}
+        & {dq(pill("Back to the explanation", BACK_ICON))}
         & "</svg>"
-{ENC}""", None, "8 Cards SVG", True, desc=f"{k} drill path pop-up (tooltip page tt_drill): drill page and 4 steps, text only (E-58).", cat="ImageUrl")
-dispatch("KPI Drill SVG", "Drill SVG {k}", "Drill path pop-up of the KPI in context (tt_drill).", cat="ImageUrl")
+{ENC}""", None, "8 Cards SVG", True, desc=f"{k} drill path (Explain page, state B; web DrillPop): drill page and 4 steps, footer, back pill (E-58).", cat="ImageUrl")
+dispatch("KPI Drill SVG", "Drill SVG {k}", "Drill path panel of the KPI picked on the Explain page (state B).", cat="ImageUrl")
 
 # status-chip rule tooltip (v5 data-tip on .st)
 RW = 300
@@ -608,7 +635,7 @@ VAR _on         = INT ( _pk / 1000 )
 VAR _watch      = INT ( MOD ( _pk, 1000 ) / 100 )
 VAR _offc       = INT ( MOD ( _pk, 100 ) / 10 )
 VAR _dot        = MOD ( _pk, 10 )
-VAR _dc         = SWITCH ( _dot, 1, "{C['dot_green']}", 2, "{C['dot_orange']}", 3, "{C['dot_red']}", "{C['col']}" )
+VAR _dc         = SWITCH ( _dot, 1, "{C['dot_green']}", 2, "{C['dot_orange']}", 3, "{C['dot_red']}", "{C['dot_grey']}" )
 VAR _w1         = SWITCH ( _on, {pill_w("▲ {n} on track")}, 110 )
 VAR _w2         = SWITCH ( _watch, {pill_w("● {n} watch")}, 90 )
 VAR _w3         = SWITCH ( _offc, {pill_w("▼ {n} off track")}, 110 )

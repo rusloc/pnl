@@ -50,7 +50,7 @@ C = {
     "acc": "#2048C6", "accT": "#EAEFFB", "accSel": "#E6ECFA", "accLine": "#9AA9E0",
     "good": "#136C3A", "goodT": "#E1F0E5", "watch": "#9A5B00", "watchT": "#FBEFD6", "off": "#C0272D", "offT": "#FAE3E3",
     "col": "#D1D5DB", "tgt": "#9CA3AF", "mix1": "#2048C6", "mix2": "#374151", "mix3": "#B6BCC6",
-    "dot_green": "#2E9E5B", "dot_orange": "#E3A52A", "dot_red": "#B3261E",
+    "dot_green": "#2E9E5B", "dot_orange": "#E3A52A", "dot_red": "#B3261E", "dot_grey": "#9AA1AD",
     "chip_line": "#DBDCDF", "na": "#5F6878", "naT": "#F1F3F5",
 }
 

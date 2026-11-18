@@ -1,10 +1,10 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
   "name": "exec_landing",
-  "displayName": "Executive dashboard",
+  "displayName": "Executive",
   "displayOption": "FitToPage",
-  "height": 810,
-  "width": 1440,
+  "height": 720,
+  "width": 1280,
   "objects": {
     "background": [
       {
@@ -74,6 +74,21 @@
     {
       "source": "menu_item_wide",
       "target": "menu_item",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_param_attr_group",
+      "target": "more_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_param_attr_lever",
+      "target": "more_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "menu_param_attr_owner",
+      "target": "more_table",
       "type": "NoFilter"
     }
   ]

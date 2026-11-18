@@ -1,6 +1,8 @@
 param(
     [Parameter(Mandatory)] [int] $Port,
     [string] $Pattern = ".",
+    [string[]] $Names = @(),
+    [int] $Timeout = 1800,
     [string] $TestFile = (Join-Path $PSScriptRoot "..\..\tests\control-totals.dax"),
     [string] $OutDir = (Join-Path $env:TEMP "nordmark-tests"),
     [string] $PbiBin = "$env:ProgramFiles\Microsoft Power BI Desktop\bin"
@@ -11,8 +13,10 @@ $ErrorActionPreference = "Stop"
 $blocks = Join-Path $OutDir "blocks"
 python (Join-Path $PSScriptRoot "split_blocks.py") $TestFile $blocks | Out-Null
 $fail = 0; $rows = 0
-foreach ($f in Get-ChildItem $blocks -Filter *.dax | Sort-Object Name | Where-Object { $_.BaseName -match $Pattern }) {
-    $o = & (Join-Path $PSScriptRoot "run-dax.ps1") -DaxFile $f.FullName -Port $Port -OutCsv (Join-Path $OutDir "$($f.BaseName).csv") -PbiBin $PbiBin
+foreach ($f in Get-ChildItem $blocks -Filter *.dax | Sort-Object Name | Where-Object { $_.BaseName -match $Pattern -and ($Names.Count -eq 0 -or $Names -contains $_.BaseName) }) {
+    # one failing block (timeout, engine error) is reported and the run goes on
+    try { $o = & (Join-Path $PSScriptRoot "run-dax.ps1") -DaxFile $f.FullName -Port $Port -OutCsv (Join-Path $OutDir "$($f.BaseName).csv") -PbiBin $PbiBin -Timeout $Timeout }
+    catch { $o = @("TOTAL: ERROR $($_.Exception.Message -replace '\s+', ' ')"); $fail++ }
     $t = $o | Where-Object { $_ -like "TOTAL:*" }
     "{0} | {1}" -f $f.BaseName, $t
     $o | Where-Object { $_ -like "FAIL*" } | Select-Object -First 5

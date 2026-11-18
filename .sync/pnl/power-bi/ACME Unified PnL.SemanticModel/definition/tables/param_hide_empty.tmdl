@@ -1,0 +1,37 @@
+/// F-17 / M-22 Hide empty lines: On (default, leaf accounts without data drop out) / Off (in-scope leaf accounts show 0).
+table param_hide_empty
+	lineageTag: c3fab69c-db6c-5988-9266-3d790c2bd7ee
+
+	column hide_empty
+		dataType: string
+		lineageTag: d909a017-9106-5ff9-8c35-c69cb5251b97
+		summarizeBy: none
+		sourceColumn: [hide_empty]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cb4b1dcd-9c87-528d-9ae1-2833c835460c
+		summarizeBy: none
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_hide_empty = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "hide_empty", STRING,
+				    "sort_order", INTEGER,
+				    {
+				        { "On", 10 },
+				        { "Off", 20 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

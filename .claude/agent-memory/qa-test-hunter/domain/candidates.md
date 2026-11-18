@@ -1,4 +1,4 @@
-<!-- next-id: CAND-011 -->
+<!-- next-id: CAND-012 -->
 
 # Candidates
 
@@ -82,3 +82,11 @@
 **Tags:** format-string, rounding, dax, parity, blank
 **Promote-to:** defect-patterns.md on second sighting (near DEF-007)
 **Expires:** 2027-02-07
+
+### CAND-011 · Partial comparison window reported as growth (12 months vs 6) · first seen 2026-11-16
+**Where:** vosk.dev `src/lib/pnl/engine/versions.ts` PY plan (C-04: months before history dropped, notice only); repro P&L `tv=RANGE&sfy=2024&sm=7&fy=2025&m=6` or LTM Jun 2025 → NR vs PY +129.0 %
+**Why interesting:** contract-conformant (C-04 "some missing → notice") so a parity oracle must assert it (rule 3 only bars known bugs), yet the number is meaningless; every track inherits it
+**Watch for:** any comparison column whose month count differs from the base's; ask whether the contract wants n/a or a like-for-like window
+**Tags:** prior-year, partial-window, growth, contract, custom-range
+**Promote-to:** defect-patterns.md on second sighting
+**Expires:** 2027-02-14

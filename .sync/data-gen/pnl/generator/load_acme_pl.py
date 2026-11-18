@@ -5,7 +5,12 @@ Full overwrite per table (idempotent re-run). Every CSV is parsed strictly again
 header = spec columns (names and order), row count = expected, 0 duplicate keys, no nulls in not-null columns.
 If any table fails a check, nothing is written.
 
-ADR-0008 step (a)+(b), derived in this script and checked before any write (spec section 7, C-10..C-13, C-36):
+ADR-0008 step (a)+(b), derived in this script and checked before any write (spec section 7, C-10..C-13, C-31, C-36):
+- fact_pl_allocated.amount_local re-derived unrounded from fact_pl (C-31, ruling D6 of 2026-11-16, the web engine's
+  rule): below-CM amount of entity x version x month x region x account x NR(slice tuple) / NR(group), NR = blocks
+  GR + GTN, kept at 6 dp. The CSV gives the rows; its cent-rounded amounts are replaced.
+- param_time_view + the report's custom range row RANGE (web time-windows.ts; not in the dataset CSV, which mirrors
+  the web manifest).
 - pre-translated amounts appended to fact_pl, fact_pl_allocated (amount_*) and fact_operational (gmv_*):
   one column per reporting currency at the row version's own rate type (ACT/FC at the month's ACTUAL_AVG, BUD at
   BUDGET); translated per row, so the sum of any slice equals the month x currency translation the model does
@@ -154,6 +159,11 @@ DERIVED_COLUMNS = {
 }
 # fact_pl_elim (C-36): same key and columns as fact_pl; rows = fact_pl rows with a counterparty (expected 5,304)
 ELIM_TABLE, ELIM_ROWS = "fact_pl_elim", 5304
+# fact_pl_allocated (C-31, D6): amount_local unrounded, rounded half-even to 6 dp per row (Decimal Number in the model)
+ALLOC_TABLE, ALLOC_AMT, NR_BLOCKS = "fact_pl_allocated", pa.decimal128(18, 6), ("GR", "GTN")
+# rows the reports need on top of a CSV (same columns): the custom range time view (spec 03-model, RANGE)
+EXTRA_ROWS = {"param_time_view": [
+    {"time_view_code": "RANGE", "time_view_name": "Custom range", "sort_order": 60, "is_default": False}]}
 
 
 def arrow_schema(columns):
@@ -277,6 +287,58 @@ def add_translations(table, data, rate, month_fy):
     return data, problems, worst
 
 
+def allocate(loaded):
+    """fact_pl_allocated (C-31, D6): replaces amount_local by the unrounded allocation from fact_pl, per entity x
+    version x month x region group g: amount(g, below-CM account) x NR(g, channel x line x segment) / NR(g).
+    Checks: every group has net revenue, every CSV row matches a below-CM amount and an NR tuple, the rows cover every
+    (group, account) x NR tuple, and per group x account the rows sum to the booked amount (6-dp rounding only)."""
+    acc = loaded["dim_account"]
+    codes = acc.column("account_code").to_pylist()
+    below = {c for c, b in zip(codes, acc.column("is_below_cm").to_pylist()) if b}
+    nr_acc = {c for c, b in zip(codes, acc.column("block_code").to_pylist()) if b in NR_BLOCKS}
+    group, slices = ["entity_code", "version_key", "month_key", "region_code"], ["channel_code", "line_code", "segment_code"]
+    cols = group + slices + ["account_code", "counterparty_entity_code", "amount_local"]
+
+    pl = {c: loaded["fact_pl"].column(c).to_pylist() for c in cols}
+    nr, nr_total, amount = defaultdict(Decimal), defaultdict(Decimal), defaultdict(Decimal)
+    for row in zip(*pl.values()):
+        g, t, a, cp, x = row[:4], row[4:7], row[7], row[8], row[9]
+        if a in below:
+            if cp is not None:
+                return None, [f"below-CM row with a counterparty: {row}"], Decimal(0)
+            amount[g + (a,)] += x
+        elif a in nr_acc:
+            nr[g + t] += x
+            nr_total[g] += x
+    tuples = defaultdict(int)
+    for k in nr:
+        tuples[k[:4]] += 1
+
+    al = loaded[ALLOC_TABLE]
+    rows = {c: al.column(c).to_pylist() for c in cols}
+    values, sums, worst_row = [], defaultdict(Decimal), Decimal(0)
+    for row in zip(*rows.values()):
+        g, t, a = row[:4], row[4:7], row[7]
+        if not nr_total.get(g):
+            return None, [f"no net revenue to allocate group {g} by (C-31)"], Decimal(0)
+        if g + (a,) not in amount or g + t not in nr:
+            return None, [f"row {row} has no below-CM amount or NR tuple in fact_pl"], Decimal(0)
+        v = CTX.divide(CTX.multiply(amount[g + (a,)], nr[g + t]), nr_total[g]).quantize(Q6, context=CTX)
+        values.append(v)
+        sums[g + (a,)] += v
+        worst_row = max(worst_row, abs(v - row[9]))
+    problems = []
+    expected_rows = sum(tuples[k[:4]] for k in amount)
+    if al.num_rows != expected_rows:
+        problems.append(f"rows {al.num_rows} != (group, account) x NR tuples {expected_rows}")
+    worst_sum = max((abs(sums[k] - amount[k]) for k in amount), default=Decimal(0))
+    if worst_sum > Decimal("0.0001"):
+        problems.append(f"allocated rows differ from the booked below-CM amount by {worst_sum}")
+    i = al.schema.get_field_index("amount_local")
+    al = al.set_column(i, pa.field("amount_local", ALLOC_AMT, nullable=False), pa.array(values, type=ALLOC_AMT))
+    return al, problems, worst_row
+
+
 def build_elim(loaded):
     """fact_pl_elim (C-36, D-33): every fact_pl row with a counterparty, account replaced by its block's elimination
     account (dim_account: is_intercompany, not has_fact_rows, is_direct: ELIM_GR / ELIM_VSC), every amount negated.
@@ -322,6 +384,19 @@ def derive(loaded):
     if problems:
         return [("fact_fx_rate", 0, "", problems)]
     report = []
+    for table, extra in EXTRA_ROWS.items():
+        data, key = loaded[table], TABLES[table][2]
+        taken = set(zip(*(data.column(k).to_pylist() for k in key)))
+        dup = [r for r in extra if tuple(r[k] for k in key) in taken]
+        loaded[table] = pa.concat_tables([data, pa.Table.from_pylist(extra, schema=data.schema)])
+        report.append((table, loaded[table].num_rows, f"+{len(extra)} row(s) on load",
+                       [f"row(s) already in the CSV: {dup}"] if dup else []))
+    alloc, probs, worst = allocate(loaded)
+    report.append((ALLOC_TABLE, 0 if alloc is None else alloc.num_rows,
+                   f"amount_local unrounded (C-31, D6), max |row - CSV| {worst:.6f}", probs))
+    if alloc is None:
+        return report
+    loaded[ALLOC_TABLE] = alloc
     for table in DERIVED_COLUMNS:
         data, probs, worst = add_translations(table, loaded[table], rate, month_fy)
         loaded[table] = data

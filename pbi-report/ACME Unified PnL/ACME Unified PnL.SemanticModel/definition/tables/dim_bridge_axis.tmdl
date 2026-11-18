@@ -1,0 +1,89 @@
+/// X axis of the net revenue bridge (Analysis): dim_bridge_step with the first bar once per comparison ("Budget NR", "Latest estimate NR", "Prior year NR"; web analysis.ts). Bridge Axis Delta / Bridge Axis Is Total blank the rows of other companies and comparisons.
+table dim_bridge_axis
+	lineageTag: b91e0fba-4350-5936-947d-af8da7a0438c
+
+	column entity_view_code
+		dataType: string
+		isHidden
+		lineageTag: 039207a7-5c42-522a-ae35-a8d30c7b5af3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [entity_view_code]
+
+		annotation SummarizationSetBy = User
+
+	column step_code
+		dataType: string
+		isHidden
+		lineageTag: 28d8ca09-cbec-5719-8bc8-881fd78dde0a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_code]
+
+		annotation SummarizationSetBy = User
+
+	column cmp_code
+		dataType: string
+		isHidden
+		lineageTag: 5a8c6d37-547e-5116-b81e-7b9889f9a356
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [cmp_code]
+
+		annotation SummarizationSetBy = User
+
+	column axis_label
+		dataType: string
+		lineageTag: 6ad43add-1bc0-55d4-bf99-ea6a2c11a865
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [axis_label]
+		sortByColumn: axis_sort
+
+		annotation SummarizationSetBy = User
+
+	column axis_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 774c2535-5e60-502e-9c7f-402d95755fd3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [axis_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_bridge_axis = calculated
+		mode: import
+		source =
+				VAR _steps         =
+				    SELECTCOLUMNS (
+				        dim_bridge_step
+				        ,"entity_view_code", dim_bridge_step[entity_view_code]
+				        ,"step_code", dim_bridge_step[step_code]
+				        ,"step_label", dim_bridge_step[step_label]
+				        ,"step_sort", dim_bridge_step[step_sort]
+				    )
+				VAR _cmps         = DATATABLE ( "cmp_code", STRING, "cmp_name", STRING, { { "B", "Budget" }, { "LE", "Latest estimate" }, { "PY", "Prior year" } } )
+				RETURN
+				    UNION (
+				        SELECTCOLUMNS (
+				            FILTER ( _steps, [step_code] <> "START" )
+				            ,"entity_view_code", [entity_view_code]
+				            ,"step_code", [step_code]
+				            ,"cmp_code", ""
+				            ,"axis_label", [step_label]
+				            ,"axis_sort", [step_sort]
+				        )
+				        ,SELECTCOLUMNS (
+				            CROSSJOIN ( FILTER ( _steps, [step_code] = "START" ), _cmps )
+				            ,"entity_view_code", [entity_view_code]
+				            ,"step_code", [step_code]
+				            ,"cmp_code", [cmp_code]
+				            ,"axis_label", [cmp_name] & " NR"
+				            ,"axis_sort", [step_sort]
+				        )
+				    )
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,37 @@
+/// F-17 Classification tags in the statement Line note column (IFRS 18, MPM, Mgmt, IC): On (default) / Off.
+table param_show_tags
+	lineageTag: e71becd0-efdb-5f66-912c-1860abde7363
+
+	column show_tags
+		dataType: string
+		lineageTag: 2015a115-1ae9-5081-8626-026d1642fa93
+		summarizeBy: none
+		sourceColumn: [show_tags]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 671a7546-762f-56c0-87e5-49f866acb78c
+		summarizeBy: none
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_show_tags = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "show_tags", STRING,
+				    "sort_order", INTEGER,
+				    {
+				        { "On", 10 },
+				        { "Off", 20 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table
+

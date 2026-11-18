@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "menu_param_category",
   "position": {
-    "x": 86,
-    "y": 510,
+    "x": 77.0,
+    "y": 446.0,
     "z": 9500,
-    "height": 48,
-    "width": 320,
+    "height": 48.0,
+    "width": 284.0,
     "tabOrder": 5500
   },
   "visual": {
@@ -101,7 +101,7 @@
             "textSize": {
               "expr": {
                 "Literal": {
-                  "Value": "11D"
+                  "Value": "8D"
                 }
               }
             },
@@ -245,7 +245,12 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true
+    "drillFilterOtherVisuals": true,
+    "syncGroup": {
+      "groupName": "category",
+      "fieldChanges": true,
+      "filterChanges": true
+    }
   },
   "parentGroupName": "grp_filters",
   "isHidden": true

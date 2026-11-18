@@ -32,17 +32,6 @@ table dim_pl_row
 
 		annotation SummarizationSetBy = User
 
-	/// Statement row label for the report matrix: the line's number in display order (all lines, ratio rows included) and its name in capitals, e.g. 01. GROSS REVENUE; leaf rows carry their block's label. Report only: line_label stays the name Track A reads.
-	column line_display
-		dataType: string
-		lineageTag: 94a6ba9f-cdb0-4dd7-b9b5-919b672d9c67
-		summarizeBy: none
-		isNameInferred
-		sourceColumn: [line_display]
-		sortByColumn: line_sort
-
-		annotation SummarizationSetBy = User
-
 	column line_sort
 		dataType: int64
 		isHidden
@@ -153,6 +142,17 @@ table dim_pl_row
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [ratio_sign]
+
+		annotation SummarizationSetBy = User
+
+	/// Statement row label for the report matrix: the line's number in display order (all lines, ratio rows included) and its name in capitals, e.g. 01. GROSS REVENUE; leaf rows carry their block's label. Report only: line_label stays the name Track A reads.
+	column line_display
+		dataType: string
+		lineageTag: 94a6ba9f-cdb0-4dd7-b9b5-919b672d9c67
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [line_display]
+		sortByColumn: line_sort
 
 		annotation SummarizationSetBy = User
 

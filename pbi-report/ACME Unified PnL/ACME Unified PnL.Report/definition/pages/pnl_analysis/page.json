@@ -1,0 +1,2160 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "pnl_analysis",
+  "displayName": "Analysis",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F2F4F7'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F2F4F7'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "an_var_table",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_var_table",
+      "target": "vf_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_nr_chart",
+      "target": "vf_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "an_pb_chart",
+      "target": "vf_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "info_filters_table",
+      "target": "vf_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_region",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_region",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_channel",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_channel",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_line",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_line",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_var_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_var_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_var_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_var_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_h_segment",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "hdr_notice_badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "hdr_status",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_var_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_nr_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_nr_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_nr_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_pb_title",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_pb_info",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "an_pb_chart",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "hdr_entity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_time_view",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_fiscal_year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_period",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "fly_period_range_cap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_range_start",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_base_version",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_compare_a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_compare_b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "fly_slice_h_region",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "fly_slice_h_channel",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "fly_slice_h_line",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "fly_slice_h_segment",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_currency",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_fx_basis",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_cost_sign",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_stmt_cols",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_show_tags",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "s_hide_empty",
+      "type": "NoFilter"
+    },
+    {
+      "source": "vf_segment",
+      "target": "info_filters_table",
+      "type": "NoFilter"
+    }
+  ]
+}

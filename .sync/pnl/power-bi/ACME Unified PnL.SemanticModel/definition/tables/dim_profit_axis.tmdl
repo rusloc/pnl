@@ -1,0 +1,76 @@
+/// X axis of the profit bridge (Analysis): dim_profit_step with the first bar once per comparison ("Budget Adj. EBITDA" …). Profit Axis Delta / Profit Axis Is Total blank the rows of other comparisons.
+table dim_profit_axis
+	lineageTag: cf5a7113-f4fe-58b5-941c-3173367b2462
+
+	column step_code
+		dataType: string
+		isHidden
+		lineageTag: 763e4529-8c3d-5f7e-9f3c-6eb58fa82af6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [step_code]
+
+		annotation SummarizationSetBy = User
+
+	column cmp_code
+		dataType: string
+		isHidden
+		lineageTag: 3702ba6f-fbb1-5bae-8f75-82a53969ce53
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [cmp_code]
+
+		annotation SummarizationSetBy = User
+
+	column axis_label
+		dataType: string
+		lineageTag: 624de14a-db7c-5fed-8d70-731cceec5430
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [axis_label]
+		sortByColumn: axis_sort
+
+		annotation SummarizationSetBy = User
+
+	column axis_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 657c01db-a1f8-5996-a554-72be7aede1c2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [axis_sort]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_profit_axis = calculated
+		mode: import
+		source =
+				VAR _steps         =
+				    SELECTCOLUMNS (
+				        dim_profit_step
+				        ,"step_code", dim_profit_step[step_code]
+				        ,"step_label", dim_profit_step[step_label]
+				        ,"step_sort", dim_profit_step[step_sort]
+				    )
+				VAR _cmps         = DATATABLE ( "cmp_code", STRING, "cmp_name", STRING, { { "B", "Budget" }, { "LE", "Latest estimate" }, { "PY", "Prior year" } } )
+				RETURN
+				    UNION (
+				        SELECTCOLUMNS (
+				            FILTER ( _steps, [step_code] <> "BUD" )
+				            ,"step_code", [step_code]
+				            ,"cmp_code", ""
+				            ,"axis_label", [step_label]
+				            ,"axis_sort", [step_sort]
+				        )
+				        ,SELECTCOLUMNS (
+				            CROSSJOIN ( FILTER ( _steps, [step_code] = "BUD" ), _cmps )
+				            ,"step_code", [step_code]
+				            ,"cmp_code", [cmp_code]
+				            ,"axis_label", [cmp_name] & " Adj. EBITDA"
+				            ,"axis_sort", [step_sort]
+				        )
+				    )
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,124 @@
+/// X axis of the revenue and margin chart (spec 2026-11-17 §6): one row per month and one per fiscal quarter of dim_month. Combo NR / Combo CM % fill the months of the window, or its quarters when it is longer than 12 months; the other rows stay blank and drop from the chart. Axis = year_label > period_label (the year under the first period of each year).
+table dim_combo_period
+	lineageTag: 0c0628f9-c808-5dec-88bc-b751c657308d
+
+	column period_code
+		dataType: string
+		isHidden
+		lineageTag: 9ae2c37a-c776-599a-8b6c-ba592e39acb9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [period_code]
+
+		annotation SummarizationSetBy = User
+
+	column period_kind
+		dataType: string
+		isHidden
+		lineageTag: fb0393d1-5b16-507f-a7c0-ff338603135d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [period_kind]
+
+		annotation SummarizationSetBy = User
+
+	column year_label
+		dataType: string
+		lineageTag: 667a345d-e482-5f08-9599-933018352876
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [year_label]
+
+		annotation SummarizationSetBy = User
+
+	column period_label
+		dataType: string
+		lineageTag: b48f5c4c-aaa6-5d86-a806-4ef5abcc6cc2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [period_label]
+		sortByColumn: label_sort
+
+		annotation SummarizationSetBy = User
+
+	column label_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bde86429-6497-5e4f-829e-cf145d116b0e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [label_sort]
+
+		annotation SummarizationSetBy = User
+
+	column start_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e58595d2-f638-50df-812d-70ddc5573616
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [start_index]
+
+		annotation SummarizationSetBy = User
+
+	column end_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cad98f2d-d181-5462-aebc-3c2743afb3dc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [end_index]
+
+		annotation SummarizationSetBy = User
+
+	column period_long
+		dataType: string
+		isHidden
+		lineageTag: 247b56c5-d5eb-5ed5-a8ce-14b7f1461ac7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [period_long]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_combo_period = calculated
+		mode: import
+		source =
+				VAR _months =
+				    SELECTCOLUMNS (
+				        dim_month
+				        ,"period_code", "M" & dim_month[month_index]
+				        ,"period_kind", "M"
+				        ,"year_label", FORMAT ( dim_month[fiscal_year], "0" )
+				        ,"period_label", dim_month[month_name]
+				        ,"label_sort", dim_month[month_number]
+				        ,"start_index", dim_month[month_index]
+				        ,"end_index", dim_month[month_index]
+				        ,"period_long", dim_month[month_name] & " " & dim_month[fiscal_year]
+				    )
+				VAR _quarters =
+				    SELECTCOLUMNS (
+				        GROUPBY (
+				            dim_month
+				            ,dim_month[fiscal_year]
+				            ,dim_month[quarter]
+				            ,"@start", MINX ( CURRENTGROUP (), dim_month[month_index] )
+				            ,"@end", MAXX ( CURRENTGROUP (), dim_month[month_index] )
+				        )
+				        ,"period_code", "Q" & [@start]
+				        ,"period_kind", "Q"
+				        ,"year_label", FORMAT ( dim_month[fiscal_year], "0" )
+				        ,"period_label", dim_month[quarter]
+				        ,"label_sort", 12 + VALUE ( RIGHT ( dim_month[quarter], 1 ) )
+				        ,"start_index", [@start]
+				        ,"end_index", [@end]
+				        ,"period_long", dim_month[quarter] & " " & dim_month[fiscal_year]
+				    )
+				RETURN
+				    UNION ( _months, _quarters )
+
+	annotation PBI_ResultType = Table
+
