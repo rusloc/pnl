@@ -66,3 +66,10 @@
 - [2026-11-16] Cent rounding of fact_pl_allocated came from the generator (gen_data.js r2 parts + residual to the largest slice), not the loader; the loader now re-derives amount_local from fact_pl with the web rule (slices.ts Pass 2), decimal(18,6), CSV rows kept, CSVs unchanged (source: observed)
 - [2026-11-16] Offline after: goldens #21/#22/#27 within 0.0001 USD, #62 within 5e-13 (before -0.093/+0.245/+0.660/+4.7e-9); 552/552 control totals both ways; max row move 0.106, 8,468 rows > 0.01; pack 22/23 byte-identical, fact_pl_allocated 18.68 -> 20.26 MB (source: observed)
 - [2026-11-16] param_time_view gets RANGE ("Custom range", sort 60, not default) on load (EXTRA_ROWS in the loader), not in the CSV: the dataset CSV mirrors the web manifest (spec 02-data: RANGE added by the report); verify SQL expects 6 (source: observed)
+
+## 2026-11-24 Fabric demo cases (ADR-0018, demos/; IDs live in demos/*/run_log.md)
+- [2026-11-24] ws_migration_demo: lh_sales_demo (no schemas) + nb_01_build_sales_demo + nb_02_append_day; ws_cicd_demo_dev: lh_cicd_demo (no schemas) + nb_seed_sales; ws_cicd_demo_test / _prod empty (pipeline fills them). All on the RAW F64 (source: observed)
+- [2026-11-24] Notebook repo source = Fabric Git format (<name>.Notebook/notebook-content.py + .platform, LF, no BOM) with {{LAKEHOUSE_ID}} / {{WORKSPACE_ID}} placeholders (SDD: no IDs in committed files except run_log.md); substituted at upload (source: observed)
+- [2026-11-24] nb_01 at 300k: 9 tables, counts = spec § 4 scaled (raw/fact 300,000; dims 200,000 / 2,500 / 100 / 1,096). nb_seed_sales: 1 / 365 / 50 / 50,000 (source: observed)
+- [2026-11-24] nb_01 at 30M (spec value, verbatim source): 190 s job incl. session start; counts = § 4 exactly; 0 null keys / orphans / dup sales_id; order_date 2024-01-01..2026-10-31; gold Sales 19,476,577,850.61, Cost 13,680,398,573.72 (baseline in demos/01-migration/run_log.md). nb_02 not run (source: observed)
+- [2026-11-24] Seed in Dev: dim_environment = ws_cicd_demo_dev (context key currentWorkspaceName works), Margin % as written 0.66667 (source: observed)

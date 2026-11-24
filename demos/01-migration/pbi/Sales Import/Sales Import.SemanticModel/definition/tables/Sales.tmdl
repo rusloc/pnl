@@ -1,0 +1,116 @@
+/// Order lines from raw_sales (Spec 1 § 4 contract).
+table Sales
+	lineageTag: 4af9b01e-a2db-5649-91a2-f76bc7e5311a
+
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 9ebd9651-8097-534e-8f2e-81817b2cdb0e
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6a83ada1-95de-53b2-b819-7a572712624c
+		summarizeBy: none
+		sourceColumn: Customer Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6500c9ce-d27b-53c8-b455-42d7b4d1d6cc
+		summarizeBy: none
+		sourceColumn: Product Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 79c1c7ed-f8c7-5e14-ad85-36d86c1fa5b8
+		summarizeBy: none
+		sourceColumn: Store Key
+
+		annotation SummarizationSetBy = User
+
+	column Quantity
+		dataType: int64
+		formatString: #,0
+		lineageTag: 88a09e72-559b-515e-993a-2b569a743796
+		summarizeBy: none
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Price'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: aff0a97b-3101-57de-8c6c-598f834ccfaa
+		summarizeBy: none
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = User
+
+	column 'Unit Cost'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 9d80205a-a002-5e0a-95f0-acd2e68e5e3b
+		summarizeBy: none
+		sourceColumn: Unit Cost
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 76b89c89-f920-5ee3-a322-a3e7fa38283c
+		summarizeBy: none
+		sourceColumn: Net Amount
+
+		annotation SummarizationSetBy = User
+
+	column 'Cost Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: cb616639-de07-54c2-9184-2605ae70a616
+		summarizeBy: none
+		sourceColumn: Cost Amount
+
+		annotation SummarizationSetBy = User
+
+	column 'Load Timestamp'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 39fb216d-972a-5883-85ca-d44d5372384a
+		summarizeBy: none
+		sourceColumn: Load Timestamp
+
+		annotation SummarizationSetBy = User
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_raw_sales = Source{[Schema = "dbo", Item = "raw_sales"]}[Data],
+				    // Legacy piece 1 (Spec 1 § 6 step 2): amounts computed in Power Query, on purpose. Both steps fold (multiplication).
+				    #"Added Net Amount" = Table.AddColumn(dbo_raw_sales, "Net Amount", each [quantity] * [net_price], Currency.Type),
+				    #"Added Cost Amount" = Table.AddColumn(#"Added Net Amount", "Cost Amount", each [quantity] * [unit_cost], Currency.Type),
+				    #"Removed Columns" = Table.RemoveColumns(#"Added Cost Amount", {"sales_id", "order_id", "unit_price", "discount_pct"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"order_date", "Order Date"}, {"customer_id", "Customer Key"}, {"product_id", "Product Key"}, {"store_id", "Store Key"}, {"quantity", "Quantity"}, {"net_price", "Net Price"}, {"unit_cost", "Unit Cost"}, {"load_ts", "Load Timestamp"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

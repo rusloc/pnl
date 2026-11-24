@@ -23,10 +23,12 @@
 | Raw data — source for Tracks A + B (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Lakehouse `lh_raw` (`b4fdb831-8417-475c-badb-a9a87be796b8`), schema `acme_pl` — holds the `data/acme_pl_dummy_data/` tables |
 | Track A app (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Fabric App `acme` — see Track A |
 | Track B semantic model — Track A source (**dev**) | RAW | `7f065ce8-ffe8-4670-88eb-ed81a3c9c1bd` | Semantic model `ACME Unified PnL` (`748d5471-6773-4854-bd82-994641466ad7`), Import from `lh_raw` SQL endpoint, 0 roles (RLS deferred); cloud connection `acme-lh_raw-sql-dev` (`31f48293-4ec9-4c24-86b5-4fd071b62bf6`, OAuth2 as the USER, Organizational); refresh baseline 28 s, ~1.25 M rows · ADR-0006 |
+| Demo cases 1 + 2 (video, `demos/`) | ws_migration_demo | `cfdc37ca-2415-4e31-82e7-523d7081f298` | `lh_sales_demo` (30 M rows), notebooks `nb_01_build_sales_demo` / `nb_02_append_day`, models + reports `Sales Import` / `Sales Direct Lake`; other IDs in `demos/01-migration/run_log.md` · ADR-0018 |
+| Demo case 3 Dev / Prod (video, `demos/`; Test dropped 2026-11-24) | ws_cicd_demo_dev / _prod | `fa5ef562-84b9-4a60-a006-5660a27f014a` / `f6a40758-3770-40de-bef8-cfbd9b811581` | `lh_cicd_demo`, `nb_seed_sales`, `Sales CICD` model + report per stage; pipeline `dp_cicd_demo`; IDs in `demos/03-cicd/run_log.md` · ADR-0018 |
 
 - RAW runs on a **dev** capacity (F64, North Europe). It is for building assets only; publishing happens later on another capacity (TBD).
 - In RAW, **only `lh_raw`, the `acme` app and the semantic model `ACME Unified PnL` (+ its connection `acme-lh_raw-sql-dev`) are relevant**. Every other item in the workspace is a leftover from other projects — ignore it, never use or modify it.
-- No Spark for this project's data layer (cost): pipelines are plain Python.
+- No Spark for this project's data layer (cost): pipelines are plain Python. Exception: `demos/` runs its spec PySpark notebooks (ADR-0018) in its own workspaces `ws_migration_demo`, `ws_cicd_demo_{dev,prod}` on the same dev F64.
 
 Report / app workspaces and publishing capacity: TBD.
 
@@ -53,6 +55,7 @@ Report / app workspaces and publishing capacity: TBD.
 | Track B — Power BI report | `pbi-report/` |
 | Track C — custom JS report | `js-report/` |
 | ACME Trucks web app | `js-trucks/` · `docs/ADR/0016-acme-trucks-js-flavour.md` |
+| Fabric demo cases (video: migration, slow report, CI/CD) | `demos/` · specs `.log/reports/` · `docs/ADD/features/fabric-demos-sdd.md` · `docs/ADR/0018-fabric-demo-cases.md` |
 
 ---
 

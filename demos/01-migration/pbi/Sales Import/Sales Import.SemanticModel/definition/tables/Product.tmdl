@@ -1,0 +1,74 @@
+table Product
+	lineageTag: 85ab02a0-72a4-50fd-82ef-a5063ac9cdc4
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bc33e226-2522-539f-8035-10d5200a5e40
+		summarizeBy: none
+		sourceColumn: Product Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 2827687a-a99d-5280-8ed7-4bd4a9de8423
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = User
+
+	column Brand
+		dataType: string
+		lineageTag: 99110eca-ad53-53e4-8666-30da4df40aa0
+		summarizeBy: none
+		sourceColumn: Brand
+
+		annotation SummarizationSetBy = User
+
+	column Category
+		dataType: string
+		lineageTag: 3f3ab44f-24e1-5cd7-beb8-0fe686a4ce4b
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = User
+
+	column 'Unit Price'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 043e2f0e-2550-5123-b716-165b65b3f0c7
+		summarizeBy: none
+		sourceColumn: Unit Price
+
+		annotation SummarizationSetBy = User
+
+	column 'Price Band' =
+			SWITCH (
+			    TRUE ()
+			    ,'Product'[Unit Price] < 50
+			        ,"Budget"
+			    ,'Product'[Unit Price] < 300
+			        ,"Mid"
+			    ,"Premium"
+			)
+		dataType: string
+		lineageTag: f639908f-f869-52e4-ab10-616795faee4f
+		summarizeBy: none
+
+		annotation SummarizationSetBy = User
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_raw_product = Source{[Schema = "dbo", Item = "raw_product"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_raw_product, {"unit_cost"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"product_id", "Product Key"}, {"product_name", "Product Name"}, {"brand", "Brand"}, {"category", "Category"}, {"unit_price", "Unit Price"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

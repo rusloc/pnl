@@ -1,0 +1,26 @@
+table Environment
+	lineageTag: 3fc159ef-9100-52b0-a7cc-40cca8b0929e
+
+	column Environment
+		dataType: string
+		lineageTag: 6d5f48d9-f7df-55b4-9096-dd38492352f2
+		summarizeBy: none
+		sourceColumn: environment
+
+		annotation SummarizationSetBy = User
+
+	column 'Seeded At'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8af6349a-257a-5302-975c-585df4f63180
+		summarizeBy: none
+		sourceColumn: seeded_at
+
+		annotation SummarizationSetBy = User
+
+	partition Environment = entity
+		mode: directLake
+		source
+			entityName: dim_environment
+			expressionSource: 'DirectLake - lh_cicd_demo'
+

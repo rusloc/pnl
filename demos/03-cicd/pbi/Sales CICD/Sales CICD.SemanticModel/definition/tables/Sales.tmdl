@@ -1,0 +1,58 @@
+table Sales
+	lineageTag: 78d408f8-da87-5156-9018-30de41f60736
+
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 632db293-1ed3-51f1-abfd-72ad7d2b036c
+		summarizeBy: none
+		sourceColumn: order_date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d4cd70b5-3a8d-55c2-9355-b02b939ad18c
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = User
+
+	column Quantity
+		dataType: int64
+		formatString: #,0
+		lineageTag: 42d526f6-24ef-5bf5-b1ca-2a5ab5a01da9
+		summarizeBy: none
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 4afb8c35-b6cd-5edf-92da-7560ab7b8b19
+		summarizeBy: none
+		sourceColumn: net_amount
+
+		annotation SummarizationSetBy = User
+
+	column 'Cost Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 751d9a45-653e-5eb2-b264-9b26c821929d
+		summarizeBy: none
+		sourceColumn: cost_amount
+
+		annotation SummarizationSetBy = User
+
+	partition Sales = entity
+		mode: directLake
+		source
+			entityName: fact_sales
+			expressionSource: 'DirectLake - lh_cicd_demo'
+

@@ -1,0 +1,60 @@
+table Product
+	lineageTag: f3bfaaa8-f86f-5ef6-9094-a80b742c193b
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dcce52c6-56fc-50d9-a4f8-8803329a818a
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 4fc98e2f-e9fc-5608-b254-a42107530b71
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = User
+
+	column Brand
+		dataType: string
+		lineageTag: 9ef2c2bd-6b72-53cf-b779-8810c8a1c78c
+		summarizeBy: none
+		sourceColumn: brand
+
+		annotation SummarizationSetBy = User
+
+	column Category
+		dataType: string
+		lineageTag: c7025fb1-74af-5e06-b2b0-a667d1f8a7a0
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = User
+
+	column 'Unit Price'
+		dataType: decimal
+		formatString: #,0.00
+		lineageTag: bffa10e5-8dff-5657-8dac-a8946c4ce031
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = User
+
+	column 'Price Band'
+		dataType: string
+		lineageTag: ad69799d-1c28-59db-b925-ec779e57f043
+		summarizeBy: none
+		sourceColumn: price_band
+
+		annotation SummarizationSetBy = User
+
+	partition Product = entity
+		mode: directLake
+		source
+			entityName: dim_product
+			expressionSource: 'DirectLake - lh_sales_demo'
+

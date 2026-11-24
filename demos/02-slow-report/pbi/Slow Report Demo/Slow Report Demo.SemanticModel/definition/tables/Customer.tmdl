@@ -1,0 +1,50 @@
+table Customer
+	lineageTag: 4dde3a4e-43d2-5159-8872-b9338486a113
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: aca36315-f848-5174-8755-d4ecfbeb2fd4
+		summarizeBy: none
+		sourceColumn: Customer Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Customer Name'
+		dataType: string
+		lineageTag: 666f8744-8da9-5c71-a967-b20c510f9073
+		summarizeBy: none
+		sourceColumn: Customer Name
+
+		annotation SummarizationSetBy = User
+
+	column Country
+		dataType: string
+		lineageTag: ef0d1b4c-6d8e-5c85-8a12-14fc31abfdc0
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: c009f7b7-4444-5c1b-b4a7-343df6322644
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	partition Customer = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_dim_customer = Source{[Schema = "dbo", Item = "dim_customer"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_dim_customer, {"signup_date"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"customer_key", "Customer Key"}, {"customer_name", "Customer Name"}, {"country", "Country"}, {"segment", "Segment"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

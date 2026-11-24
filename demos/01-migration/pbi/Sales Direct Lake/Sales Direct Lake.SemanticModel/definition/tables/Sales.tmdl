@@ -1,0 +1,106 @@
+/// Order lines from fact_sales (Spec 1 § 4 contract).
+table Sales
+	lineageTag: f0179925-8c1c-521d-8176-ca140f40ad64
+
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 0de74421-f993-5845-8c5c-c76304ee2d4b
+		summarizeBy: none
+		sourceColumn: order_date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ad4f0152-10e2-5a16-a8c9-c80a6afaa3a0
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: af8cd5ae-c0e1-5dd5-a20a-2d84d5e7acf8
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c4278ff4-61c6-54b2-acee-399455f9574f
+		summarizeBy: none
+		sourceColumn: store_key
+
+		annotation SummarizationSetBy = User
+
+	column Quantity
+		dataType: int64
+		formatString: #,0
+		lineageTag: 768d148c-1bab-5049-aff8-bdecc84d4dcf
+		summarizeBy: none
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Price'
+		dataType: decimal
+		formatString: #,0.00
+		lineageTag: 0006ae6c-da63-5205-b466-d1860ae0904f
+		summarizeBy: none
+		sourceColumn: net_price
+
+		annotation SummarizationSetBy = User
+
+	column 'Unit Cost'
+		dataType: decimal
+		formatString: #,0.00
+		lineageTag: a2cd2f12-f47e-5bbd-82d0-4a71d0a4be6d
+		summarizeBy: none
+		sourceColumn: unit_cost
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 60fc6dfa-d80f-5af9-afb8-0c640e35f4e3
+		summarizeBy: none
+		sourceColumn: net_amount
+
+		annotation SummarizationSetBy = User
+
+	column 'Cost Amount'
+		dataType: decimal
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 5ffe6962-4cef-50f2-b9d4-a526a285344b
+		summarizeBy: none
+		sourceColumn: cost_amount
+
+		annotation SummarizationSetBy = User
+
+	column 'Load Timestamp'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: adbf1c2f-bf92-5405-89b0-610f272cf090
+		summarizeBy: none
+		sourceColumn: load_ts
+
+		annotation SummarizationSetBy = User
+
+	partition Sales = entity
+		mode: directLake
+		source
+			entityName: fact_sales
+			expressionSource: 'DirectLake - lh_sales_demo'
+

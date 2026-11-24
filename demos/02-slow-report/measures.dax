@@ -1,0 +1,22 @@
+// Spec 2 § 6 · Slow report, live fix demo · measures on the _Measures table (ADR-0018 amendment: names end in (fx))
+// Paste the optimized body over Big Line Sales (fx) for the live fix (Spec 2 § 7 step 8).
+
+// ---- Base measure
+Sales Amount (fx) = SUM ( Sales[Net Amount] )
+
+// ---- Slow version: the body Big Line Sales starts with
+Big Line Sales (fx) =
+CALCULATE (
+    [Sales Amount (fx)]
+    ,FILTER (
+        Sales
+        ,Sales[Quantity] * Sales[Net Price] >= 500
+    )
+)
+
+// ---- Optimized version: what the live fix pastes in
+Big Line Sales (fx) =
+CALCULATE (
+    [Sales Amount (fx)]
+    ,KEEPFILTERS ( Sales[Quantity] * Sales[Net Price] >= 500 )
+)

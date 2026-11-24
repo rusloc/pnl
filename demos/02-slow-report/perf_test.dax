@@ -1,0 +1,79 @@
+// Spec 2 § 7 · test queries. Run one block at a time (DAX Studio: Server Timings on, Clear Cache then Run).
+// Blocks 1 and 2 are the benchmark (Spec 2 § 7 step 6); block 3 is the difference query (step 7); block 4 is the search query (step 9).
+
+// ======== 1. Benchmark, [Slow] ========
+DEFINE
+    MEASURE _Measures[Slow] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,FILTER (
+                Sales
+                ,Sales[Quantity] * Sales[Net Price] >= 500
+            )
+        )
+    MEASURE _Measures[Fast] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,KEEPFILTERS ( Sales[Quantity] * Sales[Net Price] >= 500 )
+        )
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Product'[Brand]
+    ,'Date'[Year Month]
+    ,"Big Line Sales", [Slow]
+)
+
+// ======== 2. Benchmark, [Fast] (same query, last line changed) ========
+DEFINE
+    MEASURE _Measures[Slow] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,FILTER (
+                Sales
+                ,Sales[Quantity] * Sales[Net Price] >= 500
+            )
+        )
+    MEASURE _Measures[Fast] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,KEEPFILTERS ( Sales[Quantity] * Sales[Net Price] >= 500 )
+        )
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Product'[Brand]
+    ,'Date'[Year Month]
+    ,"Big Line Sales", [Fast]
+)
+
+// ======== 3. Difference query: must return no rows ========
+DEFINE
+    MEASURE _Measures[Slow] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,FILTER (
+                Sales
+                ,Sales[Quantity] * Sales[Net Price] >= 500
+            )
+        )
+    MEASURE _Measures[Fast] =
+        CALCULATE (
+            [Sales Amount (fx)]
+            ,KEEPFILTERS ( Sales[Quantity] * Sales[Net Price] >= 500 )
+        )
+EVALUATE
+FILTER (
+    SUMMARIZECOLUMNS (
+        'Product'[Brand]
+        ,'Date'[Year Month]
+        ,"Slow", [Slow]
+        ,"Fast", [Fast]
+    )
+    ,[Slow] <> [Fast]
+)
+
+// ======== 4. Search query: measures whose formula contains FILTER ========
+EVALUATE
+FILTER (
+    INFO.VIEW.MEASURES ()
+    ,CONTAINSSTRING ( [Expression], "FILTER" )
+)

@@ -21,7 +21,7 @@ Codified recurring failure shapes. Consult before reviewing code that touches a 
 - **Where it bites:** every track folder (`fabric-app/`, `js-report/`, `pbi-report/`); seen with fin (`fabric-app/.claude/agent-memory/` still exists 2026-10-23).
 - **Detect:** any `.claude/` directory below the repo root other than the root one.
 - **Fix:** every delegation brief names the absolute memory path (repo-root `.claude/agent-memory/<agent>/`); move stray notes back to the root folder and remove the track copy (USER's call).
-- **Sightings:** 2026-10-21 (twice); 2026-10-23 (the fin folder still present); 2026-11-04 (bip, `pbi-report/ACME Trucks/.claude/agent-memory/`, not gitignored, left for the USER to delete).
+- **Sightings:** 2026-10-21 (twice); 2026-10-23 (the fin folder still present); 2026-11-04 (bip, `pbi-report/ACME Trucks/.claude/agent-memory/`, not gitignored, left for the USER to delete); 2026-11-17 (bip, inside a PBIR folder `…Report/definition/pages/.claude/agent-memory/bip/` → validator warning `PBIR_PAGE_DIR_NOT_IN_ORDER`; was CAND-050). Empty strays still present 2026-11-24: `pbi-report/{ACME Unified PnL,Nordmark Exec,ACME Trucks}/.claude/`, `.sync/.claude/`.
 
 ### AP-003 — "Harmless" read-only git commands despite the no-git rule (was CAND-008)
 - **Shape:** an agent runs `git status`, `git check-ignore`, `git diff` or `git log` to "just check" while the rule says agents never run git; read-only commands still touch the working tree's index lock and break the USER-only git contract.
@@ -36,3 +36,10 @@ Codified recurring failure shapes. Consult before reviewing code that touches a 
 - **Detect:** before the generator exists, re-derive every headline figure from its inputs in a small table (archi's job in the ADR): any figure that cannot be reproduced from the others within rounding is a conflict. A generator README with more than a handful of "D-nn deviations from the mockup" is the late symptom.
 - **Fix:** the ADR fixes one consistent parameter set first (ADR-0015 (d) pattern: the story numbers as a table, mockup values kept only where consistent); the generator targets that table; the requirement note cites the table, not the mockup; the mockup is reference for look and copy only.
 - **Sightings:** 2026-10-28 (Nordmark v5 data rulings); 2026-11-04 (ACME Marketing mockup → D-1 … D-18).
+
+### AP-005 — Dynamic or zero-rule format strings and computed label text on hot visuals (was CAND-047)
+- **Shape:** a measure-driven format string (e.g. a zero rule that prints "−0.0" / blank / "n/a"), a label-text measure or an exact-colour SVG icon measure is evaluated per cell in the formula engine, on top of the value itself; on a matrix or bar chart with many cells it costs more than the value.
+- **Where it bites:** Track B, `pbi-report/**/*.SemanticModel/definition/tables/_measures.tmdl` (`formatStringDefinition`, label / icon measures) bound to big matrices and bridges.
+- **Detect:** page-cold time per visual before and after binding the dynamic format / label; DAX Studio Server Timings with FE share far above SE. Any `formatStringDefinition` on a measure bound to a matrix is a suspect.
+- **Fix:** measure before shipping; prefer a static format string, native conditional-format icons and static labels; keep dynamic formats only where the USER accepts the cost (ADR-0017).
+- **Sightings:** 2026-11-16 (bridge label carrier 3× slower, NR 3.7 → 12 s; statement zero-rule formats ~2.5–3 s of 6.4 s); 2026-11-17 (Profitability Δ columns +1.6 s cold; exact-colour SVG status icon +1.5 s → native icons kept).

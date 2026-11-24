@@ -1,0 +1,16 @@
+relationship f21a7d9a-1404-56c8-884c-6b12e071b97e
+	fromColumn: Sales.'Customer Key'
+	toColumn: Customer.'Customer Key'
+
+relationship 69b49df3-4b78-556e-b165-f307e2bb6732
+	fromColumn: Sales.'Product Key'
+	toColumn: Product.'Product Key'
+
+relationship 65e22379-99b2-5120-a8e1-7e4dae6a3bda
+	fromColumn: Sales.'Store Key'
+	toColumn: Store.'Store Key'
+
+relationship 8b231bc7-fc92-510f-bf7a-39b7a153fd65
+	fromColumn: Sales.'Order Date'
+	toColumn: 'Date'.'Date'
+

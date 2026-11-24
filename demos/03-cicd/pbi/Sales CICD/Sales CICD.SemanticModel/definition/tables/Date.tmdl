@@ -1,0 +1,38 @@
+table 'Date'
+	lineageTag: 4593dd51-21ba-5b17-a2f2-83722f234d7e
+
+	column 'Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 1f68e689-97c1-56d7-8a6b-96cfde8f2a90
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Month No'
+		dataType: int64
+		formatString: 0
+		lineageTag: c82f4e01-0019-5ed8-8283-853932194c5a
+		summarizeBy: none
+		sourceColumn: month_no
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Name'
+		dataType: string
+		lineageTag: 30c7e7b6-e420-5010-9abe-4e9d27a21696
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: 'Month No'
+
+		annotation SummarizationSetBy = User
+
+	partition 'Date' = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			expressionSource: 'DirectLake - lh_cicd_demo'
+

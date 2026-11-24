@@ -1,0 +1,44 @@
+table Product
+	lineageTag: 61ff7e9b-fa92-5982-83b9-31cf358dee5a
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6a0b3874-9c96-5921-8ff1-e81017b635db
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 1699481c-49da-5916-9a82-0b2bea18999b
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = User
+
+	column Category
+		dataType: string
+		lineageTag: d2bff046-9674-55d2-becd-6c90b76957f7
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = User
+
+	column 'Unit Price'
+		dataType: decimal
+		formatString: #,0.00
+		lineageTag: 0e4126ac-c358-5c2d-8f5b-0e1657c984b5
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = User
+
+	partition Product = entity
+		mode: directLake
+		source
+			entityName: dim_product
+			expressionSource: 'DirectLake - lh_cicd_demo'
+

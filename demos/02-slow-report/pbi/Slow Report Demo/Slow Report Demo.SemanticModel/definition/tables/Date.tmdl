@@ -1,0 +1,71 @@
+table 'Date'
+	lineageTag: 980333dd-ce7d-5dc5-9025-e678811161a9
+	dataCategory: Time
+
+	column 'Date'
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 578bd681-486f-57b3-b791-daf4f609097a
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 0df0571b-2e4c-5d80-8071-5572ada65ee5
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = User
+
+	column 'Month No'
+		dataType: int64
+		formatString: 0
+		lineageTag: bbc3b333-6528-559d-b403-ba914889db82
+		summarizeBy: none
+		sourceColumn: Month No
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Name'
+		dataType: string
+		lineageTag: a0b29a45-a8c9-5922-a983-79f1d8ac1ce6
+		summarizeBy: none
+		sourceColumn: Month Name
+		sortByColumn: 'Month No'
+
+		annotation SummarizationSetBy = User
+
+	column 'Year Month'
+		dataType: string
+		lineageTag: 4194f36e-5316-58f1-9517-74109509f41f
+		summarizeBy: none
+		sourceColumn: Year Month
+
+		annotation SummarizationSetBy = User
+
+	column Quarter
+		dataType: string
+		lineageTag: 48670633-8d13-5c21-9b46-1b17d7532e75
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = User
+
+	partition 'Date' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_dim_date = Source{[Schema = "dbo", Item = "dim_date"]}[Data],
+				    #"Renamed Columns" = Table.RenameColumns(dbo_dim_date, {{"date", "Date"}, {"year", "Year"}, {"month_no", "Month No"}, {"month_name", "Month Name"}, {"year_month", "Year Month"}, {"quarter", "Quarter"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

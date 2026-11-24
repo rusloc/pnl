@@ -1,0 +1,58 @@
+table Product
+	lineageTag: 75a670d9-2cdd-50c3-a09f-0d25943898de
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 184560ae-d51f-562f-a5d1-8807aacc9364
+		summarizeBy: none
+		sourceColumn: Product Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 1c4a3027-8493-5f96-84c2-2eb0cf1c85d6
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = User
+
+	column Brand
+		dataType: string
+		lineageTag: 98e58a98-9fe0-5f63-9b35-fbf29255b02a
+		summarizeBy: none
+		sourceColumn: Brand
+
+		annotation SummarizationSetBy = User
+
+	column Category
+		dataType: string
+		lineageTag: ea78ecc8-3cf2-5f4b-8a56-6aa8b369f0ca
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = User
+
+	column 'Price Band'
+		dataType: string
+		lineageTag: f55423de-82ba-5120-86bf-65c9449c0a9d
+		summarizeBy: none
+		sourceColumn: Price Band
+
+		annotation SummarizationSetBy = User
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_dim_product = Source{[Schema = "dbo", Item = "dim_product"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_dim_product, {"unit_price"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"product_key", "Product Key"}, {"product_name", "Product Name"}, {"brand", "Brand"}, {"category", "Category"}, {"price_band", "Price Band"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

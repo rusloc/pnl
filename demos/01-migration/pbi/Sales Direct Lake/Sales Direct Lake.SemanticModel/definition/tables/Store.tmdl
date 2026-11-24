@@ -1,0 +1,43 @@
+table Store
+	lineageTag: 9359d327-28b9-516a-8d30-e188b1a87f9e
+
+	column 'Store Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8eb92b34-dca6-5c7f-89fb-a59ebfa00fec
+		summarizeBy: none
+		sourceColumn: store_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Name'
+		dataType: string
+		lineageTag: 35498c97-2035-51ae-8574-b4732a1ad4f1
+		summarizeBy: none
+		sourceColumn: store_name
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Country'
+		dataType: string
+		lineageTag: 1bb9bbea-44af-563a-8f94-75f07d0b4bff
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = User
+
+	column Channel
+		dataType: string
+		lineageTag: 84045017-25c1-5ed5-8635-0e9f5b24423e
+		summarizeBy: none
+		sourceColumn: channel
+
+		annotation SummarizationSetBy = User
+
+	partition Store = entity
+		mode: directLake
+		source
+			entityName: dim_store
+			expressionSource: 'DirectLake - lh_sales_demo'
+

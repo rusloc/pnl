@@ -1,0 +1,55 @@
+/// Measures only (ADR-0018 amendment): every measure lives here; the hidden column keeps the table valid.
+table _Measures
+	lineageTag: d37bbb64-b1b6-5163-bca8-3af4c8bd3ea7
+
+	/// Net sales: sum of Sales[Net Amount] (Spec 1 § 4).
+	measure 'Sales Amount (fx)' = SUM ( Sales[Net Amount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 554e6b59-80e5-55e7-9ab0-c706a87f8377
+
+	/// Cost of the order lines: sum of Sales[Cost Amount] (Spec 1 § 4).
+	measure 'Cost Amount (fx)' = SUM ( Sales[Cost Amount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 00d60e94-f72e-51d6-879c-e4c091c3ad0c
+
+	/// Sales Amount minus Cost Amount (Spec 1 § 4).
+	measure 'Margin (fx)' = [Sales Amount (fx)] - [Cost Amount (fx)]
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 63f24414-862b-557f-adbd-b35aec60825e
+
+	/// Margin as a share of Sales Amount (Spec 1 § 4).
+	measure 'Margin % (fx)' = DIVIDE ( [Margin (fx)], [Sales Amount (fx)] )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 1f7b5d18-3b94-58c3-9a5e-1123977c3c81
+
+	/// Number of order lines (Spec 1 § 4).
+	measure 'Order Lines (fx)' = COUNTROWS ( Sales )
+		formatString: #,0
+		lineageTag: 2ad069df-9e5a-5d16-9a0d-d39357cc37e2
+
+	/// Latest order date in the current filter (Spec 1 § 4).
+	measure 'Last Order Date (fx)' = MAX ( Sales[Order Date] )
+		formatString: dd MMM yyyy
+		lineageTag: 21a79ee9-41a7-58b5-9965-21d4e6a252c9
+
+	/// Latest load timestamp (UTC) of the order lines (Spec 1 § 4).
+	measure 'Data As Of (fx)' = MAX ( Sales[Load Timestamp] )
+		formatString: dd MMM HH:mm
+		lineageTag: e908e792-e383-566d-80ba-c18584ca46fe
+
+	column measure_table
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ad3d80e5-1712-50d1-b48f-f3b87411d523
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [measure_table]
+
+		annotation SummarizationSetBy = User
+
+	partition _Measures = calculated
+		mode: import
+		source =
+				ROW ( "measure_table", 0 )
+

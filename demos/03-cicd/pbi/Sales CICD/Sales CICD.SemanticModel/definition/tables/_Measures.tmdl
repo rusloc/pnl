@@ -1,0 +1,39 @@
+/// Measures only (ADR-0018 amendment): every measure lives here; the hidden column keeps the table valid.
+table _Measures
+	lineageTag: 62649eaf-591f-5a5c-ba04-5245d73dcdd0
+
+	measure 'Sales Amount (fx)' = SUM ( Sales[Net Amount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 856074cd-ac30-5ee9-897f-ae43d0dad29c
+
+	measure 'Cost Amount (fx)' = SUM ( Sales[Cost Amount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 4bb25905-ed6c-5616-83c9-202df99f18e5
+
+	measure 'Margin (fx)' = [Sales Amount (fx)] - [Cost Amount (fx)]
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 26f468a2-5b9f-5f87-ba44-677037fc6137
+
+	measure 'Margin % (fx)' = DIVIDE ( [Margin (fx)], [Cost Amount (fx)] )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 9aa35805-2131-5a98-a620-394f38ed0c62
+
+	measure 'Environment Name (fx)' = SELECTEDVALUE ( Environment[Environment] )
+		lineageTag: ce7d7fe8-8e53-5080-9b37-8cfa0a0cb843
+
+	column measure_table
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e6e62455-fd09-5b12-8ba5-c9396e1a6ce3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [measure_table]
+
+		annotation SummarizationSetBy = User
+
+	partition _Measures = calculated
+		mode: import
+		source =
+				ROW ( "measure_table", 0 )
+

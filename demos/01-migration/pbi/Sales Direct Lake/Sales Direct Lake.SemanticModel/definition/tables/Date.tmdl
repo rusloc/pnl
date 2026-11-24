@@ -1,0 +1,65 @@
+table 'Date'
+	lineageTag: a7076ae4-9fd0-5b90-8c41-327f0bc89540
+	dataCategory: Time
+
+	column 'Date'
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 023da3d6-a1ce-579c-9e10-78e734f7ac47
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 727c84eb-697b-5ad3-9a92-5a0c04412e8f
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column 'Month No'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9d125688-a20e-525e-9a24-50fcdf6d2a9f
+		summarizeBy: none
+		sourceColumn: month_no
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Name'
+		dataType: string
+		lineageTag: cd84e8fe-e5c9-5b6b-9db0-c58d40abfabc
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: 'Month No'
+
+		annotation SummarizationSetBy = User
+
+	column 'Year Month'
+		dataType: string
+		lineageTag: 7558d5bd-ab11-5b23-852f-486295b22779
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = User
+
+	column Quarter
+		dataType: string
+		lineageTag: 6fd668a1-ed7a-5aa5-b73c-686a0a5cec14
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	partition 'Date' = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			expressionSource: 'DirectLake - lh_sales_demo'
+

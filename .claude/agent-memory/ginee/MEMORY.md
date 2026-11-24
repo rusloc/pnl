@@ -18,6 +18,7 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
+- Fabric demos (ADR-0018, 2026-11-24): data + models + reports deployed (DL totals = gold); Sales Import refreshed 295 s, all totals = gold; Spec 3 now Dev -> Prod, waits on USER Production parameter rules then redeploy + reframe + verify, dp_cicd_demo after USER's GitHub connect; 60M rebuild needs consent; capacity XMLA R/W unverified (portal)
 - ADR-0017 P&L PBI performance (2026-11-16): drafted, Proposed; rec = E frills then B (bip logical, then small agg + volume driver + CC long form, M prototype before loader); target 5 s showcase; awaits USER decision
 - C-31 unrounded allocation (2026-11-16, D6): loader + pack loader copy changed, offline green; USER yes for lh_raw load, then model refresh + verify SQL; regen pack fact_pl_allocated.parquet; amount_local -> double applied in both models (validator 0/0); + RANGE row in param_time_view on load; same single reload; see data.md
 - ACME Trucks twin (2026-11-04): USER to run the git block (parquet/ in data/ is not gitignored, optional line); Trucks DAX tests pin the live extract -> bip re-base if the PBIP switches to the twin; hand-off note paragraph given to main agent (bip owns .sync/acme-trucks/ + note)
@@ -41,6 +42,11 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-11-24 (delegated, later): Sales Import bound + refreshed 295 s, totals = gold; dp_cicd_demo rebuilt Dev -> Prod (items paired, deploy 6 s); guide + run logs updated; waits on USER Production rules
+- 2026-11-24 (delegated, Part B): dp_cicd_demo created + assigned, Dev->Test deploy OK incl. PBIR report, Test seeded (env ws_cicd_demo_test); stopped at parameter rules (no API, USER portal); Prod deployed + seeded later the same session; waits on USER rules for Test + Prod
+- 2026-11-24 (delegated, after fix): 3 models + 3 reports created by API (measures in _Measures, (fx)); DL framing 5-6 s, totals exact; Sales Import waits on connection; run logs updated
+- 2026-11-24 (delegated, later): demo model deploy blocked on Cost Amount column/measure collision (all 3 models); nothing created; run logs noted
+- 2026-11-24 (delegated): ADR-0018 build: 4 workspaces on the RAW F64, 2 lakehouses, 3 notebooks (repo demos/*/notebooks, Git format, ID placeholders), nb_01 300k + 30M green, seed green, run_log.md x2; no git, RAW untouched
 - 2026-11-16 (delegated, later): ADR-0017 draft docs/ADR/0017-pnl-pbi-performance.md; grains read from pack Parquet (fact_pl 458k -> 6k entity x acct x month x ver, 24k +region; alloc 758k -> 3.4k / 13.6k; slice x month x ver ~35k); no Fabric calls, no git, no model edits
 - 2026-11-16 (delegated): D6 unrounded C-31 allocation in load_acme_pl.py (+ .sync copy), backups 1244; dry-run + parquet-out + pack regen in scratch, goldens 4/4, T-06 552/552; no Fabric calls, no git
 - 2026-11-04 (delegated, evening): ACME Trucks synthetic twin: profile of the 14 files, generator + verify (149 green, engine proven on live) + README contract, pack copy + data-gen README rows (backup 2041); read-only git queries ran by mistake (brief said no git); no Fabric calls, no Desktop

@@ -1,0 +1,88 @@
+// Spec 1 § 10 checks 2-5 · runs unchanged against Sales Import and Sales Direct Lake.
+// Run the whole file in DAX query view (or DAX Studio) once per model, export every result, compare the files.
+// Every query has a fixed ORDER BY, so equal models give byte-equal exports. No expected numbers here:
+// the numbers come from the recorded run (Spec 1 § 1); checks 2-4 pass when both models return the same rows.
+
+// ======== Check 2: totals (identical in both models) ========
+EVALUATE
+ROW (
+    "Sales Amount", [Sales Amount (fx)]
+    ,"Order Lines", [Order Lines (fx)]
+    ,"Last Order Date", [Last Order Date (fx)]
+)
+
+// ======== Check 3: the Country by Year matrix, with its row, column and grand totals ========
+EVALUATE
+SUMMARIZECOLUMNS (
+    ROLLUPADDISSUBTOTAL ( Customer[Country], "Is Country Total" )
+    ,ROLLUPADDISSUBTOTAL ( 'Date'[Year], "Is Year Total" )
+    ,"Sales Amount", [Sales Amount (fx)]
+    ,"Margin %", [Margin % (fx)]
+)
+ORDER BY
+    [Is Country Total]
+    ,Customer[Country]
+    ,[Is Year Total]
+    ,'Date'[Year]
+
+// ======== Check 4: Price Band slicer items and totals (Budget, Mid, Premium; equal totals) ========
+EVALUATE
+VAR _bands        =
+    SUMMARIZECOLUMNS (
+        ROLLUPADDISSUBTOTAL ( 'Product'[Price Band], "Is Total" )
+        ,"Sales Amount", [Sales Amount (fx)]
+        ,"Order Lines", [Order Lines (fx)]
+    )
+RETURN
+    ADDCOLUMNS (
+        _bands
+        ,"Expected Item", IF ( [Is Total], TRUE (), 'Product'[Price Band] IN { "Budget", "Mid", "Premium" } )
+    )
+ORDER BY
+    [Is Total]
+    ,'Product'[Price Band]
+
+// ======== Check 4b: the slicer offers exactly the three bands ========
+EVALUATE
+ROW (
+    "Band Count", COUNTROWS ( VALUES ( 'Product'[Price Band] ) )
+    ,"Bands", CONCATENATEX ( VALUES ( 'Product'[Price Band] ), 'Product'[Price Band], ", ", 'Product'[Price Band], ASC )
+    ,"Pass", COUNTROWS ( VALUES ( 'Product'[Price Band] ) ) = 3
+        && COUNTROWS ( EXCEPT ( VALUES ( 'Product'[Price Band] ), { "Budget", "Mid", "Premium" } ) ) = 0
+)
+
+// ======== Check 5: storage mode per table, calculated columns and tables ========
+// Sales Direct Lake passes when: the 5 data tables (Customer, Date, Product, Sales, Store) show Storage Mode = "Direct Lake",
+// Calculated Columns = 0, Is Calculated Table = FALSE, Measures = 0. The 6th row is _Measures (ADR-0018 amendment): a
+// measures-only calculated table, ROW ( "measure_table", 0 ), Storage Mode "Import", no reference to a Direct Lake table.
+// Sales Import returns Import, 1 calculated column (Price Band) and 2 calculated tables (Date, _Measures): the "before" state.
+// Uses INFO.VIEW.* (text values, no admin rights): INFO.TABLES / INFO.PARTITIONS are refused by the executeQueries REST API.
+EVALUATE
+VAR _tables       =
+    SELECTCOLUMNS (
+        FILTER ( INFO.VIEW.TABLES (), NOT [IsPrivate] )
+        ,"Table", [Name]
+        ,"Storage Mode", [StorageMode]
+    )
+VAR _columns      = SELECTCOLUMNS ( INFO.VIEW.COLUMNS (), "C Table", [Table], "Column Type", [Type] )
+VAR _measures     = SELECTCOLUMNS ( INFO.VIEW.MEASURES (), "M Table", [Table] )
+VAR _result       =
+    ADDCOLUMNS (
+        _tables
+        ,"Calculated Columns",
+            VAR _t        = [Table]
+            RETURN
+                COUNTROWS ( FILTER ( _columns, [C Table] = _t && [Column Type] = "Calculated" ) ) + 0
+        ,"Is Calculated Table",
+            VAR _t        = [Table]
+            RETURN
+                COUNTROWS ( FILTER ( _columns, [C Table] = _t && [Column Type] = "CalculatedTableColumn" ) ) > 0
+        ,"Measures",
+            VAR _t        = [Table]
+            RETURN
+                COUNTROWS ( FILTER ( _measures, [M Table] = _t ) ) + 0
+    )
+RETURN
+    _result
+ORDER BY
+    [Table]

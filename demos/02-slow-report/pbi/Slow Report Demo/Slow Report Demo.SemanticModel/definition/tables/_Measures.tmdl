@@ -1,0 +1,37 @@
+/// Measures only (ADR-0018 amendment): every measure lives here; the hidden column keeps the table valid.
+table _Measures
+	lineageTag: a8c06800-a07a-54ec-bda0-c5b99f29528f
+
+	/// Net sales: sum of Sales[Net Amount] (Spec 2 § 6).
+	measure 'Sales Amount (fx)' = SUM ( Sales[Net Amount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 92ef0ed6-76cf-5acf-a1b1-044b1ecf23d7
+
+	/// Sales from order lines worth 500 or more (Spec 2 § 6).
+	measure 'Big Line Sales (fx)' =
+			CALCULATE (
+			    [Sales Amount (fx)]
+			    ,FILTER (
+			        Sales
+			        ,Sales[Quantity] * Sales[Net Price] >= 500
+			    )
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 213e4ef0-1c09-51e5-a3c8-582d0c62ea1e
+
+	column measure_table
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7f0124ce-549e-5278-a0e0-cd7fd23902c1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [measure_table]
+
+		annotation SummarizationSetBy = User
+
+	partition _Measures = calculated
+		mode: import
+		source =
+				ROW ( "measure_table", 0 )
+

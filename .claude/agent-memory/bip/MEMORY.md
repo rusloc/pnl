@@ -9,6 +9,7 @@
 - [ACME Marketing](project_acme_marketing.md) — ADR-0015 phase 2 PBIP; generator in repo tools/ (gitignored); phases 2+3 + pack; tests 26 blocks / 28.9k rows
 - [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; generator in repo `tools/`; 2026-11-16 web sync phases 1+2 (1280 x 720, Explain page, report_web_sync.py)
 
+- [Fabric demos ADR-0018](project_fabric_demos.md) — 3 video demo PBIPs in demos/; 11-24 amendment: measures "(fx)" in _Measures; placeholders for ginee
 - [P&L web spec gap](project_pnl_web_spec_gap.md) — 2026-11-16 vosk.dev spec vs PBIP; oracle sync (4,514 rows); ADR-0017 P0+P1 2026-11-17, 316 measures
 
 ## Open threads

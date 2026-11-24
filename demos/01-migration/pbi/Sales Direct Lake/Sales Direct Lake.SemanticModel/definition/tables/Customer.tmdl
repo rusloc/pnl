@@ -1,0 +1,43 @@
+table Customer
+	lineageTag: 31c7ae4d-6c25-562b-aa5e-80859c06714f
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 157a6d02-adbb-5758-8ca9-9843bd1c1d9a
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = User
+
+	column 'Customer Name'
+		dataType: string
+		lineageTag: 2a8fef7c-c421-591f-889f-5917456a4890
+		summarizeBy: none
+		sourceColumn: customer_name
+
+		annotation SummarizationSetBy = User
+
+	column Country
+		dataType: string
+		lineageTag: e146afe4-2b2d-5ddc-880a-23ab123fb886
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: b0791c14-a311-5f36-89ad-86692a6d79d9
+		summarizeBy: none
+		sourceColumn: segment
+
+		annotation SummarizationSetBy = User
+
+	partition Customer = entity
+		mode: directLake
+		source
+			entityName: dim_customer
+			expressionSource: 'DirectLake - lh_sales_demo'
+

@@ -136,6 +136,9 @@ TODO: lock North Star
 - **2026-11-16** — **USER: Power BI flavours synced to the vosk.dev build specs as input (Option B):** the PBI base stays the main source, no ADR; hard targets = numbers equal to the web, layout / design = the spec; the rest decided by the main agent (gap docs § 11). #decision
 - **2026-11-16** — **ADR-0017 Accepted** (P&L Power BI performance): 5 s showcase target (10 s worst), phased P0–P3, P2 / P3 only if a page is still over target; N-01 2 s stays long-term (T-18 open). #adr
 - **2026-11-16** — **USER: speed over exact bridge labels** → static "$… m" labels on the bridge bars (overrules the ADR draft's tooltip-only proposal); variance totals row kept. #decision
+- **2026-11-17** — **USER: every view page of the P&L report is 16:9**, 1280 × 720 FitToPage; tooltip pages exempt. #decision
+- **2026-11-17** — **USER: new sub-agent `aid`** (Fabric data agents, AI-ready data) with skills `fabric-data-agent`, `optima`; roster target 8 → 9. #decision
+- **2026-11-17** — **USER: undo the Desktop save's visual changes** on the repo P&L PBIP (statement headers, auto-size, concentration legend), then re-pack. #decision
 
 ## Features
 ### Planned
@@ -160,6 +163,7 @@ TODO: lock North Star
 - **ACME Trucks JS — follow-ups (2026-11-09):** USER rules on contract § 10 A–E; USER first look at `js-trucks/`; optional bip capture of `?wt=onspot` Refueling `0.00%`; delete the stray `js-trucks/.claude/`.
 - **P&L PBI performance — ADR-0017 follow-ups (2026-11-16):** USER rules on static statement format strings (~3 s, "−0.0" vs the web's "0.0") and on P2 (ginee: CC long form + volume driver + aggregate, `lh_raw` reload, ~2–3.5 d) vs accepting 6–8 s; P3 (service update + query caching) at publish.
 - **PBI web sync — follow-ups (2026-11-16):** USER yes for the `lh_raw` reload (unrounded allocation, `RANGE` view) + model refresh; USER click-tests of both reports; Nordmark Performance Analyzer; first open + save of the P&L in Desktop.
+- **P&L Profitability — follow-ups (2026-11-17):** USER click-test (ⓘ × 4, How to read, Δ header card, Commerce Cloud, range > 12 months) without saving; zero-rule format decision shared with ADR-0017 (a); bip fixes `tools/phase2-web-sync/gen_report.py` (broken since 11-17 00:21) and the gap doc § 12.2 cache sentence.
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -217,4 +221,5 @@ TODO: lock North Star
 - **2026-11-05** — **ACME Marketing PBI:** per-vital binoculars → single-metric dynamics pop-up; O5 / O6 last-30-day fallback; validator 0 / 0, tests 29 blocks / 29,387 rows TRUE. Uncommitted at close.
 - **2026-11-08** — **ACME Trucks JS flavour (ADR-0016)** `js-trucks/`: data 264,724 B first paint / 343,096 B total, pure-TS engine, page "Time utilization" + tooltip, URL state; PBI = JS parity 1,649 rows / 0 gaps / 2 accepted, independent recomputation 551,040 values / 0 differences; 68 tests; pack `.sync/acme-trucks/js-app/` (48 files, 1.14 MB, standalone build proven, status draft). Committed `83be565` (2026-11-09).
 - **2026-11-16** — **P&L + Nordmark Exec PBI synced to the vosk.dev build specs:** P&L 4 pages + 2 tooltip pages, 56 bookmarks, oracle 4,515 / goldens 1,342 / control totals 867 rows TRUE (web oracle 4,514 rows, 0 gaps); Nordmark one page 1280 × 720 + Explain, 31 bookmarks, 470 measures, control totals 50,390 + web-sync 3,539 rows TRUE (oracle 1,620 rows, 0 gaps); validator 0 / 0; packs `.sync/{pnl,nordmark-exec}/power-bi/` re-packed and checked on fresh data-gen output; hand-off `.sync/2026-11-16-pbi-web-sync.md`. Loader / pack generator: unrounded allocation (`lh_raw` reload pending). Uncommitted at close.
-- **2026-11-16** — **ADR-0017 P0 + P1:** `LV Delta Bar` off, `_Win` once, literal selection defaults, entity fast path, profitability visual filter removed; P&L page-cold statement 22.9 → 6.4 s, Vitals 6.2 → 1.6 s, Analysis 21.1 → 7.6 s, Profitability 36.9 → 2.4 s; 316 measures, no renames, Track A probe identical. Uncommitted at close.
+- **2026-11-16** — **ADR-0017 P0 + P1:** `LV Delta Bar` off, `_Win` once, literal selection defaults, entity fast path, profitability visual filter removed; P&L page-cold statement 22.9 → 6.4 s, Vitals 6.2 → 1.6 s, Analysis 21.1 → 7.6 s, Profitability 36.9 → 2.4 s; 316 measures, no renames, Track A probe identical. Uncommitted at close. Committed `c9b44d6` (2026-11-18).
+- **2026-11-17** — **P&L Profitability rebuilt to the vosk.dev spec of 2026-11-17** (one page, combo "Revenue and margin by month / quarter" via `dim_combo_period`, CM status icons, region × category heatmap); all four views 1280 × 720; 152 visuals, 321 measures; tests 117 (§ 8) / 4,515 / 1,342 / 867 rows TRUE; page-cold 3.5 s; validator 0 / 0; pack `.sync/pnl/power-bi/` re-issued 2026-11-18 (scratch 3,536 rows TRUE). Committed `c9b44d6` (2026-11-18).

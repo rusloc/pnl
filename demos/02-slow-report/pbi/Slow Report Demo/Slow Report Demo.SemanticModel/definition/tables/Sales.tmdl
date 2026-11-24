@@ -1,0 +1,86 @@
+/// Order lines from fact_sales (Spec 2 § 4).
+table Sales
+	lineageTag: b899f3db-ba5a-54f8-ba7b-e0875cbc1d30
+
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 51361421-a1b4-5cd2-bc4f-b9e3512b1ad0
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7389c3d4-7805-54ab-9866-4f4099bf92d1
+		summarizeBy: none
+		sourceColumn: Customer Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Product Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3550b057-70a5-5bb6-a43b-f54be93c66a3
+		summarizeBy: none
+		sourceColumn: Product Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 07d4ec69-98c2-5baf-aa72-35cd7b435321
+		summarizeBy: none
+		sourceColumn: Store Key
+
+		annotation SummarizationSetBy = User
+
+	column Quantity
+		dataType: int64
+		formatString: #,0
+		lineageTag: b8d1a6ee-dc7b-5150-bd36-b00d430794e1
+		summarizeBy: none
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Price'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 7d65ef99-e4ad-5485-8662-b8d1a04f6177
+		summarizeBy: none
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = User
+
+	column 'Net Amount'
+		dataType: double
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 3cc591f2-8b31-5c12-83e6-84aad24e3171
+		summarizeBy: none
+		sourceColumn: Net Amount
+
+		annotation SummarizationSetBy = User
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_fact_sales = Source{[Schema = "dbo", Item = "fact_sales"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_fact_sales, {"sales_id", "order_id", "unit_cost", "cost_amount", "load_ts"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"order_date", "Order Date"}, {"customer_key", "Customer Key"}, {"product_key", "Product Key"}, {"store_key", "Store Key"}, {"quantity", "Quantity"}, {"net_price", "Net Price"}, {"net_amount", "Net Amount"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

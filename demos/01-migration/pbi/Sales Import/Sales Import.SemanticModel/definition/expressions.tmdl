@@ -1,0 +1,12 @@
+expression SqlEndpoint = "<lh_sales_demo-sql-endpoint-host>" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = "Text"]
+	lineageTag: 24e181d4-5777-5775-ba45-593e5b1e0030
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+expression Database = "lh_sales_demo" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = "Text"]
+	lineageTag: 95b4aed0-3de7-5de1-b0bb-55294e6c5687
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+

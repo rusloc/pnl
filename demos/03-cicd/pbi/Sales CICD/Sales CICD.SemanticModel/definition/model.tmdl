@@ -1,0 +1,21 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["WorkspaceId", "LakehouseId", "DirectLake - lh_cicd_demo"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table Sales
+ref table Product
+ref table 'Date'
+ref table Environment
+ref table _Measures
+

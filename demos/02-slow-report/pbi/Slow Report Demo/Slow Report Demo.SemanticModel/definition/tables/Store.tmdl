@@ -1,0 +1,42 @@
+table Store
+	lineageTag: d50b47c9-12ac-51a7-ba2f-6795268cb82e
+
+	column 'Store Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6def5473-4ff1-5b8f-8454-410eebcd29d5
+		summarizeBy: none
+		sourceColumn: Store Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Store Name'
+		dataType: string
+		lineageTag: a3f0b0cd-e2fb-5611-a9fa-49bfe9a4100d
+		summarizeBy: none
+		sourceColumn: Store Name
+
+		annotation SummarizationSetBy = User
+
+	column Channel
+		dataType: string
+		lineageTag: 11e1047a-fc16-519f-be62-0af3efdcd4fe
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = User
+
+	partition Store = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlEndpoint, Database),
+				    dbo_dim_store = Source{[Schema = "dbo", Item = "dim_store"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_dim_store, {"country"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns", {{"store_key", "Store Key"}, {"store_name", "Store Name"}, {"channel", "Channel"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

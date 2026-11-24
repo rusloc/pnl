@@ -1,0 +1,81 @@
+/// Legacy piece 3 (Spec 1 § 6 step 4): DAX calculated table, on purpose.
+table 'Date'
+	lineageTag: d58b7657-2742-571a-810e-5069a6883230
+	dataCategory: Time
+
+	column 'Date'
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 0e57c634-2edf-54d0-acb9-0e204b490598
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 09ebe59f-8d4a-512f-ba30-929fb56568a6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
+
+		annotation SummarizationSetBy = User
+
+	column 'Month No'
+		dataType: int64
+		formatString: 0
+		lineageTag: 20751ab4-5eff-590c-a651-49eec00eeae2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month No]
+
+		annotation SummarizationSetBy = User
+
+	column 'Month Name'
+		dataType: string
+		lineageTag: 2c2d85bb-e1a6-5cae-93cc-d690ff8dc3ab
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Name]
+		sortByColumn: 'Month No'
+
+		annotation SummarizationSetBy = User
+
+	column 'Year Month'
+		dataType: string
+		lineageTag: 8851171e-4335-51a6-b219-31ce20937589
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Month]
+
+		annotation SummarizationSetBy = User
+
+	column Quarter
+		dataType: string
+		lineageTag: efa7f2b1-716e-5f9b-9e34-3be782a3f409
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+
+		annotation SummarizationSetBy = User
+
+	partition 'Date' = calculated
+		mode: import
+		source =
+				VAR _first_year   = YEAR ( MIN ( Sales[Order Date] ) )
+				VAR _last_year    = YEAR ( MAX ( Sales[Order Date] ) )
+				RETURN
+				    ADDCOLUMNS (
+				        CALENDAR ( DATE ( _first_year, 1, 1 ), DATE ( _last_year, 12, 31 ) )
+				        ,"Year", YEAR ( [Date] )
+				        ,"Month No", MONTH ( [Date] )
+				        ,"Month Name", FORMAT ( [Date], "MMM" )
+				        ,"Year Month", FORMAT ( [Date], "yyyy-MM" )
+				        ,"Quarter", "Q" & QUARTER ( [Date] )
+				    )
+
