@@ -47,5 +47,6 @@
 ## 2026-11-24 Demo models (ADR-0018; IDs in demos/*/run_log.md)
 - [2026-11-24] Sales Direct Lake (ws_migration_demo): Direct Lake on OneLake, M params WorkspaceId/LakehouseId, measures in calc table _Measures (ROW) with " (fx)" suffix; framing 5.2 s; totals = gold 30M baseline (source: observed)
 - [2026-11-24] Sales CICD (ws_cicd_demo_dev): same pattern; framing 5.7 s; Margin % (fx) 0.66667, Environment = ws_cicd_demo_dev (source: observed)
+- [2026-11-24] Sales CICD (ws_cicd_demo_prod): params set by pipeline rules; reframe 5.8 s; env ws_cicd_demo_prod, Margin % 0.66667, Sales 39,693,347.19 = Dev (seed is hash-based, identical rows per stage; only dim_environment differs) (source: observed)
 - [2026-11-24] Sales Import (ws_migration_demo): Import via Sql.Database(SqlEndpoint, Database) on lh_sales_demo; deployed, NOT bound, never refreshed; waits on USER cloud connection demo-lh_sales_demo-sql (OAuth2) (source: observed)
 - [2026-11-24] Sales Import bound via BindToGateway (gatewayObjectId zero GUID, datasourceObjectIds = cloud connection demo-lh_sales_demo-sql); first full refresh 295 s (12:23:54-12:28:49 UTC) on F64, 30M rows; totals = gold. Baseline for the video; >= 2 min so no 60M rebuild (source: observed)

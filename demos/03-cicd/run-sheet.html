@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case 3 run sheet</title><style>
+:root{--bg:#f7f7f5;--panel:#ffffff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e3e3e0;--accent:#2f6fde;
+--do:#2f6fde;--wait:#b7791f;--show:#2f855a;--post:#805ad5;--if:#c53030;--ph:#fff4d6;--phink:#7a5200;
+--s1:#3b82f6;--s2:#10b981;--s3:#f59e0b;--s4:#ef4444;--s5:#8b5cf6;--s6:#06b6d4;--s7:#ec4899;--s8:#84cc16;--s9:#f97316;--s10:#64748b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}}
+:root[data-theme="dark"]{--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sub{color:var(--muted);margin:0 0 4px}.claim{font-size:17px;margin:12px 0 0}
+code{font:13px/1.3 ui-monospace,Consolas,monospace;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 4px;border-radius:4px}
+.ph{background:var(--ph);color:var(--phink);border-radius:4px;padding:0 3px;font-weight:600}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.stat b{display:block;font-size:20px}.stat span{color:var(--muted);font-size:12px}
+.timeline{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 6px;border-bottom:1px solid var(--line)}
+.bar{display:flex;height:42px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;text-decoration:none;min-width:0;border-right:1px solid rgba(255,255,255,.35)}
+.seg:hover{filter:brightness(1.1)}.seg span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
+.ticks{position:relative;height:18px;font-size:11px;color:var(--muted)}.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}.ticks span.cap{color:var(--if);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+ol.steps{list-style:none;margin:0;padding:0}ol.steps li{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:22px;border-radius:11px;background:var(--do);color:var(--panel);font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+li:not(.k-do) .kind{margin-left:34px}
+.kind{flex:0 0 44px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.k-do .kind{color:var(--do)}.k-wait .kind{color:var(--wait)}.k-show .kind{color:var(--show)}.k-post .kind{color:var(--post)}.k-if .kind{color:var(--if)}
+.k-if .txt,.k-post .txt{color:var(--muted)}
+.scene{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;scroll-margin-top:90px}
+.scene header{grid-column:1/-1;display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.badge{color:#fff;font-weight:800;border-radius:8px;padding:3px 10px}.time{font-variant-numeric:tabular-nums;font-weight:700}
+.dur{color:var(--muted);font-size:13px}.screen{color:var(--muted);font-size:13px;flex:1;min-width:0}
+.col{padding:12px 16px}.col+.col{border-left:1px solid var(--line)}
+.col h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vo{font-size:17px;line-height:1.55;margin:0}.vo::before{content:"“"}.vo::after{content:"”"}
+.wc{color:var(--muted);font-size:12px;margin-top:8px}
+ul.plain{margin:0;padding-left:18px}ul.plain li{margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle{float:right;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit;font-size:13px}
+@media (max-width:760px){.scene{grid-template-columns:1fr}.col+.col{border-left:0;border-top:1px solid var(--line)}.grid2{grid-template-columns:1fr}.seg span{display:none}.vo{font-size:16px}}
+@media print{.timeline{position:static}.toggle{display:none}}
+</style></head><body><main>
+<button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=(r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark'">Theme</button>
+<h1>Case 3 · Fabric CI/CD: from Publish to one-click deployment</h1>
+<p class="sub">Run sheet · built from <code>demos/03-cicd/script.md</code> and <code>guide.md</code> § 4 · <strong>draft v0.1</strong> (2026-11-24) · target <strong>3:15</strong> (hard cap 5:00) · voice-over about 225 words (about 1:45 spoken); the rest is on-screen action and cut waits.</p>
+<p class="claim"><strong>The one claim:</strong> a change goes from a commit to production with one click, every step leaves a record, and each environment keeps its own data.</p>
+<div class="stats"><div class="stat"><b>3:15</b><span>target length</span></div>
+<div class="stat"><b>8</b><span>scenes</span></div><div class="stat"><b>13</b><span>on-camera clicks</span></div>
+<div class="stat"><b>226</b><span>voice-over words (~1:40 spoken)</span></div>
+<div class="stat"><b>1:45</b><span>spare to the 5:00 cap</span></div></div>
+<div class="timeline"><div class="bar"><a class="seg" href="#s1" style="width:6.667%;background:var(--s1)" title="Scene 1 · 0:00–0:20"><span>1</span></a><a class="seg" href="#s2" style="width:6.667%;background:var(--s2)" title="Scene 2 · 0:20–0:40"><span>2</span></a><a class="seg" href="#s3" style="width:8.333%;background:var(--s3)" title="Scene 3 · 0:40–1:05"><span>3</span></a><a class="seg" href="#s4" style="width:5.000%;background:var(--s4)" title="Scene 4 · 1:05–1:20"><span>4</span></a><a class="seg" href="#s5" style="width:10.000%;background:var(--s5)" title="Scene 5 · 1:20–1:50"><span>5</span></a><a class="seg" href="#s6" style="width:13.333%;background:var(--s6)" title="Scene 6 · 1:50–2:30"><span>6</span></a><a class="seg" href="#s7" style="width:10.000%;background:var(--s7)" title="Scene 7 · 2:30–3:00"><span>7</span></a><a class="seg" href="#s8" style="width:5.000%;background:var(--s8)" title="Scene 8 · 3:00–3:15"><span>8</span></a><div style="width:35.000%;background:repeating-linear-gradient(45deg,transparent 0 6px,var(--line) 6px 8px)" title="spare until the 5:00 cap"></div></div><div class="ticks"><span style="left:0">0:00</span><span style="left:10.000%">0:30</span><span style="left:20.000%">1:00</span><span style="left:30.000%">1:30</span><span style="left:40.000%">2:00</span><span style="left:50.000%">2:30</span><span style="left:60.000%">3:00</span><span style="left:70.000%">3:30</span><span style="left:80.000%">4:00</span><span style="left:90.000%">4:30</span><span class="cap" style="right:0;transform:none">5:00 cap</span></div><div class="legend"><span><i style="background:var(--do)"></i>Click</span><span><i style="background:var(--wait)"></i>Wait</span><span><i style="background:var(--show)"></i>Show</span><span><i style="background:var(--post)"></i>Edit</span><span><i style="background:var(--if)"></i>If</span><span><span class="ph">{…}</span> fill from the recorded run</span></div></div>
+<h2>Before you press record (off camera)</h2><div class="box"><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">VS Code › <code>C:\__PBI\fabric-cicd-demo</code> › <code>_Measures.tmdl</code> at the Margin % line</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt">Browser tabs: GitHub commits · Dev <strong>Source control</strong> · <code>dp_cicd_demo</code> · Dev report · Prod report</span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Desktop with a local PBIX (e.g. <code>Sales Import.pbix</code>) for scene 1</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Check: both reports 66.7 % · Dev Source control empty · <code>git status</code> clean</span></li>
+<li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">Start recording</span></li></ol></div>
+<h2>Scenes</h2><section class="scene" id="s1">
+<header><span class="badge" style="background:var(--s1)">1</span><span class="time">0:00–0:20</span><span class="dur">20 s · clicks 1–2</span><span class="screen">Desktop › Publish › pick a workspace › "Replace this semantic model?" › Cancel.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Desktop › Home › <strong>Publish</strong> › pick <code>ws_migration_demo</code></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Prompt “Replace this semantic model?”</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt"><strong>Cancel</strong> (never Replace: it overwrites the Case 1 model)</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">This is how most teams ship Power BI. One click on Publish, straight into production. No review, no test, no history, and no way back.</p><div class="wc">25 words · about 11 s spoken</div></div>
+</section><section class="scene" id="s2">
+<header><span class="badge" style="background:var(--s2)">2</span><span class="time">0:20–0:40</span><span class="dur">20 s · click 3</span><span class="screen">Simple overlay: VS Code → GitHub → Dev workspace → pipeline → Prod. Then the Dev and Prod reports side by side: Margin % (fx) 66.7 %, Environment cards <code>ws_cicd_demo_dev</code> / <code>ws_cicd_demo_prod</code>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-post"><span class="kind">Edit</span><span class="txt">Overlay: VS Code → GitHub → Dev → pipeline → Prod</span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Dev report tab and Prod report tab side by side</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point: Margin % (fx) 66.7 % · Environment cards dev / prod</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Here's the same kind of change, done properly. The model lives in GitHub. The Dev workspace syncs from it, and a deployment pipeline moves it to Production. Both show a margin of 66.7 percent. That's a bug: it divides by cost instead of sales.</p><div class="wc">44 words · about 20 s spoken</div></div>
+</section><section class="scene" id="s3">
+<header><span class="badge" style="background:var(--s3)">3</span><span class="time">0:40–1:05</span><span class="dur">25 s · clicks 4–5</span><span class="screen">VS Code › <code>_Measures.tmdl</code>: <code>[Cost Amount (fx)]</code> → <code>[Sales Amount (fx)]</code> › Ctrl+S › Source Control: message <code>Margin % fix</code> › Commit › Sync.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">VS Code › Margin % line: <code>[Cost Amount (fx)]</code> → <code>[Sales Amount (fx)]</code> › <strong>Ctrl+S</strong></span></li>
+<li class="k-if"><span class="kind">If</span><span class="txt">Off camera: <code>git diff --stat</code> = 1 insertion, 1 deletion</span></li>
+<li class="k-do"><span class="num">5</span><span class="kind">Click</span><span class="txt">Source Control panel › message <code>Margin % fix</code> › <strong>Commit</strong> › <strong>Sync Changes</strong></span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The model is plain text. I change one reference, cost to sales, save, commit with a message, and push.</p><div class="wc">19 words · about 8 s spoken</div></div>
+</section><section class="scene" id="s4">
+<header><span class="badge" style="background:var(--s4)">4</span><span class="time">1:05–1:20</span><span class="dur">15 s · click 6</span><span class="screen">GitHub › commits › <code>Margin % fix</code> › diff: one changed line.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">6</span><span class="kind">Click</span><span class="txt">GitHub tab › reload commits › <strong>Margin % fix</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Diff: one changed line</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">GitHub shows exactly one changed line. Anyone can review it, and anyone can roll it back.</p><div class="wc">16 words · about 7 s spoken</div></div>
+</section><section class="scene" id="s5">
+<header><span class="badge" style="background:var(--s5)">5</span><span class="time">1:20–1:50</span><span class="dur">30 s · clicks 7–8</span><span class="screen"><code>ws_cicd_demo_dev</code> › Source control › Updates (1) › Update all. Dev report › Refresh: <strong>40.0 %</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">7</span><span class="kind">Click</span><span class="txt">Dev workspace tab › <strong>Source control</strong> › <strong>Updates</strong> (1) › <strong>Update all</strong></span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Update done (cut the wait; note seconds)</span></li>
+<li class="k-do"><span class="num">8</span><span class="kind">Click</span><span class="txt">Dev report tab › <strong>Refresh</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Margin % (fx) 40.0 %</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">In the Dev workspace, Source control sees one incoming change. Update all pulls it in, and the Dev report shows 40 percent. Nobody pressed Publish.</p><div class="wc">25 words · about 11 s spoken</div></div>
+</section><section class="scene" id="s6">
+<header><span class="badge" style="background:var(--s6)">6</span><span class="time">1:50–2:30</span><span class="dur">40 s · clicks 9–11</span><span class="screen"><code>dp_cicd_demo</code>: Production marks <code>Sales CICD</code> as different › select › Deploy, note <code>Margin % fix</code>. Prod report › Refresh: <strong>40.0 %</strong>, Environment <code>ws_cicd_demo_prod</code>. Caption: <strong>Deploy: <span class="ph">{n}</span> s</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">9</span><span class="kind">Click</span><span class="txt">Pipeline tab › Production: <code>Sales CICD</code> marked different › tick it</span></li>
+<li class="k-do"><span class="num">10</span><span class="kind">Click</span><span class="txt"><strong>Deploy</strong> › note <code>Margin % fix</code> › <strong>Deploy</strong></span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Succeeded (cut the wait; caption the seconds)</span></li>
+<li class="k-do"><span class="num">11</span><span class="kind">Click</span><span class="txt">Prod report tab › <strong>Refresh</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Margin % (fx) 40.0 % · Environment <code>ws_cicd_demo_prod</code></span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The pipeline marks the model as different in Production. Select it, add a note, deploy. Seconds later, Production shows 40 percent too. And look at the environment card: Production still reads its own lakehouse. A deployment rule swaps the connection on the way in, so nobody edits anything by hand.</p><div class="wc">50 words · about 22 s spoken</div></div>
+</section><section class="scene" id="s7">
+<header><span class="badge" style="background:var(--s7)">7</span><span class="time">2:30–3:00</span><span class="dur">30 s · clicks 12–13</span><span class="screen">Deployment history next to the GitHub commit list.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">12</span><span class="kind">Click</span><span class="txt">Pipeline › <strong>Deployment history</strong></span></li>
+<li class="k-do"><span class="num">13</span><span class="kind">Click</span><span class="txt">GitHub commits tab side by side</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Every step left a record. GitHub knows who changed what, and why. The pipeline knows when it went where. And if something breaks, the way back is the same path: revert the commit, deploy again.</p><div class="wc">35 words · about 16 s spoken</div></div>
+</section><section class="scene" id="s8">
+<header><span class="badge" style="background:var(--s8)">8</span><span class="time">3:00–3:15</span><span class="dur">15 s · no clicks</span><span class="screen">Closing card: <strong>CI/CD setup · 1 week · $1,200</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-post"><span class="kind">Edit</span><span class="txt">Closing card</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Want this for your own workspaces? A CI/CD setup takes one week.</p><div class="wc">12 words · about 5 s spoken</div></div>
+</section>
+<h2>After the take</h2><div class="grid2"><div class="box"><h3 style="margin:0 0 6px;font-size:13px">Reset for another take</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">VS Code: Margin % line back to <code>[Cost Amount (fx)]</code> › Ctrl+S › commit <code>Revert Margin % for demo</code> › push</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt">Dev › Source control › Updates › <strong>Update all</strong></span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Pipeline › <strong>Deploy</strong> to Production, note <code>Revert Margin % for demo</code> › both reports 66.7 %</span></li></ol></div>
+<div class="box"><h3 style="margin:0 0 6px;font-size:13px">Blur in post</h3><ul class="plain"><li>Tenant and account name; workspace IDs in the address bar; your GitHub username; Fabric's first commit message in the commit list (<code>Committing 4 items from workspace &lt;Dev ID&gt;</code>); never open <code>expressions.tmdl</code> (Dev IDs, public repo).</li></ul></div></div>
+<h2>Edit notes</h2><div class="box"><ul class="plain"><li><strong>Scene 3:</strong> use the VS Code Source Control panel on camera (cleaner than the terminal), but run <code>git diff --stat</code> off camera first: it must show 1 insertion, 1 deletion (guide § 4 step 3).</li><li><strong>Scenes 5 and 6:</strong> cut the waits for Update all and the deploy; keep the real seconds as a caption.</li><li>Room to spare (about 1:45): if wanted, add the feature-branch + pull-request variant between scenes 3 and 4 (guide § 4, about 30 s), or a 15 s revert montage after scene 7.</li></ul></div>
+</main></body></html>

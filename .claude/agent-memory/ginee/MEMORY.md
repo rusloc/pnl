@@ -18,7 +18,7 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
-- Fabric demos (ADR-0018, 2026-11-24): data + models + reports deployed (DL totals = gold); Sales Import refreshed 295 s, all totals = gold; Spec 3 now Dev -> Prod, waits on USER Production parameter rules then redeploy + reframe + verify, dp_cicd_demo after USER's GitHub connect; 60M rebuild needs consent; capacity XMLA R/W unverified (portal)
+- Fabric demos (ADR-0018, 2026-11-24): data + models + reports deployed (DL totals = gold); Sales Import refreshed 295 s, all totals = gold; Spec 3 Dev -> Prod: rules applied (deploy 2, 7.4 s), Prod reframed, env per stage verified; next = USER's GitHub connect, then rehearsal; 60M rebuild needs consent; capacity XMLA R/W unverified (portal)
 - ADR-0017 P&L PBI performance (2026-11-16): drafted, Proposed; rec = E frills then B (bip logical, then small agg + volume driver + CC long form, M prototype before loader); target 5 s showcase; awaits USER decision
 - C-31 unrounded allocation (2026-11-16, D6): loader + pack loader copy changed, offline green; USER yes for lh_raw load, then model refresh + verify SQL; regen pack fact_pl_allocated.parquet; amount_local -> double applied in both models (validator 0/0); + RANGE row in param_time_view on load; same single reload; see data.md
 - ACME Trucks twin (2026-11-04): USER to run the git block (parquet/ in data/ is not gitignored, optional line); Trucks DAX tests pin the live extract -> bip re-base if the PBIP switches to the twin; hand-off note paragraph given to main agent (bip owns .sync/acme-trucks/ + note)
@@ -42,6 +42,7 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-11-24 (delegated, evening): dp_cicd_demo deploy 2 Dev->Prod "Apply Production parameter rules" 7.4 s, Prod params = Prod, reframe 5.8 s, env ws_cicd_demo_prod, Dev untouched; run_log + guide updated (backups 1933); no git
 - 2026-11-24 (delegated, later): Sales Import bound + refreshed 295 s, totals = gold; dp_cicd_demo rebuilt Dev -> Prod (items paired, deploy 6 s); guide + run logs updated; waits on USER Production rules
 - 2026-11-24 (delegated, Part B): dp_cicd_demo created + assigned, Dev->Test deploy OK incl. PBIR report, Test seeded (env ws_cicd_demo_test); stopped at parameter rules (no API, USER portal); Prod deployed + seeded later the same session; waits on USER rules for Test + Prod
 - 2026-11-24 (delegated, after fix): 3 models + 3 reports created by API (measures in _Measures, (fx)); DL framing 5-6 s, totals exact; Sales Import waits on connection; run logs updated

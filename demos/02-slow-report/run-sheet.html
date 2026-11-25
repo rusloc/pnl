@@ -1,0 +1,119 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case 2 run sheet</title><style>
+:root{--bg:#f7f7f5;--panel:#ffffff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e3e3e0;--accent:#2f6fde;
+--do:#2f6fde;--wait:#b7791f;--show:#2f855a;--post:#805ad5;--if:#c53030;--ph:#fff4d6;--phink:#7a5200;
+--s1:#3b82f6;--s2:#10b981;--s3:#f59e0b;--s4:#ef4444;--s5:#8b5cf6;--s6:#06b6d4;--s7:#ec4899;--s8:#84cc16;--s9:#f97316;--s10:#64748b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}}
+:root[data-theme="dark"]{--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sub{color:var(--muted);margin:0 0 4px}.claim{font-size:17px;margin:12px 0 0}
+code{font:13px/1.3 ui-monospace,Consolas,monospace;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 4px;border-radius:4px}
+.ph{background:var(--ph);color:var(--phink);border-radius:4px;padding:0 3px;font-weight:600}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.stat b{display:block;font-size:20px}.stat span{color:var(--muted);font-size:12px}
+.timeline{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 6px;border-bottom:1px solid var(--line)}
+.bar{display:flex;height:42px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;text-decoration:none;min-width:0;border-right:1px solid rgba(255,255,255,.35)}
+.seg:hover{filter:brightness(1.1)}.seg span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
+.ticks{position:relative;height:18px;font-size:11px;color:var(--muted)}.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}.ticks span.cap{color:var(--if);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+ol.steps{list-style:none;margin:0;padding:0}ol.steps li{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:22px;border-radius:11px;background:var(--do);color:var(--panel);font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+li:not(.k-do) .kind{margin-left:34px}
+.kind{flex:0 0 44px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.k-do .kind{color:var(--do)}.k-wait .kind{color:var(--wait)}.k-show .kind{color:var(--show)}.k-post .kind{color:var(--post)}.k-if .kind{color:var(--if)}
+.k-if .txt,.k-post .txt{color:var(--muted)}
+.scene{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;scroll-margin-top:90px}
+.scene header{grid-column:1/-1;display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.badge{color:#fff;font-weight:800;border-radius:8px;padding:3px 10px}.time{font-variant-numeric:tabular-nums;font-weight:700}
+.dur{color:var(--muted);font-size:13px}.screen{color:var(--muted);font-size:13px;flex:1;min-width:0}
+.col{padding:12px 16px}.col+.col{border-left:1px solid var(--line)}
+.col h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vo{font-size:17px;line-height:1.55;margin:0}.vo::before{content:"“"}.vo::after{content:"”"}
+.wc{color:var(--muted);font-size:12px;margin-top:8px}
+ul.plain{margin:0;padding-left:18px}ul.plain li{margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle{float:right;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit;font-size:13px}
+@media (max-width:760px){.scene{grid-template-columns:1fr}.col+.col{border-left:0;border-top:1px solid var(--line)}.grid2{grid-template-columns:1fr}.seg span{display:none}.vo{font-size:16px}}
+@media print{.timeline{position:static}.toggle{display:none}}
+</style></head><body><main>
+<button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=(r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark'">Theme</button>
+<h1>Case 2 · Slow report, live fix</h1>
+<p class="sub">Run sheet · built from <code>demos/02-slow-report/script.md</code> and <code>guide.md</code> § 4 · <strong>draft v0.1</strong> (2026-11-24) · target <strong>4:05</strong> (hard cap 5:00) · voice-over about 265 words (about 2:00 spoken); the rest is on-screen action and cut waits.</p>
+<p class="claim"><strong>The one claim:</strong> your slow report might be one line of DAX.</p>
+<div class="stats"><div class="stat"><b>4:05</b><span>target length</span></div>
+<div class="stat"><b>9</b><span>scenes</span></div><div class="stat"><b>14</b><span>on-camera clicks</span></div>
+<div class="stat"><b>264</b><span>voice-over words (~1:57 spoken)</span></div>
+<div class="stat"><b>0:55</b><span>spare to the 5:00 cap</span></div></div>
+<div class="timeline"><div class="bar"><a class="seg" href="#s1" style="width:6.667%;background:var(--s1)" title="Scene 1 · 0:00–0:20"><span>1</span></a><a class="seg" href="#s2" style="width:8.333%;background:var(--s2)" title="Scene 2 · 0:20–0:45"><span>2</span></a><a class="seg" href="#s3" style="width:13.333%;background:var(--s3)" title="Scene 3 · 0:45–1:25"><span>3</span></a><a class="seg" href="#s4" style="width:11.667%;background:var(--s4)" title="Scene 4 · 1:25–2:00"><span>4</span></a><a class="seg" href="#s5" style="width:13.333%;background:var(--s5)" title="Scene 5 · 2:00–2:40"><span>5</span></a><a class="seg" href="#s6" style="width:6.667%;background:var(--s6)" title="Scene 6 · 2:40–3:00"><span>6</span></a><a class="seg" href="#s7" style="width:10.000%;background:var(--s7)" title="Scene 7 · 3:00–3:30"><span>7</span></a><a class="seg" href="#s8" style="width:6.667%;background:var(--s8)" title="Scene 8 · 3:30–3:50"><span>8</span></a><a class="seg" href="#s9" style="width:5.000%;background:var(--s9)" title="Scene 9 · 3:50–4:05"><span>9</span></a><div style="width:18.333%;background:repeating-linear-gradient(45deg,transparent 0 6px,var(--line) 6px 8px)" title="spare until the 5:00 cap"></div></div><div class="ticks"><span style="left:0">0:00</span><span style="left:10.000%">0:30</span><span style="left:20.000%">1:00</span><span style="left:30.000%">1:30</span><span style="left:40.000%">2:00</span><span style="left:50.000%">2:30</span><span style="left:60.000%">3:00</span><span style="left:70.000%">3:30</span><span style="left:80.000%">4:00</span><span style="left:90.000%">4:30</span><span class="cap" style="right:0;transform:none">5:00 cap</span></div><div class="legend"><span><i style="background:var(--do)"></i>Click</span><span><i style="background:var(--wait)"></i>Wait</span><span><i style="background:var(--show)"></i>Show</span><span><i style="background:var(--post)"></i>Edit</span><span><i style="background:var(--if)"></i>If</span><span><span class="ph">{…}</span> fill from the recorded run</span></div></div>
+<h2>Before you press record (off camera)</h2><div class="box"><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Desktop › open <code>Slow Report Demo.pbix</code> (slow body) › click every visual once</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt">DAX Studio › connect to <code>Slow Report Demo</code> › <strong>Server Timings</strong> on › open <code>perf_test.dax</code></span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Editor: <code>measures.dax</code> open at the optimized body (for the paste)</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Check: <code>perf_log.md</code> holds the rehearsal numbers for every <code><span class="ph">{…}</span></code></span></li>
+<li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">Timer overlay on › start recording</span></li></ol></div>
+<h2>Scenes</h2><section class="scene" id="s1">
+<header><span class="badge" style="background:var(--s1)">1</span><span class="time">0:00–0:20</span><span class="dur">20 s · click 1</span><span class="screen">Page "Sales by brand". Click a Country in the slicer; the matrix spins. Timer overlay <span class="ph">{≈ 26–33 s}</span>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Page <strong>Sales by brand</strong> › <strong>Country</strong> slicer › pick a country not clicked yet</span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Matrix spins (keep 2 s, cut the rest)</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">One click on this slicer, and the report stalls. Half a minute, every time someone changes a filter. Let's find out why, and fix it live.</p><div class="wc">26 words · about 12 s spoken</div></div>
+</section><section class="scene" id="s2">
+<header><span class="badge" style="background:var(--s2)">2</span><span class="time">0:20–0:45</span><span class="dur">25 s · clicks 2–4</span><span class="screen">Optimize › Performance analyzer › Start recording › click again › expand the matrix: DAX query <span class="ph">{ms}</span> vs Visual display <span class="ph">{ms}</span>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt"><strong>Optimize</strong> ribbon › <strong>Performance analyzer</strong> › <strong>Start recording</strong></span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Country slicer › another fresh country</span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Matrix redraws</span></li>
+<li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">Performance analyzer › expand the matrix row</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point: <strong>DAX query</strong> vs <strong>Visual display</strong></span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Performance Analyzer splits the time. Almost all of it is the DAX query. The visual itself draws in milliseconds. So the problem is in the model, not on the page.</p><div class="wc">30 words · about 13 s spoken</div></div>
+</section><section class="scene" id="s3">
+<header><span class="badge" style="background:var(--s3)">3</span><span class="time">0:45–1:25</span><span class="dur">40 s · clicks 5–7</span><span class="screen">Copy query › DAX Studio › Clear Cache then Run › Server Timings: highlight Total, the FE share, the SE query with <span class="ph">{rows}</span> rows.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">5</span><span class="kind">Click</span><span class="txt">Matrix row › <strong>Copy query</strong></span></li>
+<li class="k-do"><span class="num">6</span><span class="kind">Click</span><span class="txt">DAX Studio › new query › paste › Run ▾ <strong>Clear Cache then Run</strong></span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Query finishes (cut the wait)</span></li>
+<li class="k-do"><span class="num">7</span><span class="kind">Click</span><span class="txt"><strong>Server Timings</strong> tab</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point: Total › FE share › the SE line with the big Rows value</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Copy the query into DAX Studio and turn on Server Timings. Two clues. Most of the time sits in the formula engine, which runs on a single thread. And one storage-engine query returns <span class="ph">{rows}</span> rows, for a matrix with only eight hundred and fifty cells. The engine is hauling data it doesn't need.</p><div class="wc">53 words · about 24 s spoken</div></div>
+</section><section class="scene" id="s4">
+<header><span class="badge" style="background:var(--s4)">4</span><span class="time">1:25–2:00</span><span class="dur">35 s · click 8</span><span class="screen">Data pane › <code>_Measures</code> › <strong>Big Line Sales (fx)</strong>; highlight <code>FILTER ( Sales, ... )</code>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">8</span><span class="kind">Click</span><span class="txt">Power BI › Data pane › <code>_Measures</code> › <strong>Big Line Sales (fx)</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Formula bar: select <code>FILTER ( Sales, ... )</code></span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The matrix uses one measure: sales from order lines worth five hundred or more. And here's the cause. FILTER over the whole Sales table. That hands CALCULATE every column of every matching row, and the engine has to build all of it first.</p><div class="wc">43 words · about 19 s spoken</div></div>
+</section><section class="scene" id="s5">
+<header><span class="badge" style="background:var(--s5)">5</span><span class="time">2:00–2:40</span><span class="dur">40 s · clicks 9–10</span><span class="screen">The optimized body next to the slow one. DAX Studio: <code>perf_test.dax</code> block 1 <code>[Slow]</code>, then block 2 <code>[Fast]</code>, each Clear Cache then Run. Caption: <strong><span class="ph">{slow}</span> s → <span class="ph">{fast}</span> s</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-show"><span class="kind">Show</span><span class="txt">Show the optimized body (<code>measures.dax</code>) next to the slow one</span></li>
+<li class="k-do"><span class="num">9</span><span class="kind">Click</span><span class="txt">DAX Studio › <code>perf_test.dax</code> block 1 <code>[Slow]</code> › <strong>Clear Cache then Run</strong></span></li>
+<li class="k-do"><span class="num">10</span><span class="kind">Click</span><span class="txt">Block 2 <code>[Fast]</code> › <strong>Clear Cache then Run</strong></span></li>
+<li class="k-post"><span class="kind">Edit</span><span class="txt">Caption: <span class="ph">{slow}</span> s → <span class="ph">{fast}</span> s</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The fix: filter only the two columns the condition needs. KEEPFILTERS keeps the filters that are already there, exactly like before. Same query, both versions, cold cache. <span class="ph">{slow}</span> seconds before. <span class="ph">{fast}</span> seconds after.</p><div class="wc">33 words · about 15 s spoken</div></div>
+</section><section class="scene" id="s6">
+<header><span class="badge" style="background:var(--s6)">6</span><span class="time">2:40–3:00</span><span class="dur">20 s · click 11</span><span class="screen">Block 3 (difference query): no rows.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">11</span><span class="kind">Click</span><span class="txt">Block 3 (difference query) › <strong>Run</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Results pane: no rows</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Faster is useless if the numbers change. This query compares both versions cell by cell. Zero rows. They match exactly.</p><div class="wc">20 words · about 9 s spoken</div></div>
+</section><section class="scene" id="s7">
+<header><span class="badge" style="background:var(--s7)">7</span><span class="time">3:00–3:30</span><span class="dur">30 s · clicks 12–13</span><span class="screen">Paste the optimized body into Big Line Sales (fx) › Enter. Click the same Country: the matrix redraws at once; the Big Line Sales (fx) card is unchanged.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">12</span><span class="kind">Click</span><span class="txt">Power BI › Big Line Sales (fx) formula bar › paste the optimized body › <strong>Enter</strong></span></li>
+<li class="k-do"><span class="num">13</span><span class="kind">Click</span><span class="txt">Country slicer › a fresh country</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Matrix redraws at once; <strong>Big Line Sales (fx)</strong> card unchanged</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Paste the new formula into the model. Same slicer, same click. Instant. And the total hasn't moved.</p><div class="wc">17 words · about 8 s spoken</div></div>
+</section><section class="scene" id="s8">
+<header><span class="badge" style="background:var(--s8)">8</span><span class="time">3:30–3:50</span><span class="dur">20 s · click 14</span><span class="screen">Block 4 (search query): the measures that contain FILTER.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">14</span><span class="kind">Click</span><span class="txt">DAX Studio › block 4 (search query) › <strong>Run</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point at the measure list</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">One last query lists every measure in the model that uses FILTER. On a client model, that list is the tune-up backlog.</p><div class="wc">22 words · about 10 s spoken</div></div>
+</section><section class="scene" id="s9">
+<header><span class="badge" style="background:var(--s9)">9</span><span class="time">3:50–4:05</span><span class="dur">15 s · no clicks</span><span class="screen">Closing card: <strong>Model tune-up · 3 to 5 days · $900</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-post"><span class="kind">Edit</span><span class="txt">Closing card</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">If your reports feel slow, it might be one line of DAX. A model tune-up takes three to five days.</p><div class="wc">20 words · about 9 s spoken</div></div>
+</section>
+<h2>After the take</h2><div class="grid2"><div class="box"><h3 style="margin:0 0 6px;font-size:13px">Reset for another take</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Close Power BI <strong>without saving</strong> › reopen <code>Slow Report Demo.pbix</code></span></li></ol></div>
+<div class="box"><h3 style="margin:0 0 6px;font-size:13px">Blur in post</h3><ul class="plain"><li>Account name in Desktop's top-right corner and in DAX Studio's connection bar; the SQL endpoint host if Transform data or Data source settings show it.</li></ul></div></div>
+<h2>Edit notes</h2><div class="box"><ul class="plain"><li><strong>Cut the waits.</strong> Scenes 1 and 3 each wait half a minute on a cold run. Keep the first two seconds of the spinner and the timer jump; drop the middle. The caption carries the real number.</li><li><strong>Scene 5 is the money shot.</strong> Both timings on one frame. If <span class="ph">{fast}</span> is under 0.1 s, say "a fraction of a second" instead of the number.</li><li><strong>Say the measured numbers, not the spec's.</strong> The spec expected 3–20 s; the shared 30 M-row data runs slower (accepted 2026-11-24). Fill every <code><span class="ph">{…}</span></code> from <code>perf_log.md</code>.</li><li>Never Ctrl+S during a take; reset = close without saving and reopen (guide § 4).</li></ul></div>
+</main></body></html>

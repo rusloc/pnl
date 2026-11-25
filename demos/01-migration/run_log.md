@@ -87,7 +87,7 @@ The Import model computes Net Amount from `raw_sales` in Power Query (`quantity 
 | `[Cost Amount (fx)]` | 13,680,398,573.72 = gold |
 | `[Last Order Date (fx)]` / `[Data As Of (fx)]` | 2026-10-31 / 2026-11-24 11:09:43 UTC |
 | Sales Amount by Price Band | Budget 637,441,473.99 · Mid 3,416,125,104.29 · Premium 15,423,011,272.33 = gold |
-| "Keep your Direct Lake data up to date" (§ 7 step 6) | not exposed by the API; confirm in the model's settings › Refresh (on by default) |
+| "Keep your Direct Lake data up to date" (§ 7 step 6) | not exposed by the API; USER checked the model settings › Refresh 2026-11-24: On (default) |
 | `Sales Import` data source | `Sql` · lh_sales_demo endpoint host · `lh_sales_demo`, bound 12:23 UTC to the cloud connection `demo-lh_sales_demo-sql` (`39817d5c-0b05-4b55-a12d-62024a5da24a`, created by the USER: shareable cloud, SQL, OAuth2, Organizational) |
 
 ### Import refresh, `Sales Import` (spec § 6 step 8)

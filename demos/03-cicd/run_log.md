@@ -8,7 +8,8 @@ Numbers from real runs only (ADR-0018). Demo-only IDs are allowed here; secrets 
 |---|---|
 | Run date | 2026-11-24 |
 | Capacity | `issglobalfabric`, F64, North Europe (`1bb7581b-5ed3-4e71-b22c-4501afea0ba4`), shared with workspace RAW |
-| Tenant Git settings (read 2026-11-24) | Git integration on; GitHub sync on; export to Git repos in other geographies **off** |
+| Tenant Git settings (read 2026-11-24) | Git integration on; GitHub sync on; export to Git repos in other geographies **off** (the GitHub connect succeeded with it off) |
+| Capacity XMLA endpoint | Read Write (USER, 2026-11-24) |
 
 ## Workspaces (spec § 6 step 2)
 
@@ -76,15 +77,54 @@ The USER amended Spec 3 to two stages (Development, Production; no Test). The fi
 | # | From → to | Items | Note | Server time | Result |
 |---|---|---|---|---|---|
 | 1 | Development → Production | `Sales CICD` model + report | "Initial deployment, Dev -> Prod pipeline" | 6.0 s (12:24:43.6–12:24:49.6 UTC) | Succeeded; diff 0 new, 0 different, 2 no difference |
+| 2 | Development → Production | `Sales CICD` model + report (selective) | "Apply Production parameter rules" | 7.4 s (16:32:21.6–16:32:29.0 UTC) | Succeeded; diff 0 new, 1 different (model), 1 no difference (report) |
 
 After deployment 1: Prod report still bound to the Prod model (`48f71404-…`); Prod model parameters still the Dev values (`WorkspaceId` `fa5ef562-…`, `LakehouseId` `e4c57cf0-…`) until the Production rules exist; not refreshed.
 
 ### Production rules (USER, portal; no API)
 
+Set by the USER on 2026-11-24 before deployment 2.
+
 | Parameter | Value |
 |---|---|
 | `WorkspaceId` | `f6a40758-3770-40de-bef8-cfbd9b811581` |
 | `LakehouseId` | `b36cf304-8037-4b8f-956c-12cb38ae1fa7` (Prod `lh_cicd_demo`, re-read 12:24 UTC) |
+
+### After deployment 2 (verified 2026-11-24)
+
+| Check | Result |
+|---|---|
+| Prod model parameters (Power BI REST `parameters`) | `WorkspaceId` = `f6a40758-…`, `LakehouseId` = `b36cf304-…`: the Production rules applied on deploy |
+| Reframe Prod model (enhanced refresh, full) | Completed, 16:32:54.7–16:33:00.5 UTC, 5.8 s |
+| `[Environment Name (fx)]`, Prod | `ws_cicd_demo_prod` |
+| `[Margin % (fx)]`, Prod | 0.66667 |
+| `[Sales Amount (fx)]` / `[Cost Amount (fx)]`, Prod | 39,693,347.19 / 23,815,959.96; `Sales` 50,000 rows. Same as Dev: the seed is hash-based per `sales_id`, so every stage writes the same rows; only `dim_environment` differs |
+| Prod report bound to the Prod model | yes (datasetId = `48f71404-…`, Prod workspace) |
+| Dev untouched | `[Environment Name (fx)]` = `ws_cicd_demo_dev`, parameters still the Dev IDs |
+
+## Git integration (spec § 6 steps 7–9, ADR-0018 amendment 4) 2026-11-24
+
+Done by the USER in the portal and on GitHub. Git is the source: local edit → GitHub → Dev Source control › Updates → pipeline Dev → Prod.
+
+| Field | Value |
+|---|---|
+| Repo | GitHub `rusloc/fabric-cicd-demo`, public |
+| Branch | `main` |
+| Git folder | blank: item folders at the repo root (not `workspace/`) |
+| Connected workspace | `ws_cicd_demo_dev` only (Prod is written by the pipeline only) |
+| Credential | fine-grained personal access token, this repo only, Contents Read and write (+ Metadata Read); held in Fabric's GitHub connection, not recorded here |
+| Local clone | `C:\__PBI\fabric-cicd-demo` (sibling of this repo, its own git repo; the USER runs its git) |
+
+| Time (UTC) | Commit | Message | By |
+|---|---|---|---|
+| 16:45 | — | `readme` | USER, on GitHub (so `main` exists) |
+| 16:46 | `8f05927` | `Committing 4 items from workspace <Dev workspace ID>` | Fabric, on connect |
+
+Repo root after connect: `Sales CICD.SemanticModel/`, `Sales CICD.Report/`, `lh_cicd_demo.Lakehouse/`, `nb_seed_sales.Notebook/`, `README.md`. The model is TMDL; the measures are in `Sales CICD.SemanticModel/definition/tables/_Measures.tmdl`, `Margin % (fx)` as written (÷ cost), same text as `pbi/Sales CICD/`.
+
+- Fabric made the first commit itself; the spec's § 6 step 8 manual commit was not run. Reason: Fabric writes a `.platform` file with a `logicalId` per item; pushing the local PBIP first would have clashed with the existing workspace items.
+- The first commit's message carries the Dev workspace ID, and the model's `definition/expressions.tmdl` carries the Dev workspace and lakehouse IDs (`WorkspaceId` / `LakehouseId`) in the public repo: blur in post, do not open that file on camera.
+- Clone files are CRLF on disk (checked 2026-11-24, `_Measures.tmdl` 38 / 38 lines).
 
 ## First deployment pipeline, three stages (deleted) 2026-11-24
 
@@ -157,6 +197,6 @@ Deployment rules have no public API (Fabric and Power BI REST; a probe of a stag
 
 ## Pending (later steps)
 
-- GitHub repo `rusloc/fabric-cicd-demo` (USER) and Dev → Git connection, folder `workspace`
-- Production parameter rules (USER, portal), redeploy Dev → Production, reframe, Environment = ws_cicd_demo_prod, Margin % (fx) 0.6667
-- Seconds per deployment
+- ~~GitHub repo `rusloc/fabric-cicd-demo` (USER) and Dev → Git connection, folder `workspace`~~ done 2026-11-24, folder blank = repo root (Git integration, amendment 4)
+- ~~Production parameter rules (USER, portal), redeploy Dev → Production, reframe, Environment = ws_cicd_demo_prod, Margin % (fx) 0.6667~~ done 2026-11-24 (deployment 2)
+- Seconds per Update all and per deployment of the recording run

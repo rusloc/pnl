@@ -4,8 +4,8 @@ USER click guide for rehearsal and recording. Spec: `.log/reports/Spec 1 · Powe
 
 ## 1. Prerequisites still open
 
-- [ ] **XMLA Read Write on the capacity** (needed for Desktop live edit and for creating a Direct Lake model from Desktop). Admin portal › Capacity settings › Fabric capacity › `issglobalfabric` › Power BI workloads › XMLA Endpoint = **Read Write** › Apply. The tenant XMLA setting is already on (`run_log.md` › Environment).
-- [ ] **Automatic updates on `Sales Direct Lake`** (spec § 7 step 6; the API cannot read it). `ws_migration_demo` › `Sales Direct Lake` (semantic model) › … › Settings › Refresh › **Keep your Direct Lake data up to date** = On › Apply.
+- [x] **XMLA Read Write on the capacity** (USER, 2026-11-24) (needed for Desktop live edit and for creating a Direct Lake model from Desktop). Admin portal › Capacity settings › Fabric capacity › `issglobalfabric` › Power BI workloads › XMLA Endpoint = **Read Write** › Apply. The tenant XMLA setting is already on (`run_log.md` › Environment).
+- [x] **Automatic updates on `Sales Direct Lake`** (USER, 2026-11-24: already On) (spec § 7 step 6; the API cannot read it). `ws_migration_demo` › `Sales Direct Lake` (semantic model) › … › Settings › Refresh › **Keep your Direct Lake data up to date** = On › Apply.
 - [ ] **Cloud connection `demo-lh_sales_demo-sql`** for `Sales Import` (spec § 6 step 8):
   1. `ws_migration_demo` › `Sales Import` (semantic model) › … › Settings › **Gateway and cloud connections**.
   2. Under Cloud connections, row of the SQL data source › Maps to › **Create a connection**.

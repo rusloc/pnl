@@ -21,7 +21,7 @@ The USER needs all assets of three demo cases built so that the videos can be re
 | d | Build mode | Hybrid. Agents build everything that is code (notebooks, TMDL, PBIR, DAX tests, guides) and deploy / verify through Fabric APIs and `fab`. The USER does sign-ins (data source OAuth, GitHub connection), consents and the on-camera clicks. Desktop-only spec steps get a click guide. |
 | e | Files | PBIP (TMDL + PBIR) is the source of truth in `demos/`. The spec-named `.pbix` files are saved by the USER locally from the PBIP and stay out of git (`*.pbix` is already ignored). |
 | f | Specs 1 + 2 data | One shared `lh_sales_demo` built to Spec 1 (30 M rows, 31 discount levels). Spec 2 runs on it; if its slow query is outside 3–20 s, tune per Spec 2 § 8 (report side first), and log it in `perf_log.md`. |
-| g | Spec 3 Git | GitHub instead of Azure DevOps: repo `rusloc/fabric-cicd-demo`, branch `main`, folder `workspace`. Separate from this repo (Fabric commits into it). |
+| g | Spec 3 Git | GitHub instead of Azure DevOps: repo `rusloc/fabric-cicd-demo`, branch `main`, folder `workspace`. Separate from this repo (Fabric commits into it). Flow, folder and first commit changed: see amendment 4. |
 | h | Spec 3 Part C | Not built. Kept as a written recipe in the guide (GitHub Actions instead of `azure-pipelines.yml`); no service principal, secret or tenant change now. |
 | i | Order | Spec 1 → Spec 2; Spec 3 in parallel. |
 
@@ -35,6 +35,15 @@ Spec 3 runs **Dev → Prod only, no Test**. `dp_cicd_demo` is recreated with two
 - Spec 1 § 10 check 4b: the Direct Lake report's Price Band and Channel slicers show "(Blank)" (Direct Lake blank member on every dimension; values identical). **Accepted as is**, no slicer filter.
 - Spec 2 § 8: Slow 25–33 s on the service F64 (gate 3–20 s), Fast ~0.8 s net, 31–42× net, difference query 0 rows. **Accepted with the current tests**; no tuning, page stays Brand × Year Month.
 - Spec 1 layout: line-chart month labels truncated and the Country × Year matrix clipped (scrollbars). **Accepted as is**, no layout change.
+
+### Amendment 4 2026-11-24 (USER): Spec 3, Git is the source
+Spec 3's flow is reversed. A change starts in Git: local edit of the TMDL → commit + push to GitHub `rusloc/fabric-cicd-demo` (public, `main`) → `ws_cicd_demo_dev` › Source control › **Updates** › Update all → `dp_cicd_demo` Deploy Dev → Prod. This replaces the spec's edit in the browser (Open data model) and commit from workspace Source control (§ 2 steps 1–2, § 9 steps 2–4).
+- Git folder blank: item folders sit at the repo root, not in `workspace/` (replaces decision g's folder).
+- Fabric made the first commit itself on connect (it writes `.platform` files with logicalIds; pushing the local PBIP first would clash with the existing workspace items). Spec § 6 step 8 is not run.
+- Live demo repo: local clone `C:\__PBI\fabric-cicd-demo`, a sibling of this repo and its own git repo, managed from this repo's sessions as files; the USER runs its git. `demos/03-cicd/pbi/Sales CICD/` stays the build source and backup; the two are not synced.
+- Rules: never edit the model in Fabric between takes (Git conflict); reset = the reverse edit, pushed the same way; measure-only deploys need no reframe. Feature branch + pull request is an optional variant (guide).
+- Spec § 10 wording: check 1 "repo root holds four item folders"; check 4 "one incoming change under Updates"; check 5 "GitHub commit diff = the local one-line change, nothing else".
+- Done (USER): fine-grained token on this repo only (Contents Read and write), Dev Git connect, Production parameter rules, XMLA Read Write on the capacity (§ 4 first item, capacity side). Blur in post: Fabric's first commit message (Dev workspace ID), tenant and account names.
 
 ## 3. Consequences
 

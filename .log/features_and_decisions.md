@@ -41,6 +41,8 @@ TODO: lock North Star
 
 - **2026-11-01 — Engine view-model dump as the parity oracle:** a read-only Node script dumps the Track C engine view-model for a set of selections, and the Power BI side is compared against it (bip used it for Mirelo: 60 + 244 + 58 checks). Candidate for hunter's harness. Also: a model-review check that display names are unique or that visuals group by key (CAND-040).
 
+- **2026-11-24 — Run-sheet generator in the repo:** move the script that builds `demos/0{1,2,3}-*/run-sheet.html` from each `script.md` + guide § 4 out of the session scratchpad into `demos/tools/`, so the sheets can be rebuilt after the `{placeholders}` are filled.
+
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
 - **2026-10-21** — This repo delivers assets only; vosk.dev embedding lives in a separate repo. (ADR-0001)
@@ -139,6 +141,13 @@ TODO: lock North Star
 - **2026-11-17** — **USER: every view page of the P&L report is 16:9**, 1280 × 720 FitToPage; tooltip pages exempt. #decision
 - **2026-11-17** — **USER: new sub-agent `aid`** (Fabric data agents, AI-ready data) with skills `fabric-data-agent`, `optima`; roster target 8 → 9. #decision
 - **2026-11-17** — **USER: undo the Desktop save's visual changes** on the repo P&L PBIP (statement headers, auto-size, concentration legend), then re-pack. #decision
+- **2026-11-24** — **ADR-0018 Accepted** (three Fabric demo cases for video): `demos/` in this repo, Spark only for `demos/`, dev F64 `issglobalfabric`, GitHub `rusloc/fabric-cicd-demo` instead of Azure DevOps, hybrid build, PBIP in the repo + PBIX local, Specs 1 + 2 share `lh_sales_demo`, Spec 3 Part C not built. #adr
+- **2026-11-24** — **USER: every demo measure ends in " (fx)" and lives in `_Measures`** (all 4 models; the spec's measure `Cost Amount` clashed with the column, amendment 1). #decision
+- **2026-11-24** — **USER: Spec 3 runs Dev → Prod only**, no Test stage (amendment 2). #decision
+- **2026-11-24** — **USER: accepted as is:** DL "(Blank)" slicer item, Spec 2 timing 25–33 s (spec said 3–20 s), Spec 1 layout clipping (amendment 3). #decision
+- **2026-11-24** — **ADR-0018 amendment 4: Git is the source for case 3:** local TMDL edit → push → Dev Source control › Update all → pipeline Deploy Dev → Prod; items at the repo root; reset = reverse push. #adr #decision
+- **2026-11-24** — **USER: two separate folders / repos** (`C:\__PBI\PNL` main, `C:\__PBI\fabric-cicd-demo` demo clone managed from PNL via `additionalDirectories`; git in both by the USER). #decision
+- **2026-11-24** — **USER: tenant / account / IDs blurred in post-production**, not hidden on screen. #decision
 
 ## Features
 ### Planned
@@ -164,6 +173,7 @@ TODO: lock North Star
 - **P&L PBI performance — ADR-0017 follow-ups (2026-11-16):** USER rules on static statement format strings (~3 s, "−0.0" vs the web's "0.0") and on P2 (ginee: CC long form + volume driver + aggregate, `lh_raw` reload, ~2–3.5 d) vs accepting 6–8 s; P3 (service update + query caching) at publish.
 - **PBI web sync — follow-ups (2026-11-16):** USER yes for the `lh_raw` reload (unrounded allocation, `RANGE` view) + model refresh; USER click-tests of both reports; Nordmark Performance Analyzer; first open + save of the P&L in Desktop.
 - **P&L Profitability — follow-ups (2026-11-17):** USER click-test (ⓘ × 4, How to read, Δ header card, Commerce Cloud, range > 12 months) without saving; zero-rule format decision shared with ADR-0017 (a); bip fixes `tools/phase2-web-sync/gen_report.py` (broken since 11-17 00:21) and the gap doc § 12.2 cache sentence.
+- **Fabric demo cases — follow-ups (2026-11-24, ADR-0018):** USER rehearsals (case 1 append-day run; case 2 Desktop + DAX Studio → `perf_log.md`; case 3 Git-first loop, deploy seconds into `run_log.md`); fill the `{placeholders}` in the three `script.md` and rebuild the run sheets; align case 2 scene 7 wording; record + blur in post (tenant / account, IDs in URLs, GitHub user, Fabric's first commit message, `expressions.tmdl`).
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -223,3 +233,5 @@ TODO: lock North Star
 - **2026-11-16** — **P&L + Nordmark Exec PBI synced to the vosk.dev build specs:** P&L 4 pages + 2 tooltip pages, 56 bookmarks, oracle 4,515 / goldens 1,342 / control totals 867 rows TRUE (web oracle 4,514 rows, 0 gaps); Nordmark one page 1280 × 720 + Explain, 31 bookmarks, 470 measures, control totals 50,390 + web-sync 3,539 rows TRUE (oracle 1,620 rows, 0 gaps); validator 0 / 0; packs `.sync/{pnl,nordmark-exec}/power-bi/` re-packed and checked on fresh data-gen output; hand-off `.sync/2026-11-16-pbi-web-sync.md`. Loader / pack generator: unrounded allocation (`lh_raw` reload pending). Uncommitted at close.
 - **2026-11-16** — **ADR-0017 P0 + P1:** `LV Delta Bar` off, `_Win` once, literal selection defaults, entity fast path, profitability visual filter removed; P&L page-cold statement 22.9 → 6.4 s, Vitals 6.2 → 1.6 s, Analysis 21.1 → 7.6 s, Profitability 36.9 → 2.4 s; 316 measures, no renames, Track A probe identical. Uncommitted at close. Committed `c9b44d6` (2026-11-18).
 - **2026-11-17** — **P&L Profitability rebuilt to the vosk.dev spec of 2026-11-17** (one page, combo "Revenue and margin by month / quarter" via `dim_combo_period`, CM status icons, region × category heatmap); all four views 1280 × 720; 152 visuals, 321 measures; tests 117 (§ 8) / 4,515 / 1,342 / 867 rows TRUE; page-cold 3.5 s; validator 0 / 0; pack `.sync/pnl/power-bi/` re-issued 2026-11-18 (scratch 3,536 rows TRUE). Committed `c9b44d6` (2026-11-18).
+- **2026-11-24** — **Fabric demo cases 1–3 built (ADR-0018), pending USER rehearsal + recording:** `ws_migration_demo` (`lh_sales_demo` 30 M rows, notebooks, `Sales Import` refresh 295 s = `Sales Direct Lake` framing 5.2 s = gold), `Slow Report Demo` (Slow 25.7–33.0 s vs Fast ~0.8 s, 0 differences), `ws_cicd_demo_{dev,prod}` + `dp_cicd_demo` (Production parameter rules applied, Prod reads its own lakehouse, deploy 7.4 s), Dev Git-connected to `rusloc/fabric-cicd-demo`; 4 PBIPs + tests, guides, run logs, SDD v1.2. Committed `3aa1786` (build); amendment 4 and the rest uncommitted at close.
+- **2026-11-24** — **Video scripts + HTML run sheets (draft v0.1):** `demos/0{1,2,3}-*/script.md` (4:30 / 4:05 / 3:15, voice-over per scene, numbers as `{placeholders}`) and `run-sheet.html` (timeline, numbered on-camera clicks 12 / 14 / 13, off-camera checklist, reset, blur). Uncommitted at close.

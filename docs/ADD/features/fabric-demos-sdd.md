@@ -1,6 +1,6 @@
 # SDD — Fabric demo cases (migration, slow report, CI/CD)
 
-- **Status:** draft v1.1, 2026-11-24 (main agent). Decisions: ADR-0018 (+ amendments: (fx) measures in `_Measures`; Spec 3 Dev → Prod only).
+- **Status:** draft v1.2, 2026-11-24 (main agent; v1.2 by bip). Decisions: ADR-0018 (+ amendments: (fx) measures in `_Measures`; Spec 3 Dev → Prod only; accepted first-run results; amendment 4: Spec 3 Git is the source).
 - **Specs (contract, read first):** `.log/reports/Spec 1 · …`, `Spec 2 · …`, `Spec 3 · …` (2026-11-23). This SDD adds only *how we build*; names, data, DAX, steps and acceptance checks are the specs'. Where the SDD and a spec disagree, the spec wins unless ADR-0018 says otherwise.
 - **Goal:** every acceptance check of the three specs ticked, so the USER can rehearse and record three ~2.5-minute videos.
 
@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | 1 Migration | New data in Direct Lake in seconds; Import waits for a refresh | `ws_migration_demo`: `lh_sales_demo`, `nb_01_build_sales_demo`, `nb_02_append_day`, models + reports `Sales Import`, `Sales Direct Lake` | ginee (workspace, lakehouse, notebooks, deploys, refresh), bip (both models' logical layer, report, DAX checks) | data-source OAuth for the Import model; Desktop click-through of the Direct Lake creation (rehearsal); recording |
 | 2 Slow report | One `FILTER ( Sales, … )` measure; fixed live, ≥ 10× faster | reuses `lh_sales_demo`; local `Slow Report Demo` PBIP / PBIX | bip (model, measures, page, `measures.dax`, `perf_test.dax`, first timings) | opens the PBIP in Desktop, saves the PBIX, DAX Studio run, recording |
-| 3 CI/CD | Measure fix Dev → Prod via Git commit + Deploy (no Test stage, USER 2026-11-24) | `ws_cicd_demo_{dev,prod}`, `lh_cicd_demo` × 3, `nb_seed_sales`, `Sales CICD` model + report, pipeline `dp_cicd_demo`; GitHub `rusloc/fabric-cicd-demo` | ginee (workspaces, lakehouse, notebook, deploy, pipeline, Git wiring), bip (model with M parameters, report) | creates the GitHub repo + connects Git (PAT / OAuth); deployment rules (owner only); recording |
+| 3 CI/CD | Measure fix in a local clone → push to GitHub → Dev Update all → Deploy to Prod (Git is the source, amendment 4; no Test stage) | `ws_cicd_demo_{dev,prod}`, `lh_cicd_demo` × 2, `nb_seed_sales`, `Sales CICD` model + report, pipeline `dp_cicd_demo`; GitHub `rusloc/fabric-cicd-demo` (items at the repo root), clone `C:\__PBI\fabric-cicd-demo` | ginee (workspaces, lakehouse, notebook, deploy, pipeline, Git wiring), bip (model with M parameters, report, the guide's TMDL edit) | GitHub repo, token, Git connect, clone (done); deployment rules (owner only, done); git commands in the clone; recording |
 
 ## 2. Repo layout
 
@@ -33,6 +33,10 @@ demos/
     pbi/Sales CICD/                 → PBIP: Direct Lake on OneLake with M parameters WorkspaceId / LakehouseId
     guide.md                        → parts A, B (+ part C recipe, not built)
     run_log.md
+
+C:\__PBI\fabric-cicd-demo\          → live demo repo (sibling of this repo, own git; clone of GitHub rusloc/fabric-cicd-demo):
+                                      Sales CICD.SemanticModel, Sales CICD.Report, lh_cicd_demo.Lakehouse, nb_seed_sales.Notebook, README.md
+                                      at the root; edited as files from this repo's sessions, git run by the USER; not synced with pbi/Sales CICD/
 ```
 
 Rules: names exactly as in the specs; PBIP is the source, `.pbix` stays local (ADR-0018 e); no workspace / item / tenant IDs in committed files except `run_log.md`. Those are demo-only IDs, and the specs require them there. Credentials never.
@@ -53,12 +57,12 @@ Rules: names exactly as in the specs; PBIP is the source, `.pbix` stays local (A
 3. USER: open the PBIP in Desktop, refresh locally, save `Slow Report Demo.pbix` + `- fixed.pbix`, DAX Studio Server Timings on the PBIX → `perf_log.md` (§ 8 checks 4–6, machine CPU / RAM).
 
 ### Case 3 (in parallel with case 1)
-1. ginee: create the three workspaces + `lh_cicd_demo` in Dev, `nb_seed_sales` (spec § 5), run → verify: counts 1 / 365 / 50 / 50,000, `dim_environment` = `ws_cicd_demo_dev`.
+1. ginee: create the workspaces (three; Test later dropped, amendment 2) + `lh_cicd_demo` in Dev, `nb_seed_sales` (spec § 5), run → verify: counts 1 / 365 / 50 / 50,000, `dim_environment` = `ws_cicd_demo_dev`.
 2. bip: `Sales CICD` PBIP: Direct Lake on OneLake with `WorkspaceId` / `LakehouseId` M parameters (spec § 6 step 5), four tables, five measures (Margin % wrong on purpose), report page (§ 5) → ginee deploys to Dev → verify: Margin % ≈ 66.7 %, Environment = dev.
-3. USER: create `rusloc/fabric-cicd-demo` (README, `main`), connect Dev to GitHub (folder `workspace`), first commit → verify: four item folders, model as TMDL.
+3. USER: create `rusloc/fabric-cicd-demo` (README, `main`), fine-grained token (this repo, Contents Read and write), connect Dev to GitHub with the Git folder blank; Fabric makes the first commit on connect; clone to `C:\__PBI\fabric-cicd-demo` → verify: four item folders at the repo root, model as TMDL. **Done 2026-11-24** (amendment 4; `run_log.md` › Git integration).
 4. ginee: create `dp_cicd_demo` with two stages (Development, Production), assign Dev + Prod, deploy Dev → Prod → verify: spec § 7 step 3 checkpoint (PBIR report deploys?) — **stop and ask the USER if not**.
 5. ginee + USER: seed Prod, parameter rules on Production (USER, no API), redeploy, reframe → Environment = prod → verify: § 10 checks 2, 3, 6, 7 (stages = Dev, Prod).
-6. Rehearsal of the change-and-revert loop twice → § 10 checks 4, 5, 8, 9, 10.
+6. Rehearsal of the change-and-revert loop twice (local edit of `_Measures.tmdl` → push → Dev Source control › Updates › Update all → Deploy to Prod; reset = the reverse push) → § 10 checks 4, 5, 8, 9, 10.
 
 ## 4. Risks
 
@@ -70,11 +74,13 @@ Rules: names exactly as in the specs; PBIP is the source, `.pbix` stays local (A
 | SQL endpoint sync lag | Import refresh misses the new day on camera | spec § 9: wait a minute, refresh the endpoint |
 | Spark / big refresh on the shared F64 | CU contention with RAW (P&L model) | run big jobs off-hours; one at a time |
 | Direct Lake via API vs via Desktop | the video shows a Desktop flow never rehearsed | `guide.md` click-through rehearsal by the USER before recording |
+| Spec 3 model edited in Fabric between takes | Git conflict under Source control, take breaks | edit only in the clone; reset = the reverse push (amendment 4) |
+| Spec 3 public repo shows demo IDs (first commit message, `expressions.tmdl`) | IDs on camera | blur in post; never open `expressions.tmdl` on camera |
 
 ## 5. USER inputs needed
 
 1. OAuth sign-in on the `Sales Import` (and `Slow Report Demo` service copy, if used) data source.
-2. GitHub repo `rusloc/fabric-cicd-demo` + Fabric Git connection.
-3. Deployment rules in Test / Prod if the API cannot create them.
+2. GitHub repo `rusloc/fabric-cicd-demo` + Fabric Git connection + local clone (done 2026-11-24); the git commands in the clone during rehearsal and recording.
+3. Deployment rules in Prod (no API; set by the USER 2026-11-24).
 4. The 30 M run after green 300 k checks is covered by "start building" (ADR-0018 c). Consent is still needed for the 60 M rebuild and before any delete or overwrite of an existing item.
 5. Recording: rehearsal per `guide.md`, timings into the run logs.

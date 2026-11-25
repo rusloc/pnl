@@ -1,0 +1,125 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case 1 run sheet</title><style>
+:root{--bg:#f7f7f5;--panel:#ffffff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e3e3e0;--accent:#2f6fde;
+--do:#2f6fde;--wait:#b7791f;--show:#2f855a;--post:#805ad5;--if:#c53030;--ph:#fff4d6;--phink:#7a5200;
+--s1:#3b82f6;--s2:#10b981;--s3:#f59e0b;--s4:#ef4444;--s5:#8b5cf6;--s6:#06b6d4;--s7:#ec4899;--s8:#84cc16;--s9:#f97316;--s10:#64748b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}}
+:root[data-theme="dark"]{--bg:#121214;--panel:#1c1c1f;--ink:#ececef;--muted:#9a9aa2;--line:#2c2c31;--accent:#7aa7ff;
+--do:#7aa7ff;--wait:#e0b04f;--show:#5fcf93;--post:#b597f5;--if:#f08080;--ph:#3a3020;--phink:#f3d28a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sub{color:var(--muted);margin:0 0 4px}.claim{font-size:17px;margin:12px 0 0}
+code{font:13px/1.3 ui-monospace,Consolas,monospace;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 4px;border-radius:4px}
+.ph{background:var(--ph);color:var(--phink);border-radius:4px;padding:0 3px;font-weight:600}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.stat b{display:block;font-size:20px}.stat span{color:var(--muted);font-size:12px}
+.timeline{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 6px;border-bottom:1px solid var(--line)}
+.bar{display:flex;height:42px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;text-decoration:none;min-width:0;border-right:1px solid rgba(255,255,255,.35)}
+.seg:hover{filter:brightness(1.1)}.seg span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
+.ticks{position:relative;height:18px;font-size:11px;color:var(--muted)}.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}.ticks span.cap{color:var(--if);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+ol.steps{list-style:none;margin:0;padding:0}ol.steps li{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:22px;border-radius:11px;background:var(--do);color:var(--panel);font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+li:not(.k-do) .kind{margin-left:34px}
+.kind{flex:0 0 44px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.k-do .kind{color:var(--do)}.k-wait .kind{color:var(--wait)}.k-show .kind{color:var(--show)}.k-post .kind{color:var(--post)}.k-if .kind{color:var(--if)}
+.k-if .txt,.k-post .txt{color:var(--muted)}
+.scene{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;scroll-margin-top:90px}
+.scene header{grid-column:1/-1;display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.badge{color:#fff;font-weight:800;border-radius:8px;padding:3px 10px}.time{font-variant-numeric:tabular-nums;font-weight:700}
+.dur{color:var(--muted);font-size:13px}.screen{color:var(--muted);font-size:13px;flex:1;min-width:0}
+.col{padding:12px 16px}.col+.col{border-left:1px solid var(--line)}
+.col h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vo{font-size:17px;line-height:1.55;margin:0}.vo::before{content:"“"}.vo::after{content:"”"}
+.wc{color:var(--muted);font-size:12px;margin-top:8px}
+ul.plain{margin:0;padding-left:18px}ul.plain li{margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle{float:right;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit;font-size:13px}
+@media (max-width:760px){.scene{grid-template-columns:1fr}.col+.col{border-left:0;border-top:1px solid var(--line)}.grid2{grid-template-columns:1fr}.seg span{display:none}.vo{font-size:16px}}
+@media print{.timeline{position:static}.toggle{display:none}}
+</style></head><body><main>
+<button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=(r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark'">Theme</button>
+<h1>Case 1 · Power BI to Fabric migration</h1>
+<p class="sub">Run sheet · built from <code>demos/01-migration/script.md</code> and <code>guide.md</code> § 4 · <strong>draft v0.1</strong> (2026-11-24) · target <strong>4:30</strong> (hard cap 5:00) · voice-over about 380 words (about 2:50 spoken); the rest is on-screen action, waits and pauses.</p>
+<p class="claim"><strong>The one claim:</strong> after migration, new data shows up in seconds, with no refresh to wait for.</p>
+<div class="stats"><div class="stat"><b>4:30</b><span>target length</span></div>
+<div class="stat"><b>10</b><span>scenes</span></div><div class="stat"><b>12</b><span>on-camera clicks</span></div>
+<div class="stat"><b>378</b><span>voice-over words (~2:48 spoken)</span></div>
+<div class="stat"><b>0:30</b><span>spare to the 5:00 cap</span></div></div>
+<div class="timeline"><div class="bar"><a class="seg" href="#s1" style="width:6.667%;background:var(--s1)" title="Scene 1 · 0:00–0:20"><span>1</span></a><a class="seg" href="#s2" style="width:6.667%;background:var(--s2)" title="Scene 2 · 0:20–0:40"><span>2</span></a><a class="seg" href="#s3" style="width:8.333%;background:var(--s3)" title="Scene 3 · 0:40–1:05"><span>3</span></a><a class="seg" href="#s4" style="width:5.000%;background:var(--s4)" title="Scene 4 · 1:05–1:20"><span>4</span></a><a class="seg" href="#s5" style="width:5.000%;background:var(--s5)" title="Scene 5 · 1:20–1:35"><span>5</span></a><a class="seg" href="#s6" style="width:25.000%;background:var(--s6)" title="Scene 6 · 1:35–2:50"><span>6</span></a><a class="seg" href="#s7" style="width:10.000%;background:var(--s7)" title="Scene 7 · 2:50–3:20"><span>7</span></a><a class="seg" href="#s8" style="width:10.000%;background:var(--s8)" title="Scene 8 · 3:20–3:50"><span>8</span></a><a class="seg" href="#s9" style="width:8.333%;background:var(--s9)" title="Scene 9 · 3:50–4:15"><span>9</span></a><a class="seg" href="#s10" style="width:5.000%;background:var(--s10)" title="Scene 10 · 4:15–4:30"><span>10</span></a><div style="width:10.000%;background:repeating-linear-gradient(45deg,transparent 0 6px,var(--line) 6px 8px)" title="spare until the 5:00 cap"></div></div><div class="ticks"><span style="left:0">0:00</span><span style="left:10.000%">0:30</span><span style="left:20.000%">1:00</span><span style="left:30.000%">1:30</span><span style="left:40.000%">2:00</span><span style="left:50.000%">2:30</span><span style="left:60.000%">3:00</span><span style="left:70.000%">3:30</span><span style="left:80.000%">4:00</span><span style="left:90.000%">4:30</span><span class="cap" style="right:0;transform:none">5:00 cap</span></div><div class="legend"><span><i style="background:var(--do)"></i>Click</span><span><i style="background:var(--wait)"></i>Wait</span><span><i style="background:var(--show)"></i>Show</span><span><i style="background:var(--post)"></i>Edit</span><span><i style="background:var(--if)"></i>If</span><span><span class="ph">{…}</span> fill from the recorded run</span></div></div>
+<h2>Before you press record (off camera)</h2><div class="box"><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Fabric › <code>ws_migration_demo</code> › open report <strong>Sales Import</strong> (browser window 1)</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt">Open report <strong>Sales Direct Lake</strong> (window 2) › snap both side by side</span></li>
+<li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Click through both reports once (warm cache)</span></li>
+<li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">Open <code>nb_02_append_day</code> › <strong>Connect</strong> › wait until the Spark session is ready</span></li>
+<li class="k-do"><span class="num">5</span><span class="kind">Click</span><span class="txt">Desktop: open <code>Sales Import.pbix</code> (B-roll) · Fabric tab: <code>nb_01_build_sales_demo</code> at cell 3</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Check: both reports match; <code>Sales Import</code> refreshed after the last data change</span></li>
+<li class="k-do"><span class="num">6</span><span class="kind">Click</span><span class="txt">Stopwatch overlay on › start recording</span></li></ol></div>
+<h2>Scenes</h2><section class="scene" id="s1">
+<header><span class="badge" style="background:var(--s1)">1</span><span class="time">0:00–0:20</span><span class="dur">20 s · no clicks</span><span class="screen">Split screen: <code>Sales Import</code> (grey bar) left, <code>Sales Direct Lake</code> (green bar) right. Cards match: Sales Amount (fx) <span class="ph">{≈ $19,476,577,851}</span>, Order Lines (fx) <span class="ph">{≈ 30,000,000}</span>, Last Order Date (fx) <span class="ph">{≈ 31 Oct 2026}</span>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-show"><span class="kind">Show</span><span class="txt">Hold the split screen 3–4 s</span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Hover the four cards left, then right</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Same report, same thirty million order lines, built twice. On the left, a classic Power BI Import model. On the right, the same report after migration to Microsoft Fabric, running on Direct Lake. Right now the numbers match. Let's see what happens when new data arrives.</p><div class="wc">46 words · about 20 s spoken</div></div>
+</section><section class="scene" id="s2">
+<header><span class="badge" style="background:var(--s2)">2</span><span class="time">0:20–0:40</span><span class="dur">20 s · click 1</span><span class="screen"><code>nb_02_append_day</code> › Run all › output <code>Appended 50,000 lines for 2026-11-01</code>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Switch to the <code>nb_02_append_day</code> tab › <strong>Run all</strong></span></li>
+<li class="k-wait"><span class="kind">Wait</span><span class="txt">Output: <code>Appended 50,000 lines for 2026-11-01</code></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Note the finish time (start of the Direct Lake clock)</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">This notebook is our nightly load. It writes one new day, fifty thousand order lines, into the lakehouse.</p><div class="wc">18 words · about 8 s spoken</div></div>
+</section><section class="scene" id="s3">
+<header><span class="badge" style="background:var(--s3)">3</span><span class="time">0:40–1:05</span><span class="dur">25 s · click 2</span><span class="screen">Right report › Refresh: Last Order Date (fx) 01 Nov 2026, Order Lines (fx) <span class="ph">{≈ 30,050,000}</span>, Data As Of (fx) = now. Caption: <strong>Direct Lake: <span class="ph">{n}</span> s</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt">Window 2 (<strong>Sales Direct Lake</strong>) › report toolbar <strong>Refresh</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point: Last Order Date (fx) › Order Lines (fx) › Data As Of (fx)</span></li>
+<li class="k-if"><span class="kind">If</span><span class="txt">No change after 60 s: <code>Sales Direct Lake</code> (model) › <strong>Refresh now</strong> once</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Refresh the Direct Lake report, and the new day is already there. Last order date, line count, timestamp: all updated within seconds. Direct Lake doesn't copy the data. It reads the Delta tables in OneLake and simply picks up the new version.</p><div class="wc">42 words · about 19 s spoken</div></div>
+</section><section class="scene" id="s4">
+<header><span class="badge" style="background:var(--s4)">4</span><span class="time">1:05–1:20</span><span class="dur">15 s · click 3</span><span class="screen">Left report › Refresh: nothing changes.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">3</span><span class="kind">Click</span><span class="txt">Window 1 (<strong>Sales Import</strong>) › <strong>Refresh</strong></span></li>
+<li class="k-show"><span class="kind">Show</span><span class="txt">Point at the unchanged cards</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The Import report still shows yesterday. It holds its own copy of the data, and that copy is only as fresh as its last refresh.</p><div class="wc">25 words · about 11 s spoken</div></div>
+</section><section class="scene" id="s5">
+<header><span class="badge" style="background:var(--s5)">5</span><span class="time">1:20–1:35</span><span class="dur">15 s · clicks 4–5</span><span class="screen">Workspace › <code>Sales Import</code> (semantic model) › Refresh now. Stopwatch starts.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-wait"><span class="kind">Wait</span><span class="txt">About 1 min after the notebook finished (SQL endpoint sync)</span></li>
+<li class="k-do"><span class="num">4</span><span class="kind">Click</span><span class="txt">Workspace › <code>Sales Import</code> (semantic model) › <strong>…</strong> › <strong>Refresh now</strong></span></li>
+<li class="k-do"><span class="num">5</span><span class="kind">Click</span><span class="txt">Start the stopwatch</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">So let's refresh it. All thirty million rows get copied again. While that runs, here's what actually changes in a migration.</p><div class="wc">21 words · about 9 s spoken</div></div>
+</section><section class="scene" id="s6">
+<header><span class="badge" style="background:var(--s6)">6</span><span class="time">1:35–2:50</span><span class="dur">75 s · clicks 6–10</span><span class="screen">B-roll, stopwatch in the corner (time-lapse): Power Query › Customer (Merged Columns), Sales (Added Net Amount, Added Cost Amount); Product › <strong>Price Band</strong> column formula; <strong>Date</strong> table formula; then <code>nb_01_build_sales_demo</code> cell 3.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-do"><span class="num">6</span><span class="kind">Click</span><span class="txt">Desktop › <strong>Transform data</strong> › query <strong>Customer</strong> › step <em>Merged Columns</em></span></li>
+<li class="k-do"><span class="num">7</span><span class="kind">Click</span><span class="txt">Query <strong>Sales</strong> › steps <em>Added Net Amount</em>, <em>Added Cost Amount</em> › Close</span></li>
+<li class="k-do"><span class="num">8</span><span class="kind">Click</span><span class="txt">Table view › <strong>Product</strong> › column <strong>Price Band</strong> (formula bar)</span></li>
+<li class="k-do"><span class="num">9</span><span class="kind">Click</span><span class="txt">Table view › <strong>Date</strong> (formula bar: calculated table)</span></li>
+<li class="k-do"><span class="num">10</span><span class="kind">Click</span><span class="txt">Fabric › <code>nb_01_build_sales_demo</code> › scroll to <strong>cell 3</strong></span></li>
+<li class="k-post"><span class="kind">Edit</span><span class="txt">Time-lapse the refresh; stopwatch stays in the corner; tag “sped up”</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The Import model does its shaping inside Power BI. Power Query merges first and last names and adds net and cost amounts. A DAX column sorts products into price bands. A DAX table builds the calendar. Direct Lake tables have no Power Query, so that logic moves upstream. One notebook cell now does all of it, once, in the lakehouse, and every model that reads these tables gets the same result. For bigger models, Semantic Link Labs can script this migration. Here every step was done by hand, so you can see it.</p><div class="wc">93 words · about 41 s spoken</div></div>
+</section><section class="scene" id="s7">
+<header><span class="badge" style="background:var(--s7)">7</span><span class="time">2:50–3:20</span><span class="dur">30 s · no clicks</span><span class="screen">Overlay card, four rows: Refresh · Editing · First query · Licence (Import vs Direct Lake).</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-post"><span class="kind">Edit</span><span class="txt">Overlay card: Refresh · Editing · First query · Licence</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">A few more things change. Refresh becomes framing: reading metadata, in seconds. You edit the model live in the workspace instead of a local file. The first query after a change is a bit slower, because columns load from OneLake on demand. And Direct Lake needs a Fabric capacity.</p><div class="wc">49 words · about 22 s spoken</div></div>
+</section><section class="scene" id="s8">
+<header><span class="badge" style="background:var(--s8)">8</span><span class="time">3:20–3:50</span><span class="dur">30 s · clicks 11–12</span><span class="screen">Settings › Refresh history: duration <span class="ph">{≈ 4 min 55 s}</span>. Caption: <strong>Import: <span class="ph">{m:ss}</span> · Direct Lake: <span class="ph">{n}</span> s</strong>. Refresh left report: both match.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-wait"><span class="kind">Wait</span><span class="txt">Refresh finishes</span></li>
+<li class="k-do"><span class="num">11</span><span class="kind">Click</span><span class="txt"><code>Sales Import</code> › <strong>Settings</strong> › <strong>Refresh history</strong> › point at the duration</span></li>
+<li class="k-do"><span class="num">12</span><span class="kind">Click</span><span class="txt">Window 1 › <strong>Refresh</strong> › cards match window 2</span></li>
+<li class="k-if"><span class="kind">If</span><span class="txt">New day missing: lakehouse › SQL analytics endpoint › <strong>Refresh</strong>, then model <strong>Refresh now</strong> again</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">The Import refresh is done. Almost five minutes, against a few seconds for Direct Lake. And both reports agree again.</p><div class="wc">20 words · about 9 s spoken</div></div>
+</section><section class="scene" id="s9">
+<header><span class="badge" style="background:var(--s9)">9</span><span class="time">3:50–4:15</span><span class="dur">25 s · no clicks</span><span class="screen">Split screen again; highlight the measures list and the visuals.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-show"><span class="kind">Show</span><span class="txt">Split screen; optional: open the Data pane on both reports (same measures)</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">What stays the same? The DAX measures, the relationships, every visual. The Direct Lake report is a copy of the Import report, pointed at the new model. Nothing was rebuilt. And Import isn't dead: it's still the right choice for some models, and one model can now mix both.</p><div class="wc">49 words · about 22 s spoken</div></div>
+</section><section class="scene" id="s10">
+<header><span class="badge" style="background:var(--s10)">10</span><span class="time">4:15–4:30</span><span class="dur">15 s · no clicks</span><span class="screen">Closing card: <strong>Migration Assessment · 1 week · $1,200</strong>.</span></header>
+<div class="col"><h3>Click order</h3><ol class="steps"><li class="k-post"><span class="kind">Edit</span><span class="txt">Closing card</span></li></ol></div>
+<div class="col"><h3>Voice-over</h3><p class="vo">Want to know what moving your models would take? A Migration Assessment takes one week.</p><div class="wc">15 words · about 7 s spoken</div></div>
+</section>
+<h2>After the take</h2><div class="grid2"><div class="box"><h3 style="margin:0 0 6px;font-size:13px">Reset for another take</h3><ol class="steps"><li class="k-do"><span class="num">1</span><span class="kind">Click</span><span class="txt">Rerun <code>nb_01_build_sales_demo</code> (overwrites every table, about 3 min)</span></li>
+<li class="k-do"><span class="num">2</span><span class="kind">Click</span><span class="txt"><code>Sales Import</code> › <strong>Refresh now</strong> (about 5 min)</span></li></ol></div>
+<div class="box"><h3 style="margin:0 0 6px;font-size:13px">Blur in post</h3><ul class="plain"><li>Tenant and account name, workspace and item IDs in the address bar, the SQL endpoint host if Power Query settings show it.</li></ul></div></div>
+<h2>Edit notes</h2><div class="box"><ul class="plain"><li><strong>Scene 6 is a time-lapse.</strong> The real Import refresh (<span class="ph">{≈ 295 s}</span>) is longer than the slot. Keep the stopwatch visible, speed the middle up, and add a small "sped up" tag; scene 8 shows the real duration.</li><li><strong>Scene 3 timing is the money shot.</strong> If the Direct Lake update takes more than about 20 s, cut the wait but keep the caption honest ("<span class="ph">{n}</span> s").</li><li>Captions on screen: only the two timings and the card numbers. Everything else is voice-over.</li></ul></div>
+</main></body></html>
