@@ -1,4 +1,4 @@
-<!-- next-id: CAND-028 -->
+<!-- next-id: CAND-037 -->
 
 # Candidates (single observation, awaiting a second hit)
 
@@ -115,3 +115,40 @@ Seen: js-trucks/lib/engine/url-state.ts `l` (2026-11-09, contract §6 followed a
 ### CAND-027 · Source Parquet in ZSTD: hyparquet needs a codec; Node's zlib has one · 2026-11-09 · expires 2027-02-07
 hyparquet 1.31.5 throws on ZSTD without `compressors`; `zstdDecompressSync` from node:zlib (Node ≥ 24) covers build scripts with no new dependency. Browser files stay Snappy from hyparquet-writer.
 Seen: js-trucks/scripts/build-trucks-data.ts (2026-11-09)
+
+### CAND-028 · `all:unset` on a generic HTML class also hits same-named SVG elements · 2026-11-25 · expires 2027-02-23
+`.bar{all:unset;...}` for HTML bar buttons matched `<rect class="bar">` in inline SVG charts on the same page: fill reset, bars vanished with no error. Fix: never reuse a class name across HTML and SVG marks when one rule uses `all:unset`; scope as `button.x` or rename (`.brow`).
+Seen: docs/design/cash flow statement/mockup-v1-2026-11-25.html (2026-11-25, caught in the screenshot pass)
+
+### CAND-029 · Zero-width bar with a border still paints a stub · 2026-11-26 · expires 2027-02-24
+An outlined "net" bar (`border:2px; border-left:0; width:0%`) rendered a 2 px vertical tick for a zero net (Investing, Oct 2026), reading as a tiny value. Any bar mark drawn with border / outline / stroke must be skipped (not sized to 0) when |v| < half a display unit.
+Seen: docs/design/cash flow statement/mockup-v2-ui.js activity block (2026-11-26, caught in the screenshot pass)
+
+### CAND-030 · Static mock carries its own control totals and ties itself on load · 2026-11-26 · expires 2027-02-24
+Embedding the control-total rows for every month and year (≈ 30 kB) let the file:// mock run 1,517 ties in 31 ms on load (console.table + `window.CF_SELFCHECK`) and back a cheap Reconciliation pop-up from the same function; the headless shot script asserts `CF_SELFCHECK.pass` on every screenshot. Worth repeating for any data-backed mock: one `selfCheck(periodKey?)` used by console, pop-up and headless harness.
+Seen: docs/design/cash flow statement/mockup-v2-core.js selfCheck (2026-11-26)
+
+### CAND-031 · Windows scratch Python: no stdlib names, ASCII-only prints under -I · 2026-11-26 · expires 2027-02-24
+A scratch file named `inspect.py` shadowed the stdlib module inside pyarrow (`import inspect` loaded the script). `py -I` ignores PYTHONIOENCODING, so printing "→" to the cp1252 console raised UnicodeEncodeError mid-test. Name scratch scripts with a project prefix (`peek_cf.py`) and keep console output ASCII.
+Seen: session scratchpad, ACME Cash Flow mock v2 build (2026-11-26)
+Related: PG-005
+
+### CAND-032 · Fixed-size modal whose content grows: flex column + `margin:auto` child + stable gutter · 2026-11-26 · expires 2027-02-24
+"Pop-up must not resize when content changes": box `width/height:min(N, 100% - 32px, 100vw/vh - 32px)`, `display:flex;flex-direction:column;overflow:hidden`; header `flex:none`; body `flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable`. Short content centred with `margin:auto` on the child (auto margins fall to 0 on overflow, unlike `align-content:center`, which clips the top). A fixed-pixel child (SVG tree) must be sized to body width minus the reserved gutter (1158 − 15 → 1120), or expanding adds a sideways scroll.
+Seen: docs/design/cash flow statement/mockup-v2.css .pop.dia/.pop.rec + mockup-v2-pops.js diagramBody (2026-11-26, round 11)
+
+### CAND-033 · Headless loop holding an element that the handler re-renders → infinite loop · 2026-11-26 · expires 2027-02-24
+`const yb = $('.ystep b'); while (+yb.innerText > y) click(prev)` inside page.evaluate: the click handler replaces the pop-up's innerHTML, so `yb` is detached and never changes; the run hung (output buffered, nothing printed). Re-query per iteration and bound every loop; run scripts with `py -u` and an outer `timeout`.
+Seen: scratchpad r11_check.py calendar sweep (2026-11-26)
+
+### CAND-034 · Initial focus on a "no active state" control reads as active · 2026-11-26 · expires 2027-02-24
+Calendar rule "while YTD/QTD/MTD is set, no span is active", but openPop focused the span tab via data-first; its orange focus ring looked like the selected state in the shot. When a rule says "nothing selected", put initial focus on the control that IS active (the quick button).
+Seen: docs/design/cash flow statement/mockup-v2-pops.js calHtml data-first (2026-11-26, caught in shot 61)
+
+### CAND-035 · DOM palette self-test: computed SVG fill is black on svg / g / line · 2026-11-26 · expires 2027-02-24
+Walking getComputedStyle for a palette gate: HTML and SVG containers report `fill: rgb(0,0,0)` (initial value) even though nothing paints. Test fill only on SVGGeometryElement / SVGTextContentElement (not SVGLineElement), stroke when not 'none'; parse `color(srgb r g b / a)` (color-mix results) as well as rgb(); allow any alpha on an allowed base; resolve derived tokens through a probe element (`probe.style.color = 'var(--x)'`).
+Seen: docs/design/cash flow statement/mockup-v2-ui.js paletteCheck (2026-11-26, round 14)
+
+### CAND-036 · Equal-width tabs sized to the widest label: inline-grid + grid-auto-columns:1fr · 2026-11-26 · expires 2027-02-24
+A shrink-to-fit grid with `1fr` columns sizes every track to the largest max-content, so three tabs share the widest label's width with no JS; reserve the bold width with `::after{content:attr(data-t);font-weight:600;height:0;visibility:hidden}` in a flex-column item (a grid item would stretch the hidden row and mis-centre the label). Borders: left + top + bottom on each, right only on the last, so border-box widths stay equal.
+Seen: docs/design/cash flow statement/mockup-v2.css .ftabs (2026-11-26, round 14)

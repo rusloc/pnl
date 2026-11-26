@@ -1,6 +1,9 @@
 # Nerd — Memory Index
 
 ## Hot findings (last 30 days)
+- 2026-11-26 · Cash Flow mock v2 round 11: Diagram + Reconciliation fixed 1200 × 600 box, Activities text tabs, calendar span/elements + YTD/QTD/MTD (mode 'A' = calendar year), orange Clr marks; self-check 1,666; CAND-032/033/034. Round 12 (USER): tabs above the title, flat #FF6F1A Clr discs (2.22:1 non-text, USER accepted), orange balance bars in cash card, orange [×] with #000 glyph 7.54:1 + ink focus ring. Round 13: folder-tab strip on Activities (.ftabs/.hm-box), static calendar 400 × 432, calendar selections navy, one 12 px statement bar height (How-to-read "thick bar" row removed, per AP-002). Round 14: four colours exact, derived = sRGB mixes, V2.paletteCheck() gate; crumb pill; narrow equal tabs; CAND-035/036
+- 2026-11-26 · ACME Cash Flow mock v2 on real data (docs/design/cash flow statement/mockup-v2-*): statement + row bars, heatmap, ledger, diagram, 4 live palettes; build-mock-v2-data.py ties 1,554 control values, page self-check 1,517; CAND-029/030/031
+- 2026-11-25 · ACME Cash Flow layout mock v1 (ADR-0019) in docs/design/cash flow statement/: 1440 × 810, accent Cash teal #0F6E73, drill panel replaces charts column; CAND-028 all:unset vs SVG class
 - 2026-11-09 · js-trucks/ steps 0–5 built (ADR-0016): 343 kB data, 959 / 959 pinned rows; CAND-025 BLANK ÷ number = BLANK, CAND-026 URL 256 cap vs multi-pick, CAND-027 ZSTD via node:zlib
 - 2026-11-05 · .sync/acme-marketing/js-app issued (60 files, 3.85 MB; standalone npm ci + gate green, 88 + 3 skipped); DEF-007 fixed: DAX bare SUM over no rows = BLANK, JS tracks campaign-day row presence (ds.cdRow / hasRows)
 - 2026-11-05 · js-marketing contract steps 1–6 built: 7 Parquet + manifest (717 kB first paint), engine = port of generator/metrics.py (AT-01 28,628 rows both ways), 1,416 / 1,416 PBI parity captures matched in a scratch self-check; CAND-023 (share measures), CAND-024 (bundle)
@@ -32,7 +35,7 @@
 - anti-patterns.md     — 2 entries · stalest 2026-10-30 · AP-NNN
 - platform-gotchas.md — 5 entries · stalest 2026-10-22 · PG-NNN (PG-005 verified 2026-10-30)
 - conventions.md       — 1 entry   · stalest 2026-10-27 · CONV-NNN
-- candidates.md        — 24 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001, CAND-020 → AP-002)
+- candidates.md        — 33 awaiting second hit (CAND-013 → PG-005, CAND-015 → AP-001, CAND-020 → AP-002)
 
 ## Track C facts (verify before citing)
 - 2026-10-22: Track C finalisation moved to the vosk.dev repo agent; hand-off in `.sync/2026-10-22-track-c-handoff.md` (steps 0–3 built here).

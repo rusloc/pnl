@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>ACME Cash Flow</title>
+<meta name="description" content="Layout mock v2 (2026-11-26) of the ACME Cash Flow report on the generated data: expandable statement with row-aligned bars and % of net income, cash balance pop-up, daily activity heatmap, transaction ledger, KPI diagram; period calendar; Orbya palette. ADR-0019, ADR-0012. Data: data/acme_cash_flow_dummy_data (seed 42), via build-mock-v2-data.py.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="mockup-v2.css">
+</head>
+<body>
+<div class="frame" id="frame">
+  <header class="top">
+    <button class="sq" id="btnCal" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Period and settings"><span class="pm" id="pm"></span></button>
+    <div class="ttl"><h1>ACME Cash Flow</h1><p id="ctx"></p></div>
+    <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+    <button class="sq" id="btnMenu" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="3.25"/></g></svg>
+    </button>
+  </header>
+  <section class="kpis" id="kpis" aria-label="Key figures"></section>
+  <div class="body"><main class="layer" id="layer" tabindex="-1"></main></div>
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="pop" id="pop" role="dialog" aria-modal="true" hidden></div>
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+</div>
+<script src="mockup-v2-data.js"></script>
+<script src="mockup-v2-core.js"></script>
+<script src="mockup-v2-ui.js"></script>
+<script src="mockup-v2-pops.js"></script>
+</body>
+</html>

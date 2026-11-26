@@ -9,6 +9,7 @@
 - [2026-10-21] First load done and verified: 28/28 row counts OK, control total diff 0.00 (source: observed)
 - [2026-10-21] SQL endpoint sync took ~15 min after the write; collation case-sensitive (upper-case INFORMATION_SCHEMA) (source: observed)
 
+- [2026-11-25] ACME Cash Flow synthetic QBO company at data/acme_cash_flow_dummy_data/ (ADR-0019): Parquet + qbo/ JSON, verify 74 green; see data.md
 - [2026-11-04] ACME Trucks synthetic twin at data/acme_trucks_dummy_data/ (14 files, same names/types as the live extract, verify 149 green, pack .sync/data-gen/acme-trucks); see data.md
 - [2026-11-04] ACME marketing dataset at data/acme_marketing_dummy_data/ (ADR-0015 ph 1): 27 tables, 0.26 M rows, verify 132 green; see data.md
 - [2026-10-28] Nordmark exec dataset at data/nordmark_retail_dummy_data/ (Parquet only, 15.4 MB, story-first); see data.md
@@ -18,6 +19,8 @@
 ## Items → data.md · Models → models.md · Platform → platform.md
 
 ## Open threads
+- ACME Cash Flow pack (2026-11-26): .sync/data-gen/acme-cash-flow ready (114 files byte-identical, verify 74 green, clean venv); .gitignore + `.sync/data-gen/*/qbo/`; USER runs the git block
+- ACME Cash Flow data (2026-11-25): built, verify 74 green; USER: git or ignore for parquet/ (0.68 MB) + qbo/ (9.1 MB, no .gitignore rule covers them); Taxes-paid presentation (D-9); payroll JE_CASH as routine (D-10)
 - Fabric demos (ADR-0018, 2026-11-24): data + models + reports deployed (DL totals = gold); Sales Import refreshed 295 s, all totals = gold; Spec 3 Dev -> Prod: rules applied (deploy 2, 7.4 s), Prod reframed, env per stage verified; next = USER's GitHub connect, then rehearsal; 60M rebuild needs consent; capacity XMLA R/W unverified (portal)
 - ADR-0017 P&L PBI performance (2026-11-16): drafted, Proposed; rec = E frills then B (bip logical, then small agg + volume driver + CC long form, M prototype before loader); target 5 s showcase; awaits USER decision
 - C-31 unrounded allocation (2026-11-16, D6): loader + pack loader copy changed, offline green; USER yes for lh_raw load, then model refresh + verify SQL; regen pack fact_pl_allocated.parquet; amount_local -> double applied in both models (validator 0/0); + RANGE row in param_time_view on load; same single reload; see data.md
@@ -42,6 +45,8 @@
 - local_per_usd must be Decimal Number (double) in the model, never Fixed Decimal (ADR-0003)
 
 ## Last session
+- 2026-11-26 (delegated): Cash Flow generator pack in .sync/data-gen/acme-cash-flow (preface + verbatim contract), data-gen README rows, .gitignore qbo/ line (backups 1721); lessons: `python -I` breaks multi-module generators (drops script dir from sys.path); one read-only `git check-ignore` ran despite "no git" (2nd time) -> test ignore rules with pathspec only; Git Bash `grep -c $'\r'` miscounts, check bytes in Python
+- 2026-11-25 (delegated): ACME Cash Flow generator (16 modules) + Parquet + QBO files + independent verify (74 green, byte-identical) + README contract; no Fabric calls, no git
 - 2026-11-24 (delegated, evening): dp_cicd_demo deploy 2 Dev->Prod "Apply Production parameter rules" 7.4 s, Prod params = Prod, reframe 5.8 s, env ws_cicd_demo_prod, Dev untouched; run_log + guide updated (backups 1933); no git
 - 2026-11-24 (delegated, later): Sales Import bound + refreshed 295 s, totals = gold; dp_cicd_demo rebuilt Dev -> Prod (items paired, deploy 6 s); guide + run logs updated; waits on USER Production rules
 - 2026-11-24 (delegated, Part B): dp_cicd_demo created + assigned, Dev->Test deploy OK incl. PBIR report, Test seeded (env ws_cicd_demo_test); stopped at parameter rules (no API, USER portal); Prod deployed + seeded later the same session; waits on USER rules for Test + Prod

@@ -33,7 +33,11 @@ shipped until 2026-10-30 byte for byte (P&L 23 Parquet + 28 CSV, Mirelo 18 Parqu
 | `acme-trucks/generator/` | yes | `generate.py` (seed 20261104) + `requirements.txt` (ginee 2026-11-04, synthetic twin of the Trucks live extract) |
 | `acme-trucks/checks/` | yes | `verify.py` (149 checks incl. a byte-identical rerun), `control_totals.csv` (620 rows) |
 | `acme-trucks/README.md` | yes | Data contract: the 14 files, columns, codes the model relies on, differences from the live extract D-1 … D-9 |
+| `acme-cash-flow/generator/` | yes | `generate.py` + 20 modules (seed 42) + `requirements.txt` (ginee 2026-11-25, ADR-0019, synthetic QuickBooks Online company) |
+| `acme-cash-flow/checks/` | yes | `verify.py` (74 checks incl. a byte-identical rerun), `control_totals_usd.csv` (2,662 rows) |
+| `acme-cash-flow/README.md` | yes | Data contract: 15 tables, QBO files, sign rules, classification rules, scenarios, deviations D-1 … D-15 |
 | `<report>/parquet/` | no (generated) | The Parquet files the PBIP imports (= `DataFolder`) |
+| `acme-cash-flow/qbo/` | no (generated) | QBO-shaped JSON (96 files + `manifest.json`, 9.1 MB): optional for the reports, read by `verify.py` |
 | `pnl/facts/`, `dims/`, `params/`, `checks/_counts.json` · `mirelo-sales/dims/`, `facts/`, `params/` | no (generated) | CSV outputs |
 | `.venv/` | no | The Python environment |
 
@@ -63,6 +67,7 @@ py -3.12 -m venv .venv
 .venv\Scripts\python.exe nordmark-exec\generator\generate.py    # 18 Parquet + manifest.json + control totals into nordmark-exec\ (~5 s)
 .venv\Scripts\python.exe acme-marketing\generator\generate.py   # 27 Parquet + manifest.json + control totals into acme-marketing\ (~3 s)
 .venv\Scripts\python.exe acme-trucks\generator\generate.py      # 14 Parquet + manifest.json into acme-trucks\ (~20 s)
+.venv\Scripts\python.exe acme-cash-flow\generator\generate.py   # 15 Parquet + manifest.json + qbo\ + control totals into acme-cash-flow\ (~2 s)
 ```
 
 Check the data (optional before Power BI, required after any change):
@@ -72,6 +77,7 @@ Check the data (optional before Power BI, required after any change):
 .venv\Scripts\python.exe nordmark-exec\checks\verify.py         # 91 checks incl. a byte-identical rerun; ALL CHECKS GREEN (~50 s)
 .venv\Scripts\python.exe acme-marketing\checks\verify.py        # 132 checks incl. a byte-identical rerun; exit 1 on any failure (~20 s)
 .venv\Scripts\python.exe acme-trucks\checks\verify.py           # 149 checks incl. a byte-identical rerun; writes the control totals (~30 s)
+.venv\Scripts\python.exe acme-cash-flow\checks\verify.py        # 74 checks incl. a byte-identical rerun; ALL CHECKS GREEN, exit 1 on any failure (~25 s)
 ```
 
 The P&L generate step checks itself: every CSV is parsed strictly (header, row count, unique keys, no nulls in not-null columns) and
@@ -85,6 +91,7 @@ and exits 1 on any failure.
 | Nordmark Exec | `nordmark-exec\parquet` (18 files + `manifest.json`, 15.4 MB) | 0.88 M | `../nordmark-exec/power-bi/` |
 | ACME Marketing | `acme-marketing\parquet` (27 files + `manifest.json`, 2.2 MB) | 0.26 M | `../acme-marketing/power-bi/` |
 | ACME Trucks | `acme-trucks\parquet` (14 files + `manifest.json`, 5.2 MB) | 1.70 M | `../acme-trucks/power-bi/` |
+| ACME Cash Flow | `acme-cash-flow\parquet` (15 files + `manifest.json`, 0.68 MB) | 0.03 M | `../acme cash flow/power-bi/` (also the Next.js build input, `../acme cash flow/js-spec/`) |
 
 - Every generator writes into its own report folder by default (the folder above `generator\`). `--out <folder>` writes elsewhere;
   then `verify.py --data <folder>` checks that folder (Nordmark's ET-20 rerun needs `generator\` inside it, or pass `--no-rerun`).
@@ -117,5 +124,6 @@ The source of truth stays in rusloc/pnl; the scripts here are unchanged copies, 
 | `nordmark-exec/generator/`, `checks/`, `README.md` | `data/nordmark_retail_dummy_data/` (README with a pack preface) |
 | `acme-marketing/generator/`, `checks/`, `README.md` | `data/acme_marketing_dummy_data/` (README with a pack preface; checked 2026-11-04 by bip: the pack generator reproduced the repo Parquet and control totals byte for byte) |
 | `acme-trucks/generator/`, `checks/`, `README.md` | `data/acme_trucks_dummy_data/` (README with a pack preface; checked 2026-11-04 by ginee: the pack generator reproduced the repo Parquet, manifest and control totals byte for byte) |
+| `acme-cash-flow/generator/`, `checks/`, `README.md` | `data/acme_cash_flow_dummy_data/` (README with a pack preface; checked 2026-11-26 by ginee in a clean venv from the pins: the pack generator reproduced all 114 files, Parquet, both manifests, QBO JSON and control totals, byte for byte, and `verify.py` was ALL CHECKS GREEN, 74 checks) |
 
 Data, names and numbers are fictional.
