@@ -2,7 +2,7 @@
 table dim_cf_line
 	lineageTag: 115e9b83-e68d-5c38-834a-27880a3be438
 
-	column 'view'
+	column view
 		dataType: string
 		isHidden
 		lineageTag: e91f3880-680a-50b1-900d-5ab1349c2ad2
@@ -94,6 +94,21 @@ table dim_cf_line
 
 		annotation SummarizationSetBy = User
 
+	/// Activity of the line: Operating / Investing / Financing (decomposition tree level; other sections keep their code).
+	column activity =
+			SWITCH (
+			    dim_cf_line[section_code]
+			    ,"OPERATING", "Operating"
+			    ,"INVESTING", "Investing"
+			    ,"FINANCING", "Financing"
+			    ,dim_cf_line[section_code]
+			)
+		dataType: string
+		lineageTag: aea0fabe-8158-5d7c-83a2-996a746e7139
+		summarizeBy: none
+
+		annotation SummarizationSetBy = User
+
 	partition dim_cf_line = m
 		mode: import
 		source =
@@ -120,3 +135,4 @@ table dim_cf_line
 				    add_name
 
 	annotation PBI_ResultType = Table
+

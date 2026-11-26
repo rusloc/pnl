@@ -38,11 +38,22 @@
       "grp_act_op_menu_stmt",
       "grp_act_op_menu_act",
       "grp_act_op_menu_txn",
+      "grp_act_op_menu_mv_box",
       "grp_act_op_menu_mv",
       "grp_act_op_menu_diagram",
       "grp_act_op_menu_recon",
       "grp_act_op_menu_sep",
-      "grp_act_op_menu_how"
+      "grp_act_op_menu_how",
+      "grp_act_op_dia",
+      "grp_act_op_dia_dim",
+      "grp_act_op_dia_scrim",
+      "grp_act_op_dia_panel",
+      "grp_act_op_dia_h",
+      "grp_act_op_dia_i",
+      "grp_act_op_dia_x",
+      "grp_act_op_dia_tree",
+      "grp_act_op_dia_kpis",
+      "grp_act_op_dia_kpis_blk"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -203,6 +214,11 @@
               "visualType": "actionButton"
             }
           },
+          "grp_act_op_menu_mv_box": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
           "grp_act_op_menu_mv": {
             "singleVisual": {
               "visualType": "textbox"
@@ -227,6 +243,51 @@
             "singleVisual": {
               "visualType": "actionButton"
             }
+          },
+          "grp_act_op_dia_dim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_op_dia_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_op_dia_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_op_dia_h": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_act_op_dia_i": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_act_op_dia_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_op_dia_tree": {
+            "singleVisual": {
+              "visualType": "decompositionTreeVisual"
+            }
+          },
+          "grp_act_op_dia_kpis": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_act_op_dia_kpis_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
           }
         },
         "visualContainerGroups": {
@@ -237,6 +298,9 @@
             "isHidden": true
           },
           "grp_act_op_menu": {
+            "isHidden": true
+          },
+          "grp_act_op_dia": {
             "isHidden": true
           }
         }

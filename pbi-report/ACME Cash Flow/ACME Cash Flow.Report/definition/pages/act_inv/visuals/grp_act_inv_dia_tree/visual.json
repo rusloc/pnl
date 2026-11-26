@@ -1,0 +1,469 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "grp_act_inv_dia_tree",
+  "position": {
+    "x": 52,
+    "y": 136,
+    "z": 15690,
+    "height": 630,
+    "width": 930,
+    "tabOrder": 15690
+  },
+  "visual": {
+    "visualType": "decompositionTreeVisual",
+    "query": {
+      "queryState": {
+        "Analyze": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_measures"
+                    }
+                  },
+                  "Property": "Decomp Net Change"
+                }
+              },
+              "queryRef": "_measures.Decomp Net Change",
+              "nativeQueryRef": "Decomp Net Change",
+              "displayName": "Net change in cash"
+            }
+          ]
+        },
+        "ExplainBy": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_cf_line"
+                    }
+                  },
+                  "Property": "activity"
+                }
+              },
+              "queryRef": "dim_cf_line.activity",
+              "nativeQueryRef": "activity",
+              "displayName": "Activity"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_cf_line"
+                    }
+                  },
+                  "Property": "line_name"
+                }
+              },
+              "queryRef": "dim_cf_line.line_name",
+              "nativeQueryRef": "line_name",
+              "displayName": "Line"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_counterparty"
+                    }
+                  },
+                  "Property": "counterparty_name"
+                }
+              },
+              "queryRef": "dim_counterparty.counterparty_name",
+              "nativeQueryRef": "counterparty_name",
+              "displayName": "Counterparty"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_date"
+                    }
+                  },
+                  "Property": "month_key"
+                }
+              },
+              "queryRef": "dim_date.month_key",
+              "nativeQueryRef": "month_key",
+              "displayName": "Month"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "analysis": [
+        {
+          "properties": {
+            "aiEnabled": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "tree": [
+        {
+          "properties": {
+            "density": {
+              "expr": {
+                "Literal": {
+                  "Value": "'default'"
+                }
+              }
+            },
+            "accentColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FF6F1A'"
+                    }
+                  }
+                }
+              }
+            },
+            "connectorDefaultColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#C2C3C3'"
+                    }
+                  }
+                }
+              }
+            },
+            "connectorType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'curve'"
+                }
+              }
+            },
+            "barsPerLevel": {
+              "expr": {
+                "Literal": {
+                  "Value": "8L"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dataBars": [
+        {
+          "properties": {
+            "positiveBarColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#2C3A54'"
+                    }
+                  }
+                }
+              }
+            },
+            "negativeBarColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#7B828E'"
+                    }
+                  }
+                }
+              }
+            },
+            "dataBarBackgroundColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#ECEAE5'"
+                    }
+                  }
+                }
+              }
+            },
+            "dataBarScalingType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'parentNode'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dataLabels": [
+        {
+          "properties": {
+            "dataLabelFontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            },
+            "dataLabelFontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "dataLabelFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#2C3A54'"
+                    }
+                  }
+                }
+              }
+            },
+            "dataLabelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryLabels": [
+        {
+          "properties": {
+            "categoryLabelFontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
+                }
+              }
+            },
+            "categoryLabelFontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "categoryLabelFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#2C3A54'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "levelHeader": [
+        {
+          "properties": {
+            "levelHeaderBackgroundColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F6F5F2'"
+                    }
+                  }
+                }
+              }
+            },
+            "levelTitleFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#2C3A54'"
+                    }
+                  }
+                }
+              }
+            },
+            "levelTitleFontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            },
+            "levelTitleFontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10.5D"
+                }
+              }
+            },
+            "levelSubtitleFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#525C70'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F6F5F2'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Decomposition tree: net change in cash by activity, line, counterparty and month'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "parentGroupName": "grp_act_inv_dia",
+  "isHidden": true
+}

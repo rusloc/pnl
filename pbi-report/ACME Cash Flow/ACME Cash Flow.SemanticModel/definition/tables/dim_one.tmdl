@@ -1,7 +1,7 @@
 /// One row: the category column that hosts the SVG measures in table visuals (works under drill-through filters).
 table dim_one
-	lineageTag: b617e799-d709-51f9-aba9-4bbcd33de999
 	isHidden
+	lineageTag: b617e799-d709-51f9-aba9-4bbcd33de999
 
 	column one
 		dataType: string
@@ -24,3 +24,4 @@ table dim_one
 				)
 
 	annotation PBI_ResultType = Table
+

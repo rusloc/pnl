@@ -1,7 +1,7 @@
 /// checks/control_totals_usd.csv (2,662 rows: period x metric x scope, USD), next to the Parquet folder. The Reconciliation page ties the page values to it.
 table ctl_control_total
-	lineageTag: 40fb0d70-8299-5067-bc39-9b405c252230
 	isHidden
+	lineageTag: 40fb0d70-8299-5067-bc39-9b405c252230
 
 	column period_key
 		dataType: string
@@ -52,3 +52,4 @@ table ctl_control_total
 				    typed
 
 	annotation PBI_ResultType = Table
+

@@ -1,0 +1,732 @@
+{
+ "dataset": "ACME Trucks synthetic twin",
+ "seed": 20261104,
+ "generator_version": "1.0.0",
+ "calendar_span": [
+  "2022-10-29",
+  "2023-04-02"
+ ],
+ "fact_span": [
+  "2022-11-01",
+  "2023-03-26"
+ ],
+ "tested_grain": "week \"10 (4.3-10.3)\" (2023-03-04 .. 2023-03-10), Month plan, Weighted, Trucks + On spot, is_included = \"да\", contractor blank",
+ "kpi_targets": {
+  "truck_loading_plan": 0.43,
+  "truck_loading_fact": 0.45,
+  "effective_work_plan": 0.54,
+  "effective_work_fact": 0.515,
+  "mass_plan": 7300.0,
+  "mass_fact": 7100.0
+ },
+ "calibration": {
+  "fact_loss_factor": 1.119772,
+  "fact_aux_factor": 0.169196,
+  "plan_loss_factor": 1.242208,
+  "plan_aux_factor": 0.801401,
+  "fact_mass_factor": 1.021562,
+  "plan_mass_factor": 0.959445
+ },
+ "tables": [
+  {
+   "file": "AREA_DIM.parquet",
+   "rows": 13,
+   "bytes": 1046,
+   "sha256": "adaa3d0060b3350372fa05f23892c29ddedaedb6a5ea26f0e5f25be7ea51cc1a",
+   "columns": [
+    [
+     "_area",
+     "string"
+    ],
+    [
+     "enterprise_id",
+     "int64"
+    ]
+   ]
+  },
+  {
+   "file": "Calendar.parquet",
+   "rows": 156,
+   "bytes": 10947,
+   "sha256": "eec445a29e40ee537e6e8f5b010736a840f004cd706a4d22f0b34740f4dd8c04",
+   "columns": [
+    [
+     "_weekStartBiz",
+     "timestamp[us]"
+    ],
+    [
+     "_weekEndBiz",
+     "timestamp[us]"
+    ],
+    [
+     "_weekNumBiz",
+     "int64"
+    ],
+    [
+     "Date",
+     "timestamp[us]"
+    ],
+    [
+     "Год",
+     "int64"
+    ],
+    [
+     "Месяц",
+     "int64"
+    ],
+    [
+     "Число",
+     "int64"
+    ],
+    [
+     "День недели",
+     "string"
+    ],
+    [
+     "Номер дня недели",
+     "int64"
+    ],
+    [
+     "Номер недели",
+     "int64"
+    ],
+    [
+     "День_Месяц",
+     "string"
+    ],
+    [
+     "Начало_недели",
+     "timestamp[us]"
+    ],
+    [
+     "Конец_недели",
+     "timestamp[us]"
+    ],
+    [
+     "Номер_диапазон",
+     "string"
+    ],
+    [
+     "curPeriod",
+     "string"
+    ],
+    [
+     "_weekDayNum",
+     "int64"
+    ],
+    [
+     "_dateSpanBiz",
+     "string"
+    ],
+    [
+     "_sortSpan",
+     "int64"
+    ],
+    [
+     "_dateBiz",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "FIELD_DIM.parquet",
+   "rows": 21,
+   "bytes": 3125,
+   "sha256": "69eaee647f71dcede09db6939db99336b421adc9d02747c9f3cc1b7bbd69f354",
+   "columns": [
+    [
+     "_field_id",
+     "string"
+    ],
+    [
+     "dir_for_plan",
+     "string"
+    ],
+    [
+     "enterprise_name",
+     "string"
+    ],
+    [
+     "enterprise_id",
+     "int64"
+    ],
+    [
+     "area",
+     "string"
+    ],
+    [
+     "block",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "OFFICE_DIM.parquet",
+   "rows": 6,
+   "bytes": 1508,
+   "sha256": "be9c061b921ada64dcf564ae6b8f551f3acc26b0b2fbff03d30f75cf568e2716",
+   "columns": [
+    [
+     "_id",
+     "int64"
+    ],
+    [
+     "_longName",
+     "string"
+    ],
+    [
+     "_shortName",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "intervals.parquet",
+   "rows": 766,
+   "bytes": 5232,
+   "sha256": "0f727180d8e7d436ce5c4b74758c9b9f22d4ed84de5267286038f1daa4bcb77e",
+   "columns": [
+    [
+     "interval_id",
+     "int64"
+    ],
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_group_code",
+     "int64"
+    ],
+    [
+     "reserve_l",
+     "bool"
+    ],
+    [
+     "start_dat",
+     "timestamp[us]"
+    ],
+    [
+     "end_dat",
+     "timestamp[us]"
+    ]
+   ]
+  },
+  {
+   "file": "Интервалы.parquet",
+   "rows": 129,
+   "bytes": 4545,
+   "sha256": "447abdec3e795efe3f46f81dc977e53546f2054efa103de3d7d1671eb8ba49ac",
+   "columns": [
+    [
+     "interval_pf_id",
+     "int64"
+    ],
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_group_code",
+     "int64"
+    ],
+    [
+     "start_dat",
+     "timestamp[us]"
+    ],
+    [
+     "end_dat",
+     "timestamp[us]"
+    ],
+    [
+     "suser_name",
+     "string"
+    ],
+    [
+     "modi_date",
+     "timestamp[us]"
+    ],
+    [
+     "area",
+     "string"
+    ],
+    [
+     "block",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "КРВ АС.parquet",
+   "rows": 817687,
+   "bytes": 2959887,
+   "sha256": "d33ef286f7de7ff2aa60c53276dc00cb3ae52b4fc5a221e40ef6f1aa70f982f8",
+   "columns": [
+    [
+     "enterprise_id",
+     "int64"
+    ],
+    [
+     "dat",
+     "timestamp[us]"
+    ],
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_name",
+     "string"
+    ],
+    [
+     "idle_name_for_op",
+     "string"
+    ],
+    [
+     "duration",
+     "int64"
+    ],
+    [
+     "kfv",
+     "int64"
+    ],
+    [
+     "ktg",
+     "double"
+    ],
+    [
+     "kio",
+     "double"
+    ],
+    [
+     "kio_adv",
+     "double"
+    ],
+    [
+     "vehicle_model_name",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "ПФ КРВ.parquet",
+   "rows": 201392,
+   "bytes": 602802,
+   "sha256": "29f39a0c26c6f1a98bc5b800008e94ead9e5ec2136813ac8ce2c534f55c85da2",
+   "columns": [
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_name",
+     "string"
+    ],
+    [
+     "dat",
+     "timestamp[us]"
+    ],
+    [
+     "idle_name_for_op",
+     "string"
+    ],
+    [
+     "duration",
+     "double"
+    ],
+    [
+     "ent_id",
+     "int64"
+    ],
+    [
+     "_active",
+     "int64"
+    ],
+    [
+     "area",
+     "string"
+    ],
+    [
+     "block",
+     "string"
+    ],
+    [
+     "_id",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "ПФ Отчет о рейсах.parquet",
+   "rows": 16396,
+   "bytes": 593988,
+   "sha256": "5ea3539d8bd60d596a11a3164c301a3a806a759f0b0107274872197cc0e635e2",
+   "columns": [
+    [
+     "Дата",
+     "timestamp[us]"
+    ],
+    [
+     "Экскаватор",
+     "string"
+    ],
+    [
+     "Разрез",
+     "string"
+    ],
+    [
+     "Грузооборот факт",
+     "double"
+    ],
+    [
+     "Техническая скорость",
+     "double"
+    ],
+    [
+     "Машиносмены",
+     "double"
+    ],
+    [
+     "Плечо_добыча",
+     "double"
+    ],
+    [
+     "Плечо_Ва_На",
+     "double"
+    ],
+    [
+     "Экспортный код",
+     "int64"
+    ],
+    [
+     "Машиносмены_исходные",
+     "double"
+    ]
+   ]
+  },
+  {
+   "file": "ПФ объемы.parquet",
+   "rows": 18922,
+   "bytes": 235666,
+   "sha256": "684a9066f474b450519a4a8468123a62672a864361d9e3175401d269a4779f98",
+   "columns": [
+    [
+     "Дата",
+     "timestamp[us]"
+    ],
+    [
+     "Разрез",
+     "string"
+    ],
+    [
+     "КФВ",
+     "int64"
+    ],
+    [
+     "Объем добычи план",
+     "double"
+    ],
+    [
+     "Объем добычи факт",
+     "double"
+    ],
+    [
+     "Объем ГМ план",
+     "double"
+    ],
+    [
+     "Объем ГМ факт",
+     "double"
+    ],
+    [
+     "Объем ГМ на авто план",
+     "double"
+    ],
+    [
+     "Объем ГМ на авто факт",
+     "double"
+    ],
+    [
+     "Добыча план",
+     "double"
+    ],
+    [
+     "Вскрыша авто план",
+     "double"
+    ],
+    [
+     "Вскрыша авто факт",
+     "double"
+    ],
+    [
+     "Навалы авто план",
+     "double"
+    ],
+    [
+     "Навалы авто факт",
+     "double"
+    ],
+    [
+     "ПГР авто план",
+     "double"
+    ],
+    [
+     "ПГР авто факт",
+     "double"
+    ],
+    [
+     "Вскрыша б/т план",
+     "double"
+    ],
+    [
+     "Вскрыша б/т факт",
+     "double"
+    ],
+    [
+     "Переэкскавация план",
+     "double"
+    ],
+    [
+     "Переэкскавация факт",
+     "double"
+    ],
+    [
+     "ПГР план",
+     "double"
+    ],
+    [
+     "ПГР факт",
+     "double"
+    ],
+    [
+     "Экспортный код",
+     "int64"
+    ],
+    [
+     "Объем добычи план месяц",
+     "double"
+    ],
+    [
+     "Объем ГМ план месяц",
+     "double"
+    ],
+    [
+     "Объем ГМ на авто план месяц",
+     "double"
+    ],
+    [
+     "Добыча план месяц",
+     "double"
+    ],
+    [
+     "Вскрыша авто план месяц",
+     "double"
+    ],
+    [
+     "Навалы авто план месяц",
+     "double"
+    ],
+    [
+     "ПГР авто план месяц",
+     "double"
+    ],
+    [
+     "Вскрыша б/т план месяц",
+     "double"
+    ],
+    [
+     "Переэкскавация план месяц",
+     "double"
+    ],
+    [
+     "ПГР план месяц",
+     "double"
+    ]
+   ]
+  },
+  {
+   "file": "План_2.parquet",
+   "rows": 408218,
+   "bytes": 595943,
+   "sha256": "6330e0573444eb2ad0b36d93df522af8448bb3a23613fd781bf2bcbb24f10ae3",
+   "columns": [
+    [
+     "enterprise_id",
+     "int64"
+    ],
+    [
+     "dat",
+     "timestamp[us]"
+    ],
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_name",
+     "string"
+    ],
+    [
+     "indicator_name",
+     "string"
+    ],
+    [
+     "measure_name",
+     "string"
+    ],
+    [
+     "indicator_amount",
+     "double"
+    ],
+    [
+     "Сортировка",
+     "string"
+    ],
+    [
+     "_active",
+     "int64"
+    ],
+    [
+     "area",
+     "string"
+    ],
+    [
+     "block",
+     "string"
+    ],
+    [
+     "_id",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "План_2_МЕС.parquet",
+   "rows": 234413,
+   "bytes": 132395,
+   "sha256": "77eb5773887d15a94d163b743a1998d382f765de07628050b2e2c0f2dd8cf011",
+   "columns": [
+    [
+     "enterprise_id",
+     "int64"
+    ],
+    [
+     "dat",
+     "timestamp[us]"
+    ],
+    [
+     "vehicle_export_code",
+     "int64"
+    ],
+    [
+     "vehicle_name",
+     "string"
+    ],
+    [
+     "indicator_name",
+     "string"
+    ],
+    [
+     "measure_name",
+     "string"
+    ],
+    [
+     "indicator_amount",
+     "double"
+    ],
+    [
+     "period_id",
+     "int64"
+    ],
+    [
+     "_active",
+     "int64"
+    ],
+    [
+     "area",
+     "string"
+    ],
+    [
+     "block",
+     "string"
+    ],
+    [
+     "_id",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "Справочник ЭКС.parquet",
+   "rows": 168,
+   "bytes": 11091,
+   "sha256": "40e5ddf7facab245f8be84fcb5cb0672b5852990b361031e3997885faea52d84",
+   "columns": [
+    [
+     "Филиал",
+     "string"
+    ],
+    [
+     "Название ЭКС в АСД КРВ",
+     "string"
+    ],
+    [
+     "Название ЭКС в ГД",
+     "string"
+    ],
+    [
+     "objrem_id",
+     "int64"
+    ],
+    [
+     "name",
+     "string"
+    ],
+    [
+     "номер",
+     "string"
+    ],
+    [
+     "Комментарий",
+     "string"
+    ],
+    [
+     "Объем ковша",
+     "int64"
+    ],
+    [
+     "Учитывать",
+     "string"
+    ],
+    [
+     "Название ЭКС в АСД Рейсы",
+     "string"
+    ],
+    [
+     "Поле",
+     "string"
+    ],
+    [
+     "Подрядчик",
+     "string"
+    ]
+   ]
+  },
+  {
+   "file": "Справочник разрезов.parquet",
+   "rows": 7,
+   "bytes": 1020,
+   "sha256": "856a3b6efc2f3e8b7e24e59ddd64a6f42039d554580f5972753df8fbc8cc2503",
+   "columns": [
+    [
+     "enterprise_id",
+     "int64"
+    ],
+    [
+     "enterprise_name_short",
+     "string"
+    ]
+   ]
+  }
+ ]
+}

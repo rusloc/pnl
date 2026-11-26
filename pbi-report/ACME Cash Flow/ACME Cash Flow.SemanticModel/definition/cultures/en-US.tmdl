@@ -1,2 +1,573 @@
 cultureInfo en-US
 
+	linguisticMetadata =
+			{
+			  "Version": "2.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "table_measures.cash_card_balance": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Cash Card Balance"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.cash_card_operating": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Cash Card Operating"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.cash_card_investing": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Cash Card Investing"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.cash_card_financing": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Cash Card Financing"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.stmt_axis_svg": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Stmt Axis SVG"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.bal_amount": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Bal Amount"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.bal_bar": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Bal Bar"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.bal__of_ni": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Bal % of NI"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_cfo": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card cfo"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_close": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card close"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_conv": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card conv"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_dso": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card dso"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_fcf": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card fcf"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.kpi_card_net": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "KPI Card net"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.stmt_amount": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Stmt Amount"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.stmt_bar": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Stmt Bar"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.stmt__of_ni": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Stmt % of NI"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.heat_value": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Heat Value"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.heat_totals_operating": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Heat Totals Operating"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.heat_totals_investing": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Heat Totals Investing"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.heat_totals_financing": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Heat Totals Financing"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.ledger_amount": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Ledger Amount"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Amount": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.ledger_clr_svg": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Ledger Clr SVG"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Clr": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.ledger_trio_svg": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Ledger Trio SVG"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.recon_page": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Recon Page"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Page": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.recon_control": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Recon Control"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Control": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.recon_mark": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Recon Mark"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.line_heat_text": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Line Heat Text"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Heatmap row": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.line_ledger_text": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Line Ledger Text"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Ledger": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.line_control_text": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Line Control Text"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Control": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "table_measures.line_mark": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_measures",
+			          "ConceptualProperty": "Line Mark"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_one.one": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_one",
+			          "ConceptualProperty": "one"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_bal_row.row_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_bal_row",
+			          "ConceptualProperty": "row_label"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_stmt_row.section_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_stmt_row",
+			          "ConceptualProperty": "section_label"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_stmt_row.row_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_stmt_row",
+			          "ConceptualProperty": "row_label"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_cf_line.line_name": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_cf_line",
+			          "ConceptualProperty": "line_name"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Line": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "Direct line": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "dim_date.date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_date",
+			          "ConceptualProperty": "date"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "fact_txn.txn_id": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_txn",
+			          "ConceptualProperty": "txn_id"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "fact_txn.type_no": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_txn",
+			          "ConceptualProperty": "type_no"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Type · No.": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_cash_posting.txn_date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_cash_posting",
+			          "ConceptualProperty": "txn_date"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Date": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_cash_posting.ledger_memo": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_cash_posting",
+			          "ConceptualProperty": "ledger_memo"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Memo": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_cash_posting.direction": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_cash_posting",
+			          "ConceptualProperty": "direction"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "dim_counterparty.counterparty_name": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_counterparty",
+			          "ConceptualProperty": "counterparty_name"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Party": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "dim_recon_check.check_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_recon_check",
+			          "ConceptualProperty": "check_label"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Statement · KPI": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    }
+			  }
+			}
+		contentType: json
+

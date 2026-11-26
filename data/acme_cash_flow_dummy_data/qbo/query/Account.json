@@ -1,0 +1,78 @@
+{
+ "QueryResponse": {
+  "Account": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "1",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Operating Checking",
+    "SubAccount": false,
+    "FullyQualifiedName": "Operating Checking",
+    "Active": true,
+    "Classification": "Asset",
+    "AccountType": "Bank",
+    "AccountSubType": "Checking",
+    "CurrentBalance": 49095.9,
+    "CurrentBalanceWithSubAccounts": 49095.9,
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    }
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "2",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Payroll Checking",
+    "SubAccount": false,
+    "FullyQualifiedName": "Payroll Checking",
+    "Active": true,
+    "Classification": "Asset",
+    "AccountType": "Bank",
+    "AccountSubType": "Checking",
+    "CurrentBalance": 10039.61,
+    "CurrentBalanceWithSubAccounts": 10039.61,
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    }
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "3",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Business Savings",
+    "SubAccount": false,
+    "FullyQualifiedName": "Business Savings",
+    "Active": true,
+    "Classification": "Asset",
+    "AccountType": "Bank",
+    "AccountSubType": "Savings",
+    "CurrentBalance": 241943.95,
+    "CurrentBalanceWithSubAccounts": 241943.95,
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    }
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

@@ -1,0 +1,51 @@
+{
+ "QueryResponse": {
+  "Term": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "1",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Due on receipt",
+    "Active": true,
+    "Type": "STANDARD",
+    "DueDays": 0
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "2",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Net 15",
+    "Active": true,
+    "Type": "STANDARD",
+    "DueDays": 15
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "3",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Net 30",
+    "Active": true,
+    "Type": "STANDARD",
+    "DueDays": 30
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

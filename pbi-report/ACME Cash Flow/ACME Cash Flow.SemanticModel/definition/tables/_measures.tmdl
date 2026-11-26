@@ -416,7 +416,7 @@ table _measures
 	/// Statement row value in USD: section header = its total, Net income, one row per account (hidden when it did not move), Total adjustments, Net cash from the section.
 	measure 'Stmt Value' =
 			VAR _a            = [_A]
-			VAR _leaf         = ISINSCOPE ( dim_stmt_row[row_label] )
+			VAR _leaf         = HASONEVALUE ( dim_stmt_row[row_label] )
 			VAR _sec          = SELECTEDVALUE ( dim_stmt_row[section_code] )
 			VAR _kind         = SELECTEDVALUE ( dim_stmt_row[row_kind] )
 			VAR _acc          = SELECTEDVALUE ( dim_stmt_row[account_id] )
@@ -613,30 +613,35 @@ table _measures
 		displayFolder: 1 Statement
 		lineageTag: 5724cbed-8a39-5a83-b0c9-955ae09e7f1e
 
-	/// Pinned-row bar: balances dark #2C3A54 with a notch when longer than the axis; net increase grey like the lines.
+	/// Pinned-row bar length as a share of the bar width: opening and closing on their own scale (full = the larger of the two), net increase on the line axis.
+	measure 'Bal Bar Ratio' =
+			VAR _code         = SELECTEDVALUE ( dim_bal_row[row_code] )
+			VAR _v            = ABS ( [Bal Value] )
+			VAR _balMax       = MAX ( ABS ( [Opening Cash] ), ABS ( [Closing Cash] ) )
+			VAR _max          = IF ( _code = "NET", [_Stmt Axis Max], _balMax )
+			RETURN
+			    IF ( NOT ISBLANK ( [Bal Value] ), MIN ( DIVIDE ( _v, _max ), 1 ) )
+		formatString: 0.0000
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 6dc5ac06-5316-5eeb-bad1-246698f44168
+
+	/// Pinned-row bar: opening / closing dark #2C3A54 on their own scale (full width = the larger balance, round 2); net increase grey on the line axis.
 	measure 'Bal Bar' =
 			VAR _code         = SELECTEDVALUE ( dim_bal_row[row_code] )
-			VAR _v            = [Bal Value]
-			VAR _max          = [_Stmt Axis Max]
-			VAR _a            = ABS ( _v )
+			VAR _r            = [Bal Bar Ratio]
 			VAR _isBal        = _code <> "NET"
-			VAR _clip         = _isBal && _a > _max
-			VAR _len          = MIN ( _a / _max, 1 ) * 566
+			VAR _len          = _r * 566
 			VAR _fill         = IF ( _isBal, "%232C3A54", "%238A8986" )
 			VAR _bar          =
 			    IF (
 			        _len >= 0.5
 			        ,"<rect x='20' y='7' width='" & FORMAT ( _len, "0.0" ) & "' height='12' rx='2' fill='" & _fill & "'/>"
 			    )
-			VAR _notch        =
-			    IF (
-			        _clip
-			        ,"<path d='M545 1 L551 7 L545 13 L551 19 L545 25' fill='none' stroke='%23E8E5DF' stroke-width='4'/>"
-			    )
 			RETURN
 			    IF (
-			        NOT ISBLANK ( _v )
-			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='602' height='26' viewBox='0 0 602 26'><rect x='161.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='303.0' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='444.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='585.5' y='0' width='1' height='26' fill='%23D9D7D4'/>" & _bar & _notch & "</svg>"
+			        NOT ISBLANK ( _r )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='602' height='26' viewBox='0 0 602 26'>" & IF ( _isBal, "", "<rect x='161.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='303.0' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='444.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='585.5' y='0' width='1' height='26' fill='%23D9D7D4'/>" ) & _bar & "</svg>"
 			    )
 		isHidden
 		displayFolder: 8 Report
@@ -1323,22 +1328,6 @@ table _measures
 		isHidden
 		displayFolder: 8 Report
 		lineageTag: cff49146-d3b0-5402-8dd9-bcf2555d7b94
-		dataCategory: ImageUrl
-
-	/// Top-left period square (mock .sq .pm): mode, period, year; opens the calendar.
-	measure 'Header Badge' =
-			VAR _mode         = UPPER ( [_Mode Name] )
-			VAR _big          = [_Badge Big]
-			VAR _small        = [_Badge Small]
-			RETURN
-			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56' font-family='Segoe UI, sans-serif' text-anchor='middle'>"
-			        & "<rect width='56' height='56' rx='16' fill='%232C3A54'/>"
-			        & "<text x='28' y='17' font-size='8.5' font-weight='600' letter-spacing='0.7' fill='%23F6F5F2' fill-opacity='0.7'>" & COALESCE ( _mode, "MONTH" ) & "</text>"
-			        & "<text x='28' y='34' font-size='15' font-weight='700' fill='%23F6F5F2'>" & COALESCE ( _big, "–" ) & "</text>"
-			        & "<text x='28' y='47' font-size='10.5' fill='%23F6F5F2' fill-opacity='0.85'>" & COALESCE ( _small, "no data" ) & "</text></svg>"
-		isHidden
-		displayFolder: 8 Report
-		lineageTag: fe924501-c664-5848-84a7-cd536b065226
 		dataCategory: ImageUrl
 
 	/// Sub-title under ACME Cash Flow: company, window dates, units, as-of day.
@@ -2167,30 +2156,12 @@ table _measures
 		lineageTag: 5513d7c2-3939-5c67-8466-d2665a52b902
 		dataCategory: ImageUrl
 
-	/// Management diagram (mock diagramBody): net change in cash = operating + investing + financing, each with its KPI groups; a group shows its three metrics when picked in the Groups slicer (nothing picked = all collapsed).
-	measure 'Diagram SVG' =
+	/// Diagram pop-up, KPI groups beside the tree (the mock's diagram groups the decomposition tree cannot carry): cash quality, working capital, FCF and investment, leverage and coverage.
+	measure 'Diagram KPI SVG' =
 			VAR _a            = [_A]
-			VAR _any         = ISFILTERED ( dim_dgroup[group_name] )
-			VAR _open        = VALUES ( dim_dgroup[group_code] )
-			VAR _lbl         = [_Period Label]
-			VAR _net         = [Net Change in Cash]
-			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0" ) )
-			VAR _net_t = _net_s & IF ( [_Is K] && TRUE (), "k" )
-			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
 			VAR _netDebt     = [Net Debt]
-			VAR _sOP = [Operating Cash Flow]
-			VAR _sOP_s = IF ( [_Is K], FORMAT ( ABS ( _sOP ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sOP ), "#,0" ) )
-			VAR _sOP_t = _sOP_s & IF ( [_Is K] && TRUE (), "k" )
-			VAR _sOP_m = IF ( ISBLANK ( _sOP ) || _sOP_s IN { "0", "0.0", "0.00" }, "–", IF ( _sOP < 0, "(" & _sOP_t & ")", _sOP_t ) )
-			VAR _sINV = [Investing Cash Flow]
-			VAR _sINV_s = IF ( [_Is K], FORMAT ( ABS ( _sINV ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sINV ), "#,0" ) )
-			VAR _sINV_t = _sINV_s & IF ( [_Is K] && TRUE (), "k" )
-			VAR _sINV_m = IF ( ISBLANK ( _sINV ) || _sINV_s IN { "0", "0.0", "0.00" }, "–", IF ( _sINV < 0, "(" & _sINV_t & ")", _sINV_t ) )
-			VAR _sFIN = [Financing Cash Flow]
-			VAR _sFIN_s = IF ( [_Is K], FORMAT ( ABS ( _sFIN ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sFIN ), "#,0" ) )
-			VAR _sFIN_t = _sFIN_s & IF ( [_Is K] && TRUE (), "k" )
-			VAR _sFIN_m = IF ( ISBLANK ( _sFIN ) || _sFIN_s IN { "0", "0.0", "0.00" }, "–", IF ( _sFIN < 0, "(" & _sFIN_t & ")", _sFIN_t ) )
-			VAR _oquality = _any && "quality" IN _open
+			VAR _lquality = [KPI Cash Conversion]
+			VAR _lquality_m = IF ( ISBLANK ( _lquality ), "n/m", IF ( _lquality < 0, "−", "" ) & FORMAT ( ABS ( _lquality ), "0.00" ) & "×" )
 			VAR _mquality0 = [Operating Cash Margin]
 			VAR _mquality0_m = IF ( ISBLANK ( _mquality0 ), "n/m", IF ( _mquality0 < 0, "−", "" ) & FORMAT ( ABS ( _mquality0 ) * 100, "#,0.0" ) & "%25" )
 			VAR _mquality1 = [KPI Cash Conversion]
@@ -2199,18 +2170,18 @@ table _measures
 			VAR _mquality2_s = IF ( [_Is K], FORMAT ( ABS ( _mquality2 ) / 1000, "#,0.0" ), FORMAT ( ABS ( _mquality2 ), "#,0" ) )
 			VAR _mquality2_t = _mquality2_s & IF ( [_Is K] && TRUE (), "k" )
 			VAR _mquality2_m = IF ( ISBLANK ( _mquality2 ) || _mquality2_s IN { "0", "0.0", "0.00" }, "–", IF ( _mquality2 < 0, "(" & _mquality2_t & ")", _mquality2_t ) )
-			VAR _lquality = [KPI Cash Conversion]
-			VAR _lquality_m = IF ( ISBLANK ( _lquality ), "n/m", IF ( _lquality < 0, "−", "" ) & FORMAT ( ABS ( _lquality ), "0.00" ) & "×" )
-			VAR _owc = _any && "wc" IN _open
+			VAR _lwc = [Cash Conversion Cycle]
+			VAR _lwc_m = IF ( ISBLANK ( _lwc ), "n/m", FORMAT ( _lwc, "#,0.0" ) & " d" )
 			VAR _mwc0 = [DSO Days]
 			VAR _mwc0_m = IF ( ISBLANK ( _mwc0 ), "n/m", FORMAT ( _mwc0, "#,0.0" ) & " d" )
 			VAR _mwc1 = [DPO Days]
 			VAR _mwc1_m = IF ( ISBLANK ( _mwc1 ), "n/m", FORMAT ( _mwc1, "#,0.0" ) & " d" )
 			VAR _mwc2 = [Cash Conversion Cycle]
 			VAR _mwc2_m = IF ( ISBLANK ( _mwc2 ), "n/m", FORMAT ( _mwc2, "#,0.0" ) & " d" )
-			VAR _lwc = [Cash Conversion Cycle]
-			VAR _lwc_m = IF ( ISBLANK ( _lwc ), "n/m", FORMAT ( _lwc, "#,0.0" ) & " d" )
-			VAR _ofcf = _any && "fcf" IN _open
+			VAR _lfcf = [Free Cash Flow]
+			VAR _lfcf_s = IF ( [_Is K], FORMAT ( ABS ( _lfcf ) / 1000, "#,0.0" ), FORMAT ( ABS ( _lfcf ), "#,0" ) )
+			VAR _lfcf_t = _lfcf_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _lfcf_m = IF ( ISBLANK ( _lfcf ) || _lfcf_s IN { "0", "0.0", "0.00" }, "–", IF ( _lfcf < 0, "(" & _lfcf_t & ")", _lfcf_t ) )
 			VAR _mfcf0 = [Free Cash Flow]
 			VAR _mfcf0_s = IF ( [_Is K], FORMAT ( ABS ( _mfcf0 ) / 1000, "#,0.0" ), FORMAT ( ABS ( _mfcf0 ), "#,0" ) )
 			VAR _mfcf0_t = _mfcf0_s & IF ( [_Is K] && TRUE (), "k" )
@@ -2219,77 +2190,117 @@ table _measures
 			VAR _mfcf1_m = IF ( ISBLANK ( _mfcf1 ), "n/m", IF ( _mfcf1 < 0, "−", "" ) & FORMAT ( ABS ( _mfcf1 ) * 100, "#,0.0" ) & "%25" )
 			VAR _mfcf2 = [Capex Coverage]
 			VAR _mfcf2_m = IF ( ISBLANK ( _mfcf2 ), "no capex", IF ( _mfcf2 < 0, "−", "" ) & FORMAT ( ABS ( _mfcf2 ), "0.00" ) & "×" )
-			VAR _lfcf = [Free Cash Flow]
-			VAR _lfcf_s = IF ( [_Is K], FORMAT ( ABS ( _lfcf ) / 1000, "#,0.0" ), FORMAT ( ABS ( _lfcf ), "#,0" ) )
-			VAR _lfcf_t = _lfcf_s & IF ( [_Is K] && TRUE (), "k" )
-			VAR _lfcf_m = IF ( ISBLANK ( _lfcf ) || _lfcf_s IN { "0", "0.0", "0.00" }, "–", IF ( _lfcf < 0, "(" & _lfcf_t & ")", _lfcf_t ) )
-			VAR _olev = _any && "lev" IN _open
+			VAR _llev = [DSCR]
+			VAR _llev_m = IF ( ISBLANK ( _llev ), "n/m", IF ( _llev < 0, "−", "" ) & FORMAT ( ABS ( _llev ), "0.00" ) & "×" )
 			VAR _mlev0 = [DSCR]
 			VAR _mlev0_m = IF ( ISBLANK ( _mlev0 ), "n/m", IF ( _mlev0 < 0, "−", "" ) & FORMAT ( ABS ( _mlev0 ), "0.00" ) & "×" )
 			VAR _mlev1 = [Net Debt to EBITDA]
 			VAR _mlev1_m = IF ( ISBLANK ( _mlev1 ), "n/m", IF ( _mlev1 < 0, "−", "" ) & FORMAT ( ABS ( _mlev1 ), "0.00" ) & "×" )
 			VAR _mlev2 = [Payout Cover]
 			VAR _mlev2_m = IF ( ISBLANK ( _mlev2 ), "no draws", IF ( _mlev2 < 0, "−", "" ) & FORMAT ( ABS ( _mlev2 ), "0.00" ) & "×" )
-			VAR _llev = [DSCR]
-			VAR _llev_m = IF ( ISBLANK ( _llev ), "n/m", IF ( _llev < 0, "−", "" ) & FORMAT ( ABS ( _llev ), "0.00" ) & "×" )
 			RETURN
 			    IF (
 			        NOT ISBLANK ( _a )
-			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1120' height='886' viewBox='0 0 1120 886' preserveAspectRatio='xMidYMid meet' font-family='Segoe UI, sans-serif'><defs><pattern id='d' width='22' height='22' patternUnits='userSpaceOnUse'><circle cx='11' cy='11' r='1.6' fill='%23FF6F1A' fill-opacity='0.3'/></pattern></defs><rect width='1120' height='886' fill='url(%23d)'/>"
-			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 212.0 277.0 212.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<line x1='277.0' y1='212.0' x2='299.0' y2='212.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='212.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='216.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
-			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 536.0 277.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<line x1='277.0' y1='536.0' x2='299.0' y2='536.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='536.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='540.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
-			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 758.0 277.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<line x1='277.0' y1='758.0' x2='299.0' y2='758.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='758.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='762.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
-			    & IF ( _oquality, "<path d='M509.0 212.0 C535.0 212.0 535.0 110.0 561.0 110.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 212.0 C535.0 212.0 535.0 110.0 561.0 110.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
-			    & IF ( _oquality, "<path d='M801.0 110.0 C827.0 110.0 827.0 44.0 853.0 44.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='16.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='36.0' font-size='12' fill='%23525C70'>CFO margin</text><text x='867.0' y='57.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality0_m & "</text><text x='867.0' y='62.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ revenue" & "</text>"
-			    & "<path d='M801.0 110.0 C827.0 110.0 827.0 110.0 853.0 110.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='82.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='102.0' font-size='12' fill='%23525C70'>Cash conversion</text><text x='867.0' y='123.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality1_m & "</text><text x='867.0' y='128.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ net income" & "</text>"
-			    & "<path d='M801.0 110.0 C827.0 110.0 827.0 176.0 853.0 176.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='148.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='168.0' font-size='12' fill='%23525C70'>Accruals</text><text x='867.0' y='189.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality2_m & "</text><text x='867.0' y='194.0' font-size='10.5' fill='%235B6577'>" & "net income − CFO" & "</text>" )
-			    & IF ( _owc, "<path d='M509.0 212.0 C535.0 212.0 535.0 314.0 561.0 314.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 212.0 C535.0 212.0 535.0 314.0 561.0 314.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
-			    & IF ( _owc, "<path d='M801.0 314.0 C827.0 314.0 827.0 248.0 853.0 248.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='220.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='240.0' font-size='12' fill='%23525C70'>DSO</text><text x='867.0' y='261.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc0_m & "</text><text x='867.0' y='266.0' font-size='10.5' fill='%235B6577'>" & "A/R ÷ revenue × days" & "</text>"
-			    & "<path d='M801.0 314.0 C827.0 314.0 827.0 314.0 853.0 314.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='286.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='306.0' font-size='12' fill='%23525C70'>DPO</text><text x='867.0' y='327.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc1_m & "</text><text x='867.0' y='332.0' font-size='10.5' fill='%235B6577'>" & "A/P ÷ bills spend × days" & "</text>"
-			    & "<path d='M801.0 314.0 C827.0 314.0 827.0 380.0 853.0 380.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='352.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='372.0' font-size='12' fill='%23525C70'>Cash conversion cycle</text><text x='867.0' y='393.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc2_m & "</text><text x='867.0' y='398.0' font-size='10.5' fill='%235B6577'>" & "DSO − DPO (no inventory)" & "</text>" )
-			    & IF ( _ofcf, "<path d='M509.0 536.0 C535.0 536.0 535.0 536.0 561.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 536.0 C535.0 536.0 535.0 536.0 561.0 536.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
-			    & IF ( _ofcf, "<path d='M801.0 536.0 C827.0 536.0 827.0 470.0 853.0 470.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='442.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='462.0' font-size='12' fill='%23525C70'>Free cash flow</text><text x='867.0' y='483.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf0_m & "</text><text x='867.0' y='488.0' font-size='10.5' fill='%235B6577'>" & "CFO − capex + proceeds" & "</text>"
-			    & "<path d='M801.0 536.0 C827.0 536.0 827.0 536.0 853.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='508.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='528.0' font-size='12' fill='%23525C70'>Capex intensity</text><text x='867.0' y='549.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf1_m & "</text><text x='867.0' y='554.0' font-size='10.5' fill='%235B6577'>" & "capex ÷ revenue" & "</text>"
-			    & "<path d='M801.0 536.0 C827.0 536.0 827.0 602.0 853.0 602.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='574.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='594.0' font-size='12' fill='%23525C70'>Capex coverage</text><text x='867.0' y='615.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf2_m & "</text><text x='867.0' y='620.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ capex" & "</text>" )
-			    & IF ( _olev, "<path d='M509.0 758.0 C535.0 758.0 535.0 758.0 561.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 758.0 C535.0 758.0 535.0 758.0 561.0 758.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
-			    & IF ( _olev, "<path d='M801.0 758.0 C827.0 758.0 827.0 692.0 853.0 692.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='664.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='684.0' font-size='12' fill='%23525C70'>DSCR</text><text x='867.0' y='705.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev0_m & "</text><text x='867.0' y='710.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ (interest + term principal)" & "</text>"
-			    & "<path d='M801.0 758.0 C827.0 758.0 827.0 758.0 853.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='730.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='750.0' font-size='12' fill='%23525C70'>Net debt ÷ EBITDA</text><text x='867.0' y='771.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev1_m & "</text><text x='867.0' y='776.0' font-size='10.5' fill='%235B6577'>" & IF ( _netDebt < 0, "net cash · EBITDA annualised", "EBITDA annualised" ) & "</text>"
-			    & "<path d='M801.0 758.0 C827.0 758.0 827.0 824.0 853.0 824.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
-			    & "<rect x='853.0' y='796.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='816.0' font-size='12' fill='%23525C70'>Payout cover</text><text x='867.0' y='837.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev2_m & "</text><text x='867.0' y='842.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ owner draws" & "</text>" )
-			    & "<rect x='7.0' y='433.0' width='240' height='104' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='21.0' y='453.0' font-size='12' fill='%23525C70'>Net change in cash</text><text x='21.0' y='483.0' font-size='24' font-weight='600' fill='%232C3A54'>" & _net_m & "</text><text x='21.0' y='527.0' font-size='10.5' fill='%235B6577'>" & "closing less opening · " & _lbl & "</text>"
-			    & "<rect x='299.0' y='173.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='193.0' font-size='12' fill='%23525C70'>Operating →</text><text x='313.0' y='217.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sOP_m & "</text><text x='313.0' y='241.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
-			    & "<rect x='299.0' y='497.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='517.0' font-size='12' fill='%23525C70'>Investing →</text><text x='313.0' y='541.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sINV_m & "</text><text x='313.0' y='565.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
-			    & "<rect x='299.0' y='719.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='739.0' font-size='12' fill='%23525C70'>Financing →</text><text x='313.0' y='763.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sFIN_m & "</text><text x='313.0' y='787.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
-			    & "<rect x='561.0' y='75.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='95.0' font-size='12' fill='%23525C70'>Cash quality</text><text x='575.0' y='119.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lquality_m & "</text><text x='575.0' y='135.0' font-size='10.5' fill='%235B6577'>" & "cash conversion" & "</text>"
-			    & "<rect x='561.0' y='279.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='299.0' font-size='12' fill='%23525C70'>Working capital</text><text x='575.0' y='323.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lwc_m & "</text><text x='575.0' y='339.0' font-size='10.5' fill='%235B6577'>" & "cash conversion cycle" & "</text>"
-			    & "<rect x='561.0' y='501.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='521.0' font-size='12' fill='%23525C70'>FCF and investment</text><text x='575.0' y='545.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lfcf_m & "</text><text x='575.0' y='561.0' font-size='10.5' fill='%235B6577'>" & "free cash flow" & "</text>"
-			    & "<rect x='561.0' y='723.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='743.0' font-size='12' fill='%23525C70'>Leverage and coverage</text><text x='575.0' y='767.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _llev_m & "</text><text x='575.0' y='783.0' font-size='10.5' fill='%235B6577'>" & "debt service coverage" & "</text>"
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='380' height='600' viewBox='0 0 380 600' font-family='Segoe UI, sans-serif'>"
+			    & "<rect x='0.5' y='0.5' width='379' height='140' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='16' y='22' font-size='12' fill='%23525C70'>Cash quality · Operating</text><text x='364' y='24' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _lquality_m & "</text><text x='364' y='38' font-size='10' text-anchor='end' fill='%235B6577'>cash conversion</text>"
+			    & "<text x='16' y='60' font-size='12.5' fill='%232C3A54'>CFO margin</text><text x='16' y='72' font-size='9.5' fill='%235B6577'>" & "CFO ÷ revenue" & "</text><text x='364' y='64' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mquality0_m & "</text>"
+			    & "<text x='16' y='89' font-size='12.5' fill='%232C3A54'>Cash conversion</text><text x='16' y='101' font-size='9.5' fill='%235B6577'>" & "CFO ÷ net income" & "</text><text x='364' y='93' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mquality1_m & "</text>"
+			    & "<text x='16' y='118' font-size='12.5' fill='%232C3A54'>Accruals</text><text x='16' y='130' font-size='9.5' fill='%235B6577'>" & "net income − CFO" & "</text><text x='364' y='122' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mquality2_m & "</text>"
+			    & "<rect x='0.5' y='153.5' width='379' height='140' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='16' y='175' font-size='12' fill='%23525C70'>Working capital · Operating</text><text x='364' y='177' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _lwc_m & "</text><text x='364' y='191' font-size='10' text-anchor='end' fill='%235B6577'>cash conversion cycle</text>"
+			    & "<text x='16' y='213' font-size='12.5' fill='%232C3A54'>DSO</text><text x='16' y='225' font-size='9.5' fill='%235B6577'>" & "A/R ÷ revenue × days" & "</text><text x='364' y='217' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mwc0_m & "</text>"
+			    & "<text x='16' y='242' font-size='12.5' fill='%232C3A54'>DPO</text><text x='16' y='254' font-size='9.5' fill='%235B6577'>" & "A/P ÷ bills spend × days" & "</text><text x='364' y='246' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mwc1_m & "</text>"
+			    & "<text x='16' y='271' font-size='12.5' fill='%232C3A54'>Cash conversion cycle</text><text x='16' y='283' font-size='9.5' fill='%235B6577'>" & "DSO − DPO (no inventory)" & "</text><text x='364' y='275' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mwc2_m & "</text>"
+			    & "<rect x='0.5' y='306.5' width='379' height='140' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='16' y='328' font-size='12' fill='%23525C70'>FCF and investment · Investing</text><text x='364' y='330' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _lfcf_m & "</text><text x='364' y='344' font-size='10' text-anchor='end' fill='%235B6577'>free cash flow</text>"
+			    & "<text x='16' y='366' font-size='12.5' fill='%232C3A54'>Free cash flow</text><text x='16' y='378' font-size='9.5' fill='%235B6577'>" & "CFO − capex + proceeds" & "</text><text x='364' y='370' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mfcf0_m & "</text>"
+			    & "<text x='16' y='395' font-size='12.5' fill='%232C3A54'>Capex intensity</text><text x='16' y='407' font-size='9.5' fill='%235B6577'>" & "capex ÷ revenue" & "</text><text x='364' y='399' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mfcf1_m & "</text>"
+			    & "<text x='16' y='424' font-size='12.5' fill='%232C3A54'>Capex coverage</text><text x='16' y='436' font-size='9.5' fill='%235B6577'>" & "CFO ÷ capex" & "</text><text x='364' y='428' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mfcf2_m & "</text>"
+			    & "<rect x='0.5' y='459.5' width='379' height='140' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='16' y='481' font-size='12' fill='%23525C70'>Leverage and coverage · Financing</text><text x='364' y='483' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _llev_m & "</text><text x='364' y='497' font-size='10' text-anchor='end' fill='%235B6577'>debt service coverage</text>"
+			    & "<text x='16' y='519' font-size='12.5' fill='%232C3A54'>DSCR</text><text x='16' y='531' font-size='9.5' fill='%235B6577'>" & "CFO ÷ (interest + term principal)" & "</text><text x='364' y='523' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mlev0_m & "</text>"
+			    & "<text x='16' y='548' font-size='12.5' fill='%232C3A54'>Net debt ÷ EBITDA</text><text x='16' y='560' font-size='9.5' fill='%235B6577'>" & IF ( _netDebt < 0, "net cash · EBITDA annualised", "EBITDA annualised" ) & "</text><text x='364' y='552' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mlev1_m & "</text>"
+			    & "<text x='16' y='577' font-size='12.5' fill='%232C3A54'>Payout cover</text><text x='16' y='589' font-size='9.5' fill='%235B6577'>" & "CFO ÷ owner draws" & "</text><text x='364' y='581' font-size='13' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _mlev2_m & "</text>"
 			    & "</svg>"
 			    )
 		isHidden
 		displayFolder: 8 Report
-		lineageTag: 3d1f4f1a-e7bd-55ec-a6fc-ab060ff78797
+		lineageTag: e5a9c2e9-9288-55b8-93df-3f8d8e61c4ae
 		dataCategory: ImageUrl
 
-	/// Diagram page title.
+	/// Net change in cash as the sum of the direct cash postings (= M03 at the root); splits by activity, line, counterparty and month honour the tree's path. (spec M03 / M11)
+	measure 'Decomp Net Cash USD' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,KEEPFILTERS ( dim_date[month_index] >= _a )
+			            ,KEEPFILTERS ( dim_date[month_index] <= _b )
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 5 Diagram
+		lineageTag: 8dd842ff-0971-556b-9312-5037ff937dc7
+
+	/// Decomposition tree metric: net change in cash in the picked units (direct postings; the activity split is the direct view, the statement adds the non-cash gap).
+	measure 'Decomp Net Change' = DIVIDE ( [Decomp Net Cash USD], [_Div] )
+		displayFolder: 5 Diagram
+		lineageTag: 8eb32119-aa64-5a20-bf8a-3a8eed82b99b
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0;(#,0);–" )
+
+	/// Diagram pop-up title.
 	measure 'Diagram Title' = "Diagram · " & [Stmt Header Period]
 		isHidden
 		displayFolder: 8 Report
 		lineageTag: 0989e487-28b4-56d0-be8e-42ddf5038dc8
+
+	/// Statement row tooltip: the row label.
+	measure 'Tip Row Label' =
+			VAR _l            =
+			    IF (
+			        HASONEVALUE ( dim_stmt_row[row_label] )
+			        ,SELECTEDVALUE ( dim_stmt_row[row_label] )
+			        ,SELECTEDVALUE ( dim_stmt_row[section_label] )
+			    )
+			RETURN
+			    TRIM ( SUBSTITUTE ( _l, UNICHAR ( 8195 ), "" ) )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 36ab57d2-89a3-528c-9f7c-bcfcb5dfa272
+
+	/// Ledger row tooltip: cleared status in words.
+	measure 'Tip Clr' =
+			SWITCH (
+			    SELECTEDVALUE ( fact_cash_posting[cleared_status] )
+			    ,"Reconciled", "Reconciled (R)"
+			    ,"Cleared", "Cleared (C)"
+			    ,"Uncleared", "Uncleared"
+			    ,"NotApplicable", "Not applicable (Undeposited Funds)"
+			)
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 0d46d35e-ec90-5882-a1c5-f854f5dd857d
+
+	/// Ledger row tooltip: date, type and number.
+	measure 'Tip Ledger Head' = FORMAT ( SELECTEDVALUE ( fact_cash_posting[txn_date] ), "ddd d mmm yyyy" ) & " · " & SELECTEDVALUE ( fact_txn[type_no] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: be833e6f-637f-58d7-9a75-c7a76eb281cc
+
+	/// Ledger row tooltip: party.
+	measure 'Tip Party' = SELECTEDVALUE ( dim_counterparty[counterparty_name] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: df16e076-d85b-592b-b352-192b1f79ee5c
+
+	/// Ledger row tooltip: memo.
+	measure 'Tip Memo' = SELECTEDVALUE ( fact_cash_posting[ledger_memo] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 61670262-0f14-52df-a865-11c8ff9e5298
 
 	/// Control total of the check row for the picked month / year (blank for quarters: no controls).
 	measure 'Control Value' =

@@ -1,7 +1,7 @@
 /// Every pickable period (mock period()): window month indexes a .. b, prior window (-1 = none), labels, control key. The engine looks the picked period up here; DAX tests filter period_key directly.
 table param_period
-	lineageTag: feec8dce-63ca-5443-911e-10380169606d
 	isHidden
+	lineageTag: feec8dce-63ca-5443-911e-10380169606d
 
 	column period_key
 		dataType: string
@@ -254,3 +254,4 @@ table param_period
 				)
 
 	annotation PBI_ResultType = Table
+

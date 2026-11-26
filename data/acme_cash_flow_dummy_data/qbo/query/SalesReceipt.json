@@ -1,0 +1,195 @@
+{
+ "QueryResponse": {
+  "SalesReceipt": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "98",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-11T12:07:30-08:00",
+     "LastUpdatedTime": "2024-01-11T12:07:30-08:00"
+    },
+    "TxnDate": "2024-01-08",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "65",
+     "name": "Juniper Row Credit Union"
+    },
+    "DepositToAccountRef": {
+     "value": "5",
+     "name": "Undeposited Funds"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 1350.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 3,
+       "UnitPrice": 450.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Workshop seats"
+     },
+     {
+      "Amount": 1350.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 111.38
+    },
+    "TotalAmt": 1461.38,
+    "Balance": 0.0,
+    "DocNumber": "1066"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "168",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-27T14:04:40-08:00",
+     "LastUpdatedTime": "2024-01-27T14:04:40-08:00"
+    },
+    "TxnDate": "2024-01-24",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "87",
+     "name": "Saltmarsh Freight"
+    },
+    "DepositToAccountRef": {
+     "value": "5",
+     "name": "Undeposited Funds"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 1350.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 3,
+       "UnitPrice": 450.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Workshop seats"
+     },
+     {
+      "Amount": 1350.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 111.38
+    },
+    "TotalAmt": 1461.38,
+    "Balance": 0.0,
+    "DocNumber": "1081"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "265",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-02-13T17:31:10-08:00",
+     "LastUpdatedTime": "2024-02-13T17:31:10-08:00"
+    },
+    "TxnDate": "2024-02-12",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "57",
+     "name": "Kestrel Point Builders"
+    },
+    "DepositToAccountRef": {
+     "value": "5",
+     "name": "Undeposited Funds"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 495.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 1,
+       "UnitPrice": 495.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Workshop seats"
+     },
+     {
+      "Amount": 495.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 40.84
+    },
+    "TotalAmt": 535.84,
+    "Balance": 0.0,
+    "DocNumber": "1108"
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

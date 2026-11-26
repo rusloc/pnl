@@ -2,7 +2,7 @@
 table dim_date
 	lineageTag: 75f407da-9613-5526-afa7-3ffcc392e6ad
 
-	column 'date'
+	column date
 		dataType: dateTime
 		isKey
 		formatString: d
@@ -137,3 +137,4 @@ table dim_date
 				    add_mi
 
 	annotation PBI_ResultType = Table
+

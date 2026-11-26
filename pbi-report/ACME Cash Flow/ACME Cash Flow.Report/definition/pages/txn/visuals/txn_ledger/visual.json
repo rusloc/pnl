@@ -4,10 +4,10 @@
   "position": {
     "x": 34,
     "y": 308,
-    "z": 16590,
+    "z": 20990,
     "height": 474,
     "width": 1372,
-    "tabOrder": 16590
+    "tabOrder": 20990
   },
   "visual": {
     "visualType": "tableEx",
@@ -842,7 +842,21 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "type": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Canvas'"
+                }
+              }
+            },
+            "section": {
+              "expr": {
+                "Literal": {
+                  "Value": "'tt_ledger'"
                 }
               }
             }

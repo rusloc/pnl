@@ -1,0 +1,174 @@
+{
+ "QueryResponse": {
+  "CreditMemo": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "326",
+    "SyncToken": "1",
+    "MetaData": {
+     "CreateTime": "2024-02-28T09:50:40-08:00",
+     "LastUpdatedTime": "2024-04-17T09:49:40-07:00"
+    },
+    "TxnDate": "2024-02-26",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "62",
+     "name": "Thistledown Bakehouse"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 316.15,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "1",
+        "name": "Consulting - Hourly"
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       },
+       "Qty": 1,
+       "UnitPrice": 316.15,
+       "TaxCodeRef": {
+        "value": "NON"
+       }
+      },
+      "Description": "Service credit - scope adjustment"
+     },
+     {
+      "Amount": 316.15,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 0.0
+    },
+    "TotalAmt": 316.15,
+    "RemainingCredit": 0.0,
+    "Balance": 0.0,
+    "DocNumber": "1122"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "327",
+    "SyncToken": "1",
+    "MetaData": {
+     "CreateTime": "2024-02-28T11:30:46-08:00",
+     "LastUpdatedTime": "2024-04-17T11:26:57-07:00"
+    },
+    "TxnDate": "2024-02-27",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "85",
+     "name": "Ironvale Coffee Roasters"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 312.25,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 1,
+       "UnitPrice": 312.25,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Service credit - scope adjustment"
+     },
+     {
+      "Amount": 312.25,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 25.76
+    },
+    "TotalAmt": 338.01,
+    "RemainingCredit": 0.0,
+    "Balance": 0.0,
+    "DocNumber": "1123"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "773",
+    "SyncToken": "1",
+    "MetaData": {
+     "CreateTime": "2024-05-24T08:54:34-07:00",
+     "LastUpdatedTime": "2024-06-12T11:37:52-07:00"
+    },
+    "TxnDate": "2024-05-21",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "53",
+     "name": "Umberfield Coffee Roasters"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 513.95,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "3",
+        "name": "Managed Services Retainer"
+       },
+       "ClassRef": {
+        "value": "2",
+        "name": "Managed Services"
+       },
+       "Qty": 1,
+       "UnitPrice": 513.95,
+       "TaxCodeRef": {
+        "value": "NON"
+       }
+      },
+      "Description": "Service credit - scope adjustment"
+     },
+     {
+      "Amount": 513.95,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 0.0
+    },
+    "TotalAmt": 513.95,
+    "RemainingCredit": 0.0,
+    "Balance": 0.0,
+    "DocNumber": "1231"
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

@@ -1,0 +1,310 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Diagram (Statement)",
+  "name": "bm_stmt_dia",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_stmt_dia",
+      "grp_stmt_dia_dim",
+      "grp_stmt_dia_scrim",
+      "grp_stmt_dia_panel",
+      "grp_stmt_dia_h",
+      "grp_stmt_dia_i",
+      "grp_stmt_dia_x",
+      "grp_stmt_dia_tree",
+      "grp_stmt_dia_kpis",
+      "grp_stmt_dia_kpis_blk",
+      "grp_stmt_cal",
+      "grp_stmt_cal_scrim",
+      "grp_stmt_cal_panel",
+      "grp_stmt_cal_h",
+      "grp_stmt_cal_x",
+      "grp_stmt_cal_span",
+      "grp_stmt_cal_year",
+      "grp_stmt_cal_month",
+      "grp_stmt_cal_quarter",
+      "grp_stmt_cal_uh",
+      "grp_stmt_cal_units",
+      "grp_stmt_menu",
+      "grp_stmt_menu_scrim",
+      "grp_stmt_menu_panel",
+      "grp_stmt_menu_h",
+      "grp_stmt_menu_x",
+      "grp_stmt_menu_dp",
+      "grp_stmt_menu_stmt",
+      "grp_stmt_menu_act",
+      "grp_stmt_menu_txn",
+      "grp_stmt_menu_mv_box",
+      "grp_stmt_menu_mv",
+      "grp_stmt_menu_diagram",
+      "grp_stmt_menu_recon",
+      "grp_stmt_menu_sep",
+      "grp_stmt_menu_how",
+      "grp_stmt_cash",
+      "grp_stmt_cash_scrim",
+      "grp_stmt_cash_panel",
+      "grp_stmt_cash_h",
+      "grp_stmt_cash_x",
+      "grp_stmt_cash_c0",
+      "grp_stmt_cash_c0_blk",
+      "grp_stmt_cash_c1",
+      "grp_stmt_cash_c1_blk",
+      "grp_stmt_cash_c2",
+      "grp_stmt_cash_c2_blk",
+      "grp_stmt_cash_c3",
+      "grp_stmt_cash_c3_blk"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "stmt",
+    "sections": {
+      "stmt": {
+        "visualContainers": {
+          "grp_stmt_dia_dim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_dia_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_dia_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_dia_h": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_stmt_dia_i": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_stmt_dia_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_dia_tree": {
+            "singleVisual": {
+              "visualType": "decompositionTreeVisual"
+            }
+          },
+          "grp_stmt_dia_kpis": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_stmt_dia_kpis_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cal_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cal_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_cal_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_stmt_cal_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cal_span": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_stmt_cal_year": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_stmt_cal_month": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_stmt_cal_quarter": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_stmt_cal_uh": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_stmt_cal_units": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_stmt_menu_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_menu_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_stmt_menu_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_dp": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_stmt_menu_stmt": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_act": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_txn": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_mv_box": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_menu_mv": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_stmt_menu_diagram": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_recon": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_menu_sep": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_menu_how": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_stmt_cash_h": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_stmt_cash_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_c0": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_stmt_cash_c0_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_c1": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_stmt_cash_c1_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_c2": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_stmt_cash_c2_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_stmt_cash_c3": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_stmt_cash_c3_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_stmt_dia": {
+            "isHidden": false
+          },
+          "grp_stmt_cal": {
+            "isHidden": true
+          },
+          "grp_stmt_menu": {
+            "isHidden": true
+          },
+          "grp_stmt_cash": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

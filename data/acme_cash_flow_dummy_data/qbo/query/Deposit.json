@@ -1,0 +1,137 @@
+{
+ "QueryResponse": {
+  "Deposit": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "80",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-06T15:21:16-08:00",
+     "LastUpdatedTime": "2024-01-06T15:21:16-08:00"
+    },
+    "TxnDate": "2024-01-03",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "TotalAmt": 3797.5,
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 787.5,
+      "LinkedTxn": [
+       {
+        "TxnId": "60",
+        "TxnType": "Payment",
+        "TxnLineId": "0"
+       }
+      ]
+     },
+     {
+      "Id": "2",
+      "LineNum": 2,
+      "Amount": 3010.0,
+      "LinkedTxn": [
+       {
+        "TxnId": "62",
+        "TxnType": "Payment",
+        "TxnLineId": "0"
+       }
+      ]
+     }
+    ],
+    "PrivateNote": "Bank deposit"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "102",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-11T15:02:48-08:00",
+     "LastUpdatedTime": "2024-01-11T15:02:48-08:00"
+    },
+    "TxnDate": "2024-01-03",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "TotalAmt": 25000.0,
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 25000.0,
+      "DetailType": "DepositLineDetail",
+      "DepositLineDetail": {
+       "AccountRef": {
+        "value": "26",
+        "name": "Owner's Equity:Owner Investments"
+       },
+       "Entity": {
+        "value": "24",
+        "name": "Jordan Avery (Owner)",
+        "type": "VENDOR"
+       }
+      },
+      "Description": "Owner capital contribution"
+     }
+    ]
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "107",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-12T13:58:10-08:00",
+     "LastUpdatedTime": "2024-01-12T13:58:10-08:00"
+    },
+    "TxnDate": "2024-01-11",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "TotalAmt": 25000.0,
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 25000.0,
+      "DetailType": "DepositLineDetail",
+      "DepositLineDetail": {
+       "AccountRef": {
+        "value": "20",
+        "name": "Line of Credit - Larkspur Bank"
+       },
+       "Entity": {
+        "value": "16",
+        "name": "Larkspur Bank",
+        "type": "VENDOR"
+       }
+      },
+      "Description": "Line of credit draw"
+     }
+    ],
+    "PrivateNote": "Line of credit draw"
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

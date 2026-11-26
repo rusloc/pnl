@@ -1,0 +1,139 @@
+{
+ "QueryResponse": {
+  "BillPayment": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "115",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-14T08:19:25-08:00",
+     "LastUpdatedTime": "2024-01-14T08:19:25-08:00"
+    },
+    "TxnDate": "2024-01-11",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "VendorRef": {
+     "value": "30",
+     "name": "Quarrystone Data Labs"
+    },
+    "APAccountRef": {
+     "value": "14",
+     "name": "Accounts Payable (A/P)"
+    },
+    "TotalAmt": 558.78,
+    "Line": [
+     {
+      "Amount": 558.78,
+      "LinkedTxn": [
+       {
+        "TxnId": "77",
+        "TxnType": "Bill"
+       }
+      ]
+     }
+    ],
+    "PayType": "Check",
+    "CheckPayment": {
+     "BankAccountRef": {
+      "value": "1",
+      "name": "Operating Checking"
+     },
+     "PrintStatus": "NotSet"
+    },
+    "DocNumber": "2105"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "138",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-19T11:56:36-08:00",
+     "LastUpdatedTime": "2024-01-19T11:56:36-08:00"
+    },
+    "TxnDate": "2024-01-18",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "VendorRef": {
+     "value": "23",
+     "name": "Bramble Street Creative"
+    },
+    "APAccountRef": {
+     "value": "14",
+     "name": "Accounts Payable (A/P)"
+    },
+    "TotalAmt": 2240.0,
+    "Line": [
+     {
+      "Amount": 2240.0,
+      "LinkedTxn": [
+       {
+        "TxnId": "51",
+        "TxnType": "Bill"
+       }
+      ]
+     }
+    ],
+    "PayType": "Check",
+    "CheckPayment": {
+     "BankAccountRef": {
+      "value": "1",
+      "name": "Operating Checking"
+     },
+     "PrintStatus": "NotSet"
+    },
+    "DocNumber": "2106"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "156",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-23T16:21:16-08:00",
+     "LastUpdatedTime": "2024-01-23T16:21:16-08:00"
+    },
+    "TxnDate": "2024-01-18",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "VendorRef": {
+     "value": "33",
+     "name": "Saffron Pixel Studio"
+    },
+    "APAccountRef": {
+     "value": "14",
+     "name": "Accounts Payable (A/P)"
+    },
+    "TotalAmt": 2850.8,
+    "Line": [
+     {
+      "Amount": 2850.8,
+      "LinkedTxn": [
+       {
+        "TxnId": "37",
+        "TxnType": "Bill"
+       }
+      ]
+     }
+    ],
+    "PayType": "CreditCard",
+    "CreditCardPayment": {
+     "CCAccountRef": {
+      "value": "15",
+      "name": "Harborline Visa Business"
+     }
+    }
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

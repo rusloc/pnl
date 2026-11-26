@@ -14,6 +14,7 @@
       "grp_txn_menu_stmt",
       "grp_txn_menu_act",
       "grp_txn_menu_txn",
+      "grp_txn_menu_mv_box",
       "grp_txn_menu_mv",
       "grp_txn_menu_diagram",
       "grp_txn_menu_recon",
@@ -42,7 +43,17 @@
       "grp_txn_cash_c2",
       "grp_txn_cash_c2_blk",
       "grp_txn_cash_c3",
-      "grp_txn_cash_c3_blk"
+      "grp_txn_cash_c3_blk",
+      "grp_txn_dia",
+      "grp_txn_dia_dim",
+      "grp_txn_dia_scrim",
+      "grp_txn_dia_panel",
+      "grp_txn_dia_h",
+      "grp_txn_dia_i",
+      "grp_txn_dia_x",
+      "grp_txn_dia_tree",
+      "grp_txn_dia_kpis",
+      "grp_txn_dia_kpis_blk"
     ],
     "suppressActiveSection": true,
     "suppressData": true
@@ -91,6 +102,11 @@
           "grp_txn_menu_txn": {
             "singleVisual": {
               "visualType": "actionButton"
+            }
+          },
+          "grp_txn_menu_mv_box": {
+            "singleVisual": {
+              "visualType": "shape"
             }
           },
           "grp_txn_menu_mv": {
@@ -227,6 +243,51 @@
             "singleVisual": {
               "visualType": "actionButton"
             }
+          },
+          "grp_txn_dia_dim": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_txn_dia_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_txn_dia_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_txn_dia_h": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_txn_dia_i": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_txn_dia_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_txn_dia_tree": {
+            "singleVisual": {
+              "visualType": "decompositionTreeVisual"
+            }
+          },
+          "grp_txn_dia_kpis": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_txn_dia_kpis_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
           }
         },
         "visualContainerGroups": {
@@ -237,6 +298,9 @@
             "isHidden": true
           },
           "grp_txn_cash": {
+            "isHidden": true
+          },
+          "grp_txn_dia": {
             "isHidden": true
           }
         }

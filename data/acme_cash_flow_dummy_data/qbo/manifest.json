@@ -1,0 +1,554 @@
+{
+ "dataset": "acme_cash_flow_dummy_data",
+ "engine_version": "1.0.0",
+ "seed": 42,
+ "preset": "typical",
+ "config": {
+  "profile": "services",
+  "size": "S",
+  "home_currency": "USD",
+  "fiscal_year_start_month": 1,
+  "start_date": "2024-01-01",
+  "end_date": "2026-10-31",
+  "as_of": "2026-11-05T09:00:00-08:00",
+  "features": {
+   "classes": true,
+   "locations": false,
+   "account_numbers": false
+  },
+  "bank_accounts": [
+   "Operating Checking",
+   "Payroll Checking",
+   "Business Savings"
+  ],
+  "undeposited_funds_share": 0.4,
+  "credit_cards": {
+   "count": 1,
+   "share_target": 0.3
+  },
+  "scenarios": [
+   "S01",
+   "S02",
+   "S03",
+   "S04",
+   "S06",
+   "S07",
+   "S08",
+   "S13",
+   "S18"
+  ],
+  "modes": [
+   "files"
+  ],
+  "opening_position": "established",
+  "revenue_y1": 1200000.0,
+  "growth": 0.12
+ },
+ "counts": {
+  "Account": 60,
+  "Bill": 318,
+  "BillPayment": 314,
+  "Class": 4,
+  "CompanyInfo": 1,
+  "CreditCardPayment": 34,
+  "CreditMemo": 22,
+  "Customer": 66,
+  "Deposit": 329,
+  "Employee": 9,
+  "Invoice": 1243,
+  "Item": 6,
+  "JournalEntry": 150,
+  "Payment": 1028,
+  "PaymentMethod": 5,
+  "Preferences": 1,
+  "Purchase": 1471,
+  "RefundReceipt": 11,
+  "SalesReceipt": 86,
+  "Term": 5,
+  "Transfer": 111,
+  "Vendor": 38,
+  "VendorCredit": 11
+ },
+ "files": [
+  {
+   "path": "entities/Account.jsonl",
+   "bytes": 28884,
+   "sha256": "3973759b5f9ca13eadc3fda58756e98e03a44944454960166c87c465f296a067"
+  },
+  {
+   "path": "query/Account.json",
+   "bytes": 1906,
+   "sha256": "f545bc258ca637c4df3298a806257aa69dbc1111fa038b1e83046c39794c455b"
+  },
+  {
+   "path": "entities/Bill.jsonl",
+   "bytes": 267763,
+   "sha256": "4f474de5d1c0b9c005a7fe2c1cc0c5e6b811de26cfed328f834c8a0e4a8595ef"
+  },
+  {
+   "path": "query/Bill.json",
+   "bytes": 3814,
+   "sha256": "41688bc0433865a73b7a93869a0d3e3b8dcf2ddb1b84d3f051c47e1a6e6ebe83"
+  },
+  {
+   "path": "entities/BillPayment.jsonl",
+   "bytes": 186561,
+   "sha256": "e936cb8c99d7b8ecd8c672a28f2d361029c20ca385770e92995d16616296e418"
+  },
+  {
+   "path": "query/BillPayment.json",
+   "bytes": 2711,
+   "sha256": "4243f157563e2a4b49f32e4765493c6c60fe0547a53e46e5e605e283d987873e"
+  },
+  {
+   "path": "entities/Class.jsonl",
+   "bytes": 972,
+   "sha256": "9abfa9dfcf5602a09f221792c907d641c4483abcd01c8ac8a2fce4e18faef72d"
+  },
+  {
+   "path": "query/Class.json",
+   "bytes": 1099,
+   "sha256": "52e13e3d0bd143d20d7dd746007a70c4cf3ecee393bb24d21afa167cdc82028d"
+  },
+  {
+   "path": "entities/CompanyInfo.jsonl",
+   "bytes": 597,
+   "sha256": "3de5a0bae0b0acfa1ad7fe2c0e28551e1d1ce0818315694d7233de1b0d7b5151"
+  },
+  {
+   "path": "query/CompanyInfo.json",
+   "bytes": 924,
+   "sha256": "91a63228746634b565421d18fa9a8d607eb9e2e3ac0a4d00741aaa453856996f"
+  },
+  {
+   "path": "entities/CreditCardPayment.jsonl",
+   "bytes": 16847,
+   "sha256": "00c213f26aba83b41c08f45b95624c4606920d06758e219ff9e3412d46fd2537"
+  },
+  {
+   "path": "query/CreditCardPayment.json",
+   "bytes": 2142,
+   "sha256": "a4c14e54605c7994d6493c49b577bd8733468204d20820e10ff9d27c79fb67e1"
+  },
+  {
+   "path": "entities/CreditMemo.jsonl",
+   "bytes": 17639,
+   "sha256": "697f47e2b493693f94ee7b07d2854748b0da2114368d7fcb522229129717881e"
+  },
+  {
+   "path": "query/CreditMemo.json",
+   "bytes": 3687,
+   "sha256": "016e3201bc54753c57333e7906973b269240e766800ad5878c0443d4661770d9"
+  },
+  {
+   "path": "entities/Customer.jsonl",
+   "bytes": 30948,
+   "sha256": "2a1f4765c1c67148a36884e4e68b85b51e8d0a3b48466173e8b044010bdf5c4e"
+  },
+  {
+   "path": "query/Customer.json",
+   "bytes": 1943,
+   "sha256": "38618b3d47ba3b1bad16f858c17f4d9a8a0a823a6f5a57b191e5dea9a2f1c94c"
+  },
+  {
+   "path": "entities/Deposit.jsonl",
+   "bytes": 186696,
+   "sha256": "cee2bf4e8a0ed735cd0803222e4b5ce397edae524996772edd9dd73a0af30c42"
+  },
+  {
+   "path": "query/Deposit.json",
+   "bytes": 2834,
+   "sha256": "ef3a706770cb145b66e3582903ba7663d6ddd69beedaf999aed7be1fa237937b"
+  },
+  {
+   "path": "entities/Employee.jsonl",
+   "bytes": 2504,
+   "sha256": "4289a51aff395c4ea0cd62a1fd9e1ed819cbcf8264501ae23317bd2d2106ddf9"
+  },
+  {
+   "path": "query/Employee.json",
+   "bytes": 1212,
+   "sha256": "62ec34e697c3bb65d61dae9ca31d5860cd4e11ece871752f6c1715381b7b2b7e"
+  },
+  {
+   "path": "entities/Invoice.jsonl",
+   "bytes": 1201550,
+   "sha256": "beef3c4e3b34941c8d062385ace39143aebeb45f6b42d44a8832d69abd1e81d4"
+  },
+  {
+   "path": "query/Invoice.json",
+   "bytes": 4329,
+   "sha256": "5458cc96f7272fb8237bbf14272cb8d87f64ad3768f687cec997532933056398"
+  },
+  {
+   "path": "entities/Item.jsonl",
+   "bytes": 2159,
+   "sha256": "2c6f24b4acf8dba2e286f19cb61614f0b1163bdfdc26d416cf9070ab36920292"
+  },
+  {
+   "path": "query/Item.json",
+   "bytes": 1569,
+   "sha256": "051e55ffd919847cf3f128a902edb4b27a24d36faca35fe3978fb1249d29f3cf"
+  },
+  {
+   "path": "entities/JournalEntry.jsonl",
+   "bytes": 357751,
+   "sha256": "8fcbec226a140f7dc3341750fb9ce67b5ee81b179cf034631eac2b7c9032efcd"
+  },
+  {
+   "path": "query/JournalEntry.json",
+   "bytes": 16321,
+   "sha256": "eb60349a492d17f8c05e2ad11941ec922a300100122efba2a63ad199edf6499b"
+  },
+  {
+   "path": "entities/Payment.jsonl",
+   "bytes": 587678,
+   "sha256": "2214021b0ce218a84ac68151680fdd5c258ae2c09288366797a153d109b7fcc3"
+  },
+  {
+   "path": "query/Payment.json",
+   "bytes": 2610,
+   "sha256": "e54867897368bccb867f78d931b35c0394d0f2cbd00dc98a53f7e3a5bcaa074b"
+  },
+  {
+   "path": "entities/PaymentMethod.jsonl",
+   "bytes": 1053,
+   "sha256": "241234c554d1ab129491a1b4084d0342a6393a37f0adab3296cff987a8ef6a74"
+  },
+  {
+   "path": "query/PaymentMethod.json",
+   "bytes": 988,
+   "sha256": "9ea612ecb4ec5a2c35190d929dac317efc5315454083205066c8b0f1375e3287"
+  },
+  {
+   "path": "entities/Preferences.jsonl",
+   "bytes": 604,
+   "sha256": "b47d3b853302f1afc5eb778078624339ca715f4a00102a36e0af700246e3a77c"
+  },
+  {
+   "path": "query/Preferences.json",
+   "bytes": 949,
+   "sha256": "4f4691d1f0eb4a756edddfb73dbb1d176d7f839b3d695cddec82a2f85a8ab17b"
+  },
+  {
+   "path": "entities/Purchase.jsonl",
+   "bytes": 1084844,
+   "sha256": "a4b5cea6ffa12b3db4ed961dca7091142e68e722f895f6075aff5764ebe5d961"
+  },
+  {
+   "path": "query/Purchase.json",
+   "bytes": 3360,
+   "sha256": "ba502086c2eab9cee8d1422d5c560a2ae9ba7ab3b87de5cfa9ce2d3195011f84"
+  },
+  {
+   "path": "entities/RefundReceipt.jsonl",
+   "bytes": 9680,
+   "sha256": "3993714e490f5077f41d5e66e20b3815c08561232abe4e5c9d58b8927855f5c3"
+  },
+  {
+   "path": "query/RefundReceipt.json",
+   "bytes": 4059,
+   "sha256": "6f7e3e303e69269bbcf6f108244529be79b11ab4c1b087883c08f7a195ac5af7"
+  },
+  {
+   "path": "entities/SalesReceipt.jsonl",
+   "bytes": 74241,
+   "sha256": "95bf1e85c8b62e0fccb4376f9fe7fb00af69bdc151a095340c19c6a5dd573451"
+  },
+  {
+   "path": "query/SalesReceipt.json",
+   "bytes": 4015,
+   "sha256": "9a2f11519c7c506c062814d5bb01b6e11a73d2a0aedd07e7e7ff1c2d6ed26593"
+  },
+  {
+   "path": "entities/Term.jsonl",
+   "bytes": 1097,
+   "sha256": "83eeaa88847edf6781d2014721b77c0c4e9adced703e17e95275faff22a61170"
+  },
+  {
+   "path": "query/Term.json",
+   "bytes": 1025,
+   "sha256": "b96755ad32682f75a354e94365869be84e95eec2df872bb5fcfc520375c08e25"
+  },
+  {
+   "path": "entities/Transfer.jsonl",
+   "bytes": 45170,
+   "sha256": "b59c4a5addf3c46aabfc1d8ef6c763a7feb39c2063169c693a0c1b5d79897d31"
+  },
+  {
+   "path": "query/Transfer.json",
+   "bytes": 1801,
+   "sha256": "0b5c280f28fd8a64dfc61c0740055dea0cacf0f8b8cb0e3f8aa6d76bf22ed8ae"
+  },
+  {
+   "path": "entities/Vendor.jsonl",
+   "bytes": 14513,
+   "sha256": "46fddcc3d0ad120a55a58d6fcaa95509b87f2dae3bf2abb7a420618b6ab442bc"
+  },
+  {
+   "path": "query/Vendor.json",
+   "bytes": 1587,
+   "sha256": "74ce12b57cbb8a966be987c509ebb4e515eb3c3d4f51c96dd6034ecea86fcd2f"
+  },
+  {
+   "path": "entities/VendorCredit.jsonl",
+   "bytes": 8310,
+   "sha256": "4781780a0af77843c3b6df406967ecbd841937a8d6c42a49b52a0906c76ed5e0"
+  },
+  {
+   "path": "query/VendorCredit.json",
+   "bytes": 3424,
+   "sha256": "0c0e2b22541b5f101a623a61ee32ccce938d7786f833c42a92b6cda10e177747"
+  },
+  {
+   "path": "reports/CashFlow/2024-01-01_2024-06-30_Month.json",
+   "bytes": 8982,
+   "sha256": "f04bef0af4b673c36305478dfc2ff8d9f57cf7ae278e92af28e306aae19129ef"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2024-01-01_2024-06-30_Month.json",
+   "bytes": 11227,
+   "sha256": "512fa8cf5940724ef0350b46e7d8f2c0a8b3b6d422180b39a3105f73b439e425"
+  },
+  {
+   "path": "reports/BalanceSheet/2024-01-01_2024-06-30_Month.json",
+   "bytes": 12677,
+   "sha256": "ebb33cb64acd5fdb38fc2ba647d5a50e7aaf4366d0ccd7c21d94b454e7f1a128"
+  },
+  {
+   "path": "reports/CashFlow/2024-01-01_2024-06-30_Total.json",
+   "bytes": 4147,
+   "sha256": "9f8340dc25bd69940b46c864e45a9082bae323b64e43b97f292cac67ae70adb9"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2024-01-01_2024-06-30_Total.json",
+   "bytes": 4986,
+   "sha256": "a2ad739bc61036945421df9fe033fe634bc7c6f60a7c094c128112f289cb1aa1"
+  },
+  {
+   "path": "reports/BalanceSheet/2024-01-01_2024-06-30_Total.json",
+   "bytes": 6147,
+   "sha256": "5628a16e1d0cede32f70348fb03a68a86d206a1ece23bf600222a5046e2cd07c"
+  },
+  {
+   "path": "reports/GeneralLedger/2024-01-01_2024-06-30_Total.json",
+   "bytes": 551962,
+   "sha256": "d590dc558595dd12ad9a21647ec019d85138ce078aae22be2f35b87ac94b914f"
+  },
+  {
+   "path": "reports/TransactionList/2024-01-01_2024-06-30_Total.json",
+   "bytes": 226772,
+   "sha256": "547cb7cd71108cd9ad1aaa1309839b1fd7bb95c90f6b8efc796295ad1ad6e12b"
+  },
+  {
+   "path": "reports/CashFlow/2024-07-01_2024-12-31_Month.json",
+   "bytes": 8448,
+   "sha256": "372947ba4ca1bf058dcfdb84b84303c57d04ea3f8b1982b914e4a9454bae0332"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2024-07-01_2024-12-31_Month.json",
+   "bytes": 11087,
+   "sha256": "9d5443386fc7cbbf7123226f1e4afd59a269fcb1b6e8f0bd5e4ee10148c10c24"
+  },
+  {
+   "path": "reports/BalanceSheet/2024-07-01_2024-12-31_Month.json",
+   "bytes": 12877,
+   "sha256": "80e1798eb069b15e72a8868d53be44c22c930b407e8d741fd3e995b6b1b88a6a"
+  },
+  {
+   "path": "reports/CashFlow/2024-07-01_2024-12-31_Total.json",
+   "bytes": 3595,
+   "sha256": "d0be29cc7d27bcde09564c931a8093c528417f6b61b1b85aeeaf406530b25f26"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2024-07-01_2024-12-31_Total.json",
+   "bytes": 4902,
+   "sha256": "147d07bba9303b386786287709315ff01594254a6140cdc4fbd82ea1a22f0159"
+  },
+  {
+   "path": "reports/BalanceSheet/2024-07-01_2024-12-31_Total.json",
+   "bytes": 6346,
+   "sha256": "f229b11176588b7672d8ecc75d2a452162eff13df7f58dfcbe2c845ed7a1b69c"
+  },
+  {
+   "path": "reports/GeneralLedger/2024-07-01_2024-12-31_Total.json",
+   "bytes": 545342,
+   "sha256": "60e8354d363db9d5258a7d818830af7363362022ce364bee28616901b9f5d689"
+  },
+  {
+   "path": "reports/TransactionList/2024-07-01_2024-12-31_Total.json",
+   "bytes": 220525,
+   "sha256": "2c562550859f193c2e5f43adebbb3e07c31a658b32507ccbac36e7c2ad1fc96c"
+  },
+  {
+   "path": "reports/CashFlow/2025-01-01_2025-06-30_Month.json",
+   "bytes": 9218,
+   "sha256": "757cf4f0cf8913018541f1cd5dbdb9fd4a730e0f64bda0c7a9b805caf69b6f25"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2025-01-01_2025-06-30_Month.json",
+   "bytes": 11604,
+   "sha256": "9ddc3884c3012ac40aa198fecb4797cd66021d8309d5c4ddea369632480e2295"
+  },
+  {
+   "path": "reports/BalanceSheet/2025-01-01_2025-06-30_Month.json",
+   "bytes": 12894,
+   "sha256": "14aeaee4358c4b6a45764c1f4345fe5e8d7d8c6bc333f34f794089489c8fcb78"
+  },
+  {
+   "path": "reports/CashFlow/2025-01-01_2025-06-30_Total.json",
+   "bytes": 4349,
+   "sha256": "f34c497c34b4cb228ed9106827f476eee6f85138b170586c9bff35a8b42dd526"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2025-01-01_2025-06-30_Total.json",
+   "bytes": 5157,
+   "sha256": "9be796fb15745dda8456d84ac8a94a871d74e9fdbb1c9c59f586eff202a503e8"
+  },
+  {
+   "path": "reports/BalanceSheet/2025-01-01_2025-06-30_Total.json",
+   "bytes": 6348,
+   "sha256": "f90203b015910e26b7424d1cb7c1f26dd13a7a7ef35b743e4130b3309ab09436"
+  },
+  {
+   "path": "reports/GeneralLedger/2025-01-01_2025-06-30_Total.json",
+   "bytes": 550243,
+   "sha256": "de8db49cfa22f4014317b9601e2417371eeb4c2a97ad048d38fc904a16fb5782"
+  },
+  {
+   "path": "reports/TransactionList/2025-01-01_2025-06-30_Total.json",
+   "bytes": 222103,
+   "sha256": "aa18c2187fa122ce5607c213fca330bc2e04180d0d9076c6cabe9d0f0e297cc9"
+  },
+  {
+   "path": "reports/CashFlow/2025-07-01_2025-12-31_Month.json",
+   "bytes": 8694,
+   "sha256": "9ff95319256912d075c5f267f20721ff100f46e6f32c539c09f05829c02e4d89"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2025-07-01_2025-12-31_Month.json",
+   "bytes": 11275,
+   "sha256": "8977ddbc07ed98e2df5482f746e7246834819ce8a54814609a9f26e2f44f531c"
+  },
+  {
+   "path": "reports/BalanceSheet/2025-07-01_2025-12-31_Month.json",
+   "bytes": 13093,
+   "sha256": "8a17d52aa7329394519f17631577357145d7864745426d62a3b8d9221a543263"
+  },
+  {
+   "path": "reports/CashFlow/2025-07-01_2025-12-31_Total.json",
+   "bytes": 3977,
+   "sha256": "85f0e5adad44b703ce9f951227f3e244a62a0afa83f29b6f0a1a6e511908f37c"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2025-07-01_2025-12-31_Total.json",
+   "bytes": 4984,
+   "sha256": "ab9ac90815022a7516cbc1e355797458815697ddba4c37d57815cfff02718acc"
+  },
+  {
+   "path": "reports/BalanceSheet/2025-07-01_2025-12-31_Total.json",
+   "bytes": 6258,
+   "sha256": "77f7ea5c6f97a102a8113b751c060c39e1c33646ffe11139cf5d8836a0f5d3ea"
+  },
+  {
+   "path": "reports/GeneralLedger/2025-07-01_2025-12-31_Total.json",
+   "bytes": 554840,
+   "sha256": "95e23256021488a064a6c6948506b460d5e537f562c9d09f4dea20fd39633dfa"
+  },
+  {
+   "path": "reports/TransactionList/2025-07-01_2025-12-31_Total.json",
+   "bytes": 219501,
+   "sha256": "574d67bbdf2b8f9c301621347a7922d24297ce4a778d88547206df4aca0dab13"
+  },
+  {
+   "path": "reports/CashFlow/2026-01-01_2026-06-30_Month.json",
+   "bytes": 9250,
+   "sha256": "b660c6b2d18546e92122e32bb6837659e0698c9ecf83f3a6f2f98639541deab3"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2026-01-01_2026-06-30_Month.json",
+   "bytes": 11455,
+   "sha256": "5248b1711fb02b7be18c14efd747ce7189c7e6b4ba2b151003dcb2c96b65fe81"
+  },
+  {
+   "path": "reports/BalanceSheet/2026-01-01_2026-06-30_Month.json",
+   "bytes": 12951,
+   "sha256": "b2dd2ccb19754b19b7f4943f60e8effa7e918a2a97eb7abde988f5f50a7635fe"
+  },
+  {
+   "path": "reports/CashFlow/2026-01-01_2026-06-30_Total.json",
+   "bytes": 4262,
+   "sha256": "8dc0b5dd35b0f0c5239ded8171a400099e15afd667c9c3eb88ad87da79208d8d"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2026-01-01_2026-06-30_Total.json",
+   "bytes": 5071,
+   "sha256": "6fcc356d48445d7e13f51b348ec54f9e2a106450ec31a6541fca712c7fa738ae"
+  },
+  {
+   "path": "reports/BalanceSheet/2026-01-01_2026-06-30_Total.json",
+   "bytes": 6351,
+   "sha256": "b6d30b684df9e670dc1004198a22a7c4d2246ba08f1f3331cbf6fb607ac7aa87"
+  },
+  {
+   "path": "reports/GeneralLedger/2026-01-01_2026-06-30_Total.json",
+   "bytes": 541135,
+   "sha256": "1ea2cad0b7d24f675b112f5edc4568ea6c4ef7541bfe92926fa555e4d73a5a80"
+  },
+  {
+   "path": "reports/TransactionList/2026-01-01_2026-06-30_Total.json",
+   "bytes": 215686,
+   "sha256": "f08ab713f3c26c6b5a88e40985684e61d7060755028034cec971ab57050b71d6"
+  },
+  {
+   "path": "reports/CashFlow/2026-07-01_2026-10-31_Month.json",
+   "bytes": 6985,
+   "sha256": "ae12b5013442082852cb1fbfdd1b03a820c21e6ac695eb599b6eab3b701caf23"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2026-07-01_2026-10-31_Month.json",
+   "bytes": 8988,
+   "sha256": "6ebc4ac0199fa2f26d34f622d6a0dd490de0265f7573be645c8ed63619e50f36"
+  },
+  {
+   "path": "reports/BalanceSheet/2026-07-01_2026-10-31_Month.json",
+   "bytes": 10375,
+   "sha256": "48dd2a31e117f021c30c025399e113e7753f48b3dbba8ef681e42e1699f13960"
+  },
+  {
+   "path": "reports/CashFlow/2026-07-01_2026-10-31_Total.json",
+   "bytes": 3902,
+   "sha256": "515bff13719b3f53f5a73087dba38320e691d950f2c17d65e3090c2b5151e95d"
+  },
+  {
+   "path": "reports/ProfitAndLoss/2026-07-01_2026-10-31_Total.json",
+   "bytes": 4884,
+   "sha256": "f5ea09523d532edc170f05325dd8cd88732b11d4927f6ee357c52b7e0c4a5a37"
+  },
+  {
+   "path": "reports/BalanceSheet/2026-07-01_2026-10-31_Total.json",
+   "bytes": 6454,
+   "sha256": "e374e3e4a713d38c48c48fc11aa00f94f2c41ce2d2b8c2052cfbe7e6e9325022"
+  },
+  {
+   "path": "reports/GeneralLedger/2026-07-01_2026-10-31_Total.json",
+   "bytes": 398726,
+   "sha256": "e025dd2f060d29c940fd87dabd69ff59cae52b9529e4e0e03e746591048ad038"
+  },
+  {
+   "path": "reports/TransactionList/2026-07-01_2026-10-31_Total.json",
+   "bytes": 158756,
+   "sha256": "a4caf75c5c0f1f75f3972f4a2678e9bd4dcd6aa7d3c250f24499b3616a05feb0"
+  },
+  {
+   "path": "expected/scenarios.jsonl",
+   "bytes": 3797,
+   "sha256": "ad34498c16659a31dafb94f8aad4076d200ee1b375210abaa3c30c8077b72bf2"
+  },
+  {
+   "path": "expected/chains.jsonl",
+   "bytes": 250160,
+   "sha256": "fb334999ecdf78dfe6e8281745b717fddc6cf92729d4a4ad8a1e0607268df8a7"
+  }
+ ]
+}

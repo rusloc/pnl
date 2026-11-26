@@ -1,0 +1,69 @@
+{
+ "QueryResponse": {
+  "Item": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "1",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Consulting - Hourly",
+    "FullyQualifiedName": "Consulting - Hourly",
+    "Type": "Service",
+    "Active": true,
+    "Taxable": false,
+    "UnitPrice": 0,
+    "IncomeAccountRef": {
+     "value": "30",
+     "name": "Service Revenue:Consulting"
+    }
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "2",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Project Milestone",
+    "FullyQualifiedName": "Project Milestone",
+    "Type": "Service",
+    "Active": true,
+    "Taxable": false,
+    "UnitPrice": 0,
+    "IncomeAccountRef": {
+     "value": "30",
+     "name": "Service Revenue:Consulting"
+    }
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "3",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2023-12-28T10:15:00-08:00",
+     "LastUpdatedTime": "2023-12-28T10:15:00-08:00"
+    },
+    "Name": "Managed Services Retainer",
+    "FullyQualifiedName": "Managed Services Retainer",
+    "Type": "Service",
+    "Active": true,
+    "Taxable": false,
+    "UnitPrice": 0,
+    "IncomeAccountRef": {
+     "value": "31",
+     "name": "Service Revenue:Managed Services"
+    }
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

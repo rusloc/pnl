@@ -1,0 +1,702 @@
+{
+ "QueryResponse": {
+  "JournalEntry": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "55",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-02T10:12:00-08:00",
+     "LastUpdatedTime": "2024-01-02T10:12:00-08:00"
+    },
+    "TxnDate": "2023-12-31",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "Adjustment": false,
+    "TotalAmt": 179650.0,
+    "Line": [
+     {
+      "Id": "0",
+      "LineNum": 1,
+      "Amount": 48250.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "1",
+        "name": "Operating Checking"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "1",
+      "LineNum": 2,
+      "Amount": 2400.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "2",
+        "name": "Payroll Checking"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "2",
+      "LineNum": 3,
+      "Amount": 60000.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "3",
+        "name": "Business Savings"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "3",
+      "LineNum": 4,
+      "Amount": 13000.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "13",
+        "name": "Security Deposits"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "4",
+      "LineNum": 5,
+      "Amount": 24000.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "8",
+        "name": "Office Equipment:Original Cost"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "5",
+      "LineNum": 6,
+      "Amount": 9600.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "9",
+        "name": "Office Equipment:Accumulated Depreciation"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "6",
+      "LineNum": 7,
+      "Amount": 32000.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "11",
+        "name": "Vehicles:Original Cost"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "7",
+      "LineNum": 8,
+      "Amount": 19200.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "12",
+        "name": "Vehicles:Accumulated Depreciation"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "8",
+      "LineNum": 9,
+      "Amount": 4870.35,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "15",
+        "name": "Harborline Visa Business"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "9",
+      "LineNum": 10,
+      "Amount": 6120.4,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "17",
+        "name": "Payroll Liabilities:Federal Payroll Taxes"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "10",
+      "LineNum": 11,
+      "Amount": 1084.1,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "18",
+        "name": "Payroll Liabilities:State Payroll Taxes"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "11",
+      "LineNum": 12,
+      "Amount": 1390.55,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "19",
+        "name": "Sales Tax Payable"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "12",
+      "LineNum": 13,
+      "Amount": 50000.0,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "26",
+        "name": "Owner's Equity:Owner Investments"
+       }
+      },
+      "Description": "Opening balance"
+     },
+     {
+      "Id": "13",
+      "LineNum": 14,
+      "Amount": 87384.6,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "28",
+        "name": "Retained Earnings"
+       }
+      },
+      "Description": "Opening balance"
+     }
+    ],
+    "DocNumber": "OB-2023",
+    "PrivateNote": "Opening balances as of 2023-12-31 (conversion)"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "110",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-13T08:13:44-08:00",
+     "LastUpdatedTime": "2024-01-13T08:13:44-08:00"
+    },
+    "TxnDate": "2024-01-12",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "Adjustment": false,
+    "TotalAmt": 19450.65,
+    "Line": [
+     {
+      "Id": "0",
+      "LineNum": 1,
+      "Amount": 2292.31,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "39",
+         "name": "Avery Pendleton"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "1",
+      "LineNum": 2,
+      "Amount": 2803.85,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "40",
+         "name": "Casey Hollister"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "2",
+      "LineNum": 3,
+      "Amount": 3665.38,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "41",
+         "name": "Jules Brightwater"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "3",
+      "LineNum": 4,
+      "Amount": 2919.23,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "42",
+         "name": "Quinn Greywood"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "4",
+      "LineNum": 5,
+      "Amount": 3065.38,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "43",
+         "name": "Morgan Everly"
+        }
+       },
+       "ClassRef": {
+        "value": "2",
+        "name": "Managed Services"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "5",
+      "LineNum": 6,
+      "Amount": 3123.08,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "44",
+         "name": "Reese Sterling"
+        }
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "6",
+      "LineNum": 7,
+      "Amount": 1581.42,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "40",
+        "name": "Payroll Expenses:Employer Payroll Taxes"
+       },
+       "ClassRef": {
+        "value": "4",
+        "name": "Overhead"
+       }
+      },
+      "Description": "Employer payroll taxes"
+     },
+     {
+      "Id": "7",
+      "LineNum": 8,
+      "Amount": 5235.66,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "17",
+        "name": "Payroll Liabilities:Federal Payroll Taxes"
+       }
+      },
+      "Description": "Federal withholding and FICA"
+     },
+     {
+      "Id": "8",
+      "LineNum": 9,
+      "Amount": 1018.54,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "18",
+        "name": "Payroll Liabilities:State Payroll Taxes"
+       }
+      },
+      "Description": "State withholding and unemployment"
+     },
+     {
+      "Id": "9",
+      "LineNum": 10,
+      "Amount": 13196.45,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "2",
+        "name": "Payroll Checking"
+       },
+       "Entity": {
+        "Type": "Vendor",
+        "EntityRef": {
+         "value": "25",
+         "name": "Paystream Payroll Services"
+        }
+       }
+      },
+      "Description": "Net pay"
+     }
+    ],
+    "DocNumber": "PR-20240112",
+    "PrivateNote": "Payroll run, pay date 2024-01-12"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "169",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-01-27T14:18:10-08:00",
+     "LastUpdatedTime": "2024-01-27T14:18:10-08:00"
+    },
+    "TxnDate": "2024-01-26",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "Adjustment": false,
+    "TotalAmt": 19450.65,
+    "Line": [
+     {
+      "Id": "0",
+      "LineNum": 1,
+      "Amount": 2292.31,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "39",
+         "name": "Avery Pendleton"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "1",
+      "LineNum": 2,
+      "Amount": 2803.85,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "40",
+         "name": "Casey Hollister"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "2",
+      "LineNum": 3,
+      "Amount": 3665.38,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "41",
+         "name": "Jules Brightwater"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "3",
+      "LineNum": 4,
+      "Amount": 2919.23,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "42",
+         "name": "Quinn Greywood"
+        }
+       },
+       "ClassRef": {
+        "value": "1",
+        "name": "Consulting"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "4",
+      "LineNum": 5,
+      "Amount": 3065.38,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "43",
+         "name": "Morgan Everly"
+        }
+       },
+       "ClassRef": {
+        "value": "2",
+        "name": "Managed Services"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "5",
+      "LineNum": 6,
+      "Amount": 3123.08,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "39",
+        "name": "Payroll Expenses:Wages"
+       },
+       "Entity": {
+        "Type": "Employee",
+        "EntityRef": {
+         "value": "44",
+         "name": "Reese Sterling"
+        }
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       }
+      },
+      "Description": "Gross wages"
+     },
+     {
+      "Id": "6",
+      "LineNum": 7,
+      "Amount": 1581.42,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Debit",
+       "AccountRef": {
+        "value": "40",
+        "name": "Payroll Expenses:Employer Payroll Taxes"
+       },
+       "ClassRef": {
+        "value": "4",
+        "name": "Overhead"
+       }
+      },
+      "Description": "Employer payroll taxes"
+     },
+     {
+      "Id": "7",
+      "LineNum": 8,
+      "Amount": 5235.66,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "17",
+        "name": "Payroll Liabilities:Federal Payroll Taxes"
+       }
+      },
+      "Description": "Federal withholding and FICA"
+     },
+     {
+      "Id": "8",
+      "LineNum": 9,
+      "Amount": 1018.54,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "18",
+        "name": "Payroll Liabilities:State Payroll Taxes"
+       }
+      },
+      "Description": "State withholding and unemployment"
+     },
+     {
+      "Id": "9",
+      "LineNum": 10,
+      "Amount": 13196.45,
+      "DetailType": "JournalEntryLineDetail",
+      "JournalEntryLineDetail": {
+       "PostingType": "Credit",
+       "AccountRef": {
+        "value": "2",
+        "name": "Payroll Checking"
+       },
+       "Entity": {
+        "Type": "Vendor",
+        "EntityRef": {
+         "value": "25",
+         "name": "Paystream Payroll Services"
+        }
+       }
+      },
+      "Description": "Net pay"
+     }
+    ],
+    "DocNumber": "PR-20240126",
+    "PrivateNote": "Payroll run, pay date 2024-01-26"
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "grp_txn_menu_diagram",
   "position": {
-    "x": 1136,
-    "y": 294,
-    "z": 18790,
+    "x": 1140,
+    "y": 306,
+    "z": 23200,
     "height": 34,
-    "width": 276,
-    "tabOrder": 18790
+    "width": 268,
+    "tabOrder": 23200
   },
   "visual": {
     "visualType": "actionButton",
@@ -319,7 +319,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Diagram'"
+                  "Value": "'Open the Diagram pop-up'"
                 }
               }
             }
@@ -373,21 +373,21 @@
             "type": {
               "expr": {
                 "Literal": {
-                  "Value": "'PageNavigation'"
+                  "Value": "'Bookmark'"
                 }
               }
             },
-            "navigationSection": {
+            "bookmark": {
               "expr": {
                 "Literal": {
-                  "Value": "'diagram'"
+                  "Value": "'bm_txn_dia'"
                 }
               }
             },
             "tooltip": {
               "expr": {
                 "Literal": {
-                  "Value": "'Open Diagram'"
+                  "Value": "'Open the Diagram'"
                 }
               }
             }

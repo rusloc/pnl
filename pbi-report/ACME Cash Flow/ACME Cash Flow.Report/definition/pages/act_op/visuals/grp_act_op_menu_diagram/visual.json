@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "grp_act_op_menu_diagram",
   "position": {
-    "x": 1136,
-    "y": 294,
-    "z": 7460,
+    "x": 1140,
+    "y": 306,
+    "z": 8570,
     "height": 34,
-    "width": 276,
-    "tabOrder": 7460
+    "width": 268,
+    "tabOrder": 8570
   },
   "visual": {
     "visualType": "actionButton",
@@ -319,7 +319,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Diagram'"
+                  "Value": "'Open the Diagram pop-up'"
                 }
               }
             }
@@ -373,21 +373,21 @@
             "type": {
               "expr": {
                 "Literal": {
-                  "Value": "'PageNavigation'"
+                  "Value": "'Bookmark'"
                 }
               }
             },
-            "navigationSection": {
+            "bookmark": {
               "expr": {
                 "Literal": {
-                  "Value": "'diagram'"
+                  "Value": "'bm_act_op_dia'"
                 }
               }
             },
             "tooltip": {
               "expr": {
                 "Literal": {
-                  "Value": "'Open Diagram'"
+                  "Value": "'Open the Diagram'"
                 }
               }
             }

@@ -1,0 +1,195 @@
+{
+ "QueryResponse": {
+  "RefundReceipt": [
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "607",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-04-18T13:53:38-07:00",
+     "LastUpdatedTime": "2024-04-18T13:53:38-07:00"
+    },
+    "TxnDate": "2024-04-16",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "79",
+     "name": "Willowmere Dental Group"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 425.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 1,
+       "UnitPrice": 425.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Refund - cancelled workshop seat"
+     },
+     {
+      "Amount": 425.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 35.06
+    },
+    "TotalAmt": 460.06,
+    "Balance": 0.0,
+    "DocNumber": "1195"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "786",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-05-26T15:15:22-07:00",
+     "LastUpdatedTime": "2024-05-26T15:15:22-07:00"
+    },
+    "TxnDate": "2024-05-24",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "45",
+     "name": "Redfern Builders"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 450.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 1,
+       "UnitPrice": 450.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Refund - cancelled workshop seat"
+     },
+     {
+      "Amount": 450.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 37.12
+    },
+    "TotalAmt": 487.12,
+    "Balance": 0.0,
+    "DocNumber": "1236"
+   },
+   {
+    "domain": "QBO",
+    "sparse": false,
+    "Id": "816",
+    "SyncToken": "0",
+    "MetaData": {
+     "CreateTime": "2024-06-04T17:02:08-07:00",
+     "LastUpdatedTime": "2024-06-04T17:02:08-07:00"
+    },
+    "TxnDate": "2024-06-04",
+    "CurrencyRef": {
+     "value": "USD",
+     "name": "United States Dollar"
+    },
+    "CustomerRef": {
+     "value": "50",
+     "name": "Quillstone Realty"
+    },
+    "DepositToAccountRef": {
+     "value": "1",
+     "name": "Operating Checking"
+    },
+    "PaymentMethodRef": {
+     "value": "3",
+     "name": "Credit Card"
+    },
+    "Line": [
+     {
+      "Id": "1",
+      "LineNum": 1,
+      "Amount": 425.0,
+      "DetailType": "SalesItemLineDetail",
+      "SalesItemLineDetail": {
+       "ItemRef": {
+        "value": "4",
+        "name": "Workshop Seat"
+       },
+       "ClassRef": {
+        "value": "3",
+        "name": "Training"
+       },
+       "Qty": 1,
+       "UnitPrice": 425.0,
+       "TaxCodeRef": {
+        "value": "TAX"
+       }
+      },
+      "Description": "Refund - cancelled workshop seat"
+     },
+     {
+      "Amount": 425.0,
+      "DetailType": "SubTotalLineDetail",
+      "SubTotalLineDetail": {}
+     }
+    ],
+    "TxnTaxDetail": {
+     "TotalTax": 35.06
+    },
+    "TotalAmt": 460.06,
+    "Balance": 0.0,
+    "DocNumber": "1243"
+   }
+  ],
+  "startPosition": 1,
+  "maxResults": 3
+ },
+ "time": "2026-11-05T09:00:00-08:00"
+}
