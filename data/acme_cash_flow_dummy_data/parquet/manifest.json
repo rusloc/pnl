@@ -1,0 +1,300 @@
+{
+ "dataset": "acme_cash_flow_dummy_data",
+ "engine_version": "1.0.0",
+ "seed": 42,
+ "preset": "typical",
+ "as_of": "2026-11-05T09:00:00",
+ "start_date": "2024-01-01",
+ "end_date": "2026-10-31",
+ "currency": "USD",
+ "scenarios": [
+  "S01",
+  "S02",
+  "S03",
+  "S04",
+  "S06",
+  "S07",
+  "S08",
+  "S13",
+  "S18"
+ ],
+ "tables": [
+  {
+   "table": "dim_account",
+   "rows": 60,
+   "parquet_bytes": 10546,
+   "columns": {
+    "account_id": "int32",
+    "account_name": "string",
+    "fully_qualified_name": "string",
+    "parent_account_id": "int32",
+    "account_level": "int32",
+    "account_type": "string",
+    "account_subtype": "string",
+    "classification": "string",
+    "is_pl": "bool",
+    "is_cash": "bool",
+    "is_bank": "bool",
+    "cash_kind": "string",
+    "default_section": "string",
+    "override_section": "string",
+    "override_line_label": "string",
+    "direct_line_in": "string",
+    "direct_line_out": "string",
+    "sort_order": "int32",
+    "active": "bool",
+    "current_balance": "double",
+    "last_reconciled_date": "date32[day]",
+    "cash_floor": "double"
+   }
+  },
+  {
+   "table": "dim_cf_line",
+   "rows": 40,
+   "parquet_bytes": 4277,
+   "columns": {
+    "view": "string",
+    "line_code": "string",
+    "section_code": "string",
+    "line_label": "string",
+    "line_kind": "string",
+    "sort_order": "int32",
+    "usual_direction": "string",
+    "sign_rule": "string",
+    "qbo_group": "string"
+   }
+  },
+  {
+   "table": "dim_counterparty",
+   "rows": 114,
+   "parquet_bytes": 4182,
+   "columns": {
+    "counterparty_id": "int32",
+    "counterparty_kind": "string",
+    "counterparty_name": "string",
+    "active": "bool",
+    "created_date": "date32[day]"
+   }
+  },
+  {
+   "table": "dim_class",
+   "rows": 4,
+   "parquet_bytes": 811,
+   "columns": {
+    "class_id": "int32",
+    "class_name": "string"
+   }
+  },
+  {
+   "table": "dim_date",
+   "rows": 1157,
+   "parquet_bytes": 9585,
+   "columns": {
+    "date": "date32[day]",
+    "month_key": "string",
+    "year": "int32",
+    "quarter": "int32",
+    "month_num": "int32",
+    "month_name": "string",
+    "fiscal_year": "int32",
+    "is_month_end": "bool",
+    "is_working_day": "bool",
+    "is_actual": "bool"
+   }
+  },
+  {
+   "table": "map_account_line",
+   "rows": 138,
+   "parquet_bytes": 6585,
+   "columns": {
+    "map_id": "int32",
+    "account_id": "int32",
+    "view": "string",
+    "direction": "string",
+    "section_code": "string",
+    "line_code": "string",
+    "line_label": "string",
+    "effective_from": "date32[day]",
+    "is_override": "bool",
+    "reason": "string",
+    "author": "string",
+    "created_at": "timestamp[ms]"
+   }
+  },
+  {
+   "table": "fact_txn",
+   "rows": 5128,
+   "parquet_bytes": 248339,
+   "columns": {
+    "txn_id": "int32",
+    "txn_type": "string",
+    "txn_date": "date32[day]",
+    "month_key": "string",
+    "doc_number": "string",
+    "counterparty_id": "int32",
+    "header_account_id": "int32",
+    "bank_account_id": "int32",
+    "payment_type": "string",
+    "payment_method": "string",
+    "total_amount": "double",
+    "open_balance": "double",
+    "cash_amount": "double",
+    "private_note": "string",
+    "created_at": "timestamp[ms]",
+    "updated_at": "timestamp[ms]",
+    "sync_token": "int32",
+    "is_edited": "bool",
+    "process_id": "string",
+    "chain_id": "int32",
+    "scenario_id": "string",
+    "cleared_status": "string",
+    "cleared_date": "date32[day]",
+    "qbo_link": "string"
+   }
+  },
+  {
+   "table": "fact_ledger_line",
+   "rows": 11789,
+   "parquet_bytes": 165445,
+   "columns": {
+    "txn_id": "int32",
+    "ledger_seq": "int32",
+    "txn_date": "date32[day]",
+    "month_key": "string",
+    "txn_type": "string",
+    "account_id": "int32",
+    "amount": "double",
+    "line_kind": "string",
+    "line_seq": "int32",
+    "qbo_line_id": "string",
+    "counterparty_id": "int32",
+    "class_id": "int32",
+    "description": "string",
+    "link_txn_id": "int32",
+    "link_txn_type": "string"
+   }
+  },
+  {
+   "table": "fact_cash_posting",
+   "rows": 4424,
+   "parquet_bytes": 120542,
+   "columns": {
+    "posting_id": "int32",
+    "txn_id": "int32",
+    "txn_date": "date32[day]",
+    "month_key": "string",
+    "source_type": "string",
+    "cash_account_id": "int32",
+    "cash_kind": "string",
+    "offset_ledger_seq": "int32",
+    "posting_account_id": "int32",
+    "offset_account_id": "int32",
+    "settled_txn_id": "int32",
+    "settled_ledger_seq": "int32",
+    "counterparty_id": "int32",
+    "counterparty_source": "string",
+    "class_id": "int32",
+    "amount": "double",
+    "is_internal_transfer": "bool",
+    "direct_line_code": "string",
+    "default_direct_line_code": "string",
+    "in_bank_view": "bool",
+    "bank_view_line_code": "string",
+    "cleared_status": "string",
+    "cleared_date": "date32[day]",
+    "is_journal_entry": "bool",
+    "memo": "string"
+   }
+  },
+  {
+   "table": "fact_account_balance",
+   "rows": 2100,
+   "parquet_bytes": 27608,
+   "columns": {
+    "account_id": "int32",
+    "month_key": "string",
+    "month_end": "date32[day]",
+    "opening_balance": "double",
+    "net_change": "double",
+    "closing_balance": "double"
+   }
+  },
+  {
+   "table": "fact_settlement_link",
+   "rows": 2301,
+   "parquet_bytes": 55745,
+   "columns": {
+    "link_id": "int32",
+    "payment_txn_id": "int32",
+    "payment_txn_type": "string",
+    "payment_line_seq": "int32",
+    "document_txn_id": "int32",
+    "document_txn_type": "string",
+    "document_ledger_seq": "int32",
+    "document_account_id": "int32",
+    "applied_amount": "double",
+    "allocated_amount": "double"
+   }
+  },
+  {
+   "table": "fact_noncash_item",
+   "rows": 8,
+   "parquet_bytes": 2729,
+   "columns": {
+    "txn_id": "int32",
+    "txn_date": "date32[day]",
+    "month_key": "string",
+    "section_code": "string",
+    "indirect_amount": "double",
+    "direct_amount": "double",
+    "noncash_amount": "double",
+    "noncash_amount_default": "double"
+   }
+  },
+  {
+   "table": "fact_exception",
+   "rows": 90,
+   "parquet_bytes": 4780,
+   "columns": {
+    "exception_id": "int32",
+    "exception_code": "string",
+    "txn_id": "int32",
+    "account_id": "int32",
+    "month_key": "string",
+    "amount": "double",
+    "detail": "string",
+    "is_routine": "bool",
+    "scenario_id": "string"
+   }
+  },
+  {
+   "table": "ctl_qbo_cashflow",
+   "rows": 904,
+   "parquet_bytes": 8205,
+   "columns": {
+    "month_key": "string",
+    "row_group": "string",
+    "row_label": "string",
+    "account_id": "int32",
+    "row_kind": "string",
+    "amount": "double",
+    "report_file": "string",
+    "pulled_at": "timestamp[ms]"
+   }
+  },
+  {
+   "table": "ctl_scenario",
+   "rows": 12,
+   "parquet_bytes": 6059,
+   "columns": {
+    "scenario_id": "string",
+    "instance": "int32",
+    "period": "string",
+    "txn_ids": "string",
+    "checks": "string",
+    "exception_codes": "string",
+    "expected_json": "string"
+   }
+  }
+ ]
+}

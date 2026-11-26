@@ -27,6 +27,7 @@ Click path: `guide.md` § 4. Numbers in `{braces}` come from `perf_log.md` (the 
 ## Edit notes
 
 - **Cut the waits.** Scenes 1 and 3 each wait half a minute on a cold run. Keep the first two seconds of the spinner and the timer jump; drop the middle. The caption carries the real number.
+- **Scene 7: the same Country as in scene 2, on purpose.** Only the same filter proves the card is unchanged, and committing the measure edit clears the model cache, so the instant redraw is a real run, not a cache hit.
 - **Scene 5 is the money shot.** Both timings on one frame. If {fast} is under 0.1 s, say "a fraction of a second" instead of the number.
 - **Say the measured numbers, not the spec's.** The spec expected 3–20 s; the shared 30 M-row data runs slower (accepted 2026-11-24). Fill every `{…}` from `perf_log.md`.
 - Never Ctrl+S during a take; reset = close without saving and reopen (guide § 4).

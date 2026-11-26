@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Palette sheet</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#474745}a:hover{color:#141414}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 56px clamp(20px, 4vw, 56px) 64px; background: {{ground}}; color: {{ink}}; font-family: 'Space Grotesk', system-ui, sans-serif">
+<div style="max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+
+<header style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font: 600 44px/48px 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em">Palette sheet</h1>
+<p style="margin: 0; font: 500 18px/26px 'Space Grotesk', system-ui, sans-serif; text-wrap: pretty">Ten palettes, each a four-color stack: primary, secondary, highlight, background.</p>
+<p style="margin: 0; font: 500 12px/18px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}; text-wrap: pretty">Highlight hex values are printed in the source reels. Primary and secondary are sampled from the screenshots. Background is derived.</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 32px 20px">
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">01</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Vantro</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">PC case</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #D4A440; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#D4A440</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Butterscotch Gold</div>
+</div>
+<div style="background: #202125; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#202125</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Graphite Ink</div>
+</div>
+<div style="background: #2448FF; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#2448FF</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Hyper Cobalt</div>
+</div>
+<div style="background: #EDDBB7; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#EDDBB7</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Vanilla Cream</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">02</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Kafro</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Espresso machine</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #EFE8D6; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#EFE8D6</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Crema Ivory</div>
+</div>
+<div style="background: #1C3B29; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#1C3B29</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Pine Velvet</div>
+</div>
+<div style="background: #FF5A4A; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#FF5A4A</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Coral Rocket</div>
+</div>
+<div style="background: #F9F6EF; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#F9F6EF</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Steamed Milk</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">03</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Ravlo</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Desk lamp</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #E3E2DD; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#E3E2DD</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Stone</div>
+</div>
+<div style="background: #2A2D34; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#2A2D34</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Graphite</div>
+</div>
+<div style="background: #F2A33A; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight · suggested</span><span>#F2A33A</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Lamp Amber</div>
+</div>
+<div style="background: #F4F3F1; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#F4F3F1</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Chalk</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">04</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Takto</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Keyboard</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #172B29; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#172B29</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Raven Teal</div>
+</div>
+<div style="background: #8C9D94; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#8C9D94</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Seagrass Grey</div>
+</div>
+<div style="background: #FF8A1F; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#FF8A1F</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Apricot Flare</div>
+</div>
+<div style="background: #0E1A19; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#0E1A19</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Midnight Pine</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">05</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Orbya</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Earbuds</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #E8E5DF; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#E8E5DF</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Sea Salt</div>
+</div>
+<div style="background: #2C3A54; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#2C3A54</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Denim Navy</div>
+</div>
+<div style="background: #FF6F1A; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#FF6F1A</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Kumquat Orange</div>
+</div>
+<div style="background: #F6F5F2; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#F6F5F2</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Sea Foam</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">06</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Fotaro</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Camera</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #EDE7D8; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#EDE7D8</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Ricotta Cream</div>
+</div>
+<div style="background: #1E3046; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#1E3046</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Prussian Blue</div>
+</div>
+<div style="background: #F03A2A; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#F03A2A</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Lobster Red</div>
+</div>
+<div style="background: #F8F5EF; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#F8F5EF</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Paper White</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">07</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Loftra Polar</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Drone</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #F5F6F8; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#F5F6F8</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Polar White</div>
+</div>
+<div style="background: #A9D3E8; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#A9D3E8</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Glacier Blue</div>
+</div>
+<div style="background: #E4002B; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#E4002B</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Racing Red</div>
+</div>
+<div style="background: #FFFFFF; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#FFFFFF</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Fresh Snow</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">08</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Loftra Storm</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Drone</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #62666D; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#62666D</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Storm Grey</div>
+</div>
+<div style="background: #1C1D21; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#1C1D21</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Matte Black</div>
+</div>
+<div style="background: #FF5F00; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#FF5F00</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Safety Orange</div>
+</div>
+<div style="background: #C0C2C5; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#C0C2C5</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Cloud Grey</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">09</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Loftra Desert</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Drone</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #D7C5A4; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#D7C5A4</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Desert Sand</div>
+</div>
+<div style="background: #5D613E; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#5D613E</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Olive Drab</div>
+</div>
+<div style="background: #FFD21F; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#FFD21F</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Signal Yellow</div>
+</div>
+<div style="background: #EFE8DB; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#EFE8DB</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Dune Mist</div>
+</div>
+</div>
+</article>
+
+<article style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">10</span>
+<h2 style="margin: 0; font: 600 20px/24px 'Space Grotesk', system-ui, sans-serif">Rotava</h2>
+<span style="margin-left: auto; font: 500 12px/24px 'JetBrains Mono', ui-monospace, Menlo, monospace; color: {{mute}}">Turntable</span>
+</div>
+<div style="border: 1px solid rgba(127,127,127,0.3); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.12); font: 500 11px/16px 'JetBrains Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase">
+<div style="background: #EFE4D3; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Primary</span><span>#EFE4D3</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Mascarpone Cream</div>
+</div>
+<div style="background: #1D452D; color: #FFFFFF; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Secondary</span><span>#1D452D</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Highland Green</div>
+</div>
+<div style="background: #EF4229; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Highlight</span><span>#EF4229</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">San Marzano</div>
+</div>
+<div style="background: #F9F4ED; color: #111111; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>Background</span><span>#F9F4ED</span></div>
+<div style="font: 600 18px/22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none">Burrata White</div>
+</div>
+</div>
+</article>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"ground":{"editor":"enum","options":["Light","Dark"],"default":"Light"},"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+var dark = (this.props.ground ?? 'Light') === 'Dark';
+return {
+ground: dark ? '#161616' : '#D9D9D6',
+ink: dark ? '#F3F3F1' : '#141414',
+mute: dark ? '#B9B9B5' : '#474745'
+};
+}
+}
+</script>
+</body>
+</html>

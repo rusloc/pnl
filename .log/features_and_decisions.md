@@ -41,7 +41,7 @@ TODO: lock North Star
 
 - **2026-11-01 — Engine view-model dump as the parity oracle:** a read-only Node script dumps the Track C engine view-model for a set of selections, and the Power BI side is compared against it (bip used it for Mirelo: 60 + 244 + 58 checks). Candidate for hunter's harness. Also: a model-review check that display names are unique or that visuals group by key (CAND-040).
 
-- **2026-11-24 — Run-sheet generator in the repo:** move the script that builds `demos/0{1,2,3}-*/run-sheet.html` from each `script.md` + guide § 4 out of the session scratchpad into `demos/tools/`, so the sheets can be rebuilt after the `{placeholders}` are filled.
+- **2026-11-24 — Run-sheet generator in the repo:** move the script that builds `demos/0{1,2,3}-*/run-sheet.html` from each `script.md` + guide § 4 out of the session scratchpad into `demos/tools/`, so the sheets can be rebuilt after the `{placeholders}` are filled. → **implemented 2026-11-25** as `demos/scripts/build-run-sheets.py` (`tools/` is gitignored at any depth).
 
 ## Decisions
 - **2026-10-21** — Three tracks in one repo, one folder each: A Rayfin `fabric-app/`, B PBI `pbi-report/`, C JS `js-report/`. (ADR-0001)
@@ -148,6 +148,12 @@ TODO: lock North Star
 - **2026-11-24** — **ADR-0018 amendment 4: Git is the source for case 3:** local TMDL edit → push → Dev Source control › Update all → pipeline Deploy Dev → Prod; items at the repo root; reset = reverse push. #adr #decision
 - **2026-11-24** — **USER: two separate folders / repos** (`C:\__PBI\PNL` main, `C:\__PBI\fabric-cicd-demo` demo clone managed from PNL via `additionalDirectories`; git in both by the USER). #decision
 - **2026-11-24** — **USER: tenant / account / IDs blurred in post-production**, not hidden on screen. #decision
+- **2026-11-25** — **Demo case 2 scene 7 clicks the same Country as scene 2** (card-unchanged proof; the measure commit clears the model cache). #decision
+- **2026-11-25** — **ADR-0019 Proposed: ACME Cash Flow** (QuickBooks Online cash flow replacement, USER spec pair `.sync/acme cash flow/spec/`); data `data/acme_cash_flow_dummy_data/`, mock `docs/design/cash flow statement/`; defaults services / S / USD / seed 42 / Jan 2024 – Oct 2026 / QBO cash set. #adr
+- **2026-11-25** — **USER: cash flow data = spec § 9.2 tables as Parquet + QBO JSON files** (§ 10.1); no mock API, incremental mode or sandbox. #decision
+- **2026-11-25** — **USER: "typical" scenario preset** S01, S02, S03, S04, S06, S07, S08, S13, S18 with oracle records. #decision
+- **2026-11-25** — **USER: ADR-0012 wins over the cash flow spec** (no tile / row sparklines, controls in the side-bar menu, text only in ⓘ / How to read). #decision
+- **2026-11-25** — **USER: cash flow mock = static HTML with layout, navigation and design approach**, no data. #decision
 
 ## Features
 ### Planned
@@ -174,6 +180,7 @@ TODO: lock North Star
 - **PBI web sync — follow-ups (2026-11-16):** USER yes for the `lh_raw` reload (unrounded allocation, `RANGE` view) + model refresh; USER click-tests of both reports; Nordmark Performance Analyzer; first open + save of the P&L in Desktop.
 - **P&L Profitability — follow-ups (2026-11-17):** USER click-test (ⓘ × 4, How to read, Δ header card, Commerce Cloud, range > 12 months) without saving; zero-rule format decision shared with ADR-0017 (a); bip fixes `tools/phase2-web-sync/gen_report.py` (broken since 11-17 00:21) and the gap doc § 12.2 cache sentence.
 - **Fabric demo cases — follow-ups (2026-11-24, ADR-0018):** USER rehearsals (case 1 append-day run; case 2 Desktop + DAX Studio → `perf_log.md`; case 3 Git-first loop, deploy seconds into `run_log.md`); fill the `{placeholders}` in the three `script.md` and rebuild the run sheets; align case 2 scene 7 wording; record + blur in post (tenant / account, IDs in URLs, GitHub user, Fabric's first commit message, `expressions.tmdl`).
+- **ACME Cash Flow — follow-ups (2026-11-25, ADR-0019 Proposed):** USER review of mock v1 + decisions (Financing fold vs Adjustments collapsed; "Indirect ⇄" shortcut; Share / row-height readings; `qbo/` commit vs ignore; Taxes paid net vs separate line, D-9; payroll JEs as routine exceptions, D-10); ADR-0019 → Accepted; delivery tool (PBI / JS / both); mock v2 on the generated numbers.
 
 ### Implemented
 - **2026-10-21** — Shared Fabric data layer: `lh_raw.acme_pl` (28 tables) via `fabric-data/lh_raw/load_acme_pl.py`; verified (row counts + NR control total diff 0.00)
@@ -235,3 +242,6 @@ TODO: lock North Star
 - **2026-11-17** — **P&L Profitability rebuilt to the vosk.dev spec of 2026-11-17** (one page, combo "Revenue and margin by month / quarter" via `dim_combo_period`, CM status icons, region × category heatmap); all four views 1280 × 720; 152 visuals, 321 measures; tests 117 (§ 8) / 4,515 / 1,342 / 867 rows TRUE; page-cold 3.5 s; validator 0 / 0; pack `.sync/pnl/power-bi/` re-issued 2026-11-18 (scratch 3,536 rows TRUE). Committed `c9b44d6` (2026-11-18).
 - **2026-11-24** — **Fabric demo cases 1–3 built (ADR-0018), pending USER rehearsal + recording:** `ws_migration_demo` (`lh_sales_demo` 30 M rows, notebooks, `Sales Import` refresh 295 s = `Sales Direct Lake` framing 5.2 s = gold), `Slow Report Demo` (Slow 25.7–33.0 s vs Fast ~0.8 s, 0 differences), `ws_cicd_demo_{dev,prod}` + `dp_cicd_demo` (Production parameter rules applied, Prod reads its own lakehouse, deploy 7.4 s), Dev Git-connected to `rusloc/fabric-cicd-demo`; 4 PBIPs + tests, guides, run logs, SDD v1.2. Committed `3aa1786` (build); amendment 4 and the rest uncommitted at close.
 - **2026-11-24** — **Video scripts + HTML run sheets (draft v0.1):** `demos/0{1,2,3}-*/script.md` (4:30 / 4:05 / 3:15, voice-over per scene, numbers as `{placeholders}`) and `run-sheet.html` (timeline, numbered on-camera clicks 12 / 14 / 13, off-camera checklist, reset, blur). Uncommitted at close.
+- **2026-11-25** — **Run-sheet generator in the repo** `demos/scripts/build-run-sheets.py` (reproduces the committed sheets byte-identical); case 2 scene 7 aligned. Uncommitted at close.
+- **2026-11-25** — **ACME Cash Flow layout mock v1** `docs/design/cash flow statement/mockup-v1-2026-11-25.html` (1440 × 810, L0 tiles + bridge + monthly + bank bridge, statement indirect / direct, drill L2–L4, reconciliation pop-up, design-notes layer, light / dark; illustrative figures tie). Uncommitted at close.
+- **2026-11-25** — **ACME Cash Flow synthetic QBO company** `data/acme_cash_flow_dummy_data/`: 15 Parquet tables (28,269 rows, 0.7 MB), `qbo/` 96 files (9.0 MB), control totals 2,662 rows; independent `verify.py` 74 / 74 incl. byte-identical rerun; 9 scenarios with oracle; deviations D-1…D-15. Uncommitted at close.

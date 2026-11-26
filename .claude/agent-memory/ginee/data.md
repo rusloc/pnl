@@ -73,3 +73,9 @@
 - [2026-11-24] nb_01 at 300k: 9 tables, counts = spec § 4 scaled (raw/fact 300,000; dims 200,000 / 2,500 / 100 / 1,096). nb_seed_sales: 1 / 365 / 50 / 50,000 (source: observed)
 - [2026-11-24] nb_01 at 30M (spec value, verbatim source): 190 s job incl. session start; counts = § 4 exactly; 0 null keys / orphans / dup sales_id; order_date 2024-01-01..2026-10-31; gold Sales 19,476,577,850.61, Cost 13,680,398,573.72 (baseline in demos/01-migration/run_log.md). nb_02 not run (source: observed)
 - [2026-11-24] Seed in Dev: dim_environment = ws_cicd_demo_dev (context key currentWorkspaceName works), Margin % as written 0.66667 (source: observed)
+
+## 2026-11-25 ACME Cash Flow synthetic QBO company (local only, data/acme_cash_flow_dummy_data/, ADR-0019)
+- [2026-11-25] Generator in 16 modules (config/company/sim_*/cashpass/scenarios/book/emit/ledger/classify/derive_*/reports*/oracle/metrics/writers/generate), seed 42, typical preset; 15 Parquet tables 28,269 rows 0.68 MB + qbo/ 96 files 9.1 MB (5,128 txns); generate ~2 s, verify 74 checks ~28 s incl. byte-identical rerun of 114 files (source: observed)
+- [2026-11-25] One source of truth proven: verify re-posts all QBO JSON transactions with its own rules = fact_ledger_line; rebuilds all cash postings (split + look-through + mapping) exactly; recomputes 2,662 control totals from the ledger (source: observed)
+- [2026-11-25] Design choices: LoC draws/repays as Deposit/Purchase vs the LoC account (Transfers carry no name -> NO_NAME spam); cheque payers assigned until ~40 % of invoices (per-customer coin flip gave 23 %); one subcontractor always card-paid + card scale x growth gives ~31 % card share; DUP_DEPOSIT only for deposits with an unlinked line (single-receipt sweeps collided) (source: observed)
+- [2026-11-25] Open presentation points for USER: Taxes paid shows sales tax collected (invoice look-through) net of remitted; 74 payroll JEs flagged JE_CASH as is_routine (rule 7.3.5) (source: observed)
