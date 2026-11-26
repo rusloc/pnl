@@ -1,0 +1,2537 @@
+/// Measure table: every report measure lives here (CLAUDE.md Track B). Folders 1-6 are the report metrics (window = the period picker),
+/// 8 Report (texts, colours, SVG faces) and 9 Engine (period resolution, window, units) are hidden.
+table _measures
+	lineageTag: 47a449ce-26f6-5389-99d8-45273296f060
+
+	/// Picked span: A (Year), Q, M, YTD, QTD, MTD; nothing picked = M.
+	measure _Span = SELECTEDVALUE ( param_span[span_code], "M" )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 98b1d1ff-8489-5ed1-ab7d-3959de3b093c
+
+	/// Picked year (Year / Quarter / Month spans); nothing picked = 2026.
+	measure _Year = SELECTEDVALUE ( param_year[year], 2026 )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: cccfb82f-aab1-53ae-a372-d1990a5ad3fb
+
+	/// Picked month 1-12 (Month span); nothing picked = 10.
+	measure _Month = SELECTEDVALUE ( param_month[month_num], 10 )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 995f9e2b-8790-59dc-9b15-1793545f8c06
+
+	/// Picked quarter 1-4 (Quarter span); nothing picked = 4.
+	measure _Quarter = SELECTEDVALUE ( param_quarter[quarter_num], 4 )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 6b933735-c372-58a1-924a-2f843e444907
+
+	/// param_period key of the picked period (a direct filter on param_period wins: DAX tests). Nov / Dec 2026 have no row: every measure is blank.
+	measure '_Period Key' =
+			VAR _forced       = IF ( ISFILTERED ( param_period[period_key] ), SELECTEDVALUE ( param_period[period_key] ) )
+			VAR _span         = [_Span]
+			VAR _y            = [_Year]
+			VAR _key          =
+			    SWITCH (
+			        _span
+			        ,"A", "A-" & _y
+			        ,"Q", "Q" & [_Quarter] & "-" & _y
+			        ,"M", "M-" & _y & "-" & FORMAT ( [_Month], "00" )
+			        ,_span
+			    )
+			RETURN
+			    IF ( ISBLANK ( _forced ), _key, _forced )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 3aca2f55-1b8e-5906-bb1d-fc30dbc664b5
+
+	/// TRUE inside CALCULATE ( ..., dim_shift[shift_code] = "PRIOR" ): the window moves to the prior period.
+	measure _Prior = SELECTEDVALUE ( dim_shift[shift_code], "CUR" ) = "PRIOR"
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 31165929-468c-50ad-910b-f65dc57b6036
+
+	/// First month index of the window (0 = 2024-01); prior window under dim_shift PRIOR; blank = no period / no prior.
+	measure _A =
+			VAR _key          = [_Period Key]
+			VAR _prior        = [_Prior]
+			VAR _v            =
+			    CALCULATE (
+			        IF ( _prior, MAX ( param_period[prior_a] ), MAX ( param_period[a] ) )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+			RETURN
+			    IF ( _v >= 0, _v )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 399b1ced-616c-510f-9d7c-0ede39a2cb21
+
+	/// Last month index of the window.
+	measure _B =
+			VAR _key          = [_Period Key]
+			VAR _prior        = [_Prior]
+			VAR _v            =
+			    CALCULATE (
+			        IF ( _prior, MAX ( param_period[prior_b] ), MAX ( param_period[b] ) )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+			RETURN
+			    IF ( _v >= 0, _v )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: a023e143-c600-53c8-bafb-6664ee4f5962
+
+	/// Control-total period key (M-yyyy-mm / Y-yyyy / ALL) of the picked period; empty for quarters.
+	measure '_Ctl Key' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[ctl_key] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 82e60d5a-1545-56f2-be06-d9dd0025bae9
+
+	/// Period label as the mock: Oct 2026, Q4 2026, 2026, YTD Oct 2026.
+	measure '_Period Label' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[label] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 62ca7602-639d-5e17-b335-75ed9bb2ee83
+
+	/// Prior-period label of the KPI deltas (Sep 2026, Q3 2026, 2025, Jan–Oct 2025, YTD 2025).
+	measure '_Prior Label' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[prior_label] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: d5728ba6-83b1-5372-9b6a-49ae39dd9c52
+
+	/// Badge line 1: Month / Quarter / Year / YTD / QTD / MTD.
+	measure '_Mode Name' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[mode_name] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 68b3cc79-2d67-54ce-b836-23b9aedcef7d
+
+	/// Badge line 2: Oct / Q4 / 2026.
+	measure '_Badge Big' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[badge_big] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 6a586ad7-57a1-5ff8-b86e-6d9998d31f8d
+
+	/// Badge line 3: 2026 or the year's months (Jan–Oct).
+	measure '_Badge Small' =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[badge_small] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 9b63af37-52c1-5320-9ce5-1a99a7f0d4bb
+
+	/// 1 when a quarter or year is cut by the data end (to date).
+	measure _Partial =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[partial] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 8c87d8da-b48c-58b8-870f-f83ebfe05fd1
+
+	/// First day of the window.
+	measure _D0 =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[d0] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		formatString: yyyy-mm-dd
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: d6c4d06b-ec7a-5200-8de8-2174f917da98
+
+	/// Last day of the window.
+	measure _D1 =
+			VAR _key          = [_Period Key]
+			RETURN
+			    CALCULATE (
+			        MAX ( param_period[d1] )
+			        ,REMOVEFILTERS ( param_period )
+			        ,param_period[period_key] = _key
+			    )
+		formatString: yyyy-mm-dd
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: b61c542b-4d99-5ab9-a7c8-52284abd8516
+
+	/// Calendar days in the window (DSO / DPO day count).
+	measure _Days =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            COUNTROWS ( dim_date )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			        )
+			    )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 9d5ed2fe-c9a6-59a4-b605-6567ea51d1ce
+
+	/// TRUE when Units = USD k (display units in DAX, CLAUDE.md Track B).
+	measure '_Is K' = SELECTEDVALUE ( param_units[unit_code], "USD" ) = "USDK"
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: ac63f3e4-8f7b-5610-8136-3798924eeda8
+
+	/// Display divisor: 1 (USD) or 1,000 (USD k).
+	measure _Div = IF ( [_Is K], 1000, 1 )
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 0fe478c9-cb86-5117-ac88-c10a2b2e6a80
+
+	/// Cash at the start of the window: Bank + Undeposited Funds opening balance of the first month (QBO cash set). (spec M01)
+	measure 'Opening Cash' =
+			VAR _a            = [_A]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_account_balance[opening_balance] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[is_cash] = TRUE ()
+			            ,fact_account_balance[month_index] = _a
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 82c6a946-7667-5c5f-9aef-5c9b04971755
+
+	/// Cash at the end of the window: cash-set closing balance of the last month. (spec M02)
+	measure 'Closing Cash' =
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _b )
+			        ,0 + CALCULATE (
+			            SUM ( fact_account_balance[closing_balance] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[is_cash] = TRUE ()
+			            ,fact_account_balance[month_index] = _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 5d520ebe-90e8-5267-9e25-7a8c02e0ca6d
+
+	/// Closing less opening cash; equals operating + investing + financing. (spec M03)
+	measure 'Net Change in Cash' =
+			VAR _open         = [Opening Cash]
+			VAR _close        = [Closing Cash]
+			RETURN
+			    IF ( NOT ISBLANK ( _open ), _close - _open )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: a65f2f04-879b-516c-baac-b14cc63ab7e7
+
+	/// Accrual net income of the window: minus the net change of every P&L account (ledger is debit positive). (spec M04)
+	measure 'Net Income' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 - CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[is_pl] = TRUE ()
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: b4e7df3d-eac3-5f07-8545-51c2fdb21393
+
+	/// Income-type accounts (credit as positive) over the window. (spec REVENUE)
+	measure Revenue =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 - CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_type] = "Income"
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 4cedf253-351a-57c9-b480-cdc6a2ee0cb7
+
+	/// Operating / investing / financing adjustment of the statement accounts in context: minus the change of the debit balance (asset up = cash out). (spec M05)
+	measure 'Account Adjustment' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			VAR _acc          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[row_kind] = "ACC"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 - CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,KEEPFILTERS ( TREATAS ( _acc, dim_account[account_id] ) )
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 2556fcec-d930-5ee4-9265-d4f246c0ba81
+
+	/// Total adjustments to reconcile net income: depreciation + working-capital accounts. (spec M06 − M04)
+	measure 'Operating Adjustments' =
+			VAR _acc          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[row_kind] = "ACC"
+			        ,dim_stmt_row[section_code] = "OP"
+			    )
+			RETURN
+			    CALCULATE (
+			        [Account Adjustment]
+			        ,REMOVEFILTERS ( dim_account )
+			        ,TREATAS ( _acc, dim_account[account_id] )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 6c1d7ebd-bf81-51e9-93f5-ec55bdca6db2
+
+	/// Net cash from investing activities (indirect). (spec M07)
+	measure 'Investing Cash Flow' =
+			VAR _acc          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[row_kind] = "ACC"
+			        ,dim_stmt_row[section_code] = "INV"
+			    )
+			RETURN
+			    CALCULATE (
+			        [Account Adjustment]
+			        ,REMOVEFILTERS ( dim_account )
+			        ,TREATAS ( _acc, dim_account[account_id] )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 913bb214-4bfd-571f-944c-c1a88b066a7c
+
+	/// Net cash from financing activities (indirect, line of credit moved here by S01). (spec M08)
+	measure 'Financing Cash Flow' =
+			VAR _acc          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[row_kind] = "ACC"
+			        ,dim_stmt_row[section_code] = "FIN"
+			    )
+			RETURN
+			    CALCULATE (
+			        [Account Adjustment]
+			        ,REMOVEFILTERS ( dim_account )
+			        ,TREATAS ( _acc, dim_account[account_id] )
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: e3a9c6ca-4250-5908-b2e6-304bbe6c58bd
+
+	/// Net cash from operating activities: net income + adjustments (indirect, overrides on). (spec M06)
+	measure 'Operating Cash Flow' =
+			VAR _ni           = [Net Income]
+			RETURN
+			    IF ( NOT ISBLANK ( _ni ), _ni + [Operating Adjustments] )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 4932bf5e-da0d-5406-9e8a-67c372604b2c
+
+	/// Statement row value in USD: section header = its total, Net income, one row per account (hidden when it did not move), Total adjustments, Net cash from the section.
+	measure 'Stmt Value' =
+			VAR _a            = [_A]
+			VAR _leaf         = ISINSCOPE ( dim_stmt_row[row_label] )
+			VAR _sec          = SELECTEDVALUE ( dim_stmt_row[section_code] )
+			VAR _kind         = SELECTEDVALUE ( dim_stmt_row[row_kind] )
+			VAR _acc          = SELECTEDVALUE ( dim_stmt_row[account_id] )
+			VAR _sect         =
+			    SWITCH (
+			        _sec
+			        ,"OP", [Operating Cash Flow]
+			        ,"INV", [Investing Cash Flow]
+			        ,"FIN", [Financing Cash Flow]
+			    )
+			VAR _v            =
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _a )
+			            ,BLANK ()
+			        ,NOT _leaf
+			            ,_sect
+			        ,_kind = "NI"
+			            ,[Net Income]
+			        ,_kind = "ACC"
+			            ,CALCULATE ( [Account Adjustment], dim_account[account_id] = _acc )
+			        ,_kind = "TOT"
+			            ,[Operating Adjustments]
+			        ,_kind = "SECT"
+			            ,_sect
+			    )
+			VAR _hide         = _kind = "ACC" && _leaf && ABS ( _v ) < 0.005
+			RETURN
+			    IF ( NOT _hide, _v )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: ddcbd52e-eecf-5b1b-ba36-27060e276dd2
+
+	/// Statement amount in the picked units (cash out in parentheses, zero = –).
+	measure 'Stmt Amount' = DIVIDE ( [Stmt Value], [_Div] )
+		displayFolder: 1 Statement
+		lineageTag: 08070faf-2428-5e58-89e9-6c9b98213a8e
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0;(#,0);–" )
+
+	/// Row as a share of net income (net income = 100 %), sign kept as parentheses, 1 dp under 10 %; n/m on every row when net income ≤ 0.
+	measure 'Stmt % of NI' =
+			VAR _v            = [Stmt Value]
+			VAR _ni           = [Net Income]
+			VAR _x            = DIVIDE ( _v, _ni ) * 100
+			VAR _ax           = ABS ( _x )
+			VAR _t            = IF ( _ax < 10, FORMAT ( _ax, "0.0" ), FORMAT ( _ax, "#,0" ) ) & "%"
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _v )
+			            ,BLANK ()
+			        ,_ni <= 0.005
+			            ,"n/m"
+			        ,_x < 0 && _t <> "0.0%"
+			            ,"(" & _t & ")"
+			        ,_t
+			    )
+		displayFolder: 1 Statement
+		lineageTag: abd649f0-e09f-51d4-b300-a3187b94e1a6
+
+	/// Working-capital rows that moved in the window (the 'Changes in operating assets and liabilities' sub-header shows only when > 0).
+	measure '_WC Rows' =
+			VAR _ids          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[sub_kind] = "WC"
+			    )
+			VAR _t            =
+			    CALCULATETABLE (
+			        ADDCOLUMNS ( VALUES ( dim_account[account_id] ), "@v", [Account Adjustment] )
+			        ,REMOVEFILTERS ( dim_account )
+			        ,TREATAS ( _ids, dim_account[account_id] )
+			    )
+			RETURN
+			    COUNTROWS ( FILTER ( _t, ABS ( [@v] ) >= 0.005 ) ) + 0
+		formatString: 0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: e2923294-2ce1-5918-b857-91f2512cd13a
+
+	/// Shared bar axis of the statement: the mock's niceMax of the largest flow row (balances excluded; they clip with a notch).
+	measure '_Stmt Axis Max' =
+			VAR _ids          =
+			    CALCULATETABLE (
+			        VALUES ( dim_stmt_row[account_id] )
+			        ,REMOVEFILTERS ( dim_stmt_row )
+			        ,dim_stmt_row[row_kind] = "ACC"
+			    )
+			VAR _acc          =
+			    MAXX (
+			        CALCULATETABLE (
+			            ADDCOLUMNS ( VALUES ( dim_account[account_id] ), "@v", ABS ( [Account Adjustment] ) )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,TREATAS ( _ids, dim_account[account_id] )
+			        )
+			        ,[@v]
+			    )
+			VAR _m            =
+			    MAXX (
+			        {
+			            _acc
+			            ,ABS ( [Net Income] )
+			            ,ABS ( [Operating Adjustments] )
+			            ,ABS ( [Operating Cash Flow] )
+			            ,ABS ( [Investing Cash Flow] )
+			            ,ABS ( [Financing Cash Flow] )
+			            ,ABS ( [Net Change in Cash] )
+			        }
+			        ,[Value]
+			    )
+			VAR _e            = POWER ( 10, INT ( LOG10 ( MAX ( _m, 1 ) ) ) )
+			VAR _f            = MINX ( FILTER ( { 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10 }, [Value] * _e >= _m ), [Value] )
+			RETURN
+			    IF ( _m > 0, _f * _e, 1 )
+		formatString: #,0
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: fbe5b46b-2056-57c2-be2c-912c00956b76
+
+	/// Statement bar: absolute row amount on one shared axis (grey #8A8986, 12 px), axis grid at 25 / 50 / 75 / 100 %; keeps the sub-header rows alive.
+	measure 'Stmt Bar' =
+			VAR _a            = [_A]
+			VAR _leaf         = ISINSCOPE ( dim_stmt_row[row_label] )
+			VAR _kind         = SELECTEDVALUE ( dim_stmt_row[row_kind] )
+			VAR _sub          = SELECTEDVALUE ( dim_stmt_row[sub_kind] )
+			VAR _v            = [Stmt Value]
+			VAR _max          = [_Stmt Axis Max]
+			VAR _len          = IF ( NOT ISBLANK ( _v ), MIN ( ABS ( _v ) / _max, 1 ) * 566, 0 )
+			VAR _bar          =
+			    IF (
+			        _len >= 0.5
+			        ,"<rect x='20' y='7' width='" & FORMAT ( _len, "0.0" ) & "' height='12' rx='2' fill='%238A8986'/>"
+			    )
+			VAR _show         =
+			    NOT ISBLANK ( _a )
+			        && (
+			            NOT ISBLANK ( _v )
+			            || ( _leaf && _kind = "SUB" && ( _sub = "ADJ" || [_WC Rows] > 0 ) )
+			        )
+			RETURN
+			    IF (
+			        _show
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='602' height='26' viewBox='0 0 602 26'><rect x='161.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='303.0' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='444.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='585.5' y='0' width='1' height='26' fill='%23D9D7D4'/>" & _bar & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 9942ee79-ad9a-53f5-80af-4217f2bd7966
+		dataCategory: ImageUrl
+
+	/// Pinned rows: cash at beginning, net increase (decrease), cash at end.
+	measure 'Bal Value' =
+			VAR _code         = SELECTEDVALUE ( dim_bal_row[row_code] )
+			RETURN
+			    SWITCH (
+			        _code
+			        ,"OPEN", [Opening Cash]
+			        ,"NET", [Net Change in Cash]
+			        ,"CLOSE", [Closing Cash]
+			    )
+		formatString: #,0.00
+		displayFolder: 1 Statement
+		lineageTag: 3e2bf972-3dc7-54cf-bcc5-7e99bcd30dd2
+
+	/// Pinned row amount in the picked units.
+	measure 'Bal Amount' = DIVIDE ( [Bal Value], [_Div] )
+		displayFolder: 1 Statement
+		lineageTag: bf0e9824-50c7-570c-9fd3-d655aaac3520
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0;(#,0);–" )
+
+	/// % of net income on the net-increase row only (opening and closing cash have none).
+	measure 'Bal % of NI' =
+			VAR _code         = SELECTEDVALUE ( dim_bal_row[row_code] )
+			VAR _v            = [Bal Value]
+			VAR _ni           = [Net Income]
+			VAR _x            = DIVIDE ( _v, _ni ) * 100
+			VAR _ax           = ABS ( _x )
+			VAR _t            = IF ( _ax < 10, FORMAT ( _ax, "0.0" ), FORMAT ( _ax, "#,0" ) ) & "%"
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,_code <> "NET" || ISBLANK ( _v )
+			            ,UNICHAR ( 160 )
+			        ,_ni <= 0.005
+			            ,"n/m"
+			        ,_x < 0 && _t <> "0.0%"
+			            ,"(" & _t & ")"
+			        ,_t
+			    )
+		displayFolder: 1 Statement
+		lineageTag: 5724cbed-8a39-5a83-b0c9-955ae09e7f1e
+
+	/// Pinned-row bar: balances dark #2C3A54 with a notch when longer than the axis; net increase grey like the lines.
+	measure 'Bal Bar' =
+			VAR _code         = SELECTEDVALUE ( dim_bal_row[row_code] )
+			VAR _v            = [Bal Value]
+			VAR _max          = [_Stmt Axis Max]
+			VAR _a            = ABS ( _v )
+			VAR _isBal        = _code <> "NET"
+			VAR _clip         = _isBal && _a > _max
+			VAR _len          = MIN ( _a / _max, 1 ) * 566
+			VAR _fill         = IF ( _isBal, "%232C3A54", "%238A8986" )
+			VAR _bar          =
+			    IF (
+			        _len >= 0.5
+			        ,"<rect x='20' y='7' width='" & FORMAT ( _len, "0.0" ) & "' height='12' rx='2' fill='" & _fill & "'/>"
+			    )
+			VAR _notch        =
+			    IF (
+			        _clip
+			        ,"<path d='M545 1 L551 7 L545 13 L551 19 L545 25' fill='none' stroke='%23E8E5DF' stroke-width='4'/>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='602' height='26' viewBox='0 0 602 26'><rect x='161.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='303.0' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='444.5' y='0' width='1' height='26' fill='%23D9D7D4'/><rect x='585.5' y='0' width='1' height='26' fill='%23D9D7D4'/>" & _bar & _notch & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 1c521e78-503c-5ede-b542-8932d65ecdbc
+		dataCategory: ImageUrl
+
+	/// Net cash of the direct lines in context (all lines when none), window, internal transfers excluded. (spec DIRECT_LINE / M11)
+	measure 'Direct Net' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,REMOVEFILTERS ( dim_counterparty )
+			            ,REMOVEFILTERS ( fact_txn )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: bb9e5c3d-26f5-583d-ae8a-87f7e2d8972a
+
+	/// Cash in of the direct lines in context. (spec M09)
+	measure 'Direct In' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,REMOVEFILTERS ( dim_counterparty )
+			            ,REMOVEFILTERS ( fact_txn )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			            ,fact_cash_posting[amount] > 0
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: ccefbb0a-70b5-56d0-b4f2-cfa9e2c46e00
+
+	/// Cash out of the direct lines in context (negative). (spec M10)
+	measure 'Direct Out' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,REMOVEFILTERS ( dim_counterparty )
+			            ,REMOVEFILTERS ( fact_txn )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			            ,fact_cash_posting[amount] < 0
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 03ea71c8-1668-5389-a07c-e55dd486bc7e
+
+	/// Cash in, all lines (cash balance card). (spec M09)
+	measure 'Cash In' = CALCULATE ( [Direct In], REMOVEFILTERS ( dim_cf_line ) )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 081cf769-db2d-520d-9349-9e3e624bdde9
+
+	/// Cash out, all lines (negative). (spec M10)
+	measure 'Cash Out' = CALCULATE ( [Direct Out], REMOVEFILTERS ( dim_cf_line ) )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 9e5fee38-f693-5dd9-899f-1748aacea070
+
+	/// Cash in + cash out (= net change, check C06). (spec M11)
+	measure 'Net Cash Direct' = CALCULATE ( [Direct Net], REMOVEFILTERS ( dim_cf_line ) )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 24478513-3ed7-5356-8f56-610cd93be32b
+
+	/// Postings between cash-set accounts (nets to 0, check C09). (spec M12)
+	measure 'Internal Transfers' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,REMOVEFILTERS ( dim_cf_line )
+			            ,REMOVEFILTERS ( dim_counterparty )
+			            ,REMOVEFILTERS ( fact_txn )
+			            ,fact_cash_posting[is_internal_transfer] = TRUE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 4c1931a6-7adb-57d8-95d3-d5c08028c1e7
+
+	/// Fixed-asset purchases as a positive amount (minus the Purchase of fixed assets line).
+	measure Capex =
+			0 - CALCULATE (
+			    [Direct Net]
+			    ,REMOVEFILTERS ( dim_cf_line )
+			    ,dim_cf_line[line_code] = "D_INV_PURCHASE"
+			)
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: f5041423-082c-5b2f-98cb-9d47deb73705
+
+	/// Proceeds from asset sales.
+	measure 'Asset Sale Proceeds' =
+			CALCULATE (
+			    [Direct Net]
+			    ,REMOVEFILTERS ( dim_cf_line )
+			    ,dim_cf_line[line_code] = "D_INV_PROCEEDS"
+			)
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 412bb36f-3bd1-54a4-9c90-a45d4ba82cf1
+
+	/// Interest paid as a positive amount.
+	measure 'Interest Paid' =
+			0 - CALCULATE (
+			    [Direct Net]
+			    ,REMOVEFILTERS ( dim_cf_line )
+			    ,dim_cf_line[line_code] = "D_PAY_INT"
+			)
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 6e155f49-c9e1-5e44-92f2-4de3949873cd
+
+	/// Owner draws and dividends as a positive amount.
+	measure 'Owner Draws' =
+			0 - CALCULATE (
+			    [Direct Net]
+			    ,REMOVEFILTERS ( dim_cf_line )
+			    ,dim_cf_line[line_code] = "D_FIN_DRAWS"
+			)
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 690e3d63-ab8b-56e4-b17e-27cd5ccc6231
+
+	/// Principal repaid on the term and vehicle loans (accounts 22, 23); the revolver (line of credit) is left out, as the mock's DSCR base.
+	measure 'Term Principal Repaid' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 - CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,REMOVEFILTERS ( dim_counterparty )
+			            ,REMOVEFILTERS ( fact_txn )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			            ,REMOVEFILTERS ( dim_cf_line )
+			            ,dim_cf_line[line_code] = "D_FIN_REPAID"
+			            ,fact_cash_posting[offset_account_id] IN { 22, 23 }
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: fedcdacf-66ed-5706-afad-914074ccca13
+
+	/// Statement section total less the direct section net: the non-cash movements of the section (sums to 0 over the three). (spec M13)
+	measure 'Non-Cash Gap' =
+			VAR _sec          = SELECTEDVALUE ( dim_cf_line[section_code] )
+			VAR _ind          =
+			    SWITCH (
+			        _sec
+			        ,"OPERATING", [Operating Cash Flow]
+			        ,"INVESTING", [Investing Cash Flow]
+			        ,"FINANCING", [Financing Cash Flow]
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( _ind ), _ind - [Direct Net] )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 179b3560-5aa3-52f6-a441-0e910d76ae41
+
+	/// Operating cash flow less fixed-asset purchases plus asset-sale proceeds. (spec M15)
+	measure 'Free Cash Flow' = [Operating Cash Flow] - [Capex] + [Asset Sale Proceeds]
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: f377cd5f-7694-5516-8d59-7b876079ebfe
+
+	/// Operating cash flow ÷ net income (the KPI card shows n/m when net income ≤ 0). (spec M16)
+	measure 'Cash Conversion' =
+			VAR _ni           = [Net Income]
+			RETURN
+			    IF ( ABS ( _ni ) > 0.005, DIVIDE ( [Operating Cash Flow], _ni ) )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: 0bd48b82-e2c8-558e-ba6c-01f8882ac74e
+
+	/// Operating cash flow ÷ revenue. (spec M17)
+	measure 'Operating Cash Margin' =
+			VAR _rev          = [Revenue]
+			RETURN
+			    IF ( _rev > 0, DIVIDE ( [Operating Cash Flow], _rev ) )
+		formatString: 0.0%
+		displayFolder: 2 KPIs
+		lineageTag: f83499f6-f597-52aa-a1fc-1239fddea340
+
+	/// A/R closing balance at the window end (debit positive).
+	measure 'AR Closing' =
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _b )
+			        ,CALCULATE (
+			            SUM ( fact_account_balance[closing_balance] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_id] = 4
+			            ,fact_account_balance[month_index] = _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 56d696b8-c5ee-5595-8fc5-da5b701647db
+
+	/// A/P closing balance at the window end (credit as positive).
+	measure 'AP Closing' =
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _b )
+			        ,0 - CALCULATE (
+			            SUM ( fact_account_balance[closing_balance] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_id] = 14
+			            ,fact_account_balance[month_index] = _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 1c464f4d-a916-55b6-9087-0a158f4e2848
+
+	/// Line of credit + term loan + vehicle loan at the window end (credit as positive).
+	measure 'Debt Closing' =
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _b )
+			        ,0 - CALCULATE (
+			            SUM ( fact_account_balance[closing_balance] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_id] IN { 20, 22, 23 }
+			            ,fact_account_balance[month_index] = _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 655beec4-f1e7-5877-96c3-b41045172ab3
+
+	/// DPO base: cost of services + expenses without payroll, bad debts and interest (mock kpi.spend).
+	measure 'Bills Spend' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_type] IN { "Cost of Goods Sold", "Expense" }
+			            ,NOT dim_account[account_id] IN { 38, 39, 40, 41, 58, 59 }
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 2a1f3541-1a36-57fa-8d0d-3926d1582868
+
+	/// Interest expense (P&L) for EBITDA.
+	measure 'Interest Expense' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_id] = 59
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: da94a061-a9ad-5268-a411-9441a4fc3739
+
+	/// Depreciation expense (P&L) for EBITDA.
+	measure 'Depreciation Expense' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_account_balance[net_change] )
+			            ,REMOVEFILTERS ( dim_account )
+			            ,dim_account[account_id] = 60
+			            ,fact_account_balance[month_index] >= _a
+			            ,fact_account_balance[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		isHidden
+		displayFolder: 9 Engine
+		lineageTag: 33e2457a-794c-5327-a4e9-8879a32a51fa
+
+	/// Days of revenue in receivables at the window end: A/R closing ÷ revenue × days.
+	measure 'DSO Days' =
+			VAR _rev          = [Revenue]
+			RETURN
+			    IF ( _rev > 0, [AR Closing] / _rev * [_Days] )
+		formatString: 0.0
+		displayFolder: 2 KPIs
+		lineageTag: 5e5d8d3a-f7da-55af-96b6-1c08d905d480
+
+	/// A/P closing ÷ bills spend × days (open question: DPO base).
+	measure 'DPO Days' =
+			VAR _sp           = [Bills Spend]
+			RETURN
+			    IF ( _sp > 0, [AP Closing] / _sp * [_Days] )
+		formatString: 0.0
+		displayFolder: 2 KPIs
+		lineageTag: 42e624fc-6f1f-580a-ac51-0b5818a085f4
+
+	/// DSO − DPO (no inventory).
+	measure 'Cash Conversion Cycle' =
+			VAR _dso          = [DSO Days]
+			VAR _dpo          = [DPO Days]
+			RETURN
+			    IF ( NOT ISBLANK ( _dso ) && NOT ISBLANK ( _dpo ), _dso - _dpo )
+		formatString: 0.0
+		displayFolder: 2 KPIs
+		lineageTag: 5a479dc8-7fe8-5212-a667-959820c8a76d
+
+	/// Net income − operating cash flow.
+	measure Accruals =
+			VAR _ni           = [Net Income]
+			RETURN
+			    IF ( NOT ISBLANK ( _ni ), _ni - [Operating Cash Flow] )
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 5b488e59-7a08-5b01-a356-99508d5c9185
+
+	/// Capex ÷ revenue.
+	measure 'Capex Intensity' =
+			VAR _rev          = [Revenue]
+			RETURN
+			    IF ( _rev > 0, [Capex] / _rev )
+		formatString: 0.0%
+		displayFolder: 2 KPIs
+		lineageTag: c8728c14-bc19-5c4d-94a4-ff01a9647da8
+
+	/// Operating cash flow ÷ capex ('no capex' when none).
+	measure 'Capex Coverage' =
+			VAR _cx           = [Capex]
+			RETURN
+			    IF ( _cx > 0.005, [Operating Cash Flow] / _cx )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: 7f301014-95a9-56b6-b62f-32f9ecdf938e
+
+	/// Interest paid + term-loan principal (revolver excluded, open question).
+	measure 'Debt Service' = [Interest Paid] + [Term Principal Repaid]
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 584bc034-3ac4-508e-a5b6-d21f53698a90
+
+	/// Debt service coverage: operating cash flow ÷ (interest + term principal).
+	measure DSCR =
+			VAR _ds           = [Debt Service]
+			RETURN
+			    IF ( _ds > 0.005, [Operating Cash Flow] / _ds )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: a9d7efba-ae71-560c-a921-26154aa199af
+
+	/// Net income + interest expense + depreciation (P&L).
+	measure EBITDA = [Net Income] + [Interest Expense] + [Depreciation Expense]
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: aefe5f32-2287-55df-ab97-4179bc507c6b
+
+	/// EBITDA × 12 ÷ months in the window (open question: annualised EBITDA).
+	measure 'EBITDA Annualised' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF ( NOT ISBLANK ( _a ), [EBITDA] * 12 / ( _b - _a + 1 ) )
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: 7bb7abe7-3bee-513b-b413-378d00aa29da
+
+	/// Debt at the window end less closing cash (negative = net cash).
+	measure 'Net Debt' =
+			VAR _d            = [Debt Closing]
+			RETURN
+			    IF ( NOT ISBLANK ( _d ), _d - [Closing Cash] )
+		formatString: #,0.00
+		displayFolder: 2 KPIs
+		lineageTag: eb8e7aa0-4e18-5bcf-a9b9-9cf9534a52a1
+
+	/// Net debt ÷ annualised EBITDA.
+	measure 'Net Debt to EBITDA' =
+			VAR _e            = [EBITDA Annualised]
+			RETURN
+			    IF ( _e > 0.005, [Net Debt] / _e )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: e6f980bc-dd3b-5072-a9da-fe0484874a2f
+
+	/// Operating cash flow ÷ owner draws ('no draws' when none).
+	measure 'Payout Cover' =
+			VAR _dr           = [Owner Draws]
+			RETURN
+			    IF ( _dr > 0.005, [Operating Cash Flow] / _dr )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: 4589332c-866c-5f1a-8e77-89b7c234c898
+
+	/// Cash conversion as the KPI card shows it: blank (n/m) when net income ≤ 0.
+	measure 'KPI Cash Conversion' =
+			VAR _ni           = [Net Income]
+			RETURN
+			    IF ( _ni > 0.005, DIVIDE ( [Operating Cash Flow], _ni ) )
+		formatString: 0.00
+		displayFolder: 2 KPIs
+		lineageTag: 061d3483-b2d3-59e5-9c39-b6e68261541c
+
+	/// KPI card 'Closing cash' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card close' =
+			VAR _a            = [_A]
+			VAR _v            = [Closing Cash]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [Closing Cash], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_s = IF ( [_Is K], FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			VAR _v_t = _v_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _v_m = IF ( ISBLANK ( _v ) || _v_s IN { "0", "0.0", "0.00" }, "–", IF ( _v < 0, "(" & _v_t & ")", _v_t ) )
+			VAR _ad_s = IF ( [_Is K], FORMAT ( ABS ( _ad ) / 1000, "#,0.0" ), FORMAT ( ABS ( _ad ), "#,0" ) )
+			VAR _ad_t = _ad_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _ad_m = IF ( ISBLANK ( _ad ) || _ad_s IN { "0", "0.0", "0.00" }, "–", IF ( _ad < 0, "(" & _ad_t & ")", _ad_t ) )
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>Closing cash</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "<rect x='192' y='51' width='24' height='24' rx='7' fill='%23FF6F1A'/><path d='M199 70V65M204 70V58M209 70V63' fill='none' stroke='%232C3A54' stroke-width='2' stroke-linecap='round'/></svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: c33eb1c2-0628-5cbd-9633-c95193d7c5b6
+		dataCategory: ImageUrl
+
+	/// KPI card 'Net change' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card net' =
+			VAR _a            = [_A]
+			VAR _v            = [Net Change in Cash]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [Net Change in Cash], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_s = IF ( [_Is K], FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			VAR _v_t = _v_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _v_m = IF ( ISBLANK ( _v ) || _v_s IN { "0", "0.0", "0.00" }, "–", IF ( _v < 0, "(" & _v_t & ")", _v_t ) )
+			VAR _ad_s = IF ( [_Is K], FORMAT ( ABS ( _ad ) / 1000, "#,0.0" ), FORMAT ( ABS ( _ad ), "#,0" ) )
+			VAR _ad_t = _ad_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _ad_m = IF ( ISBLANK ( _ad ) || _ad_s IN { "0", "0.0", "0.00" }, "–", IF ( _ad < 0, "(" & _ad_t & ")", _ad_t ) )
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>Net change</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: e898489e-e1a5-530b-9d4d-80e38df83733
+		dataCategory: ImageUrl
+
+	/// KPI card 'Operating cash flow' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card cfo' =
+			VAR _a            = [_A]
+			VAR _v            = [Operating Cash Flow]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [Operating Cash Flow], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_s = IF ( [_Is K], FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			VAR _v_t = _v_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _v_m = IF ( ISBLANK ( _v ) || _v_s IN { "0", "0.0", "0.00" }, "–", IF ( _v < 0, "(" & _v_t & ")", _v_t ) )
+			VAR _ad_s = IF ( [_Is K], FORMAT ( ABS ( _ad ) / 1000, "#,0.0" ), FORMAT ( ABS ( _ad ), "#,0" ) )
+			VAR _ad_t = _ad_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _ad_m = IF ( ISBLANK ( _ad ) || _ad_s IN { "0", "0.0", "0.00" }, "–", IF ( _ad < 0, "(" & _ad_t & ")", _ad_t ) )
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>Operating cash flow</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 8c7f7d85-0874-5e1b-be7c-8a5f60af1ffb
+		dataCategory: ImageUrl
+
+	/// KPI card 'Free cash flow' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card fcf' =
+			VAR _a            = [_A]
+			VAR _v            = [Free Cash Flow]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [Free Cash Flow], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_s = IF ( [_Is K], FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			VAR _v_t = _v_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _v_m = IF ( ISBLANK ( _v ) || _v_s IN { "0", "0.0", "0.00" }, "–", IF ( _v < 0, "(" & _v_t & ")", _v_t ) )
+			VAR _ad_s = IF ( [_Is K], FORMAT ( ABS ( _ad ) / 1000, "#,0.0" ), FORMAT ( ABS ( _ad ), "#,0" ) )
+			VAR _ad_t = _ad_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _ad_m = IF ( ISBLANK ( _ad ) || _ad_s IN { "0", "0.0", "0.00" }, "–", IF ( _ad < 0, "(" & _ad_t & ")", _ad_t ) )
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>Free cash flow</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 8b53aa67-71c7-5298-9a64-5e5fe622995f
+		dataCategory: ImageUrl
+
+	/// KPI card 'Cash conversion' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card conv' =
+			VAR _a            = [_A]
+			VAR _v            = [KPI Cash Conversion]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [KPI Cash Conversion], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_m = IF ( ISBLANK ( _v ), "n/m", IF ( _v < 0, "−", "" ) & FORMAT ( ABS ( _v ), "0.00" ) & "×" )
+			VAR _ad_m = FORMAT ( _ad, "0.00" ) & "×"
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>Cash conversion</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 41fa4b06-4255-5183-b633-0fae3cb2537e
+		dataCategory: ImageUrl
+
+	/// KPI card 'DSO · days' (mock .kpi): value in the picked units, delta vs the prior period (▲ / ▼ absolute), 'no prior period' at the data start.
+	measure 'KPI Card dso' =
+			VAR _a            = [_A]
+			VAR _v            = [DSO Days]
+			VAR _hasPrior     = NOT ISBLANK ( CALCULATE ( [_A], dim_shift[shift_code] = "PRIOR" ) )
+			VAR _pv           = CALCULATE ( [DSO Days], dim_shift[shift_code] = "PRIOR" )
+			VAR _pl           = [_Prior Label]
+			VAR _d            = _v - _pv
+			VAR _ad           = ABS ( _d )
+			VAR _arrow        = IF ( _ad < 0.005, "", IF ( _d > 0, "▲ ", "▼ " ) )
+			VAR _v_m = IF ( ISBLANK ( _v ), "n/m", FORMAT ( _v, "#,0.0" ) )
+			VAR _ad_m = FORMAT ( _ad, "#,0.0" )
+			VAR _dl           =
+			    SWITCH (
+			        TRUE ()
+			        ,NOT _hasPrior
+			            ,"<tspan fill='%23525C70'>no prior period</tspan>"
+			        ,ISBLANK ( _v ) || ISBLANK ( _pv )
+			            ,"<tspan fill='%23525C70'>vs " & _pl & ": n/m</tspan>"
+			        ,"<tspan font-weight='600' fill='%232C3A54'>" & _arrow & _ad_m & "</tspan><tspan fill='%23525C70' dx='6'>vs " & _pl & "</tspan>"
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='84' viewBox='0 0 225 84' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='224' height='83' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='14' y='25' font-size='12' font-weight='500' fill='%23525C70'>DSO · days</text>"
+			            & "<text x='14' y='52' font-size='21' font-weight='600' fill='%232C3A54' letter-spacing='-0.4'>" & _v_m & "</text>"
+			            & "<text x='14' y='72' font-size='11.5'>" & _dl & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: cff49146-d3b0-5402-8dd9-bcf2555d7b94
+		dataCategory: ImageUrl
+
+	/// Top-left period square (mock .sq .pm): mode, period, year; opens the calendar.
+	measure 'Header Badge' =
+			VAR _mode         = UPPER ( [_Mode Name] )
+			VAR _big          = [_Badge Big]
+			VAR _small        = [_Badge Small]
+			RETURN
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56' font-family='Segoe UI, sans-serif' text-anchor='middle'>"
+			        & "<rect width='56' height='56' rx='16' fill='%232C3A54'/>"
+			        & "<text x='28' y='17' font-size='8.5' font-weight='600' letter-spacing='0.7' fill='%23F6F5F2' fill-opacity='0.7'>" & COALESCE ( _mode, "MONTH" ) & "</text>"
+			        & "<text x='28' y='34' font-size='15' font-weight='700' fill='%23F6F5F2'>" & COALESCE ( _big, "–" ) & "</text>"
+			        & "<text x='28' y='47' font-size='10.5' fill='%23F6F5F2' fill-opacity='0.85'>" & COALESCE ( _small, "no data" ) & "</text></svg>"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: fe924501-c664-5848-84a7-cd536b065226
+		dataCategory: ImageUrl
+
+	/// Sub-title under ACME Cash Flow: company, window dates, units, as-of day.
+	measure 'Header Context' =
+			VAR _d0           = [_D0]
+			VAR _d1           = [_D1]
+			VAR _unit         = IF ( [_Is K], "USD thousands", "USD" )
+			RETURN
+			    IF (
+			        ISBLANK ( _d0 )
+			        ,"ACME Advisory Services LLC · no data for this period · " & _unit
+			        ,"ACME Advisory Services LLC · " & FORMAT ( _d0, "d mmm" ) & " – " & FORMAT ( _d1, "d mmm yyyy" ) & " · " & _unit & " · as of 5 Nov 2026"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 829db5e0-c8fe-5f02-9df8-38c36ac7a470
+
+	/// Statement column header: the period label (· to date when cut by the data end).
+	measure 'Stmt Header Period' =
+			VAR _l            = [_Period Label]
+			RETURN
+			    IF ( ISBLANK ( _l ), "No data", _l & IF ( [_Partial] = 1, " · to date" ) )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: aa000b54-806f-5a96-bcf6-f7879d695dbc
+
+	/// Amount column header.
+	measure 'Units Label' = IF ( [_Is K], "USD k", "USD" )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 368deebf-509d-5cbe-a46c-f807df75feb5
+
+	/// Tick labels over the bar column (0, 25 / 50 / 75 / 100 % of the axis).
+	measure 'Stmt Axis SVG' =
+			VAR _max          = [_Stmt Axis Max]
+			VAR _k            = [_Is K]
+			VAR _ticks        =
+			    CONCATENATEX (
+			        { 0, 0.25, 0.5, 0.75, 1 }
+			        ,VAR _f = [Value]
+			        VAR _x = _max * _f
+			        VAR _s = IF ( _k, FORMAT ( _x / 1000, "#,0.0" ) & "k", FORMAT ( _x, "#,0" ) )
+			        RETURN
+			            "<text x='" & FORMAT ( 20 + 566 * _f, "0.0" ) & "' y='20' text-anchor='" & IF ( _f = 0, "start", IF ( _f = 1, "end", "middle" ) ) & "'>"
+			                & IF ( _f = 0, "0", _s ) & "</text>"
+			        ,""
+			    )
+			RETURN
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='602' height='28' viewBox='0 0 602 28' font-family='Segoe UI, sans-serif' font-size='10.5' fill='%235B6577'>" & _ticks & "</svg>"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: a36ccb2d-a4a7-5b93-9f2c-05439e0cf583
+		dataCategory: ImageUrl
+
+	/// The ⓘ glyph (hover target of the tt_info tooltip page).
+	measure 'Info Glyph' = "i"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: ae2ff34f-df9a-5bdb-ad2d-3d652083ea18
+
+	/// ⓘ tooltip: title.
+	measure 'Info Title' = SELECTEDVALUE ( dim_info[info_title] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 8f8537cf-7dbf-56b8-88e7-7c2fdc7c503b
+
+	/// ⓘ tooltip: body.
+	measure 'Info Body' = SELECTEDVALUE ( dim_info[info_body] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: f563870f-6caf-55a5-afb1-9c0115019e69
+
+	/// ⓘ tooltip: formula.
+	measure 'Info Formula' = SELECTEDVALUE ( dim_info[info_formula] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 555e103a-2027-52b9-a333-27d498a25289
+
+	/// ⓘ tooltip: source.
+	measure 'Info Source' = SELECTEDVALUE ( dim_info[info_source] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 411cf938-baad-5702-ae0d-95cb1e9e8c9e
+
+	/// Cash pop-up, Cash balance card: opening + in + out = closing (bars on one axis; opening / closing orange, USER round 12).
+	measure 'Cash Card Balance' =
+			VAR _open         = [Opening Cash]
+			VAR _in           = [Cash In]
+			VAR _out          = [Cash Out]
+			VAR _close        = [Closing Cash]
+			VAR _max          = MAX ( MAX ( MAX ( _open, _close ), MAX ( _in, 0 - _out ) ), 1 )
+			VAR _open_s = IF ( [_Is K], FORMAT ( ABS ( _open ) / 1000, "#,0.0" ), FORMAT ( ABS ( _open ), "#,0" ) )
+			VAR _open_t = _open_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _open_m = IF ( ISBLANK ( _open ) || _open_s IN { "0", "0.0", "0.00" }, "–", IF ( _open < 0, "(" & _open_t & ")", _open_t ) )
+			VAR _in_s = IF ( [_Is K], FORMAT ( ABS ( _in ) / 1000, "#,0.0" ), FORMAT ( ABS ( _in ), "#,0" ) )
+			VAR _in_t = _in_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _in_m = IF ( ISBLANK ( _in ) || _in_s IN { "0", "0.0", "0.00" }, "–", IF ( _in < 0, "(" & _in_t & ")", _in_t ) )
+			VAR _out_s = IF ( [_Is K], FORMAT ( ABS ( _out ) / 1000, "#,0.0" ), FORMAT ( ABS ( _out ), "#,0" ) )
+			VAR _out_t = _out_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _out_m = IF ( ISBLANK ( _out ) || _out_s IN { "0", "0.0", "0.00" }, "–", IF ( _out < 0, "(" & _out_t & ")", _out_t ) )
+			VAR _close_s = IF ( [_Is K], FORMAT ( ABS ( _close ) / 1000, "#,0.0" ), FORMAT ( ABS ( _close ), "#,0" ) )
+			VAR _close_t = _close_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _close_m = IF ( ISBLANK ( _close ) || _close_s IN { "0", "0.0", "0.00" }, "–", IF ( _close < 0, "(" & _close_t & ")", _close_t ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _open )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160' viewBox='0 0 320 160' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='319' height='159' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='16' y='28' font-size='15' font-weight='600' fill='%232C3A54'>Cash balance</text>"
+			            & "<text x='304' y='28' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _close_m & "</text>"
+			            & "<text x='16' y='56' font-size='12' fill='%23525C70'>Opening</text>"
+			            & IF ( ABS ( _open ) >= 0.005, "<rect x='78' y='46' width='" & FORMAT ( ABS ( _open ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%23FF6F1A'/>" )
+			            & "<text x='304' y='56' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _open_m & "</text>"
+			            & "<text x='16' y='82' font-size='12' fill='%23525C70'>In</text>"
+			            & IF ( ABS ( _in ) >= 0.005, "<rect x='78' y='72' width='" & FORMAT ( ABS ( _in ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%232C3A54'/>" )
+			            & "<text x='304' y='82' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _in_m & "</text>"
+			            & "<text x='16' y='108' font-size='12' fill='%23525C70'>Out</text>"
+			            & IF ( ABS ( _out ) >= 0.005, "<rect x='78' y='98' width='" & FORMAT ( ABS ( _out ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%237B828E'/>" )
+			            & "<text x='304' y='108' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _out_m & "</text>"
+			            & "<text x='16' y='134' font-size='12' fill='%23525C70'>Closing</text>"
+			            & IF ( ABS ( _close ) >= 0.005, "<rect x='78' y='124' width='" & FORMAT ( ABS ( _close ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%23FF6F1A'/>" )
+			            & "<text x='304' y='134' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _close_m & "</text>"
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: f4a8a331-182e-509c-a585-cd3166e7658a
+		dataCategory: ImageUrl
+
+	/// Cash pop-up, Operating card: cash in, cash out, net of the direct lines; the statement's non-cash gap under it; click opens Operating activities.
+	measure 'Cash Card Operating' =
+			VAR _a            = [_A]
+			VAR _in           = CALCULATE ( [Direct In], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "OPERATING" )
+			VAR _out          = CALCULATE ( [Direct Out], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "OPERATING" )
+			VAR _net          = _in + _out
+			VAR _gap          = CALCULATE ( [Non-Cash Gap], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "OPERATING" )
+			VAR _max          =
+			    MAX (
+			        MAXX (
+			            CALCULATETABLE ( VALUES ( dim_cf_line[section_code] ), REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] IN { "OPERATING", "INVESTING", "FINANCING" } )
+			            ,MAX ( [Direct In], 0 - [Direct Out] )
+			        )
+			        ,1
+			    )
+			VAR _in_s = IF ( [_Is K], FORMAT ( ABS ( _in ) / 1000, "#,0.0" ), FORMAT ( ABS ( _in ), "#,0" ) )
+			VAR _in_t = _in_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _in_m = IF ( ISBLANK ( _in ) || _in_s IN { "0", "0.0", "0.00" }, "–", IF ( _in < 0, "(" & _in_t & ")", _in_t ) )
+			VAR _out_s = IF ( [_Is K], FORMAT ( ABS ( _out ) / 1000, "#,0.0" ), FORMAT ( ABS ( _out ), "#,0" ) )
+			VAR _out_t = _out_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _out_m = IF ( ISBLANK ( _out ) || _out_s IN { "0", "0.0", "0.00" }, "–", IF ( _out < 0, "(" & _out_t & ")", _out_t ) )
+			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0" ) )
+			VAR _net_t = _net_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
+			VAR _gap_s = IF ( [_Is K], FORMAT ( ABS ( _gap ) / 1000, "#,0.0" ), FORMAT ( ABS ( _gap ), "#,0" ) )
+			VAR _gap_t = _gap_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _gap_m = IF ( ISBLANK ( _gap ) || _gap_s IN { "0", "0.0", "0.00" }, "–", IF ( _gap < 0, "(" & _gap_t & ")", _gap_t ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160' viewBox='0 0 320 160' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='319' height='159' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='16' y='28' font-size='15' font-weight='600' fill='%232C3A54'>Operating</text>"
+			            & "<text x='286' y='28' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & "<text x='304' y='28' font-size='15' text-anchor='end' fill='%235B6577'>→</text>"
+			            & "<text x='16' y='82' font-size='12' fill='%23525C70'>In</text>"
+			            & IF ( ABS ( _in ) >= 0.005, "<rect x='78' y='72' width='" & FORMAT ( ABS ( _in ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%232C3A54'/>" )
+			            & "<text x='304' y='82' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _in_m & "</text>"
+			            & "<text x='16' y='108' font-size='12' fill='%23525C70'>Out</text>"
+			            & IF ( ABS ( _out ) >= 0.005, "<rect x='78' y='98' width='" & FORMAT ( ABS ( _out ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%237B828E'/>" )
+			            & "<text x='304' y='108' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _out_m & "</text>"
+			            & "<text x='16' y='134' font-size='12' fill='%23525C70'>Net</text>"
+			            & IF ( ABS ( _net ) >= 0.005, "<rect x='78' y='124' width='" & FORMAT ( ABS ( _net ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%23FF6F1A'/>" )
+			            & "<text x='304' y='134' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & IF ( ABS ( _gap ) >= 0.005, "<text x='16' y='152' font-size='11' fill='%23525C70'>statement adds " & _gap_m & " non-cash</text>" )
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: d46aefe1-2654-5386-9e2f-f3a3c6bc7e83
+		dataCategory: ImageUrl
+
+	/// Cash pop-up, Investing card: cash in, cash out, net of the direct lines; the statement's non-cash gap under it; click opens Investing activities.
+	measure 'Cash Card Investing' =
+			VAR _a            = [_A]
+			VAR _in           = CALCULATE ( [Direct In], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "INVESTING" )
+			VAR _out          = CALCULATE ( [Direct Out], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "INVESTING" )
+			VAR _net          = _in + _out
+			VAR _gap          = CALCULATE ( [Non-Cash Gap], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "INVESTING" )
+			VAR _max          =
+			    MAX (
+			        MAXX (
+			            CALCULATETABLE ( VALUES ( dim_cf_line[section_code] ), REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] IN { "OPERATING", "INVESTING", "FINANCING" } )
+			            ,MAX ( [Direct In], 0 - [Direct Out] )
+			        )
+			        ,1
+			    )
+			VAR _in_s = IF ( [_Is K], FORMAT ( ABS ( _in ) / 1000, "#,0.0" ), FORMAT ( ABS ( _in ), "#,0" ) )
+			VAR _in_t = _in_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _in_m = IF ( ISBLANK ( _in ) || _in_s IN { "0", "0.0", "0.00" }, "–", IF ( _in < 0, "(" & _in_t & ")", _in_t ) )
+			VAR _out_s = IF ( [_Is K], FORMAT ( ABS ( _out ) / 1000, "#,0.0" ), FORMAT ( ABS ( _out ), "#,0" ) )
+			VAR _out_t = _out_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _out_m = IF ( ISBLANK ( _out ) || _out_s IN { "0", "0.0", "0.00" }, "–", IF ( _out < 0, "(" & _out_t & ")", _out_t ) )
+			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0" ) )
+			VAR _net_t = _net_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
+			VAR _gap_s = IF ( [_Is K], FORMAT ( ABS ( _gap ) / 1000, "#,0.0" ), FORMAT ( ABS ( _gap ), "#,0" ) )
+			VAR _gap_t = _gap_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _gap_m = IF ( ISBLANK ( _gap ) || _gap_s IN { "0", "0.0", "0.00" }, "–", IF ( _gap < 0, "(" & _gap_t & ")", _gap_t ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160' viewBox='0 0 320 160' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='319' height='159' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='16' y='28' font-size='15' font-weight='600' fill='%232C3A54'>Investing</text>"
+			            & "<text x='286' y='28' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & "<text x='304' y='28' font-size='15' text-anchor='end' fill='%235B6577'>→</text>"
+			            & "<text x='16' y='82' font-size='12' fill='%23525C70'>In</text>"
+			            & IF ( ABS ( _in ) >= 0.005, "<rect x='78' y='72' width='" & FORMAT ( ABS ( _in ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%232C3A54'/>" )
+			            & "<text x='304' y='82' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _in_m & "</text>"
+			            & "<text x='16' y='108' font-size='12' fill='%23525C70'>Out</text>"
+			            & IF ( ABS ( _out ) >= 0.005, "<rect x='78' y='98' width='" & FORMAT ( ABS ( _out ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%237B828E'/>" )
+			            & "<text x='304' y='108' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _out_m & "</text>"
+			            & "<text x='16' y='134' font-size='12' fill='%23525C70'>Net</text>"
+			            & IF ( ABS ( _net ) >= 0.005, "<rect x='78' y='124' width='" & FORMAT ( ABS ( _net ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%23FF6F1A'/>" )
+			            & "<text x='304' y='134' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & IF ( ABS ( _gap ) >= 0.005, "<text x='16' y='152' font-size='11' fill='%23525C70'>statement adds " & _gap_m & " non-cash</text>" )
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: d1de688e-3c5c-5787-b530-d91e7bc06171
+		dataCategory: ImageUrl
+
+	/// Cash pop-up, Financing card: cash in, cash out, net of the direct lines; the statement's non-cash gap under it; click opens Financing activities.
+	measure 'Cash Card Financing' =
+			VAR _a            = [_A]
+			VAR _in           = CALCULATE ( [Direct In], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "FINANCING" )
+			VAR _out          = CALCULATE ( [Direct Out], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "FINANCING" )
+			VAR _net          = _in + _out
+			VAR _gap          = CALCULATE ( [Non-Cash Gap], REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] = "FINANCING" )
+			VAR _max          =
+			    MAX (
+			        MAXX (
+			            CALCULATETABLE ( VALUES ( dim_cf_line[section_code] ), REMOVEFILTERS ( dim_cf_line ), dim_cf_line[section_code] IN { "OPERATING", "INVESTING", "FINANCING" } )
+			            ,MAX ( [Direct In], 0 - [Direct Out] )
+			        )
+			        ,1
+			    )
+			VAR _in_s = IF ( [_Is K], FORMAT ( ABS ( _in ) / 1000, "#,0.0" ), FORMAT ( ABS ( _in ), "#,0" ) )
+			VAR _in_t = _in_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _in_m = IF ( ISBLANK ( _in ) || _in_s IN { "0", "0.0", "0.00" }, "–", IF ( _in < 0, "(" & _in_t & ")", _in_t ) )
+			VAR _out_s = IF ( [_Is K], FORMAT ( ABS ( _out ) / 1000, "#,0.0" ), FORMAT ( ABS ( _out ), "#,0" ) )
+			VAR _out_t = _out_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _out_m = IF ( ISBLANK ( _out ) || _out_s IN { "0", "0.0", "0.00" }, "–", IF ( _out < 0, "(" & _out_t & ")", _out_t ) )
+			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0" ) )
+			VAR _net_t = _net_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
+			VAR _gap_s = IF ( [_Is K], FORMAT ( ABS ( _gap ) / 1000, "#,0.0" ), FORMAT ( ABS ( _gap ), "#,0" ) )
+			VAR _gap_t = _gap_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _gap_m = IF ( ISBLANK ( _gap ) || _gap_s IN { "0", "0.0", "0.00" }, "–", IF ( _gap < 0, "(" & _gap_t & ")", _gap_t ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160' viewBox='0 0 320 160' font-family='Segoe UI, sans-serif'>"
+			            & "<rect x='0.5' y='0.5' width='319' height='159' rx='14' fill='%23E8E5DF' stroke='%23D9D7D4'/>"
+			            & "<text x='16' y='28' font-size='15' font-weight='600' fill='%232C3A54'>Financing</text>"
+			            & "<text x='286' y='28' font-size='18' font-weight='600' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & "<text x='304' y='28' font-size='15' text-anchor='end' fill='%235B6577'>→</text>"
+			            & "<text x='16' y='82' font-size='12' fill='%23525C70'>In</text>"
+			            & IF ( ABS ( _in ) >= 0.005, "<rect x='78' y='72' width='" & FORMAT ( ABS ( _in ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%232C3A54'/>" )
+			            & "<text x='304' y='82' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _in_m & "</text>"
+			            & "<text x='16' y='108' font-size='12' fill='%23525C70'>Out</text>"
+			            & IF ( ABS ( _out ) >= 0.005, "<rect x='78' y='98' width='" & FORMAT ( ABS ( _out ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%237B828E'/>" )
+			            & "<text x='304' y='108' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _out_m & "</text>"
+			            & "<text x='16' y='134' font-size='12' fill='%23525C70'>Net</text>"
+			            & IF ( ABS ( _net ) >= 0.005, "<rect x='78' y='124' width='" & FORMAT ( ABS ( _net ) / _max * 130, "0.0" ) & "' height='12' rx='2' fill='%23FF6F1A'/>" )
+			            & "<text x='304' y='134' font-size='12.5' text-anchor='end' fill='%232C3A54'>" & _net_m & "</text>"
+			            & IF ( ABS ( _gap ) >= 0.005, "<text x='16' y='152' font-size='11' fill='%23525C70'>statement adds " & _gap_m & " non-cash</text>" )
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: c770cdac-c0ba-52a3-97d9-bd924ec2fd1f
+		dataCategory: ImageUrl
+
+	/// Cash moved on the day for the line in context (cash in + |cash out|); 0 on window days without cash, blank outside the window.
+	measure 'Heat Moved' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			VAR _mi           = SELECTEDVALUE ( dim_date[month_index] )
+			VAR _in           = NOT ISBLANK ( _a ) && NOT ISBLANK ( _mi ) && _mi >= _a && _mi <= _b
+			VAR _v            =
+			    CALCULATE (
+			        SUMX ( fact_cash_posting, ABS ( fact_cash_posting[amount] ) )
+			        ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			    )
+			RETURN
+			    IF ( _in, _v + 0 )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: f219bc09-b499-5fdf-8c67-8330a0c37d43
+
+	/// Heatmap block of the cell: 1-5 by count over this activity's non-zero day cells in the window (ties go up, mock quint()); 0 = no cash.
+	measure 'Heat Cell Block' =
+			VAR _v            = [Heat Moved]
+			VAR _vc           = ROUND ( _v * 100, 0 )
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			VAR _sec          = SELECTEDVALUE ( dim_cf_line[section_code] )
+			VAR _grid         =
+			    CALCULATETABLE (
+			        ADDCOLUMNS (
+			            SUMMARIZE ( fact_cash_posting, fact_cash_posting[direct_line_code], fact_cash_posting[txn_date] )
+			            ,"@c", ROUND ( CALCULATE ( SUMX ( fact_cash_posting, ABS ( fact_cash_posting[amount] ) ) ) * 100, 0 )
+			        )
+			        ,REMOVEFILTERS ( dim_cf_line )
+			        ,dim_cf_line[section_code] = _sec
+			        ,REMOVEFILTERS ( dim_date )
+			        ,dim_date[month_index] >= _a
+			        ,dim_date[month_index] <= _b
+			        ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			    )
+			VAR _nz           = FILTER ( _grid, [@c] > 0 )
+			VAR _n            = COUNTROWS ( _nz )
+			VAR _le           = COUNTROWS ( FILTER ( _nz, [@c] <= _vc ) )
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _v )
+			            ,BLANK ()
+			        ,_vc <= 0
+			            ,0
+			        ,MIN ( 5, MAX ( 1, ROUNDUP ( _le * 5 / _n, 0 ) ) )
+			    )
+		formatString: 0
+		displayFolder: 3 Direct and activities
+		lineageTag: a57f672b-6aa9-587a-81ca-99d1698b0d24
+
+	/// Matrix value of the heatmap (hidden: the font takes the cell colour).
+	measure 'Heat Value' =
+			VAR _line         = ISINSCOPE ( dim_cf_line[line_name] )
+			VAR _day          = ISINSCOPE ( dim_date[date] )
+			VAR _m            = IF ( _day, [Heat Moved] )
+			RETURN
+			    IF ( _line, _m, IF ( NOT ISBLANK ( _m ), 0 ) )
+		formatString: #,0
+		displayFolder: 3 Direct and activities
+		lineageTag: 0a0849dc-b4a3-5a28-bd07-451d7786bb5f
+
+	/// Cell fill (and font, so the number hides): no cash = page tint, blocks 1-4 navy steps, block 5 orange #FF6F1A.
+	measure 'Heat Cell Colour' =
+			VAR _line         = ISINSCOPE ( dim_cf_line[line_name] )
+			VAR _day          = ISINSCOPE ( dim_date[date] )
+			VAR _v            = [Heat Value]
+			VAR _blk          = IF ( _line && _day, [Heat Cell Block] )
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _v )
+			            ,BLANK ()
+			        ,ISBLANK ( _blk )
+			            ,"#E8E5DF"
+			        ,_blk = 0
+			            ,"#F0EFEA"
+			        ,_blk = 1
+			            ,"#777E8C"
+			        ,_blk = 2
+			            ,"#5D6678"
+			        ,_blk = 3
+			            ,"#445066"
+			        ,_blk = 4
+			            ,"#2C3A54"
+			        ,"#FF6F1A"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: c1f09244-23ab-52c6-bf81-5a39425ddc85
+
+	/// Net cash of the line(s) in context over the window (heatmap totals column). (spec DIRECT_LINE)
+	measure 'Heat Row Net' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,REMOVEFILTERS ( dim_date )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 3 Direct and activities
+		lineageTag: 370bf1fd-9c9a-51e3-b001-b4110c78bf85
+
+	/// Heatmap row summed day by day (Reconciliation: heatmap row = ledger = control). (spec DIRECT_LINE)
+	measure 'Heat Row Net by Day' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,0 + SUMX (
+			            CALCULATETABLE ( VALUES ( dim_date[date] ), REMOVEFILTERS ( dim_date ), dim_date[month_index] >= _a, dim_date[month_index] <= _b )
+			            ,CALCULATE ( SUM ( fact_cash_posting[amount] ), fact_cash_posting[is_internal_transfer] = FALSE () )
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 6 Reconciliation
+		lineageTag: 35f713d5-a0d3-54bd-ac08-95fff0a21173
+
+	/// Operating heatmap totals column: each line's net with a block square (quintile of this activity's |row totals|), section net under the rule.
+	measure 'Heat Totals Operating' =
+			VAR _a            = [_A]
+			VAR _k            = [_Is K]
+			VAR _rows         =
+			    ADDCOLUMNS (
+			        CALCULATETABLE (
+			            SUMMARIZE ( dim_cf_line, dim_cf_line[line_code], dim_cf_line[sort_order] )
+			            ,REMOVEFILTERS ( dim_cf_line )
+			            ,dim_cf_line[section_code] = "OPERATING"
+			            ,dim_cf_line[view] = "DIRECT"
+			            ,dim_cf_line[line_kind] = "data"
+			        )
+			        ,"@net", CALCULATE ( [Heat Row Net] )
+			    )
+			VAR _rk           = ADDCOLUMNS ( _rows, "@c", ROUND ( ABS ( [@net] ) * 100, 0 ), "@i", RANKX ( _rows, dim_cf_line[sort_order], , ASC ) )
+			VAR _nz           = FILTER ( _rk, [@c] > 0 )
+			VAR _n            = COUNTROWS ( _nz )
+			VAR _total        = SUMX ( _rows, [@net] )
+			VAR _body         =
+			    CONCATENATEX (
+			        _rk
+			        ,VAR _c = [@c]
+			        VAR _blk = IF ( _c > 0, MIN ( 5, MAX ( 1, ROUNDUP ( COUNTROWS ( FILTER ( _nz, [@c] <= _c ) ) * 5 / _n, 0 ) ) ), 0 )
+			        VAR _fill = SWITCH ( _blk, 0, "%23F0EFEA", 1, "%23777E8C", 2, "%235D6678", 3, "%23445066", 4, "%232C3A54", "%23FF6F1A" )
+			        VAR _v = [@net]
+			        VAR _s = IF ( _k, FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			        VAR _t = IF ( _s IN { "0", "0.0" }, "–", IF ( _v < 0, "(" & _s & ")", _s ) )
+			        VAR _y = 30 + ( [@i] - 1 ) * 31.2
+			        RETURN
+			            "<rect x='8' y='" & ( _y + 3 ) & "' width='25.2' height='25.2' rx='2' fill='" & _fill & "'/>"
+			                & "<text x='144' y='" & ( _y + 20.6 ) & "' text-anchor='end' fill='" & IF ( _c = 0, "%235B6577", "%232C3A54" ) & "'>" & _t & "</text>"
+			        ,""
+			        ,[@i], ASC
+			    )
+			VAR _ty           = 30 + COUNTROWS ( _rows ) * 31.2
+			VAR _ts           = IF ( _k, FORMAT ( ABS ( _total ) / 1000, "#,0.0" ), FORMAT ( ABS ( _total ), "#,0" ) )
+			VAR _tt           = IF ( _ts IN { "0", "0.0" }, "–", IF ( _total < 0, "(" & _ts & ")", _ts ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='" & ( _ty + 40 ) & "' viewBox='0 0 150 " & ( _ty + 40 ) & "' font-family='Segoe UI, sans-serif' font-size='13'>"
+			            & "<text x='144' y='20' text-anchor='end' font-size='11.5' fill='%23525C70'>Total</text>"
+			            & _body
+			            & "<rect x='0' y='" & ( _ty + 1 ) & "' width='150' height='1' fill='%232C3A54'/>"
+			            & "<text x='144' y='" & ( _ty + 22 ) & "' text-anchor='end' font-weight='600' fill='%232C3A54'>" & _tt & "</text></svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 66eeb5e5-6978-5bfd-a29d-338e39e3b905
+		dataCategory: ImageUrl
+
+	/// Investing heatmap totals column: each line's net with a block square (quintile of this activity's |row totals|), section net under the rule.
+	measure 'Heat Totals Investing' =
+			VAR _a            = [_A]
+			VAR _k            = [_Is K]
+			VAR _rows         =
+			    ADDCOLUMNS (
+			        CALCULATETABLE (
+			            SUMMARIZE ( dim_cf_line, dim_cf_line[line_code], dim_cf_line[sort_order] )
+			            ,REMOVEFILTERS ( dim_cf_line )
+			            ,dim_cf_line[section_code] = "INVESTING"
+			            ,dim_cf_line[view] = "DIRECT"
+			            ,dim_cf_line[line_kind] = "data"
+			        )
+			        ,"@net", CALCULATE ( [Heat Row Net] )
+			    )
+			VAR _rk           = ADDCOLUMNS ( _rows, "@c", ROUND ( ABS ( [@net] ) * 100, 0 ), "@i", RANKX ( _rows, dim_cf_line[sort_order], , ASC ) )
+			VAR _nz           = FILTER ( _rk, [@c] > 0 )
+			VAR _n            = COUNTROWS ( _nz )
+			VAR _total        = SUMX ( _rows, [@net] )
+			VAR _body         =
+			    CONCATENATEX (
+			        _rk
+			        ,VAR _c = [@c]
+			        VAR _blk = IF ( _c > 0, MIN ( 5, MAX ( 1, ROUNDUP ( COUNTROWS ( FILTER ( _nz, [@c] <= _c ) ) * 5 / _n, 0 ) ) ), 0 )
+			        VAR _fill = SWITCH ( _blk, 0, "%23F0EFEA", 1, "%23777E8C", 2, "%235D6678", 3, "%23445066", 4, "%232C3A54", "%23FF6F1A" )
+			        VAR _v = [@net]
+			        VAR _s = IF ( _k, FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			        VAR _t = IF ( _s IN { "0", "0.0" }, "–", IF ( _v < 0, "(" & _s & ")", _s ) )
+			        VAR _y = 30 + ( [@i] - 1 ) * 31.2
+			        RETURN
+			            "<rect x='8' y='" & ( _y + 3 ) & "' width='25.2' height='25.2' rx='2' fill='" & _fill & "'/>"
+			                & "<text x='144' y='" & ( _y + 20.6 ) & "' text-anchor='end' fill='" & IF ( _c = 0, "%235B6577", "%232C3A54" ) & "'>" & _t & "</text>"
+			        ,""
+			        ,[@i], ASC
+			    )
+			VAR _ty           = 30 + COUNTROWS ( _rows ) * 31.2
+			VAR _ts           = IF ( _k, FORMAT ( ABS ( _total ) / 1000, "#,0.0" ), FORMAT ( ABS ( _total ), "#,0" ) )
+			VAR _tt           = IF ( _ts IN { "0", "0.0" }, "–", IF ( _total < 0, "(" & _ts & ")", _ts ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='" & ( _ty + 40 ) & "' viewBox='0 0 150 " & ( _ty + 40 ) & "' font-family='Segoe UI, sans-serif' font-size='13'>"
+			            & "<text x='144' y='20' text-anchor='end' font-size='11.5' fill='%23525C70'>Total</text>"
+			            & _body
+			            & "<rect x='0' y='" & ( _ty + 1 ) & "' width='150' height='1' fill='%232C3A54'/>"
+			            & "<text x='144' y='" & ( _ty + 22 ) & "' text-anchor='end' font-weight='600' fill='%232C3A54'>" & _tt & "</text></svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 3a66466d-2a02-5bd8-beeb-ef23e00b6be4
+		dataCategory: ImageUrl
+
+	/// Financing heatmap totals column: each line's net with a block square (quintile of this activity's |row totals|), section net under the rule.
+	measure 'Heat Totals Financing' =
+			VAR _a            = [_A]
+			VAR _k            = [_Is K]
+			VAR _rows         =
+			    ADDCOLUMNS (
+			        CALCULATETABLE (
+			            SUMMARIZE ( dim_cf_line, dim_cf_line[line_code], dim_cf_line[sort_order] )
+			            ,REMOVEFILTERS ( dim_cf_line )
+			            ,dim_cf_line[section_code] = "FINANCING"
+			            ,dim_cf_line[view] = "DIRECT"
+			            ,dim_cf_line[line_kind] = "data"
+			        )
+			        ,"@net", CALCULATE ( [Heat Row Net] )
+			    )
+			VAR _rk           = ADDCOLUMNS ( _rows, "@c", ROUND ( ABS ( [@net] ) * 100, 0 ), "@i", RANKX ( _rows, dim_cf_line[sort_order], , ASC ) )
+			VAR _nz           = FILTER ( _rk, [@c] > 0 )
+			VAR _n            = COUNTROWS ( _nz )
+			VAR _total        = SUMX ( _rows, [@net] )
+			VAR _body         =
+			    CONCATENATEX (
+			        _rk
+			        ,VAR _c = [@c]
+			        VAR _blk = IF ( _c > 0, MIN ( 5, MAX ( 1, ROUNDUP ( COUNTROWS ( FILTER ( _nz, [@c] <= _c ) ) * 5 / _n, 0 ) ) ), 0 )
+			        VAR _fill = SWITCH ( _blk, 0, "%23F0EFEA", 1, "%23777E8C", 2, "%235D6678", 3, "%23445066", 4, "%232C3A54", "%23FF6F1A" )
+			        VAR _v = [@net]
+			        VAR _s = IF ( _k, FORMAT ( ABS ( _v ) / 1000, "#,0.0" ), FORMAT ( ABS ( _v ), "#,0" ) )
+			        VAR _t = IF ( _s IN { "0", "0.0" }, "–", IF ( _v < 0, "(" & _s & ")", _s ) )
+			        VAR _y = 30 + ( [@i] - 1 ) * 31.2
+			        RETURN
+			            "<rect x='8' y='" & ( _y + 3 ) & "' width='25.2' height='25.2' rx='2' fill='" & _fill & "'/>"
+			                & "<text x='144' y='" & ( _y + 20.6 ) & "' text-anchor='end' fill='" & IF ( _c = 0, "%235B6577", "%232C3A54" ) & "'>" & _t & "</text>"
+			        ,""
+			        ,[@i], ASC
+			    )
+			VAR _ty           = 30 + COUNTROWS ( _rows ) * 31.2
+			VAR _ts           = IF ( _k, FORMAT ( ABS ( _total ) / 1000, "#,0.0" ), FORMAT ( ABS ( _total ), "#,0" ) )
+			VAR _tt           = IF ( _ts IN { "0", "0.0" }, "–", IF ( _total < 0, "(" & _ts & ")", _ts ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='" & ( _ty + 40 ) & "' viewBox='0 0 150 " & ( _ty + 40 ) & "' font-family='Segoe UI, sans-serif' font-size='13'>"
+			            & "<text x='144' y='20' text-anchor='end' font-size='11.5' fill='%23525C70'>Total</text>"
+			            & _body
+			            & "<rect x='0' y='" & ( _ty + 1 ) & "' width='150' height='1' fill='%232C3A54'/>"
+			            & "<text x='144' y='" & ( _ty + 22 ) & "' text-anchor='end' font-weight='600' fill='%232C3A54'>" & _tt & "</text></svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: eefd3a4d-4cea-5270-bc16-b1a4dd13ff6f
+		dataCategory: ImageUrl
+
+	/// Cell tooltip: the date.
+	measure 'Tip Day' = FORMAT ( SELECTEDVALUE ( dim_date[date] ), "ddd d mmm yyyy" )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 98476b9f-e75a-59cc-913a-d290f36976fd
+
+	/// Cell tooltip: the direct line.
+	measure 'Tip Line' = SELECTEDVALUE ( dim_cf_line[line_name] )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: bffb9009-3401-5bac-aa11-5bfbe63570f8
+
+	/// Cell tooltip: cash in on the day.
+	measure 'Tip In' =
+			DIVIDE (
+			    CALCULATE (
+			        SUM ( fact_cash_posting[amount] )
+			        ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			        ,fact_cash_posting[amount] > 0
+			    ) + 0
+			    ,[_Div]
+			)
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: a418b196-716a-52cf-98c7-f38903729121
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0.00;(#,0.00);–" )
+
+	/// Cell tooltip: cash out on the day.
+	measure 'Tip Out' =
+			DIVIDE (
+			    CALCULATE (
+			        SUM ( fact_cash_posting[amount] )
+			        ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			        ,fact_cash_posting[amount] < 0
+			    ) + 0
+			    ,[_Div]
+			)
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: e239cbe5-c7ad-507d-bdfd-8680d7a3b163
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0.00;(#,0.00);–" )
+
+	/// Cell tooltip: ledger rows on the day.
+	measure 'Tip Transactions' =
+			COUNTROWS (
+			    CALCULATETABLE (
+			        SUMMARIZE (
+			            fact_cash_posting
+			            ,fact_cash_posting[txn_id]
+			            ,fact_cash_posting[counterparty_id]
+			            ,fact_cash_posting[direction]
+			        )
+			        ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			    )
+			) + 0
+		formatString: 0
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 3398e02f-3507-59aa-81fa-9645f56e3f87
+
+	/// Ledger amount in USD of the rows in context (drill-through line / day honoured), window, internal transfers excluded. (spec DIRECT_LINE)
+	measure 'Ledger Value' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            SUM ( fact_cash_posting[amount] )
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 4 Transactions
+		lineageTag: e803033c-cd31-5c26-85ec-cf55cc9055a3
+
+	/// Ledger amount in the picked units (cents in USD).
+	measure 'Ledger Amount' = DIVIDE ( [Ledger Value], [_Div] )
+		displayFolder: 4 Transactions
+		lineageTag: 7b1803e0-43f1-515f-b86f-8c1b4155dfed
+
+		formatStringDefinition =
+				IF ( [_Is K], "#,0.0;(#,0.0);–", "#,0.00;(#,0.00);–" )
+
+	/// Cash in of the ledger rows.
+	measure 'Ledger Cash In' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            SUM ( fact_cash_posting[amount] ) + 0
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			            ,fact_cash_posting[amount] > 0
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 4 Transactions
+		lineageTag: f0efa844-906f-5f7f-9cc8-9467683b060d
+
+	/// Cash out of the ledger rows.
+	measure 'Ledger Cash Out' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            SUM ( fact_cash_posting[amount] ) + 0
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+			            ,fact_cash_posting[amount] < 0
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 4 Transactions
+		lineageTag: 0de0fbd7-db94-57ed-ac2e-d1210deecf02
+
+	/// Ledger rows (transaction x line x counterparty x direction) in context.
+	measure 'Ledger Rows' =
+			VAR _a            = [_A]
+			VAR _b            = [_B]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,CALCULATE (
+			            COUNTROWS (
+			                SUMMARIZE (
+			                    fact_cash_posting
+			                    ,fact_cash_posting[txn_id]
+			                    ,fact_cash_posting[direct_line_code]
+			                    ,fact_cash_posting[counterparty_id]
+			                    ,fact_cash_posting[direction]
+			                )
+			            ) + 0
+			            ,fact_cash_posting[is_internal_transfer] = FALSE ()
+			            ,dim_date[month_index] >= _a
+			            ,dim_date[month_index] <= _b
+
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 4 Transactions
+		lineageTag: 2d49e2ca-d732-5c27-8dac-6e808f151e77
+
+	/// Ledger rows of the line(s) in context summed row by row (Reconciliation 'Ledger' column). (spec DIRECT_LINE)
+	measure 'Ledger Line Sum' =
+			SUMX (
+			    CALCULATETABLE (
+			        SUMMARIZE (
+			            fact_cash_posting
+			            ,fact_cash_posting[txn_id]
+			            ,fact_cash_posting[counterparty_id]
+			            ,fact_cash_posting[direction]
+			        )
+			        ,REMOVEFILTERS ( dim_date )
+			    )
+			    ,[Ledger Value]
+			)
+		formatString: #,0.00
+		displayFolder: 6 Reconciliation
+		lineageTag: 9e42ea8e-45a5-5c83-91f5-8a12f40130ce
+
+	/// Clr mark: orange disc with R (reconciled) / C (cleared), plain disc = uncleared, dot = Undeposited Funds (not applicable).
+	measure 'Ledger Clr SVG' =
+			VAR _s            = SELECTEDVALUE ( fact_cash_posting[cleared_status] )
+			VAR _l            = SWITCH ( _s, "Reconciled", "R", "Cleared", "C", "" )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( [Ledger Value] ) && HASONEVALUE ( fact_txn[txn_id] )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' font-family='Segoe UI, sans-serif'>"
+			            & IF (
+			                _s = "NotApplicable"
+			                ,"<circle cx='9' cy='9' r='3' fill='%23FF6F1A'/>"
+			                ,"<circle cx='9' cy='9' r='8' fill='%23FF6F1A'/><text x='9' y='12.5' font-size='9.5' font-weight='700' text-anchor='middle' fill='%232C3A54'>" & _l & "</text>"
+			            )
+			            & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: a2c8a5b0-9019-586d-9710-d8269d1b9c67
+		dataCategory: ImageUrl
+
+	/// Ledger card title: activity › line (all lines when none).
+	measure 'Ledger Title' =
+			VAR _sec          = SELECTEDVALUE ( dim_cf_line[section_code] )
+			VAR _line         = IF ( ISFILTERED ( dim_cf_line[line_name] ), SELECTEDVALUE ( dim_cf_line[line_name] ) )
+			VAR _name         =
+			    SWITCH (
+			        _sec
+			        ,"OPERATING", "Operating"
+			        ,"INVESTING", "Investing"
+			        ,"FINANCING", "Financing"
+			        ,"All activities"
+			    )
+			RETURN
+			    _name & " › " & IF ( ISBLANK ( _line ), "all lines", _line )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 3ba40cbc-ec19-52d4-97cc-7480ed064a23
+
+	/// Ledger card sub-title: the drilled day, else the period.
+	measure 'Ledger When' =
+			VAR _day          = IF ( ISFILTERED ( dim_date[date] ), SELECTEDVALUE ( dim_date[date] ) )
+			RETURN
+			    IF ( ISBLANK ( _day ), [Stmt Header Period], FORMAT ( _day, "ddd d mmm yyyy" ) )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 46393a5a-a08f-5f1d-8bf8-51b321e42388
+
+	/// Transactions trio: cash in, cash out, net, transactions of the ledger rows in context.
+	measure 'Ledger Trio SVG' =
+			VAR _in           = [Ledger Cash In]
+			VAR _out          = [Ledger Cash Out]
+			VAR _net          = _in + _out
+			VAR _n            = [Ledger Rows]
+			VAR _in_s = IF ( [_Is K], FORMAT ( ABS ( _in ) / 1000, "#,0.0" ), FORMAT ( ABS ( _in ), "#,0.00" ) )
+			VAR _in_t = _in_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _in_m = IF ( ISBLANK ( _in ) || _in_s IN { "0", "0.0", "0.00" }, "–", IF ( _in < 0, "(" & _in_t & ")", _in_t ) )
+			VAR _out_s = IF ( [_Is K], FORMAT ( ABS ( _out ) / 1000, "#,0.0" ), FORMAT ( ABS ( _out ), "#,0.00" ) )
+			VAR _out_t = _out_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _out_m = IF ( ISBLANK ( _out ) || _out_s IN { "0", "0.0", "0.00" }, "–", IF ( _out < 0, "(" & _out_t & ")", _out_t ) )
+			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0.00" ) )
+			VAR _net_t = _net_s & IF ( [_Is K] && FALSE (), "k" )
+			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
+			VAR _w            = ( 1370 - 30 ) / 4
+			VAR _box          =
+			    CONCATENATEX (
+			        { ( 0, "Cash in", 1 ), ( 1, "Cash out", 2 ), ( 2, "Net", 0 ), ( 3, "Transactions", 0 ) }
+			        ,VAR _i = [Value1]
+			        VAR _x = _i * ( _w + 10 )
+			        VAR _val = SWITCH ( _i, 0, _in_m, 1, _out_m, 2, _net_m, FORMAT ( _n, "#,0" ) )
+			        RETURN
+			            "<rect x='" & _x & "' y='0' width='" & _w & "' height='56' rx='10' fill='%23F0EFEA'/>"
+			                & IF ( [Value3] = 1, "<rect x='" & ( _x + 10 ) & "' y='0' width='" & ( _w - 20 ) & "' height='3' fill='%232C3A54'/>" )
+			                & IF ( [Value3] = 2, "<rect x='" & ( _x + 10 ) & "' y='0' width='" & ( _w - 20 ) & "' height='3' fill='%237B828E'/>" )
+			                & "<text x='" & ( _x + 12 ) & "' y='21' font-size='11.5' fill='%23525C70'>" & [Value2] & "</text>"
+			                & "<text x='" & ( _x + 12 ) & "' y='44' font-size='17' font-weight='600' fill='%232C3A54'>" & _val & "</text>"
+			        ,""
+			        ,[Value1], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1370' height='56' viewBox='0 0 1370 56' font-family='Segoe UI, sans-serif'>" & _box & "</svg>"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 5513d7c2-3939-5c67-8466-d2665a52b902
+		dataCategory: ImageUrl
+
+	/// Management diagram (mock diagramBody): net change in cash = operating + investing + financing, each with its KPI groups; a group shows its three metrics when picked in the Groups slicer (nothing picked = all collapsed).
+	measure 'Diagram SVG' =
+			VAR _a            = [_A]
+			VAR _any         = ISFILTERED ( dim_dgroup[group_name] )
+			VAR _open        = VALUES ( dim_dgroup[group_code] )
+			VAR _lbl         = [_Period Label]
+			VAR _net         = [Net Change in Cash]
+			VAR _net_s = IF ( [_Is K], FORMAT ( ABS ( _net ) / 1000, "#,0.0" ), FORMAT ( ABS ( _net ), "#,0" ) )
+			VAR _net_t = _net_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _net_m = IF ( ISBLANK ( _net ) || _net_s IN { "0", "0.0", "0.00" }, "–", IF ( _net < 0, "(" & _net_t & ")", _net_t ) )
+			VAR _netDebt     = [Net Debt]
+			VAR _sOP = [Operating Cash Flow]
+			VAR _sOP_s = IF ( [_Is K], FORMAT ( ABS ( _sOP ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sOP ), "#,0" ) )
+			VAR _sOP_t = _sOP_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _sOP_m = IF ( ISBLANK ( _sOP ) || _sOP_s IN { "0", "0.0", "0.00" }, "–", IF ( _sOP < 0, "(" & _sOP_t & ")", _sOP_t ) )
+			VAR _sINV = [Investing Cash Flow]
+			VAR _sINV_s = IF ( [_Is K], FORMAT ( ABS ( _sINV ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sINV ), "#,0" ) )
+			VAR _sINV_t = _sINV_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _sINV_m = IF ( ISBLANK ( _sINV ) || _sINV_s IN { "0", "0.0", "0.00" }, "–", IF ( _sINV < 0, "(" & _sINV_t & ")", _sINV_t ) )
+			VAR _sFIN = [Financing Cash Flow]
+			VAR _sFIN_s = IF ( [_Is K], FORMAT ( ABS ( _sFIN ) / 1000, "#,0.0" ), FORMAT ( ABS ( _sFIN ), "#,0" ) )
+			VAR _sFIN_t = _sFIN_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _sFIN_m = IF ( ISBLANK ( _sFIN ) || _sFIN_s IN { "0", "0.0", "0.00" }, "–", IF ( _sFIN < 0, "(" & _sFIN_t & ")", _sFIN_t ) )
+			VAR _oquality = _any && "quality" IN _open
+			VAR _mquality0 = [Operating Cash Margin]
+			VAR _mquality0_m = IF ( ISBLANK ( _mquality0 ), "n/m", IF ( _mquality0 < 0, "−", "" ) & FORMAT ( ABS ( _mquality0 ) * 100, "#,0.0" ) & "%25" )
+			VAR _mquality1 = [KPI Cash Conversion]
+			VAR _mquality1_m = IF ( ISBLANK ( _mquality1 ), "n/m", IF ( _mquality1 < 0, "−", "" ) & FORMAT ( ABS ( _mquality1 ), "0.00" ) & "×" )
+			VAR _mquality2 = [Accruals]
+			VAR _mquality2_s = IF ( [_Is K], FORMAT ( ABS ( _mquality2 ) / 1000, "#,0.0" ), FORMAT ( ABS ( _mquality2 ), "#,0" ) )
+			VAR _mquality2_t = _mquality2_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _mquality2_m = IF ( ISBLANK ( _mquality2 ) || _mquality2_s IN { "0", "0.0", "0.00" }, "–", IF ( _mquality2 < 0, "(" & _mquality2_t & ")", _mquality2_t ) )
+			VAR _lquality = [KPI Cash Conversion]
+			VAR _lquality_m = IF ( ISBLANK ( _lquality ), "n/m", IF ( _lquality < 0, "−", "" ) & FORMAT ( ABS ( _lquality ), "0.00" ) & "×" )
+			VAR _owc = _any && "wc" IN _open
+			VAR _mwc0 = [DSO Days]
+			VAR _mwc0_m = IF ( ISBLANK ( _mwc0 ), "n/m", FORMAT ( _mwc0, "#,0.0" ) & " d" )
+			VAR _mwc1 = [DPO Days]
+			VAR _mwc1_m = IF ( ISBLANK ( _mwc1 ), "n/m", FORMAT ( _mwc1, "#,0.0" ) & " d" )
+			VAR _mwc2 = [Cash Conversion Cycle]
+			VAR _mwc2_m = IF ( ISBLANK ( _mwc2 ), "n/m", FORMAT ( _mwc2, "#,0.0" ) & " d" )
+			VAR _lwc = [Cash Conversion Cycle]
+			VAR _lwc_m = IF ( ISBLANK ( _lwc ), "n/m", FORMAT ( _lwc, "#,0.0" ) & " d" )
+			VAR _ofcf = _any && "fcf" IN _open
+			VAR _mfcf0 = [Free Cash Flow]
+			VAR _mfcf0_s = IF ( [_Is K], FORMAT ( ABS ( _mfcf0 ) / 1000, "#,0.0" ), FORMAT ( ABS ( _mfcf0 ), "#,0" ) )
+			VAR _mfcf0_t = _mfcf0_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _mfcf0_m = IF ( ISBLANK ( _mfcf0 ) || _mfcf0_s IN { "0", "0.0", "0.00" }, "–", IF ( _mfcf0 < 0, "(" & _mfcf0_t & ")", _mfcf0_t ) )
+			VAR _mfcf1 = [Capex Intensity]
+			VAR _mfcf1_m = IF ( ISBLANK ( _mfcf1 ), "n/m", IF ( _mfcf1 < 0, "−", "" ) & FORMAT ( ABS ( _mfcf1 ) * 100, "#,0.0" ) & "%25" )
+			VAR _mfcf2 = [Capex Coverage]
+			VAR _mfcf2_m = IF ( ISBLANK ( _mfcf2 ), "no capex", IF ( _mfcf2 < 0, "−", "" ) & FORMAT ( ABS ( _mfcf2 ), "0.00" ) & "×" )
+			VAR _lfcf = [Free Cash Flow]
+			VAR _lfcf_s = IF ( [_Is K], FORMAT ( ABS ( _lfcf ) / 1000, "#,0.0" ), FORMAT ( ABS ( _lfcf ), "#,0" ) )
+			VAR _lfcf_t = _lfcf_s & IF ( [_Is K] && TRUE (), "k" )
+			VAR _lfcf_m = IF ( ISBLANK ( _lfcf ) || _lfcf_s IN { "0", "0.0", "0.00" }, "–", IF ( _lfcf < 0, "(" & _lfcf_t & ")", _lfcf_t ) )
+			VAR _olev = _any && "lev" IN _open
+			VAR _mlev0 = [DSCR]
+			VAR _mlev0_m = IF ( ISBLANK ( _mlev0 ), "n/m", IF ( _mlev0 < 0, "−", "" ) & FORMAT ( ABS ( _mlev0 ), "0.00" ) & "×" )
+			VAR _mlev1 = [Net Debt to EBITDA]
+			VAR _mlev1_m = IF ( ISBLANK ( _mlev1 ), "n/m", IF ( _mlev1 < 0, "−", "" ) & FORMAT ( ABS ( _mlev1 ), "0.00" ) & "×" )
+			VAR _mlev2 = [Payout Cover]
+			VAR _mlev2_m = IF ( ISBLANK ( _mlev2 ), "no draws", IF ( _mlev2 < 0, "−", "" ) & FORMAT ( ABS ( _mlev2 ), "0.00" ) & "×" )
+			VAR _llev = [DSCR]
+			VAR _llev_m = IF ( ISBLANK ( _llev ), "n/m", IF ( _llev < 0, "−", "" ) & FORMAT ( ABS ( _llev ), "0.00" ) & "×" )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _a )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1120' height='886' viewBox='0 0 1120 886' preserveAspectRatio='xMidYMid meet' font-family='Segoe UI, sans-serif'><defs><pattern id='d' width='22' height='22' patternUnits='userSpaceOnUse'><circle cx='11' cy='11' r='1.6' fill='%23FF6F1A' fill-opacity='0.3'/></pattern></defs><rect width='1120' height='886' fill='url(%23d)'/>"
+			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 212.0 277.0 212.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<line x1='277.0' y1='212.0' x2='299.0' y2='212.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='212.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='216.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
+			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 536.0 277.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<line x1='277.0' y1='536.0' x2='299.0' y2='536.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='536.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='540.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
+			    & "<path d='M247.0 485.0 C262.0 485.0 262.0 758.0 277.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<line x1='277.0' y1='758.0' x2='299.0' y2='758.0' stroke='%232C3A54' stroke-width='1.5'/><circle cx='277.0' cy='758.0' r='10' fill='%23E8E5DF' stroke='%232C3A54'/><text x='277.0' y='762.0' font-size='12' font-weight='700' text-anchor='middle' fill='%232C3A54'>+</text>"
+			    & IF ( _oquality, "<path d='M509.0 212.0 C535.0 212.0 535.0 110.0 561.0 110.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 212.0 C535.0 212.0 535.0 110.0 561.0 110.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
+			    & IF ( _oquality, "<path d='M801.0 110.0 C827.0 110.0 827.0 44.0 853.0 44.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='16.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='36.0' font-size='12' fill='%23525C70'>CFO margin</text><text x='867.0' y='57.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality0_m & "</text><text x='867.0' y='62.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ revenue" & "</text>"
+			    & "<path d='M801.0 110.0 C827.0 110.0 827.0 110.0 853.0 110.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='82.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='102.0' font-size='12' fill='%23525C70'>Cash conversion</text><text x='867.0' y='123.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality1_m & "</text><text x='867.0' y='128.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ net income" & "</text>"
+			    & "<path d='M801.0 110.0 C827.0 110.0 827.0 176.0 853.0 176.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='148.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='168.0' font-size='12' fill='%23525C70'>Accruals</text><text x='867.0' y='189.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mquality2_m & "</text><text x='867.0' y='194.0' font-size='10.5' fill='%235B6577'>" & "net income − CFO" & "</text>" )
+			    & IF ( _owc, "<path d='M509.0 212.0 C535.0 212.0 535.0 314.0 561.0 314.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 212.0 C535.0 212.0 535.0 314.0 561.0 314.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
+			    & IF ( _owc, "<path d='M801.0 314.0 C827.0 314.0 827.0 248.0 853.0 248.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='220.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='240.0' font-size='12' fill='%23525C70'>DSO</text><text x='867.0' y='261.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc0_m & "</text><text x='867.0' y='266.0' font-size='10.5' fill='%235B6577'>" & "A/R ÷ revenue × days" & "</text>"
+			    & "<path d='M801.0 314.0 C827.0 314.0 827.0 314.0 853.0 314.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='286.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='306.0' font-size='12' fill='%23525C70'>DPO</text><text x='867.0' y='327.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc1_m & "</text><text x='867.0' y='332.0' font-size='10.5' fill='%235B6577'>" & "A/P ÷ bills spend × days" & "</text>"
+			    & "<path d='M801.0 314.0 C827.0 314.0 827.0 380.0 853.0 380.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='352.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='372.0' font-size='12' fill='%23525C70'>Cash conversion cycle</text><text x='867.0' y='393.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mwc2_m & "</text><text x='867.0' y='398.0' font-size='10.5' fill='%235B6577'>" & "DSO − DPO (no inventory)" & "</text>" )
+			    & IF ( _ofcf, "<path d='M509.0 536.0 C535.0 536.0 535.0 536.0 561.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 536.0 C535.0 536.0 535.0 536.0 561.0 536.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
+			    & IF ( _ofcf, "<path d='M801.0 536.0 C827.0 536.0 827.0 470.0 853.0 470.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='442.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='462.0' font-size='12' fill='%23525C70'>Free cash flow</text><text x='867.0' y='483.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf0_m & "</text><text x='867.0' y='488.0' font-size='10.5' fill='%235B6577'>" & "CFO − capex + proceeds" & "</text>"
+			    & "<path d='M801.0 536.0 C827.0 536.0 827.0 536.0 853.0 536.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='508.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='528.0' font-size='12' fill='%23525C70'>Capex intensity</text><text x='867.0' y='549.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf1_m & "</text><text x='867.0' y='554.0' font-size='10.5' fill='%235B6577'>" & "capex ÷ revenue" & "</text>"
+			    & "<path d='M801.0 536.0 C827.0 536.0 827.0 602.0 853.0 602.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='574.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='594.0' font-size='12' fill='%23525C70'>Capex coverage</text><text x='867.0' y='615.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mfcf2_m & "</text><text x='867.0' y='620.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ capex" & "</text>" )
+			    & IF ( _olev, "<path d='M509.0 758.0 C535.0 758.0 535.0 758.0 561.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>", "<path d='M509.0 758.0 C535.0 758.0 535.0 758.0 561.0 758.0' fill='none' stroke='%23C2C3C3' stroke-width='1.5'/>" )
+			    & IF ( _olev, "<path d='M801.0 758.0 C827.0 758.0 827.0 692.0 853.0 692.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='664.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='684.0' font-size='12' fill='%23525C70'>DSCR</text><text x='867.0' y='705.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev0_m & "</text><text x='867.0' y='710.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ (interest + term principal)" & "</text>"
+			    & "<path d='M801.0 758.0 C827.0 758.0 827.0 758.0 853.0 758.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='730.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='750.0' font-size='12' fill='%23525C70'>Net debt ÷ EBITDA</text><text x='867.0' y='771.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev1_m & "</text><text x='867.0' y='776.0' font-size='10.5' fill='%235B6577'>" & IF ( _netDebt < 0, "net cash · EBITDA annualised", "EBITDA annualised" ) & "</text>"
+			    & "<path d='M801.0 758.0 C827.0 758.0 827.0 824.0 853.0 824.0' fill='none' stroke='%232C3A54' stroke-width='1.5'/>"
+			    & "<rect x='853.0' y='796.0' width='260' height='56' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='867.0' y='816.0' font-size='12' fill='%23525C70'>Payout cover</text><text x='867.0' y='837.0' font-size='15' font-weight='600' fill='%232C3A54'>" & _mlev2_m & "</text><text x='867.0' y='842.0' font-size='10.5' fill='%235B6577'>" & "CFO ÷ owner draws" & "</text>" )
+			    & "<rect x='7.0' y='433.0' width='240' height='104' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='21.0' y='453.0' font-size='12' fill='%23525C70'>Net change in cash</text><text x='21.0' y='483.0' font-size='24' font-weight='600' fill='%232C3A54'>" & _net_m & "</text><text x='21.0' y='527.0' font-size='10.5' fill='%235B6577'>" & "closing less opening · " & _lbl & "</text>"
+			    & "<rect x='299.0' y='173.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='193.0' font-size='12' fill='%23525C70'>Operating →</text><text x='313.0' y='217.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sOP_m & "</text><text x='313.0' y='241.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
+			    & "<rect x='299.0' y='497.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='517.0' font-size='12' fill='%23525C70'>Investing →</text><text x='313.0' y='541.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sINV_m & "</text><text x='313.0' y='565.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
+			    & "<rect x='299.0' y='719.0' width='210' height='78' rx='12' fill='%23E8E5DF' stroke='%232C3A54' stroke-width='2'/><text x='313.0' y='739.0' font-size='12' fill='%23525C70'>Financing →</text><text x='313.0' y='763.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _sFIN_m & "</text><text x='313.0' y='787.0' font-size='10.5' fill='%235B6577'>" & "net cash · opens activities" & "</text>"
+			    & "<rect x='561.0' y='75.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='95.0' font-size='12' fill='%23525C70'>Cash quality</text><text x='575.0' y='119.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lquality_m & "</text><text x='575.0' y='135.0' font-size='10.5' fill='%235B6577'>" & "cash conversion" & "</text>"
+			    & "<rect x='561.0' y='279.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='299.0' font-size='12' fill='%23525C70'>Working capital</text><text x='575.0' y='323.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lwc_m & "</text><text x='575.0' y='339.0' font-size='10.5' fill='%235B6577'>" & "cash conversion cycle" & "</text>"
+			    & "<rect x='561.0' y='501.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='521.0' font-size='12' fill='%23525C70'>FCF and investment</text><text x='575.0' y='545.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _lfcf_m & "</text><text x='575.0' y='561.0' font-size='10.5' fill='%235B6577'>" & "free cash flow" & "</text>"
+			    & "<rect x='561.0' y='723.0' width='240' height='70' rx='12' fill='%23E8E5DF' stroke='%23D9D7D4'/><text x='575.0' y='743.0' font-size='12' fill='%23525C70'>Leverage and coverage</text><text x='575.0' y='767.0' font-size='18' font-weight='600' fill='%232C3A54'>" & _llev_m & "</text><text x='575.0' y='783.0' font-size='10.5' fill='%235B6577'>" & "debt service coverage" & "</text>"
+			    & "</svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 3d1f4f1a-e7bd-55ec-a6fc-ab060ff78797
+		dataCategory: ImageUrl
+
+	/// Diagram page title.
+	measure 'Diagram Title' = "Diagram · " & [Stmt Header Period]
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 0989e487-28b4-56d0-be8e-42ddf5038dc8
+
+	/// Control total of the check row for the picked month / year (blank for quarters: no controls).
+	measure 'Control Value' =
+			VAR _key          = [_Ctl Key]
+			VAR _m            = SELECTEDVALUE ( dim_recon_check[metric_code] )
+			VAR _s            = SELECTEDVALUE ( dim_recon_check[scope] )
+			RETURN
+			    IF (
+			        _key <> ""
+			        ,CALCULATE (
+			            SUM ( ctl_control_total[value] )
+			            ,ctl_control_total[period_key] = _key
+			            ,ctl_control_total[metric_code] = _m
+			            ,ctl_control_total[scope] = _s
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 6 Reconciliation
+		lineageTag: 3f1e54ae-7418-5ec3-a906-7afc0bff2b65
+
+	/// Value the report shows for the check row (statement, cash balance card, KPI).
+	measure 'Recon Page Value' =
+			VAR _code         = SELECTEDVALUE ( dim_recon_check[check_code] )
+			RETURN
+			    SWITCH (
+			        _code
+			        ,"OPEN", [Opening Cash]
+			        ,"CLOSE", [Closing Cash]
+			        ,"NET", [Net Change in Cash]
+			        ,"OP", [Operating Cash Flow]
+			        ,"INV", [Investing Cash Flow]
+			        ,"FIN", [Financing Cash Flow]
+			        ,"SECTIONS", [Operating Cash Flow] + [Investing Cash Flow] + [Financing Cash Flow]
+			        ,"IN", [Cash In]
+			        ,"OUT", [Cash Out]
+			        ,"ROLL", [Opening Cash] + [Cash In] + [Cash Out]
+			        ,"FCF", [Free Cash Flow]
+			        ,"CONV", [Cash Conversion]
+			    )
+		formatString: #,0.00
+		displayFolder: 6 Reconciliation
+		lineageTag: 4db8b1c5-c403-5151-b5b4-a407c42d4d47
+
+	/// 1 when the page value ties to the control total (0.005 USD; cash conversion 1e-6 relative).
+	measure 'Recon OK' =
+			VAR _code         = SELECTEDVALUE ( dim_recon_check[check_code] )
+			VAR _p            = [Recon Page Value]
+			VAR _c            = [Control Value]
+			VAR _tol          = IF ( _code = "CONV", 0.000001 * MAX ( 1, ABS ( _c ) ), 0.005 )
+			RETURN
+			    IF ( NOT ISBLANK ( _c ), IF ( ABS ( _p - _c ) <= _tol, 1, 0 ) )
+		formatString: 0
+		displayFolder: 6 Reconciliation
+		lineageTag: 5ea66620-f0ae-515f-a5cc-e046e2358c1e
+
+	/// Page value as text (cents; cash conversion 4 dp).
+	measure 'Recon Page' =
+			VAR _code         = SELECTEDVALUE ( dim_recon_check[check_code] )
+			VAR _v            = [Recon Page Value]
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _v )
+			            ,IF ( _code = "CONV", "n/m", "–" )
+			        ,_code = "CONV"
+			            ,FORMAT ( _v, "0.0000" )
+			        ,FORMAT ( _v, "#,0.00;(#,0.00);–" )
+			    )
+		displayFolder: 6 Reconciliation
+		lineageTag: da966130-b398-545e-a8f4-d8bb84b6aacc
+
+	/// Control value as text.
+	measure 'Recon Control' =
+			VAR _code         = SELECTEDVALUE ( dim_recon_check[check_code] )
+			VAR _v            = [Control Value]
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,ISBLANK ( _v )
+			            ,IF ( _code = "CONV", "n/m", "–" )
+			        ,_code = "CONV"
+			            ,FORMAT ( _v, "0.0000" )
+			        ,FORMAT ( _v, "#,0.00;(#,0.00);–" )
+			    )
+		displayFolder: 6 Reconciliation
+		lineageTag: 147fff68-e2a2-5203-8529-21a112f89b34
+
+	/// ✓ ties, ✗ differs.
+	measure 'Recon Mark' = SWITCH ( [Recon OK], 1, "✓", 0, "✗" )
+		displayFolder: 6 Reconciliation
+		lineageTag: 651b3cf8-405a-5353-872f-8cbd6b338b5c
+
+	/// DIRECT_LINE control total (overrides on) of the line in context; 0 when the line has no row.
+	measure 'Line Control Value' =
+			VAR _key          = [_Ctl Key]
+			VAR _code         = SELECTEDVALUE ( dim_cf_line[line_code] )
+			RETURN
+			    IF (
+			        _key <> ""
+			        ,0 + CALCULATE (
+			            SUM ( ctl_control_total[value] )
+			            ,ctl_control_total[period_key] = _key
+			            ,ctl_control_total[metric_code] = "DIRECT_LINE"
+			            ,ctl_control_total[scope] = _code
+			        )
+			    )
+		formatString: #,0.00
+		displayFolder: 6 Reconciliation
+		lineageTag: 2c37745e-d60a-5999-841b-ac04b8225f09
+
+	/// 1 when heatmap row and ledger both tie to the control.
+	measure 'Line OK' =
+			VAR _c            = [Line Control Value]
+			VAR _h            = CALCULATE ( [Heat Row Net by Day] )
+			VAR _l            = CALCULATE ( [Ledger Line Sum] )
+			RETURN
+			    IF ( NOT ISBLANK ( _c ), IF ( ABS ( _h - _c ) <= 0.005 && ABS ( _l - _c ) <= 0.005, 1, 0 ) )
+		formatString: 0
+		displayFolder: 6 Reconciliation
+		lineageTag: a45dcbf0-14c7-5cd6-a35c-b2715c82b1f3
+
+	/// Line Heat as text.
+	measure 'Line Heat Text' = FORMAT ( CALCULATE ( [Heat Row Net by Day] ), "#,0.00;(#,0.00);–" )
+		displayFolder: 6 Reconciliation
+		lineageTag: 60753248-d00c-5b19-a443-0fbaffc7d14c
+
+	/// Line Ledger as text.
+	measure 'Line Ledger Text' = FORMAT ( CALCULATE ( [Ledger Line Sum] ) + 0, "#,0.00;(#,0.00);–" )
+		displayFolder: 6 Reconciliation
+		lineageTag: 7a5dba8d-0338-5a5c-86e1-4554bc1a3d65
+
+	/// Line Control as text.
+	measure 'Line Control Text' = FORMAT ( [Line Control Value], "#,0.00;(#,0.00);–" )
+		displayFolder: 6 Reconciliation
+		lineageTag: 70c02cfb-f443-5bad-bd5e-fa4dbc6e96d4
+
+	/// ✓ when heatmap row = ledger = control.
+	measure 'Line Mark' = SWITCH ( [Line OK], 1, "✓", 0, "✗" )
+		displayFolder: 6 Reconciliation
+		lineageTag: 1624a0f6-1e7e-5479-8cc6-eb7b43047fb6
+
+	/// Reconciliation title: period and how many checks tie (statement / KPI rows + heatmap row and ledger per direct line).
+	measure 'Recon Header' =
+			VAR _key          = [_Ctl Key]
+			VAR _checks       =
+			    SUMX (
+			        CALCULATETABLE ( VALUES ( dim_recon_check[check_code] ), REMOVEFILTERS ( dim_recon_check ) )
+			        ,[Recon OK]
+			    )
+			VAR _nChecks      = COUNTROWS ( FILTER ( CALCULATETABLE ( VALUES ( dim_recon_check[check_code] ), REMOVEFILTERS ( dim_recon_check ) ), NOT ISBLANK ( [Recon OK] ) ) )
+			VAR _lines        =
+			    CALCULATETABLE (
+			        VALUES ( dim_cf_line[line_code] )
+			        ,REMOVEFILTERS ( dim_cf_line )
+			        ,dim_cf_line[view] = "DIRECT"
+			        ,dim_cf_line[line_kind] = "data"
+			    )
+			VAR _okLines      = SUMX ( _lines, [Line OK] )
+			VAR _nLines       = COUNTROWS ( _lines )
+			VAR _ok           = _checks + 2 * _okLines
+			VAR _n            = _nChecks + 2 * _nLines
+			RETURN
+			    IF (
+			        _key = "" || ISBLANK ( _key )
+			        ,"Reconciliation · " & [Stmt Header Period] & " · control totals exist per month and per year: pick a month, a year or YTD"
+			        ,"Reconciliation · " & [Stmt Header Period] & " · " & _ok & " / " & _n & " tie " & IF ( _ok = _n, "✓", "✗" )
+			    )
+		displayFolder: 6 Reconciliation
+		lineageTag: 871c1095-b292-51dc-9a52-5a95a1ce3c06
+
+	/// Selected tile fill (navy, USER round 13).
+	measure '_Sel Fill' = "#2C3A54"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: af939c92-c96f-5f18-b94f-055c6d97d121
+
+	/// Selected tile text.
+	measure '_Sel Font' = "#F6F5F2"
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 71e98275-0430-5e7d-b79c-575654f0f8bf
+
+	/// Month tile text: muted unless the Month span is active and the month has data.
+	measure 'Cal Month Font' =
+			VAR _m            = SELECTEDVALUE ( param_month[month_num] )
+			VAR _live         = [_Span] = "M" && NOT ( [_Year] = 2026 && _m > 10 )
+			RETURN
+			    IF ( _live, "#2C3A54", "#C2C3C3" )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 1075e838-015c-5755-b66c-dbf8129a517f
+
+	/// Quarter tile text: muted unless the Quarter span is active.
+	measure 'Cal Quarter Font' = IF ( [_Span] = "Q", "#2C3A54", "#C2C3C3" )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 7b42d53b-ea9d-5aa4-bb63-f8ecf76f6647
+
+	/// Year tile text: muted for YTD / QTD / MTD.
+	measure 'Cal Year Font' = IF ( [_Span] IN { "A", "Q", "M" }, "#2C3A54", "#C2C3C3" )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 9f25319b-1ae1-59ad-be71-80c6284dd85d
+
+	/// S01 pill on the line-of-credit row (override moves it from operating to financing).
+	measure 'Stmt S01 Icon' =
+			VAR _ovr          = SELECTEDVALUE ( dim_stmt_row[is_override] )
+			RETURN
+			    IF (
+			        ISINSCOPE ( dim_stmt_row[row_label] ) && _ovr = TRUE () && NOT ISBLANK ( [Stmt Value] )
+			        ,"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='18' viewBox='0 0 32 18' font-family='Segoe UI, sans-serif'><rect width='32' height='18' rx='9' fill='%23FF6F1A'/><text x='16' y='12.5' font-size='10' font-weight='700' text-anchor='middle' fill='%232C3A54'>S01</text></svg>"
+			    )
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: b1678cd8-8c28-5d7a-a740-23f0bad55b29
+		dataCategory: ImageUrl
+
+	/// Cash pop-up title.
+	measure 'Cash Title' = "Cash · " & [Stmt Header Period]
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: 454b21b3-52dd-5354-9b23-531d4b805580
+
+	/// Activities card sub-title (period).
+	measure 'Activities Period' = [Stmt Header Period]
+		isHidden
+		displayFolder: 8 Report
+		lineageTag: ee83696e-6a30-56e1-b6f9-beed7d1a779a
+
+	column measure_table
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 367ff030-24f5-5ffa-9022-838c36da0e0b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [measure_table]
+
+		annotation SummarizationSetBy = User
+
+	partition _measures = calculated
+		mode: import
+		source = ROW ( "measure_table", 0 )
+
+	annotation PBI_ResultType = Table

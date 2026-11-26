@@ -1,0 +1,88 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Calendar (Reconciliation)",
+  "name": "bm_recon_cal",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_recon_cal",
+      "grp_recon_cal_scrim",
+      "grp_recon_cal_panel",
+      "grp_recon_cal_h",
+      "grp_recon_cal_x",
+      "grp_recon_cal_span",
+      "grp_recon_cal_year",
+      "grp_recon_cal_month",
+      "grp_recon_cal_quarter",
+      "grp_recon_cal_uh",
+      "grp_recon_cal_units"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "recon",
+    "sections": {
+      "recon": {
+        "visualContainers": {
+          "grp_recon_cal_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_recon_cal_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_recon_cal_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_recon_cal_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_recon_cal_span": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_recon_cal_year": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_recon_cal_month": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_recon_cal_quarter": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_recon_cal_uh": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_recon_cal_units": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_recon_cal": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

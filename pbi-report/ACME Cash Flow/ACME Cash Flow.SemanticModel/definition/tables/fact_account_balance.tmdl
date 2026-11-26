@@ -1,0 +1,99 @@
+/// Account x month end (2,100), debit positive: opening, net change, closing. Derived on load: month_index (0 = 2024-01; 2023-12 = -1).
+table fact_account_balance
+	lineageTag: 1e1e454e-6cdb-52a6-9abb-4cf064ce1bb7
+
+	column account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b98be5fe-266b-56c2-afa1-e085cd8d1a4e
+		summarizeBy: none
+		sourceColumn: account_id
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 999d5c0d-dd65-58db-90a2-2d887c7c2d54
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column month_end
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 2b71fe95-6838-507c-bee8-63cb90d77c60
+		summarizeBy: none
+		sourceColumn: month_end
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column opening_balance
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 6057606e-47de-51f3-935f-b2820cc0a709
+		summarizeBy: none
+		sourceColumn: opening_balance
+
+		annotation SummarizationSetBy = User
+
+	column net_change
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 37fd1349-d407-5706-b14e-4dc0e67d8b2c
+		summarizeBy: none
+		sourceColumn: net_change
+
+		annotation SummarizationSetBy = User
+
+	column closing_balance
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 7a872831-9f02-5667-ae7f-05b4accbd50d
+		summarizeBy: none
+		sourceColumn: closing_balance
+
+		annotation SummarizationSetBy = User
+
+	/// Months since 2024-01.
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: afcb428d-6339-5941-8d48-9f2e25851052
+		summarizeBy: none
+		sourceColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	partition fact_account_balance = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_account_balance.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"account_id", Int64.Type},
+				            {"month_key", type text},
+				            {"month_end", type date},
+				            {"opening_balance", type number},
+				            {"net_change", type number},
+				            {"closing_balance", type number}
+				        }
+				    ),
+				    add_mi = Table.AddColumn(typed, "month_index", each (Number.FromText(Text.Start([month_key], 4)) - 2024) * 12 + Number.FromText(Text.End([month_key], 2)) - 1, Int64.Type)
+				in
+				    add_mi
+
+	annotation PBI_ResultType = Table

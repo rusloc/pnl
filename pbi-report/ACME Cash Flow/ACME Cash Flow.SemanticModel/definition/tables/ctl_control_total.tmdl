@@ -1,0 +1,54 @@
+/// checks/control_totals_usd.csv (2,662 rows: period x metric x scope, USD), next to the Parquet folder. The Reconciliation page ties the page values to it.
+table ctl_control_total
+	lineageTag: 40fb0d70-8299-5067-bc39-9b405c252230
+	isHidden
+
+	column period_key
+		dataType: string
+		isHidden
+		lineageTag: 194a8463-a4a1-5cbd-93bd-e263a88c75e4
+		summarizeBy: none
+		sourceColumn: period_key
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: b885bf82-a5c0-591f-92ec-ea2ac4e85a80
+		summarizeBy: none
+		sourceColumn: metric_code
+
+		annotation SummarizationSetBy = User
+
+	column scope
+		dataType: string
+		isHidden
+		lineageTag: 8137b94c-72af-5b2b-89ed-aa96e41afa77
+		summarizeBy: none
+		sourceColumn: scope
+
+		annotation SummarizationSetBy = User
+
+	column value
+		dataType: double
+		isHidden
+		formatString: #,0.000000
+		lineageTag: 7f7a7e3f-2964-524a-ab24-f66420f65511
+		summarizeBy: none
+		sourceColumn: value
+
+		annotation SummarizationSetBy = User
+
+	partition ctl_control_total = m
+		mode: import
+		source =
+				let
+				    // The generator writes checks\control_totals_usd.csv beside parquet\ (data README "How to run"): the same DataFolder serves both.
+				    src = Csv.Document(File.Contents(DataFolder & "\..\checks\control_totals_usd.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+				    promoted = Table.PromoteHeaders(src, [PromoteAllScalars = true]),
+				    typed = Table.TransformColumnTypes(promoted, {{"period_key", type text}, {"metric_code", type text}, {"scope", type text}, {"value", type number}}, "en-US")
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

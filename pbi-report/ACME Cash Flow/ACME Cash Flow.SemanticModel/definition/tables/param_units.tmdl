@@ -1,0 +1,49 @@
+/// Display units (mock Units): USD or USD k. Disconnected; nothing picked = USD.
+table param_units
+	lineageTag: b16e1b42-ba73-581d-99f2-afdbe5ffe4dd
+
+	column unit_code
+		dataType: string
+		isHidden
+		lineageTag: 64e771f5-e897-54b6-91ab-0c9c2fe46ee4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [unit_code]
+
+		annotation SummarizationSetBy = User
+
+	column unit_name
+		dataType: string
+		lineageTag: 8d7bf882-d769-53d9-9200-3bcf1e305a9b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [unit_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 71c40e42-1a8c-50e8-81f0-be43d87e69c3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_units = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "unit_code", STRING
+				    ,"unit_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "USD", "USD", 1 }
+				        ,{ "USDK", "USD k", 2 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

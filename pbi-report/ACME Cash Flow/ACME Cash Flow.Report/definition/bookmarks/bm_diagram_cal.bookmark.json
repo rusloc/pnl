@@ -1,0 +1,88 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Calendar (Diagram)",
+  "name": "bm_diagram_cal",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_diagram_cal",
+      "grp_diagram_cal_scrim",
+      "grp_diagram_cal_panel",
+      "grp_diagram_cal_h",
+      "grp_diagram_cal_x",
+      "grp_diagram_cal_span",
+      "grp_diagram_cal_year",
+      "grp_diagram_cal_month",
+      "grp_diagram_cal_quarter",
+      "grp_diagram_cal_uh",
+      "grp_diagram_cal_units"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "diagram",
+    "sections": {
+      "diagram": {
+        "visualContainers": {
+          "grp_diagram_cal_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_diagram_cal_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_diagram_cal_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_diagram_cal_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_diagram_cal_span": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_diagram_cal_year": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_diagram_cal_month": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_diagram_cal_quarter": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_diagram_cal_uh": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_diagram_cal_units": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_diagram_cal": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

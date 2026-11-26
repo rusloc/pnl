@@ -1,0 +1,6 @@
+/// Folder that holds the Parquet files + manifest.json of data/acme_cash_flow_dummy_data/parquet (absolute path; change it on another machine). The control totals are read from ..\checks\ beside it.
+expression DataFolder = "C:\__PBI\PNL\data\acme_cash_flow_dummy_data\parquet" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 66abc1ad-8008-5c4a-a3bb-75af6624f71f
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text

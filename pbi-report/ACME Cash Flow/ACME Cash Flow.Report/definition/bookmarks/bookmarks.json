@@ -1,0 +1,71 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "bmg_stmt",
+      "displayName": "Statement",
+      "children": [
+        "bm_stmt_cal",
+        "bm_stmt_menu",
+        "bm_stmt_cash",
+        "bm_stmt_close"
+      ]
+    },
+    {
+      "name": "bmg_act_op",
+      "displayName": "Activities · Operating",
+      "children": [
+        "bm_act_op_cal",
+        "bm_act_op_menu",
+        "bm_act_op_cash",
+        "bm_act_op_close"
+      ]
+    },
+    {
+      "name": "bmg_act_inv",
+      "displayName": "Activities · Investing",
+      "children": [
+        "bm_act_inv_cal",
+        "bm_act_inv_menu",
+        "bm_act_inv_cash",
+        "bm_act_inv_close"
+      ]
+    },
+    {
+      "name": "bmg_act_fin",
+      "displayName": "Activities · Financing",
+      "children": [
+        "bm_act_fin_cal",
+        "bm_act_fin_menu",
+        "bm_act_fin_cash",
+        "bm_act_fin_close"
+      ]
+    },
+    {
+      "name": "bmg_txn",
+      "displayName": "Transactions",
+      "children": [
+        "bm_txn_cal",
+        "bm_txn_menu",
+        "bm_txn_cash",
+        "bm_txn_close"
+      ]
+    },
+    {
+      "name": "bmg_diagram",
+      "displayName": "Diagram",
+      "children": [
+        "bm_diagram_cal",
+        "bm_diagram_close"
+      ]
+    },
+    {
+      "name": "bmg_recon",
+      "displayName": "Reconciliation",
+      "children": [
+        "bm_recon_cal",
+        "bm_recon_close"
+      ]
+    }
+  ]
+}

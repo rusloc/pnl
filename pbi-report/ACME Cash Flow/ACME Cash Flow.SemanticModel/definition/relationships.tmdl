@@ -1,0 +1,19 @@
+relationship a5708295-74d3-5c9a-8627-441b4a34926f
+	fromColumn: fact_cash_posting.txn_date
+	toColumn: dim_date.'date'
+
+relationship b4a54c7f-b184-549a-8baf-f47699884948
+	fromColumn: fact_cash_posting.direct_line_code
+	toColumn: dim_cf_line.line_code
+
+relationship f0485f80-40a3-5426-a0fc-28f196e6f7dc
+	fromColumn: fact_cash_posting.counterparty_id
+	toColumn: dim_counterparty.counterparty_id
+
+relationship f6fac6f7-f098-55f7-95bd-109ed9d1f2ae
+	fromColumn: fact_cash_posting.txn_id
+	toColumn: fact_txn.txn_id
+
+relationship b08129b2-57c0-5d9c-a6bd-d36da6486cce
+	fromColumn: fact_account_balance.account_id
+	toColumn: dim_account.account_id

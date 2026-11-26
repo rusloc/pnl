@@ -1,0 +1,50 @@
+/// The pinned statement rows: cash at beginning (over the matrix), net increase and cash at end (under it).
+table dim_bal_row
+	lineageTag: 5f50e5f4-d348-5afa-9347-245562d72c27
+
+	column row_code
+		dataType: string
+		isHidden
+		lineageTag: a864120a-55c8-5c94-8de0-07ce3b131058
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_code]
+
+		annotation SummarizationSetBy = User
+
+	column row_label
+		dataType: string
+		lineageTag: 1463f824-13f8-5a6f-9916-2d27b4f5d78a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 24939126-4703-5c74-985c-40d69be39909
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_bal_row = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "row_code", STRING
+				    ,"row_label", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "OPEN", "Cash at beginning of period", 1 }
+				        ,{ "NET", "Net increase (decrease) in cash", 2 }
+				        ,{ "CLOSE", "Cash at end of period", 3 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

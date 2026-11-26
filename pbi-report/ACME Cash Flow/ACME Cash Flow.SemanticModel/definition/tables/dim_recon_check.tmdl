@@ -1,0 +1,81 @@
+/// Reconciliation rows (mock selfCheck): statement, cash balance card and KPI values against the control totals.
+table dim_recon_check
+	lineageTag: eeca2ecc-4a88-585d-abb7-0edeb94da24a
+
+	column check_code
+		dataType: string
+		isHidden
+		lineageTag: f957a2e9-6d61-5346-b6d7-ba19eccace28
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [check_code]
+
+		annotation SummarizationSetBy = User
+
+	column check_label
+		dataType: string
+		lineageTag: 55408b76-8114-5ac5-a7f3-1a92ae797ad0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [check_label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column metric_code
+		dataType: string
+		isHidden
+		lineageTag: c039ebd3-0e51-552b-bdf0-c2e77da5dea7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [metric_code]
+
+		annotation SummarizationSetBy = User
+
+	column scope
+		dataType: string
+		isHidden
+		lineageTag: 57e92e43-9ec4-502d-a692-68cb682f245c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [scope]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 52c568a8-b9a5-5758-a7ae-5e5958c12bc7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_recon_check = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "check_code", STRING
+				    ,"check_label", STRING
+				    ,"metric_code", STRING
+				    ,"scope", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "OPEN", "M01 opening (statement)", "M01", "ALL", 1 }
+				        ,{ "CLOSE", "M02 closing (statement)", "M02", "ALL", 2 }
+				        ,{ "NET", "M03 net change (statement)", "M03", "ALL", 3 }
+				        ,{ "OP", "M06 operating (statement)", "M06", "OVERRIDES_ON", 4 }
+				        ,{ "INV", "M07 investing (statement)", "M07", "OVERRIDES_ON", 5 }
+				        ,{ "FIN", "M08 financing (statement)", "M08", "OVERRIDES_ON", 6 }
+				        ,{ "SECTIONS", "M03 = sections", "M03", "ALL", 7 }
+				        ,{ "IN", "M09 cash in (cash balance card)", "M09", "ALL", 8 }
+				        ,{ "OUT", "M10 cash out (cash balance card)", "M10", "ALL", 9 }
+				        ,{ "ROLL", "M02 = opening + in + out (cash balance card)", "M02", "ALL", 10 }
+				        ,{ "FCF", "M15 free cash flow (KPI)", "M15", "ALL", 11 }
+				        ,{ "CONV", "M16 cash conversion (KPI)", "M16", "ALL", 12 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

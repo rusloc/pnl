@@ -1,0 +1,342 @@
+/// Cash transaction x offsetting split line (4,424): the direct view (overrides on), cash in +, out -. Derived on load: direction (In / Out), the ledger row split.
+table fact_cash_posting
+	lineageTag: f0926f5d-c405-5a75-bca3-a3678c698336
+
+	column posting_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 677f586a-2ae8-5740-87d7-434af594c23d
+		summarizeBy: none
+		sourceColumn: posting_id
+
+		annotation SummarizationSetBy = User
+
+	column txn_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6f404248-302b-53ba-8a65-7aab1b546f66
+		summarizeBy: none
+		sourceColumn: txn_id
+
+		annotation SummarizationSetBy = User
+
+	column txn_date
+		dataType: dateTime
+		formatString: d mmm yy
+		lineageTag: 9f56aa37-740d-511a-8253-c3e6f828d68e
+		summarizeBy: none
+		sourceColumn: txn_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: fe7aba2b-a3bd-57ca-8d85-a88932885aad
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column source_type
+		dataType: string
+		isHidden
+		lineageTag: c62015d3-d1cd-5dd3-91df-5b0316e66adf
+		summarizeBy: none
+		sourceColumn: source_type
+
+		annotation SummarizationSetBy = User
+
+	column cash_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 72175b43-abb8-5ecf-8c62-3acfab117a7d
+		summarizeBy: none
+		sourceColumn: cash_account_id
+
+		annotation SummarizationSetBy = User
+
+	column cash_kind
+		dataType: string
+		isHidden
+		lineageTag: 73a18cbf-0d5f-513f-baa2-a96b978ff1d8
+		summarizeBy: none
+		sourceColumn: cash_kind
+
+		annotation SummarizationSetBy = User
+
+	column offset_ledger_seq
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b3439c2e-ab8b-5411-887e-bf040f3e827b
+		summarizeBy: none
+		sourceColumn: offset_ledger_seq
+
+		annotation SummarizationSetBy = User
+
+	column posting_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bd830bf4-10a7-56a7-8fde-70fe0077ec42
+		summarizeBy: none
+		sourceColumn: posting_account_id
+
+		annotation SummarizationSetBy = User
+
+	column offset_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9564f3cc-d34d-5e12-a3e9-e40f1e24fc04
+		summarizeBy: none
+		sourceColumn: offset_account_id
+
+		annotation SummarizationSetBy = User
+
+	column settled_txn_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f0421dc2-eaa6-5798-9b5b-f5d9babd3447
+		summarizeBy: none
+		sourceColumn: settled_txn_id
+
+		annotation SummarizationSetBy = User
+
+	column settled_ledger_seq
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d1d26821-18f5-5710-b25c-e33130ea1ad6
+		summarizeBy: none
+		sourceColumn: settled_ledger_seq
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 16b45134-a87a-5003-9da6-0d110fae806c
+		summarizeBy: none
+		sourceColumn: counterparty_id
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_source
+		dataType: string
+		isHidden
+		lineageTag: 951add2d-f6ac-5855-ae34-8cdbd9c141be
+		summarizeBy: none
+		sourceColumn: counterparty_source
+
+		annotation SummarizationSetBy = User
+
+	column class_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 00c84a16-5ffb-523f-995e-2aa7cf687a7e
+		summarizeBy: none
+		sourceColumn: class_id
+
+		annotation SummarizationSetBy = User
+
+	column amount
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: fe7c012b-3329-5829-b18c-a3febe738e78
+		summarizeBy: none
+		sourceColumn: amount
+
+		annotation SummarizationSetBy = User
+
+	column is_internal_transfer
+		dataType: boolean
+		isHidden
+		lineageTag: 67f9bde4-ff77-5079-94e8-4dacc5a5b62d
+		summarizeBy: none
+		sourceColumn: is_internal_transfer
+
+		annotation SummarizationSetBy = User
+
+	column direct_line_code
+		dataType: string
+		isHidden
+		lineageTag: 12ce068f-ab40-59a9-945d-e279a8a33b58
+		summarizeBy: none
+		sourceColumn: direct_line_code
+
+		annotation SummarizationSetBy = User
+
+	column default_direct_line_code
+		dataType: string
+		isHidden
+		lineageTag: e2b4a98b-20be-5df0-9dc4-6e904cfcfa2d
+		summarizeBy: none
+		sourceColumn: default_direct_line_code
+
+		annotation SummarizationSetBy = User
+
+	column in_bank_view
+		dataType: boolean
+		isHidden
+		lineageTag: b8b55452-8c79-5e75-a805-b7df2425108f
+		summarizeBy: none
+		sourceColumn: in_bank_view
+
+		annotation SummarizationSetBy = User
+
+	column bank_view_line_code
+		dataType: string
+		isHidden
+		lineageTag: 4669c27b-fed2-5417-bfdd-dafe0ec156cb
+		summarizeBy: none
+		sourceColumn: bank_view_line_code
+
+		annotation SummarizationSetBy = User
+
+	column cleared_status
+		dataType: string
+		isHidden
+		lineageTag: 437dec68-cccc-5815-9bf4-f4ab4e793427
+		summarizeBy: none
+		sourceColumn: cleared_status
+
+		annotation SummarizationSetBy = User
+
+	column cleared_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 16846f9a-3576-5b68-be31-9a253eefb342
+		summarizeBy: none
+		sourceColumn: cleared_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column is_journal_entry
+		dataType: boolean
+		isHidden
+		lineageTag: 8a9ca1ea-532f-5a72-8c51-ea8fa5bfcff6
+		summarizeBy: none
+		sourceColumn: is_journal_entry
+
+		annotation SummarizationSetBy = User
+
+	column memo
+		dataType: string
+		isHidden
+		lineageTag: 241330ed-a43e-56b5-94af-bcbe7c21d996
+		summarizeBy: none
+		sourceColumn: memo
+
+		annotation SummarizationSetBy = User
+
+	/// In when amount > 0, else Out (a ledger row never mixes both).
+	column direction
+		dataType: string
+		lineageTag: d72e9097-d8c4-517f-a84c-8addc672a157
+		summarizeBy: none
+		sourceColumn: direction
+
+		annotation SummarizationSetBy = User
+
+	/// Ledger memo of the row (mock build-mock-v2-data.py): the first non-empty posting memo of the row, else the transaction note, else the settled document ('Invoice 1043 + 2 more').
+	column ledger_memo =
+			VAR _txn          = fact_cash_posting[txn_id]
+			VAR _line         = fact_cash_posting[direct_line_code]
+			VAR _cp           = fact_cash_posting[counterparty_id]
+			VAR _dir          = fact_cash_posting[direction]
+			VAR _grp          =
+			    FILTER (
+			        fact_cash_posting
+			        ,fact_cash_posting[txn_id] = _txn
+			            && fact_cash_posting[direct_line_code] = _line
+			            && fact_cash_posting[counterparty_id] = _cp
+			            && fact_cash_posting[direction] = _dir
+			            && fact_cash_posting[is_internal_transfer] = FALSE ()
+			    )
+			VAR _memos        = FILTER ( _grp, fact_cash_posting[memo] <> "" )
+			VAR _firstMemo    = MINX ( _memos, fact_cash_posting[posting_id] )
+			VAR _memo         = MAXX ( FILTER ( _memos, fact_cash_posting[posting_id] = _firstMemo ), fact_cash_posting[memo] )
+			VAR _note         = LOOKUPVALUE ( fact_txn[private_note], fact_txn[txn_id], _txn )
+			VAR _docs         =
+			    ADDCOLUMNS (
+			        GROUPBY ( FILTER ( _grp, NOT ISBLANK ( fact_cash_posting[settled_txn_id] ) ), fact_cash_posting[settled_txn_id] )
+			        ,"@first", CALCULATE ( MIN ( fact_cash_posting[posting_id] ), FILTER ( _grp, fact_cash_posting[settled_txn_id] = EARLIER ( fact_cash_posting[settled_txn_id] ) ) )
+			    )
+			VAR _n            = COUNTROWS ( _docs )
+			VAR _d0           = MAXX ( TOPN ( 1, _docs, [@first], ASC ), fact_cash_posting[settled_txn_id] )
+			VAR _dType        = LOOKUPVALUE ( fact_txn[txn_type], fact_txn[txn_id], _d0 )
+			VAR _dNo          = LOOKUPVALUE ( fact_txn[doc_number], fact_txn[txn_id], _d0 )
+			VAR _docText      = _dType & " " & IF ( ISBLANK ( _dNo ) || _dNo = "", FORMAT ( _d0, "0" ), _dNo ) & IF ( _n > 1, " + " & ( _n - 1 ) & " more" )
+			RETURN
+			    SWITCH (
+			        TRUE ()
+			        ,NOT ISBLANK ( _memo ) && _memo <> ""
+			            ,_memo
+			        ,NOT ISBLANK ( _note ) && _note <> ""
+			            ,_note
+			        ,_n > 0
+			            ,_docText
+			        ,"–"
+			    )
+		dataType: string
+		lineageTag: 14177f94-5c3e-547d-b5ea-4310811f3b53
+		summarizeBy: none
+
+		annotation SummarizationSetBy = User
+
+	partition fact_cash_posting = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_cash_posting.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"posting_id", Int64.Type},
+				            {"txn_id", Int64.Type},
+				            {"txn_date", type date},
+				            {"month_key", type text},
+				            {"source_type", type text},
+				            {"cash_account_id", Int64.Type},
+				            {"cash_kind", type text},
+				            {"offset_ledger_seq", Int64.Type},
+				            {"posting_account_id", Int64.Type},
+				            {"offset_account_id", Int64.Type},
+				            {"settled_txn_id", Int64.Type},
+				            {"settled_ledger_seq", Int64.Type},
+				            {"counterparty_id", Int64.Type},
+				            {"counterparty_source", type text},
+				            {"class_id", Int64.Type},
+				            {"amount", type number},
+				            {"is_internal_transfer", type logical},
+				            {"direct_line_code", type text},
+				            {"default_direct_line_code", type text},
+				            {"in_bank_view", type logical},
+				            {"bank_view_line_code", type text},
+				            {"cleared_status", type text},
+				            {"cleared_date", type date},
+				            {"is_journal_entry", type logical},
+				            {"memo", type text}
+				        }
+				    ),
+				    add_dir = Table.AddColumn(typed, "direction", each if [amount] > 0 then "In" else "Out", type text)
+				in
+				    add_dir
+
+	annotation PBI_ResultType = Table

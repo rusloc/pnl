@@ -1,0 +1,73 @@
+/// Customer, vendor or employee (114) plus id 0 '(no name)'.
+table dim_counterparty
+	lineageTag: f0fd27ae-09fb-56b4-b79b-63875adce0ff
+
+	column counterparty_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1aa81dd5-0254-5c5b-8973-85e2308cd5ec
+		summarizeBy: none
+		sourceColumn: counterparty_id
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_kind
+		dataType: string
+		isHidden
+		lineageTag: 55607488-d309-516c-83cd-4236b553023f
+		summarizeBy: none
+		sourceColumn: counterparty_kind
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_name
+		dataType: string
+		lineageTag: 318acd2d-50be-50a9-b700-fd222e84d06b
+		summarizeBy: none
+		sourceColumn: counterparty_name
+
+		annotation SummarizationSetBy = User
+
+	column active
+		dataType: boolean
+		isHidden
+		lineageTag: b50f112b-bd14-5b4d-b11f-cef93b6fb922
+		summarizeBy: none
+		sourceColumn: active
+
+		annotation SummarizationSetBy = User
+
+	column created_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: b0354a51-0f71-55d9-8d24-5a04519542ba
+		summarizeBy: none
+		sourceColumn: created_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	partition dim_counterparty = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_counterparty.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"counterparty_id", Int64.Type},
+				            {"counterparty_kind", type text},
+				            {"counterparty_name", type text},
+				            {"active", type logical},
+				            {"created_date", type date}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

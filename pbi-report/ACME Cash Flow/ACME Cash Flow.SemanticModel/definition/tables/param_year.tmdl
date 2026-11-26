@@ -1,0 +1,39 @@
+/// Calendar year of the Year / Quarter / Month spans. Disconnected; nothing picked = 2026.
+table param_year
+	lineageTag: caa028a8-f6bc-52ed-b13f-9abb9ee0a998
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 65185138-b2a9-5d14-90db-544db8f96fa5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [year]
+
+		annotation SummarizationSetBy = User
+
+	column year_name
+		dataType: string
+		lineageTag: b90594a4-9bfb-5917-9240-0b58e972a23b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [year_name]
+		sortByColumn: year
+
+		annotation SummarizationSetBy = User
+
+	partition param_year = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "year", INTEGER
+				    ,"year_name", STRING
+				    ,{
+				        { 2024, "2024" }
+				        ,{ 2025, "2025" }
+				        ,{ 2026, "2026" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

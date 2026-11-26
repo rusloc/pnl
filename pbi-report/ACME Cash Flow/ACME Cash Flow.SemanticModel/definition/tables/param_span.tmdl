@@ -1,0 +1,53 @@
+/// Calendar span (mock calendar, rounds 11-14): Year / Quarter / Month pick an element; YTD / QTD / MTD are the to-date handles at Oct 2026. Disconnected; nothing picked = Month.
+table param_span
+	lineageTag: f77f8a9a-eb65-5270-8b7f-87220ced2b3b
+
+	column span_code
+		dataType: string
+		isHidden
+		lineageTag: 16e9961a-2015-5739-9fdb-c7a7266a9093
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [span_code]
+
+		annotation SummarizationSetBy = User
+
+	column span_name
+		dataType: string
+		lineageTag: 63d0335d-4992-523e-921c-f54394fc89ea
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [span_name]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bbcd4fc4-c9c9-5a99-b323-cc89d794fe2f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_span = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "span_code", STRING
+				    ,"span_name", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "A", "Year", 1 }
+				        ,{ "Q", "Quarter", 2 }
+				        ,{ "M", "Month", 3 }
+				        ,{ "YTD", "YTD", 4 }
+				        ,{ "QTD", "QTD", 5 }
+				        ,{ "MTD", "MTD", 6 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

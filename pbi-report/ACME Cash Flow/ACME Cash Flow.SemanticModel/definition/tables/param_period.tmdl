@@ -1,0 +1,256 @@
+/// Every pickable period (mock period()): window month indexes a .. b, prior window (-1 = none), labels, control key. The engine looks the picked period up here; DAX tests filter period_key directly.
+table param_period
+	lineageTag: feec8dce-63ca-5443-911e-10380169606d
+	isHidden
+
+	column period_key
+		dataType: string
+		isHidden
+		lineageTag: 1994030c-fdcd-54ac-9078-200948229d02
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [period_key]
+
+		annotation SummarizationSetBy = User
+
+	column span_code
+		dataType: string
+		isHidden
+		lineageTag: 34ef0904-e7d3-53b6-b259-b97339663f03
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [span_code]
+
+		annotation SummarizationSetBy = User
+
+	column mode_name
+		dataType: string
+		isHidden
+		lineageTag: 23778608-e35c-5c27-ba72-2a8225586b85
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mode_name]
+
+		annotation SummarizationSetBy = User
+
+	column label
+		dataType: string
+		isHidden
+		lineageTag: 60d83f27-1521-5a5d-a1d4-ef24f09509b6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [label]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column a
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2816c0fd-8ba0-524d-9272-3d5b86d3f249
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [a]
+
+		annotation SummarizationSetBy = User
+
+	column b
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2fc7d2e5-3bba-5b43-80c9-1c18c6118345
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [b]
+
+		annotation SummarizationSetBy = User
+
+	column prior_a
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 23b3c4c6-c2ad-577c-ba5e-b4ef05f74c62
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [prior_a]
+
+		annotation SummarizationSetBy = User
+
+	column prior_b
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6d754f35-3091-53bd-847b-ce03fe7c888e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [prior_b]
+
+		annotation SummarizationSetBy = User
+
+	column prior_label
+		dataType: string
+		isHidden
+		lineageTag: 61a99a83-2993-5a70-a1c3-95f1d48ac3f4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [prior_label]
+
+		annotation SummarizationSetBy = User
+
+	column ctl_key
+		dataType: string
+		isHidden
+		lineageTag: 5c1f929a-5747-543c-b6f2-9b544a7bda49
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ctl_key]
+
+		annotation SummarizationSetBy = User
+
+	column partial
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dabad02a-ae68-5aa0-9889-97291e0aaeb1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [partial]
+
+		annotation SummarizationSetBy = User
+
+	column badge_big
+		dataType: string
+		isHidden
+		lineageTag: 3d8a99fb-120e-5f48-87d7-c6b7b3693f1d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [badge_big]
+
+		annotation SummarizationSetBy = User
+
+	column badge_small
+		dataType: string
+		isHidden
+		lineageTag: cea68dc1-2ad2-5ab6-96d8-13e77e3f7a31
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [badge_small]
+
+		annotation SummarizationSetBy = User
+
+	column d0
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: d1eaf78d-4480-540c-a6ca-bfea129b63c6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [d0]
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column d1
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 3f1d0e61-e0c0-5ccb-879b-8ca249fdd1fb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [d1]
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fbe3f50e-e5e1-5603-9287-b2937084430e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition param_period = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "period_key", STRING
+				    ,"span_code", STRING
+				    ,"mode_name", STRING
+				    ,"label", STRING
+				    ,"a", INTEGER
+				    ,"b", INTEGER
+				    ,"prior_a", INTEGER
+				    ,"prior_b", INTEGER
+				    ,"prior_label", STRING
+				    ,"ctl_key", STRING
+				    ,"partial", INTEGER
+				    ,"badge_big", STRING
+				    ,"badge_small", STRING
+				    ,"d0", DATETIME
+				    ,"d1", DATETIME
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "M-2024-01", "M", "Month", "Jan 2024", 0, 0, -1, -1, "", "M-2024-01", 0, "Jan", "2024", "2024-01-01", "2024-01-31", 1 }
+				        ,{ "M-2024-02", "M", "Month", "Feb 2024", 1, 1, 0, 0, "Jan 2024", "M-2024-02", 0, "Feb", "2024", "2024-02-01", "2024-02-29", 2 }
+				        ,{ "M-2024-03", "M", "Month", "Mar 2024", 2, 2, 1, 1, "Feb 2024", "M-2024-03", 0, "Mar", "2024", "2024-03-01", "2024-03-31", 3 }
+				        ,{ "M-2024-04", "M", "Month", "Apr 2024", 3, 3, 2, 2, "Mar 2024", "M-2024-04", 0, "Apr", "2024", "2024-04-01", "2024-04-30", 4 }
+				        ,{ "M-2024-05", "M", "Month", "May 2024", 4, 4, 3, 3, "Apr 2024", "M-2024-05", 0, "May", "2024", "2024-05-01", "2024-05-31", 5 }
+				        ,{ "M-2024-06", "M", "Month", "Jun 2024", 5, 5, 4, 4, "May 2024", "M-2024-06", 0, "Jun", "2024", "2024-06-01", "2024-06-30", 6 }
+				        ,{ "M-2024-07", "M", "Month", "Jul 2024", 6, 6, 5, 5, "Jun 2024", "M-2024-07", 0, "Jul", "2024", "2024-07-01", "2024-07-31", 7 }
+				        ,{ "M-2024-08", "M", "Month", "Aug 2024", 7, 7, 6, 6, "Jul 2024", "M-2024-08", 0, "Aug", "2024", "2024-08-01", "2024-08-31", 8 }
+				        ,{ "M-2024-09", "M", "Month", "Sep 2024", 8, 8, 7, 7, "Aug 2024", "M-2024-09", 0, "Sep", "2024", "2024-09-01", "2024-09-30", 9 }
+				        ,{ "M-2024-10", "M", "Month", "Oct 2024", 9, 9, 8, 8, "Sep 2024", "M-2024-10", 0, "Oct", "2024", "2024-10-01", "2024-10-31", 10 }
+				        ,{ "M-2024-11", "M", "Month", "Nov 2024", 10, 10, 9, 9, "Oct 2024", "M-2024-11", 0, "Nov", "2024", "2024-11-01", "2024-11-30", 11 }
+				        ,{ "M-2024-12", "M", "Month", "Dec 2024", 11, 11, 10, 10, "Nov 2024", "M-2024-12", 0, "Dec", "2024", "2024-12-01", "2024-12-31", 12 }
+				        ,{ "M-2025-01", "M", "Month", "Jan 2025", 12, 12, 11, 11, "Dec 2024", "M-2025-01", 0, "Jan", "2025", "2025-01-01", "2025-01-31", 13 }
+				        ,{ "M-2025-02", "M", "Month", "Feb 2025", 13, 13, 12, 12, "Jan 2025", "M-2025-02", 0, "Feb", "2025", "2025-02-01", "2025-02-28", 14 }
+				        ,{ "M-2025-03", "M", "Month", "Mar 2025", 14, 14, 13, 13, "Feb 2025", "M-2025-03", 0, "Mar", "2025", "2025-03-01", "2025-03-31", 15 }
+				        ,{ "M-2025-04", "M", "Month", "Apr 2025", 15, 15, 14, 14, "Mar 2025", "M-2025-04", 0, "Apr", "2025", "2025-04-01", "2025-04-30", 16 }
+				        ,{ "M-2025-05", "M", "Month", "May 2025", 16, 16, 15, 15, "Apr 2025", "M-2025-05", 0, "May", "2025", "2025-05-01", "2025-05-31", 17 }
+				        ,{ "M-2025-06", "M", "Month", "Jun 2025", 17, 17, 16, 16, "May 2025", "M-2025-06", 0, "Jun", "2025", "2025-06-01", "2025-06-30", 18 }
+				        ,{ "M-2025-07", "M", "Month", "Jul 2025", 18, 18, 17, 17, "Jun 2025", "M-2025-07", 0, "Jul", "2025", "2025-07-01", "2025-07-31", 19 }
+				        ,{ "M-2025-08", "M", "Month", "Aug 2025", 19, 19, 18, 18, "Jul 2025", "M-2025-08", 0, "Aug", "2025", "2025-08-01", "2025-08-31", 20 }
+				        ,{ "M-2025-09", "M", "Month", "Sep 2025", 20, 20, 19, 19, "Aug 2025", "M-2025-09", 0, "Sep", "2025", "2025-09-01", "2025-09-30", 21 }
+				        ,{ "M-2025-10", "M", "Month", "Oct 2025", 21, 21, 20, 20, "Sep 2025", "M-2025-10", 0, "Oct", "2025", "2025-10-01", "2025-10-31", 22 }
+				        ,{ "M-2025-11", "M", "Month", "Nov 2025", 22, 22, 21, 21, "Oct 2025", "M-2025-11", 0, "Nov", "2025", "2025-11-01", "2025-11-30", 23 }
+				        ,{ "M-2025-12", "M", "Month", "Dec 2025", 23, 23, 22, 22, "Nov 2025", "M-2025-12", 0, "Dec", "2025", "2025-12-01", "2025-12-31", 24 }
+				        ,{ "M-2026-01", "M", "Month", "Jan 2026", 24, 24, 23, 23, "Dec 2025", "M-2026-01", 0, "Jan", "2026", "2026-01-01", "2026-01-31", 25 }
+				        ,{ "M-2026-02", "M", "Month", "Feb 2026", 25, 25, 24, 24, "Jan 2026", "M-2026-02", 0, "Feb", "2026", "2026-02-01", "2026-02-28", 26 }
+				        ,{ "M-2026-03", "M", "Month", "Mar 2026", 26, 26, 25, 25, "Feb 2026", "M-2026-03", 0, "Mar", "2026", "2026-03-01", "2026-03-31", 27 }
+				        ,{ "M-2026-04", "M", "Month", "Apr 2026", 27, 27, 26, 26, "Mar 2026", "M-2026-04", 0, "Apr", "2026", "2026-04-01", "2026-04-30", 28 }
+				        ,{ "M-2026-05", "M", "Month", "May 2026", 28, 28, 27, 27, "Apr 2026", "M-2026-05", 0, "May", "2026", "2026-05-01", "2026-05-31", 29 }
+				        ,{ "M-2026-06", "M", "Month", "Jun 2026", 29, 29, 28, 28, "May 2026", "M-2026-06", 0, "Jun", "2026", "2026-06-01", "2026-06-30", 30 }
+				        ,{ "M-2026-07", "M", "Month", "Jul 2026", 30, 30, 29, 29, "Jun 2026", "M-2026-07", 0, "Jul", "2026", "2026-07-01", "2026-07-31", 31 }
+				        ,{ "M-2026-08", "M", "Month", "Aug 2026", 31, 31, 30, 30, "Jul 2026", "M-2026-08", 0, "Aug", "2026", "2026-08-01", "2026-08-31", 32 }
+				        ,{ "M-2026-09", "M", "Month", "Sep 2026", 32, 32, 31, 31, "Aug 2026", "M-2026-09", 0, "Sep", "2026", "2026-09-01", "2026-09-30", 33 }
+				        ,{ "M-2026-10", "M", "Month", "Oct 2026", 33, 33, 32, 32, "Sep 2026", "M-2026-10", 0, "Oct", "2026", "2026-10-01", "2026-10-31", 34 }
+				        ,{ "Q1-2024", "Q", "Quarter", "Q1 2024", 0, 2, -1, -1, "", "", 0, "Q1", "2024", "2024-01-01", "2024-03-31", 35 }
+				        ,{ "Q2-2024", "Q", "Quarter", "Q2 2024", 3, 5, 0, 2, "Q1 2024", "", 0, "Q2", "2024", "2024-04-01", "2024-06-30", 36 }
+				        ,{ "Q3-2024", "Q", "Quarter", "Q3 2024", 6, 8, 3, 5, "Q2 2024", "", 0, "Q3", "2024", "2024-07-01", "2024-09-30", 37 }
+				        ,{ "Q4-2024", "Q", "Quarter", "Q4 2024", 9, 11, 6, 8, "Q3 2024", "", 0, "Q4", "2024", "2024-10-01", "2024-12-31", 38 }
+				        ,{ "Q1-2025", "Q", "Quarter", "Q1 2025", 12, 14, 9, 11, "Q4 2024", "", 0, "Q1", "2025", "2025-01-01", "2025-03-31", 39 }
+				        ,{ "Q2-2025", "Q", "Quarter", "Q2 2025", 15, 17, 12, 14, "Q1 2025", "", 0, "Q2", "2025", "2025-04-01", "2025-06-30", 40 }
+				        ,{ "Q3-2025", "Q", "Quarter", "Q3 2025", 18, 20, 15, 17, "Q2 2025", "", 0, "Q3", "2025", "2025-07-01", "2025-09-30", 41 }
+				        ,{ "Q4-2025", "Q", "Quarter", "Q4 2025", 21, 23, 18, 20, "Q3 2025", "", 0, "Q4", "2025", "2025-10-01", "2025-12-31", 42 }
+				        ,{ "Q1-2026", "Q", "Quarter", "Q1 2026", 24, 26, 21, 23, "Q4 2025", "", 0, "Q1", "2026", "2026-01-01", "2026-03-31", 43 }
+				        ,{ "Q2-2026", "Q", "Quarter", "Q2 2026", 27, 29, 24, 26, "Q1 2026", "", 0, "Q2", "2026", "2026-04-01", "2026-06-30", 44 }
+				        ,{ "Q3-2026", "Q", "Quarter", "Q3 2026", 30, 32, 27, 29, "Q2 2026", "", 0, "Q3", "2026", "2026-07-01", "2026-09-30", 45 }
+				        ,{ "Q4-2026", "Q", "Quarter", "Q4 2026", 33, 33, 30, 30, "Q3 2026", "", 1, "Q4", "2026", "2026-10-01", "2026-10-31", 46 }
+				        ,{ "A-2024", "A", "Year", "2024", 0, 11, -1, -1, "", "Y-2024", 0, "2024", "Jan–Dec", "2024-01-01", "2024-12-31", 47 }
+				        ,{ "A-2025", "A", "Year", "2025", 12, 23, 0, 11, "2024", "Y-2025", 0, "2025", "Jan–Dec", "2025-01-01", "2025-12-31", 48 }
+				        ,{ "A-2026", "A", "Year", "2026", 24, 33, 12, 21, "Jan–Oct 2025", "Y-2026", 1, "2026", "Jan–Oct", "2026-01-01", "2026-10-31", 49 }
+				        ,{ "YTD", "YTD", "YTD", "YTD Oct 2026", 24, 33, 12, 21, "YTD 2025", "Y-2026", 0, "Oct", "2026", "2026-01-01", "2026-10-31", 50 }
+				        ,{ "QTD", "QTD", "QTD", "Q4 2026", 33, 33, 30, 30, "Q3 2026", "", 1, "Q4", "2026", "2026-10-01", "2026-10-31", 51 }
+				        ,{ "MTD", "MTD", "MTD", "Oct 2026", 33, 33, 32, 32, "Sep 2026", "M-2026-10", 0, "Oct", "2026", "2026-10-01", "2026-10-31", 52 }
+				        ,{ "ALL", "ALL", "All", "Jan 2024 – Oct 2026", 0, 33, -1, -1, "", "ALL", 0, "All", "2024–26", "2024-01-01", "2026-10-31", 53 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

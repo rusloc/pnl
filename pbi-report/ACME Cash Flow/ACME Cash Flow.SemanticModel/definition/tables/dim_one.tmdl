@@ -1,0 +1,26 @@
+/// One row: the category column that hosts the SVG measures in table visuals (works under drill-through filters).
+table dim_one
+	lineageTag: b617e799-d709-51f9-aba9-4bbcd33de999
+	isHidden
+
+	column one
+		dataType: string
+		isHidden
+		lineageTag: be70ac7c-38e7-56af-8a4c-29c2ad73deb5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [one]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_one = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "one", STRING
+				    ,{
+				        { "1" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

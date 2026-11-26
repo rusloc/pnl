@@ -1,0 +1,89 @@
+/// ⓘ texts (mock INFO): title, definition, formula, source per info code. Disconnected; the ⓘ visuals filter one code each.
+table dim_info
+	lineageTag: ac416fa1-33c3-52ab-af2f-9be81f47ced8
+
+	column info_code
+		dataType: string
+		isHidden
+		lineageTag: 2ae5dbce-e27e-5842-9d2b-54cbc7da1ea8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_code]
+
+		annotation SummarizationSetBy = User
+
+	column info_title
+		dataType: string
+		lineageTag: 1c32e04c-5f8b-50ac-bf94-8e80fabd8437
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_title]
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column info_body
+		dataType: string
+		lineageTag: 87f1d1c6-c989-568b-9dc5-0b4bbb006716
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_body]
+
+		annotation SummarizationSetBy = User
+
+	column info_formula
+		dataType: string
+		lineageTag: 69874211-c8c3-52e5-9289-5b7111b14117
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_formula]
+
+		annotation SummarizationSetBy = User
+
+	column info_source
+		dataType: string
+		lineageTag: 9383ca6b-e65a-594d-8152-284b256147a4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [info_source]
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 49a558b9-7d5a-51c2-9e0d-e2f0bd7958a8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sort_order]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_info = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "info_code", STRING
+				    ,"info_title", STRING
+				    ,"info_body", STRING
+				    ,"info_formula", STRING
+				    ,"info_source", STRING
+				    ,"sort_order", INTEGER
+				    ,{
+				        { "close", "Closing cash", "Bank accounts plus Undeposited Funds at the period end. The orange button opens the cash balance and the three activities.", "M02 = M01 + M03", "Spec M02", 1 }
+				        ,{ "net", "Net change", "Closing less opening cash; equals operating + investing + financing.", "M03 = M02 − M01", "Spec M03", 2 }
+				        ,{ "cfo", "Operating cash flow", "Net income plus non-cash adjustments and working-capital changes; line of credit in financing (S01).", "M06 = M04 + Σ M05 (operating)", "Spec M06, overrides on", 3 }
+				        ,{ "fcf", "Free cash flow", "Operating cash flow less fixed-asset purchases, plus asset-sale proceeds.", "M15 = M06 + purchases + proceeds", "Spec M15", 4 }
+				        ,{ "conv", "Cash conversion", "How much of net income arrived as cash. n/m when net income is zero or a loss.", "M16 = M06 ÷ M04", "Spec M16", 5 }
+				        ,{ "dso", "DSO · days", "Days of revenue sitting in receivables at the period end.", "A/R closing ÷ revenue × days in period", "fact_account_balance (A/R), Income accounts", 6 }
+				        ,{ "pct", "% of net income", "Each row as a share of net income for the period; net income = 100 %. Sign kept: (12%) is a cash outflow. n/m on every row when net income is zero or a loss. Opening and closing cash have none.", "row ÷ net income × 100", "M04 (net income)", 7 }
+				        ,{ "stmt", "Statement", "Indirect method in the order of the classic statement: opening cash, three activities, net change, closing cash. One row per balance-sheet account, as QBO shows them; rows with no movement in the period are hidden. The S01 icon marks the line of credit, moved from operating to financing by the override. Select a section row and use Activities to open it.", "Bar = absolute amount of the row on one shared axis", "Overrides on: M06 / M07 / M08", 8 }
+				        ,{ "heat", "Activities", "One row per direct-method line, one column per calendar date. Cells: each block holds 20 % of the days with cash moved (in + out, absolute), ranked within this activity and period; orange = the top 20 %. Totals column: each line's net on the same five colours, blocks by quintile of this activity's row totals. Internal transfers excluded. Select a line or a day and use Transactions (or right-click, Drill through).", "Row total = DIRECT_LINE (overrides on)", "fact_cash_posting.direct_line_code", 9 }
+				        ,{ "ledger", "Transactions", "Every cash movement behind the drilled line or day, one line per transaction, counterparty and direction. A payment that settles an invoice shows the invoice number as memo. Clr: R reconciled, C cleared, plain disc uncleared, dot = Undeposited Funds.", "Total = heatmap row or cell", "fact_cash_posting × fact_txn", 10 }
+				        ,{ "diagram", "Diagram", "Net change in cash split into the three activities, each with its KPI groups. Pick groups to show their metrics (Select all = expand all); click an activity to open its activities.", "Net change = Operating + Investing + Financing", "M03, M06–M08, M15–M17", 11 }
+				        ,{ "recon", "Reconciliation", "Every figure the report shows for the period tied to checks/control_totals_usd.csv: statement and KPI values, and per direct line the heatmap row, the ledger and the control. Control totals exist per month and per year.", "Tolerance 0.005 USD; cash conversion 1e-6 relative", "control_totals_usd.csv", 12 }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

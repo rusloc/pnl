@@ -10,6 +10,7 @@
 - [Nordmark Exec](project_nordmark_exec.md) — ADR-0013 PBI flavour; generator in repo `tools/`; 2026-11-16 web sync phases 1+2 (1280 x 720, Explain page, report_web_sync.py)
 
 - [Fabric demos ADR-0018](project_fabric_demos.md) — 3 video demo PBIPs in demos/; 11-24 amendment: measures "(fx)" in _Measures; placeholders for ginee
+- [ACME Cash Flow](project_acme_cash_flow.md) — ADR-0019 PBIP pass 1 2026-11-26: generator tools/gen, 143 measures, tests 23 blocks / 6,537 TRUE, no pack yet
 - [P&L web spec gap](project_pnl_web_spec_gap.md) — 2026-11-16 vosk.dev spec vs PBIP; oracle sync (4,514 rows); ADR-0017 P0+P1 2026-11-17, 316 measures
 
 ## Open threads

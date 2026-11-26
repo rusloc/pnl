@@ -1,0 +1,139 @@
+/// Calendar day 2023-11-01 .. 2026-12-31. Derived on load: month_index (0 = 2024-01), the window key of every measure. date shows as the day number (heatmap axis).
+table dim_date
+	lineageTag: 75f407da-9613-5526-afa7-3ffcc392e6ad
+
+	column 'date'
+		dataType: dateTime
+		isKey
+		formatString: d
+		lineageTag: b894d188-c64e-5f43-a7cf-70d466e267c5
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 5fb1f239-e3ec-54fd-bb4b-ec25959e5a7f
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a086d545-138d-52d0-992e-c35fc65b641b
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 02537e48-4aa3-5886-8ab3-91a3ac9a7acf
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3e7faa3c-335b-589c-b019-c3a26e085e8b
+		summarizeBy: none
+		sourceColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		isHidden
+		lineageTag: 6e98db66-f15d-56f5-9f65-eaf891f08427
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = User
+
+	column fiscal_year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d464aca4-ca17-5e2e-9d92-e1a9c4c31875
+		summarizeBy: none
+		sourceColumn: fiscal_year
+
+		annotation SummarizationSetBy = User
+
+	column is_month_end
+		dataType: boolean
+		isHidden
+		lineageTag: 2d85f8f1-0673-5e28-8824-bf94070483a4
+		summarizeBy: none
+		sourceColumn: is_month_end
+
+		annotation SummarizationSetBy = User
+
+	column is_working_day
+		dataType: boolean
+		isHidden
+		lineageTag: 9b92592c-9408-5f3e-8c98-dac9fe3dfc0c
+		summarizeBy: none
+		sourceColumn: is_working_day
+
+		annotation SummarizationSetBy = User
+
+	column is_actual
+		dataType: boolean
+		isHidden
+		lineageTag: d3d163a3-51d0-5944-ae3a-59828f99b6fe
+		summarizeBy: none
+		sourceColumn: is_actual
+
+		annotation SummarizationSetBy = User
+
+	/// Months since 2024-01 (0 .. 33 in the span).
+	column month_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6ec72b11-4463-5fda-b696-2b6ae8b6040e
+		summarizeBy: none
+		sourceColumn: month_index
+
+		annotation SummarizationSetBy = User
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_date.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"date", type date},
+				            {"month_key", type text},
+				            {"year", Int64.Type},
+				            {"quarter", Int64.Type},
+				            {"month_num", Int64.Type},
+				            {"month_name", type text},
+				            {"fiscal_year", Int64.Type},
+				            {"is_month_end", type logical},
+				            {"is_working_day", type logical},
+				            {"is_actual", type logical}
+				        }
+				    ),
+				    add_mi = Table.AddColumn(typed, "month_index", each ([year] - 2024) * 12 + [month_num] - 1, Int64.Type)
+				in
+				    add_mi
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,43 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder", "dim_account", "dim_cf_line", "dim_counterparty", "dim_date", "fact_txn", "fact_cash_posting", "fact_account_balance", "ctl_control_total"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_account
+ref table dim_cf_line
+ref table dim_counterparty
+ref table dim_date
+ref table fact_txn
+ref table fact_cash_posting
+ref table fact_account_balance
+ref table ctl_control_total
+ref table param_span
+ref table param_year
+ref table param_month
+ref table param_quarter
+ref table param_units
+ref table dim_shift
+ref table dim_one
+ref table dim_bal_row
+ref table dim_dgroup
+ref table dim_recon_check
+ref table dim_info
+ref table param_period
+ref table dim_stmt_row
+ref table _measures
+
+ref cultureInfo en-US

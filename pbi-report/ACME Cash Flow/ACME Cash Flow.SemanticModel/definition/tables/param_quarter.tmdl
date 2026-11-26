@@ -1,0 +1,40 @@
+/// Quarter of the Quarter span. Disconnected; nothing picked = Q4.
+table param_quarter
+	lineageTag: 54251024-0d1d-5c13-99ec-9b15eac3207e
+
+	column quarter_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7bc62fa2-cf61-5d4b-b9d5-64e839276e39
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [quarter_num]
+
+		annotation SummarizationSetBy = User
+
+	column quarter_name
+		dataType: string
+		lineageTag: 63be9943-9b21-5094-a710-757a9958f44f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [quarter_name]
+		sortByColumn: quarter_num
+
+		annotation SummarizationSetBy = User
+
+	partition param_quarter = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "quarter_num", INTEGER
+				    ,"quarter_name", STRING
+				    ,{
+				        { 1, "Q1" }
+				        ,{ 2, "Q2" }
+				        ,{ 3, "Q3" }
+				        ,{ 4, "Q4" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

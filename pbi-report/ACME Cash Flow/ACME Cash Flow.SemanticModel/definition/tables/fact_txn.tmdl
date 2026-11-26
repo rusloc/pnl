@@ -1,0 +1,301 @@
+/// Transaction header (5,128), the Level 4 attributes of a ledger row: type, number, note, cleared status. Used as a dimension of fact_cash_posting.
+table fact_txn
+	lineageTag: 5668e2e5-d7d2-57ad-a488-be072f5623c5
+
+	column txn_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c2693f16-0733-5f6b-a3ad-8a8613884575
+		summarizeBy: none
+		sourceColumn: txn_id
+
+		annotation SummarizationSetBy = User
+
+	column txn_type
+		dataType: string
+		isHidden
+		lineageTag: 943c3b10-2819-5180-b927-6de8055e6b3e
+		summarizeBy: none
+		sourceColumn: txn_type
+
+		annotation SummarizationSetBy = User
+
+	column txn_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 2d7109d5-94b3-5dfb-9fad-c2eeec3839af
+		summarizeBy: none
+		sourceColumn: txn_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column month_key
+		dataType: string
+		isHidden
+		lineageTag: 9683ad5d-50b3-5006-bd09-aff1687fbf93
+		summarizeBy: none
+		sourceColumn: month_key
+
+		annotation SummarizationSetBy = User
+
+	column doc_number
+		dataType: string
+		isHidden
+		lineageTag: 82059f66-ea7d-522e-b328-d60d14e2eedd
+		summarizeBy: none
+		sourceColumn: doc_number
+
+		annotation SummarizationSetBy = User
+
+	column counterparty_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 174d8013-2be5-5215-bdab-afb7499f86c0
+		summarizeBy: none
+		sourceColumn: counterparty_id
+
+		annotation SummarizationSetBy = User
+
+	column header_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d0640cfc-eed5-55e4-8cf9-4319d0d0c521
+		summarizeBy: none
+		sourceColumn: header_account_id
+
+		annotation SummarizationSetBy = User
+
+	column bank_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7b6872c9-400f-5db5-a5bc-bbd27d2275d1
+		summarizeBy: none
+		sourceColumn: bank_account_id
+
+		annotation SummarizationSetBy = User
+
+	column payment_type
+		dataType: string
+		isHidden
+		lineageTag: acc34559-12fb-5448-9260-5b94affbd91a
+		summarizeBy: none
+		sourceColumn: payment_type
+
+		annotation SummarizationSetBy = User
+
+	column payment_method
+		dataType: string
+		isHidden
+		lineageTag: 443d6a06-4c38-53f3-b41a-cc73cc7d9493
+		summarizeBy: none
+		sourceColumn: payment_method
+
+		annotation SummarizationSetBy = User
+
+	column total_amount
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 730ffa3f-9977-57db-b574-352331a4fb06
+		summarizeBy: none
+		sourceColumn: total_amount
+
+		annotation SummarizationSetBy = User
+
+	column open_balance
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 5ec6188c-a0e3-5786-b918-b1a95958672a
+		summarizeBy: none
+		sourceColumn: open_balance
+
+		annotation SummarizationSetBy = User
+
+	column cash_amount
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 38bf6455-a895-5a64-a820-b3260754c5bb
+		summarizeBy: none
+		sourceColumn: cash_amount
+
+		annotation SummarizationSetBy = User
+
+	column private_note
+		dataType: string
+		isHidden
+		lineageTag: 912e4f50-77a8-507b-b5a0-4d654acc7328
+		summarizeBy: none
+		sourceColumn: private_note
+
+		annotation SummarizationSetBy = User
+
+	column created_at
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: d43ca373-bc55-5e31-9b01-71af17b151f2
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = User
+
+	column updated_at
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd hh:nn
+		lineageTag: 00d87c24-4dc6-52ea-936a-6ac1538a0879
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = User
+
+	column sync_token
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9b9890ea-4613-53b0-86af-00d497bbaeee
+		summarizeBy: none
+		sourceColumn: sync_token
+
+		annotation SummarizationSetBy = User
+
+	column is_edited
+		dataType: boolean
+		isHidden
+		lineageTag: fca42659-081f-56f9-bbe8-1769afb29214
+		summarizeBy: none
+		sourceColumn: is_edited
+
+		annotation SummarizationSetBy = User
+
+	column process_id
+		dataType: string
+		isHidden
+		lineageTag: 193182da-b5d4-5bd6-826e-b163588165b2
+		summarizeBy: none
+		sourceColumn: process_id
+
+		annotation SummarizationSetBy = User
+
+	column chain_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a0b37387-d7c1-57ee-b74d-af1fada2e34f
+		summarizeBy: none
+		sourceColumn: chain_id
+
+		annotation SummarizationSetBy = User
+
+	column scenario_id
+		dataType: string
+		isHidden
+		lineageTag: 38316f24-eb4b-530c-8cd4-bf170b943ad8
+		summarizeBy: none
+		sourceColumn: scenario_id
+
+		annotation SummarizationSetBy = User
+
+	column cleared_status
+		dataType: string
+		isHidden
+		lineageTag: 97b685ee-6194-56b0-b6e6-de85ab6dd781
+		summarizeBy: none
+		sourceColumn: cleared_status
+
+		annotation SummarizationSetBy = User
+
+	column cleared_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: ed085a42-9154-5564-a4bc-e1067c4d7b55
+		summarizeBy: none
+		sourceColumn: cleared_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column qbo_link
+		dataType: string
+		isHidden
+		lineageTag: 40810896-29a6-5c9a-983f-edc07b4f6235
+		summarizeBy: none
+		sourceColumn: qbo_link
+
+		annotation SummarizationSetBy = User
+
+	/// Type and number as the ledger shows them: 'Bill Payment #1043'.
+	column type_no =
+			VAR _t            = fact_txn[txn_type]
+			VAR _name         =
+			    SWITCH (
+			        _t
+			        ,"SalesReceipt", "Sales Receipt"
+			        ,"RefundReceipt", "Refund Receipt"
+			        ,"CreditMemo", "Credit Memo"
+			        ,"VendorCredit", "Vendor Credit"
+			        ,"BillPayment", "Bill Payment"
+			        ,"CreditCardPayment", "Credit Card Payment"
+			        ,"JournalEntry", "Journal Entry"
+			        ,_t
+			    )
+			VAR _doc          = fact_txn[doc_number]
+			RETURN
+			    _name & IF ( NOT ISBLANK ( _doc ) && _doc <> "", " #" & _doc )
+		dataType: string
+		lineageTag: b853fbda-72b1-56f6-ad13-181a67bd5e9a
+		summarizeBy: none
+
+		annotation SummarizationSetBy = User
+
+	partition fact_txn = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\fact_txn.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"txn_id", Int64.Type},
+				            {"txn_type", type text},
+				            {"txn_date", type date},
+				            {"month_key", type text},
+				            {"doc_number", type text},
+				            {"counterparty_id", Int64.Type},
+				            {"header_account_id", Int64.Type},
+				            {"bank_account_id", Int64.Type},
+				            {"payment_type", type text},
+				            {"payment_method", type text},
+				            {"total_amount", type number},
+				            {"open_balance", type number},
+				            {"cash_amount", type number},
+				            {"private_note", type text},
+				            {"created_at", type datetime},
+				            {"updated_at", type datetime},
+				            {"sync_token", Int64.Type},
+				            {"is_edited", type logical},
+				            {"process_id", type text},
+				            {"chain_id", Int64.Type},
+				            {"scenario_id", type text},
+				            {"cleared_status", type text},
+				            {"cleared_date", type date},
+				            {"qbo_link", type text}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

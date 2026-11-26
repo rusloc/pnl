@@ -1,0 +1,248 @@
+/// QBO account (60): type, cash-set flag, default and S01 override section. Statement rows (dim_stmt_row) are built from it.
+table dim_account
+	lineageTag: 4f4ad6ea-c493-5af0-b5ab-c4eb87bd17b2
+
+	column account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 17b09fe8-c58e-5199-ae0b-c8bc162ba6e2
+		summarizeBy: none
+		sourceColumn: account_id
+
+		annotation SummarizationSetBy = User
+
+	column account_name
+		dataType: string
+		lineageTag: d02f319e-c8c0-5731-90c3-abc81fffe810
+		summarizeBy: none
+		sourceColumn: account_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column fully_qualified_name
+		dataType: string
+		lineageTag: 401054b1-a02b-5b63-a77b-ba3999a555a4
+		summarizeBy: none
+		sourceColumn: fully_qualified_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column parent_account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2499f45d-b0f8-5e80-b0a1-4b2fc6e7b8ab
+		summarizeBy: none
+		sourceColumn: parent_account_id
+
+		annotation SummarizationSetBy = User
+
+	column account_level
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 05d97dec-793f-5a14-b8a6-8c3cb4097e6d
+		summarizeBy: none
+		sourceColumn: account_level
+
+		annotation SummarizationSetBy = User
+
+	column account_type
+		dataType: string
+		lineageTag: fd5c3f1a-8d9d-5738-8751-fd201301a626
+		summarizeBy: none
+		sourceColumn: account_type
+
+		annotation SummarizationSetBy = User
+
+	column account_subtype
+		dataType: string
+		isHidden
+		lineageTag: 1513bf67-955f-5cb6-b2b8-e84d48e3f682
+		summarizeBy: none
+		sourceColumn: account_subtype
+
+		annotation SummarizationSetBy = User
+
+	column classification
+		dataType: string
+		isHidden
+		lineageTag: d0720cc2-1ffa-5dea-96f4-e324ab03337c
+		summarizeBy: none
+		sourceColumn: classification
+
+		annotation SummarizationSetBy = User
+
+	column is_pl
+		dataType: boolean
+		isHidden
+		lineageTag: ea15df76-97aa-5180-9ac0-4b490db1c69f
+		summarizeBy: none
+		sourceColumn: is_pl
+
+		annotation SummarizationSetBy = User
+
+	column is_cash
+		dataType: boolean
+		isHidden
+		lineageTag: 438a364f-2af6-5b0f-a226-78e63dc2c0a2
+		summarizeBy: none
+		sourceColumn: is_cash
+
+		annotation SummarizationSetBy = User
+
+	column is_bank
+		dataType: boolean
+		isHidden
+		lineageTag: 3e10407a-5817-5866-9171-00518afed5cc
+		summarizeBy: none
+		sourceColumn: is_bank
+
+		annotation SummarizationSetBy = User
+
+	column cash_kind
+		dataType: string
+		isHidden
+		lineageTag: eb68e0ed-9276-59f8-a7f2-bdeeba434161
+		summarizeBy: none
+		sourceColumn: cash_kind
+
+		annotation SummarizationSetBy = User
+
+	column default_section
+		dataType: string
+		isHidden
+		lineageTag: 59fd8382-3d18-5f3c-8d7a-e67cc8e9560d
+		summarizeBy: none
+		sourceColumn: default_section
+
+		annotation SummarizationSetBy = User
+
+	column override_section
+		dataType: string
+		isHidden
+		lineageTag: 2dc23648-9959-56fd-b2ec-9cc1cd443b08
+		summarizeBy: none
+		sourceColumn: override_section
+
+		annotation SummarizationSetBy = User
+
+	column override_line_label
+		dataType: string
+		isHidden
+		lineageTag: ec2a4bad-ed67-54b2-896d-933d260a9ad8
+		summarizeBy: none
+		sourceColumn: override_line_label
+
+		annotation SummarizationSetBy = User
+
+	column direct_line_in
+		dataType: string
+		isHidden
+		lineageTag: f8b7795e-b294-5358-bffc-79e1cadaa609
+		summarizeBy: none
+		sourceColumn: direct_line_in
+
+		annotation SummarizationSetBy = User
+
+	column direct_line_out
+		dataType: string
+		isHidden
+		lineageTag: ba5c341a-fd57-5dfe-812f-a09cdba2e831
+		summarizeBy: none
+		sourceColumn: direct_line_out
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 39c590d3-b874-53c2-ac51-457a0a1ac5eb
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column active
+		dataType: boolean
+		isHidden
+		lineageTag: 53ac85c9-58af-556c-aec8-0c27c815463d
+		summarizeBy: none
+		sourceColumn: active
+
+		annotation SummarizationSetBy = User
+
+	column current_balance
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 56d38a54-26af-52fa-815e-fe4886d4b51a
+		summarizeBy: none
+		sourceColumn: current_balance
+
+		annotation SummarizationSetBy = User
+
+	column last_reconciled_date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 170f99b6-4742-5255-a8b3-8bc7284cba60
+		summarizeBy: none
+		sourceColumn: last_reconciled_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = User
+
+	column cash_floor
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 6b65618a-9323-51ff-8651-b7bcf55cc1b9
+		summarizeBy: none
+		sourceColumn: cash_floor
+
+		annotation SummarizationSetBy = User
+
+	partition dim_account = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_account.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"account_id", Int64.Type},
+				            {"account_name", type text},
+				            {"fully_qualified_name", type text},
+				            {"parent_account_id", Int64.Type},
+				            {"account_level", Int64.Type},
+				            {"account_type", type text},
+				            {"account_subtype", type text},
+				            {"classification", type text},
+				            {"is_pl", type logical},
+				            {"is_cash", type logical},
+				            {"is_bank", type logical},
+				            {"cash_kind", type text},
+				            {"default_section", type text},
+				            {"override_section", type text},
+				            {"override_line_label", type text},
+				            {"direct_line_in", type text},
+				            {"direct_line_out", type text},
+				            {"sort_order", Int64.Type},
+				            {"active", type logical},
+				            {"current_balance", type number},
+				            {"last_reconciled_date", type date},
+				            {"cash_floor", type number}
+				        }
+				    )
+				in
+				    typed
+
+	annotation PBI_ResultType = Table

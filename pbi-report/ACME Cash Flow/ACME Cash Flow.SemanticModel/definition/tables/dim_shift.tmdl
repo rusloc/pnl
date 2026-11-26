@@ -1,0 +1,27 @@
+/// Engine: CUR / PRIOR window switch (KPI deltas). Never on a visual.
+table dim_shift
+	lineageTag: 836473de-d0e8-5092-9c4f-7159044d84c6
+	isHidden
+
+	column shift_code
+		dataType: string
+		isHidden
+		lineageTag: 277574f3-075b-5e50-900f-12ab165ac24e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [shift_code]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_shift = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "shift_code", STRING
+				    ,{
+				        { "CUR" }
+				        ,{ "PRIOR" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

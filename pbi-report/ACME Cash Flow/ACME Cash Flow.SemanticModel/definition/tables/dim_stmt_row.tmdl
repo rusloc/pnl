@@ -1,0 +1,225 @@
+/// Statement rows (indirect view, S01 override on; mock stmtRows): per section Net income, sub-headers, one row per balance-sheet account (accumulated depreciation under operating), Total adjustments, Net cash from the section. Built from dim_account; disconnected (measures read the row).
+table dim_stmt_row
+	lineageTag: 80c2b9e1-f9f9-5689-864e-da876a916329
+
+	column row_key
+		dataType: string
+		isHidden
+		lineageTag: 2c9c5945-0262-5aeb-b47c-fb9c0e9bd978
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_key]
+
+		annotation SummarizationSetBy = User
+
+	column section_code
+		dataType: string
+		isHidden
+		lineageTag: e969f122-df85-537a-9c75-d76bab768832
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [section_code]
+
+		annotation SummarizationSetBy = User
+
+	column section_label
+		dataType: string
+		lineageTag: 8b8f0cf6-976d-5238-8c71-a3b02de57cd7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [section_label]
+		sortByColumn: section_sort
+
+		annotation SummarizationSetBy = User
+
+	column section_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7921ba1d-31ae-5f09-a3b8-fb22f03b5cb5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [section_sort]
+
+		annotation SummarizationSetBy = User
+
+	column row_label
+		dataType: string
+		lineageTag: e14b1c6b-3a49-5035-aace-d25685215803
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_label]
+		sortByColumn: row_sort
+
+		annotation SummarizationSetBy = User
+
+	column row_sort
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c26cfc3e-1494-56bf-a8ea-1e24b318aa7b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_sort]
+
+		annotation SummarizationSetBy = User
+
+	column row_kind
+		dataType: string
+		isHidden
+		lineageTag: cf53ab6a-f62b-5b6b-aa8f-80455c1ac203
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [row_kind]
+
+		annotation SummarizationSetBy = User
+
+	column sub_kind
+		dataType: string
+		isHidden
+		lineageTag: 05a7c106-e4b3-562e-89fa-ace1dfde2899
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sub_kind]
+
+		annotation SummarizationSetBy = User
+
+	column account_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 723393f1-8ceb-5619-95cb-c1ec409ae4f2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [account_id]
+
+		annotation SummarizationSetBy = User
+
+	column is_override
+		dataType: boolean
+		isHidden
+		lineageTag: 92e789c0-8945-5eb7-a9db-f99464c89f41
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_override]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_stmt_row = calculated
+		mode: import
+		source =
+				VAR _ind          = UNICHAR ( 8195 )
+				VAR _acc          =
+				    SELECTCOLUMNS (
+				        FILTER (
+				            dim_account
+				            ,NOT dim_account[is_pl]
+				                && NOT dim_account[is_cash]
+				                && COALESCE ( dim_account[override_section], dim_account[default_section] ) IN { "OPERATING", "INVESTING", "FINANCING" }
+				        )
+				        ,"@id", dim_account[account_id]
+				        ,"@sec", COALESCE ( dim_account[override_section], dim_account[default_section] )
+				        ,"@dep", dim_account[account_subtype] = "AccumulatedDepreciation"
+				        ,"@fq", dim_account[fully_qualified_name]
+				        ,"@parent", dim_account[parent_account_id]
+				        ,"@ord", dim_account[sort_order]
+				        ,"@ovr", NOT ISBLANK ( dim_account[override_section] )
+				    )
+				VAR _accRows      =
+				    SELECTCOLUMNS (
+				        _acc
+				        ,"row_key", "ACC-" & [@id]
+				        ,"section_code",
+				            SWITCH (
+				                TRUE ()
+				                ,[@dep]
+				                    ,"OP"
+				                ,[@sec] = "OPERATING"
+				                    ,"OP"
+				                ,[@sec] = "INVESTING"
+				                    ,"INV"
+				                ,"FIN"
+				            )
+				        ,"row_label",
+				            SWITCH (
+				                TRUE ()
+				                ,[@dep]
+				                    ,_ind & "Depreciation · " & LOOKUPVALUE ( dim_account[account_name], dim_account[account_id], [@parent] )
+				                ,[@sec] = "OPERATING"
+				                    ,REPT ( _ind, 2 ) & SUBSTITUTE ( [@fq], ":", " · " )
+				                ,SUBSTITUTE ( [@fq], ":", " · " )
+				            )
+				        ,"row_sort",
+				            SWITCH (
+				                TRUE ()
+				                ,[@dep]
+				                    ,30 + [@ord]
+				                ,[@sec] = "OPERATING"
+				                    ,210 + [@ord]
+				                ,10 + [@ord]
+				            )
+				        ,"row_kind", "ACC"
+				        ,"sub_kind",
+				            SWITCH (
+				                TRUE ()
+				                ,[@dep]
+				                    ,"DEP"
+				                ,[@sec] = "OPERATING"
+				                    ,"WC"
+				                ,[@sec] = "INVESTING"
+				                    ,"INV"
+				                ,"FIN"
+				            )
+				        ,"account_id", [@id]
+				        ,"is_override", [@ovr]
+				    )
+				VAR _static       =
+				    SELECTCOLUMNS (
+				        DATATABLE (
+				            "row_key", STRING
+				            ,"section_code", STRING
+				            ,"row_label", STRING
+				            ,"row_sort", INTEGER
+				            ,"row_kind", STRING
+				            ,"sub_kind", STRING
+				            ,{
+				                { "NI", "OP", "Net income", 10, "NI", "" }
+				                ,{ "SUB-ADJ", "OP", "Adjustments to reconcile net income", 20, "SUB", "ADJ" }
+				                ,{ "SUB-WC", "OP", "Changes in operating assets and liabilities", 200, "SUB", "WC" }
+				                ,{ "TOT-ADJ", "OP", "Total adjustments", 800, "TOT", "" }
+				                ,{ "SECT-OP", "OP", "Net cash from operating activities", 900, "SECT", "" }
+				                ,{ "SECT-INV", "INV", "Net cash from investing activities", 900, "SECT", "" }
+				                ,{ "SECT-FIN", "FIN", "Net cash from financing activities", 900, "SECT", "" }
+				            }
+				        )
+				        ,"row_key", [row_key]
+				        ,"section_code", [section_code]
+				        ,"row_label",
+				            SWITCH (
+				                [row_key]
+				                ,"SUB-WC", _ind & [row_label]
+				                ,[row_label]
+				            )
+				        ,"row_sort", [row_sort]
+				        ,"row_kind", [row_kind]
+				        ,"sub_kind", [sub_kind]
+				        ,"account_id", BLANK ()
+				        ,"is_override", FALSE ()
+				    )
+				VAR _all          = UNION ( _accRows, _static )
+				RETURN
+				    SELECTCOLUMNS (
+				        _all
+				        ,"row_key", [row_key]
+				        ,"section_code", [section_code]
+				        ,"section_label", SWITCH ( [section_code], "OP", "Operating activities", "INV", "Investing activities", "Financing activities" )
+				        ,"section_sort", SWITCH ( [section_code], "OP", 1, "INV", 2, 3 )
+				        ,"row_label", [row_label]
+				        ,"row_sort", SWITCH ( [section_code], "OP", 1000, "INV", 2000, 3000 ) + [row_sort]
+				        ,"row_kind", [row_kind]
+				        ,"sub_kind", [sub_kind]
+				        ,"account_id", [account_id]
+				        ,"is_override", [is_override]
+				    )
+
+	annotation PBI_ResultType = Table

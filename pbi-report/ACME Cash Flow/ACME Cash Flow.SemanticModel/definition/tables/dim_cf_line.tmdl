@@ -1,0 +1,122 @@
+/// Statement line x view (40). The heatmap rows and drill-through use line_name (derived on load: the direct label, else the code, so it sorts by sort_order).
+table dim_cf_line
+	lineageTag: 115e9b83-e68d-5c38-834a-27880a3be438
+
+	column 'view'
+		dataType: string
+		isHidden
+		lineageTag: e91f3880-680a-50b1-900d-5ab1349c2ad2
+		summarizeBy: none
+		sourceColumn: view
+
+		annotation SummarizationSetBy = User
+
+	column line_code
+		dataType: string
+		isHidden
+		lineageTag: 3cfa3df3-9b13-59df-b2be-9d403a30f695
+		summarizeBy: none
+		sourceColumn: line_code
+
+		annotation SummarizationSetBy = User
+
+	column section_code
+		dataType: string
+		isHidden
+		lineageTag: aa9e2f69-90a1-579f-a1c6-63c1582f5a01
+		summarizeBy: none
+		sourceColumn: section_code
+
+		annotation SummarizationSetBy = User
+
+	column line_label
+		dataType: string
+		isHidden
+		lineageTag: 36f05e66-aab0-5b14-b70e-03d6894d57c5
+		summarizeBy: none
+		sourceColumn: line_label
+
+		annotation SummarizationSetBy = User
+
+	column line_kind
+		dataType: string
+		isHidden
+		lineageTag: b49ca103-3f73-5e7c-ab45-fb1a1f435714
+		summarizeBy: none
+		sourceColumn: line_kind
+
+		annotation SummarizationSetBy = User
+
+	column sort_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5a1ef6bc-6ce0-5110-9bdc-a0155bfd5279
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	column usual_direction
+		dataType: string
+		isHidden
+		lineageTag: a222c86f-add0-5cba-9c88-58e77a180bf2
+		summarizeBy: none
+		sourceColumn: usual_direction
+
+		annotation SummarizationSetBy = User
+
+	column sign_rule
+		dataType: string
+		isHidden
+		lineageTag: 697c5451-d9a3-54f2-9507-37c4dc77a626
+		summarizeBy: none
+		sourceColumn: sign_rule
+
+		annotation SummarizationSetBy = User
+
+	column qbo_group
+		dataType: string
+		isHidden
+		lineageTag: d9a87e7b-7510-573a-80c0-f6f0ca923805
+		summarizeBy: none
+		sourceColumn: qbo_group
+
+		annotation SummarizationSetBy = User
+
+	/// Direct line label (indirect rows: the code). Sorted by sort_order.
+	column line_name
+		dataType: string
+		lineageTag: c42db587-8e32-501a-b132-ff91b06ff3a0
+		summarizeBy: none
+		sourceColumn: line_name
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = User
+
+	partition dim_cf_line = m
+		mode: import
+		source =
+				let
+				    // Portable source (ADR-0014 / ADR-0015 pattern): one Parquet file per table in DataFolder. A file source does not fold:
+				    // the file is read whole; types are set explicitly from manifest.json (data README Format).
+				    src = Parquet.Document(File.Contents(DataFolder & "\dim_cf_line.parquet")),
+				    typed = Table.TransformColumnTypes(
+				        src,
+				        {
+				            {"view", type text},
+				            {"line_code", type text},
+				            {"section_code", type text},
+				            {"line_label", type text},
+				            {"line_kind", type text},
+				            {"sort_order", Int64.Type},
+				            {"usual_direction", type text},
+				            {"sign_rule", type text},
+				            {"qbo_group", type text}
+				        }
+				    ),
+				    add_name = Table.AddColumn(typed, "line_name", each if [view] = "DIRECT" then [line_label] else [line_code], type text)
+				in
+				    add_name
+
+	annotation PBI_ResultType = Table

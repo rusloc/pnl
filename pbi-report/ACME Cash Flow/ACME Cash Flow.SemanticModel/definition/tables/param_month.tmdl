@@ -1,0 +1,48 @@
+/// Month of the Month span. Disconnected; nothing picked = Oct. Nov / Dec 2026 have no data (tiles muted).
+table param_month
+	lineageTag: 25d657dc-b183-5d9f-9bec-bfb1e6bd8fe4
+
+	column month_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 89fc1c17-b1c6-5289-89f3-3be09e7e631d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_num]
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: 6da057fe-87ba-5877-b5c8-a57ac464e977
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [month_name]
+		sortByColumn: month_num
+
+		annotation SummarizationSetBy = User
+
+	partition param_month = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "month_num", INTEGER
+				    ,"month_name", STRING
+				    ,{
+				        { 1, "Jan" }
+				        ,{ 2, "Feb" }
+				        ,{ 3, "Mar" }
+				        ,{ 4, "Apr" }
+				        ,{ 5, "May" }
+				        ,{ 6, "Jun" }
+				        ,{ 7, "Jul" }
+				        ,{ 8, "Aug" }
+				        ,{ 9, "Sep" }
+				        ,{ 10, "Oct" }
+				        ,{ 11, "Nov" }
+				        ,{ 12, "Dec" }
+				    }
+				)
+
+	annotation PBI_ResultType = Table

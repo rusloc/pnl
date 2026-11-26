@@ -1,0 +1,246 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Calendar (Activities · Financing)",
+  "name": "bm_act_fin_cal",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "grp_act_fin_cal",
+      "grp_act_fin_cal_scrim",
+      "grp_act_fin_cal_panel",
+      "grp_act_fin_cal_h",
+      "grp_act_fin_cal_x",
+      "grp_act_fin_cal_span",
+      "grp_act_fin_cal_year",
+      "grp_act_fin_cal_month",
+      "grp_act_fin_cal_quarter",
+      "grp_act_fin_cal_uh",
+      "grp_act_fin_cal_units",
+      "grp_act_fin_menu",
+      "grp_act_fin_menu_scrim",
+      "grp_act_fin_menu_panel",
+      "grp_act_fin_menu_h",
+      "grp_act_fin_menu_x",
+      "grp_act_fin_menu_dp",
+      "grp_act_fin_menu_stmt",
+      "grp_act_fin_menu_act",
+      "grp_act_fin_menu_txn",
+      "grp_act_fin_menu_mv",
+      "grp_act_fin_menu_diagram",
+      "grp_act_fin_menu_recon",
+      "grp_act_fin_menu_sep",
+      "grp_act_fin_menu_how",
+      "grp_act_fin_cash",
+      "grp_act_fin_cash_scrim",
+      "grp_act_fin_cash_panel",
+      "grp_act_fin_cash_h",
+      "grp_act_fin_cash_x",
+      "grp_act_fin_cash_c0",
+      "grp_act_fin_cash_c0_blk",
+      "grp_act_fin_cash_c1",
+      "grp_act_fin_cash_c1_blk",
+      "grp_act_fin_cash_c2",
+      "grp_act_fin_cash_c2_blk",
+      "grp_act_fin_cash_c3",
+      "grp_act_fin_cash_c3_blk"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "act_fin",
+    "sections": {
+      "act_fin": {
+        "visualContainers": {
+          "grp_act_fin_cal_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cal_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_fin_cal_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_act_fin_cal_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cal_span": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_act_fin_cal_year": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_act_fin_cal_month": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_act_fin_cal_quarter": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_act_fin_cal_uh": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_act_fin_cal_units": {
+            "singleVisual": {
+              "visualType": "advancedSlicerVisual"
+            }
+          },
+          "grp_act_fin_menu_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_fin_menu_h": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_act_fin_menu_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_dp": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_act_fin_menu_stmt": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_act": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_txn": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_mv": {
+            "singleVisual": {
+              "visualType": "textbox"
+            }
+          },
+          "grp_act_fin_menu_diagram": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_recon": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_menu_sep": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_fin_menu_how": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_scrim": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_panel": {
+            "singleVisual": {
+              "visualType": "shape"
+            }
+          },
+          "grp_act_fin_cash_h": {
+            "singleVisual": {
+              "visualType": "cardVisual"
+            }
+          },
+          "grp_act_fin_cash_x": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_c0": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_act_fin_cash_c0_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_c1": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_act_fin_cash_c1_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_c2": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_act_fin_cash_c2_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          },
+          "grp_act_fin_cash_c3": {
+            "singleVisual": {
+              "visualType": "tableEx"
+            }
+          },
+          "grp_act_fin_cash_c3_blk": {
+            "singleVisual": {
+              "visualType": "actionButton"
+            }
+          }
+        },
+        "visualContainerGroups": {
+          "grp_act_fin_cal": {
+            "isHidden": false
+          },
+          "grp_act_fin_menu": {
+            "isHidden": true
+          },
+          "grp_act_fin_cash": {
+            "isHidden": true
+          }
+        }
+      }
+    }
+  }
+}

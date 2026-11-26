@@ -1,0 +1,95 @@
+{
+  "name": "acme-cash-flow-theme.json",
+  "dataColors": [
+    "#2C3A54",
+    "#FF6F1A",
+    "#8A8986",
+    "#5D6678",
+    "#7B828E",
+    "#777E8C",
+    "#445066",
+    "#C2C3C3"
+  ],
+  "background": "#F6F5F2",
+  "foreground": "#2C3A54",
+  "tableAccent": "#C2C3C3",
+  "good": "#2C3A54",
+  "bad": "#FF6F1A",
+  "neutral": "#525C70",
+  "foregroundNeutralSecondary": "#525C70",
+  "foregroundNeutralTertiary": "#5B6577",
+  "backgroundLight": "#F0EFEA",
+  "backgroundNeutral": "#D9D7D4",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#2C3A54"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 16,
+      "color": "#2C3A54"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 11,
+      "color": "#2C3A54"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 9,
+      "color": "#525C70"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "background": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F6F5F2"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F6F5F2"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}
